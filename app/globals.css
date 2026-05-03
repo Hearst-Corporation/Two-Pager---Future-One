@@ -22,22 +22,22 @@
   --color-surface: #FFFFFF;
 
   /* Gris */
-  --color-gray-900: #0E1013;
-  --color-gray-850: #14171B;
-  --color-gray-800: #191C21;
-  --color-gray-750: #20242A;
-  --color-gray-700: #2A2F36;
-  --color-gray-600: #3A4048;
+  --color-gray-900: #1A1D24;
+  --color-gray-850: #22262E;
+  --color-gray-800: #2A2F38;
+  --color-gray-750: #323842;
+  --color-gray-700: #3D4450;
+  --color-gray-600: #4B5363;
   --color-gray-500: #5B616A;
   --color-gray-400: #8A9099;
   --color-gray-300: #C9CDD2;
   --color-gray-200: #E4E6EA;
   --color-gray-100: #F2F3F5;
 
-  /* Footer / zones agressives — PRINT: rich black C60 M40 Y40 K100 */
-  --color-dark-surface: #14171B;
-  --color-dark-elevated: #1C2026;
-  --color-dark-contrast: #0E1013;
+  /* Footer / zones agressives — PRINT: imprimer en rich black (C60 M40 Y40 K100), pas en K100 seul */
+  --color-dark-surface: #22262E;
+  --color-dark-elevated: #2A2F38;
+  --color-dark-contrast: #1A1D24;
 
   /* Accent — PRINT: Pantone 199 C en ton direct */
   --color-accent-primary: #9F1239;
@@ -50,7 +50,7 @@
   --color-error: #DC2626;
 
   /* Texte */
-  --color-text-primary: #0E1013;
+  --color-text-primary: #1A1D24;
   --color-text-secondary: #3A4048;
   --color-text-muted: #8A9099;
   --color-text-inverse: #FFFFFF;
