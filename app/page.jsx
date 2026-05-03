@@ -56,8 +56,8 @@ export default function Home() {
                 fontSize: 12,
                 borderRadius: 8,
                 border: '1px solid rgba(255,255,255,.12)',
-                background: view === v.id ? '#fff' : 'transparent',
-                color: view === v.id ? '#111' : '#fff',
+                background: view === v.id ? 'var(--color-accent-strong)' : 'transparent',
+                color: 'var(--color-text-inverse)',
                 fontWeight: 500,
                 transition: 'all .15s ease',
               }}
@@ -89,7 +89,7 @@ export default function Home() {
           justifyContent: 'center',
           padding: 40,
           background:
-            'radial-gradient(circle at 50% 30%, #2a2a2a 0%, #1a1a1a 60%, #111 100%)',
+            'radial-gradient(circle at 50% 30%, var(--color-gray-750) 0%, var(--color-gray-850) 60%, var(--color-dark-contrast) 100%)',
           overflow: 'auto',
         }}
       >

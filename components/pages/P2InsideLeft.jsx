@@ -336,7 +336,7 @@ const S = {
     fontSize: 7.5,
     letterSpacing: 1.6,
     fontWeight: 700,
-    color: 'var(--color-gray-400)',
+    color: 'var(--color-accent-strong)',
     marginBottom: 8,
   },
   darkHeadline: {
@@ -379,6 +379,7 @@ const S = {
     lineHeight: 1,
     letterSpacing: -0.3,
     whiteSpace: 'nowrap',
+    color: 'var(--color-accent-soft)',
   },
   statLabel: {
     fontSize: 6,
@@ -418,7 +419,7 @@ const S = {
     letterSpacing: 1.2,
     fontWeight: 700,
     marginBottom: 3,
-    color: 'var(--color-text-primary)',
+    color: 'var(--color-accent-primary)',
   },
   footerBody: {
     fontSize: 6.5,

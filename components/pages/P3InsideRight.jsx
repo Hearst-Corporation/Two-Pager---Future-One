@@ -166,7 +166,7 @@ function Arrow() {
 }
 
 function PhaseIcon({ kind }) {
-  const stroke = 'var(--color-gray-850)';
+  const stroke = 'var(--color-accent-primary)';
   const sz = 18;
   if (kind === 'seed')
     return (
@@ -541,6 +541,7 @@ const S = {
     fontWeight: 800,
     letterSpacing: 1,
     marginTop: 4,
+    color: 'var(--color-accent-strong)',
   },
   phaseLine1: {
     fontSize: 7.5,
@@ -563,11 +564,11 @@ const S = {
   arrowLine: {
     width: 12,
     height: 1,
-    background: 'var(--color-gray-400)',
+    background: 'var(--color-accent-primary)',
   },
   arrowHead: {
     fontSize: 12,
-    color: 'var(--color-gray-400)',
+    color: 'var(--color-accent-primary)',
     marginLeft: -2,
     lineHeight: 1,
   },
@@ -648,6 +649,7 @@ const S = {
     letterSpacing: -1.5,
     marginTop: 6,
     lineHeight: 1,
+    color: 'var(--color-accent-primary)',
   },
   fundingGrid: {
     marginTop: 6,

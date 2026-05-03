@@ -73,7 +73,7 @@ function Spread({ children, scale, cols = 2, fold = false }) {
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
           display: 'flex',
-          background: '#fff',
+          background: 'var(--color-surface)',
           position: 'relative',
         }}
       >
@@ -90,8 +90,8 @@ function Page({ node, label, border }) {
       style={{
         width: REF_W,
         height: REF_H,
-        background: '#fff',
-        color: '#111',
+        background: 'var(--color-surface)',
+        color: 'var(--color-text-primary)',
         position: 'relative',
         overflow: 'hidden',
         borderLeft: border === 'left' ? '1px dashed rgba(0,0,0,.15)' : 'none',
@@ -130,7 +130,7 @@ function Placeholder({ label }) {
         alignItems: 'center',
         justifyContent: 'center',
         background:
-          'repeating-linear-gradient(45deg, #fafafa, #fafafa 12px, #f0f0f0 12px, #f0f0f0 24px)',
+          'repeating-linear-gradient(45deg, var(--color-bg-main), var(--color-bg-main) 12px, var(--color-bg-secondary) 12px, var(--color-bg-secondary) 24px)',
         color: 'rgba(0,0,0,.35)',
         fontSize: 14,
         fontWeight: 500,
