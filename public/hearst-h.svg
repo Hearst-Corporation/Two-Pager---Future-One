@@ -1,0 +1,10 @@
+<svg width="268" height="295" viewBox="0 0 268 295" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Real Hearst H, solid black -->
+  <g fill="#000">
+    <rect x="0" y="0" width="61" height="295"/>
+    <rect x="207" y="0" width="61" height="295"/>
+    <polygon points="81,70 149,70 190,232 125,232"/>
+  </g>
+  <!-- Dotted frame around the whole H, kept as second element -->
+  <rect x="3" y="3" width="262" height="289" fill="none" stroke="#000" stroke-width="0.8" stroke-dasharray="1.6 1.6"/>
+</svg>

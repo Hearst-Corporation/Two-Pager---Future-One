@@ -1,3 +1,20 @@
+/* ============================================================
+   PRINT SPECIFICATION — Futur One brochure
+   Format    : A3 plié 2 = A4 portrait fermé (210×297 mm)
+   Papier    : 350 g/m² couché demi-mat
+   Finition  : pelliculage (mat ou brillant à confirmer)
+   Bleed     : 3 mm sur les 4 côtés (à appliquer via PrintSheet)
+   Profil    : Fogra39 ou Fogra51 selon imprimeur
+   ------------------------------------------------------------
+   ACCENT     : Pantone 199 C en ton direct (5e couleur).
+                NE PAS convertir en quadri.
+                Fallback CMYK si refus : C0 M100 Y65 K0
+   NOIRS      : --color-dark-surface / dark-contrast = rich black.
+                Recette imprimeur : C60 M40 Y40 K100
+                NE PAS imprimer en K100 seul (rendu délavé).
+   POLICE     : à embarquer dans le PDF (étape ultérieure).
+   ============================================================ */
+
 :root {
   /* Primary / Base */
   --color-bg-main: #F5F5F6;
@@ -17,12 +34,12 @@
   --color-gray-200: #E4E6EA;
   --color-gray-100: #F2F3F5;
 
-  /* Footer / zones agressives */
+  /* Footer / zones agressives — PRINT: rich black C60 M40 Y40 K100 */
   --color-dark-surface: #14171B;
   --color-dark-elevated: #1C2026;
   --color-dark-contrast: #0E1013;
 
-  /* Accent */
+  /* Accent — PRINT: Pantone 199 C en ton direct */
   --color-accent-primary: #9F1239;
   --color-accent-strong: #BE123C;
   --color-accent-soft: #E11D48;
@@ -47,14 +64,25 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: var(--color-gray-850);
+  background: var(--color-gray-900);
   color: var(--color-text-inverse);
   overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--color-accent-strong);
+  color: #fff;
 }
 
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+a {
+  color: inherit;
 }

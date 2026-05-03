@@ -110,29 +110,13 @@ export default function P3InsideRight() {
       {/* ============== PICTURE (placeholder photo entre mid et building) ============== */}
       <section style={S.picture} aria-label="Placeholder — photo" />
 
-      {/* ============== BUILDING IMAGE ============== */}
+      {/* ============== FOOTER (4 KPIs) ============== */}
       <section style={S.building}>
-        <div style={S.buildingImg} aria-label="Placeholder — image campus" />
-        <div style={S.buildingOverlay} />
-        <div style={S.statsRow}>
+        <div style={S.buildingFooter}>
           <StatRow icon="rack" value="150" label="STARTUPS MAX CAPACITY" />
           <StatRow icon="people" value="4 K" label={`RESIDENTS\n(FOUNDERS & TEAMS)`} />
           <StatRow icon="building" value="100 K" label="SQM TOTAL CAMPUS" />
           <StatRow icon="bolt" value="€400M" label="PHASE 1 CAPEX" />
-        </div>
-        <div style={S.buildingFooter}>
-          <div>
-            <div style={S.tagline}>Sovereign by design.</div>
-            <div style={{ ...S.tagline, color: 'var(--color-gray-300)' }}>Global by intent.</div>
-          </div>
-          <div style={S.qatarText}>
-            <strong>QATAR LABEL PROGRAM</strong> · Official certification for high-potential
-            companies.
-            <br />
-            0% tax environment · Fast company setup · Full ownership.
-            <br />
-            Housing, education, healthcare packages.
-          </div>
         </div>
       </section>
     </div>
@@ -436,8 +420,8 @@ function RowIcon({ kind }) {
 }
 
 /* ---------- styles ---------- */
-/* Page totale = 680px. Sections en pixels exacts — heights LOCKED, ne plus toucher.
-   header(122) + phases(102) + mid(282, padding-top 80) + picture(82) + building(92) = 680. */
+/* Page totale = 680px. Sections en pixels exacts.
+   header(122) + phases(102) + mid(282, padding-top 80) + picture(124) + building(50) = 680. */
 
 const SECTION = { flexShrink: 0, flexGrow: 0, minHeight: 0, overflow: 'hidden' };
 
@@ -586,9 +570,10 @@ const S = {
   /* PICTURE (placeholder photo entre mid et building) */
   picture: {
     ...SECTION,
-    height: 82,
-    background:
-      'repeating-linear-gradient(45deg, var(--color-bg-secondary), var(--color-bg-secondary) 10px, var(--color-gray-200) 10px, var(--color-gray-200) 20px)',
+    height: 124,
+    backgroundImage: 'url(/p3-picture.png)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
     borderBottom: '1px solid var(--color-border-light)',
   },
   midLeft: {
@@ -694,7 +679,7 @@ const S = {
   /* BUILDING */
   building: {
     ...SECTION,
-    height: 92,
+    height: 50,
     position: 'relative',
   },
   buildingImg: {
@@ -722,29 +707,14 @@ const S = {
   },
   buildingFooter: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 8,
+    inset: 0,
     padding: '0 22px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    gap: 16,
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 1fr 1fr',
+    alignItems: 'center',
+    gap: 10,
+    background: 'var(--color-dark-surface)',
     color: 'var(--color-text-inverse)',
-  },
-  tagline: {
-    fontSize: 12,
-    fontWeight: 600,
-    fontStyle: 'italic',
-    lineHeight: 1.2,
-    color: 'var(--color-text-inverse)',
-  },
-  qatarText: {
-    fontSize: 6,
-    lineHeight: 1.4,
-    color: 'var(--color-gray-300)',
-    textAlign: 'right',
-    maxWidth: '52%',
   },
   statRow: {
     display: 'flex',
