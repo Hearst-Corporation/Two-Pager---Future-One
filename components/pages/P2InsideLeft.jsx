@@ -40,7 +40,7 @@ export default function P2InsideLeft() {
           </p>
 
           <blockquote style={S.quote}>
-            <span style={S.quoteMark}>“</span>
+            <span style={S.quoteMark}>"</span>
             We will allocate compute capacity, energy, and HPC infrastructure to support the
             development of your projects at the scale required to empower the next generation of
             founders and future industry leaders.
@@ -222,8 +222,8 @@ const S = {
   page: {
     width: '100%',
     height: '100%',
-    background: '#fff',
-    color: '#111',
+    background: 'var(--color-surface)',
+    color: 'var(--color-text-primary)',
     fontFamily:
       'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     display: 'flex',
@@ -236,13 +236,13 @@ const S = {
     ...SECTION,
     position: 'relative',
     height: 270,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
   heroImage: {
     position: 'absolute',
     inset: 0,
     background:
-      'linear-gradient(180deg, #1a1a1a 0%, #2e2e2e 30%, #4a4a4a 60%, #1a1a1a 100%)',
+      'linear-gradient(180deg, var(--color-gray-850) 0%, var(--color-gray-750) 30%, var(--color-gray-600) 60%, var(--color-gray-850) 100%)',
   },
   heroOverlay: {
     position: 'absolute',
@@ -257,7 +257,7 @@ const S = {
     fontSize: 8,
     letterSpacing: 1.6,
     fontWeight: 700,
-    color: '#bbb',
+    color: 'var(--color-gray-300)',
     zIndex: 2,
   },
   pageNum: {
@@ -267,13 +267,13 @@ const S = {
     fontSize: 9,
     fontWeight: 500,
     textAlign: 'right',
-    color: '#ddd',
+    color: 'var(--color-gray-200)',
     zIndex: 2,
   },
   pageNumBar: {
     width: 18,
     height: 1.5,
-    background: '#888',
+    background: 'var(--color-gray-400)',
     marginLeft: 'auto',
     marginTop: 3,
   },
@@ -292,13 +292,13 @@ const S = {
     margin: 0,
   },
   titleAccent: {
-    color: '#bdbdbd',
+    color: 'var(--color-accent-strong)',
   },
   intro: {
     marginTop: 12,
     fontSize: 8.5,
     lineHeight: 1.4,
-    color: '#e5e5e5',
+    color: 'var(--color-gray-200)',
   },
   quote: {
     margin: '10px 0 0',
@@ -307,7 +307,7 @@ const S = {
     fontSize: 8,
     lineHeight: 1.4,
     fontStyle: 'italic',
-    color: '#cfcfcf',
+    color: 'var(--color-gray-300)',
   },
   quoteMark: {
     position: 'absolute',
@@ -315,7 +315,7 @@ const S = {
     top: -3,
     fontSize: 18,
     lineHeight: 1,
-    color: '#888',
+    color: 'var(--color-gray-400)',
     fontStyle: 'normal',
   },
 
@@ -323,8 +323,8 @@ const S = {
   darkBand: {
     ...SECTION,
     height: 220,
-    background: '#181818',
-    color: '#fff',
+    background: 'var(--color-dark-surface)',
+    color: 'var(--color-text-inverse)',
     padding: '14px 22px',
     display: 'flex',
     gap: 16,
@@ -336,7 +336,7 @@ const S = {
     fontSize: 7.5,
     letterSpacing: 1.6,
     fontWeight: 700,
-    color: '#9a9a9a',
+    color: 'var(--color-gray-400)',
     marginBottom: 8,
   },
   darkHeadline: {
@@ -346,13 +346,13 @@ const S = {
     fontWeight: 500,
   },
   darkHeadlineAccent: {
-    color: '#bdbdbd',
+    color: 'var(--color-accent-soft)',
   },
   darkBody: {
     fontSize: 8,
     lineHeight: 1.5,
     margin: '8px 0 0',
-    color: '#bdbdbd',
+    color: 'var(--color-gray-300)',
   },
 
   /* STATS */
@@ -382,7 +382,7 @@ const S = {
   },
   statLabel: {
     fontSize: 6,
-    color: '#9a9a9a',
+    color: 'var(--color-gray-400)',
     marginTop: 4,
     letterSpacing: 0.6,
     fontWeight: 600,
@@ -395,7 +395,7 @@ const S = {
     ...SECTION,
     height: 100,
     background:
-      'linear-gradient(180deg, #5a5a5a 0%, #3c3c3c 60%, #1f1f1f 100%)',
+      'linear-gradient(180deg, var(--color-gray-500) 0%, var(--color-gray-700) 60%, var(--color-gray-800) 100%)',
   },
 
   /* FOOTER */
@@ -406,8 +406,8 @@ const S = {
     gridTemplateColumns: '1fr 1fr 1fr',
     gap: 14,
     padding: '12px 18px',
-    background: '#fff',
-    color: '#1a1a1a',
+    background: 'var(--color-surface)',
+    color: 'var(--color-text-primary)',
   },
   footerCol: {
     display: 'flex',
@@ -418,11 +418,11 @@ const S = {
     letterSpacing: 1.2,
     fontWeight: 700,
     marginBottom: 3,
-    color: '#1a1a1a',
+    color: 'var(--color-text-primary)',
   },
   footerBody: {
     fontSize: 6.5,
     lineHeight: 1.4,
-    color: '#444',
+    color: 'var(--color-text-secondary)',
   },
 };

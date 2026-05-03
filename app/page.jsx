@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import FoldableA3 from '@/components/FoldableA3';
+import P1Cover from '@/components/pages/P1Cover';
 import P2InsideLeft from '@/components/pages/P2InsideLeft';
 import P3InsideRight from '@/components/pages/P3InsideRight';
+import P4Back from '@/components/pages/P4Back';
 
 const VIEWS = [
   { id: 'closed', label: 'Fermé (couverture)' },
@@ -16,8 +18,7 @@ export default function Home() {
   const [view, setView] = useState('open');
   const [scale, setScale] = useState(1);
 
-  // P1 (couverture) et P4 (dos) restent en placeholders pour l'instant.
-  const pages = [null, <P2InsideLeft key="p2" />, <P3InsideRight key="p3" />, null];
+  const pages = [<P1Cover key="p1" />, <P2InsideLeft key="p2" />, <P3InsideRight key="p3" />, <P4Back key="p4" />];
 
   return (
     <main

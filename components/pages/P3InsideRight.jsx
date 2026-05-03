@@ -92,17 +92,17 @@ export default function P3InsideRight() {
           <FundingGrid />
           <div style={S.legend}>
             <div style={S.legendRow}>
-              <div style={{ ...S.legendDot, background: '#d4d4d4' }} />
+              <div style={{ ...S.legendDot, background: 'var(--color-gray-300)' }} />
               <span>MENA AVERAGE (&lt; 10%)</span>
             </div>
             <div style={S.legendRow}>
-              <div style={{ ...S.legendDot, background: '#1a1a1a' }} />
+              <div style={{ ...S.legendDot, background: 'var(--color-gray-850)' }} />
               <span>FUTUR ONE TARGET (70%)</span>
             </div>
           </div>
           <blockquote style={S.midQuote}>
-            “We will be the world's first fully AI-managed campus, orchestrating every dimension
-            from sports and health to energy optimization and beyond.”
+            "We will be the world's first fully AI-managed campus, orchestrating every dimension
+            from sports and health to energy optimization and beyond."
           </blockquote>
         </div>
       </section>
@@ -123,7 +123,7 @@ export default function P3InsideRight() {
         <div style={S.buildingFooter}>
           <div>
             <div style={S.tagline}>Sovereign by design.</div>
-            <div style={{ ...S.tagline, color: '#bdbdbd' }}>Global by intent.</div>
+            <div style={{ ...S.tagline, color: 'var(--color-gray-300)' }}>Global by intent.</div>
           </div>
           <div style={S.qatarText}>
             <strong>QATAR LABEL PROGRAM</strong> · Official certification for high-potential
@@ -166,7 +166,7 @@ function Arrow() {
 }
 
 function PhaseIcon({ kind }) {
-  const stroke = '#1a1a1a';
+  const stroke = 'var(--color-gray-850)';
   const sz = 18;
   if (kind === 'seed')
     return (
@@ -287,7 +287,7 @@ function Hub() {
               top: '50%',
               width: lineLen,
               height: 1,
-              background: '#9a9a9a',
+              background: 'var(--color-gray-400)',
               transform: `translate(${startOffsetX}px, ${startOffsetY}px) rotate(${s.angle}deg)`,
               transformOrigin: '0 50%',
             }}
@@ -343,7 +343,7 @@ function Hub() {
                 style={{
                   fontSize: 6,
                   lineHeight: 1.3,
-                  color: '#666',
+                  color: 'var(--color-text-muted)',
                   whiteSpace: 'pre-line',
                   textAlign: s.textSide === 'right' ? 'left' : s.textSide === 'left' ? 'right' : 'center',
                   marginTop: 1,
@@ -371,7 +371,7 @@ function FundingGrid() {
             key={i}
             style={{
               ...S.fundingCell,
-              background: filled ? '#1a1a1a' : '#e0e0e0',
+              background: filled ? 'var(--color-gray-850)' : 'var(--color-gray-200)',
             }}
           />
         );
@@ -444,8 +444,8 @@ const S = {
   page: {
     width: '100%',
     height: '100%',
-    background: '#fff',
-    color: '#111',
+    background: 'var(--color-surface)',
+    color: 'var(--color-text-primary)',
     fontFamily:
       'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     display: 'flex',
@@ -472,25 +472,25 @@ const S = {
     lineHeight: 1,
   },
   titleAccent: {
-    color: '#666',
+    color: 'var(--color-accent-strong)',
   },
   pageNum: {
     fontSize: 9,
     fontWeight: 500,
     textAlign: 'right',
-    color: '#444',
+    color: 'var(--color-text-secondary)',
   },
   pageNumBar: {
     width: 18,
     height: 1.5,
-    background: '#888',
+    background: 'var(--color-gray-400)',
     marginLeft: 'auto',
     marginTop: 3,
   },
   subtitle: {
     fontSize: 8.5,
     lineHeight: 1.45,
-    color: '#444',
+    color: 'var(--color-text-secondary)',
     marginTop: 6,
     maxWidth: '78%',
   },
@@ -504,7 +504,7 @@ const S = {
     alignItems: 'stretch',
     padding: '0 22px',
     gap: 4,
-    borderBottom: '1px solid #e8e8e8',
+    borderBottom: '1px solid var(--color-border-light)',
   },
   /* wrapper interne pour décaler le contenu vers le haut sans toucher la box */
   phasesInner: {
@@ -525,7 +525,7 @@ const S = {
   phaseN: {
     fontSize: 28,
     fontWeight: 800,
-    color: '#dcdcdc',
+    color: 'var(--color-gray-200)',
     lineHeight: 1,
     letterSpacing: -1,
   },
@@ -543,12 +543,12 @@ const S = {
   },
   phaseLine1: {
     fontSize: 7.5,
-    color: '#222',
+    color: 'var(--color-text-primary)',
     marginTop: 2,
   },
   phaseLine2: {
     fontSize: 7,
-    color: '#666',
+    color: 'var(--color-text-muted)',
     marginTop: 1,
   },
   arrow: {
@@ -562,11 +562,11 @@ const S = {
   arrowLine: {
     width: 12,
     height: 1,
-    background: '#888',
+    background: 'var(--color-gray-400)',
   },
   arrowHead: {
     fontSize: 12,
-    color: '#888',
+    color: 'var(--color-gray-400)',
     marginLeft: -2,
     lineHeight: 1,
   },
@@ -578,7 +578,7 @@ const S = {
     display: 'flex',
     padding: '15px 22px 10px',
     gap: 16,
-    borderBottom: '1px solid #e8e8e8',
+    borderBottom: '1px solid var(--color-border-light)',
   },
 
   /* PICTURE (placeholder photo entre mid et building) */
@@ -586,8 +586,8 @@ const S = {
     ...SECTION,
     height: 82,
     background:
-      'repeating-linear-gradient(45deg, #ececec, #ececec 10px, #e0e0e0 10px, #e0e0e0 20px)',
-    borderBottom: '1px solid #e8e8e8',
+      'repeating-linear-gradient(45deg, var(--color-bg-secondary), var(--color-bg-secondary) 10px, var(--color-gray-200) 10px, var(--color-gray-200) 20px)',
+    borderBottom: '1px solid var(--color-border-light)',
   },
   midLeft: {
     flex: '0 0 58%',
@@ -601,12 +601,12 @@ const S = {
     fontSize: 7,
     letterSpacing: 1.4,
     fontWeight: 700,
-    color: '#1a1a1a',
+    color: 'var(--color-text-primary)',
     lineHeight: 1.4,
   },
   midSubtitle: {
     fontSize: 9,
-    color: '#222',
+    color: 'var(--color-text-primary)',
     marginTop: 4,
     lineHeight: 1.3,
   },
@@ -624,8 +624,8 @@ const S = {
     width: 56,
     height: 56,
     borderRadius: '50%',
-    background: '#1a1a1a',
-    color: '#fff',
+    background: 'var(--color-gray-850)',
+    color: 'var(--color-text-inverse)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -637,7 +637,7 @@ const S = {
     width: 16,
     height: 16,
     borderRadius: '50%',
-    background: '#1a1a1a',
+    background: 'var(--color-gray-850)',
   },
 
   /* FUNDING */
@@ -672,7 +672,7 @@ const S = {
     alignItems: 'center',
     gap: 5,
     fontSize: 6.5,
-    color: '#444',
+    color: 'var(--color-text-secondary)',
     letterSpacing: 0.4,
     fontWeight: 600,
   },
@@ -684,7 +684,7 @@ const S = {
     margin: '8px 0 0',
     fontSize: 7.5,
     fontStyle: 'italic',
-    color: '#444',
+    color: 'var(--color-text-secondary)',
     lineHeight: 1.4,
   },
 
@@ -698,7 +698,7 @@ const S = {
     position: 'absolute',
     inset: 0,
     background:
-      'linear-gradient(180deg, #555 0%, #2c2c2c 60%, #1a1a1a 100%)',
+      'linear-gradient(180deg, var(--color-gray-600) 0%, var(--color-gray-750) 60%, var(--color-gray-850) 100%)',
   },
   buildingOverlay: {
     position: 'absolute',
@@ -715,7 +715,7 @@ const S = {
     gridTemplateColumns: '1fr 1fr 1fr 1fr',
     padding: '0 22px',
     gap: 8,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
   buildingFooter: {
     position: 'absolute',
@@ -727,19 +727,19 @@ const S = {
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     gap: 16,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
   tagline: {
     fontSize: 12,
     fontWeight: 600,
     fontStyle: 'italic',
     lineHeight: 1.2,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
   qatarText: {
     fontSize: 6,
     lineHeight: 1.4,
-    color: '#cfcfcf',
+    color: 'var(--color-gray-300)',
     textAlign: 'right',
     maxWidth: '52%',
   },
@@ -755,7 +755,7 @@ const S = {
   },
   statRowLabel: {
     fontSize: 5.5,
-    color: '#cfcfcf',
+    color: 'var(--color-gray-300)',
     marginTop: 2,
     letterSpacing: 0.4,
     fontWeight: 600,
