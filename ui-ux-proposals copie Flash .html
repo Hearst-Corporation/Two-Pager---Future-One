@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futur One - UI/UX Proposals (Corrected)</title>
+    <style>
+        :root {
+            /* Exact tokens from globals.css */
+            --color-surface: #FFFFFF;
+            --color-bg-main: #F5F5F6;
+            
+            --color-gray-900: #0E1013;
+            --color-gray-850: #14171B;
+            --color-gray-400: #8A9099;
+            --color-gray-300: #C9CDD2;
+            --color-gray-200: #E4E6EA;
+            
+            --color-accent-primary: #9F1239;
+            --color-accent-strong: #BE123C;
+            
+            --color-text-primary: #0E1013;
+            --color-text-secondary: #3A4048;
+            --color-text-muted: #8A9099;
+            --color-text-inverse: #FFFFFF;
+            
+            --color-border-light: #E4E6EA;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-bg-main);
+            color: var(--color-text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            padding: 40px;
+            text-align: center;
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border-light);
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0;
+            text-transform: uppercase;
+            color: var(--color-text-primary);
+        }
+
+        h1 span {
+            color: var(--color-accent-strong);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .panel {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border-light);
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 2px solid var(--color-gray-200);
+            padding-bottom: 10px;
+        }
+
+        /* 01. STEP NUMBERING */
+        .steps-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px 0;
+        }
+
+        .step-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--color-accent-strong);
+            line-height: 1;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        .step-icon-placeholder {
+            width: 24px;
+            height: 24px;
+            border: 1.5px solid var(--color-accent-strong);
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .step-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--color-accent-strong);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .step-desc {
+            font-size: 10px;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+
+        .step-arrow {
+            color: var(--color-accent-strong);
+            font-size: 16px;
+            margin-top: 20px;
+            padding: 0 15px;
+        }
+
+        /* 02. HUB DIAGRAM */
+        .hub-container {
+            position: relative;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-surface);
+        }
+
+        .hub-center {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--color-accent-strong);
+            color: var(--color-text-inverse);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .hub-center strong {
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .hub-center span {
+            font-size: 9px;
+            margin-top: 2px;
+            opacity: 0.9;
+        }
+
+        .hub-sat-wrapper {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 120px;
+        }
+
+        .hub-sat {
+            width: 16px;
+            height: 16px;
+            background: var(--color-accent-strong);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .hub-line {
+            position: absolute;
+            height: 1px;
+            background: var(--color-accent-strong);
+            opacity: 0.4;
+            transform-origin: left center;
+            z-index: 1;
+        }
+
+        .hub-sat-text {
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .hub-sat-title {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            letter-spacing: 0.5px;
+        }
+
+        .hub-sat-desc {
+            font-size: 8px;
+            color: var(--color-text-muted);
+            margin-top: 3px;
+            line-height: 1.3;
+        }
+
+        /* 03. HEATMAP */
+        .heatmap-wrapper {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .heatmap-info {
+            flex: 0 0 150px;
+        }
+
+        .heatmap-eyebrow {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .heatmap-value {
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--color-accent-strong);
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        .heatmap-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 3px;
+        }
+
+        .heat-cell {
+            aspect-ratio: 2 / 1;
+            background: var(--color-gray-200);
+        }
+
+        .heat-cell.active {
+            background: var(--color-accent-strong);
+        }
+
+        .heatmap-legend {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-box {
+            width: 12px;
+            height: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Futur One <span>UI/UX Audit</span></h1>
+        <p style="font-size: 13px; color: var(--color-text-muted); margin-top: 8px;">Correction : Application stricte de la charte graphique (Rouge #BE123C / Blanc / Gris)</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- 01. THE METHOD -->
+        <div class="panel">
+            <div class="section-title">01. The Method (Steps)</div>
+            <div class="steps-container">
+                <div class="step-item">
+                    <div class="step-num">01</div>
+                    <div class="step-icon-placeholder" style="border-radius: 50% 0;"></div>
+                    <div class="step-title">INCUBATE</div>
+                    <div class="step-desc">Pre-seed → Seed<br>3–6 months<br>20–30 / batch</div>
+                </div>
+                <div class="step-arrow">→</div>
+                
+                <div class="step-item">
+                    <div class="step-num">02</div>
+                    <div class="step-icon-placeholder" style="border-radius: 50% 50% 20% 20%;"></div>
+                    <div class="step-title">ACCELERATE</div>
+                    <div class="step-desc">Seed → Series A<br>6–9 months<br>20–30 / cohort</div>
+                </div>
+                <div class="step-arrow">→</div>
+
+                <div class="step-item">
+                    <div class="step-num">03</div>
+                    <div class="step-icon-placeholder" style="border-bottom: none; display:flex; align-items:flex-end; gap:2px; border:none;">
+                        <div style="width:6px; height:40%; background:var(--color-accent-strong)"></div>
+                        <div style="width:6px; height:70%; background:var(--color-accent-strong)"></div>
+                        <div style="width:6px; height:100%; background:var(--color-accent-strong)"></div>
+                    </div>
+                    <div class="step-title">SCALE</div>
+                    <div class="step-desc">Series A → B+<br>Rolling<br>20–30 companies</div>
+                </div>
+                <div class="step-arrow">→</div>
+
+                <div class="step-item">
+                    <div class="step-num">04</div>
+                    <div class="step-icon-placeholder" style="border-radius: 50%; border-width: 2px;"></div>
+                    <div class="step-title">ANCHOR</div>
+                    <div class="step-desc">Big Tech Bridge<br>Rolling<br>POCs • M&A</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 02. HUB DIAGRAM -->
+        <div class="panel">
+            <div class="section-title">02. The Sovereign AI Infrastructure Hub</div>
+            <div class="hub-container" id="hub-demo">
+                <div class="hub-center">
+                    <strong>FUTUR<br>ONE</strong>
+                    <span>QATAR</span>
+                </div>
+                <!-- JS will populate satellites -->
+            </div>
+        </div>
+
+        <!-- 03. HEATMAP -->
+        <div class="panel">
+            <div class="section-title">03. Follow-on Funding</div>
+            <div class="heatmap-wrapper">
+                <div class="heatmap-info">
+                    <div class="heatmap-eyebrow">FOLLOW-ON FUNDING<br>AT 18 MONTHS</div>
+                    <div class="heatmap-value">70%</div>
+                </div>
+                <div style="flex: 1;">
+                    <div class="heatmap-grid" id="heatmap-demo">
+                        <!-- JS will populate cells -->
+                    </div>
+                    <div class="heatmap-legend">
+                        <div class="legend-item">
+                            <div class="legend-box" style="background: var(--color-gray-200);"></div>
+                            <span>MENA AVERAGE (< 10%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box" style="background: var(--color-accent-strong);"></div>
+                            <span>FUTUR ONE TARGET (70%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Populate Hub
+        const hubDemo = document.getElementById('hub-demo');
+        const satellites = [
+            { angle: -150, title: 'AI SERVICES', desc: 'Models · Data\nTools · Platforms\nSupport' },
+            { angle: -90, title: 'COMPUTE & HPC', desc: 'Tier IV Data Centers\nHigh-Density Racks\nMassive Scale' },
+            { angle: -30, title: 'ENERGY', desc: 'Reliable Power\nSustainable\nOptimized' },
+            { angle: 150, title: 'CAPITAL', desc: 'Sovereign Funds\nCo-investment\nLong-Term Alignment' },
+            { angle: 90, title: 'TALENT & COMMUNITY', desc: 'Engineers · Researchers\nEntrepreneurs · Operators' },
+            { angle: 30, title: 'INFRASTRUCTURE', desc: 'Campus & Facilities\nConnectivity\nSecurity' }
+        ];
+        
+        const radius = 110;
+        const centerRadius = 45; // half of 90px
+        
+        satellites.forEach(sat => {
+            const rad = sat.angle * Math.PI / 180;
+            const x = Math.cos(rad) * radius;
+            const y = Math.sin(rad) * radius;
+            
+            // Lines
+            const line = document.createElement('div');
+            line.className = 'hub-line';
+            const lineLength = radius - centerRadius;
+            line.style.width = `${lineLength}px`;
+            
+            // Position line starting from edge of center circle
+            const startX = Math.cos(rad) * centerRadius;
+            const startY = Math.sin(rad) * centerRadius;
+            line.style.left = `calc(50% + ${startX}px)`;
+            line.style.top = `calc(50% + ${startY}px)`;
+            line.style.transform = `rotate(${sat.angle}deg)`;
+            hubDemo.appendChild(line);
+
+            // Satellites
+            const satEl = document.createElement('div');
+            satEl.className = 'hub-sat-wrapper';
+            satEl.style.left = `calc(50% + ${x}px - 60px)`; // 60px is half width
+            satEl.style.top = `calc(50% + ${y}px - 8px)`; // 8px is half height of dot
+            
+            satEl.innerHTML = `
+                <div class="hub-sat"></div>
+                <div class="hub-sat-text">
+                    <div class="hub-sat-title">${sat.title}</div>
+                    <div class="hub-sat-desc">${sat.desc.replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
+            hubDemo.appendChild(satEl);
+        });
+
+        // Populate Heatmap
+        const heatmapDemo = document.getElementById('heatmap-demo');
+        for(let i=0; i<100; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'heat-cell';
+            if(i < 70) cell.classList.add('active');
+            heatmapDemo.appendChild(cell);
+        }
+    </script>
+</body>
+</html>
