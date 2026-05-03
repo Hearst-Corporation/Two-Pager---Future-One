@@ -33,17 +33,17 @@ export default function P3InsideRight() {
           <Phase
             n="01"
             title="INCUBATE"
-            line1="Pre-seed → Seed"
-            line2="3–6 months"
-            line3="20–30 / batch"
+            line1="Pre seed → Seed"
+            line2="3 to 6 months"
+            line3="20 to 30 / cohort"
           />
           <div style={S.arrow}>›</div>
           <Phase
             n="02"
             title="ACCELERATE"
             line1="Seed → Series A"
-            line2="6–9 months"
-            line3="20–30 / cohort"
+            line2="6 to 9 months"
+            line3="20 to 30 / cohort"
           />
           <div style={S.arrow}>›</div>
           <Phase
@@ -51,13 +51,13 @@ export default function P3InsideRight() {
             title="SCALE"
             line1="Series A → B+"
             line2="Rolling"
-            line3="20–30 companies"
+            line3="20 to 30 companies"
           />
           <div style={S.arrow}>›</div>
           <Phase
             n="04"
             title="ANCHOR"
-            line1="Big Tech Bridge"
+            line1="Global Tech Bridge"
             line2="Rolling"
             line3="POCs • M&A"
           />
@@ -78,7 +78,7 @@ export default function P3InsideRight() {
 
         <div style={S.midRight}>
           <div style={S.eyebrow}>
-            FOLLOW-ON FUNDING
+            SUBSEQUENT FUNDING
             <br />
             AT 18 MONTHS
           </div>
@@ -110,7 +110,7 @@ export default function P3InsideRight() {
         <div style={S.buildingImg} aria-label="Image campus" />
         <div style={S.buildingOverlay} />
         <div style={S.statsRow}>
-          <StatRow icon="rack" value="150" label="STARTUPS MAX CAPACITY" />
+          <StatRow icon="rack" value="150" label="STARTUPS / ACTIVE RESIDENCY" />
           <StatRow icon="people" value="4 K" label={`RESIDENTS\n(FOUNDERS & TEAMS)`} />
           <StatRow icon="building" value="100 K" label="SQM TOTAL CAMPUS" />
           <StatRow icon="bolt" value="€400M" label="PHASE 1 CAPEX" />
@@ -121,7 +121,7 @@ export default function P3InsideRight() {
             <div style={{ ...S.tagline, color: 'var(--color-gray-300)' }}>Global by intent.</div>
           </div>
           <div style={S.qatarText}>
-            <strong style={{ color: 'white' }}>QATAR LABEL PROGRAM</strong> · Official certification for high-potential
+            <strong style={{ color: 'var(--color-text-inverse)' }}>QATAR LABEL PROGRAM</strong> · Official certification for high-potential
             companies.
             <br />
             0% tax environment · Fast company setup · Full ownership.
@@ -155,21 +155,22 @@ function Phase({ n, title, line1, line2, line3 }) {
 
 function Hub() {
   const satellites = [
-    { angle: -150, radius: 55, title: 'AI SERVICES', desc: 'Models · Data\nTools · Platforms' },
-    { angle: -90, radius: 85, title: 'COMPUTE & HPC', desc: 'Tier IV Data Centers\nHigh-Density Racks' },
-    { angle: -30, radius: 55, title: 'ENERGY', desc: 'Reliable Power\nSustainable' },
-    { angle: 30, radius: 85, title: 'INFRASTRUCTURE', desc: 'Campus & Facilities\nConnectivity' },
-    { angle: 90, radius: 55, title: 'TALENT', desc: 'Engineers · Researchers\nEntrepreneurs' },
-    { angle: 150, radius: 85, title: 'CAPITAL', desc: 'Sovereign Funds\nCo-investment' }
+    { angle: -150, radius: 52.5, title: 'AI SERVICES', desc: 'Models • Data\nTools • Platforms' },
+    { angle: -90, radius: 82.5, title: 'COMPUTE & HPC', desc: 'Tier IV Data Centers\nHigh density racks' },
+    { angle: -30, radius: 52.5, title: 'ENERGY', desc: 'Reliable Power\nSustainable' },
+    { angle: 30, radius: 82.5, title: 'INFRASTRUCTURE', desc: 'Campus & Facilities\nConnectivity' },
+    { angle: 90, radius: 52.5, title: 'TALENT', desc: 'Engineers • Researchers\nEntrepreneurs' },
+    { angle: 150, radius: 82.5, title: 'CAPITAL', desc: 'Sovereign Funds\nJoint investment' }
   ];
   
-  const centerRadius = 22; // half of 44px core
+  const centerRadius = 24; // half of 48px core
 
   return (
     <div style={S.hub}>
       {/* Delicate background rings */}
-      <div style={{ ...S.hubBgRing, width: 110, height: 110 }} />
-      <div style={{ ...S.hubBgRing, width: 170, height: 170 }} />
+      <div style={{ ...S.hubBgRing, width: 105, height: 105 }} />
+      <div style={{ ...S.hubBgRing, width: 165, height: 165 }} />
+      <div style={{ ...S.hubBgRing, width: 225, height: 225, borderStyle: 'dotted' }} />
 
       {/* Satellites & Connectors */}
       {satellites.map((sat, i) => {
@@ -180,6 +181,11 @@ function Hub() {
         const startX = Math.cos(rad) * centerRadius;
         const startY = Math.sin(rad) * centerRadius;
         const lineLength = sat.radius - centerRadius;
+        
+        // Position of the data packet (at 65% of the line)
+        const packetDist = centerRadius + lineLength * 0.65;
+        const packetX = Math.cos(rad) * packetDist;
+        const packetY = Math.sin(rad) * packetDist;
 
         return (
           <div key={i}>
@@ -193,12 +199,18 @@ function Hub() {
                 transform: `rotate(${sat.angle}deg)`,
               }}
             />
+            {/* Data packet on the trace */}
+            <div style={{
+              ...S.hubDataPacket,
+              left: `calc(50% + ${packetX}px)`,
+              top: `calc(50% + ${packetY}px)`,
+            }} />
             {/* Satellite Node */}
             <div
               style={{
                 ...S.hubSatWrapper,
                 left: `calc(50% + ${x}px - 40px)`, // 40px is half width
-                top: `calc(50% + ${y}px - 4px)`, // 4px is half height of node
+                top: `calc(50% + ${y}px - 6px)`, // 6px is half height of node
               }}
             >
               <div style={S.hubSatNode}>
@@ -219,9 +231,28 @@ function Hub() {
 
       {/* Core */}
       <div style={S.hubCore}>
-        <strong style={S.hubCoreStrong}>FUTUR<br />ONE</strong>
+        <div style={{
+          position: 'absolute',
+          inset: 3,
+          background: 'var(--color-gray-900)',
+          clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)',
+          zIndex: -1,
+        }} />
+        <strong style={{...S.hubCoreStrong, color: 'var(--color-surface)'}}>FUTUR<br />ONE</strong>
         <span style={S.hubCoreSpan}>QATAR</span>
       </div>
+      {/* Core Mask to hide lines under core */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 54,
+        height: 54,
+        background: 'var(--color-surface)',
+        clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)',
+        zIndex: 1,
+      }} />
     </div>
   );
 }
@@ -305,7 +336,7 @@ function RowIcon({ kind }) {
 
 /* ---------- styles ---------- */
 /* Page totale = 680px. Sections en pixels exacts — heights LOCKED.
-   header(122) + phases(102) + mid(266) + picture(98) + building(92) = 680. */
+   header(122) + phases(102) + mid(282) + picture(82) + building(92) = 680. */
 
 const SECTION = { flexShrink: 0, flexGrow: 0, minHeight: 0, overflow: 'hidden' };
 
@@ -325,7 +356,7 @@ const S = {
   header: {
     ...SECTION,
     height: 122,
-    padding: '34px 22px 18px',
+    padding: '34px 26px 18px',
   },
   headerTop: {
     display: 'flex',
@@ -373,7 +404,7 @@ const S = {
     height: 102,
     display: 'flex',
     alignItems: 'stretch',
-    padding: '0 22px',
+    padding: '0 26px',
     borderBottom: '1px solid var(--color-border-light)',
   },
   phasesInner: {
@@ -446,12 +477,12 @@ const S = {
     margin: '0 5px',
   },
 
-  /* MID (266px) */
+  /* MID (282px) */
   mid: {
     ...SECTION,
-    height: 266,
+    height: 282,
     display: 'flex',
-    padding: '15px 22px 10px',
+    padding: '15px 26px 10px',
     gap: 16,
     borderBottom: '1px solid var(--color-border-light)',
   },
@@ -481,52 +512,56 @@ const S = {
     fontWeight: 500,
   },
 
-  /* HUB DIAGRAM */
+  /* ==========================================
+     HUB DIAGRAM (Tech / Neural Network Style)
+     ========================================== */
   hub: {
     position: 'relative',
     width: '100%',
     height: 180,
     marginTop: 15,
   },
+  /* Neural Network Background */
   hubBgRing: {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
     borderRadius: '50%',
-    border: '0.5px solid var(--color-gray-200)',
+    border: '0.5px dashed rgba(138, 144, 153, 0.5)', /* Pointillés tech */
     zIndex: 1,
   },
+  /* Hexagonal Core (Chip style) */
   hubCore: {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     background: 'var(--color-surface)',
-    border: '0.5px solid var(--color-gray-300)',
-    borderRadius: '50%',
+    border: '1.5px solid var(--color-gray-900)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
     zIndex: 10,
+    clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)', /* Hexagone parfait */
   },
   hubCoreStrong: {
     fontSize: 7.5,
-    fontWeight: 800,
+    fontWeight: 900,
     lineHeight: 1.1,
-    color: 'var(--color-text-primary)',
-    letterSpacing: 0,
+    color: 'var(--color-surface)',
+    letterSpacing: 0.5,
   },
   hubCoreSpan: {
     fontSize: 4.5,
     marginTop: 2,
-    fontWeight: 600,
+    fontWeight: 800,
     color: 'var(--color-accent-strong)',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
   hubSatWrapper: {
     position: 'absolute',
@@ -536,45 +571,63 @@ const S = {
     width: 80,
     zIndex: 5,
   },
+  /* Tech Node (Square rotated) */
   hubSatNode: {
-    width: 8,
-    height: 8,
+    width: 12,
+    height: 12,
     background: 'var(--color-surface)',
-    border: '0.5px solid var(--color-accent-strong)',
-    borderRadius: '50%',
+    border: '1px solid var(--color-accent-strong)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    transform: 'rotate(45deg)', /* Losange */
+    boxShadow: '0 0 0 2px var(--color-surface)', /* Pour dégager la ligne en dessous */
   },
+  /* Inner node circuit */
   hubSatDot: {
-    width: 2.5,
-    height: 2.5,
-    background: 'var(--color-accent-strong)',
-    borderRadius: '50%',
+    width: 4,
+    height: 4,
+    background: 'var(--color-gray-900)',
+    transform: 'rotate(-45deg)', /* Remet droit à l'intérieur */
+    clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)', /* Petit losange interne */
   },
+  /* Circuit board traces */
   hubConnector: {
     position: 'absolute',
-    height: 0.5,
+    height: 1,
     background: 'var(--color-gray-300)',
     transformOrigin: 'left center',
     zIndex: 2,
   },
+  /* Data packet on the trace */
+  hubDataPacket: {
+    position: 'absolute',
+    width: 3.5,
+    height: 3.5,
+    background: 'var(--color-accent-strong)',
+    borderRadius: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: 3,
+    boxShadow: '0 0 0 1px var(--color-surface)',
+  },
   hubSatText: {
     marginTop: 4,
     textAlign: 'center',
+    background: 'var(--color-surface)',
+    padding: '2px 4px',
   },
   hubSatTitle: {
-    fontSize: 5.5,
-    fontWeight: 700,
+    fontSize: 6,
+    fontWeight: 900,
     color: 'var(--color-text-primary)',
     letterSpacing: 0.5,
   },
   hubSatDesc: {
-    fontSize: 5,
-    color: 'var(--color-gray-400)',
+    fontSize: 5.5,
+    color: 'var(--color-text-secondary)',
     marginTop: 1.5,
     lineHeight: 1.3,
-    fontWeight: 500,
+    fontWeight: 600,
   },
 
   /* FUNDING */
@@ -628,10 +681,10 @@ const S = {
     paddingLeft: 8,
   },
 
-  /* PICTURE (98px) */
+  /* PICTURE (82px) */
   picture: {
     ...SECTION,
-    height: 98,
+    height: 82,
     backgroundImage: "url('/u2883995211_httpss.mj.run0EzymJvOvRs_Aerial_masterplan_view_of__2273042f-e6f1-4e14-a216-b976ea0fdab7.png')",
     backgroundSize: 'cover',
     backgroundPosition: 'center 20%', /* Haut de l'image */
@@ -662,7 +715,7 @@ const S = {
     top: 12,
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
-    padding: '0 22px',
+    padding: '0 26px',
     gap: 8,
     color: 'var(--color-text-inverse)',
   },
@@ -689,7 +742,7 @@ const S = {
     left: 0,
     right: 0,
     bottom: 10,
-    padding: '0 22px',
+    padding: '0 26px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-end',

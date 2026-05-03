@@ -36,10 +36,12 @@ export default function P2InsideLeft() {
           </p>
 
           <blockquote style={S.quote}>
-            We will allocate compute capacity, energy, and HPC<br />
+            "We will allocate compute capacity, energy, and HPC<br />
             infrastructure to support the development of your projects at<br />
             the scale required to empower the next generation of<br />
-            founders and future industry leaders.
+            founders and future industry leaders."
+            <br /><br />
+            <span style={S.quoteAuthor}>— CEO, Hearst Qatar</span>
           </blockquote>
         </div>
       </section>
@@ -61,11 +63,11 @@ export default function P2InsideLeft() {
         <div style={S.textBlock}>
           <div style={S.eyebrow}>THE OPPORTUNITY</div>
           <div style={S.darkHeadline}>
-            High-potential founders.
+            High potential founders.
             <br />
             Undercapitalized markets.
             <br />
-            <span style={S.darkHeadlineAccent}>Sovereign-grade infrastructure.</span>
+            <span style={S.darkHeadlineAccent}>Sovereign grade infrastructure.</span>
           </div>
           <p style={S.darkBody}>
             <strong>FUTUR ONE</strong> concentrates compute, capital and living<br />
@@ -95,8 +97,9 @@ export default function P2InsideLeft() {
           title="BUILT BY"
           body={
             <>
-              <strong>Hearst Qatar</strong> - designed by<br />
-              Foster, built by <strong>JB Pastor & Fils</strong>.
+              <strong>Hearst Qatar</strong> • Designed by<br />
+              Foster • Built by <strong>JB Pastor &<br />
+              Fils</strong>.
             </>
           }
         />
@@ -109,7 +112,7 @@ export default function P2InsideLeft() {
           title="TECHNOLOGY STACK"
           body={
             <>
-              Tier-1 hyperscalers<br />
+              Tier 1 hyperscalers<br />
               and silicon partners.
             </>
           }
@@ -123,7 +126,7 @@ export default function P2InsideLeft() {
           title="QATAR LABEL PROGRAM"
           body={
             <>
-              0% tax - Full ownership -<br />
+              0% tax • Full ownership •<br />
               Housing & healthcare.
             </>
           }
@@ -235,12 +238,20 @@ const S = {
   quote: {
     margin: '16px 0 0',
     paddingLeft: 10,
-    borderLeft: '2px solid var(--color-gray-400)', /* Ligne grise/blanche comme sur la maquette */
+    borderLeft: '2px solid var(--color-gray-400)',
     fontSize: 7,
     lineHeight: 1.5,
     fontStyle: 'italic',
     color: 'var(--color-gray-300)',
     fontWeight: 500,
+  },
+  quoteAuthor: {
+    fontSize: 6,
+    fontWeight: 800,
+    fontStyle: 'normal',
+    color: 'var(--color-surface)',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
 
   /* DARK BAND (220px) */
