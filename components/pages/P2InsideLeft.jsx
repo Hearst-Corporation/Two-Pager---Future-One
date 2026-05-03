@@ -48,6 +48,12 @@ export default function P2InsideLeft() {
       <section style={S.darkBand}>
         {/* Left: Logo Block */}
         <div style={S.logoBlock}>
+          {/* 360° Edge Texts */}
+        <div style={{ ...S.edgeText, ...S.edgeTop }}>INFRASTRUCTURE</div>
+        <div style={{ ...S.edgeText, ...S.edgeRight }}>COMPUTE</div>
+        <div style={{ ...S.edgeText, ...S.edgeBottom }}>SOFTWARE</div>
+        <div style={{ ...S.edgeText, ...S.edgeLeft }}>ENERGY</div>
+
           <svg width="55%" height="55%" viewBox="0 0 91 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 43.4041L41.5946 74H61L19.7092 34L10 43.4041Z" fill="var(--color-surface)"/>
             <path d="M80 57.8356L48.4056 28H29L70.2908 67L80 57.8356Z" fill="var(--color-surface)"/>
@@ -95,8 +101,7 @@ export default function P2InsideLeft() {
           body={
             <>
               <strong>Hearst Qatar</strong> - designed by<br />
-              Foster, built by <strong>JB Pastor &<br />
-              Fils</strong>.
+              Foster, built by <strong>JB Pastor & Fils</strong>.
             </>
           }
         />
@@ -259,6 +264,36 @@ const S = {
     alignItems: 'center',
     justifyContent: 'center',
     borderRight: '1px solid rgba(255,255,255,0.05)',
+    position: 'relative', /* Ajouté pour positionner les textes sur les bords */
+  },
+  edgeText: {
+    position: 'absolute',
+    fontSize: 5.5,
+    fontWeight: 700,
+    letterSpacing: 3,
+    color: 'var(--color-gray-500)',
+    textTransform: 'uppercase',
+    whiteSpace: 'nowrap',
+  },
+  edgeTop: {
+    top: 16,
+    left: '50%',
+    transform: 'translateX(-50%)',
+  },
+  edgeBottom: {
+    bottom: 16,
+    left: '50%',
+    transform: 'translateX(-50%)',
+  },
+  edgeLeft: {
+    left: 16,
+    top: '50%',
+    transform: 'translate(-50%, -50%) rotate(-90deg)',
+  },
+  edgeRight: {
+    right: 16,
+    top: '50%',
+    transform: 'translate(50%, -50%) rotate(90deg)',
   },
   textBlock: {
     flex: 1,
