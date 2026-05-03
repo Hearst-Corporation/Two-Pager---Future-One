@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Futur One - Ultra Premium UI/UX</title>
+    <title>Futur One - Print-Ready Editorial Design</title>
     <style>
         :root {
             /* Exact tokens */
@@ -28,18 +28,11 @@
             --color-border-light: #E4E6EA;
         }
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes spinReverse { 100% { transform: rotate(-360deg); } }
-        @keyframes scanline {
-            0% { top: 0; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-        @keyframes dataFlow {
-            0% { left: 0; width: 0; opacity: 0; }
-            50% { width: 40px; opacity: 1; }
-            100% { left: 100%; width: 0; opacity: 0; }
+        /* PRINT-SPECIFIC RESET: No animations, no hover states, no digital glows */
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         body {
@@ -47,52 +40,48 @@
             padding: 0;
             background-color: var(--color-bg-main);
             color: var(--color-text-primary);
-            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            /* Premium matte paper noise texture */
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
         }
 
-        /* Tech/Blueprint Accents */
-        .tech-corners {
+        /* Editorial Accents */
+        .print-crop-marks {
             position: relative;
         }
-        .tech-corners::before, .tech-corners::after {
-            content: ''; position: absolute; width: 12px; height: 12px; pointer-events: none; z-index: 20;
+        .print-crop-marks::before, .print-crop-marks::after {
+            content: ''; position: absolute; width: 10px; height: 10px; pointer-events: none;
         }
-        .tech-corners::before {
+        .print-crop-marks::before {
             top: -1px; left: -1px;
-            border-top: 2px solid var(--color-accent-strong);
-            border-left: 2px solid var(--color-accent-strong);
+            border-top: 1px solid var(--color-gray-900);
+            border-left: 1px solid var(--color-gray-900);
         }
-        .tech-corners::after {
+        .print-crop-marks::after {
             bottom: -1px; right: -1px;
-            border-bottom: 2px solid var(--color-accent-strong);
-            border-right: 2px solid var(--color-accent-strong);
+            border-bottom: 1px solid var(--color-gray-900);
+            border-right: 1px solid var(--color-gray-900);
         }
 
         .micro-text {
             font-family: "SF Mono", ui-monospace, Menlo, Monaco, monospace;
-            font-size: 8px;
-            letter-spacing: 2px;
-            color: var(--color-gray-400);
+            font-size: 7px;
+            letter-spacing: 1px;
+            color: var(--color-gray-500);
             text-transform: uppercase;
         }
 
         header {
-            padding: 60px 40px;
+            padding: 40px;
             text-align: center;
             background: var(--color-surface);
             border-bottom: 1px solid var(--color-border-light);
             position: relative;
-            overflow: hidden;
         }
 
         h1 {
-            font-size: 48px;
+            font-size: 36px;
             font-weight: 900;
-            letter-spacing: -2px;
+            letter-spacing: -1px;
             margin: 0;
             text-transform: uppercase;
         }
@@ -100,19 +89,18 @@
         h1 span { color: var(--color-accent-strong); }
 
         .container {
-            max-width: 1100px;
-            margin: 60px auto;
+            max-width: 1000px;
+            margin: 40px auto;
             display: flex;
             flex-direction: column;
-            gap: 80px;
+            gap: 60px;
             padding: 0 40px;
         }
 
         .panel {
             background: var(--color-surface);
-            padding: 60px;
+            padding: 50px;
             position: relative;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.03);
             border: 1px solid var(--color-border-light);
         }
 
@@ -120,22 +108,22 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-bottom: 50px;
-            border-bottom: 1px solid var(--color-gray-200);
-            padding-bottom: 15px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--color-gray-900);
+            padding-bottom: 10px;
         }
 
         .section-title {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 800;
             color: var(--color-text-primary);
             text-transform: uppercase;
-            letter-spacing: 4px;
+            letter-spacing: 2px;
             margin: 0;
         }
 
         /* ==========================================
-           01. THE METHOD (Editorial Overlap)
+           01. THE METHOD (Static Print Layout)
            ========================================== */
         .steps-wrapper {
             position: relative;
@@ -144,21 +132,15 @@
             gap: 20px;
         }
 
-        /* Continuous track line */
+        /* Solid track line for print */
         .steps-track {
             position: absolute;
             top: 40px;
             left: 5%;
             right: 5%;
             height: 1px;
-            background: var(--color-gray-200);
+            background: var(--color-gray-300);
             z-index: 1;
-        }
-        .steps-track-active {
-            position: absolute;
-            top: 0; left: 0; height: 100%;
-            background: var(--color-accent-strong);
-            animation: dataFlow 4s infinite cubic-bezier(0.65, 0, 0.35, 1);
         }
 
         .step-card {
@@ -168,90 +150,70 @@
             padding-top: 20px;
         }
 
-        /* Giant watermark number */
+        /* Giant watermark number - Prints beautifully as a light gray */
         .step-watermark {
             position: absolute;
-            top: -30px;
+            top: -25px;
             left: -10px;
-            font-size: 120px;
+            font-size: 100px;
             font-weight: 900;
             color: var(--color-gray-200);
-            opacity: 0.4;
             line-height: 1;
-            letter-spacing: -6px;
+            letter-spacing: -4px;
             z-index: -1;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            pointer-events: none;
         }
 
         .step-node {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             background: var(--color-surface);
             border: 2px solid var(--color-accent-strong);
             border-radius: 50%;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             position: relative;
-            box-shadow: 0 0 0 4px var(--color-surface);
-        }
-        .step-node::after {
-            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 4px; height: 4px; background: var(--color-accent-strong); border-radius: 50%;
         }
 
         .step-title {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 800;
             color: var(--color-text-primary);
-            letter-spacing: 2px;
-            margin-bottom: 12px;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .step-title::before {
-            content: ''; width: 12px; height: 1px; background: var(--color-accent-strong);
+            content: ''; width: 10px; height: 1px; background: var(--color-accent-strong);
         }
 
         .step-desc {
-            font-size: 11px;
+            font-size: 9px;
             color: var(--color-text-secondary);
-            line-height: 1.7;
+            line-height: 1.6;
             font-weight: 500;
-            border-left: 1px solid var(--color-gray-200);
-            padding-left: 12px;
-            margin-left: 5px;
+            border-left: 1px solid var(--color-gray-300);
+            padding-left: 10px;
+            margin-left: 4px;
         }
 
         .step-desc span { color: var(--color-text-muted); font-weight: 400; }
 
         /* ==========================================
-           02. HUB DIAGRAM (Concentric Orbital)
+           02. HUB DIAGRAM (Static Infographic)
            ========================================== */
         .hub-container {
             position: relative;
-            height: 450px;
+            height: 400px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle at center, var(--color-bg-main) 0%, var(--color-surface) 70%);
-            border: 1px solid var(--color-gray-200);
-            overflow: hidden;
+            background: var(--color-surface);
         }
 
-        /* Grid background for hub */
-        .hub-container::before {
-            content: ''; position: absolute; inset: 0;
-            background-image: 
-                linear-gradient(var(--color-gray-200) 1px, transparent 1px),
-                linear-gradient(90deg, var(--color-gray-200) 1px, transparent 1px);
-            background-size: 30px 30px;
-            opacity: 0.5;
-        }
-
-        /* Orbital rings */
+        /* Static concentric rings like an architectural drawing */
         .hub-ring {
             position: absolute;
             border-radius: 50%;
@@ -259,15 +221,15 @@
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
         }
-        .hub-ring-1 { width: 200px; height: 200px; border-style: dashed; animation: spin 40s linear infinite; opacity: 0.6; }
-        .hub-ring-2 { width: 320px; height: 320px; border: 1px solid var(--color-gray-200); }
-        .hub-ring-3 { width: 440px; height: 440px; border-style: dotted; animation: spinReverse 60s linear infinite; opacity: 0.4; }
+        .hub-ring-1 { width: 180px; height: 180px; border-style: dashed; }
+        .hub-ring-2 { width: 280px; height: 280px; border: 1px solid var(--color-gray-200); }
+        .hub-ring-3 { width: 380px; height: 380px; border-style: dotted; }
 
         /* Core */
         .hub-core {
             position: relative;
-            width: 110px;
-            height: 110px;
+            width: 90px;
+            height: 90px;
             background: var(--color-accent-strong);
             color: var(--color-text-inverse);
             display: flex;
@@ -276,19 +238,11 @@
             justify-content: center;
             text-align: center;
             z-index: 10;
-            /* Hexagon shape */
             clip-path: polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
-        }
-        .hub-core::before {
-            content: ''; position: absolute; inset: 2px;
-            background: var(--color-accent-primary);
-            clip-path: polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%);
-            z-index: -1;
         }
 
-        .hub-core strong { font-size: 16px; font-weight: 900; line-height: 1.1; letter-spacing: -0.5px; }
-        .hub-core span { font-size: 8px; margin-top: 6px; opacity: 0.8; letter-spacing: 2px; }
+        .hub-core strong { font-size: 14px; font-weight: 900; line-height: 1.1; letter-spacing: -0.5px; }
+        .hub-core span { font-size: 7px; margin-top: 4px; opacity: 0.9; letter-spacing: 1px; }
 
         /* Satellites */
         .hub-sat-wrapper {
@@ -296,13 +250,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 160px;
+            width: 140px;
             z-index: 5;
         }
 
         .hub-sat-node {
-            width: 24px;
-            height: 24px;
+            width: 16px;
+            height: 16px;
             background: var(--color-surface);
             border: 2px solid var(--color-accent-strong);
             border-radius: 50%;
@@ -310,148 +264,119 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         .hub-sat-node::after {
-            content: ''; width: 8px; height: 8px; background: var(--color-accent-strong); border-radius: 50%;
+            content: ''; width: 6px; height: 6px; background: var(--color-accent-strong); border-radius: 50%;
         }
 
         .hub-connector {
             position: absolute;
             height: 1px;
-            background: linear-gradient(90deg, var(--color-accent-strong), transparent);
+            background: var(--color-accent-strong);
             transform-origin: left center;
             z-index: 1;
-            opacity: 0.5;
+            opacity: 0.6;
         }
 
         .hub-sat-text {
-            margin-top: 15px;
+            margin-top: 10px;
             text-align: center;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(4px);
-            padding: 6px 12px;
-            border: 1px solid var(--color-gray-200);
-            border-radius: 4px;
+            background: var(--color-surface);
+            padding: 4px 8px;
         }
 
         .hub-sat-title {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
             color: var(--color-text-primary);
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         .hub-sat-desc {
-            font-size: 9px;
+            font-size: 8px;
             color: var(--color-text-secondary);
-            margin-top: 5px;
-            line-height: 1.5;
+            margin-top: 4px;
+            line-height: 1.4;
         }
 
         /* ==========================================
-           03. HEATMAP (Matrix Scan)
+           03. HEATMAP (Flat Print Vector Grid)
            ========================================== */
         .heatmap-layout {
             display: grid;
-            grid-template-columns: 220px 1fr;
-            gap: 60px;
+            grid-template-columns: 200px 1fr;
+            gap: 50px;
             align-items: center;
         }
 
         .heatmap-info {
             display: flex;
             flex-direction: column;
-            border-right: 1px solid var(--color-gray-200);
-            padding-right: 40px;
+            border-right: 1px solid var(--color-gray-300);
+            padding-right: 30px;
         }
 
         .heatmap-eyebrow {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
             color: var(--color-text-secondary);
-            margin-bottom: 15px;
-            line-height: 1.5;
+            margin-bottom: 10px;
+            line-height: 1.4;
         }
 
         .heatmap-value {
-            font-size: 96px;
+            font-size: 80px;
             font-weight: 900;
             color: var(--color-accent-strong);
             line-height: 0.8;
-            letter-spacing: -4px;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            letter-spacing: -3px;
         }
 
         .heatmap-grid-container {
-            position: relative;
-            padding: 20px;
-            background: var(--color-bg-main);
-            border: 1px solid var(--color-gray-200);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        /* Laser scan effect */
-        .heatmap-grid-container::after {
-            content: '';
-            position: absolute;
-            left: 0; right: 0; height: 2px;
-            background: var(--color-accent-strong);
-            box-shadow: 0 0 10px var(--color-accent-strong);
-            animation: scanline 4s infinite linear;
-            z-index: 10;
-            pointer-events: none;
+            padding: 0;
+            background: transparent;
         }
 
         .heatmap-grid {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            gap: 4px;
+            gap: 2px; /* Tight gap for crisp print */
         }
 
+        /* Flat, solid colors for perfect CMYK/print reproduction */
         .heat-cell {
             aspect-ratio: 2 / 1;
-            background: var(--color-gray-300);
-            border-radius: 1px;
-            position: relative;
-        }
-
-        /* Inner shadow for LED panel look */
-        .heat-cell::before {
-            content: ''; position: absolute; inset: 0;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            background: var(--color-gray-200);
         }
 
         .heat-cell.active { background: var(--color-accent-strong); }
-        .heat-cell.active:nth-child(2n) { background: var(--color-accent-primary); }
-        .heat-cell.active:nth-child(7n) { opacity: 0.85; }
+        /* Subtle static variation without opacity/alpha which can print poorly */
+        .heat-cell.active:nth-child(3n) { background: var(--color-accent-primary); }
 
         .heatmap-legend {
-            margin-top: 25px;
+            margin-top: 20px;
             display: flex;
-            gap: 30px;
+            gap: 25px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .legend-box {
-            width: 20px;
-            height: 10px;
-            border-radius: 1px;
+            width: 16px;
+            height: 8px;
         }
         .legend-text {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             color: var(--color-text-secondary);
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
         }
     </style>
@@ -459,23 +384,23 @@
 <body>
 
     <header>
-        <div class="micro-text" style="position: absolute; top: 20px; left: 20px;">// DOC.REF: F1-QATAR-04</div>
-        <div class="micro-text" style="position: absolute; top: 20px; right: 20px;">SYS.STATUS: OPTIMAL</div>
+        <div class="micro-text" style="position: absolute; top: 20px; left: 20px;">DOC.REF: F1-QATAR-04</div>
+        <div class="micro-text" style="position: absolute; top: 20px; right: 20px;">PRINT READY</div>
         <h1>Futur One <span>UI/UX</span></h1>
-        <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 15px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700;">Sovereign Infrastructure Blueprint</p>
+        <p style="font-size: 11px; color: var(--color-text-muted); margin-top: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700;">Static Editorial Design (A3 Print)</p>
     </header>
 
     <div class="container">
         
         <!-- 01. THE METHOD -->
-        <div class="panel tech-corners">
+        <div class="panel print-crop-marks">
             <div class="panel-header">
                 <h2 class="section-title">01. The Method</h2>
                 <div class="micro-text">PHASE_PROGRESSION</div>
             </div>
             
             <div class="steps-wrapper">
-                <div class="steps-track"><div class="steps-track-active"></div></div>
+                <div class="steps-track"></div>
                 
                 <div class="step-card">
                     <div class="step-watermark">01</div>
@@ -508,14 +433,14 @@
         </div>
 
         <!-- 02. HUB DIAGRAM -->
-        <div class="panel tech-corners">
+        <div class="panel print-crop-marks">
             <div class="panel-header">
                 <h2 class="section-title">02. Sovereign AI Hub</h2>
                 <div class="micro-text">TOPOLOGY_MAP</div>
             </div>
             
             <div class="hub-container" id="hub-demo">
-                <!-- Orbital Rings -->
+                <!-- Static Rings -->
                 <div class="hub-ring hub-ring-1"></div>
                 <div class="hub-ring hub-ring-2"></div>
                 <div class="hub-ring hub-ring-3"></div>
@@ -530,7 +455,7 @@
         </div>
 
         <!-- 03. HEATMAP -->
-        <div class="panel tech-corners">
+        <div class="panel print-crop-marks">
             <div class="panel-header">
                 <h2 class="section-title">03. Follow-on Funding</h2>
                 <div class="micro-text">DATA_MATRIX</div>
@@ -551,11 +476,11 @@
                     
                     <div class="heatmap-legend">
                         <div class="legend-item">
-                            <div class="legend-box" style="background: var(--color-gray-300); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);"></div>
+                            <div class="legend-box" style="background: var(--color-gray-200);"></div>
                             <span class="legend-text">MENA Avg (< 10%)</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-box" style="background: var(--color-accent-strong); box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);"></div>
+                            <div class="legend-box" style="background: var(--color-accent-strong);"></div>
                             <span class="legend-text">Futur One Target</span>
                         </div>
                     </div>
@@ -566,18 +491,18 @@
     </div>
 
     <script>
-        // Populate Hub
+        // Populate Hub (Static)
         const hubDemo = document.getElementById('hub-demo');
         const satellites = [
-            { angle: -150, radius: 160, title: 'AI SERVICES', desc: 'Models · Data\nTools · Platforms\nSupport' },
-            { angle: -90, radius: 220, title: 'COMPUTE & HPC', desc: 'Tier IV Data Centers\nHigh-Density Racks\nMassive Scale' },
-            { angle: -30, radius: 160, title: 'ENERGY', desc: 'Reliable Power\nSustainable\nOptimized' },
-            { angle: 30, radius: 220, title: 'INFRASTRUCTURE', desc: 'Campus & Facilities\nConnectivity\nSecurity' },
-            { angle: 90, radius: 160, title: 'TALENT & COMMUNITY', desc: 'Engineers · Researchers\nEntrepreneurs · Operators' },
-            { angle: 150, radius: 220, title: 'CAPITAL', desc: 'Sovereign Funds\nCo-investment\nLong-Term Alignment' }
+            { angle: -150, radius: 140, title: 'AI SERVICES', desc: 'Models · Data\nTools · Platforms\nSupport' },
+            { angle: -90, radius: 190, title: 'COMPUTE & HPC', desc: 'Tier IV Data Centers\nHigh-Density Racks\nMassive Scale' },
+            { angle: -30, radius: 140, title: 'ENERGY', desc: 'Reliable Power\nSustainable\nOptimized' },
+            { angle: 30, radius: 190, title: 'INFRASTRUCTURE', desc: 'Campus & Facilities\nConnectivity\nSecurity' },
+            { angle: 90, radius: 140, title: 'TALENT & COMMUNITY', desc: 'Engineers · Researchers\nEntrepreneurs · Operators' },
+            { angle: 150, radius: 190, title: 'CAPITAL', desc: 'Sovereign Funds\nCo-investment\nLong-Term Alignment' }
         ];
         
-        const centerRadius = 55; // half of 110px core
+        const centerRadius = 45; // half of 90px core
         
         satellites.forEach((sat) => {
             const rad = sat.angle * Math.PI / 180;
@@ -600,8 +525,8 @@
             // Satellites Nodes
             const satEl = document.createElement('div');
             satEl.className = 'hub-sat-wrapper';
-            satEl.style.left = `calc(50% + ${x}px - 80px)`; // 80px is half width
-            satEl.style.top = `calc(50% + ${y}px - 12px)`; // 12px is half height of node
+            satEl.style.left = `calc(50% + ${x}px - 70px)`; // 70px is half width
+            satEl.style.top = `calc(50% + ${y}px - 8px)`; // 8px is half height of node
             
             satEl.innerHTML = `
                 <div class="hub-sat-node"></div>
@@ -613,7 +538,7 @@
             hubDemo.appendChild(satEl);
         });
 
-        // Populate Heatmap Matrix
+        // Populate Heatmap Matrix (Static)
         const heatmapDemo = document.getElementById('heatmap-demo');
         for(let i=0; i<100; i++) {
             const cell = document.createElement('div');

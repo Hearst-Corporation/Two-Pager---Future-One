@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futur One - P2 Section 2 - The Hub Icon</title>
+    <style>
+        :root {
+            --color-black: #0E1013;
+            --color-white: #FFFFFF;
+        }
+
+        body {
+            margin: 0;
+            padding: 100px;
+            background-color: #F5F5F6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, sans-serif;
+        }
+
+        /* 
+           LA DEMANDE : 
+           - Carré plein noir
+           - Juste le "H" en pointillé (contour)
+           - Blanc à l'intérieur du H
+        */
+
+        .hub-square-icon {
+            width: 120px;
+            height: 120px;
+            background-color: var(--color-black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .h-symbol {
+            width: 60px;
+            height: 60px;
+            background-color: var(--color-white); /* Blanc dedans */
+            position: relative;
+            /* Le "H" est formé par un masque ou des pseudo-éléments pour garder le fond blanc */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            /* Contour en pointillé */
+            outline: 2px dashed var(--color-white);
+            outline-offset: 4px;
+        }
+
+        /* Construction du H par soustraction visuelle (ou masquage) */
+        /* Ici on utilise une approche simple : un rectangle blanc avec deux encoches noires */
+        .h-symbol::before,
+        .h-symbol::after {
+            content: "";
+            position: absolute;
+            background-color: var(--color-black);
+            width: 24px;
+            height: 20px;
+        }
+
+        /* Encoche haut */
+        .h-symbol::before {
+            top: 0;
+            height: 22px;
+        }
+
+        /* Encoche bas */
+        .h-symbol::after {
+            bottom: 0;
+            height: 22px;
+        }
+
+        .label {
+            margin-top: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--color-black);
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="hub-square-icon">
+            <div class="h-symbol"></div>
+        </div>
+        <div class="label">P2 Section 2 - Hub Icon Spec</div>
+    </div>
+
+</body>
+</html>
