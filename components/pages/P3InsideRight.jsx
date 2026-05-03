@@ -73,7 +73,7 @@ export default function P3InsideRight() {
       {/* ============== MID : HUB + FUNDING ============== */}
       <section style={S.mid}>
         <div style={S.midLeft}>
-          <div style={S.eyebrow}>THE SOVEREIGN AI INFRASTRUCTURE HUB</div>
+          <div style={{ ...S.eyebrow, color: 'var(--color-accent-strong)' }}>THE SOVEREIGN AI INFRASTRUCTURE HUB</div>
           <div style={S.midSubtitle}>
             One integrated ecosystem.
             <br />
@@ -96,7 +96,7 @@ export default function P3InsideRight() {
               <span>MENA AVERAGE (&lt; 10%)</span>
             </div>
             <div style={S.legendRow}>
-              <div style={{ ...S.legendDot, background: 'var(--color-gray-850)' }} />
+              <div style={{ ...S.legendDot, background: 'var(--color-accent-primary)' }} />
               <span>FUTUR ONE TARGET (70%)</span>
             </div>
           </div>
@@ -287,7 +287,8 @@ function Hub() {
               top: '50%',
               width: lineLen,
               height: 1,
-              background: 'var(--color-gray-400)',
+              background: 'var(--color-accent-primary)',
+              opacity: 0.35,
               transform: `translate(${startOffsetX}px, ${startOffsetY}px) rotate(${s.angle}deg)`,
               transformOrigin: '0 50%',
             }}
@@ -371,7 +372,7 @@ function FundingGrid() {
             key={i}
             style={{
               ...S.fundingCell,
-              background: filled ? 'var(--color-gray-850)' : 'var(--color-gray-200)',
+              background: filled ? 'var(--color-accent-primary)' : 'var(--color-gray-200)',
             }}
           />
         );
@@ -525,7 +526,7 @@ const S = {
   phaseN: {
     fontSize: 28,
     fontWeight: 800,
-    color: 'var(--color-gray-200)',
+    color: 'var(--color-accent-primary)',
     lineHeight: 1,
     letterSpacing: -1,
   },
@@ -624,7 +625,7 @@ const S = {
     width: 56,
     height: 56,
     borderRadius: '50%',
-    background: 'var(--color-gray-850)',
+    background: 'var(--color-accent-primary)',
     color: 'var(--color-text-inverse)',
     display: 'flex',
     flexDirection: 'column',
@@ -637,7 +638,7 @@ const S = {
     width: 16,
     height: 16,
     borderRadius: '50%',
-    background: 'var(--color-gray-850)',
+    background: 'var(--color-accent-strong)',
   },
 
   /* FUNDING */
