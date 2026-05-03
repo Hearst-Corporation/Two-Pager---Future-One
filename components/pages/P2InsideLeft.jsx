@@ -94,8 +94,9 @@ export default function P2InsideLeft() {
           title="BUILT BY"
           body={
             <>
-              <strong>Hearst Qatar</strong> - designed by Foster,<br />
-              built by <strong>JB Pastor & Fils</strong>.
+              <strong>Hearst Qatar</strong> - designed by<br />
+              Foster, built by <strong>JB Pastor &<br />
+              Fils</strong>.
             </>
           }
         />
@@ -318,7 +319,7 @@ const S = {
     padding: '16px 26px',
     background: 'var(--color-gray-900)',
     color: 'var(--color-text-inverse)',
-    alignItems: 'center', /* Centre verticalement le contenu de la grille */
+    alignItems: 'flex-start', /* Aligne tout en haut */
   },
   footerCol: {
     display: 'flex',
@@ -327,7 +328,7 @@ const S = {
   },
   footerIcon: {
     color: 'var(--color-gray-400)',
-    marginTop: 2, /* Ajustement fin pour aligner l'icône avec le titre */
+    marginTop: 0, /* Retire le margin-top pour que l'icône soit le point d'ancrage haut */
   },
   footerTitle: {
     fontSize: 7,
@@ -336,7 +337,8 @@ const S = {
     marginBottom: 6,
     color: 'var(--color-accent-strong)',
     textTransform: 'uppercase',
-    lineHeight: 1, /* Force l'alignement strict */
+    lineHeight: 1,
+    marginTop: 2, /* Aligne visuellement le texte avec le haut de l'icône */
   },
   footerBody: {
     fontSize: 6,
