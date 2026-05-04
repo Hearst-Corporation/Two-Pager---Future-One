@@ -1,5 +1,8 @@
 'use client';
 
+import { useState } from 'react';
+import Reveal from './Reveal';
+
 const PHASES = [
   {
     n: '01',
@@ -39,30 +42,66 @@ export default function SectionMethod() {
 
       <div style={S.container}>
         <div style={S.header}>
-          <div style={S.eyebrow}>THE PROGRAM</div>
-          <h2 style={S.title}>
-            THE <span style={S.titleAccent}>METHOD.</span>
-          </h2>
-          <p style={S.subtitle}>
-            A four-phase residency program — from first line of code to global
-            anchor.
-          </p>
+          <Reveal>
+            <div style={S.eyebrow}>
+              <span style={S.eyebrowNum}>03</span>
+              <span style={S.eyebrowDivider} />
+              THE PROGRAM
+            </div>
+          </Reveal>
+          <Reveal delay={120}>
+            <h2 style={S.title}>
+              THE <span style={S.titleAccent}>METHOD.</span>
+            </h2>
+          </Reveal>
+          <Reveal delay={240}>
+            <p style={S.subtitle}>
+              A four-phase residency program — from first line of code to global
+              anchor.
+            </p>
+          </Reveal>
         </div>
 
         <div style={S.grid}>
           {PHASES.map((p, i) => (
-            <div key={p.n} style={S.card}>
-              <div style={S.cardN}>{p.n}</div>
-              <div style={S.cardTitle}>{p.title}</div>
-              <div style={S.cardStage}>{p.stage}</div>
-              <div style={S.cardDivider} />
-              <p style={S.cardBody}>{p.body}</p>
-              {i < PHASES.length - 1 && <div style={S.cardArrow}>›</div>}
-            </div>
+            <Reveal key={p.n} delay={i * 130} y={20}>
+              <PhaseCard phase={p} isLast={i === PHASES.length - 1} />
+            </Reveal>
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function PhaseCard({ phase, isLast }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...S.card,
+        transform: hover ? 'translateY(-4px)' : 'translateY(0)',
+        background: hover ? 'var(--color-gray-900)' : 'var(--color-gray-850)',
+        boxShadow: hover
+          ? '0 20px 40px -16px rgba(190,18,60,.35)'
+          : '0 0 0 0 rgba(0,0,0,0)',
+      }}
+    >
+      <div
+        style={{
+          ...S.cardAccentBar,
+          transform: hover ? 'scaleX(1)' : 'scaleX(0)',
+        }}
+      />
+      <div style={S.cardN}>{phase.n}</div>
+      <div style={S.cardTitle}>{phase.title}</div>
+      <div style={S.cardStage}>{phase.stage}</div>
+      <div style={S.cardDivider} />
+      <p style={S.cardBody}>{phase.body}</p>
+      {!isLast && <div style={S.cardArrow}>›</div>}
+    </div>
   );
 }
 
@@ -104,6 +143,21 @@ const S = {
     fontWeight: 700,
     color: 'var(--color-accent-soft)',
     marginBottom: 18,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  eyebrowNum: {
+    fontFamily: 'monospace',
+    fontWeight: 800,
+    fontSize: 11,
+    letterSpacing: 1,
+  },
+  eyebrowDivider: {
+    width: 28,
+    height: 1,
+    background: 'var(--color-accent-soft)',
+    opacity: 0.5,
   },
   title: {
     fontSize: 'clamp(36px, 4.6vw, 64px)',
@@ -137,6 +191,21 @@ const S = {
     minHeight: 240,
     display: 'flex',
     flexDirection: 'column',
+    transition:
+      'transform 0.4s cubic-bezier(.22,.61,.36,1), background 0.3s ease, box-shadow 0.4s ease',
+    cursor: 'default',
+    willChange: 'transform',
+    overflow: 'hidden',
+  },
+  cardAccentBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    background: 'var(--color-accent-strong)',
+    transformOrigin: 'left center',
+    transition: 'transform 0.5s cubic-bezier(.22,.61,.36,1)',
   },
   cardN: {
     fontSize: 38,

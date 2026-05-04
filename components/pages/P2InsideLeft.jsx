@@ -36,8 +36,7 @@ export default function P2InsideLeft() {
           <blockquote style={S.quote}>
             <strong>FUTUR ONE</strong> is the proposed sovereign vehicle to capture,
             deploy and govern that resource — founded and operated by
-            <strong>Hearst Qatar</strong>, structured for majority participation
-            by the <strong>Qatar Investment Authority</strong>.
+            <strong>Hearst Qatar</strong>.
           </blockquote>
         </div>
       </section>
@@ -121,8 +120,7 @@ export default function P2InsideLeft() {
           title="PROPOSED STRUCTURE"
           body={
             <>
-              Sovereign joint venture.<br />
-              QIA majority participation.
+              Sovereign joint venture.
             </>
           }
         />

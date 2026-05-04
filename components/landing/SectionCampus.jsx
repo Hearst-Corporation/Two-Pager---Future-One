@@ -1,53 +1,147 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
+import Reveal from './Reveal';
+import CountUp from './CountUp';
+
 const FACTS = [
-  { value: '100 K', label: 'SQM', sub: 'TOTAL CAMPUS' },
-  { value: '150', label: 'STARTUPS', sub: 'MAX CAPACITY' },
-  { value: '4 K', label: 'RESIDENTS', sub: 'FOUNDERS & TEAMS' },
-  { value: '24/7', label: 'OPERATIONS', sub: 'AI-MANAGED' },
+  {
+    label: 'SQM',
+    sub: 'TOTAL CAMPUS',
+    render: () => (
+      <>
+        <CountUp to={100} duration={1800} /> K
+      </>
+    ),
+  },
+  {
+    label: 'STARTUPS',
+    sub: 'MAX CAPACITY',
+    render: () => <CountUp to={150} duration={1800} />,
+  },
+  {
+    label: 'RESIDENTS',
+    sub: 'FOUNDERS & TEAMS',
+    render: () => (
+      <>
+        <CountUp to={4} duration={1800} /> K
+      </>
+    ),
+  },
+  {
+    label: 'OPERATIONS',
+    sub: 'AI-MANAGED',
+    render: () => '24/7',
+  },
 ];
 
 export default function SectionCampus() {
+  const imgRef = useRef(null);
+  const [parallax, setParallax] = useState(0);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const el = imgRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const wh = window.innerHeight;
+        // -1 when section bottom hits top, +1 when section top hits bottom
+        const progress = (rect.top + rect.height / 2 - wh / 2) / wh;
+        setParallax(progress * 60);
+      });
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <section id="campus" style={S.section}>
-      <div style={S.imgWrap}>
-        <img src="/aerial-campus-red.png" alt="FUTUR ONE campus aerial view" style={S.img} />
+      <div style={S.imgWrap} ref={imgRef}>
+        <img
+          src="/aerial-campus-red.png"
+          alt="FUTUR ONE campus aerial view"
+          style={{ ...S.img, transform: `translateY(${parallax}px) scale(1.1)` }}
+        />
         <div style={S.imgOverlay} />
-        <div style={S.imgCaption}>
-          <div style={S.capEyebrow}>THE CAMPUS · DOHA</div>
-          <div style={S.capTitle}>
-            Designed by <em>Foster + Partners</em>.
-            <br />
-            Built by <em>JB Pastor &amp; Fils</em>.
+        <Reveal>
+          <div style={S.imgCaption}>
+            <div style={S.capEyebrow}>
+              <span style={S.eyebrowNum}>05</span>
+              <span style={S.eyebrowDivider} />
+              THE CAMPUS · DOHA
+            </div>
+            <div style={S.capTitle}>
+              Designed by <em>Foster + Partners</em>.
+              <br />
+              Built by <em>JB Pastor &amp; Fils</em>.
+            </div>
           </div>
-        </div>
+        </Reveal>
       </div>
 
       <div style={S.bottom}>
         <div style={S.bottomLeft}>
-          <div style={S.eyebrow}>BY THE NUMBERS</div>
-          <h2 style={S.title}>
-            A controlled environment,
-            <br />
-            <span style={S.titleAccent}>at sovereign scale.</span>
-          </h2>
-          <p style={S.body}>
-            One hundred thousand square meters of integrated infrastructure —
-            residency, compute and operations under a single sovereign roof.
-          </p>
+          <Reveal>
+            <div style={S.eyebrow}>BY THE NUMBERS</div>
+          </Reveal>
+          <Reveal delay={120}>
+            <h2 style={S.title}>
+              A controlled environment,
+              <br />
+              <span style={S.titleAccent}>at sovereign scale.</span>
+            </h2>
+          </Reveal>
+          <Reveal delay={240}>
+            <p style={S.body}>
+              One hundred thousand square meters of integrated infrastructure —
+              residency, compute and operations under a single sovereign roof.
+            </p>
+          </Reveal>
         </div>
 
         <div style={S.factGrid}>
-          {FACTS.map((f) => (
-            <div key={f.label} style={S.fact}>
-              <div style={S.factVal}>{f.value}</div>
-              <div style={S.factLabel}>{f.label}</div>
-              <div style={S.factSub}>{f.sub}</div>
-            </div>
+          {FACTS.map((f, i) => (
+            <Reveal key={f.label} delay={i * 100} y={16}>
+              <FactCard fact={f} />
+            </Reveal>
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function FactCard({ fact }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...S.fact,
+        transform: hover ? 'translateY(-3px)' : 'translateY(0)',
+        background: hover ? 'rgba(190,18,60,0.06)' : 'transparent',
+      }}
+    >
+      <div
+        style={{
+          ...S.factAccentBar,
+          transform: hover ? 'scaleX(1)' : 'scaleX(0)',
+        }}
+      />
+      <div style={S.factVal}>{fact.render()}</div>
+      <div style={S.factLabel}>{fact.label}</div>
+      <div style={S.factSub}>{fact.sub}</div>
+    </div>
   );
 }
 
@@ -71,6 +165,8 @@ const S = {
     height: '100%',
     objectFit: 'cover',
     display: 'block',
+    willChange: 'transform',
+    transition: 'transform 0.1s linear',
   },
   imgOverlay: {
     position: 'absolute',
@@ -91,6 +187,21 @@ const S = {
     fontWeight: 700,
     color: 'var(--color-accent-soft)',
     marginBottom: 14,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  eyebrowNum: {
+    fontFamily: 'monospace',
+    fontWeight: 800,
+    fontSize: 11,
+    letterSpacing: 1,
+  },
+  eyebrowDivider: {
+    width: 28,
+    height: 1,
+    background: 'var(--color-accent-soft)',
+    opacity: 0.5,
   },
   capTitle: {
     fontSize: 'clamp(22px, 2.6vw, 36px)',
@@ -146,6 +257,7 @@ const S = {
     border: '1px solid rgba(255,255,255,.08)',
   },
   fact: {
+    position: 'relative',
     padding: '28px 24px',
     borderRight: '1px solid rgba(255,255,255,.08)',
     borderBottom: '1px solid rgba(255,255,255,.08)',
@@ -153,6 +265,19 @@ const S = {
     flexDirection: 'column',
     minHeight: 140,
     justifyContent: 'space-between',
+    transition: 'transform 0.4s cubic-bezier(.22,.61,.36,1), background 0.3s ease',
+    cursor: 'default',
+    overflow: 'hidden',
+  },
+  factAccentBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    background: 'var(--color-accent-strong)',
+    transformOrigin: 'left center',
+    transition: 'transform 0.5s cubic-bezier(.22,.61,.36,1)',
   },
   factVal: {
     fontSize: 38,

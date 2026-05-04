@@ -1,5 +1,8 @@
 'use client';
 
+import { useState } from 'react';
+import Reveal from './Reveal';
+
 const ITEMS = [
   {
     src: '/desalination.png',
@@ -32,34 +35,74 @@ export default function SectionGallery() {
     <section style={S.section}>
       <div style={S.container}>
         <div style={S.header}>
-          <div style={S.eyebrow}>INSIDE THE HUB</div>
-          <h2 style={S.title}>
-            One campus.
-            <br />
-            <span style={S.titleAccent}>Built for AI.</span>
-          </h2>
+          <div>
+            <Reveal>
+              <div style={S.eyebrow}>
+                <span style={S.eyebrowNum}>02</span>
+                <span style={S.eyebrowDivider} />
+                INSIDE THE HUB
+              </div>
+            </Reveal>
+            <Reveal delay={120}>
+              <h2 style={S.title}>
+                One campus.
+                <br />
+                <span style={S.titleAccent}>Built for AI.</span>
+              </h2>
+            </Reveal>
+          </div>
         </div>
 
         <div style={S.grid}>
-          {ITEMS.map((it) => (
-            <figure
-              key={it.title}
-              style={{
-                ...S.tile,
-                gridColumn: it.span === 'wide' ? 'span 2' : 'span 1',
-              }}
-            >
-              <img src={it.src} alt={it.title} style={S.img} />
-              <div style={S.overlay} />
-              <figcaption style={S.caption}>
-                <span style={S.capLabel}>{it.label}</span>
-                <span style={S.capTitle}>{it.title}</span>
-              </figcaption>
-            </figure>
+          {ITEMS.map((it, i) => (
+            <Reveal key={it.title} delay={i * 120} y={28}>
+              <Tile item={it} />
+            </Reveal>
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function Tile({ item }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <figure
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...S.tile,
+        gridColumn: item.span === 'wide' ? 'span 2' : 'span 1',
+      }}
+    >
+      <img
+        src={item.src}
+        alt={item.title}
+        style={{
+          ...S.img,
+          transform: hover ? 'scale(1.06)' : 'scale(1)',
+        }}
+      />
+      <div style={S.overlay} />
+      <div
+        style={{
+          ...S.tileAccentBar,
+          transform: hover ? 'scaleX(1)' : 'scaleX(0)',
+        }}
+      />
+      <figcaption style={S.caption}>
+        <span style={S.capLabel}>{item.label}</span>
+        <span
+          style={{
+            ...S.capTitle,
+            color: hover ? 'var(--color-accent-soft)' : '#fff',
+          }}
+        >
+          {item.title}
+        </span>
+      </figcaption>
+    </figure>
   );
 }
 
@@ -87,6 +130,21 @@ const S = {
     fontWeight: 700,
     color: 'var(--color-accent-soft)',
     marginBottom: 14,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  eyebrowNum: {
+    fontFamily: 'monospace',
+    fontWeight: 800,
+    fontSize: 11,
+    letterSpacing: 1,
+  },
+  eyebrowDivider: {
+    width: 28,
+    height: 1,
+    background: 'var(--color-accent-soft)',
+    opacity: 0.5,
   },
   title: {
     fontSize: 'clamp(28px, 3.6vw, 52px)',
@@ -111,13 +169,26 @@ const S = {
     aspectRatio: '4 / 5',
     overflow: 'hidden',
     background: 'var(--color-gray-850)',
+    cursor: 'default',
+  },
+  tileAccentBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    background: 'var(--color-accent-strong)',
+    transformOrigin: 'left center',
+    transition: 'transform 0.5s cubic-bezier(.22,.61,.36,1)',
+    zIndex: 2,
   },
   img: {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
     display: 'block',
-    transition: 'transform .6s ease',
+    transition: 'transform 0.7s cubic-bezier(.22,.61,.36,1)',
+    willChange: 'transform',
   },
   overlay: {
     position: 'absolute',
@@ -145,6 +216,6 @@ const S = {
     fontSize: 16,
     fontWeight: 700,
     letterSpacing: -0.3,
-    color: '#fff',
+    transition: 'color 0.3s ease',
   },
 };

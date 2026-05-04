@@ -1,31 +1,58 @@
 'use client';
 
+import { useCallback, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const MagneticParticles = dynamic(() => import('./MagneticParticles'), {
+  ssr: false,
+  loading: () => null,
+});
+
+const HeroIntroGate = dynamic(() => import('./HeroIntroGate'), {
+  ssr: false,
+  loading: () => null,
+});
+
 export default function Hero() {
+  const [introDone, setIntroDone] = useState(false);
+  const handleIntroEnter = useCallback(() => setIntroDone(true), []);
+
   return (
     <section id="top" style={S.hero}>
+      {/* Particles intro — hidden once entered */}
+      {!introDone && (
+        <MagneticParticles
+          imageUrl="/futur-one-h-accent.svg"
+          color={0xbe123c}
+          particleCount={45000}
+        />
+      )}
+      {!introDone && <HeroIntroGate onEnter={handleIntroEnter} />}
+
+      {/* Video bg — always mounted, visible once intro done */}
       <video
-        style={S.video}
+        style={{ ...S.video, opacity: introDone ? 1 : 0, transition: 'opacity 0.8s ease' }}
         autoPlay
         muted
         loop
         playsInline
         preload="metadata"
-        poster="/aerial-campus-red.png"
       >
         <source src="/hero-loop.mp4" type="video/mp4" />
       </video>
 
-      <div style={S.overlay} />
+      <div style={{ ...S.overlay, opacity: introDone ? 1 : 0, transition: 'opacity 0.8s ease' }} />
       <div style={S.vignette} />
 
-      <div style={S.tagRow}>
+      {/* Editorial content — revealed after intro */}
+      <div style={{ ...S.tagRow, opacity: introDone ? 1 : 0, transition: 'opacity 0.6s ease 0.2s' }}>
         <span style={S.tagDot} />
         <span style={S.tag}>FUTUR ONE · QATAR</span>
         <span style={S.tagDivider} />
         <span style={S.tagSub}>SOVEREIGN AI INNOVATION HUB</span>
       </div>
 
-      <div style={S.content}>
+      <div style={{ ...S.content, opacity: introDone ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
         <h1 style={S.title}>
           FUTUR ONE
           <br />
@@ -38,7 +65,7 @@ export default function Hero() {
         </p>
       </div>
 
-      <div style={S.bottom}>
+      <div style={{ ...S.bottom, opacity: introDone ? 1 : 0, transition: 'opacity 0.6s ease 0.4s' }}>
         <div style={S.signature}>
           <span style={S.sigLabel}>OPERATED BY</span>
           <span style={S.sigName}>HEARST QATAR</span>
@@ -61,6 +88,7 @@ const S = {
     minHeight: 640,
     overflow: 'hidden',
     color: 'var(--color-text-inverse)',
+    background: '#0e1013',
   },
   video: {
     position: 'absolute',

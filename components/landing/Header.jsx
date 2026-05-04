@@ -90,28 +90,48 @@ export default function Header() {
 
       <nav style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
         {NAV.map((n) => (
-          <a
-            key={n.id}
-            href={`#${n.id}`}
-            onClick={(e) => handleNav(e, n.id)}
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: 0.6,
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,.78)',
-              textDecoration: 'none',
-              transition: 'color .15s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.color = 'rgba(255,255,255,.78)')
-            }
-          >
-            {n.label}
-          </a>
+          <NavLink key={n.id} item={n} onNav={handleNav} />
         ))}
       </nav>
     </header>
+  );
+}
+
+function NavLink({ item, onNav }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <a
+      href={`#${item.id}`}
+      onClick={(e) => onNav(e, item.id)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        position: 'relative',
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: 0.6,
+        textTransform: 'uppercase',
+        color: hover ? '#fff' : 'rgba(255,255,255,.78)',
+        textDecoration: 'none',
+        transition: 'color .2s ease',
+        paddingBottom: 4,
+      }}
+    >
+      {item.label}
+      <span
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 1,
+          background: 'var(--color-accent-strong)',
+          transform: hover ? 'scaleX(1)' : 'scaleX(0)',
+          transformOrigin: 'left center',
+          transition: 'transform 0.4s cubic-bezier(.22,.61,.36,1)',
+        }}
+      />
+    </a>
   );
 }
