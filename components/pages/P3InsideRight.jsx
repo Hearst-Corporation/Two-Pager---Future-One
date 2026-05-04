@@ -14,22 +14,20 @@ export default function P3InsideRight() {
       <section style={S.header}>
         <div style={S.headerTop}>
           <h1 style={S.title}>
-            THE <span style={S.titleAccent}>METHOD.</span>
+            THE <span style={S.titleAccent}>ARCHITECTURE.</span>
           </h1>
-          <div style={S.pageNum}>
-            <div>02 / 04</div>
-            <div style={S.pageNumBar} />
-          </div>
         </div>
         <p style={S.subtitle}>
-          Our proprietary 4-phase program transforms early-stage companies into global category
-          leaders through infrastructure, capital and AI.
+          A sovereign joint venture combining state capital, founding operators and Tier-1
+          industrial partners to build, operate and monetize Qatar's AI compute base.
         </p>
       </section>
 
       {/* ============== 4 PHASES (102px) ============== */}
       <section style={S.phases}>
         <div style={S.phasesInner}>
+          {/* Ligne horizontale traversant tous les cercles */}
+          <div style={S.phasesLine} />
           <Phase
             n="01"
             title="INCUBATE"
@@ -58,8 +56,8 @@ export default function P3InsideRight() {
             n="04"
             title="ANCHOR"
             line1="Global Tech Bridge"
-            line2="Rolling"
-            line3="POCs • M&A"
+            line2="Long-term tenancy"
+            line3="Hyperscalers • M&A"
           />
         </div>
       </section>
@@ -67,20 +65,20 @@ export default function P3InsideRight() {
       {/* ============== MID : HUB + FUNDING (282px) ============== */}
       <section style={S.mid}>
         <div style={S.midLeft}>
-          <div style={{ ...S.eyebrow, color: 'var(--color-accent-strong)' }}>THE SOVEREIGN AI INFRASTRUCTURE HUB</div>
-          <div style={S.midSubtitle}>
-            One integrated ecosystem.
+          <div style={{ ...S.eyebrow, color: 'var(--color-accent-strong)' }}>THE SOVEREIGN AI COMPUTE BASE</div>
+          <div style={{ ...S.midSubtitle, fontWeight: 800, fontSize: 9, letterSpacing: -0.2 }}>
+            One integrated platform.
             <br />
-            Unlimited scale.
+            Four sovereign control points.
           </div>
           <Hub />
         </div>
 
         <div style={S.midRight}>
           <div style={S.eyebrow}>
-            SUBSEQUENT FUNDING
+            FOLLOW-ON FUNDING
             <br />
-            AT 18 MONTHS
+            18-MONTH TARGET
           </div>
           <div style={S.bigStat}>70%</div>
           <FundingGrid />
@@ -95,8 +93,8 @@ export default function P3InsideRight() {
             </div>
           </div>
           <blockquote style={S.midQuote}>
-            "We will be the world's first fully AI-managed campus, orchestrating every dimension
-            from sports and health to energy optimization and beyond."
+            "Operated as the world's first fully AI-managed sovereign campus — from compute
+            allocation and energy governance to security, tenant orchestration and capital flow."
           </blockquote>
         </div>
       </section>
@@ -113,7 +111,7 @@ export default function P3InsideRight() {
           <StatRow icon="rack" value="150" label="STARTUPS / ACTIVE RESIDENCY" />
           <StatRow icon="people" value="4 K" label={`RESIDENTS\n(FOUNDERS & TEAMS)`} />
           <StatRow icon="building" value="100 K" label="SQM TOTAL CAMPUS" />
-          <StatRow icon="bolt" value="€400M" label="PHASE 1 CAPEX" />
+          <StatRow icon="bolt" value="200 MW" label="IT POWER CAPACITY" />
         </div>
         <div style={S.buildingFooter}>
           <div>
@@ -154,128 +152,90 @@ function Phase({ n, title, line1, line2, line3 }) {
 }
 
 function Hub() {
-  const nodes = [
-    { id: 'n1', x: 180, y: 30, title: 'AI SERVICES', desc: 'Models • Data\nTools • Platforms', align: 'right', side: 'left' },
-    { id: 'n2', x: 420, y: 30, title: 'COMPUTE & HPC', desc: 'Tier IV Data Centers\nHigh density racks', align: 'left', side: 'right' },
-    { id: 'n3', x: 180, y: 90, title: 'ENERGY', desc: 'Reliable Power\nSustainable', align: 'right', side: 'left' },
-    { id: 'n4', x: 420, y: 90, title: 'INFRASTRUCTURE', desc: 'Campus & Facilities\nConnectivity', align: 'left', side: 'right' },
-    { id: 'n5', x: 180, y: 150, title: 'TALENT', desc: 'Engineers • Researchers\nEntrepreneurs', align: 'right', side: 'left' },
-    { id: 'n6', x: 420, y: 150, title: 'CAPITAL', desc: 'Sovereign Funds\nJoint investment', align: 'left', side: 'right' }
-  ];
-
-  const renderNappe = (startX, startY, endX, endY) => {
-    const lines = [-12, -9, -6, -3, 0, 3, 6, 9, 12];
-    const midX = (startX + endX) / 2;
-    return (
-      <g key={`${startX}-${startY}-${endY}`}>
-        {lines.map((off, i) => {
-          const isAccent = i === 4 || i === 1 || i === 7;
-          const color = isAccent ? 'var(--color-accent-strong)' : 'var(--color-gray-400)';
-          const strokeW = isAccent ? 1.2 : 0.5;
-          const opacity = isAccent ? 1 : 0.4;
-          
-          return (
-            <path
-              key={i}
-              d={`M ${startX} ${startY + off} C ${midX} ${startY + off}, ${midX} ${endY + off}, ${endX} ${endY + off}`}
-              fill="none"
-              stroke={color}
-              strokeWidth={strokeW}
-              opacity={opacity}
-            />
-          );
-        })}
-      </g>
-    );
-  };
+  const cx = 117, cy = 90;
+  const ff = 'system-ui, -apple-system, sans-serif';
 
   return (
     <div style={S.hub}>
-      <svg viewBox="0 0 600 180" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-        {/* Background Grid */}
-        <pattern id="dotGrid" width="16" height="16" patternUnits="userSpaceOnUse">
-          <circle cx="2" cy="2" r="1" fill="var(--color-gray-300)" opacity="0.3"/>
-        </pattern>
-        <rect width="100%" height="100%" fill="url(#dotGrid)" />
+      <svg viewBox="0 0 235 180" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+        {/* Background Tech Grid */}
+        <defs>
+          <pattern id="techGrid" width="12" height="12" patternUnits="userSpaceOnUse">
+            <path d="M 12 0 L 0 0 0 12" fill="none" stroke="var(--color-gray-200)" strokeWidth="0.5" opacity="0.6" />
+            <circle cx="12" cy="12" r="0.5" fill="var(--color-gray-300)" />
+          </pattern>
+        </defs>
+        <rect width="235" height="180" fill="url(#techGrid)" />
 
-        {/* Vertical Data Bus behind CPU */}
-        <g stroke="var(--color-gray-300)" strokeWidth="0.5" opacity="0.4">
-          {[-24, -16, -8, 0, 8, 16, 24].map(off => (
-            <line key={`v-${off}`} x1={300 + off} y1="0" x2={300 + off} y2="180" />
-          ))}
+        {/* Outer Blueprint Rings */}
+        <circle cx={cx} cy={cy} r="70" fill="none" stroke="var(--color-gray-300)" strokeWidth="0.5" />
+        <circle cx={cx} cy={cy} r="66" fill="none" stroke="var(--color-gray-300)" strokeWidth="0.5" strokeDasharray="2 4" />
+        <circle cx={cx} cy={cy} r="40" fill="none" stroke="var(--color-gray-300)" strokeWidth="0.5" />
+
+        {/* Precision Crosshairs */}
+        <line x1={cx} y1="5" x2={cx} y2="175" stroke="var(--color-gray-300)" strokeWidth="0.5" strokeDasharray="3 3" />
+        <line x1="15" y1={cy} x2="220" y2={cy} stroke="var(--color-gray-300)" strokeWidth="0.5" strokeDasharray="3 3" />
+
+        {/* Data Traces (PCB Style) */}
+        <path d={`M ${cx} ${cy} L 85 45 L 45 45`} fill="none" stroke="var(--color-gray-400)" strokeWidth="1.5" />
+        <path d={`M ${cx} ${cy} L 149 45 L 189 45`} fill="none" stroke="var(--color-gray-400)" strokeWidth="1.5" />
+        <path d={`M ${cx} ${cy} L 85 135 L 45 135`} fill="none" stroke="var(--color-gray-400)" strokeWidth="1.5" />
+        <path d={`M ${cx} ${cy} L 149 135 L 189 135`} fill="none" stroke="var(--color-gray-400)" strokeWidth="1.5" />
+
+        {/* Trace Accents (Red) */}
+        <path d={`M 85 45 L 45 45`} fill="none" stroke="var(--color-accent-strong)" strokeWidth="1.5" />
+        <path d={`M 149 45 L 189 45`} fill="none" stroke="var(--color-accent-strong)" strokeWidth="1.5" />
+        <path d={`M 85 135 L 45 135`} fill="none" stroke="var(--color-accent-strong)" strokeWidth="1.5" />
+        <path d={`M 149 135 L 189 135`} fill="none" stroke="var(--color-accent-strong)" strokeWidth="1.5" />
+
+        {/* Core Background to hide grid lines */}
+        <circle cx={cx} cy={cy} r="20" fill="var(--color-surface)" stroke="var(--color-gray-300)" strokeWidth="0.5" />
+
+        {/* Core Logo */}
+        <svg x={cx - 12} y={cy - 13} width="24" height="26" viewBox="0 0 91 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 43.4041L41.5946 74H61L19.7092 34L10 43.4041Z" fill="var(--color-accent-strong)"/>
+          <path d="M80 57.8356L48.4056 28H29L70.2908 67L80 57.8356Z" fill="var(--color-accent-strong)"/>
+          <path d="M23 8H7V92H23V8Z" fill="var(--color-accent-strong)"/>
+          <path d="M82 8H65V92H82V8Z" fill="var(--color-accent-strong)"/>
+        </svg>
+
+        {/* Micro-typography / Tech Specs */}
+        <text x={cx + 26} y={cy - 26} fill="var(--color-gray-400)" fontSize="4" fontFamily={ff} letterSpacing="1">CORE.01</text>
+        <text x={cx - 26} y={cy + 30} fill="var(--color-gray-400)" fontSize="4" fontFamily={ff} letterSpacing="1" textAnchor="end">QATAR.AI</text>
+
+        {/* Nodes */}
+        {/* COMPUTE (Top Left) */}
+        <g transform="translate(45, 45)">
+          <circle cx="0" cy="0" r="3" fill="var(--color-surface)" stroke="var(--color-accent-strong)" strokeWidth="1.5" />
+          <text x="-8" y="-4" textAnchor="end" fill="var(--color-gray-900)" fontSize="7" fontWeight="900" letterSpacing="0.5" fontFamily={ff}>COMPUTE</text>
+          <text x="-8" y="4" textAnchor="end" fill="var(--color-gray-500)" fontSize="5" fontWeight="700" fontFamily={ff}>High-density GPU</text>
+          <text x="-8" y="11" textAnchor="end" fill="var(--color-gray-500)" fontSize="5" fontWeight="700" fontFamily={ff}>AI-optimized DCs</text>
         </g>
 
-        {/* Nappes (Ribbon Cables) */}
-        {renderNappe(240, 50, 188, 30)}
-        {renderNappe(240, 90, 188, 90)}
-        {renderNappe(240, 130, 188, 150)}
-        
-        {renderNappe(360, 50, 412, 30)}
-        {renderNappe(360, 90, 412, 90)}
-        {renderNappe(360, 130, 412, 150)}
-
-        {/* Nodes (Connectors) */}
-        <g>
-          {nodes.map(n => (
-            <g key={n.id} transform={`translate(${n.x}, ${n.y})`}>
-              {/* Connector port */}
-              <rect x={n.side === 'left' ? -4 : -4} y="-16" width="8" height="32" rx="2" fill="var(--color-surface)" stroke="var(--color-gray-900)" strokeWidth="1.5" />
-              {/* Pins */}
-              {[-12, -9, -6, -3, 0, 3, 6, 9, 12].map(off => (
-                <line key={`pin-${off}`} x1={n.side === 'left' ? 4 : -4} y1={off} x2={n.side === 'left' ? 8 : -8} y2={off} stroke="var(--color-gray-900)" strokeWidth="1" />
-              ))}
-              <circle cx="0" cy="0" r="2.5" fill="var(--color-accent-strong)" />
-            </g>
-          ))}
+        {/* ENERGY (Top Right) */}
+        <g transform="translate(189, 45)">
+          <circle cx="0" cy="0" r="3" fill="var(--color-surface)" stroke="var(--color-accent-strong)" strokeWidth="1.5" />
+          <text x="8" y="-4" textAnchor="start" fill="var(--color-gray-900)" fontSize="7" fontWeight="900" letterSpacing="0.5" fontFamily={ff}>ENERGY</text>
+          <text x="8" y="4" textAnchor="start" fill="var(--color-gray-500)" fontSize="5" fontWeight="700" fontFamily={ff}>Reliable power</text>
+          <text x="8" y="11" textAnchor="start" fill="var(--color-gray-500)" fontSize="5" fontWeight="700" fontFamily={ff}>Sustainable</text>
         </g>
 
-        {/* Central Core (CPU) */}
-        <g transform="translate(300, 90)">
-          {/* CPU Base */}
-          <rect x="-55" y="-75" width="110" height="150" rx="4" fill="var(--color-surface)" stroke="var(--color-gray-900)" strokeWidth="1.5" />
-          <rect x="-46" y="-66" width="92" height="132" rx="2" fill="var(--color-gray-900)" />
-          
-          {/* CPU Pins */}
-          {[-60, -45, -30, -15, 0, 15, 30, 45, 60].map(off => (
-            <g key={`cpupin-${off}`}>
-              <line x1="-55" y1={off} x2="-60" y2={off} stroke="var(--color-gray-900)" strokeWidth="1.5" />
-              <line x1="55" y1={off} x2="60" y2={off} stroke="var(--color-gray-900)" strokeWidth="1.5" />
-            </g>
-          ))}
+        {/* CAPITAL (Bottom Left) */}
+        <g transform="translate(45, 135)">
+          <circle cx="0" cy="0" r="3" fill="var(--color-surface)" stroke="var(--color-accent-strong)" strokeWidth="1.5" />
+          <text x="-8" y="-4" textAnchor="end" fill="var(--color-gray-900)" fontSize="7" fontWeight="900" letterSpacing="0.5" fontFamily={ff}>CAPITAL</text>
+          <text x="-8" y="4" textAnchor="end" fill="var(--color-gray-500)" fontSize="5" fontWeight="700" fontFamily={ff}>Sovereign anchor</text>
+          <text x="-8" y="11" textAnchor="end" fill="var(--color-gray-500)" fontSize="5" fontWeight="700" fontFamily={ff}>Strategic LPs</text>
+        </g>
 
-          {/* Core Text */}
-          <text x="0" y="-6" textAnchor="middle" fill="var(--color-surface)" fontSize="18" fontWeight="900" letterSpacing="2" fontFamily="system-ui, -apple-system, sans-serif">FUTUR</text>
-          <text x="0" y="14" textAnchor="middle" fill="var(--color-surface)" fontSize="18" fontWeight="900" letterSpacing="2" fontFamily="system-ui, -apple-system, sans-serif">ONE</text>
-          <text x="0" y="32" textAnchor="middle" fill="var(--color-accent-strong)" fontSize="8" fontWeight="800" letterSpacing="3" fontFamily="system-ui, -apple-system, sans-serif">QATAR</text>
+        {/* TALENT (Bottom Right) */}
+        <g transform="translate(189, 135)">
+          <circle cx="0" cy="0" r="3" fill="var(--color-surface)" stroke="var(--color-accent-strong)" strokeWidth="1.5" />
+          <text x="8" y="-4" textAnchor="start" fill="var(--color-gray-900)" fontSize="7" fontWeight="900" letterSpacing="0.5" fontFamily={ff}>TALENT</text>
+          <text x="8" y="4" textAnchor="start" fill="var(--color-gray-500)" fontSize="5" fontWeight="700" fontFamily={ff}>Engineers & R&D</text>
+          <text x="8" y="11" textAnchor="start" fill="var(--color-gray-500)" fontSize="5" fontWeight="700" fontFamily={ff}>Founders</text>
         </g>
       </svg>
-
-      {/* HTML Text Overlays */}
-      {nodes.map(n => {
-        const isLeft = n.side === 'left';
-        const style = {
-          position: 'absolute',
-          top: `${(n.y / 180) * 100}%`,
-          transform: 'translateY(-50%)',
-          width: 76,
-          textAlign: n.align,
-        };
-        
-        if (isLeft) {
-          style.left = 0;
-        } else {
-          style.right = 0;
-        }
-
-        return (
-          <div key={`txt-${n.id}`} style={style}>
-            <div style={S.hubSatTitle}>{n.title}</div>
-            <div style={S.hubSatDesc}>
-              {n.desc.split('\n').map((line, j) => <div key={j}>{line}</div>)}
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -492,6 +452,15 @@ const S = {
     color: 'var(--color-text-muted)',
     fontWeight: 500,
   },
+  phasesLine: {
+    position: 'absolute',
+    left: 3,
+    right: 3,
+    top: 18,
+    height: 1,
+    background: 'var(--color-gray-300)',
+    zIndex: 0,
+  },
   arrow: {
     color: 'var(--color-gray-300)',
     fontSize: 12,
@@ -544,20 +513,6 @@ const S = {
     height: 180,
     marginTop: 15,
   },
-  hubSatTitle: {
-    fontSize: 6.5,
-    fontWeight: 900,
-    color: 'var(--color-text-primary)',
-    letterSpacing: 0.5,
-  },
-  hubSatDesc: {
-    fontSize: 5.5,
-    color: 'var(--color-text-secondary)',
-    marginTop: 2,
-    lineHeight: 1.3,
-    fontWeight: 600,
-  },
-
   /* FUNDING */
   bigStat: {
     fontSize: 42,

@@ -16,32 +16,28 @@ export default function P2InsideLeft() {
         <div style={S.heroImage} />
         <div style={S.heroOverlay} />
 
-        <div style={S.tag}>ALIGNED WITH QNV 2030</div>
-        <div style={S.pageNum}>
-          <div>01 / 04</div>
-        </div>
+        <div style={S.tag}>ALIGNED WITH QATAR NATIONAL VISION 2030</div>
 
         <div style={S.heroContent}>
           <h1 style={S.title}>
             FUTUR ONE
             <br />
-            <span style={S.titleAccent}>NO LIMITS,</span>
+            <span style={S.titleAccent}>THE NEXT</span>
             <br />
-            BY AI.
+            STRATEGIC RESOURCE.
           </h1>
 
           <p style={S.intro}>
-            <strong>FUTUR ONE</strong> is an AI sovereign innovation hub operated by<br />
-            <strong>Hearst Qatar</strong> in partnership with top-tier global players.
+            Qatar built one of the world's most successful sovereign industries<br />
+            on the strategic resource of the 20th century.<br />
+            The next one is <strong>intelligence</strong>.
           </p>
 
           <blockquote style={S.quote}>
-            "We will allocate compute capacity, energy, and HPC<br />
-            infrastructure to support the development of your projects at<br />
-            the scale required to empower the next generation of<br />
-            founders and future industry leaders."
-            <br /><br />
-            <span style={S.quoteAuthor}>— CEO, Hearst Qatar</span>
+            <strong>FUTUR ONE</strong> is the proposed sovereign vehicle to capture,
+            deploy and govern that resource — founded and operated by
+            <strong>Hearst Qatar</strong>, structured for majority participation
+            by the <strong>Qatar Investment Authority</strong>.
           </blockquote>
         </div>
       </section>
@@ -51,32 +47,33 @@ export default function P2InsideLeft() {
         {/* Left: Logo Block */}
         <div style={S.logoBlock}>
           {/* 360° Edge Texts */}
-        <div style={{ ...S.edgeText, ...S.edgeTop }}>INFRASTRUCTURE</div>
-        <div style={{ ...S.edgeText, ...S.edgeRight }}>COMPUTE</div>
-        <div style={{ ...S.edgeText, ...S.edgeBottom }}>SOFTWARE</div>
-        <div style={{ ...S.edgeText, ...S.edgeLeft }}>ENERGY</div>
+        <div style={{ ...S.edgeText, ...S.edgeTop }}>COMPUTE</div>
+        <div style={{ ...S.edgeText, ...S.edgeRight }}>ENERGY</div>
+        <div style={{ ...S.edgeText, ...S.edgeBottom }}>CAPITAL</div>
+        <div style={{ ...S.edgeText, ...S.edgeLeft }}>TALENT</div>
 
           <img src="/hearst-h.svg" alt="Hearst H" style={S.hearstLogo} />
         </div>
 
         {/* Right: Text Block */}
         <div style={S.textBlock}>
-          <div style={S.eyebrow}>THE OPPORTUNITY</div>
+          <div style={S.eyebrow}>THE STRATEGIC THESIS</div>
           <div style={S.darkHeadline}>
-            High potential founders.
+            Compute is the new oil and gas.
             <br />
-            Undercapitalized markets.
+            Sovereign control is the new advantage.
             <br />
-            <span style={S.darkHeadlineAccent}>Sovereign grade infrastructure.</span>
+            <span style={S.darkHeadlineAccent}>The window is now.</span>
           </div>
           <p style={S.darkBody}>
-            <strong>FUTUR ONE</strong> concentrates compute, capital and living<br />
-            infrastructure into one controlled environment designed to<br />
-            accelerate company creation and scale.
+            Within the next decade, sovereign AI compute capacity will<br />
+            determine which states sit at the table of global economic<br />
+            and security decisions.
           </p>
           <p style={S.darkBody}>
-            A controlled ecosystem where infrastructure, residency<br />
-            and capital operate as one sovereign platform.
+            <strong>FUTUR ONE</strong> proposes the architecture to put Qatar at that<br />
+            table — built domestically, governed sovereignly, operated<br />
+            to industrial standard.
           </p>
         </div>
       </section>
@@ -90,44 +87,42 @@ export default function P2InsideLeft() {
       <section style={S.footer}>
         <FooterCol
           icon={
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          }
+          title="FOUNDED & OPERATED BY"
+          body={
+            <>
+              <strong>Hearst Qatar.</strong>
+            </>
+          }
+        />
+        <FooterCol
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M8 4H4v4 M16 4h4v4 M8 20H4v-4 M16 20h4v-4" />
             </svg>
           }
           title="BUILT BY"
           body={
             <>
-              <strong>Hearst Qatar</strong> • Designed by<br />
-              Foster • Built by <strong>JB Pastor &<br />
-              Fils</strong>.
+              Designed by <strong>Foster + Partners</strong>.<br />
+              Built by <strong>JB Pastor & Fils</strong>.
             </>
           }
         />
         <FooterCol
           icon={
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M4 6h16 M4 12h16 M4 18h16" />
             </svg>
           }
-          title="TECHNOLOGY STACK"
+          title="PROPOSED STRUCTURE"
           body={
             <>
-              Tier 1 hyperscalers<br />
-              and silicon partners.
-            </>
-          }
-        />
-        <FooterCol
-          icon={
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-          }
-          title="QATAR LABEL PROGRAM"
-          body={
-            <>
-              0% tax • Full ownership •<br />
-              Housing & healthcare.
+              Sovereign joint venture.<br />
+              QIA majority participation.
             </>
           }
         />
@@ -213,8 +208,8 @@ const S = {
   heroContent: {
     position: 'absolute',
     left: 26,
-    top: 55,
-    width: '60%',
+    top: 35,
+    width: '75%',
     zIndex: 2,
   },
   title: {
@@ -254,10 +249,10 @@ const S = {
     textTransform: 'uppercase',
   },
 
-  /* DARK BAND (220px) */
+  /* DARK BAND (233px) */
   darkBand: {
     ...SECTION,
-    height: 220,
+    height: 233,
     display: 'flex',
   },
   logoBlock: {
@@ -352,10 +347,10 @@ const S = {
     backgroundPosition: 'center 50%',
   },
 
-  /* FOOTER (90px) */
+  /* FOOTER (77px) */
   footer: {
     ...SECTION,
-    height: 90,
+    height: 77,
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
     gap: 24,

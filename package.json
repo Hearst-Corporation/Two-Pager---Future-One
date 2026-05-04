@@ -6,11 +6,15 @@
     "dev": "next dev -p 5005",
     "rundev": "next dev -p 5005",
     "build": "next build",
-    "start": "next start -p 5005"
+    "start": "next start -p 5005",
+    "export": "node scripts/export.js"
   },
   "dependencies": {
     "next": "14.2.5",
     "react": "18.3.1",
     "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.42.0"
   }
 }

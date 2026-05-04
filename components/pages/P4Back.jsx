@@ -28,12 +28,16 @@ export default function P4Back() {
           AI IS THE<br />
           <span style={S.quoteAccent}>NEW GAS.</span>
         </h2>
+        <div style={S.bridgeLine}>
+          Qatar mastered the resource of the 20th century.<br />
+          The next one is intelligence.
+        </div>
       </div>
 
       <div style={S.bottomBar}>
         <div style={S.contactBlock}>
-          <div style={S.contactLabel}>INQUIRIES</div>
-          <div style={S.contactValue}>partners@futurone.qa</div>
+          <div style={S.contactLabel}>DELIVERED TO</div>
+          <div style={S.contactValue}>By invitation only.</div>
         </div>
         <div style={S.contactBlockRight}>
           <div style={S.contactLabel}>LOCATION</div>
@@ -108,6 +112,15 @@ const S = {
   },
   quoteAccent: {
     color: 'var(--color-accent-strong)',
+  },
+  bridgeLine: {
+    marginTop: 24,
+    fontSize: 9,
+    fontStyle: 'italic',
+    fontWeight: 500,
+    lineHeight: 1.5,
+    letterSpacing: 0.5,
+    color: 'var(--color-gray-300)',
   },
   bottomBar: {
     position: 'relative',

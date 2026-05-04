@@ -36,9 +36,9 @@ TOTAL    : 680px
 ### P2InsideLeft — heights LOCKED
 ```
 hero     : 270px  (anciennement 320px)
-darkBand : 220px
+darkBand : 230px
 building : 100px
-footer   :  90px
+footer   :  80px
 TOTAL    : 680px
 ```
 

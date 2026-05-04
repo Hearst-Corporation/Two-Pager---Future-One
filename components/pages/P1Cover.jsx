@@ -30,8 +30,8 @@ export default function P1Cover() {
           FUTUR<br />ONE
         </h1>
         <div style={S.subtitle}>
-          THE SOVEREIGN AI<br />
-          INFRASTRUCTURE HUB
+          A SOVEREIGN AI CHAMPION<br />
+          FOR THE STATE OF QATAR
         </div>
       </div>
 

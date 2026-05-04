@@ -97,22 +97,6 @@ function Page({ node, label, border }) {
         borderLeft: border === 'left' ? '1px dashed rgba(0,0,0,.15)' : 'none',
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          top: 6,
-          left: 6,
-          fontSize: 8,
-          color: 'rgba(255,255,255,.6)',
-          letterSpacing: 0.5,
-          textTransform: 'uppercase',
-          zIndex: 100,
-          pointerEvents: 'none',
-          mixBlendMode: 'difference',
-        }}
-      >
-        {label}
-      </div>
       <div style={{ width: '100%', height: '100%' }}>
         {node || <Placeholder label={label} />}
       </div>
