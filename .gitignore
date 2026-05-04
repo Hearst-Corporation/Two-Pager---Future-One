@@ -18,3 +18,6 @@ out/
 # Brochure print exports (generated)
 export/
 futur-one-brochure.zip
+
+# Raw Midjourney source assets (use renamed versions instead)
+public/u2883995211_*
