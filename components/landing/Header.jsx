@@ -60,22 +60,16 @@ export default function Header() {
           color: 'var(--color-text-inverse)',
         }}
       >
-        <div
+        <img
+          src="/hearst-h.svg"
+          alt="Hearst"
           style={{
-            width: 22,
             height: 22,
-            background: 'var(--color-accent-strong)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontSize: 9,
-            fontWeight: 800,
-            letterSpacing: -0.4,
+            width: 'auto',
+            display: 'block',
+            filter: 'brightness(0) invert(1)',
           }}
-        >
-          F1
-        </div>
+        />
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
           <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.4 }}>
             FUTUR ONE
@@ -117,30 +111,6 @@ export default function Header() {
             {n.label}
           </a>
         ))}
-        <a
-          href="/brochure"
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: 1.2,
-            textTransform: 'uppercase',
-            color: '#fff',
-            textDecoration: 'none',
-            padding: '9px 16px',
-            border: '1px solid rgba(255,255,255,.25)',
-            transition: 'border-color .15s ease, background .15s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'var(--color-accent-strong)';
-            e.currentTarget.style.background = 'var(--color-accent-strong)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,.25)';
-            e.currentTarget.style.background = 'transparent';
-          }}
-        >
-          Brochure
-        </a>
       </nav>
     </header>
   );

@@ -43,7 +43,7 @@ const S = {
     position: 'absolute',
     inset: 0,
     background:
-      'linear-gradient(120deg, rgba(14,16,19,.85) 0%, rgba(14,16,19,.55) 60%, rgba(14,16,19,.35) 100%)',
+      'linear-gradient(120deg, rgba(14,16,19,.55) 0%, rgba(14,16,19,.2) 60%, rgba(14,16,19,.05) 100%)',
     zIndex: 1,
   },
   content: {

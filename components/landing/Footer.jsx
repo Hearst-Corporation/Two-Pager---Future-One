@@ -37,7 +37,7 @@ export default function Footer() {
 
         <div style={S.bottom}>
           <div style={S.brand}>
-            <div style={S.brandMark}>F1</div>
+            <img src="/hearst-h.svg" alt="Hearst" style={S.brandMark} />
             <div>
               <div style={S.brandName}>FUTUR ONE · QATAR</div>
               <div style={S.brandSub}>
@@ -108,16 +108,10 @@ const S = {
     gap: 12,
   },
   brandMark: {
-    width: 26,
-    height: 26,
-    background: 'var(--color-accent-strong)',
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 800,
-    letterSpacing: -0.4,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: 24,
+    width: 'auto',
+    display: 'block',
+    filter: 'brightness(0) invert(1)',
   },
   brandName: {
     fontSize: 11,

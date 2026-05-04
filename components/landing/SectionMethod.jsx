@@ -81,14 +81,12 @@ const S = {
     backgroundImage: 'url(/aerial-white.png)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    opacity: 0.15,
-    filter: 'grayscale(80%) contrast(1.1)',
   },
   bgOverlay: {
     position: 'absolute',
     inset: 0,
     background:
-      'linear-gradient(180deg, var(--color-gray-900) 0%, rgba(14,16,19,.7) 30%, rgba(14,16,19,.95) 100%)',
+      'linear-gradient(180deg, rgba(14,16,19,.85) 0%, rgba(14,16,19,.35) 50%, rgba(14,16,19,.85) 100%)',
   },
   container: {
     position: 'relative',
