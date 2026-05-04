@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PARTICLES_EXPLODE_EVENT } from './MagneticParticles';
 
 const NAV = [
   { id: 'vision', label: 'About' },
@@ -9,14 +10,30 @@ const NAV = [
   { id: 'campus', label: 'Campus' },
 ];
 
+const REVEAL_DELAY_MS = 1100;
+
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      setRevealed(true);
+      return;
+    }
+    const onExplode = () => {
+      window.setTimeout(() => setRevealed(true), REVEAL_DELAY_MS);
+    };
+    window.addEventListener(PARTICLES_EXPLODE_EVENT, onExplode);
+    return () => window.removeEventListener(PARTICLES_EXPLODE_EVENT, onExplode);
   }, []);
 
   const handleNav = (e, id) => {
@@ -43,10 +60,13 @@ export default function Header() {
           ? '1px solid rgba(255,255,255,.06)'
           : '1px solid transparent',
         transition:
-          'padding .25s ease, background .25s ease, border-color .25s ease',
+          'padding .25s ease, background .25s ease, border-color .25s ease, opacity .8s ease, transform .8s cubic-bezier(.22,.61,.36,1)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? 'translateY(0)' : 'translateY(-12px)',
+        pointerEvents: revealed ? 'auto' : 'none',
       }}
     >
       <a

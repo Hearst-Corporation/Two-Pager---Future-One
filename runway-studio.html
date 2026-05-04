@@ -167,6 +167,102 @@
   .asset-card.in-sequence { border-color: rgba(212,160,23,0.3); }
   .asset-card.in-sequence:hover { border-color: var(--gold); }
 
+  /* Bouton +/− Timeline sur chaque asset card */
+  .tl-toggle {
+    position: absolute;
+    bottom: 28px; right: 5px;
+    border: none;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .tl-toggle.add {
+    background: var(--gold);
+    color: #000;
+  }
+  .tl-toggle.add:hover {
+    background: #f3c12a;
+    transform: scale(1.05);
+  }
+  .tl-toggle.remove {
+    background: rgba(239,68,68,0.9);
+    color: #fff;
+  }
+  .tl-toggle.remove:hover {
+    background: var(--red);
+  }
+
+  /* ── TIMELINE ─────────────────────────────────────────────────────────── */
+  .tl-clip {
+    flex-shrink: 0;
+    width: 110px;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    background: var(--surface2);
+    cursor: grab;
+    user-select: none;
+    position: relative;
+    transition: transform 0.12s, border-color 0.12s, opacity 0.15s;
+  }
+  .tl-clip:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .tl-clip.dragging { opacity: 0.35; cursor: grabbing; }
+  .tl-clip.drag-over { border-color: var(--gold); }
+  .tl-clip img {
+    width: 100%; height: 50px;
+    object-fit: cover;
+    display: block;
+  }
+  .tl-num {
+    position: absolute;
+    top: 3px; left: 3px;
+    background: var(--gold);
+    color: #000;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .tl-num.skip { background: var(--green); }
+  .tl-meta {
+    padding: 3px 5px;
+    font-size: 9px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tl-name {
+    font-size: 9px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70px;
+  }
+  .tl-dur { color: var(--accent2); font-weight: 700; }
+  .tl-remove {
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: var(--muted);
+    font-size: 10px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .tl-clip:hover .tl-remove { display: flex; }
+  .tl-remove:hover { background: var(--red); color: #fff; }
+
   /* ── CENTER STAGE ── */
   .stage {
     background: var(--bg);
@@ -476,8 +572,8 @@
       <button class="btn btn-primary" id="generateBtn" onclick="generateSelected()" disabled>
         ▶ Générer sélection
       </button>
-      <button class="btn btn-primary" style="background:var(--gold);color:#000;" onclick="generateSequence()">
-        ★ Séquence 45s
+      <button class="btn btn-primary" id="seqBtn" style="background:var(--gold);color:#000;" onclick="generateSequence()">
+        ★ Lancer la timeline
       </button>
       <button class="btn btn-ghost btn-sm" onclick="generateAll()">Tout générer</button>
       <div style="margin-left:auto; font-size:12px; color:var(--muted)" id="creditInfo"></div>
@@ -516,6 +612,17 @@
     <div style="padding:12px 16px; border-bottom:1px solid var(--border);">
       <div class="config-label" style="margin-bottom:6px;">Prompt global (appliqué à tous les clips)</div>
       <textarea id="globalPrompt" placeholder="Ex: cinematic slow push-in, golden hour, dramatic lighting, ultra-realistic architecture, Qatar desert atmosphere...">cinematic slow push-in, dramatic lighting, futuristic architecture, ultra-realistic, Qatar desert atmosphere, golden dust particles</textarea>
+    </div>
+
+    <!-- TIMELINE — séquence drag & drop -->
+    <div id="timeline" style="border-bottom:1px solid var(--border); background:var(--surface); padding:10px 14px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+        <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--gold);">▸ Timeline</span>
+        <span id="timelineDuration" style="font-size:11px; color:var(--muted);">0s</span>
+        <span style="margin-left:auto; font-size:10px; color:var(--muted);">↔ Glisse les scènes pour réorganiser</span>
+        <button class="btn btn-ghost btn-sm" onclick="resetSequence()" title="Restaurer l'ordre par défaut">↺ Reset</button>
+      </div>
+      <div id="timelineTrack" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; min-height:74px;"></div>
     </div>
 
     <!-- PREVIEW AREA -->
@@ -660,10 +767,14 @@ const ASSETS = [
 
   { name: 'back-cover',         file: 'back-cover.png',         seq: null, dur: 10,
     prompt: 'Slow zoom-out from building skyline, dramatic dusk, cinematic color grade, subtle camera drift, silhouette against burning sky' },
+
+  { name: 'texture-burgundy',   file: 'texture-burgundy.png',   seq: null, dur: 5,
+    prompt: 'Smooth polished burgundy metallic surface with subtle light moving across, ghost reflections, slow lateral camera drift, cinematic abstract texture, ultra-realistic material rendering' },
 ];
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
-let apiKey = sessionStorage.getItem('runway_api_key') || '';
+// Persiste la clé API (localStorage = survit à redémarrage navigateur)
+let apiKey = localStorage.getItem('runway_api_key') || '';
 let selectedAssets = new Set();
 let queue = [];        // { id, assetName, file, taskId, status, progress, outputUrl, prompt }
 let pollIntervals = {};
@@ -674,8 +785,141 @@ let model = 'gen4_turbo';
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function init() {
   renderAssets();
+  renderTimeline();
   if (apiKey) updateApiStatus(true);
   document.getElementById('apiModal').style.display = apiKey ? 'none' : 'flex';
+}
+
+// ─── TIMELINE (drag & drop) ───────────────────────────────────────────────────
+function getSequence() {
+  return ASSETS.filter(a => a.seq).sort((a, b) => a.seq - b.seq);
+}
+
+function renormalizeSequence(orderedNames) {
+  // Réassigne seq selon l'ordre fourni (1, 2, 3, ...)
+  orderedNames.forEach((name, idx) => {
+    const asset = ASSETS.find(a => a.name === name);
+    if (asset) asset.seq = idx + 1;
+  });
+}
+
+function renderTimeline() {
+  const track = document.getElementById('timelineTrack');
+  const seq = getSequence();
+  track.innerHTML = '';
+
+  if (seq.length === 0) {
+    track.innerHTML = '<div style="color:var(--muted); font-size:11px; padding:20px;">Timeline vide. Clique-droit sur un asset à gauche pour l\'ajouter à la séquence.</div>';
+    document.getElementById('timelineDuration').textContent = '0s';
+    return;
+  }
+
+  seq.forEach(asset => {
+    const clip = document.createElement('div');
+    clip.className = 'tl-clip';
+    clip.draggable = true;
+    clip.dataset.name = asset.name;
+    clip.innerHTML = `
+      <img src="${ASSETS_BASE}${asset.file}" alt="" onerror="this.style.background='#1c1c26'">
+      <div class="tl-num ${asset.skipRunway ? 'skip' : ''}">${asset.seq}${asset.skipRunway ? ' ✓' : ''}</div>
+      <div class="tl-remove" onclick="event.stopPropagation(); removeFromSequence('${asset.name}')" title="Retirer de la timeline">✕</div>
+      <div class="tl-meta">
+        <span class="tl-name">${asset.name}</span>
+        <span class="tl-dur">${asset.dur}s</span>
+      </div>
+    `;
+    attachDragHandlers(clip);
+    track.appendChild(clip);
+  });
+
+  const total = seq.reduce((sum, a) => sum + a.dur, 0);
+  document.getElementById('timelineDuration').textContent = `${total}s · ${seq.length} clips`;
+}
+
+let draggedName = null;
+
+function attachDragHandlers(el) {
+  el.addEventListener('dragstart', e => {
+    draggedName = el.dataset.name;
+    el.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggedName);
+  });
+  el.addEventListener('dragend', () => {
+    el.classList.remove('dragging');
+    document.querySelectorAll('.tl-clip').forEach(c => c.classList.remove('drag-over'));
+    draggedName = null;
+  });
+  el.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (el.dataset.name !== draggedName) el.classList.add('drag-over');
+  });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    el.classList.remove('drag-over');
+    const fromName = draggedName;
+    const toName = el.dataset.name;
+    if (!fromName || fromName === toName) return;
+    reorderSequence(fromName, toName);
+  });
+}
+
+function reorderSequence(fromName, toName) {
+  const ordered = getSequence().map(a => a.name);
+  const fromIdx = ordered.indexOf(fromName);
+  const toIdx = ordered.indexOf(toName);
+  if (fromIdx === -1 || toIdx === -1) return;
+  const [moved] = ordered.splice(fromIdx, 1);
+  ordered.splice(toIdx, 0, moved);
+  renormalizeSequence(ordered);
+  renderTimeline();
+  renderAssets();
+  addLog('info', `Timeline réorganisée — ${fromName} → position ${toIdx + 1}`);
+}
+
+function removeFromSequence(name) {
+  const asset = ASSETS.find(a => a.name === name);
+  if (!asset) return;
+  asset.seq = null;
+  // Renumérote les restants
+  const ordered = getSequence().map(a => a.name);
+  renormalizeSequence(ordered);
+  renderTimeline();
+  renderAssets();
+  addLog('info', `"${name}" retiré de la timeline`);
+}
+
+function addToSequence(name) {
+  const asset = ASSETS.find(a => a.name === name);
+  if (!asset || asset.seq) return;
+  const max = Math.max(0, ...getSequence().map(a => a.seq));
+  asset.seq = max + 1;
+  renderTimeline();
+  renderAssets();
+  addLog('info', `"${name}" ajouté à la timeline (position ${asset.seq})`);
+}
+
+function resetSequence() {
+  if (!confirm('Restaurer l\'ordre par défaut de la timeline ?')) return;
+  // Ordre par défaut basé sur la position dans ASSETS
+  const defaults = [
+    'H-particles-capture',
+    'water-compute', 'aerial-white',
+    'supercomputer-wide', 'supercomputer', 'vault',
+    'desalination', 'aerial-campus-red',
+    'amphitheater', 'p2-building',
+    'cover-facade',
+  ];
+  ASSETS.forEach(a => a.seq = null);
+  defaults.forEach((name, idx) => {
+    const asset = ASSETS.find(a => a.name === name);
+    if (asset) asset.seq = idx + 1;
+  });
+  renderTimeline();
+  renderAssets();
+  addLog('info', 'Timeline restaurée à l\'ordre par défaut');
 }
 
 // ─── ASSET GRID ───────────────────────────────────────────────────────────────
@@ -696,14 +940,24 @@ function renderAssets() {
     const seqBadge = asset.seq
       ? `<div class="seq-badge" style="${asset.skipRunway ? 'background:#22c55e;' : ''}">${asset.seq} · ${asset.dur}s${asset.skipRunway ? ' ✓' : ''}</div>`
       : '';
+    const tlBtn = asset.seq
+      ? `<button class="tl-toggle remove" title="Retirer de la timeline">− Timeline</button>`
+      : `<button class="tl-toggle add" title="Ajouter à la timeline">+ Timeline</button>`;
     card.innerHTML = `
       <img src="${ASSETS_BASE}${asset.file}" alt="${asset.name}" loading="lazy"
            onerror="this.style.background='#1c1c26'; this.style.height='60px'">
       ${seqBadge}
+      ${tlBtn}
       <div class="asset-name">${asset.name}</div>
       <div class="check">✓</div>
     `;
     card.onclick = () => toggleAsset(asset, card);
+    // Bouton timeline : intercepte le clic pour ne pas déclencher la sélection
+    card.querySelector('.tl-toggle').onclick = (e) => {
+      e.stopPropagation();
+      if (asset.seq) removeFromSequence(asset.name);
+      else addToSequence(asset.name);
+    };
     grid.appendChild(card);
   });
 }
@@ -745,7 +999,7 @@ function saveApiKey() {
   const val = document.getElementById('apiKeyInput').value.trim();
   if (!val) return;
   apiKey = val;
-  sessionStorage.setItem('runway_api_key', val);
+  localStorage.setItem('runway_api_key', val);
   updateApiStatus(true);
   closeApiModal();
   updateSelectedCount();

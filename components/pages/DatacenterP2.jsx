@@ -1,9 +1,11 @@
 'use client';
 
 /**
- * DatacenterP2 — Duplication isolée de P2InsideLeft pour /datacenter.
- * Sandbox dédié au one-pager "datacenter" : structure et styles identiques
- * à P2 au moment de la duplication, libre d'évoluer indépendamment.
+ * DatacenterP2 — One-pager "Partner Stack" pour /datacenter.
+ * Reprend EXACTEMENT le layout de P2InsideLeft (locks 270/220/100/90),
+ * remplace uniquement textes et footer pour mettre en avant les partenaires
+ * datacenter/mining de Hearst : Kontena · B-Global Tech · Gatti Services.
+ * Hardware & control plane propriétaires Hearst poussés dans le dark band.
  */
 export default function DatacenterP2() {
   return (
@@ -13,27 +15,27 @@ export default function DatacenterP2() {
         <div style={S.heroImage} />
         <div style={S.heroOverlay} />
 
-        <div style={S.tag}>ALIGNED WITH QATAR NATIONAL VISION 2030</div>
+        <div style={S.tag}>BUILT WITH WORLD-CLASS PARTNERS</div>
 
         <div style={S.heroContent}>
           <h1 style={S.title}>
-            FUTUR ONE
+            WE BUILD WITH
             <br />
-            <span style={S.titleAccent}>THE NEXT</span>
+            <span style={S.titleAccent}>THE BEST.</span>
             <br />
-            STRATEGIC RESOURCE.
+            NOTHING LESS.
           </h1>
 
           <p style={S.intro}>
-            Qatar built one of the world's most successful sovereign industries<br />
-            on the strategic resource of the 20th century.<br />
-            The next one is <strong>intelligence</strong>.
+            Hearst Qatar partners with the operators, engineers and builders<br />
+            who already power the world's most demanding compute and<br />
+            mining sites. Sovereign-grade requires sovereign-grade partners.
           </p>
 
           <blockquote style={S.quote}>
-            <strong>FUTUR ONE</strong> is the proposed sovereign vehicle to capture,
-            deploy and govern that resource — founded and operated by
-            <strong>Hearst Qatar</strong>.
+            From <strong>industrial Bitcoin mining</strong> to <strong>AI supercomputing</strong> — we deploy
+            proprietary hardware, modular architectures and 24/7 operations
+            at industrial scale, with a track record across four continents.
           </blockquote>
         </div>
       </section>
@@ -43,33 +45,32 @@ export default function DatacenterP2() {
         {/* Left: Logo Block */}
         <div style={S.logoBlock}>
           {/* 360° Edge Texts */}
-        <div style={{ ...S.edgeText, ...S.edgeTop }}>COMPUTE</div>
-        <div style={{ ...S.edgeText, ...S.edgeRight }}>ENERGY</div>
-        <div style={{ ...S.edgeText, ...S.edgeBottom }}>CAPITAL</div>
-        <div style={{ ...S.edgeText, ...S.edgeLeft }}>TALENT</div>
+        <div style={{ ...S.edgeText, ...S.edgeTop }}>DESIGN</div>
+        <div style={{ ...S.edgeText, ...S.edgeRight }}>BUILD</div>
+        <div style={{ ...S.edgeText, ...S.edgeBottom }}>OPERATE</div>
+        <div style={{ ...S.edgeText, ...S.edgeLeft }}>HARDWARE</div>
 
           <img src="/hearst-h.svg" alt="Hearst H" style={S.hearstLogo} />
         </div>
 
         {/* Right: Text Block */}
         <div style={S.textBlock}>
-          <div style={S.eyebrow}>THE STRATEGIC THESIS</div>
+          <div style={S.eyebrow}>THE PARTNER STACK</div>
           <div style={S.darkHeadline}>
-            Compute is the new oil and gas.
+            Mining-grade resilience.
             <br />
-            Sovereign control is the new advantage.
+            Hyperscale-grade engineering.
             <br />
-            <span style={S.darkHeadlineAccent}>The window is now.</span>
+            <span style={S.darkHeadlineAccent}>One sovereign stack.</span>
           </div>
           <p style={S.darkBody}>
-            Within the next decade, sovereign AI compute capacity will<br />
-            determine which states sit at the table of global economic<br />
-            and security decisions.
+            From industrial Bitcoin mining to AI supercomputing, Hearst<br />
+            masters both ends of the compute spectrum — and brings<br />
+            <strong>proprietary hardware and a sovereign control plane</strong> into every site.
           </p>
           <p style={S.darkBody}>
-            <strong>FUTUR ONE</strong> proposes the architecture to put Qatar at that<br />
-            table — built domestically, governed sovereignly, operated<br />
-            to industrial standard.
+            Three world-class partners. One sovereign operator. Built in<br />
+            Qatar, governed by <strong>Hearst</strong>, deployed to industrial standard.
           </p>
         </div>
       </section>
@@ -82,44 +83,37 @@ export default function DatacenterP2() {
       {/* ============== FOOTER 3 COLS (90px) ============== */}
       <section style={S.footer}>
         <FooterCol
-          icon={
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-          }
-          title="FOUNDED & OPERATED BY"
+          logoSrc="/partners/kontena.svg"
+          logoAlt="Kontena"
           body={
             <>
-              <strong>Hearst Qatar.</strong>
+              Modular AI/HPC data centers.<br />
+              <strong>Proprietary modular architecture.</strong>
             </>
           }
+          website="kontena.tech"
         />
         <FooterCol
-          icon={
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M8 4H4v4 M16 4h4v4 M8 20H4v-4 M16 20h4v-4" />
-            </svg>
-          }
-          title="BUILT BY"
+          logoSrc="/partners/bglobal.svg"
+          logoAlt="B-Global Tech"
           body={
             <>
-              Designed by <strong>Foster + Partners</strong>.<br />
-              Built by <strong>JB Pastor & Fils</strong>.
+              Data center engineering.<br />
+              <strong>8 offices · 4 continents · 15+ yrs.</strong>
             </>
           }
+          website="b-global.tech"
         />
         <FooterCol
-          icon={
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M4 6h16 M4 12h16 M4 18h16" />
-            </svg>
-          }
-          title="PROPOSED STRUCTURE"
+          logoSrc="/partners/gatti.svg"
+          logoAlt="Gatti Services"
           body={
             <>
-              Sovereign joint venture.
+              24/7 ops & Smart PDUs.<br />
+              <strong>Proprietary hardware in the rack.</strong>
             </>
           }
+          website="gatti-services.com"
         />
       </section>
     </div>
@@ -128,14 +122,12 @@ export default function DatacenterP2() {
 
 /* ---------- sub-blocks ---------- */
 
-function FooterCol({ icon, title, body }) {
+function FooterCol({ logoSrc, logoAlt, body, website }) {
   return (
     <div style={S.footerCol}>
-      <div style={S.footerIcon}>{icon}</div>
-      <div>
-        <div style={S.footerTitle}>{title}</div>
-        <div style={S.footerBody}>{body}</div>
-      </div>
+      <img src={logoSrc} alt={logoAlt} style={S.footerLogo} />
+      <div style={S.footerBody}>{body}</div>
+      {website && <div style={S.footerWebsite}>{website}</div>}
     </div>
   );
 }
@@ -169,9 +161,9 @@ const S = {
   heroImage: {
     position: 'absolute',
     inset: 0,
-    backgroundImage: "url('/u2883995211_Futuristic_autonomous_data_center_sleek_white_and_g_c37cb699-e8fc-449d-b31f-380b4bde83a2.png')",
+    backgroundImage: "url('/u2883995211_Aerial_view_of_Qatari_national_infrastructure_compl_7847dc8e-b81a-4064-ab48-565fdfc5a324.png')",
     backgroundSize: 'cover',
-    backgroundPosition: 'center 20%',
+    backgroundPosition: 'center 50%',
   },
   heroOverlay: {
     position: 'absolute',
@@ -356,27 +348,30 @@ const S = {
   },
   footerCol: {
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'flex-start',
-    gap: 10,
+    gap: 4,
   },
-  footerIcon: {
-    color: 'var(--color-gray-400)',
-    marginTop: 0, /* Retire le margin-top pour que l'icône soit le point d'ancrage haut */
-  },
-  footerTitle: {
-    fontSize: 7,
-    letterSpacing: 1,
-    fontWeight: 800,
-    marginBottom: 6,
-    color: 'var(--color-accent-strong)',
-    textTransform: 'uppercase',
-    lineHeight: 1,
-    marginTop: 2, /* Aligne visuellement le texte avec le haut de l'icône */
+  footerLogo: {
+    height: 18,
+    width: 'auto',
+    maxWidth: '100%',
+    display: 'block',
+    objectFit: 'contain',
+    objectPosition: 'left center',
   },
   footerBody: {
     fontSize: 6,
-    lineHeight: 1.4,
+    lineHeight: 1.35,
     color: 'var(--color-gray-300)',
     fontWeight: 500,
+  },
+  footerWebsite: {
+    fontSize: 6.5,
+    fontWeight: 800,
+    letterSpacing: 0.5,
+    color: 'var(--color-accent-strong)',
+    textTransform: 'lowercase',
+    marginTop: 1,
   },
 };

@@ -4,6 +4,23 @@
 Présentation A3 plié en 2 (4 pages portrait, 480×680px chacune) pour Futur One Qatar.
 Stack : Next.js · React · inline styles (pas de Tailwind, pas de CSS modules).
 
+---
+
+## 🚨 RÈGLES ABSOLUES — INFRASTRUCTURE (NON NÉGOCIABLE)
+
+### Dev server → port **5005**, toujours.
+- `npm run dev` lance **exclusivement** sur `http://localhost:5005`
+  (configuré dans `package.json` : `"dev": "next dev -p 5005"`).
+- Ne **JAMAIS** lancer sur 3000, 3001, ou un autre port.
+- Ne **JAMAIS** modifier le port dans `package.json` sans demande explicite.
+- Toute URL communiquée à l'utilisateur doit pointer sur `localhost:5005`.
+- Avant de démarrer le dev, vérifier qu'aucun process n'occupe déjà 5005 :
+  `lsof -nP -iTCP:5005 -sTCP:LISTEN`.
+- Ne pas relancer `npm run dev` si un serveur tourne déjà sur 5005 — Next.js
+  basculerait automatiquement sur 5006/5007 et casserait la règle.
+
+---
+
 ## Architecture des pages
 | Fichier | Page | Rôle |
 |---|---|---|

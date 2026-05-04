@@ -43,7 +43,18 @@ npm install
 npm run dev
 ```
 
-Ouvrir [http://localhost:3000](http://localhost:3000).
+> ⚠️ **Règle absolue** — le dev server tourne **toujours** sur le port **5005**
+> (configuré dans `package.json`). Ne jamais lancer sur 3000 ni un autre port.
+
+Ouvrir [http://localhost:5005](http://localhost:5005).
+
+### Routes disponibles
+| URL | Page |
+|---|---|
+| `/` | Landing principale |
+| `/brochure` | Brochure A3 plié (P1 → P4, 4 vues) |
+| `/datacenter` | One-pager isolé (duplication de P2) |
+| `/print` | Vue print A3 |
 
 ## Palette
 

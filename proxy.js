@@ -6,7 +6,7 @@ const http = require('http');
 const https = require('https');
 
 const PORT = 3099;
-const RUNWAY_BASE = 'api.runwayml.com';
+const RUNWAY_BASE = 'api.dev.runwayml.com';
 const RUNWAY_VERSION = '2024-11-06';
 
 function corsHeaders(res) {
