@@ -2,6 +2,7 @@ import Header from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
 import SectionOpportunity from '@/components/landing/SectionOpportunity';
 import SectionGallery from '@/components/landing/SectionGallery';
+import SectionLife from '@/components/landing/SectionLife';
 import SectionMethod from '@/components/landing/SectionMethod';
 import SectionHub from '@/components/landing/SectionHub';
 import SectionCampus from '@/components/landing/SectionCampus';
@@ -15,6 +16,7 @@ export default function Home() {
       <Hero />
       <SectionOpportunity />
       <SectionGallery />
+      <SectionLife />
       <SectionMethod />
       <SectionHub />
       <SectionCampus />

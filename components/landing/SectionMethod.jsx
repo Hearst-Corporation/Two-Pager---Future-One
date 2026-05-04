@@ -44,7 +44,7 @@ export default function SectionMethod() {
         <div style={S.header}>
           <Reveal>
             <div style={S.eyebrow}>
-              <span style={S.eyebrowNum}>03</span>
+              <span style={S.eyebrowNum}>04</span>
               <span style={S.eyebrowDivider} />
               THE PROGRAM
             </div>

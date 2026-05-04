@@ -50,7 +50,7 @@ export default function SectionHub() {
         <div style={S.header}>
           <Reveal>
             <div style={S.eyebrow}>
-              <span style={S.eyebrowNum}>04</span>
+              <span style={S.eyebrowNum}>05</span>
               <span style={S.eyebrowDivider} />
               THE SOVEREIGN AI INFRASTRUCTURE HUB
             </div>

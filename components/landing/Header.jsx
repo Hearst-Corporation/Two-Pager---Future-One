@@ -5,6 +5,7 @@ import { PARTICLES_EXPLODE_EVENT } from './MagneticParticles';
 
 const NAV = [
   { id: 'vision', label: 'About' },
+  { id: 'life', label: 'Life' },
   { id: 'method', label: 'Method' },
   { id: 'hub', label: 'Hub' },
   { id: 'campus', label: 'Campus' },

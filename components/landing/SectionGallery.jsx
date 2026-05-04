@@ -12,8 +12,8 @@ const ITEMS = [
   },
   {
     src: '/vault.png',
-    label: 'INTERIOR',
-    title: 'The Atrium',
+    label: 'COMPUTE',
+    title: 'The Vault',
     span: 'normal',
   },
   {
@@ -27,6 +27,18 @@ const ITEMS = [
     label: 'COMMUNITY',
     title: 'The Amphitheater',
     span: 'wide',
+  },
+  {
+    src: '/hub-interior.png',
+    label: 'INTERIOR',
+    title: 'The Atrium concourse',
+    span: 'wide',
+  },
+  {
+    src: '/hub-masterplan.png',
+    label: 'MASTERPLAN',
+    title: 'Aerial masterplan',
+    span: 'normal',
   },
 ];
 

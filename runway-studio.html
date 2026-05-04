@@ -621,6 +621,7 @@
         <span id="timelineDuration" style="font-size:11px; color:var(--muted);">0s</span>
         <span style="margin-left:auto; font-size:10px; color:var(--muted);">↔ Glisse les scènes pour réorganiser</span>
         <button class="btn btn-ghost btn-sm" onclick="resetSequence()" title="Restaurer l'ordre par défaut">↺ Reset</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearTimelineStorage()" title="Effacer la sauvegarde locale et recharger l'ordre du code" style="color:#f97316;">🗑 Effacer save</button>
       </div>
       <div id="timelineTrack" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; min-height:74px;"></div>
     </div>
@@ -755,21 +756,22 @@ const ASSETS = [
     seq: 11, dur: 10,
     prompt: 'Slow majestic push-in toward the FUTUR ONE facade tower. Golden hour light rakes diagonally across the surface. Heat shimmer rises from Qatar desert floor. Fine sand particles drift across frame. The building fills the entire frame by end of shot. Anamorphic lens flare at peak moment. Ultra-realistic architectural cinematography, IMAX, no camera shake' },
 
-  // ── ASSETS OPTIONNELS (hors séquence, pour variantes / B-roll) ──────────
-  { name: 'hero-datacenter',    file: 'hero-datacenter.png',    seq: null, dur: 10,
-    prompt: 'Slow cinematic push-in, sleek white autonomous data center, gold accent lights pulse on server panels, cold mist at floor, ultra-clean futuristic aesthetic, anamorphic bokeh' },
+  // ── EXTENSION TIMELINE — assets ajoutés à la suite (positions 12→16) ────
+  { name: 'hero-datacenter',    file: 'hero-datacenter.png',    seq: 12, dur: 10,
+    prompt: 'Aggressive forward dolly into the sleek white autonomous data center. Gold accent lights pulse rhythmically on server panels. Cold mist swirls actively at floor level. Light beams sweep across the corridor. Cables glow and flicker. Strong parallax depth. Cinematic IMAX, ultra-clean futuristic aesthetic, anamorphic bokeh, kinetic motion' },
 
-  { name: 'aerial-campus-2',    file: 'aerial-campus-2.png',    seq: null, dur: 10,
-    prompt: 'Aerial flyover at magic hour, slow dolly right, long shadows stretch across the campus, bird-eye view, cinematic color grade, Qatar desert' },
+  { name: 'aerial-campus-2',    file: 'aerial-campus-2.png',    seq: 13, dur: 10,
+    prompt: 'Dynamic aerial flyover at magic hour, fast dolly right movement, long shadows stretch and sweep across the campus, birds banking through frame, dust kicked up by wind, cinematic color grade, Qatar desert, kinetic drone cinematography' },
 
-  { name: 'p3-picture',         file: 'p3-picture.png',         seq: null, dur: 10,
-    prompt: 'Slow aerial crane pull-back, masterplan view of full campus, golden hour, anamorphic lens, Qatar landscape stretching to horizon' },
+  { name: 'p3-picture',         file: 'p3-picture.png',         seq: 14, dur: 10,
+    prompt: 'Sweeping aerial crane pull-back, masterplan view of the full campus, fast revealing motion, long shadows rotating with sun movement, atmospheric haze, Qatar landscape stretching to infinite horizon, anamorphic lens, dynamic IMAX cinematography' },
 
-  { name: 'back-cover',         file: 'back-cover.png',         seq: null, dur: 10,
-    prompt: 'Slow zoom-out from building skyline, dramatic dusk, cinematic color grade, subtle camera drift, silhouette against burning sky' },
+  { name: 'back-cover',         file: 'back-cover.png',         seq: 15, dur: 10,
+    prompt: 'Dramatic zoom-out from the building skyline against burning dusk sky. Clouds churn rapidly above. Birds silhouetted in flight. Dust storms at base. Strong forward parallax. Anamorphic lens flares. Cinematic color grade, kinetic motion, IMAX' },
 
+  // texture-burgundy retiré de la timeline (B-roll uniquement)
   { name: 'texture-burgundy',   file: 'texture-burgundy.png',   seq: null, dur: 5,
-    prompt: 'Smooth polished burgundy metallic surface with subtle light moving across, ghost reflections, slow lateral camera drift, cinematic abstract texture, ultra-realistic material rendering' },
+    prompt: 'Smooth polished burgundy metallic surface with active light beams sweeping diagonally across, ghost reflections shifting, slow lateral camera drift with gentle parallax, cinematic abstract transition texture, ultra-realistic material rendering' },
 ];
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
@@ -784,10 +786,38 @@ let model = 'gen4_turbo';
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function init() {
+  loadTimelineState();   // restaure ordre + durées sauvegardés
   renderAssets();
   renderTimeline();
   if (apiKey) updateApiStatus(true);
   document.getElementById('apiModal').style.display = apiKey ? 'none' : 'flex';
+}
+
+// ─── PERSISTANCE TIMELINE ─────────────────────────────────────────────────────
+const TL_STORAGE_KEY = 'runway_timeline_state';
+
+function saveTimelineState() {
+  // Sauvegarde nom + seq + dur de chaque asset (pas les prompts, pour ne pas figer les modifs code)
+  const state = ASSETS.map(a => ({ name: a.name, seq: a.seq, dur: a.dur }));
+  localStorage.setItem(TL_STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadTimelineState() {
+  const raw = localStorage.getItem(TL_STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const state = JSON.parse(raw);
+    state.forEach(saved => {
+      const asset = ASSETS.find(a => a.name === saved.name);
+      if (asset) {
+        asset.seq = saved.seq;
+        asset.dur = saved.dur;
+      }
+    });
+    addLog('info', 'Timeline restaurée depuis la session précédente.');
+  } catch (e) {
+    console.error('Failed to load timeline state:', e);
+  }
 }
 
 // ─── TIMELINE (drag & drop) ───────────────────────────────────────────────────
@@ -874,6 +904,7 @@ function reorderSequence(fromName, toName) {
   const [moved] = ordered.splice(fromIdx, 1);
   ordered.splice(toIdx, 0, moved);
   renormalizeSequence(ordered);
+  saveTimelineState();
   renderTimeline();
   renderAssets();
   addLog('info', `Timeline réorganisée — ${fromName} → position ${toIdx + 1}`);
@@ -883,9 +914,9 @@ function removeFromSequence(name) {
   const asset = ASSETS.find(a => a.name === name);
   if (!asset) return;
   asset.seq = null;
-  // Renumérote les restants
   const ordered = getSequence().map(a => a.name);
   renormalizeSequence(ordered);
+  saveTimelineState();
   renderTimeline();
   renderAssets();
   addLog('info', `"${name}" retiré de la timeline`);
@@ -896,9 +927,16 @@ function addToSequence(name) {
   if (!asset || asset.seq) return;
   const max = Math.max(0, ...getSequence().map(a => a.seq));
   asset.seq = max + 1;
+  saveTimelineState();
   renderTimeline();
   renderAssets();
   addLog('info', `"${name}" ajouté à la timeline (position ${asset.seq})`);
+}
+
+function clearTimelineStorage() {
+  if (!confirm('Effacer la sauvegarde locale ? La page va se recharger avec l\'ordre du code.')) return;
+  localStorage.removeItem(TL_STORAGE_KEY);
+  location.reload();
 }
 
 function resetSequence() {
@@ -911,12 +949,15 @@ function resetSequence() {
     'desalination', 'aerial-campus-red',
     'amphitheater', 'p2-building',
     'cover-facade',
+    'hero-datacenter', 'aerial-campus-2', 'p3-picture', 'back-cover',
+    // texture-burgundy : B-roll, pas en timeline
   ];
   ASSETS.forEach(a => a.seq = null);
   defaults.forEach((name, idx) => {
     const asset = ASSETS.find(a => a.name === name);
     if (asset) asset.seq = idx + 1;
   });
+  saveTimelineState();
   renderTimeline();
   renderAssets();
   addLog('info', 'Timeline restaurée à l\'ordre par défaut');
