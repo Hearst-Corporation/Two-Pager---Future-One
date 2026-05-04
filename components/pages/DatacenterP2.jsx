@@ -16,6 +16,10 @@ export default function DatacenterP2() {
         <div style={S.heroOverlay} />
 
         <div style={S.tag}>BUILT WITH WORLD-CLASS PARTNERS</div>
+        <svg viewBox="560 455 155 170" style={S.heroLogo}>
+          <polygon fill="currentColor" points="601.74 466.87 572.6 466.87 572.6 609.73 601.74 609.73 601.74 549.07 633.11 579.43 665.76 579.43 601.74 517.46 601.74 466.87"/>
+          <polygon fill="currentColor" points="672.72 466.87 672.72 528.12 644.63 500.93 611.98 500.93 672.72 559.72 672.72 609.73 701.86 609.73 701.86 466.87 672.72 466.87"/>
+        </svg>
 
         <div style={S.heroContent}>
           <h1 style={S.title}>
@@ -27,57 +31,50 @@ export default function DatacenterP2() {
           </h1>
 
           <p style={S.intro}>
-            Hearst Qatar partners with the operators, engineers and builders<br />
-            who already power the world's most demanding compute and<br />
-            mining sites. Sovereign-grade requires sovereign-grade partners.
+            Hearst Qatar partners with the engineers behind <strong>Yondr 200&nbsp;MW</strong>,<br />
+            <strong>Sedenak 500&nbsp;MW</strong> and <strong>A*STAR's national supercomputer</strong> — from<br />
+            Tier&nbsp;III hyperscale campuses in Asia to LEED-certified facilities in Europe.
           </p>
+        </div>
 
-          <blockquote style={S.quote}>
-            From <strong>industrial Bitcoin mining</strong> to <strong>AI supercomputing</strong> — we deploy
-            proprietary hardware, modular architectures and 24/7 operations
-            at industrial scale, with a track record across four continents.
-          </blockquote>
+        {/* KPIs alignés en bas du hero, en rouge */}
+        <div style={S.heroKpis}>
+          <HeroKpi value="500 MW" label="DEPLOYED" />
+          <HeroKpi value="TIER III" label="LEED CERTIFIED" />
+          <HeroKpi value="PUE 1.2" label="LIQUID COOLING" />
+          <HeroKpi value="4 CONT." label="GLOBAL TRACK RECORD" />
         </div>
       </section>
 
-      {/* ============== DARK BAND (220px) ============== */}
+      {/* ============== DARK BAND (220px) — split 44/56 : manifesto | photo ============== */}
       <section style={S.darkBand}>
-        {/* Left: Logo Block */}
-        <div style={S.logoBlock}>
-          {/* 360° Edge Texts */}
-        <div style={{ ...S.edgeText, ...S.edgeTop }}>DESIGN</div>
-        <div style={{ ...S.edgeText, ...S.edgeRight }}>BUILD</div>
-        <div style={{ ...S.edgeText, ...S.edgeBottom }}>OPERATE</div>
-        <div style={{ ...S.edgeText, ...S.edgeLeft }}>HARDWARE</div>
-
-          <img src="/hearst-h.svg" alt="Hearst H" style={S.hearstLogo} />
-        </div>
-
-        {/* Right: Text Block */}
-        <div style={S.textBlock}>
-          <div style={S.eyebrow}>THE PARTNER STACK</div>
-          <div style={S.darkHeadline}>
-            Mining-grade resilience.
-            <br />
-            Hyperscale-grade engineering.
-            <br />
-            <span style={S.darkHeadlineAccent}>One sovereign stack.</span>
+        {/* Left : manifesto sur fond clair (à la place du H) */}
+        <div style={S.manifestoBlock}>
+          <img src="/hearst-h.svg" alt="" style={S.manifestoWatermark} />
+          <div style={S.manifestoContent}>
+            <div style={S.eyebrow}>THE PARTNER STACK</div>
+            <div style={S.manifestoHeadline}>
+              We don't outsource excellence.
+              <br />
+              <span style={S.darkHeadlineAccent}>We assemble it.</span>
+            </div>
+            <p style={S.manifestoBody}>
+              Three world-class partners. Proprietary hardware.
+              Mining-grade resilience meets hyperscale-grade engineering —
+              governed by <strong>Hearst Qatar</strong>.
+            </p>
           </div>
-          <p style={S.darkBody}>
-            From industrial Bitcoin mining to AI supercomputing, Hearst<br />
-            masters both ends of the compute spectrum — and brings<br />
-            <strong>proprietary hardware and a sovereign control plane</strong> into every site.
-          </p>
-          <p style={S.darkBody}>
-            Three world-class partners. One sovereign operator. Built in<br />
-            Qatar, governed by <strong>Hearst</strong>, deployed to industrial standard.
-          </p>
         </div>
+
+        {/* Right : photo plein cadre */}
+        <div style={S.darkBandPhoto} />
       </section>
 
-      {/* ============== BUILDING IMAGE (100px) ============== */}
+      {/* ============== BUILDING IMAGE (125px) — 3 photos côte à côte ============== */}
       <section style={S.building}>
-        <div style={S.buildingImage} />
+        <BuildingTile image="/partners/hardware.jpg" title="HARDWARE" />
+        <BuildingTile image="/partners/connectivity.jpg" title="CONNECTIVITY" />
+        <BuildingTile image="/partners/software.jpg" title="SOFTWARE" last />
       </section>
 
       {/* ============== FOOTER 3 COLS (90px) ============== */}
@@ -85,10 +82,11 @@ export default function DatacenterP2() {
         <FooterCol
           logoSrc="/partners/kontena.svg"
           logoAlt="Kontena"
+          watermarkSrc="/partners/kontena-icon.svg"
           body={
             <>
               Modular AI/HPC data centers.<br />
-              <strong>Proprietary modular architecture.</strong>
+              <strong>KONNECT modular DC platform.</strong>
             </>
           }
           website="kontena.tech"
@@ -96,6 +94,7 @@ export default function DatacenterP2() {
         <FooterCol
           logoSrc="/partners/bglobal.svg"
           logoAlt="B-Global Tech"
+          watermarkSrc="/partners/bglobal-icon.svg"
           body={
             <>
               Data center engineering.<br />
@@ -107,10 +106,11 @@ export default function DatacenterP2() {
         <FooterCol
           logoSrc="/partners/gatti.svg"
           logoAlt="Gatti Services"
+          watermarkSrc="/partners/gatti-icon.svg"
           body={
             <>
-              24/7 ops & Smart PDUs.<br />
-              <strong>Proprietary hardware in the rack.</strong>
+              24/7 Smart Hands · Smart PDUs.<br />
+              <strong>Real-time power monitoring.</strong>
             </>
           }
           website="gatti-services.com"
@@ -122,19 +122,47 @@ export default function DatacenterP2() {
 
 /* ---------- sub-blocks ---------- */
 
-function FooterCol({ logoSrc, logoAlt, body, website }) {
+function FooterCol({ logoSrc, logoAlt, body, website, watermarkSrc }) {
   return (
-    <div style={S.footerCol}>
-      <img src={logoSrc} alt={logoAlt} style={S.footerLogo} />
-      <div style={S.footerBody}>{body}</div>
-      {website && <div style={S.footerWebsite}>{website}</div>}
+    <div style={{ ...S.footerCol, position: 'relative', overflow: 'hidden', height: '100%' }}>
+      {watermarkSrc && <img src={watermarkSrc} alt="" style={S.footerWatermark} />}
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <img src={logoSrc} alt={logoAlt} style={S.footerLogo} />
+        <div style={S.footerBody}>{body}</div>
+        {website && <div style={S.footerWebsite}>{website}</div>}
+      </div>
+    </div>
+  );
+}
+
+function HeroKpi({ value, label }) {
+  return (
+    <div style={S.heroKpiItem}>
+      <div style={S.heroKpiValue}>{value}</div>
+      <div style={S.heroKpiLabel}>{label}</div>
+    </div>
+  );
+}
+
+function BuildingTile({ image, title, last }) {
+  return (
+    <div
+      style={{
+        ...S.buildingTile,
+        backgroundImage: `url('${image}')`,
+        ...(last ? { borderRight: 'none' } : null),
+      }}
+    >
+      <div style={S.buildingTileOverlay} />
+      <div style={S.buildingTileTitle}>{title}</div>
     </div>
   );
 }
 
 /* ---------- styles ---------- */
 /* Page totale = 680px. Sections en pixels exacts.
-   hero(270) + darkBand(220) + building(100) + footer(90) = 680. */
+   hero(270) + darkBand(195) + building(125) + footer(90) = 680.
+   Variante /datacenter : photos building +25px, manifesto compacté. */
 
 const SECTION = { flexShrink: 0, flexGrow: 0, minHeight: 0, overflow: 'hidden' };
 
@@ -168,7 +196,10 @@ const S = {
   heroOverlay: {
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(90deg, rgba(26,29,36,0.85) 0%, rgba(26,29,36,0.5) 45%, rgba(26,29,36,0) 100%)',
+    background: `
+      linear-gradient(90deg, rgba(26,29,36,0.85) 0%, rgba(26,29,36,0.5) 45%, rgba(26,29,36,0) 100%),
+      linear-gradient(0deg, rgba(26,29,36,0.85) 0%, rgba(26,29,36,0) 35%)
+    `,
   },
   tag: {
     position: 'absolute',
@@ -180,6 +211,15 @@ const S = {
     color: 'var(--color-gray-300)',
     zIndex: 2,
     textTransform: 'uppercase',
+  },
+  heroLogo: {
+    position: 'absolute',
+    top: 19, /* Ajustement au pixel près pour le centrage optique avec le texte */
+    right: 26,
+    height: 14,
+    width: 'auto',
+    zIndex: 2,
+    color: 'var(--color-accent-strong)', /* Utilise la variable exacte du bordeaux/rouge accent */
   },
   pageNum: {
     position: 'absolute',
@@ -227,6 +267,38 @@ const S = {
     color: 'var(--color-gray-300)',
     fontWeight: 500,
   },
+  heroKpis: {
+    position: 'absolute',
+    left: 26,
+    right: 26,
+    bottom: 16,
+    zIndex: 2,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: 12,
+    paddingTop: 14,
+    borderTop: '1px solid rgba(232, 65, 66, 0.5)', /* Opacité augmentée pour l'impression */
+  },
+  heroKpiItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+  },
+  heroKpiValue: {
+    fontSize: 13,
+    fontWeight: 900,
+    letterSpacing: -0.3,
+    color: 'var(--color-accent-strong)',
+    lineHeight: 1,
+  },
+  heroKpiLabel: {
+    fontSize: 6,
+    fontWeight: 700,
+    letterSpacing: 1.2,
+    color: 'var(--color-gray-200)',
+    textTransform: 'uppercase',
+    whiteSpace: 'nowrap',
+  },
   quoteAuthor: {
     fontSize: 6,
     fontWeight: 800,
@@ -236,121 +308,132 @@ const S = {
     textTransform: 'uppercase',
   },
 
-  /* DARK BAND (233px) */
+  /* DARK BAND (195px) — split 44/56 : manifesto (clair, gauche) | photo (droite) */
   darkBand: {
     ...SECTION,
-    height: 233,
+    height: 195,
     display: 'flex',
   },
-  logoBlock: {
+  manifestoBlock: {
     flex: '0 0 44%',
-    backgroundColor: 'var(--color-surface)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    background: 'var(--color-surface)',
+    color: 'var(--color-text-primary)',
     borderRight: '1px solid var(--color-border-light)',
-    position: 'relative',
-  },
-  hearstLogo: {
-    width: '55%',
-    height: 'auto',
-    display: 'block',
-  },
-  edgeText: {
-    position: 'absolute',
-    fontSize: 5.5,
-    fontWeight: 700,
-    letterSpacing: 3,
-    color: 'var(--color-gray-700)',
-    textTransform: 'uppercase',
-    whiteSpace: 'nowrap',
-  },
-  edgeTop: {
-    top: 16,
-    left: '50%',
-    transform: 'translateX(-50%)',
-  },
-  edgeBottom: {
-    bottom: 16,
-    left: '50%',
-    transform: 'translateX(-50%)',
-  },
-  edgeLeft: {
-    left: 16,
-    top: '50%',
-    transform: 'translate(-50%, -50%) rotate(-90deg)',
-  },
-  edgeRight: {
-    right: 16,
-    top: '50%',
-    transform: 'translate(50%, -50%) rotate(90deg)',
-  },
-  textBlock: {
-    flex: 1,
-    background: 'var(--color-gray-900)',
-    color: 'var(--color-text-inverse)',
-    padding: '30px 26px',
+    padding: '20px 26px',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  manifestoWatermark: {
+    position: 'absolute',
+    right: 0, /* Décalé vers la gauche (à l'intérieur du bloc) */
+    bottom: -10, /* Remonté légèrement */
+    height: 140,
+    opacity: 0.06,
+    pointerEvents: 'none',
+    zIndex: 0,
+  },
+  manifestoContent: {
+    position: 'relative',
+    zIndex: 1,
   },
   eyebrow: {
     fontSize: 7,
-    letterSpacing: 1.5,
+    letterSpacing: 2,
     fontWeight: 800,
     color: 'var(--color-accent-strong)',
-    marginBottom: 10,
+    marginBottom: 8,
     textTransform: 'uppercase',
   },
-  darkHeadline: {
-    fontSize: 14,
-    lineHeight: 1.2,
+  manifestoHeadline: {
+    fontSize: 13,
+    lineHeight: 1.22,
     fontWeight: 700,
     fontStyle: 'italic',
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
+    color: 'var(--color-text-primary)',
+    marginBottom: 12,
   },
   darkHeadlineAccent: {
     color: 'var(--color-accent-strong)',
   },
-  darkBody: {
+  manifestoBody: {
     fontSize: 7,
     lineHeight: 1.5,
-    margin: '12px 0 0',
-    color: 'var(--color-gray-300)',
+    margin: 0,
+    color: 'var(--color-gray-700)',
     fontWeight: 500,
   },
-
-  /* BUILDING (100px) */
-  building: {
-    ...SECTION,
-    height: 100,
-    position: 'relative',
-  },
-  buildingImage: {
-    position: 'absolute',
-    inset: 0,
-    backgroundImage: "url('/u2883995211_httpss.mj.runAqWLlCjmmwo_Futuristic_digital_inside__cf0c651c-4400-4007-8b65-e9266d3fa6e7.png')",
+  darkBandPhoto: {
+    flex: 1,
+    backgroundImage: "linear-gradient(rgba(26,29,36,0.2), rgba(26,29,36,0.2)), url('/partners/gatti-server-room.png')",
     backgroundSize: 'cover',
     backgroundPosition: 'center 50%',
   },
 
-  /* FOOTER (77px) */
+  /* BUILDING (125px) — 3 photos côte à côte avec titre HARDWARE / CONNECTIVITY / SOFTWARE */
+  building: {
+    ...SECTION,
+    height: 125,
+    display: 'flex',
+  },
+  buildingTile: {
+    flex: 1,
+    position: 'relative',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center 50%',
+    borderRight: '1px solid var(--color-gray-900)',
+    overflow: 'hidden',
+  },
+  buildingTileOverlay: {
+    position: 'absolute',
+    inset: 0,
+    background: 'linear-gradient(180deg, rgba(26,29,36,0.2) 0%, rgba(26,29,36,0.2) 45%, rgba(26,29,36,0.9) 100%)',
+  },
+  buildingTileTitle: {
+    position: 'absolute',
+    left: 16, /* Décalé de 12 à 16 pour une marge plus premium */
+    bottom: 10,
+    fontSize: 9,
+    fontWeight: 900,
+    letterSpacing: 2,
+    color: 'var(--color-text-inverse)',
+    textTransform: 'uppercase',
+    zIndex: 2,
+  },
+
+  /* FOOTER (90px) — repris à sa hauteur d'origine */
   footer: {
     ...SECTION,
-    height: 77,
+    height: 90,
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
     gap: 24,
     padding: '16px 26px',
     background: 'var(--color-gray-900)',
     color: 'var(--color-text-inverse)',
-    alignItems: 'flex-start', /* Aligne tout en haut */
+    alignItems: 'stretch', /* Modifié pour que les colonnes prennent toute la hauteur */
   },
   footerCol: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    gap: 4,
+    /* Le gap est géré dans le wrapper interne maintenant */
+  },
+  footerWatermark: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0, /* Posé exactement sur la ligne du bas, plus de coupure ! */
+    height: 65,
+    width: 65,
+    objectFit: 'contain',
+    objectPosition: 'bottom right',
+    opacity: 0.05,
+    pointerEvents: 'none',
+    zIndex: 0,
+    filter: 'brightness(0) invert(1)',
   },
   footerLogo: {
     height: 18,
