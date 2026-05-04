@@ -154,105 +154,128 @@ function Phase({ n, title, line1, line2, line3 }) {
 }
 
 function Hub() {
-  const satellites = [
-    { angle: -150, radius: 52.5, title: 'AI SERVICES', desc: 'Models • Data\nTools • Platforms' },
-    { angle: -90, radius: 82.5, title: 'COMPUTE & HPC', desc: 'Tier IV Data Centers\nHigh density racks' },
-    { angle: -30, radius: 52.5, title: 'ENERGY', desc: 'Reliable Power\nSustainable' },
-    { angle: 30, radius: 82.5, title: 'INFRASTRUCTURE', desc: 'Campus & Facilities\nConnectivity' },
-    { angle: 90, radius: 52.5, title: 'TALENT', desc: 'Engineers • Researchers\nEntrepreneurs' },
-    { angle: 150, radius: 82.5, title: 'CAPITAL', desc: 'Sovereign Funds\nJoint investment' }
+  const nodes = [
+    { id: 'n1', x: 180, y: 30, title: 'AI SERVICES', desc: 'Models • Data\nTools • Platforms', align: 'right', side: 'left' },
+    { id: 'n2', x: 420, y: 30, title: 'COMPUTE & HPC', desc: 'Tier IV Data Centers\nHigh density racks', align: 'left', side: 'right' },
+    { id: 'n3', x: 180, y: 90, title: 'ENERGY', desc: 'Reliable Power\nSustainable', align: 'right', side: 'left' },
+    { id: 'n4', x: 420, y: 90, title: 'INFRASTRUCTURE', desc: 'Campus & Facilities\nConnectivity', align: 'left', side: 'right' },
+    { id: 'n5', x: 180, y: 150, title: 'TALENT', desc: 'Engineers • Researchers\nEntrepreneurs', align: 'right', side: 'left' },
+    { id: 'n6', x: 420, y: 150, title: 'CAPITAL', desc: 'Sovereign Funds\nJoint investment', align: 'left', side: 'right' }
   ];
-  
-  const centerRadius = 24; // half of 48px core
+
+  const renderNappe = (startX, startY, endX, endY) => {
+    const lines = [-12, -9, -6, -3, 0, 3, 6, 9, 12];
+    const midX = (startX + endX) / 2;
+    return (
+      <g key={`${startX}-${startY}-${endY}`}>
+        {lines.map((off, i) => {
+          const isAccent = i === 4 || i === 1 || i === 7;
+          const color = isAccent ? 'var(--color-accent-strong)' : 'var(--color-gray-400)';
+          const strokeW = isAccent ? 1.2 : 0.5;
+          const opacity = isAccent ? 1 : 0.4;
+          
+          return (
+            <path
+              key={i}
+              d={`M ${startX} ${startY + off} C ${midX} ${startY + off}, ${midX} ${endY + off}, ${endX} ${endY + off}`}
+              fill="none"
+              stroke={color}
+              strokeWidth={strokeW}
+              opacity={opacity}
+            />
+          );
+        })}
+      </g>
+    );
+  };
 
   return (
     <div style={S.hub}>
-      {/* Delicate background rings */}
-      <div style={{ ...S.hubBgRing, width: 105, height: 105 }} />
-      <div style={{ ...S.hubBgRing, width: 165, height: 165 }} />
-      <div style={{ ...S.hubBgRing, width: 225, height: 225, borderStyle: 'dotted' }} />
+      <svg viewBox="0 0 600 180" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+        {/* Background Grid */}
+        <pattern id="dotGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1" fill="var(--color-gray-300)" opacity="0.3"/>
+        </pattern>
+        <rect width="100%" height="100%" fill="url(#dotGrid)" />
 
-      {/* Satellites & Connectors */}
-      {satellites.map((sat, i) => {
-        const rad = (sat.angle * Math.PI) / 180;
-        const x = Math.cos(rad) * sat.radius;
-        const y = Math.sin(rad) * sat.radius;
+        {/* Vertical Data Bus behind CPU */}
+        <g stroke="var(--color-gray-300)" strokeWidth="0.5" opacity="0.4">
+          {[-24, -16, -8, 0, 8, 16, 24].map(off => (
+            <line key={`v-${off}`} x1={300 + off} y1="0" x2={300 + off} y2="180" />
+          ))}
+        </g>
+
+        {/* Nappes (Ribbon Cables) */}
+        {renderNappe(240, 50, 188, 30)}
+        {renderNappe(240, 90, 188, 90)}
+        {renderNappe(240, 130, 188, 150)}
         
-        const startX = Math.cos(rad) * centerRadius;
-        const startY = Math.sin(rad) * centerRadius;
-        const lineLength = sat.radius - centerRadius;
+        {renderNappe(360, 50, 412, 30)}
+        {renderNappe(360, 90, 412, 90)}
+        {renderNappe(360, 130, 412, 150)}
+
+        {/* Nodes (Connectors) */}
+        <g>
+          {nodes.map(n => (
+            <g key={n.id} transform={`translate(${n.x}, ${n.y})`}>
+              {/* Connector port */}
+              <rect x={n.side === 'left' ? -4 : -4} y="-16" width="8" height="32" rx="2" fill="var(--color-surface)" stroke="var(--color-gray-900)" strokeWidth="1.5" />
+              {/* Pins */}
+              {[-12, -9, -6, -3, 0, 3, 6, 9, 12].map(off => (
+                <line key={`pin-${off}`} x1={n.side === 'left' ? 4 : -4} y1={off} x2={n.side === 'left' ? 8 : -8} y2={off} stroke="var(--color-gray-900)" strokeWidth="1" />
+              ))}
+              <circle cx="0" cy="0" r="2.5" fill="var(--color-accent-strong)" />
+            </g>
+          ))}
+        </g>
+
+        {/* Central Core (CPU) */}
+        <g transform="translate(300, 90)">
+          {/* CPU Base */}
+          <rect x="-55" y="-75" width="110" height="150" rx="4" fill="var(--color-surface)" stroke="var(--color-gray-900)" strokeWidth="1.5" />
+          <rect x="-46" y="-66" width="92" height="132" rx="2" fill="var(--color-gray-900)" />
+          
+          {/* CPU Pins */}
+          {[-60, -45, -30, -15, 0, 15, 30, 45, 60].map(off => (
+            <g key={`cpupin-${off}`}>
+              <line x1="-55" y1={off} x2="-60" y2={off} stroke="var(--color-gray-900)" strokeWidth="1.5" />
+              <line x1="55" y1={off} x2="60" y2={off} stroke="var(--color-gray-900)" strokeWidth="1.5" />
+            </g>
+          ))}
+
+          {/* Core Text */}
+          <text x="0" y="-6" textAnchor="middle" fill="var(--color-surface)" fontSize="18" fontWeight="900" letterSpacing="2" fontFamily="system-ui, -apple-system, sans-serif">FUTUR</text>
+          <text x="0" y="14" textAnchor="middle" fill="var(--color-surface)" fontSize="18" fontWeight="900" letterSpacing="2" fontFamily="system-ui, -apple-system, sans-serif">ONE</text>
+          <text x="0" y="32" textAnchor="middle" fill="var(--color-accent-strong)" fontSize="8" fontWeight="800" letterSpacing="3" fontFamily="system-ui, -apple-system, sans-serif">QATAR</text>
+        </g>
+      </svg>
+
+      {/* HTML Text Overlays */}
+      {nodes.map(n => {
+        const isLeft = n.side === 'left';
+        const style = {
+          position: 'absolute',
+          top: `${(n.y / 180) * 100}%`,
+          transform: 'translateY(-50%)',
+          width: 76,
+          textAlign: n.align,
+        };
         
-        // Position of the data packet (at 65% of the line)
-        const packetDist = centerRadius + lineLength * 0.65;
-        const packetX = Math.cos(rad) * packetDist;
-        const packetY = Math.sin(rad) * packetDist;
+        if (isLeft) {
+          style.left = 0;
+        } else {
+          style.right = 0;
+        }
 
         return (
-          <div key={i}>
-            {/* Connector */}
-            <div
-              style={{
-                ...S.hubConnector,
-                width: lineLength,
-                left: `calc(50% + ${startX}px)`,
-                top: `calc(50% + ${startY}px)`,
-                transform: `rotate(${sat.angle}deg)`,
-              }}
-            />
-            {/* Data packet on the trace */}
-            <div style={{
-              ...S.hubDataPacket,
-              left: `calc(50% + ${packetX}px)`,
-              top: `calc(50% + ${packetY}px)`,
-            }} />
-            {/* Satellite Node */}
-            <div
-              style={{
-                ...S.hubSatWrapper,
-                left: `calc(50% + ${x}px - 40px)`, // 40px is half width
-                top: `calc(50% + ${y}px - 6px)`, // 6px is half height of node
-              }}
-            >
-              <div style={S.hubSatNode}>
-                <div style={S.hubSatDot} />
-              </div>
-              <div style={S.hubSatText}>
-                <div style={S.hubSatTitle}>{sat.title}</div>
-                <div style={S.hubSatDesc}>
-                  {sat.desc.split('\n').map((line, j) => (
-                    <div key={j}>{line}</div>
-                  ))}
-                </div>
-              </div>
+          <div key={`txt-${n.id}`} style={style}>
+            <div style={S.hubSatTitle}>{n.title}</div>
+            <div style={S.hubSatDesc}>
+              {n.desc.split('\n').map((line, j) => <div key={j}>{line}</div>)}
             </div>
           </div>
         );
       })}
-
-      {/* Core */}
-      <div style={S.hubCore}>
-        <div style={{
-          position: 'absolute',
-          inset: 3,
-          background: 'var(--color-gray-900)',
-          clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)',
-          zIndex: -1,
-        }} />
-        <strong style={{...S.hubCoreStrong, color: 'var(--color-surface)'}}>FUTUR<br />ONE</strong>
-        <span style={S.hubCoreSpan}>QATAR</span>
-      </div>
-      {/* Core Mask to hide lines under core */}
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 54,
-        height: 54,
-        background: 'var(--color-surface)',
-        clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)',
-        zIndex: 1,
-      }} />
     </div>
   );
 }
@@ -513,7 +536,7 @@ const S = {
   },
 
   /* ==========================================
-     HUB DIAGRAM (Tech / Neural Network Style)
+     HUB DIAGRAM (Electronic Ribbon Matrix)
      ========================================== */
   hub: {
     position: 'relative',
@@ -521,103 +544,8 @@ const S = {
     height: 180,
     marginTop: 15,
   },
-  /* Neural Network Background */
-  hubBgRing: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    borderRadius: '50%',
-    border: '0.5px dashed rgba(138, 144, 153, 0.5)', /* Pointillés tech */
-    zIndex: 1,
-  },
-  /* Hexagonal Core (Chip style) */
-  hubCore: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 48,
-    height: 48,
-    background: 'var(--color-surface)',
-    border: '1.5px solid var(--color-gray-900)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    zIndex: 10,
-    clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)', /* Hexagone parfait */
-  },
-  hubCoreStrong: {
-    fontSize: 7.5,
-    fontWeight: 900,
-    lineHeight: 1.1,
-    color: 'var(--color-surface)',
-    letterSpacing: 0.5,
-  },
-  hubCoreSpan: {
-    fontSize: 4.5,
-    marginTop: 2,
-    fontWeight: 800,
-    color: 'var(--color-accent-strong)',
-    letterSpacing: 1.5,
-  },
-  hubSatWrapper: {
-    position: 'absolute',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: 80,
-    zIndex: 5,
-  },
-  /* Tech Node (Square rotated) */
-  hubSatNode: {
-    width: 12,
-    height: 12,
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-accent-strong)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transform: 'rotate(45deg)', /* Losange */
-    boxShadow: '0 0 0 2px var(--color-surface)', /* Pour dégager la ligne en dessous */
-  },
-  /* Inner node circuit */
-  hubSatDot: {
-    width: 4,
-    height: 4,
-    background: 'var(--color-gray-900)',
-    transform: 'rotate(-45deg)', /* Remet droit à l'intérieur */
-    clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)', /* Petit losange interne */
-  },
-  /* Circuit board traces */
-  hubConnector: {
-    position: 'absolute',
-    height: 1,
-    background: 'var(--color-gray-300)',
-    transformOrigin: 'left center',
-    zIndex: 2,
-  },
-  /* Data packet on the trace */
-  hubDataPacket: {
-    position: 'absolute',
-    width: 3.5,
-    height: 3.5,
-    background: 'var(--color-accent-strong)',
-    borderRadius: '50%',
-    transform: 'translate(-50%, -50%)',
-    zIndex: 3,
-    boxShadow: '0 0 0 1px var(--color-surface)',
-  },
-  hubSatText: {
-    marginTop: 4,
-    textAlign: 'center',
-    background: 'var(--color-surface)',
-    padding: '2px 4px',
-  },
   hubSatTitle: {
-    fontSize: 6,
+    fontSize: 6.5,
     fontWeight: 900,
     color: 'var(--color-text-primary)',
     letterSpacing: 0.5,
@@ -625,7 +553,7 @@ const S = {
   hubSatDesc: {
     fontSize: 5.5,
     color: 'var(--color-text-secondary)',
-    marginTop: 1.5,
+    marginTop: 2,
     lineHeight: 1.3,
     fontWeight: 600,
   },
