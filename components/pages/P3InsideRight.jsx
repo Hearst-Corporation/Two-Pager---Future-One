@@ -72,6 +72,9 @@ export default function P3InsideRight() {
             Four sovereign control points.
           </div>
           <Hub />
+          <div style={S.hubQuote}>
+            "Sovereign by design. Global by intent."
+          </div>
         </div>
 
         <div style={S.midRight}>
@@ -114,17 +117,8 @@ export default function P3InsideRight() {
           <StatRow icon="bolt" value="200 MW" label="IT POWER CAPACITY" />
         </div>
         <div style={S.buildingFooter}>
-          <div>
-            <div style={S.tagline}>Sovereign by design.</div>
-            <div style={{ ...S.tagline, color: 'var(--color-gray-300)' }}>Global by intent.</div>
-          </div>
           <div style={S.qatarText}>
-            <strong style={{ color: 'var(--color-text-inverse)' }}>QATAR LABEL PROGRAM</strong> · Official certification for high-potential
-            companies.
-            <br />
-            0% tax environment · Fast company setup · Full ownership.
-            <br />
-            Housing, education, healthcare packages.
+            <span style={{ color: 'var(--color-text-inverse)', fontWeight: 800 }}>QATAR LABEL PROGRAM</span> &nbsp;·&nbsp; Official certification for high-potential companies. &nbsp;·&nbsp; 0% tax environment &nbsp;·&nbsp; Fast company setup &nbsp;·&nbsp; Full ownership. &nbsp;·&nbsp; Housing, education, healthcare packages.
           </div>
         </div>
       </section>
@@ -513,6 +507,15 @@ const S = {
     height: 180,
     marginTop: 15,
   },
+  hubQuote: {
+    marginTop: 12,
+    fontSize: 8.5,
+    fontStyle: 'italic',
+    fontWeight: 800,
+    color: 'var(--color-accent-strong)',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
   /* FUNDING */
   bigStat: {
     fontSize: 42,
@@ -595,7 +598,7 @@ const S = {
     position: 'absolute',
     left: 0,
     right: 0,
-    top: 12,
+    top: 22,
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     padding: '0 26px',
@@ -627,7 +630,7 @@ const S = {
     bottom: 10,
     padding: '0 26px',
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'flex-end',
     color: 'var(--color-text-inverse)',
   },
@@ -641,7 +644,7 @@ const S = {
     fontSize: 5.5,
     lineHeight: 1.4,
     color: 'var(--color-gray-300)',
-    textAlign: 'right',
-    maxWidth: '55%',
+    textAlign: 'center',
+    maxWidth: '100%',
   },
 };
