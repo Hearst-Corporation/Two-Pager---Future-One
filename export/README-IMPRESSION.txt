@@ -1,47 +1,32 @@
 FUTUR ONE — Brochure A3 pliée en 2
 ====================================
 
-FICHIERS POUR L'IMPRIMEUR
---------------------------
+FICHIERS POUR L'IMPRIMEUR (AVEC TRAITS DE COUPE)
+------------------------------------------------
+Ces fichiers sont spécialement formatés pour un imprimeur professionnel (quadrichromie, 350g pelliculé).
+Le format du PDF est légèrement plus grand (450 × 327 mm) pour inclure les traits de coupe (crop marks) autour du format final A3 (420 × 297 mm).
+
+  IMPRIMEUR_RECTO_Avec_Traits_De_Coupe.pdf
+    → Face EXTÉRIEURE (P4 à gauche, P1 à droite)
+  
+  IMPRIMEUR_VERSO_Avec_Traits_De_Coupe.pdf
+    → Face INTÉRIEURE (P2 à gauche, P3 à droite)
+
+FICHIERS STANDARDS (SANS TRAITS DE COUPE)
+-----------------------------------------
+Format A3 exact (420 × 297 mm), coupe franche au bord. Idéal pour un affichage écran ou une impression bureautique.
 
   RECTO_couverture-dos.pdf
-    → Face EXTÉRIEURE de la brochure (A3 paysage)
-    • Côté gauche : P4 — Quatrième de couverture (dos)
-    • Côté droit  : P1 — Couverture (première de couverture)
-
   VERSO_interieur.pdf
-    → Face INTÉRIEURE de la brochure (A3 paysage)
-    • Côté gauche : P2 — Intérieur gauche
-    • Côté droit  : P3 — Intérieur droit
-
-  P1_couverture.pdf / P2_interieur-gauche.pdf
-  P3_interieur-droit.pdf / P4_dos.pdf
-    → Pages individuelles en A4 portrait (contrôle qualité)
-
 
 INSTRUCTIONS IMPRIMEUR
 -----------------------
+  Format papier final : A3 (420 × 297 mm), paysage
+  Impression          : Recto-verso (Quadricolore CMJN)
+  Finition            : Pliage au centre → format final A4 portrait
+  Résolution          : 300 DPI
+  Papier recommandé   : 350g/m² couché
+  Pelliculage         : Pelliculage mat ou soft-touch recommandé
+  Traits de coupe     : INCLUS dans les fichiers "IMPRIMEUR_"
 
-  Format papier : A3 (420 × 297 mm), paysage
-  Impression    : Recto-verso
-                  RECTO = couverture-dos
-                  VERSO = intérieur
-  Finition      : Pliage au centre → format final A4 portrait
-  Résolution    : ≈ 300 DPI (290 DPI effectif)
-  Couleurs      : sRGB — demander conversion CMYK à l'imprimeur si nécessaire
-  Fond perdu    : aucun (coupe franche au bord)
-  Grammage      : 170 g/m² ou plus recommandé
-
-
-ORDRE DE MONTAGE
-----------------
-
-  Couché en 2 (vue de dessus, brochure fermée) :
-  ┌──────────┬──────────┐
-  │  P4 Dos  │  P1 Couv │  ← RECTO (extérieur)
-  └──────────┴──────────┘
-  └──────────┴──────────┘
-  │  P2 Int. │  P3 Int. │  ← VERSO (intérieur)
-  └──────────┴──────────┘
-
-Généré le : 04/05/2026 06:49:24
+Généré le : 04/05/2026 06:59:23

@@ -75,6 +75,13 @@ const S = {
     background: 'linear-gradient(180deg, rgba(26,29,36,0.7) 0%, rgba(26,29,36,0.3) 50%, rgba(26,29,36,0.85) 100%)',
     zIndex: 1,
   },
+  overlay: {
+    position: 'absolute',
+    inset: 0,
+    /* Voile subtil et élégant : juste assez pour détacher la citation blanche, sans tuer l'image */
+    background: 'linear-gradient(180deg, rgba(15,17,21,0.2) 0%, rgba(15,17,21,0.45) 50%, rgba(15,17,21,0.65) 100%)',
+    zIndex: 1,
+  },
   topBar: {
     position: 'relative',
     zIndex: 2,
