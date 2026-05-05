@@ -40,19 +40,23 @@ export default function SectionMethod() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [maxTranslate, setMaxTranslate] = useState(0);
 
+  // Mesurer la largeur du track via ResizeObserver — robuste au layout async (fonts, images).
   useEffect(() => {
-    const handleResize = () => {
-      if (trackRef.current) {
-        // Calculate exactly how far we need to translate to show the last card
-        const trackWidth = trackRef.current.scrollWidth;
-        const windowWidth = window.innerWidth;
-        setMaxTranslate(Math.max(0, trackWidth - windowWidth));
-      }
+    const el = trackRef.current;
+    if (!el) return;
+    const measure = () => {
+      const trackWidth = el.scrollWidth;
+      const viewport = window.innerWidth;
+      setMaxTranslate(Math.max(0, trackWidth - viewport));
     };
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
   }, []);
 
   useEffect(() => {
@@ -60,27 +64,30 @@ export default function SectionMethod() {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
-      
-      const startScroll = rect.top;
+
       const totalScroll = rect.height - windowHeight;
-      if (totalScroll <= 0) {
+      if (totalScroll <= 0 || maxTranslate <= 0) {
         setScrollProgress(0);
         return;
       }
-      
-      let progress = -startScroll / totalScroll;
+
+      let progress = -rect.top / totalScroll;
       progress = Math.max(0, Math.min(1, progress));
-      
       setScrollProgress(progress);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [maxTranslate]);
+
+  // Hauteur dynamique : 100vh (pin) + autant de pixels qu'il faut pour scroller le track horizontalement.
+  // Si rien à scroller (track ≤ viewport), la section fait juste 100vh, pas de zone vide.
+  const sectionHeight =
+    maxTranslate > 0 ? `calc(100vh + ${maxTranslate}px)` : '100vh';
 
   return (
-    <section id="method" ref={sectionRef} style={S.section}>
+    <section id="method" ref={sectionRef} style={{ ...S.section, height: sectionHeight }}>
       <div style={S.stickyContainer}>
         <div style={S.bg} />
         <div style={S.bgOverlay} />
@@ -89,7 +96,7 @@ export default function SectionMethod() {
           <div style={S.header}>
             <Reveal>
               <div style={S.eyebrow}>
-                <span style={S.eyebrowNum}>04</span>
+                <span style={S.eyebrowNum}>06</span>
                 <span style={S.eyebrowDivider} />
                 THE PROGRAM
               </div>
@@ -120,26 +127,30 @@ export default function SectionMethod() {
               <div style={S.timelineLine}>
                 <div style={{
                   ...S.timelineProgress,
-                  transform: `scaleX(${scrollProgress * 1.1})`,
+                  transform: `scaleX(${Math.min(1, scrollProgress * 1.1)})`,
                 }} />
               </div>
 
-              {PHASES.map((p, i) => (
+              {PHASES.map((p, i) => {
+                const nodeProgress = Math.min(1, scrollProgress * 1.1);
+                const reached = nodeProgress >= (i / (PHASES.length - 1));
+                return (
                 <div key={p.n} style={S.phaseWrapper}>
                   {/* Timeline Node */}
                   <div style={{
                     ...S.timelineNode,
-                    borderColor: scrollProgress * 1.1 > (i / (PHASES.length - 1)) 
-                      ? 'var(--color-accent-strong)' 
+                    borderColor: reached
+                      ? 'var(--color-accent-strong)'
                       : 'rgba(255,255,255,0.2)',
-                    background: scrollProgress * 1.1 > (i / (PHASES.length - 1)) 
-                      ? 'var(--color-accent-strong)' 
+                    background: reached
+                      ? 'var(--color-accent-strong)'
                       : 'transparent',
                   }} />
                   
                   <PhaseCard phase={p} isLast={i === PHASES.length - 1} />
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -158,7 +169,6 @@ function PhaseCard({ phase, isLast }) {
       style={{
         ...S.card,
         transform: hover ? 'translateY(-8px)' : 'translateY(0)',
-        background: 'var(--color-gray-850)',
       }}
       data-magnetic="true"
     >
@@ -183,7 +193,6 @@ function PhaseCard({ phase, isLast }) {
 const S = {
   section: {
     position: 'relative',
-    height: '300vh', // Forces scroll
     background: 'var(--color-gray-900)',
     color: 'var(--color-text-inverse)',
   },

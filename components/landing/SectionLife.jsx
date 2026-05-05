@@ -73,7 +73,7 @@ export default function SectionLife() {
         <div style={S.header}>
           <Reveal>
             <div style={S.eyebrow}>
-              <span style={S.eyebrowNum}>03</span>
+              <span style={S.eyebrowNum}>05</span>
               <span style={S.eyebrowDivider} />
               MORE THAN A DATA CENTER
             </div>

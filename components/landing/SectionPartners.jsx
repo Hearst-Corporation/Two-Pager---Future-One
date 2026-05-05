@@ -14,7 +14,6 @@ const KPIS = [
 const PARTNERS = [
   {
     logo: '/partners/kontena.svg',
-    icon: '/partners/kontena-icon.svg',
     name: 'KONTENA',
     role: 'HARDWARE',
     body: 'Modular AI/HPC data centers. The KONNECT platform — proprietary modular DC architecture deployed across hyperscale campuses.',
@@ -23,7 +22,6 @@ const PARTNERS = [
   },
   {
     logo: '/partners/bglobal.svg',
-    icon: '/partners/bglobal-icon.svg',
     name: 'B-GLOBAL TECH',
     role: 'ENGINEERING',
     body: 'Data center engineering at frontier scale. 8 offices, 4 continents, 15+ years — engineers behind Yondr 200 MW, Sedenak 500 MW and A*STAR national supercomputer.',
@@ -32,7 +30,6 @@ const PARTNERS = [
   },
   {
     logo: '/partners/gatti.svg',
-    icon: '/partners/gatti-icon.svg',
     name: 'GATTI SERVICES',
     role: 'OPERATIONS',
     body: '24/7 Smart Hands operations and Smart PDUs. Real-time power monitoring and mining-grade resilience in every rack.',

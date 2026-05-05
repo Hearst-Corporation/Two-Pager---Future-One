@@ -75,7 +75,7 @@ export default function SectionCampus() {
         <Reveal>
           <div style={S.imgCaption}>
             <div style={S.capEyebrow}>
-              <span style={S.eyebrowNum}>05</span>
+              <span style={S.eyebrowNum}>07</span>
               <span style={S.eyebrowDivider} />
               THE CAMPUS · DOHA
             </div>
@@ -111,7 +111,7 @@ export default function SectionCampus() {
         <div style={S.factGrid}>
           {FACTS.map((f, i) => (
             <Reveal key={f.label} delay={i * 100} y={16}>
-              <FactCard fact={f} />
+              <FactCard fact={f} index={i} total={FACTS.length} />
             </Reveal>
           ))}
         </div>
@@ -120,14 +120,19 @@ export default function SectionCampus() {
   );
 }
 
-function FactCard({ fact }) {
+function FactCard({ fact, index, total }) {
   const [hover, setHover] = useState(false);
+  // Grille 2 colonnes : retirer bordure droite sur col droite, basse sur la dernière rangée.
+  const isRightCol = index % 2 === 1;
+  const isLastRow = index >= total - 2;
   return (
     <div
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
         ...S.fact,
+        borderRight: isRightCol ? 'none' : S.fact.borderRight,
+        borderBottom: isLastRow ? 'none' : S.fact.borderBottom,
         transform: hover ? 'translateY(-3px)' : 'translateY(0)',
         background: hover ? 'rgba(190,18,60,0.06)' : 'transparent',
       }}

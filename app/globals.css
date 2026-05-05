@@ -67,11 +67,15 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: var(--color-gray-900);
   color: var(--color-text-inverse);
-  overflow-x: hidden;
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* `overflow-x: hidden` sur html/body neutralise position:sticky.
+   On le contient au niveau body uniquement — html doit rester en scroll natif
+   pour que SectionMethod puisse pin pendant son scroll horizontal. */
+body { overflow-x: clip; }
 
 ::selection {
   background: var(--color-accent-strong);

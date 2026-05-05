@@ -82,7 +82,8 @@ export default function DatacenterP2() {
           watermarkSrc="/partners/kontena-icon.svg"
           line1="Modular AI/HPC data centers."
           line2="KONNECT modular DC platform."
-          website="kontena.tech"
+          ceo="Jef Laurijssen, Founder"
+          website="kontena.eu"
         />
         <FooterCol
           logoSrc="/partners/bglobal.svg"
@@ -90,6 +91,7 @@ export default function DatacenterP2() {
           watermarkSrc="/partners/bglobal-icon.svg"
           line1="Data center engineering."
           line2="8 offices · 4 continents · 15+ yrs."
+          ceo="Carles Cortadas, CEO"
           website="b-global.tech"
         />
         <FooterCol
@@ -98,6 +100,7 @@ export default function DatacenterP2() {
           watermarkSrc="/partners/gatti-icon.svg"
           line1="24/7 Smart Hands · Smart PDUs."
           line2="Real-time power monitoring."
+          ceo="Christof Stührmann, CEO"
           website="gatti-services.com"
         />
       </section>
@@ -107,13 +110,14 @@ export default function DatacenterP2() {
 
 /* ---------- sub-blocks ---------- */
 
-function FooterCol({ logoSrc, logoAlt, line1, line2, website, watermarkSrc }) {
+function FooterCol({ logoSrc, logoAlt, line1, line2, ceo, website, watermarkSrc }) {
   return (
     <div style={S.footerCol}>
       {watermarkSrc && <img src={watermarkSrc} alt="" style={S.footerWatermark} />}
       <img src={logoSrc} alt={logoAlt} style={S.footerLogo} />
       <div style={S.footerLine1}>{line1}</div>
       <div style={S.footerLine2}>{line2}</div>
+      {ceo && <div style={S.footerCeo}>{ceo}</div>}
       <div style={S.footerWebsite}>{website}</div>
     </div>
   );
@@ -443,6 +447,16 @@ const S = {
     color: 'var(--color-text-inverse)',
     fontWeight: 700,
     whiteSpace: 'nowrap',
+  },
+  footerCeo: {
+    fontSize: 6.5,
+    lineHeight: 1,
+    color: 'var(--color-gray-400)',
+    fontWeight: 600,
+    fontStyle: 'italic',
+    letterSpacing: 0.2,
+    whiteSpace: 'nowrap',
+    marginTop: 1,
   },
   footerWebsite: {
     fontSize: 7.5,

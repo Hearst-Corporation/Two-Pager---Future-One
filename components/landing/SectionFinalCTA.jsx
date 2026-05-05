@@ -125,10 +125,6 @@ const S = {
     lineHeight: 0.95,
     letterSpacing: -2.4,
   },
-  line: {
-    color: '#fff',
-    display: 'inline-block',
-  },
   lineAccent: {
     color: 'var(--color-accent-strong)',
     display: 'inline-block',
