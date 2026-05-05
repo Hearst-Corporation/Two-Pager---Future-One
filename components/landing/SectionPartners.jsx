@@ -38,12 +38,6 @@ const PARTNERS = [
   },
 ];
 
-const PILLARS = [
-  { title: 'HARDWARE', body: 'Proprietary silicon optimization, modular DC platforms, racks built for AI workloads at sovereign scale.' },
-  { title: 'CONNECTIVITY', body: 'Tier-1 network engineering. Subsea-grade resilience, low-latency interconnect, redundant fabrics.' },
-  { title: 'SOFTWARE', body: 'Real-time orchestration. Power monitoring, workload scheduling, AI-managed operations across the stack.' },
-];
-
 export default function SectionPartners() {
   return (
     <section id="partners" style={S.section}>
@@ -93,25 +87,6 @@ export default function SectionPartners() {
           {PARTNERS.map((p, i) => (
             <Reveal key={p.name} delay={i * 130} y={28}>
               <PartnerCard partner={p} />
-            </Reveal>
-          ))}
-        </div>
-
-        {/* 3 PILLARS — HARDWARE / CONNECTIVITY / SOFTWARE */}
-        <div style={S.pillarsHeader}>
-          <Reveal>
-            <div style={S.pillarsEyebrow}>FULL STACK · FULLY OWNED</div>
-          </Reveal>
-        </div>
-        <div style={S.pillarsGrid}>
-          {PILLARS.map((p, i) => (
-            <Reveal key={p.title} delay={i * 100} y={20}>
-              <div style={S.pillar}>
-                <div style={S.pillarN}>0{i + 1}</div>
-                <div style={S.pillarTitle}>{p.title}</div>
-                <div style={S.pillarDivider} />
-                <div style={S.pillarBody}>{p.body}</div>
-              </div>
             </Reveal>
           ))}
         </div>
@@ -176,7 +151,7 @@ const S = {
     position: 'relative',
     background: 'var(--color-gray-900)',
     color: 'var(--color-text-inverse)',
-    padding: '120px 48px',
+    padding: '110px 48px',
     borderTop: '1px solid rgba(255,255,255,.05)',
     overflow: 'hidden',
   },
@@ -244,7 +219,7 @@ const S = {
     gridTemplateColumns: 'repeat(4, 1fr)',
     border: '1px solid rgba(255,255,255,.08)',
     background: 'rgba(255,255,255,.02)',
-    marginBottom: 72,
+    marginBottom: 56,
   },
   kpiItem: {
     padding: '28px 24px',
@@ -278,7 +253,6 @@ const S = {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
     gap: 20,
-    marginBottom: 96,
   },
   partnerCard: {
     background: 'var(--color-gray-850)',
@@ -359,55 +333,5 @@ const S = {
     textDecoration: 'none',
     transition: 'color 0.25s ease',
     marginTop: 'auto',
-  },
-
-  /* PILLARS */
-  pillarsHeader: {
-    marginBottom: 32,
-    paddingTop: 16,
-    borderTop: '1px solid rgba(255,255,255,.08)',
-  },
-  pillarsEyebrow: {
-    fontSize: 10,
-    letterSpacing: 2.4,
-    fontWeight: 700,
-    color: 'var(--color-accent-soft)',
-    paddingTop: 32,
-  },
-  pillarsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 0,
-    borderTop: '1px solid rgba(255,255,255,.08)',
-  },
-  pillar: {
-    padding: '32px 28px 8px 0',
-    paddingRight: 28,
-  },
-  pillarN: {
-    fontSize: 11,
-    fontWeight: 800,
-    letterSpacing: 1.4,
-    color: 'var(--color-accent-strong)',
-    fontFamily: 'monospace',
-  },
-  pillarTitle: {
-    marginTop: 12,
-    fontSize: 18,
-    fontWeight: 800,
-    letterSpacing: 1.4,
-    color: '#fff',
-  },
-  pillarDivider: {
-    marginTop: 14,
-    width: 36,
-    height: 2,
-    background: 'var(--color-accent-strong)',
-  },
-  pillarBody: {
-    marginTop: 16,
-    fontSize: 12.5,
-    lineHeight: 1.65,
-    color: 'rgba(255,255,255,.6)',
   },
 };

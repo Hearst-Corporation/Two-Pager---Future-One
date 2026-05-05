@@ -73,7 +73,7 @@ export default function SectionLife() {
         <div style={S.header}>
           <Reveal>
             <div style={S.eyebrow}>
-              <span style={S.eyebrowNum}>05</span>
+              <span style={S.eyebrowNum}>04</span>
               <span style={S.eyebrowDivider} />
               MORE THAN A DATA CENTER
             </div>
@@ -218,7 +218,7 @@ const S = {
     position: 'relative',
     background: 'var(--color-surface)',
     color: 'var(--color-text-primary)',
-    padding: '120px 48px',
+    padding: '130px 48px',
     borderTop: '1px solid var(--color-border-light)',
     overflow: 'hidden',
   },

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Reveal from './Reveal';
 
 export default function SectionOpportunity() {
@@ -37,14 +36,6 @@ export default function SectionOpportunity() {
               </p>
             </div>
           </Reveal>
-
-          <div style={S.pillars}>
-            {PILLARS.map((p, i) => (
-              <Reveal key={p.title} delay={360 + i * 100} y={16}>
-                <Pillar pillar={p} />
-              </Reveal>
-            ))}
-          </div>
         </div>
 
         <div style={S.right}>
@@ -63,53 +54,11 @@ export default function SectionOpportunity() {
   );
 }
 
-function Pillar({ pillar }) {
-  const [hover, setHover] = useState(false);
-  return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        ...S.pillar,
-        transform: hover ? 'translateY(-3px)' : 'translateY(0)',
-        borderTop: hover
-          ? '2px solid var(--color-accent-strong)'
-          : '2px solid transparent',
-        marginTop: hover ? -1 : 0,
-      }}
-    >
-      <div style={{ ...S.pillarN, color: hover ? 'var(--color-accent-soft)' : 'var(--color-accent-strong)' }}>
-        {pillar.n}
-      </div>
-      <div style={S.pillarTitle}>{pillar.title}</div>
-      <div style={S.pillarBody}>{pillar.body}</div>
-    </div>
-  );
-}
-
-const PILLARS = [
-  {
-    n: '01',
-    title: 'COMPUTE',
-    body: 'Tier IV data centers. High-density NVIDIA H100 / H200 racks at frontier scale.',
-  },
-  {
-    n: '02',
-    title: 'ARCHITECTURE',
-    body: 'A 100,000 sqm campus designed by Foster + Partners on the Qatari coast.',
-  },
-  {
-    n: '03',
-    title: 'RESIDENCY',
-    body: 'Founders, engineers and researchers living and building inside the hub.',
-  },
-];
-
 const S = {
   section: {
     background: 'var(--color-surface)',
     color: 'var(--color-text-primary)',
-    padding: '120px 48px',
+    padding: '110px 48px',
   },
   inner: {
     maxWidth: 1400,
@@ -158,44 +107,10 @@ const S = {
     maxWidth: 540,
   },
   paragraph: {
-    fontSize: 13.5,
-    lineHeight: 1.7,
+    fontSize: 14,
+    lineHeight: 1.75,
     color: 'var(--color-text-secondary)',
-    marginTop: 14,
-  },
-
-  pillars: {
-    marginTop: 44,
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 0,
-    borderTop: '1px solid var(--color-border-light)',
-  },
-  pillar: {
-    padding: '20px 18px 20px 18px',
-    borderRight: '1px solid var(--color-border-light)',
-    transition: 'transform 0.4s cubic-bezier(.22,.61,.36,1), border-color 0.3s ease',
-    cursor: 'default',
-    willChange: 'transform',
-  },
-  pillarN: {
-    fontSize: 10,
-    fontWeight: 700,
-    letterSpacing: 1,
-    transition: 'color 0.3s ease',
-  },
-  pillarTitle: {
-    fontSize: 11,
-    fontWeight: 800,
-    letterSpacing: 1.6,
-    color: 'var(--color-text-primary)',
-    marginTop: 8,
-  },
-  pillarBody: {
-    fontSize: 11,
-    lineHeight: 1.5,
-    color: 'var(--color-text-secondary)',
-    marginTop: 8,
+    marginTop: 16,
   },
 
   right: {

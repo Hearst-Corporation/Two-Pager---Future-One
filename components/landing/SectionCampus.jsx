@@ -75,7 +75,7 @@ export default function SectionCampus() {
         <Reveal>
           <div style={S.imgCaption}>
             <div style={S.capEyebrow}>
-              <span style={S.eyebrowNum}>07</span>
+              <span style={S.eyebrowNum}>06</span>
               <span style={S.eyebrowDivider} />
               THE CAMPUS · DOHA
             </div>
@@ -95,15 +95,15 @@ export default function SectionCampus() {
           </Reveal>
           <Reveal delay={120}>
             <h2 style={S.title}>
-              A controlled environment,
+              One hundred thousand sqm,
               <br />
-              <span style={S.titleAccent}>at sovereign scale.</span>
+              <span style={S.titleAccent}>under one sovereign roof.</span>
             </h2>
           </Reveal>
           <Reveal delay={240}>
             <p style={S.body}>
-              One hundred thousand square meters of integrated infrastructure —
-              residency, compute and operations under a single sovereign roof.
+              Residency, compute and operations integrated at the scale of a
+              small city — engineered for the long horizon.
             </p>
           </Reveal>
         </div>

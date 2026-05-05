@@ -96,7 +96,7 @@ export default function SectionMethod() {
           <div style={S.header}>
             <Reveal>
               <div style={S.eyebrow}>
-                <span style={S.eyebrowNum}>06</span>
+                <span style={S.eyebrowNum}>05</span>
                 <span style={S.eyebrowDivider} />
                 THE PROGRAM
               </div>
