@@ -127,20 +127,20 @@ filter_complex = (
     # Tagline (1-4s)
     "[2:v]format=rgba[t2];"
     "[v1][t2]overlay=0:0:enable='between(t,1,4)'[v2];"
-    # "From machine to human" (51-55s) — cassure
+    # "From machine to human" (51-53s) — cassure, avant que la voix reprenne à 53s
     "[3:v]format=rgba[t3];"
-    "[v2][t3]overlay=0:0:enable='between(t,51,55)'[v3];"
+    "[v2][t3]overlay=0:0:enable='between(t,51,53)'[v3];"
     # QATAR 2030 (132-137s) — final
     "[4:v]format=rgba[t4];"
     "[v3][t4]overlay=0:0:enable='between(t,132,137)'[v4];"
 
     # ── 6 CARTOUCHES DE CHAPITRE (entrée/sortie en fade) ──
-    # Chap 1 : THE VISION (15→19s) — début acte 2 MACHINE
-    "[5:v]format=rgba,fade=t=in:st=15:d=0.5:alpha=1,fade=t=out:st=18:d=0.7:alpha=1[c1];"
-    "[v4][c1]overlay=0:0:enable='between(t,15,19)'[v5];"
-    # Chap 2 : THE INFRASTRUCTURE (32→36s) — water-compute
-    "[6:v]format=rgba,fade=t=in:st=32:d=0.5:alpha=1,fade=t=out:st=35:d=0.7:alpha=1[c2];"
-    "[v5][c2]overlay=0:0:enable='between(t,32,36)'[v6];"
+    # Chap 1 : THE VISION (1→5s) — sur la façade cover-facade
+    "[5:v]format=rgba,fade=t=in:st=5:d=0.5:alpha=1,fade=t=out:st=8:d=0.7:alpha=1[c1];"
+    "[v4][c1]overlay=0:0:enable='between(t,5,9)'[v5];"
+    # Chap 2 : THE INFRASTRUCTURE (15→19s) — début acte MACHINE
+    "[6:v]format=rgba,fade=t=in:st=15:d=0.5:alpha=1,fade=t=out:st=18:d=0.7:alpha=1[c2];"
+    "[v5][c2]overlay=0:0:enable='between(t,15,19)'[v6];"
     # Chap 3 : THE PAUSE (51→55s) — désactivé pour ne pas chevaucher From machine to human
     # (on garde juste le texte central déjà en place)
 
@@ -184,7 +184,7 @@ filter_audio = (
     # Voix : delay 1.5s, padded jusqu'à 137s pour ne pas couper le mix
     "[2:a]adelay=1500|1500,apad=whole_dur=137,asplit=2[voice_main][voice_sc];"
     # Musique : démarre à 0s, pad à 137s
-    "[1:a]afade=t=in:st=0:d=1,afade=t=out:st=135:d=2,volume=1.0,apad=whole_dur=137[music_raw];"
+    "[1:a]afade=t=in:st=0:d=1,afade=t=out:st=136:d=1,volume=1.0,apad=whole_dur=137[music_raw];"
     # Sidechain ducking ADOUCI — ratio 4 (vs 8) + release 800ms pour éviter trous
     "[music_raw][voice_sc]sidechaincompress=threshold=0.05:ratio=4:attack=40:release=800:makeup=1.5[music_ducked];"
     # Mix final : duration=longest pour ne PAS couper après la voix
