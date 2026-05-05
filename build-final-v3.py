@@ -171,54 +171,29 @@ subprocess.run(["ffmpeg", "-y",
                 str(video_with_text), "-loglevel", "error"], check=True)
 print("  ✓ Textes + 5 cartouches de chapitre intégrés")
 
-# ─── MIX AUDIO MULTI-SEGMENTS ────────────────────────────────────────────────
-# Charge le timing voix
-with open(SEGMENTS / "_timing.json") as f:
-    voice_lines = json.load(f)
+# ─── MIX AUDIO PRO — UN SEUL FICHIER VOIX (volume unifié) ────────────────────
+# Voix continue déjà traitée (compression, EQ, room reverb, loudnorm -16 LUFS)
+# Musique alignée 137s avec breath sur cassure
+# Ducking sidechain pour gérer la dynamique entre voix et musique
 
-# Construit le filter graph audio
-# - Pour chaque segment voix : adelay=Xms,volume=1.0[vN]
-# - Mix toutes les voix → [voice_all]
-# - bgm musique * 0.55
-# - sidechain compress bgm contre voice_all
-# - amix(ducked, voice_all)
+print("\n▸ [5/5] Mix audio pro (voix continue + musique sidechainée)...")
 
-print("\n▸ [5/5] Mix audio multi-segments...")
-# Inputs : 0=video, 1=musique, 2..N = segments voix
-inputs = ["-i", str(video_with_text), "-i", str(AUDIO/"musique.mp3")]
-voice_mp3s = []
-for v in voice_lines:
-    p = SEGMENTS / f"{v['id']}.mp3"
-    if p.exists():
-        voice_mp3s.append((v, p))
-        inputs += ["-i", str(p)]
+# Voix démarre à 1.5s pour laisser respirer le piano sur cover-facade
+# Voix dure 95s, donc finit à 96.5s — laisse 40s de musique pure jusqu'à 137s
+filter_audio = (
+    # Voix : delay 1.5s, padded jusqu'à 137s pour ne pas couper le mix
+    "[2:a]adelay=1500|1500,apad=whole_dur=137,asplit=2[voice_main][voice_sc];"
+    # Musique : démarre à 0s, pad à 137s
+    "[1:a]afade=t=in:st=0:d=1,afade=t=out:st=135:d=2,volume=1.0,apad=whole_dur=137[music_raw];"
+    # Sidechain ducking ADOUCI — ratio 4 (vs 8) + release 800ms pour éviter trous
+    "[music_raw][voice_sc]sidechaincompress=threshold=0.05:ratio=4:attack=40:release=800:makeup=1.5[music_ducked];"
+    # Mix final : duration=longest pour ne PAS couper après la voix
+    "[music_ducked][voice_main]amix=inputs=2:duration=longest:weights='0.95 1.6':normalize=0[mix];"
+    # Limiter final + normalisation broadcast EBU R128
+    "[mix]alimiter=limit=0.95:level_in=1:level_out=1,loudnorm=I=-16:TP=-1.5:LRA=11[a]"
+)
 
-# Build filter
-# step 1 : delay chaque voix
-delay_filters = []
-voice_labels = []
-for i, (v, p) in enumerate(voice_mp3s):
-    idx = i + 2  # input index
-    delay_ms = int(v['start'] * 1000)
-    label = f"v{i}"
-    delay_filters.append(f"[{idx}:a]adelay={delay_ms}|{delay_ms},volume=1.3[{label}]")
-    voice_labels.append(label)
-
-# step 2 : mix all voices, voix présente mais pas écrasante
-voice_mix_inputs = "".join(f"[{l}]" for l in voice_labels)
-voice_mix = f"{voice_mix_inputs}amix=inputs={len(voice_labels)}:duration=longest:dropout_transition=0,dynaudnorm=p=0.9,volume=1.8,asplit=2[voice1][voice2]"
-
-# step 3 : MUSIQUE — démarre à 0s avec piano Einaudi sur cover-facade
-# Volume 0.75 pour ne pas écraser la voix dès le début
-bgm = "[1:a]afade=t=in:st=0:d=1,volume=0.75,apad=whole_dur=137[bgm]"
-
-# step 4 : sidechain DOUX — la musique baisse un peu sous la voix mais reste bien audible
-ducking = "[bgm][voice1]sidechaincompress=threshold=0.05:ratio=4:attack=20:release=500:makeup=1[ducked]"
-
-# step 5 : mix final — équilibre voix dominante mais musique audible (2:1)
-final = "[ducked][voice2]amix=inputs=2:duration=first:weights='1.5 2'[a]"
-
-filter_audio = ";".join(delay_filters + [voice_mix, bgm, ducking, final])
+inputs = ["-i", str(video_with_text), "-i", str(AUDIO/"musique.mp3"), "-i", str(AUDIO/"voiceover-final.mp3")]
 
 cmd = ["ffmpeg", "-y"] + inputs + [
     "-filter_complex", filter_audio,
