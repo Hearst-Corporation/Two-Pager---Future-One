@@ -5,9 +5,10 @@ import { PARTICLES_EXPLODE_EVENT } from './MagneticParticles';
 
 const NAV = [
   { id: 'vision', label: 'About' },
+  { id: 'hub', label: 'Hub' },
+  { id: 'partners', label: 'Partners' },
   { id: 'life', label: 'Life' },
   { id: 'method', label: 'Method' },
-  { id: 'hub', label: 'Hub' },
   { id: 'campus', label: 'Campus' },
 ];
 
@@ -16,12 +17,46 @@ const REVEAL_DELAY_MS = 1100;
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+      
+      // Calculate progress
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolledProgress = height > 0 ? (winScroll / height) * 100 : 0;
+      setScrollProgress(scrolledProgress);
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    // Intersection Observer for active nav items
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-50% 0px -50% 0px' }
+    );
+
+    // Wait a tick for DOM to be fully rendered
+    setTimeout(() => {
+      NAV.forEach((item) => {
+        const el = document.getElementById(item.id);
+        if (el) observer.observe(el);
+      });
+    }, 100);
+
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -70,6 +105,19 @@ export default function Header() {
         pointerEvents: revealed ? 'auto' : 'none',
       }}
     >
+      {/* Progress Bar */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          height: 1,
+          background: 'var(--color-accent-strong)',
+          width: `${scrollProgress}%`,
+          transition: 'width 0.1s ease-out',
+        }}
+      />
+
       <a
         href="#top"
         onClick={(e) => handleNav(e, 'top')}
@@ -111,15 +159,17 @@ export default function Header() {
 
       <nav style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
         {NAV.map((n) => (
-          <NavLink key={n.id} item={n} onNav={handleNav} />
+          <NavLink key={n.id} item={n} onNav={handleNav} isActive={activeSection === n.id} />
         ))}
       </nav>
     </header>
   );
 }
 
-function NavLink({ item, onNav }) {
+function NavLink({ item, onNav, isActive }) {
   const [hover, setHover] = useState(false);
+  const active = isActive || hover;
+  
   return (
     <a
       href={`#${item.id}`}
@@ -132,7 +182,7 @@ function NavLink({ item, onNav }) {
         fontWeight: 600,
         letterSpacing: 0.6,
         textTransform: 'uppercase',
-        color: hover ? '#fff' : 'rgba(255,255,255,.78)',
+        color: active ? '#fff' : 'rgba(255,255,255,.78)',
         textDecoration: 'none',
         transition: 'color .2s ease',
         paddingBottom: 4,
@@ -148,7 +198,7 @@ function NavLink({ item, onNav }) {
           bottom: 0,
           height: 1,
           background: 'var(--color-accent-strong)',
-          transform: hover ? 'scaleX(1)' : 'scaleX(0)',
+          transform: active ? 'scaleX(1)' : 'scaleX(0)',
           transformOrigin: 'left center',
           transition: 'transform 0.4s cubic-bezier(.22,.61,.36,1)',
         }}

@@ -46,7 +46,7 @@ export default function Footer() {
             </div>
           </div>
           <div style={S.legal}>
-            © {new Date().getFullYear()} Futur One · All rights reserved
+            © {new Date().getFullYear()} FUTUR ONE · All rights reserved
           </div>
         </div>
       </div>

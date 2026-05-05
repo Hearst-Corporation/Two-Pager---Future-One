@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Reveal from './Reveal';
+import TextReveal from './TextReveal';
+import MagneticButton from './MagneticButton';
 
 export default function SectionFinalCTA() {
   const sectionRef = useRef(null);
@@ -45,75 +47,31 @@ export default function SectionFinalCTA() {
         </Reveal>
 
         <div style={S.headline}>
-          <Reveal delay={100} y={32}>
-            <span style={S.line}>AI</span>
-          </Reveal>
-          <Reveal delay={250} y={32}>
-            <span style={S.line}>is the</span>
-          </Reveal>
-          <Reveal delay={400} y={32}>
-            <span style={S.lineAccent}>new gas.</span>
-          </Reveal>
+          <TextReveal delay={100}>AI</TextReveal>
+          <TextReveal delay={400}>is the</TextReveal>
+          <div style={S.lineAccent}>
+            <TextReveal delay={700}>new gas.</TextReveal>
+          </div>
         </div>
 
-        <Reveal delay={650}>
+        <Reveal delay={1200}>
           <p style={S.sub}>COMPUTE IS THE INFRASTRUCTURE OF NATIONS.</p>
         </Reveal>
 
-        <Reveal delay={800}>
+        <Reveal delay={1400}>
           <div style={S.actions}>
-            <CTAButton href="/brochure" primary>
+            <MagneticButton href="/brochure" style={S.ctaPrimary}>
               Read the brochure
-            </CTAButton>
-            <CTAButton href="mailto:contact@futur.one">
+              <span aria-hidden="true" style={{ marginLeft: 12 }}>→</span>
+            </MagneticButton>
+            <MagneticButton href="mailto:contact@futur.one" style={S.ctaSecondary}>
               Request a private briefing
-            </CTAButton>
+              <span aria-hidden="true" style={{ marginLeft: 12 }}>→</span>
+            </MagneticButton>
           </div>
         </Reveal>
       </div>
     </section>
-  );
-}
-
-function CTAButton({ href, children, primary = false }) {
-  const [hover, setHover] = useState(false);
-  const baseStyle = primary
-    ? {
-        background: hover ? 'var(--color-accent-soft)' : 'var(--color-accent-strong)',
-        color: '#fff',
-        border: '1px solid var(--color-accent-strong)',
-      }
-    : {
-        background: hover ? 'rgba(255,255,255,0.08)' : 'transparent',
-        color: '#fff',
-        border: '1px solid rgba(255,255,255,0.3)',
-      };
-  return (
-    <a
-      href={href}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        ...S.cta,
-        ...baseStyle,
-        transform: hover ? 'translateY(-2px)' : 'translateY(0)',
-        boxShadow: hover && primary
-          ? '0 14px 30px -10px rgba(190,18,60,0.5)'
-          : '0 0 0 0 rgba(0,0,0,0)',
-      }}
-    >
-      <span>{children}</span>
-      <span
-        aria-hidden="true"
-        style={{
-          marginLeft: 12,
-          transition: 'transform 0.3s ease',
-          transform: hover ? 'translateX(4px)' : 'translateX(0)',
-        }}
-      >
-        →
-      </span>
-    </a>
   );
 }
 
@@ -188,7 +146,7 @@ const S = {
     gap: 16,
     flexWrap: 'wrap',
   },
-  cta: {
+  ctaPrimary: {
     display: 'inline-flex',
     alignItems: 'center',
     padding: '14px 26px',
@@ -196,8 +154,22 @@ const S = {
     letterSpacing: 1.8,
     fontWeight: 700,
     textDecoration: 'none',
-    transition:
-      'transform 0.3s cubic-bezier(.22,.61,.36,1), background 0.3s ease, box-shadow 0.4s ease',
+    background: 'var(--color-accent-strong)',
+    color: '#fff',
+    border: '1px solid var(--color-accent-strong)',
+    cursor: 'pointer',
+  },
+  ctaSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '14px 26px',
+    fontSize: 11,
+    letterSpacing: 1.8,
+    fontWeight: 700,
+    textDecoration: 'none',
+    background: 'transparent',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,0.3)',
     cursor: 'pointer',
   },
 };

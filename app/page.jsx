@@ -1,27 +1,33 @@
 import Header from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
 import SectionOpportunity from '@/components/landing/SectionOpportunity';
+import SectionHub from '@/components/landing/SectionHub';
+import SectionPartners from '@/components/landing/SectionPartners';
 import SectionGallery from '@/components/landing/SectionGallery';
 import SectionLife from '@/components/landing/SectionLife';
 import SectionMethod from '@/components/landing/SectionMethod';
-import SectionHub from '@/components/landing/SectionHub';
 import SectionCampus from '@/components/landing/SectionCampus';
 import SectionFinalCTA from '@/components/landing/SectionFinalCTA';
 import Footer from '@/components/landing/Footer';
+import CustomCursor from '@/components/landing/CustomCursor';
 
 export default function Home() {
   return (
-    <main>
+    <>
+      <CustomCursor />
       <Header />
-      <Hero />
-      <SectionOpportunity />
-      <SectionGallery />
-      <SectionLife />
-      <SectionMethod />
-      <SectionHub />
-      <SectionCampus />
-      <SectionFinalCTA />
-      <Footer />
-    </main>
+      <main>
+        <Hero />
+        <SectionOpportunity />
+        <SectionHub />
+        <SectionPartners />
+        <SectionGallery />
+        <SectionLife />
+        <SectionMethod />
+        <SectionCampus />
+        <SectionFinalCTA />
+        <Footer />
+      </main>
+    </>
   );
 }

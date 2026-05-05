@@ -75,7 +75,7 @@ export default function SectionCampus() {
         <Reveal>
           <div style={S.imgCaption}>
             <div style={S.capEyebrow}>
-              <span style={S.eyebrowNum}>06</span>
+              <span style={S.eyebrowNum}>05</span>
               <span style={S.eyebrowDivider} />
               THE CAMPUS · DOHA
             </div>

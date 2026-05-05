@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Reveal from './Reveal';
 
 const PILLARS = [
@@ -32,8 +32,43 @@ const SECONDARY = [
 ];
 
 export default function SectionLife() {
+  const [offsetY, setOffsetY] = useState(0);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      // Parallax effect based on section position relative to viewport
+      setOffsetY(rect.top * -0.15);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <section id="life" style={S.section}>
+    <section id="life" ref={sectionRef} style={S.section}>
+      {/* Topographic Background */}
+      <div style={{ ...S.topoBg, transform: `translateY(${offsetY * 0.5}px)` }}>
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="topo" width="400" height="400" patternUnits="userSpaceOnUse">
+              <path d="M0 200 Q 100 150 200 200 T 400 200" fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
+              <path d="M0 220 Q 100 170 200 220 T 400 220" fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
+              <path d="M0 240 Q 100 190 200 240 T 400 240" fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
+              <path d="M0 260 Q 100 210 200 260 T 400 260" fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
+              <path d="M0 280 Q 100 230 200 280 T 400 280" fill="none" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
+              
+              <path d="M0 100 Q 150 50 250 150 T 400 100" fill="none" stroke="rgba(0,0,0,0.02)" strokeWidth="1" />
+              <path d="M0 120 Q 150 70 250 170 T 400 120" fill="none" stroke="rgba(0,0,0,0.02)" strokeWidth="1" />
+              <path d="M0 140 Q 150 90 250 190 T 400 140" fill="none" stroke="rgba(0,0,0,0.02)" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#topo)" />
+        </svg>
+      </div>
+
       <div style={S.container}>
         <div style={S.header}>
           <Reveal>
@@ -60,13 +95,24 @@ export default function SectionLife() {
           </Reveal>
         </div>
 
-        {/* 3 main lifestyle pillars with image cards */}
-        <div style={S.pillarGrid}>
-          {PILLARS.map((p, i) => (
-            <Reveal key={p.title} delay={i * 140} y={32}>
-              <PillarCard pillar={p} />
+        {/* Asymmetric Magazine Layout */}
+        <div style={S.magazineLayout}>
+          {/* Main large feature */}
+          <div style={S.magMain}>
+            <Reveal delay={100} y={40}>
+              <PillarCard pillar={PILLARS[0]} large offsetY={offsetY} />
             </Reveal>
-          ))}
+          </div>
+          
+          {/* Stacked smaller features */}
+          <div style={S.magStack}>
+            <Reveal delay={200} y={40}>
+              <PillarCard pillar={PILLARS[1]} offsetY={offsetY * 1.2} />
+            </Reveal>
+            <Reveal delay={300} y={40}>
+              <PillarCard pillar={PILLARS[2]} offsetY={offsetY * 0.8} />
+            </Reveal>
+          </div>
         </div>
 
         {/* Quote band */}
@@ -94,7 +140,7 @@ export default function SectionLife() {
   );
 }
 
-function PillarCard({ pillar }) {
+function PillarCard({ pillar, large, offsetY }) {
   const [hover, setHover] = useState(false);
   return (
     <div
@@ -103,10 +149,9 @@ function PillarCard({ pillar }) {
       style={{
         ...S.pillarCard,
         transform: hover ? 'translateY(-6px)' : 'translateY(0)',
-        boxShadow: hover
-          ? '0 24px 48px -16px rgba(190,18,60,.4)'
-          : '0 0 0 0 rgba(0,0,0,0)',
+        aspectRatio: large ? '4 / 5' : '16 / 9',
       }}
+      data-magnetic="true"
     >
       <div style={S.pillarImgWrap}>
         <img
@@ -114,7 +159,7 @@ function PillarCard({ pillar }) {
           alt={pillar.title}
           style={{
             ...S.pillarImg,
-            transform: hover ? 'scale(1.08)' : 'scale(1)',
+            transform: `scale(${hover ? 1.08 : 1.02}) translateY(${offsetY * 0.1}px)`,
           }}
         />
         <div style={S.pillarImgOverlay} />
@@ -128,8 +173,8 @@ function PillarCard({ pillar }) {
             opacity: hover ? 1 : 0.5,
           }}
         />
-        <div style={S.pillarTitle}>{pillar.title}</div>
-        <div style={S.pillarText}>{pillar.body}</div>
+        <div style={{ ...S.pillarTitle, fontSize: large ? 18 : 14 }}>{pillar.title}</div>
+        <div style={{ ...S.pillarText, fontSize: large ? 14 : 12.5 }}>{pillar.body}</div>
       </div>
     </div>
   );
@@ -142,6 +187,7 @@ function Tile({ item }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={S.tile}
+      data-magnetic="true"
     >
       <img
         src={item.src}
@@ -157,7 +203,7 @@ function Tile({ item }) {
         <span
           style={{
             ...S.tileTitle,
-            color: hover ? 'var(--color-accent-soft)' : '#fff',
+            color: hover ? 'var(--color-accent-strong)' : '#fff',
           }}
         >
           {item.title}
@@ -169,24 +215,35 @@ function Tile({ item }) {
 
 const S = {
   section: {
-    background: 'var(--color-gray-900)',
-    color: 'var(--color-text-inverse)',
+    position: 'relative',
+    background: 'var(--color-surface)',
+    color: 'var(--color-text-primary)',
     padding: '120px 48px',
-    borderTop: '1px solid rgba(255,255,255,.05)',
+    borderTop: '1px solid var(--color-border-light)',
+    overflow: 'hidden',
+  },
+  topoBg: {
+    position: 'absolute',
+    inset: -200,
+    pointerEvents: 'none',
+    zIndex: 0,
+    opacity: 0.8,
   },
   container: {
+    position: 'relative',
+    zIndex: 1,
     maxWidth: 1400,
     margin: '0 auto',
   },
   header: {
     maxWidth: 760,
-    marginBottom: 64,
+    marginBottom: 80,
   },
   eyebrow: {
     fontSize: 10,
     letterSpacing: 2.4,
     fontWeight: 700,
-    color: 'var(--color-accent-soft)',
+    color: 'var(--color-accent-strong)',
     marginBottom: 18,
     display: 'flex',
     alignItems: 'center',
@@ -201,15 +258,14 @@ const S = {
   eyebrowDivider: {
     width: 28,
     height: 1,
-    background: 'var(--color-accent-soft)',
+    background: 'var(--color-accent-strong)',
     opacity: 0.5,
   },
   title: {
-    fontSize: 'clamp(32px, 4.2vw, 60px)',
-    fontWeight: 700,
+    fontSize: 'clamp(32px, 4vw, 56px)',
+    fontWeight: 800,
     letterSpacing: -1.2,
     lineHeight: 1.05,
-    fontStyle: 'italic',
     margin: 0,
   },
   titleAccent: {
@@ -219,135 +275,146 @@ const S = {
     marginTop: 22,
     fontSize: 14,
     lineHeight: 1.7,
-    color: 'rgba(255,255,255,.65)',
+    color: 'var(--color-text-secondary)',
     maxWidth: 620,
   },
 
-  pillarGrid: {
+  magazineLayout: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 24,
-    marginBottom: 80,
+    gridTemplateColumns: '1.2fr 1fr',
+    gap: 40,
+    marginBottom: 100,
   },
-  pillarCard: {
-    background: 'var(--color-gray-850)',
-    overflow: 'hidden',
-    transition: 'transform 0.5s cubic-bezier(.22,.61,.36,1), box-shadow 0.5s ease',
-    cursor: 'default',
-    height: '100%',
+  magMain: {
     display: 'flex',
     flexDirection: 'column',
+  },
+  magStack: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 40,
+    paddingTop: 80, // Offset to create asymmetry
+  },
+
+  pillarCard: {
+    background: 'var(--color-bg-main)',
+    overflow: 'hidden',
+    transition: 'transform 0.5s cubic-bezier(.22,.61,.36,1)',
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    border: '1px solid var(--color-border-light)',
   },
   pillarImgWrap: {
     position: 'relative',
     width: '100%',
-    aspectRatio: '4 / 3',
+    flex: 1,
     overflow: 'hidden',
   },
   pillarImg: {
     width: '100%',
-    height: '100%',
+    height: '120%', // Extra height for parallax
     objectFit: 'cover',
     display: 'block',
     transition: 'transform 0.7s cubic-bezier(.22,.61,.36,1)',
     willChange: 'transform',
+    marginTop: '-10%', // Center the extra height
   },
   pillarImgOverlay: {
     position: 'absolute',
     inset: 0,
     background:
-      'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(14,16,19,.55) 100%)',
+      'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(14,16,19,.4) 100%)',
   },
   pillarN: {
     position: 'absolute',
-    top: 18,
-    left: 20,
-    fontSize: 36,
+    top: 24,
+    left: 24,
+    fontSize: 48,
     fontWeight: 800,
-    letterSpacing: -1.2,
+    letterSpacing: -2,
     lineHeight: 1,
     color: 'var(--color-accent-strong)',
-    textShadow: '0 2px 16px rgba(0,0,0,.6)',
+    textShadow: '0 2px 16px rgba(0,0,0,.2)',
   },
   pillarBody: {
     position: 'relative',
-    padding: '24px 22px 28px',
+    padding: '32px 28px 36px',
+    background: 'var(--color-surface)',
   },
   pillarAccentBar: {
     position: 'absolute',
     top: 0,
     left: 0,
-    width: 48,
-    height: 2,
+    width: 64,
+    height: 3,
     background: 'var(--color-accent-strong)',
     transformOrigin: 'left center',
     transition: 'transform 0.5s cubic-bezier(.22,.61,.36,1), opacity 0.3s ease',
   },
   pillarTitle: {
-    fontSize: 14,
     fontWeight: 800,
     letterSpacing: 1.8,
-    color: '#fff',
+    color: 'var(--color-text-primary)',
     marginTop: 4,
   },
   pillarText: {
     marginTop: 12,
-    fontSize: 12.5,
     lineHeight: 1.65,
-    color: 'rgba(255,255,255,.62)',
+    color: 'var(--color-text-secondary)',
   },
 
   quoteBand: {
     position: 'relative',
-    padding: '64px 56px',
-    background:
-      'linear-gradient(135deg, rgba(190,18,60,.10) 0%, rgba(190,18,60,.02) 100%)',
-    border: '1px solid rgba(190,18,60,.18)',
-    marginBottom: 80,
+    padding: '80px 64px',
+    background: 'var(--color-bg-main)',
+    border: '1px solid var(--color-border-light)',
+    borderLeft: '4px solid var(--color-accent-strong)',
+    marginBottom: 100,
     overflow: 'hidden',
   },
   quoteMark: {
     position: 'absolute',
-    top: -20,
-    left: 28,
-    fontSize: 160,
+    top: -10,
+    left: 32,
+    fontSize: 180,
     lineHeight: 1,
     color: 'var(--color-accent-strong)',
     fontFamily: 'Georgia, serif',
-    opacity: 0.18,
+    opacity: 0.05,
     fontWeight: 700,
   },
   quote: {
     position: 'relative',
-    fontSize: 'clamp(20px, 2.4vw, 32px)',
-    lineHeight: 1.35,
+    fontSize: 'clamp(24px, 2.8vw, 36px)',
+    lineHeight: 1.3,
     fontStyle: 'italic',
-    fontWeight: 500,
-    color: '#fff',
+    fontWeight: 600,
+    color: 'var(--color-accent-primary)',
     margin: 0,
     maxWidth: 920,
   },
   quoteAttr: {
     position: 'relative',
-    marginTop: 24,
-    fontSize: 10,
+    marginTop: 32,
+    fontSize: 11,
     letterSpacing: 2.4,
-    fontWeight: 700,
-    color: 'var(--color-accent-soft)',
+    fontWeight: 800,
+    color: 'var(--color-text-secondary)',
   },
 
   secondaryGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: 12,
+    gap: 16,
   },
   tile: {
     position: 'relative',
     margin: 0,
     aspectRatio: '4 / 5',
     overflow: 'hidden',
-    background: 'var(--color-gray-850)',
-    cursor: 'default',
+    background: 'var(--color-bg-secondary)',
+    cursor: 'pointer',
   },
   tileImg: {
     width: '100%',
@@ -361,23 +428,22 @@ const S = {
     position: 'absolute',
     inset: 0,
     background:
-      'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(14,16,19,.85) 100%)',
-    pointerEvents: 'none',
+      'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(14,16,19,.85) 100%)',
   },
   tileCaption: {
     position: 'absolute',
     left: 16,
     right: 16,
-    bottom: 14,
+    bottom: 16,
     display: 'flex',
     flexDirection: 'column',
     gap: 4,
   },
   tileLabel: {
-    fontSize: 8.5,
-    letterSpacing: 1.8,
+    fontSize: 9,
+    letterSpacing: 1.5,
     fontWeight: 800,
-    color: 'var(--color-accent-soft)',
+    color: 'var(--color-accent-strong)',
   },
   tileTitle: {
     fontSize: 13,

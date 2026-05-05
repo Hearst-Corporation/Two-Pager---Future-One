@@ -44,13 +44,13 @@ const ITEMS = [
 
 export default function SectionGallery() {
   return (
-    <section style={S.section}>
+    <section id="gallery" style={S.section}>
       <div style={S.container}>
         <div style={S.header}>
           <div>
             <Reveal>
               <div style={S.eyebrow}>
-                <span style={S.eyebrowNum}>02</span>
+                <span style={S.eyebrowNum}>04</span>
                 <span style={S.eyebrowDivider} />
                 INSIDE THE HUB
               </div>

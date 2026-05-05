@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
+import TextReveal from './TextReveal';
 
 const MagneticParticles = dynamic(() => import('./MagneticParticles'), {
   ssr: false,
@@ -54,14 +55,19 @@ export default function Hero() {
 
       <div style={{ ...S.content, opacity: introDone ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
         <h1 style={S.title}>
-          FUTUR ONE
+          <TextReveal delay={1200}>FUTUR ONE</TextReveal>
           <br />
-          <span style={S.titleAccent}>NO LIMITS,</span> BY AI.
+          <span style={S.titleAccent}>
+            <TextReveal delay={1400}>NO LIMITS,</TextReveal>
+          </span>{' '}
+          <TextReveal delay={1600}>BY AI.</TextReveal>
         </h1>
 
         <p style={S.lede}>
-          A sovereign AI innovation hub on the Qatari coast — where compute,
-          architecture and talent operate as one.
+          <TextReveal delay={1800} type="word">
+            A sovereign AI innovation hub on the Qatari coast — where compute,
+            architecture and talent operate as one.
+          </TextReveal>
         </p>
       </div>
 

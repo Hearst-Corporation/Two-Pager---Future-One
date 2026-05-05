@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 5005",
-    "rundev": "next dev -p 5005",
+    "rundev": "npm run dev",
     "build": "next build",
     "start": "next start -p 5005",
     "export": "node scripts/export.js"

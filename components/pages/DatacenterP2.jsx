@@ -16,10 +16,7 @@ export default function DatacenterP2() {
         <div style={S.heroOverlay} />
 
         <div style={S.tag}>BUILT WITH WORLD-CLASS PARTNERS</div>
-        <svg viewBox="560 455 155 170" style={S.heroLogo}>
-          <polygon fill="currentColor" points="601.74 466.87 572.6 466.87 572.6 609.73 601.74 609.73 601.74 549.07 633.11 579.43 665.76 579.43 601.74 517.46 601.74 466.87"/>
-          <polygon fill="currentColor" points="672.72 466.87 672.72 528.12 644.63 500.93 611.98 500.93 672.72 559.72 672.72 609.73 701.86 609.73 701.86 466.87 672.72 466.87"/>
-        </svg>
+        <img src="/futur-one-h-accent.svg" alt="Hearst" style={S.heroLogo} />
 
         <div style={S.heroContent}>
           <h1 style={S.title}>
@@ -83,36 +80,24 @@ export default function DatacenterP2() {
           logoSrc="/partners/kontena.svg"
           logoAlt="Kontena"
           watermarkSrc="/partners/kontena-icon.svg"
-          body={
-            <>
-              Modular AI/HPC data centers.<br />
-              <strong>KONNECT modular DC platform.</strong>
-            </>
-          }
+          line1="Modular AI/HPC data centers."
+          line2="KONNECT modular DC platform."
           website="kontena.tech"
         />
         <FooterCol
           logoSrc="/partners/bglobal.svg"
           logoAlt="B-Global Tech"
           watermarkSrc="/partners/bglobal-icon.svg"
-          body={
-            <>
-              Data center engineering.<br />
-              <strong>8 offices · 4 continents · 15+ yrs.</strong>
-            </>
-          }
+          line1="Data center engineering."
+          line2="8 offices · 4 continents · 15+ yrs."
           website="b-global.tech"
         />
         <FooterCol
           logoSrc="/partners/gatti.svg"
           logoAlt="Gatti Services"
           watermarkSrc="/partners/gatti-icon.svg"
-          body={
-            <>
-              24/7 Smart Hands · Smart PDUs.<br />
-              <strong>Real-time power monitoring.</strong>
-            </>
-          }
+          line1="24/7 Smart Hands · Smart PDUs."
+          line2="Real-time power monitoring."
           website="gatti-services.com"
         />
       </section>
@@ -122,15 +107,14 @@ export default function DatacenterP2() {
 
 /* ---------- sub-blocks ---------- */
 
-function FooterCol({ logoSrc, logoAlt, body, website, watermarkSrc }) {
+function FooterCol({ logoSrc, logoAlt, line1, line2, website, watermarkSrc }) {
   return (
-    <div style={{ ...S.footerCol, position: 'relative', overflow: 'hidden', height: '100%' }}>
+    <div style={S.footerCol}>
       {watermarkSrc && <img src={watermarkSrc} alt="" style={S.footerWatermark} />}
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <img src={logoSrc} alt={logoAlt} style={S.footerLogo} />
-        <div style={S.footerBody}>{body}</div>
-        {website && <div style={S.footerWebsite}>{website}</div>}
-      </div>
+      <img src={logoSrc} alt={logoAlt} style={S.footerLogo} />
+      <div style={S.footerLine1}>{line1}</div>
+      <div style={S.footerLine2}>{line2}</div>
+      <div style={S.footerWebsite}>{website}</div>
     </div>
   );
 }
@@ -368,7 +352,7 @@ const S = {
   },
   darkBandPhoto: {
     flex: 1,
-    backgroundImage: "linear-gradient(rgba(26,29,36,0.2), rgba(26,29,36,0.2)), url('/partners/gatti-server-room.png')",
+    backgroundImage: "linear-gradient(rgba(26,29,36,0.2), rgba(26,29,36,0.2)), url('/partners/aerial-dc-campus.png')",
     backgroundSize: 'cover',
     backgroundPosition: 'center 50%',
   },
@@ -417,44 +401,55 @@ const S = {
     alignItems: 'stretch', /* Modifié pour que les colonnes prennent toute la hauteur */
   },
   footerCol: {
+    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    /* Le gap est géré dans le wrapper interne maintenant */
+    gap: 3,
+    overflow: 'hidden',
   },
   footerWatermark: {
     position: 'absolute',
     right: 0,
-    bottom: 0, /* Posé exactement sur la ligne du bas, plus de coupure ! */
-    height: 65,
-    width: 65,
+    top: '50%',
+    transform: 'translateY(-50%)', /* Centrage vertical parfait */
+    height: 55, /* Taille optimale pour la case */
+    width: 55,
     objectFit: 'contain',
-    objectPosition: 'bottom right',
+    objectPosition: 'center right',
     opacity: 0.05,
     pointerEvents: 'none',
     zIndex: 0,
     filter: 'brightness(0) invert(1)',
   },
   footerLogo: {
-    height: 18,
+    height: 16,
     width: 'auto',
     maxWidth: '100%',
     display: 'block',
     objectFit: 'contain',
     objectPosition: 'left center',
   },
-  footerBody: {
-    fontSize: 6,
-    lineHeight: 1.35,
+  footerLine1: {
+    fontSize: 7.5,
+    lineHeight: 1,
     color: 'var(--color-gray-300)',
     fontWeight: 500,
+    whiteSpace: 'nowrap',
+  },
+  footerLine2: {
+    fontSize: 7.5,
+    lineHeight: 1,
+    color: 'var(--color-text-inverse)',
+    fontWeight: 700,
+    whiteSpace: 'nowrap',
   },
   footerWebsite: {
-    fontSize: 6.5,
+    fontSize: 7.5,
     fontWeight: 800,
     letterSpacing: 0.5,
     color: 'var(--color-accent-strong)',
     textTransform: 'lowercase',
-    marginTop: 1,
+    whiteSpace: 'nowrap',
   },
 };

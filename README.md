@@ -41,10 +41,12 @@ public/
 ```bash
 npm install
 npm run dev
+# ou alias équivalent :
+npm run rundev
 ```
 
 > ⚠️ **Règle absolue** — le dev server tourne **toujours** sur le port **5005**
-> (configuré dans `package.json`). Ne jamais lancer sur 3000 ni un autre port.
+> (`dev` et `rundev` appellent la même commande dans `package.json`). Ne jamais lancer sur 3000 ni un autre port.
 
 Ouvrir [http://localhost:5005](http://localhost:5005).
 
@@ -53,8 +55,10 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 |---|---|
 | `/` | Landing principale |
 | `/brochure` | Brochure A3 plié (P1 → P4, 4 vues) |
-| `/datacenter` | One-pager isolé (duplication de P2) |
+| `/datacenter` | One-pager isolé ; logos footer `public/partners/*.svg`, filigranes `*-icon.svg` (alignement vertical calibré dans le viewBox) |
 | `/print` | Vue print A3 |
+
+**Landing `/`** — `components/landing/SectionMethod.jsx` : le conteneur `sticky` utilise `overflow: clip` plutôt que `hidden`, sinon WebKit peut traiter ce nœud comme scrollport et casser le « pin » + le défilement lié au track horizontal.
 
 ## Palette
 

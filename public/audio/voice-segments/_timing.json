@@ -1,0 +1,170 @@
+[
+  {
+    "id": "01-title",
+    "start": 1.0,
+    "text": "FUTUR ONE.",
+    "duration": 1.068118
+  },
+  {
+    "id": "02-intro1",
+    "start": 3.0,
+    "text": "They say the future belongs to those who build it.",
+    "duration": 2.600635
+  },
+  {
+    "id": "03-intro2",
+    "start": 7.0,
+    "text": "We have decided. The future will be here.",
+    "duration": 2.136236
+  },
+  {
+    "id": "04-machine",
+    "start": 11.0,
+    "text": "In the heart of the desert, a machine breathes.",
+    "duration": 3.668753
+  },
+  {
+    "id": "04b-built",
+    "start": 15.5,
+    "text": "Built for what comes next.",
+    "duration": 1.578957
+  },
+  {
+    "id": "05-processors",
+    "start": 18.0,
+    "text": "Thousands of processors. One intelligence.",
+    "duration": 2.879274
+  },
+  {
+    "id": "05b-power",
+    "start": 21.5,
+    "text": "A new kind of power.",
+    "duration": 1.625397
+  },
+  {
+    "id": "05c-built-now",
+    "start": 25.0,
+    "text": "Built today. Built for tomorrow.",
+    "duration": 2.972154
+  },
+  {
+    "id": "06-water",
+    "start": 32.5,
+    "text": "Water and computation, fused as one.",
+    "duration": 2.693515
+  },
+  {
+    "id": "06b-resource",
+    "start": 36.5,
+    "text": "Every drop, every watt, designed to serve.",
+    "duration": 3.854512
+  },
+  {
+    "id": "07-civilization",
+    "start": 40.5,
+    "text": "The infrastructure of a new civilization.",
+    "duration": 2.321995
+  },
+  {
+    "id": "07b-rises",
+    "start": 43.5,
+    "text": "Inside, light reflects on every surface.",
+    "duration": 3.390113
+  },
+  {
+    "id": "08-cassure",
+    "start": 51.5,
+    "text": "But a machine is not enough.",
+    "duration": 2.507755
+  },
+  {
+    "id": "09-city",
+    "start": 61.0,
+    "text": "Around this intelligence, a city awakens.",
+    "duration": 3.111474
+  },
+  {
+    "id": "10-schools",
+    "start": 64.5,
+    "text": "Schools. Squares. Streets.",
+    "duration": 3.390113
+  },
+  {
+    "id": "10b-life",
+    "start": 69.5,
+    "text": "Spaces where every day takes shape.",
+    "duration": 2.647075
+  },
+  {
+    "id": "11-campus",
+    "start": 73.0,
+    "text": "A campus designed for the people who will live in it.",
+    "duration": 2.832834
+  },
+  {
+    "id": "11b-everyone",
+    "start": 78.0,
+    "text": "For students. For families. For dreamers.",
+    "duration": 3.482993
+  },
+  {
+    "id": "12-revolution",
+    "start": 83.0,
+    "text": "Because the real revolution is not technological.",
+    "duration": 2.879274
+  },
+  {
+    "id": "13-human",
+    "start": 88.0,
+    "text": "It is human.",
+    "duration": 0.928798
+  },
+  {
+    "id": "14-joy",
+    "start": 89.5,
+    "text": "The joy of meeting. Of growing. Of laughing together.",
+    "duration": 4.365351
+  },
+  {
+    "id": "14b-everyday",
+    "start": 94.5,
+    "text": "The simple beauty of every day.",
+    "duration": 1.811156
+  },
+  {
+    "id": "15-mission",
+    "start": 99.5,
+    "text": "This is our true mission: the well-being of every soul.",
+    "duration": 2.786395
+  },
+  {
+    "id": "15b-purpose",
+    "start": 105.0,
+    "text": "Happiness is not a luxury. It is the purpose.",
+    "duration": 3.250794
+  },
+  {
+    "id": "15c-together",
+    "start": 115.0,
+    "text": "Together. Under the same sky.",
+    "duration": 3.575873
+  },
+  {
+    "id": "16-final-name",
+    "start": 122.0,
+    "text": "FUTUR ONE.",
+    "duration": 1.207438
+  },
+  {
+    "id": "17-final-tagline",
+    "start": 124.5,
+    "text": "Technology in service of life.",
+    "duration": 2.182676
+  },
+  {
+    "id": "18-final-qatar",
+    "start": 132.5,
+    "text": "Qatar. Two thousand thirty.",
+    "duration": 2.739955
+  }
+]
