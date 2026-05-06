@@ -1,32 +1,36 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   S00Cover,
   S01Vision2030,
-  S02WhoWeAre,
-  S03Capabilities,
-  S04Champion,
-  S05Architecture,
-  S06Stack,
+  S02Team,
+  S03TrackRecord,
+  S04Monaco,
+  S05Masterplan,
+  S06RDI,
   S07Method,
-  S08Numbers,
-  S09Alignment,
-  S10Closing,
+  S08Qatarisation,
+  S09Governance,
+  S10Ask,
+  S11Closing,
 } from './slides';
+import { FONT_STACK } from './tokens';
 
 const SLIDES = [
   { id: 0, Component: S00Cover, label: 'Cover' },
-  { id: 1, Component: S01Vision2030, label: 'Vision' },
-  { id: 2, Component: S02WhoWeAre, label: 'Hearst Qatar' },
-  { id: 3, Component: S03Capabilities, label: 'Capabilities' },
-  { id: 4, Component: S04Champion, label: 'The Campus' },
-  { id: 5, Component: S05Architecture, label: 'Masterplan' },
-  { id: 6, Component: S06Stack, label: 'The Stack' },
+  { id: 1, Component: S01Vision2030, label: 'Conviction' },
+  { id: 2, Component: S02Team, label: 'The Team' },
+  { id: 3, Component: S03TrackRecord, label: 'Track Record' },
+  { id: 4, Component: S04Monaco, label: 'Monaco of GCC' },
+  { id: 5, Component: S05Masterplan, label: 'Masterplan' },
+  { id: 6, Component: S06RDI, label: 'RDI Ecosystem' },
   { id: 7, Component: S07Method, label: 'Method' },
-  { id: 8, Component: S08Numbers, label: 'Numbers' },
-  { id: 9, Component: S09Alignment, label: 'Vision 2030' },
-  { id: 10, Component: S10Closing, label: 'Closing' },
+  { id: 8, Component: S08Qatarisation, label: '30% Qatari' },
+  { id: 9, Component: S09Governance, label: 'Governance' },
+  { id: 10, Component: S10Ask, label: 'The Ask' },
+  { id: 11, Component: S11Closing, label: 'Closing' },
 ];
 
 export default function Deck() {
@@ -103,7 +107,18 @@ export default function Deck() {
 
   return (
     <div style={S.deck}>
-      <Current />
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -15 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ width: '100%', height: '100%', position: 'absolute' }}
+        >
+          <Current />
+        </motion.div>
+      </AnimatePresence>
 
       {/* Navigation invisible — clics zones gauche/droite */}
       <div
@@ -158,8 +173,9 @@ const S = {
     overflow: 'hidden',
     background: 'var(--color-bg-main)',
     color: 'var(--color-text-primary)',
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontFamily: FONT_STACK,
+    WebkitFontSmoothing: 'antialiased',
+    MozOsxFontSmoothing: 'grayscale',
   },
   clickZone: {
     position: 'absolute',
@@ -177,12 +193,11 @@ const S = {
     left: 0,
     right: 0,
     height: 80,
-    padding: '0 100px',
+    padding: '0 8vw',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    background:
-      'linear-gradient(180deg, rgba(245,245,246,0) 0%, rgba(245,245,246,0.9) 50%, rgba(245,245,246,1) 100%)',
+    background: 'none',
     zIndex: 100,
     pointerEvents: 'none',
   },
@@ -226,7 +241,7 @@ const S = {
     top: 32,
     right: 32,
     padding: '10px 16px',
-    background: 'rgba(255,255,255,0.8)',
+    background: 'color-mix(in srgb, var(--color-surface) 80%, transparent)',
     border: '1px solid var(--color-border-light)',
     borderRadius: 4,
     fontSize: 11,

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Reveal from './Reveal';
+import Image from 'next/image';
+import Reveal from '../ui/Reveal';
 
 const PILLARS = [
   {
@@ -78,14 +79,14 @@ export default function SectionLife() {
               MORE THAN A DATA CENTER
             </div>
           </Reveal>
-          <Reveal delay={120}>
+          <Reveal delay={60}>
             <h2 style={S.title}>
               A city for the people
               <br />
               <span style={S.titleAccent}>building the future.</span>
             </h2>
           </Reveal>
-          <Reveal delay={240}>
+          <Reveal delay={120}>
             <p style={S.subtitle}>
               FUTUR ONE is not just compute. It's a complete ecosystem —
               where founders, engineers and researchers <em>live</em>,{' '}
@@ -99,24 +100,24 @@ export default function SectionLife() {
         <div style={S.magazineLayout}>
           {/* Main large feature */}
           <div style={S.magMain}>
-            <Reveal delay={100} y={40}>
+            <Reveal delay={50} y={40}>
               <PillarCard pillar={PILLARS[0]} large offsetY={offsetY} />
             </Reveal>
           </div>
           
           {/* Stacked smaller features */}
           <div style={S.magStack}>
-            <Reveal delay={200} y={40}>
+            <Reveal delay={100} y={40}>
               <PillarCard pillar={PILLARS[1]} offsetY={offsetY * 1.2} />
             </Reveal>
-            <Reveal delay={300} y={40}>
+            <Reveal delay={150} y={40}>
               <PillarCard pillar={PILLARS[2]} offsetY={offsetY * 0.8} />
             </Reveal>
           </div>
         </div>
 
         {/* Quote band */}
-        <Reveal delay={150}>
+        <Reveal delay={80}>
           <div style={S.quoteBand}>
             <div style={S.quoteMark}>“</div>
             <p style={S.quote}>
@@ -130,7 +131,7 @@ export default function SectionLife() {
         {/* Secondary masonry strip */}
         <div style={S.secondaryGrid}>
           {SECONDARY.map((it, i) => (
-            <Reveal key={it.title} delay={i * 100} y={20}>
+            <Reveal key={it.title} delay={i * 60} y={20}>
               <Tile item={it} />
             </Reveal>
           ))}
@@ -154,12 +155,13 @@ function PillarCard({ pillar, large, offsetY }) {
       data-magnetic="true"
     >
       <div style={S.pillarImgWrap}>
-        <img
+        <Image
           src={pillar.image}
           alt={pillar.title}
+          fill
           style={{
             ...S.pillarImg,
-            transform: `scale(${hover ? 1.08 : 1.02}) translateY(${offsetY * 0.1}px)`,
+            transform: `scale(${hover ? 1.08 * 1.2 : 1.02 * 1.2}) translateY(${offsetY * 0.1}px)`,
           }}
         />
         <div style={S.pillarImgOverlay} />
@@ -189,9 +191,10 @@ function Tile({ item }) {
       style={S.tile}
       data-magnetic="true"
     >
-      <img
+      <Image
         src={item.src}
         alt={item.title}
+        fill
         style={{
           ...S.tileImg,
           transform: hover ? 'scale(1.08)' : 'scale(1)',
@@ -203,7 +206,7 @@ function Tile({ item }) {
         <span
           style={{
             ...S.tileTitle,
-            color: hover ? 'var(--color-accent-strong)' : '#fff',
+            color: hover ? 'var(--color-accent-strong)' : 'var(--color-text-inverse)',
           }}
         >
           {item.title}
@@ -218,7 +221,7 @@ const S = {
     position: 'relative',
     background: 'var(--color-surface)',
     color: 'var(--color-text-primary)',
-    padding: '130px 48px',
+    padding: '120px 48px',
     borderTop: '1px solid var(--color-border-light)',
     overflow: 'hidden',
   },
@@ -281,7 +284,7 @@ const S = {
 
   magazineLayout: {
     display: 'grid',
-    gridTemplateColumns: '1.2fr 1fr',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 500px), 1fr))',
     gap: 40,
     marginBottom: 100,
   },
@@ -312,19 +315,16 @@ const S = {
     overflow: 'hidden',
   },
   pillarImg: {
-    width: '100%',
-    height: '120%', // Extra height for parallax
     objectFit: 'cover',
     display: 'block',
     transition: 'transform 0.7s cubic-bezier(.22,.61,.36,1)',
     willChange: 'transform',
-    marginTop: '-10%', // Center the extra height
   },
   pillarImgOverlay: {
     position: 'absolute',
     inset: 0,
     background:
-      'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(14,16,19,.4) 100%)',
+      'linear-gradient(180deg, rgba(0,0,0,0) 50%, var(--color-dark-surface) 100%)',
   },
   pillarN: {
     position: 'absolute',
@@ -405,7 +405,7 @@ const S = {
 
   secondaryGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: 16,
   },
   tile: {
@@ -417,8 +417,6 @@ const S = {
     cursor: 'pointer',
   },
   tileImg: {
-    width: '100%',
-    height: '100%',
     objectFit: 'cover',
     display: 'block',
     transition: 'transform 0.7s cubic-bezier(.22,.61,.36,1)',

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Reveal from './Reveal';
+import Reveal from '../ui/Reveal';
 
 const PHASES = [
   {
@@ -101,12 +101,12 @@ export default function SectionMethod() {
                 THE PROGRAM
               </div>
             </Reveal>
-            <Reveal delay={120}>
+            <Reveal delay={60}>
               <h2 style={S.title}>
                 THE <span style={S.titleAccent}>METHOD.</span>
               </h2>
             </Reveal>
-            <Reveal delay={240}>
+            <Reveal delay={120}>
               <p style={S.subtitle}>
                 A four-phase residency program — from first line of code to global
                 anchor.
@@ -213,12 +213,13 @@ const S = {
     backgroundImage: 'url(/aerial-white.png)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
+    filter: 'brightness(0.4) saturate(0.8)',
   },
   bgOverlay: {
     position: 'absolute',
     inset: 0,
     background:
-      'linear-gradient(180deg, rgba(14,16,19,.95) 0%, rgba(14,16,19,.65) 50%, rgba(14,16,19,.95) 100%)',
+      'linear-gradient(180deg, var(--color-gray-900) 0%, rgba(14,16,19,.65) 50%, var(--color-gray-900) 100%)',
   },
   contentWrapper: {
     position: 'relative',
@@ -355,7 +356,7 @@ const S = {
     fontSize: 15,
     fontWeight: 800,
     letterSpacing: 1.6,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
   cardStage: {
     marginTop: 8,

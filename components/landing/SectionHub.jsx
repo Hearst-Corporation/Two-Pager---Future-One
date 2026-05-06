@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Reveal from './Reveal';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import Image from 'next/image';
+import Reveal from '../ui/Reveal';
 
 const SATELLITES = [
   { angle: -90, key: 'COMPUTE & HPC', sub: 'Tier IV · NVIDIA H100 / H200', details: '100MW+ CAPACITY\nLIQUID COOLED' },
@@ -70,6 +72,12 @@ export default function SectionHub() {
     return () => clearInterval(interval);
   }, [hoveredKey]);
 
+  const { scrollYProgress } = useScroll({
+    target: hubRef,
+    offset: ["start end", "end start"]
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+
   return (
     <section id="hub" style={S.section}>
       <div style={S.container}>
@@ -81,7 +89,7 @@ export default function SectionHub() {
               THE SOVEREIGN AI INFRASTRUCTURE HUB
             </div>
           </Reveal>
-          <Reveal delay={120}>
+          <Reveal delay={60}>
             <h2 style={S.title}>
               One integrated ecosystem.
               <br />
@@ -234,9 +242,16 @@ export default function SectionHub() {
             </div>
           </div>
 
-          <Reveal delay={300} y={28}>
+          <Reveal delay={150} y={28}>
             <div style={S.imgWrap}>
-              <img src="/supercomputer-wide.png" alt="FUTUR ONE compute hall" style={S.img} />
+              <motion.video
+                src="/FUTUR-ONE-FINAL.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{ ...S.img, width: '100%', height: '120%', y }}
+              />
               <div style={S.imgOverlay} />
               <div style={S.imgCaption}>
                 <span style={S.capLabel}>SOVEREIGN COMPUTE</span>
@@ -304,7 +319,7 @@ const S = {
 
   grid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 500px), 1fr))',
     gap: 48,
     alignItems: 'center',
   },
@@ -340,7 +355,7 @@ const S = {
     borderRadius: '50%',
     background:
       'radial-gradient(circle at 35% 30%, var(--color-accent-soft) 0%, var(--color-accent-strong) 60%, var(--color-accent-primary) 100%)',
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -372,7 +387,7 @@ const S = {
     fontSize: 10,
     fontWeight: 700,
     letterSpacing: 1,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
     textShadow: '0 0 5px rgba(255,255,255,0.5)',
   },
   satDot: {
@@ -387,12 +402,12 @@ const S = {
     fontSize: 11,
     fontWeight: 800,
     letterSpacing: 1.2,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
     transition: 'color 0.3s ease, transform 0.3s ease',
   },
   satSub: {
     fontSize: 10,
-    color: 'rgba(255,255,255,.5)',
+    color: 'var(--color-text-muted)',
     marginTop: 4,
     lineHeight: 1.4,
     transition: 'opacity 0.3s ease, transform 0.3s ease',
@@ -406,8 +421,7 @@ const S = {
     background: 'var(--color-gray-900)',
   },
   img: {
-    width: '100%',
-    height: '100%',
+    position: 'absolute',
     objectFit: 'cover',
     display: 'block',
   },
@@ -436,6 +450,6 @@ const S = {
     fontSize: 14,
     fontWeight: 700,
     letterSpacing: -0.2,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
 };

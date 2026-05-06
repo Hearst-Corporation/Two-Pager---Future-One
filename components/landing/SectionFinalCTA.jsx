@@ -1,43 +1,28 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Reveal from './Reveal';
-import TextReveal from './TextReveal';
-import MagneticButton from './MagneticButton';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import Reveal from '../ui/Reveal';
+import TextReveal from '../ui/TextReveal';
+import MagneticButton from '../ui/MagneticButton';
 
 export default function SectionFinalCTA() {
   const sectionRef = useRef(null);
-  const [parallax, setParallax] = useState(0);
-
-  useEffect(() => {
-    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return;
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const el = sectionRef.current;
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const wh = window.innerHeight;
-        const progress = (rect.top + rect.height / 2 - wh / 2) / wh;
-        setParallax(progress * 80);
-      });
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
   return (
     <section id="contact" ref={sectionRef} style={S.section}>
-      <img
-        src="/aerial-campus-2.png"
-        alt=""
-        style={{ ...S.bg, transform: `translateY(${parallax}px) scale(1.15)` }}
+      <motion.video
+        src="/test-cover-facade.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        style={{ ...S.bg, y, scale: 1.2 }}
       />
       <div style={S.overlay} />
 
@@ -47,24 +32,24 @@ export default function SectionFinalCTA() {
         </Reveal>
 
         <div style={S.headline}>
-          <TextReveal delay={100}>AI</TextReveal>
-          <TextReveal delay={400}>is the</TextReveal>
+          <TextReveal delay={50}>AI</TextReveal>
+          <TextReveal delay={200}>is the</TextReveal>
           <div style={S.lineAccent}>
-            <TextReveal delay={700}>new gas.</TextReveal>
+            <TextReveal delay={350}>new gas.</TextReveal>
           </div>
         </div>
 
-        <Reveal delay={1200}>
+        <Reveal delay={600}>
           <p style={S.sub}>COMPUTE IS THE INFRASTRUCTURE OF NATIONS.</p>
         </Reveal>
 
-        <Reveal delay={1400}>
+        <Reveal delay={700}>
           <div style={S.actions}>
             <MagneticButton href="/brochure" style={S.ctaPrimary}>
               Read the brochure
               <span aria-hidden="true" style={{ marginLeft: 12 }}>→</span>
             </MagneticButton>
-            <MagneticButton href="mailto:contact@futur.one" style={S.ctaSecondary}>
+            <MagneticButton href="#request-briefing" style={S.ctaSecondary}>
               Request a private briefing
               <span aria-hidden="true" style={{ marginLeft: 12 }}>→</span>
             </MagneticButton>
@@ -92,8 +77,6 @@ const S = {
     height: '100%',
     objectFit: 'cover',
     zIndex: 0,
-    willChange: 'transform',
-    transition: 'transform 0.1s linear',
   },
   overlay: {
     position: 'absolute',
@@ -151,7 +134,7 @@ const S = {
     fontWeight: 700,
     textDecoration: 'none',
     background: 'var(--color-accent-strong)',
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
     border: '1px solid var(--color-accent-strong)',
     cursor: 'pointer',
   },
@@ -164,8 +147,8 @@ const S = {
     fontWeight: 700,
     textDecoration: 'none',
     background: 'transparent',
-    color: '#fff',
-    border: '1px solid rgba(255,255,255,0.3)',
+    color: 'var(--color-text-inverse)',
+    border: '1px solid var(--color-border-medium)',
     cursor: 'pointer',
   },
 };

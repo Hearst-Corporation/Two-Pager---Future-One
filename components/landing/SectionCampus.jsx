@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Reveal from './Reveal';
-import CountUp from './CountUp';
+import { useRef, useState } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import Reveal from '../ui/Reveal';
+import CountUp from '../ui/CountUp';
 
 const FACTS = [
   {
@@ -37,39 +38,23 @@ const FACTS = [
 
 export default function SectionCampus() {
   const imgRef = useRef(null);
-  const [parallax, setParallax] = useState(0);
-
-  useEffect(() => {
-    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return;
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const el = imgRef.current;
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const wh = window.innerHeight;
-        // -1 when section bottom hits top, +1 when section top hits bottom
-        const progress = (rect.top + rect.height / 2 - wh / 2) / wh;
-        setParallax(progress * 60);
-      });
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
+  
+  const { scrollYProgress } = useScroll({
+    target: imgRef,
+    offset: ["start end", "end start"]
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
   return (
     <section id="campus" style={S.section}>
       <div style={S.imgWrap} ref={imgRef}>
-        <img
-          src="/aerial-campus-red.png"
-          alt="FUTUR ONE campus aerial view"
-          style={{ ...S.img, transform: `translateY(${parallax}px) scale(1.1)` }}
+        <motion.video
+          src="/test-cover-facade-v2.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ ...S.img, y, scale: 1.2 }}
         />
         <div style={S.imgOverlay} />
         <Reveal>
@@ -93,14 +78,14 @@ export default function SectionCampus() {
           <Reveal>
             <div style={S.eyebrow}>BY THE NUMBERS</div>
           </Reveal>
-          <Reveal delay={120}>
+          <Reveal delay={60}>
             <h2 style={S.title}>
               One hundred thousand sqm,
               <br />
               <span style={S.titleAccent}>under one sovereign roof.</span>
             </h2>
           </Reveal>
-          <Reveal delay={240}>
+          <Reveal delay={120}>
             <p style={S.body}>
               Residency, compute and operations integrated at the scale of a
               small city — engineered for the long horizon.
@@ -110,7 +95,7 @@ export default function SectionCampus() {
 
         <div style={S.factGrid}>
           {FACTS.map((f, i) => (
-            <Reveal key={f.label} delay={i * 100} y={16}>
+            <Reveal key={f.label} delay={i * 60} y={16}>
               <FactCard fact={f} index={i} total={FACTS.length} />
             </Reveal>
           ))}
@@ -170,8 +155,6 @@ const S = {
     height: '100%',
     objectFit: 'cover',
     display: 'block',
-    willChange: 'transform',
-    transition: 'transform 0.1s linear',
   },
   imgOverlay: {
     position: 'absolute',
@@ -184,7 +167,7 @@ const S = {
     bottom: 48,
     left: 48,
     right: 48,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
   capEyebrow: {
     fontSize: 10,
@@ -220,10 +203,10 @@ const S = {
     background: 'var(--color-gray-900)',
     padding: '90px 48px 110px',
     display: 'grid',
-    gridTemplateColumns: '1fr 1.2fr',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))',
     gap: 64,
     alignItems: 'center',
-    borderTop: '1px solid rgba(255,255,255,.05)',
+    borderTop: '1px solid var(--color-border-strong)',
     maxWidth: 1400,
     margin: '0 auto',
   },
@@ -289,7 +272,7 @@ const S = {
     fontWeight: 800,
     letterSpacing: -1.4,
     lineHeight: 1,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
   factLabel: {
     marginTop: 18,

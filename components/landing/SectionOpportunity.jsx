@@ -1,8 +1,17 @@
 'use client';
 
-import Reveal from './Reveal';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import Reveal from '../ui/Reveal';
 
 export default function SectionOpportunity() {
+  const imgRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: imgRef,
+    offset: ["start end", "end start"]
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+
   return (
     <section id="vision" style={S.section}>
       <div style={S.inner}>
@@ -14,14 +23,14 @@ export default function SectionOpportunity() {
               WHAT IS FUTUR ONE
             </div>
           </Reveal>
-          <Reveal delay={120}>
+          <Reveal delay={60}>
             <h2 style={S.headline}>
               A controlled environment
               <br />
               for the frontier of AI.
             </h2>
           </Reveal>
-          <Reveal delay={240}>
+          <Reveal delay={120}>
             <div style={S.lead}>
               <p style={S.paragraph}>
                 FUTUR ONE is a <strong>sovereign AI innovation hub</strong>{' '}
@@ -39,9 +48,17 @@ export default function SectionOpportunity() {
         </div>
 
         <div style={S.right}>
-          <Reveal delay={200} y={32}>
-            <div style={S.imgFrame}>
-              <img src="/supercomputer.png" alt="FUTUR ONE supercomputer hall" style={S.img} />
+          <Reveal delay={100} y={32}>
+            <div style={S.imgFrame} ref={imgRef}>
+              <motion.video
+                src="/u2883995211_Futuristic_autonomous_data_center_sleek_white_and_260510d3-d95d-4eba-9737-a28010909814_0.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{ ...S.img, width: '100%', height: '120%', y }}
+              />
+              <div style={S.imgOverlay} />
               <div style={S.imgCaption}>
                 <span style={S.capLabel}>01</span>
                 <span style={S.capText}>The compute floor</span>
@@ -58,14 +75,14 @@ const S = {
   section: {
     background: 'var(--color-surface)',
     color: 'var(--color-text-primary)',
-    padding: '110px 48px',
+    padding: '120px 48px',
   },
   inner: {
     maxWidth: 1400,
     margin: '0 auto',
     display: 'grid',
-    gridTemplateColumns: '1.1fr 1fr',
-    gap: 80,
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 500px), 1fr))',
+    gap: 'clamp(40px, 6vw, 80px)',
     alignItems: 'center',
   },
   left: {
@@ -124,10 +141,14 @@ const S = {
     background: 'var(--color-gray-900)',
   },
   img: {
-    width: '100%',
-    height: '100%',
+    position: 'absolute',
     objectFit: 'cover',
     display: 'block',
+  },
+  imgOverlay: {
+    position: 'absolute',
+    inset: 0,
+    background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(14,16,19,.85) 100%)',
   },
   imgCaption: {
     position: 'absolute',
@@ -136,8 +157,9 @@ const S = {
     display: 'flex',
     alignItems: 'baseline',
     gap: 12,
-    color: '#fff',
-    background: 'rgba(14,16,19,.55)',
+    color: 'var(--color-text-inverse)',
+    background: 'var(--color-dark-surface)',
+    opacity: 0.85,
     backdropFilter: 'blur(6px)',
     padding: '10px 16px',
   },

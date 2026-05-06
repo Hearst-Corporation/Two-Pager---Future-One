@@ -8,7 +8,8 @@ import SectionMethod from '@/components/landing/SectionMethod';
 import SectionCampus from '@/components/landing/SectionCampus';
 import SectionFinalCTA from '@/components/landing/SectionFinalCTA';
 import Footer from '@/components/landing/Footer';
-import CustomCursor from '@/components/landing/CustomCursor';
+import CustomCursor from '@/components/ui/CustomCursor';
+import ContactModal from '@/components/ui/ContactModal';
 
 export default function Home() {
   return (
@@ -26,6 +27,7 @@ export default function Home() {
         <SectionFinalCTA />
         <Footer />
       </main>
+      <ContactModal />
     </>
   );
 }

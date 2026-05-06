@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PARTICLES_EXPLODE_EVENT } from './MagneticParticles';
+import Image from 'next/image';
+import { PARTICLES_EXPLODE_EVENT } from '../ui/MagneticParticles';
+import MagneticButton from '../ui/MagneticButton';
 
 const NAV = [
   { id: 'vision', label: 'About' },
@@ -10,6 +12,7 @@ const NAV = [
   { id: 'life', label: 'Life' },
   { id: 'method', label: 'Method' },
   { id: 'campus', label: 'Campus' },
+  { id: 'contact', label: 'Contact' },
 ];
 
 const REVEAL_DELAY_MS = 1100;
@@ -19,6 +22,7 @@ export default function Header() {
   const [revealed, setRevealed] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
@@ -88,12 +92,12 @@ export default function Header() {
         zIndex: 100,
         padding: scrolled ? '12px 48px' : '20px 48px',
         background: scrolled
-          ? 'rgba(14, 16, 19, 0.78)'
+          ? 'var(--color-gray-900)'
           : 'linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 100%)',
         backdropFilter: scrolled ? 'blur(14px) saturate(140%)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(14px) saturate(140%)' : 'none',
         borderBottom: scrolled
-          ? '1px solid rgba(255,255,255,.06)'
+          ? '1px solid var(--color-border-strong)'
           : '1px solid transparent',
         transition:
           'padding .25s ease, background .25s ease, border-color .25s ease, opacity .8s ease, transform .8s cubic-bezier(.22,.61,.36,1)',
@@ -129,9 +133,11 @@ export default function Header() {
           color: 'var(--color-text-inverse)',
         }}
       >
-        <img
+        <Image
           src="/hearst-h.svg"
           alt="Hearst"
+          width={22}
+          height={22}
           style={{
             height: 22,
             width: 'auto',
@@ -157,11 +163,88 @@ export default function Header() {
         </div>
       </a>
 
-      <nav style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+      <nav 
+        className="nav-desktop"
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 28,
+        }}
+      >
         {NAV.map((n) => (
           <NavLink key={n.id} item={n} onNav={handleNav} isActive={activeSection === n.id} />
         ))}
+        <MagneticButton
+          href="#contact"
+          onClick={(e) => handleNav(e, 'contact')}
+          style={{
+            padding: '8px 18px',
+            fontSize: 10,
+            letterSpacing: 1.2,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            color: 'var(--color-text-inverse)',
+            background: 'var(--color-accent-strong)',
+            border: 'none',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            marginLeft: '12px'
+          }}
+        >
+          Request Briefing
+        </MagneticButton>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'var(--color-gray-900)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 32,
+          zIndex: 1000,
+        }}>
+          {NAV.map((n) => (
+            <NavLink 
+              key={n.id} 
+              item={n} 
+              onNav={(e, id) => {
+                setMobileMenuOpen(false);
+                handleNav(e, id);
+              }} 
+              isActive={activeSection === n.id} 
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Mobile Toggle */}
+      <button 
+        className="nav-toggle"
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        style={{
+          display: 'none',
+          background: 'none',
+          border: 'none',
+          color: 'var(--color-text-inverse)',
+          fontSize: 24,
+          cursor: 'pointer',
+          zIndex: 1100,
+        }}
+      >
+        {mobileMenuOpen ? '✕' : '☰'}
+      </button>
+
+      <style jsx>{`
+        @media (max-width: 900px) {
+          .nav-desktop { display: none !important; }
+          .nav-toggle { display: block !important; }
+        }
+      `}</style>
     </header>
   );
 }
@@ -182,7 +265,7 @@ function NavLink({ item, onNav, isActive }) {
         fontWeight: 600,
         letterSpacing: 0.6,
         textTransform: 'uppercase',
-        color: active ? '#fff' : 'rgba(255,255,255,.78)',
+        color: active ? 'var(--color-text-inverse)' : 'var(--color-text-muted)',
         textDecoration: 'none',
         transition: 'color .2s ease',
         paddingBottom: 4,

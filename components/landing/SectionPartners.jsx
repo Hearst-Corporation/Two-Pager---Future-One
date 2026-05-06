@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import Reveal from './Reveal';
-import CountUp from './CountUp';
+import { useState, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import Image from 'next/image';
+import Reveal from '../ui/Reveal';
+import CountUp from '../ui/CountUp';
 
 const KPIS = [
   { render: () => (<><CountUp to={500} duration={1800} /> MW</>), label: 'DEPLOYED', sub: 'Across 4 continents' },
@@ -39,8 +41,23 @@ const PARTNERS = [
 ];
 
 export default function SectionPartners() {
+  const sectionRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+
   return (
-    <section id="partners" style={S.section}>
+    <section id="partners" style={S.section} ref={sectionRef}>
+      <motion.video
+        src="/clip-01-H-particles.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        style={{ ...S.videoBg, y, scale: 1.2 }}
+      />
       <div style={S.bgTexture} />
 
       <div style={S.container}>
@@ -53,14 +70,14 @@ export default function SectionPartners() {
               THE PARTNER STACK
             </div>
           </Reveal>
-          <Reveal delay={120}>
+          <Reveal delay={60}>
             <h2 style={S.title}>
               We don't outsource excellence.
               <br />
               <span style={S.titleAccent}>We assemble it.</span>
             </h2>
           </Reveal>
-          <Reveal delay={240}>
+          <Reveal delay={120}>
             <p style={S.subtitle}>
               Hearst Qatar partners with the engineers behind <strong>Yondr 200 MW</strong>,{' '}
               <strong>Sedenak 500 MW</strong> and <strong>A*STAR's national supercomputer</strong> —
@@ -70,7 +87,7 @@ export default function SectionPartners() {
         </div>
 
         {/* KPI BAND */}
-        <Reveal delay={150}>
+        <Reveal delay={80}>
           <div style={S.kpiBand}>
             {KPIS.map((k, i) => (
               <div key={i} style={{ ...S.kpiItem, borderRight: i < KPIS.length - 1 ? '1px solid rgba(255,255,255,.08)' : 'none' }}>
@@ -85,7 +102,7 @@ export default function SectionPartners() {
         {/* 3 PARTNER CARDS */}
         <div style={S.partnersGrid}>
           {PARTNERS.map((p, i) => (
-            <Reveal key={p.name} delay={i * 130} y={28}>
+            <Reveal key={p.name} delay={i * 80} y={28}>
               <PartnerCard partner={p} />
             </Reveal>
           ))}
@@ -109,9 +126,10 @@ function PartnerCard({ partner }) {
       }}
     >
       <div style={S.partnerImgWrap}>
-        <img
+        <Image
           src={partner.image}
           alt={partner.name}
+          fill
           style={{
             ...S.partnerImg,
             transform: hover ? 'scale(1.06)' : 'scale(1)',
@@ -128,7 +146,7 @@ function PartnerCard({ partner }) {
             opacity: hover ? 1 : 0.5,
           }}
         />
-        <img src={partner.logo} alt={partner.name} style={S.partnerLogo} />
+        <Image src={partner.logo} alt={partner.name} width={120} height={22} style={S.partnerLogo} />
         <p style={S.partnerText}>{partner.body}</p>
         <a
           href={`https://${partner.website}`}
@@ -159,8 +177,18 @@ const S = {
     position: 'absolute',
     inset: 0,
     background:
-      'radial-gradient(60% 50% at 80% 0%, rgba(190,18,60,.08) 0%, rgba(0,0,0,0) 60%)',
+      'radial-gradient(60% 50% at 80% 0%, rgba(190,18,60,.08) 0%, rgba(0,0,0,0) 60%), linear-gradient(180deg, rgba(14,16,19,.8) 0%, rgba(14,16,19,.95) 100%)',
     pointerEvents: 'none',
+    zIndex: 0,
+  },
+  videoBg: {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    zIndex: 0,
+    opacity: 0.3,
   },
   container: {
     position: 'relative',
@@ -216,8 +244,8 @@ const S = {
   /* KPI BAND */
   kpiBand: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    border: '1px solid rgba(255,255,255,.08)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    border: '1px solid var(--color-border-strong)',
     background: 'rgba(255,255,255,.02)',
     marginBottom: 56,
   },
@@ -239,19 +267,19 @@ const S = {
     fontSize: 10.5,
     fontWeight: 800,
     letterSpacing: 1.6,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
   kpiSub: {
     fontSize: 9.5,
     letterSpacing: 1,
     fontWeight: 500,
-    color: 'rgba(255,255,255,.5)',
+    color: 'var(--color-text-muted)',
   },
 
   /* 3 PARTNER CARDS */
   partnersGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
     gap: 20,
   },
   partnerCard: {
@@ -271,8 +299,6 @@ const S = {
     overflow: 'hidden',
   },
   partnerImg: {
-    width: '100%',
-    height: '100%',
     objectFit: 'cover',
     display: 'block',
     transition: 'transform 0.7s cubic-bezier(.22,.61,.36,1)',
@@ -281,7 +307,7 @@ const S = {
   partnerImgOverlay: {
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(14,16,19,.85) 100%)',
+    background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, var(--color-dark-surface) 100%)',
   },
   partnerRole: {
     position: 'absolute',
@@ -322,7 +348,7 @@ const S = {
   partnerText: {
     fontSize: 12.5,
     lineHeight: 1.6,
-    color: 'rgba(255,255,255,.62)',
+    color: 'var(--color-text-muted)',
     margin: 0,
     flex: 1,
   },

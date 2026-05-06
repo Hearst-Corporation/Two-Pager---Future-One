@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { PARTICLES_EXPLODE_EVENT } from './MagneticParticles';
+import { PARTICLES_EXPLODE_EVENT } from '../ui/MagneticParticles';
 
 const REVEAL_DELAY_MS = 1100;
 const HINT_REVEAL_MS = 800;
@@ -23,33 +23,25 @@ export default function HeroIntroGate({ onEnter }) {
       return;
     }
 
-    const prevHtmlOverflow = document.documentElement.style.overflow;
-    const prevBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-
-    const blockWheel = (e) => e.preventDefault();
-    const blockTouch = (e) => e.preventDefault();
-    window.addEventListener('wheel', blockWheel, { passive: false });
-    window.addEventListener('touchmove', blockTouch, { passive: false });
-
-    const unlockScroll = () => {
-      document.documentElement.style.overflow = prevHtmlOverflow;
-      document.body.style.overflow = prevBodyOverflow;
-      window.removeEventListener('wheel', blockWheel);
-      window.removeEventListener('touchmove', blockTouch);
-    };
+    const unlockScroll = () => {};
 
     const enter = () => {
       if (enteredRef.current) return;
       enteredRef.current = true;
       window.dispatchEvent(new Event(PARTICLES_EXPLODE_EVENT));
-      unlockScroll();
       setPhase('hidden');
       window.setTimeout(onEnter, REVEAL_DELAY_MS);
     };
 
     enterRef.current = enter;
+
+    // Trigger enter on first scroll or touch
+    const onScrollOrTouch = () => {
+      enter();
+    };
+    
+    window.addEventListener('wheel', onScrollOrTouch, { passive: true, once: true });
+    window.addEventListener('touchmove', onScrollOrTouch, { passive: true, once: true });
 
     const onKey = (e) => {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
@@ -58,14 +50,15 @@ export default function HeroIntroGate({ onEnter }) {
       }
     };
     window.addEventListener('keydown', onKey);
-
+    
     const hintTimer = window.setTimeout(() => setHintVisible(true), HINT_REVEAL_MS);
 
     return () => {
       enterRef.current = null;
+      window.removeEventListener('wheel', onScrollOrTouch);
+      window.removeEventListener('touchmove', onScrollOrTouch);
       window.removeEventListener('keydown', onKey);
       window.clearTimeout(hintTimer);
-      if (!enteredRef.current) unlockScroll();
     };
   }, [onEnter]);
 

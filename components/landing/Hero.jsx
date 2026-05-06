@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import TextReveal from './TextReveal';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import TextReveal from '../ui/TextReveal';
 
-const MagneticParticles = dynamic(() => import('./MagneticParticles'), {
+const MagneticParticles = dynamic(() => import('../ui/MagneticParticles'), {
   ssr: false,
   loading: () => null,
 });
@@ -17,9 +18,16 @@ const HeroIntroGate = dynamic(() => import('./HeroIntroGate'), {
 export default function Hero() {
   const [introDone, setIntroDone] = useState(false);
   const handleIntroEnter = useCallback(() => setIntroDone(true), []);
+  const heroRef = useRef(null);
+
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
   return (
-    <section id="top" style={S.hero}>
+    <section id="top" ref={heroRef} style={S.hero}>
       {/* Particles intro — hidden once entered */}
       {!introDone && (
         <MagneticParticles
@@ -31,16 +39,15 @@ export default function Hero() {
       {!introDone && <HeroIntroGate onEnter={handleIntroEnter} />}
 
       {/* Video bg — always mounted, visible once intro done */}
-      <video
-        style={{ ...S.video, opacity: introDone ? 1 : 0, transition: 'opacity 0.8s ease' }}
+      <motion.video
+        style={{ ...S.video, opacity: introDone ? 1 : 0, transition: 'opacity 0.8s ease', y, scale: 1.1 }}
         autoPlay
         muted
         loop
         playsInline
         preload="metadata"
-      >
-        <source src="/hero-loop.mp4" type="video/mp4" />
-      </video>
+        src="/hero-loop.mp4"
+      />
 
       <div style={{ ...S.overlay, opacity: introDone ? 1 : 0, transition: 'opacity 0.8s ease' }} />
       <div style={S.vignette} />
@@ -53,18 +60,18 @@ export default function Hero() {
         <span style={S.tagSub}>SOVEREIGN AI INNOVATION HUB</span>
       </div>
 
-      <div style={{ ...S.content, opacity: introDone ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
+      <div style={{ ...S.content, opacity: introDone ? 1 : 0, transition: 'opacity 0.6s ease 0.1s' }}>
         <h1 style={S.title}>
-          <TextReveal delay={1200}>FUTUR ONE</TextReveal>
+          <TextReveal delay={400}>FUTUR ONE</TextReveal>
           <br />
           <span style={S.titleAccent}>
-            <TextReveal delay={1400}>NO LIMITS,</TextReveal>
+            <TextReveal delay={600}>NO LIMITS,</TextReveal>
           </span>{' '}
-          <TextReveal delay={1600}>BY AI.</TextReveal>
+          <TextReveal delay={800}>BY AI.</TextReveal>
         </h1>
 
         <p style={S.lede}>
-          <TextReveal delay={1800} type="word">
+          <TextReveal delay={1000} type="word">
             A sovereign AI innovation hub on the Qatari coast — where compute,
             architecture and talent operate as one.
           </TextReveal>
@@ -94,7 +101,7 @@ const S = {
     minHeight: 640,
     overflow: 'hidden',
     color: 'var(--color-text-inverse)',
-    background: '#0e1013',
+    background: 'var(--color-gray-900)',
   },
   video: {
     position: 'absolute',
@@ -140,18 +147,19 @@ const S = {
     fontSize: 10,
     letterSpacing: 2.2,
     fontWeight: 700,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
   tagDivider: {
     width: 24,
     height: 1,
-    background: 'rgba(255,255,255,.25)',
+    background: 'var(--color-border-medium)',
+    opacity: 0.25,
   },
   tagSub: {
     fontSize: 10,
     letterSpacing: 2.2,
     fontWeight: 600,
-    color: 'rgba(255,255,255,.55)',
+    color: 'var(--color-text-muted)',
   },
 
   content: {
@@ -177,7 +185,7 @@ const S = {
     marginTop: 22,
     fontSize: 14,
     lineHeight: 1.6,
-    color: 'rgba(255,255,255,.78)',
+    color: 'var(--color-text-muted)',
     maxWidth: 480,
     fontWeight: 400,
   },
@@ -209,7 +217,7 @@ const S = {
     fontSize: 11,
     letterSpacing: 2.4,
     fontWeight: 800,
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
   },
 
   scrollHint: {
@@ -219,11 +227,12 @@ const S = {
     fontSize: 9,
     letterSpacing: 2,
     fontWeight: 700,
-    color: 'rgba(255,255,255,.55)',
+    color: 'var(--color-text-muted)',
   },
   scrollLine: {
     width: 48,
     height: 1,
-    background: 'rgba(255,255,255,.4)',
+    background: 'var(--color-border-medium)',
+    opacity: 0.4,
   },
 };

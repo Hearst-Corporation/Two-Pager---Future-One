@@ -1,4 +1,12 @@
 import './globals.css';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata = {
   title: 'FUTUR ONE · Sovereign AI Innovation Hub · Qatar',
@@ -9,7 +17,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={inter.variable}>
       <body>{children}</body>
     </html>
   );

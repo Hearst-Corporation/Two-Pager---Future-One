@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 const COLS = [
   {
     title: 'BUILT BY',
@@ -37,7 +39,7 @@ export default function Footer() {
 
         <div style={S.bottom}>
           <div style={S.brand}>
-            <img src="/hearst-h.svg" alt="Hearst" style={S.brandMark} />
+            <Image src="/hearst-h.svg" alt="Hearst" width={24} height={24} style={S.brandMark} />
             <div>
               <div style={S.brandName}>FUTUR ONE · QATAR</div>
               <div style={S.brandSub}>
@@ -91,7 +93,7 @@ const S = {
   body: {
     fontSize: 11.5,
     lineHeight: 1.65,
-    color: 'rgba(255,255,255,.55)',
+    color: 'var(--color-text-muted)',
     maxWidth: 320,
   },
   bottom: {
