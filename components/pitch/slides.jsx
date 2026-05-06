@@ -195,7 +195,7 @@ export function S02Team() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 70%, transparent) 60%, transparent 100%)',
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
       <SectionHeader number="02" title="The Team" />
@@ -275,7 +275,7 @@ export function S03TrackRecord() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(270deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 70%, transparent) 60%, transparent 100%)',
+            'linear-gradient(270deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
       <SectionHeader number="03" title="Track Record" />
@@ -343,41 +343,50 @@ export function S03TrackRecord() {
 export function S04Monaco() {
   return (
     <div style={S.slide}>
-      <SectionHeader number="04" title="The Positioning" />
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
         style={{
           ...S.bg,
           backgroundImage: "url('/aerial-campus-red.png')",
+          backgroundPosition: 'left center',
         }}
       />
       <div
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(135deg, color-mix(in srgb, var(--color-bg-main) 92%, transparent) 0%, color-mix(in srgb, var(--color-bg-main) 78%, transparent) 60%, color-mix(in srgb, var(--color-bg-main) 95%, transparent) 100%)',
+            'linear-gradient(270deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
+      <SectionHeader number="04" title="The Positioning" />
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-start',
-          padding: `calc(56px + 4vh) ${L.padX} 4vh`,
-        }}
-      >
-        <h2 style={{ ...S.h2, maxWidth: 1100 }}>
-          The <span style={{ color: ACCENT }}>Monaco of the GCC.</span>
-        </h2>
-        <p style={{ ...S.lead, maxWidth: 920 }}>
-          <strong>100,000 m² · Sovereign compute · Qatari Free Zone.</strong> A principality of
-          intelligence, culture, sport and entertainment on Qatari soil.
-        </p>
+      <div style={{ ...S.splitLayout, zIndex: 3, justifyContent: 'flex-end' }}>
+        <motion.div 
+          style={{ ...S.splitTextRight, justifyContent: 'center' }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+              POSITIONING · THE PRINCIPALITY
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
+            The <span style={{ color: ACCENT }}>Monaco of the GCC.</span>
+          </motion.h2>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: TEXT_DIM, lineHeight: 1.6 }}>
+            <strong style={{ color: TEXT_PRIMARY }}>100,000 m² · Sovereign compute · Qatari Free Zone.</strong> A principality of
+            intelligence, culture, sport and entertainment on Qatari soil.
+          </motion.p>
 
-        <MonacoRadial />
+          <motion.div variants={fadeUpItem} style={{ marginTop: '4vh', width: '100%', maxWidth: 850 }}>
+            <MonacoRadial />
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
@@ -403,13 +412,13 @@ export function S05Masterplan() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 55%, transparent 100%)',
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 30%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 45%, transparent 100%)',
         }}
       />
       <SectionHeader number="05" title="The Masterplan" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <motion.div 
-          style={{ flex: '0 0 45%', padding: L.splitPadL, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+          style={{ flex: '0 0 33.33%', padding: L.splitPadL, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           variants={staggerContainer}
           initial="hidden"
           animate="show"
@@ -441,7 +450,7 @@ export function S05Masterplan() {
         </motion.div>
 
         <motion.div 
-          style={{ flex: '0 0 55%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+          style={{ flex: '0 0 66.66%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
           variants={staggerContainer}
           initial="hidden"
           animate="show"
@@ -475,7 +484,7 @@ export function S06RDI() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 70%, transparent) 60%, transparent 100%)',
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
       <SectionHeader number="06" title="RDI Ecosystem" />
@@ -548,30 +557,55 @@ export function S06RDI() {
 export function S07Method() {
   return (
     <div style={S.slide}>
-      <SectionHeader number="07" title="The Method" />
+      <motion.div
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        style={{
+          ...S.bg,
+          backgroundImage: "url('/partners/aerial-dc-campus.png')",
+          backgroundPosition: 'left center',
+          backgroundSize: 'cover',
+        }}
+      />
       <div
         style={{
-          position: 'relative',
-          zIndex: 2,
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-start',
-          padding: `calc(56px + 5vh) ${L.padX} 5vh`,
+          ...S.overlay,
+          background:
+            'linear-gradient(90deg, color-mix(in srgb, var(--color-bg-main) 10%, transparent) 0%, color-mix(in srgb, var(--color-bg-main) 80%, transparent) 28%, var(--color-bg-main) 33.33%, var(--color-bg-main) 100%)',
         }}
-      >
-        <h2 style={S.h2}>
-          Revenue starts before
-          <br />
-          <span style={{ color: ACCENT }}>the monument is complete.</span>
-        </h2>
-        <p style={{ ...S.lead, maxWidth: 980 }}>
-          Operations start <strong>day one (M0)</strong>. Construction runs in parallel —
-          each new module, each new wing onboarded as it ships. Every delivered module
-          becomes operational capacity.
-        </p>
+      />
+      <SectionHeader number="07" title="The Method" />
+      <div style={{ ...S.splitLayout, zIndex: 3 }}>
+        <div style={{ flex: '0 0 30%' }} /> {/* Espace vide pour l'image (environ 1/3) */}
+        
+        <motion.div 
+          style={{ flex: '0 0 70%', padding: 'calc(56px + 6vh) 6vw 4vh 2vw', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+              DELIVERY · PARALLEL TRACKS
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
+            Revenue starts before
+            <br />
+            <span style={{ color: ACCENT }}>the monument is complete.</span>
+          </motion.h2>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: TEXT_DIM, lineHeight: 1.6 }}>
+            Operations start <strong style={{ color: TEXT_PRIMARY }}>day one (M0)</strong>. Construction runs in parallel —
+            each new module, each new wing onboarded as it ships. Every delivered module
+            becomes operational capacity.
+          </motion.p>
 
-        <DualRail />
+          <motion.div variants={fadeUpItem}>
+            <DualRail />
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
@@ -597,13 +631,13 @@ export function S08Qatarisation() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 70%, transparent) 60%, transparent 100%)',
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 30%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 45%, transparent 100%)',
         }}
       />
       <SectionHeader number="08" title="30% Qatarisation" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <motion.div 
-          style={{ ...S.splitTextLeft, justifyContent: 'center' }}
+          style={{ flex: '0 0 33.33%', padding: L.splitPadL, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           variants={staggerContainer}
           initial="hidden"
           animate="show"
@@ -619,41 +653,20 @@ export function S08Qatarisation() {
             <br />
             from year one.
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: TEXT_DIM, lineHeight: 1.6 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 600, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: TEXT_DIM, lineHeight: 1.6 }}>
             Qatarisation is measured across capital, jobs, suppliers and founders.
             A <strong style={{ color: TEXT_PRIMARY }}>30% floor</strong> from year one ·
             a path to <strong style={{ color: TEXT_PRIMARY }}>50% by year five</strong>.
           </motion.p>
+        </motion.div>
 
-          <motion.div variants={fadeUpItem} style={{ display: 'flex', flexDirection: 'column', gap: '4vh', marginTop: '4vh', width: '100%', maxWidth: 850 }}>
-            {/* Cards Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vh 2vw' }}>
-              <QatCard
-                pct="30%"
-                title="CAPITAL"
-                line="Reserved tranche for Qatari investors via QFC."
-              />
-              <QatCard
-                pct="30%"
-                title="WORKFORCE"
-                line="Tawteen-aligned · HBKU pipeline."
-                roadmap="→ 50% by Y5"
-              />
-              <QatCard
-                pct="30%"
-                title="PROCUREMENT"
-                line="Domestic supply chain first."
-              />
-              <QatCard
-                pct="30%"
-                title="FOUNDERS"
-                line="45 of 150 residency seats reserved."
-              />
-            </div>
-
-            {/* Curve */}
-            <QatarisationCurve />
-          </motion.div>
+        <motion.div 
+          style={{ flex: '0 0 66.66%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <QatarisationDashboard />
         </motion.div>
       </div>
     </div>
@@ -680,7 +693,7 @@ export function S09Governance() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(270deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 70%, transparent) 60%, transparent 100%)',
+            'linear-gradient(270deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
       <SectionHeader number="09" title="Governance" />
@@ -708,13 +721,8 @@ export function S09Governance() {
             stands as an example Vision 2030 offers to the rest of the world.
           </motion.p>
 
-          <motion.div variants={fadeUpItem} style={S.govGrid}>
-            <GovRow label="HOLDING" value="Qatari-controlled · QFC-incorporated · 100% domestic capital" />
-            <GovRow label="CHAIR" value="Sheikh Mohammed Al-Thani · QFC sovereign principal" />
-            <GovRow label="BOARD" value="Qai · MoCI · Hearst Qatar · independent Qatari directors" />
-            <GovRow label="CEO" value="Qatari national · jointly appointed with Qai" />
-            <GovRow label="OPERATING PARTNER" value="Hearst Qatar · operates under Qatari governance" />
-            <GovRow label="VISION 2030" value="An open window onto the world · an example to follow" />
+          <motion.div variants={fadeUpItem} style={{ width: '100%', maxWidth: 700 }}>
+            <GovernanceStructure />
           </motion.div>
         </motion.div>
       </div>
@@ -742,7 +750,7 @@ export function S10Ask() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 70%, transparent) 60%, transparent 100%)',
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
       <SectionHeader number="10" title="The Ask" />
@@ -769,25 +777,8 @@ export function S10Ask() {
             Three concrete decisions, taken together, unlock the path to first operations.
           </motion.p>
 
-          <motion.div variants={fadeUpItem} style={S.govGrid}>
-            <GovRow
-              label="MANDATE"
-              value="Qai green-light to enter formal MoU phase · Q3 2026"
-            />
-            <GovRow
-              label="SITE"
-              value="Joint identification of the 100,000 m² parcel with MoCI · 90 days"
-            />
-            <GovRow
-              label="CAPITAL"
-              value="Anchor co-investment ticket alongside Qatari family offices"
-            />
-          </motion.div>
-
-          <motion.div variants={fadeUpItem} style={S.callout}>
-            <div style={{ ...S.calloutText, color: ACCENT, fontWeight: W.bold }}>
-              First operations online · month 18 from signing.
-            </div>
+          <motion.div variants={fadeUpItem} style={{ width: '100%', maxWidth: 700 }}>
+            <TheAskSteps />
           </motion.div>
         </motion.div>
       </div>
@@ -1688,47 +1679,64 @@ function DualRail() {
   );
 }
 
-function QatCard({ pct, title, line, roadmap }) {
+function QatarisationDashboard() {
   return (
-    <motion.div 
-      whileHover={{ y: -4, borderColor: 'var(--color-border-medium)', boxShadow: '0 15px 30px rgba(0,0,0,0.06)' }}
-      transition={{ duration: 0.3 }}
+    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingRight: '6vw', paddingLeft: '2vw' }}>
+      
+      {/* 4 Pillars Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3vh 2vw', zIndex: 2 }}>
+        <QatPremiumCard delay={0.2} title="CAPITAL" line="Reserved tranche for Qatari investors via QFC." />
+        <QatPremiumCard delay={0.3} title="WORKFORCE" line="Tawteen-aligned · HBKU pipeline." roadmap="→ 50% by Y5" />
+        <QatPremiumCard delay={0.4} title="PROCUREMENT" line="Domestic supply chain first." />
+        <QatPremiumCard delay={0.5} title="FOUNDERS" line="45 of 150 residency seats reserved." />
+      </div>
+
+      {/* Massive Glowing Curve Below */}
+      <div style={{ marginTop: '5vh', zIndex: 1 }}>
+        <QatMassiveCurve />
+      </div>
+    </div>
+  );
+}
+
+function QatPremiumCard({ delay, title, line, roadmap }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay, type: 'spring', bounce: 0.4 }}
+      whileHover={{ y: -5, boxShadow: `0 25px 50px rgba(0,0,0,0.6)`, borderColor: 'rgba(255,255,255,0.2)' }}
       style={{
-        padding: '2.5vh 2vw',
-        background: 'var(--color-surface)',
-        border: '1px solid var(--color-border-light)',
+        background: 'rgba(15, 15, 15, 0.75)',
+        border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: 16,
-        display: 'flex',
-        gap: '1.5vw',
-        alignItems: 'center',
-        boxShadow: '0 5px 15px rgba(0,0,0,0.02)',
+        padding: '3vh 2vw',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
+        boxShadow: '0 15px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '4px',
-        height: '100%',
-        background: ACCENT,
-      }} />
-      <div style={{ fontSize: 'min(4.5vh, 42px)', fontWeight: W.black, color: ACCENT, letterSpacing: LS.tight, lineHeight: 1, flex: '0 0 auto' }}>{pct}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6vh' }}>
-        <div style={{ fontSize: T.micro + 2, letterSpacing: LS.wider, fontWeight: W.black, color: TEXT_PRIMARY, textTransform: 'uppercase' }}>{title}</div>
-        <div style={{ fontSize: 'min(1.5vh, 13px)', color: TEXT_DIM, lineHeight: 1.5, fontWeight: W.medium }}>{line}</div>
-        {roadmap && <div style={{ fontSize: 'min(1.3vh, 11px)', color: ACCENT, fontWeight: W.bold, marginTop: '0.3vh', letterSpacing: LS.wide }}>{roadmap}</div>}
+      <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: ACCENT, boxShadow: `0 0 15px ${ACCENT}` }} />
+      <div style={{ fontSize: 'min(2vh, 18px)', fontWeight: W.black, color: '#fff', letterSpacing: LS.wider, marginBottom: '1vh', textTransform: 'uppercase' }}>
+        {title}
       </div>
+      <div style={{ fontSize: 'min(1.5vh, 13px)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, fontWeight: W.medium }}>
+        {line}
+      </div>
+      {roadmap && (
+        <div style={{ display: 'inline-block', marginTop: '1.5vh', padding: '0.6vh 1vw', background: 'rgba(190, 18, 60, 0.2)', borderRadius: 6, color: ACCENT, fontSize: 'min(1.4vh, 12px)', fontWeight: W.bold, letterSpacing: LS.wide }}>
+          {roadmap}
+        </div>
+      )}
     </motion.div>
   );
 }
 
-/* QatarisationCurve — Year-by-year ascent 30% → 50% over 5 years.
-   Smooth SVG curve, dot per year, annotated. */
-function QatarisationCurve() {
+function QatMassiveCurve() {
   const W_BOX = 850;
-  const H_BOX = 160;
+  const H_BOX = 200;
   const padL = 40;
   const padR = 30;
   const padT = 20;
@@ -1758,19 +1766,26 @@ function QatarisationCurve() {
 
   return (
     <motion.div 
-      whileHover={{ borderColor: 'var(--color-border-medium)', boxShadow: '0 15px 30px rgba(0,0,0,0.04)' }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.6 }}
+      whileHover={{ borderColor: 'rgba(255,255,255,0.2)', boxShadow: '0 25px 50px rgba(0,0,0,0.6)' }}
       style={{
-        padding: '2vh 2vw',
-        background: 'var(--color-surface)',
-        border: '1px solid var(--color-border-light)',
-        borderRadius: 16,
-        boxShadow: '0 5px 15px rgba(0,0,0,0.02)',
+        padding: '3vh 2vw',
+        background: 'rgba(15, 15, 15, 0.75)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 20,
+        boxShadow: '0 15px 30px rgba(0,0,0,0.4)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
         position: 'relative',
         width: '100%',
       }}
     >
-      <div style={{ fontSize: T.micro, fontWeight: W.heavy, letterSpacing: LS.widest, color: TEXT_FAINT, marginBottom: '2vh', textTransform: 'uppercase' }}>TRAJECTORY · YEAR 1 → YEAR 5</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2vh' }}>
+        <div style={{ fontSize: T.micro+2, fontWeight: W.heavy, letterSpacing: LS.widest, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>TRAJECTORY · YEAR 1 → YEAR 5</div>
+        <div style={{ fontSize: 'min(3.5vh, 28px)', fontWeight: W.black, color: ACCENT, lineHeight: 1, textShadow: `0 0 20px ${ACCENT}` }}>+20%</div>
+      </div>
       <svg
         viewBox={`0 0 ${W_BOX} ${H_BOX}`}
         style={{ width: '100%', height: 'auto', display: 'block' }}
@@ -1786,7 +1801,7 @@ function QatarisationCurve() {
                 x2={W_BOX - padR}
                 y1={yy}
                 y2={yy}
-                stroke="var(--color-border-light)"
+                stroke="rgba(255,255,255,0.15)"
                 strokeWidth="1"
                 strokeDasharray="4 6"
               />
@@ -1794,7 +1809,7 @@ function QatarisationCurve() {
                 x={padL - 10}
                 y={yy + 4}
                 textAnchor="end"
-                fill="var(--color-text-muted)"
+                fill="rgba(255,255,255,0.4)"
                 fontSize="11"
                 fontWeight="700"
                 style={{ fontFamily: FONT_STACK }}
@@ -1807,14 +1822,14 @@ function QatarisationCurve() {
         {/* Area under curve */}
         <motion.path
           d={`${path} L ${pts[pts.length - 1].x} ${H_BOX - padB} L ${pts[0].x} ${H_BOX - padB} Z`}
-          fill="url(#curve-gradient)"
+          fill="url(#curve-gradient-dark)"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
+          transition={{ duration: 1, delay: 0.8 }}
         />
         <defs>
-          <linearGradient id="curve-gradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(190, 18, 60, 0.2)" />
+          <linearGradient id="curve-gradient-dark" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(190, 18, 60, 0.4)" />
             <stop offset="100%" stopColor="rgba(190, 18, 60, 0)" />
           </linearGradient>
         </defs>
@@ -1822,12 +1837,13 @@ function QatarisationCurve() {
         <motion.path 
           d={path} 
           stroke={ACCENT} 
-          strokeWidth="3" 
+          strokeWidth="4" 
           fill="none" 
           strokeLinecap="round" 
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
+          transition={{ duration: 1.5, delay: 0.5, ease: "easeInOut" }}
+          style={{ filter: `drop-shadow(0 0 10px ${ACCENT})` }}
         />
         {/* Year markers */}
         {pts.map((p, i) => (
@@ -1835,17 +1851,17 @@ function QatarisationCurve() {
             key={`pt-${i}`}
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1 + i * 0.15, duration: 0.4, type: "spring" }}
+            transition={{ delay: 1.2 + i * 0.15, duration: 0.4, type: "spring" }}
             style={{ transformOrigin: `${p.x}px ${p.y}px` }}
           >
-            <circle cx={p.x} cy={p.y} r="6" fill="var(--color-surface)" stroke={ACCENT} strokeWidth="2.5" />
+            <circle cx={p.x} cy={p.y} r="6" fill="#111" stroke={ACCENT} strokeWidth="3" />
             {(i === 0 || i === pts.length - 1) && (
               <text
                 x={p.x}
-                y={p.y - 16}
+                y={p.y - 18}
                 textAnchor="middle"
-                fill={TEXT_PRIMARY}
-                fontSize="13"
+                fill="#fff"
+                fontSize="14"
                 fontWeight="900"
                 style={{ fontFamily: FONT_STACK }}
               >
@@ -1856,7 +1872,7 @@ function QatarisationCurve() {
               x={p.x}
               y={H_BOX - 5}
               textAnchor="middle"
-              fill={TEXT_PRIMARY}
+              fill="#fff"
               fontSize="12"
               fontWeight="800"
               letterSpacing="1"
@@ -1871,36 +1887,107 @@ function QatarisationCurve() {
   );
 }
 
-function GovRow({ label, value }) {
+function GovernanceStructure() {
   return (
-    <motion.div 
-      whileHover={{ x: 5, backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-medium)', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}
-      transition={{ duration: 0.2 }}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2vh', width: '100%', marginTop: '4vh' }}>
+       {/* Top Row: HOLDING */}
+       <GovBlock delay={0.2} role="HOLDING" title="FUTUR ONE" line="Qatari-controlled · QFC-incorporated · 100% domestic capital" isMain />
+       
+       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vw' }}>
+         <GovBlock delay={0.3} role="CHAIR" title="Sheikh Mohammed Al-Thani" line="QFC sovereign principal" />
+         <GovBlock delay={0.4} role="BOARD" title="Independent Directors" line="Qai · MoCI · Hearst Qatar" />
+       </div>
+
+       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vw' }}>
+         <GovBlock delay={0.5} role="CEO" title="Qatari National" line="Jointly appointed with Qai" />
+         <GovBlock delay={0.6} role="OPERATING PARTNER" title="Hearst Qatar" line="Operates under Qatari governance" />
+       </div>
+
+       <GovBlock delay={0.7} role="VISION 2030" title="Global Blueprint" line="An open window onto the world · an example to follow" accent />
+    </div>
+  );
+}
+
+function GovBlock({ role, title, line, isMain, accent, delay }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.6, type: 'spring', bounce: 0.4 }}
+      whileHover={{ y: -5, boxShadow: isMain ? '0 20px 40px rgba(0,0,0,0.2)' : '0 20px 40px rgba(0,0,0,0.08)', borderColor: accent ? ACCENT : (isMain ? 'var(--color-border-light)' : 'var(--color-border-medium)') }}
       style={{
-        display: 'grid',
-        gridTemplateColumns: '160px 1fr',
-        gap: '2vw',
-        padding: '2.5vh 2vw',
-        background: 'var(--color-surface)',
-        border: `1px solid var(--color-border-light)`,
-        alignItems: 'center',
-        borderRadius: 12,
-        marginBottom: '1vh',
+        background: isMain ? 'var(--color-text-primary)' : 'var(--color-surface)',
+        border: isMain ? '1px solid var(--color-border-medium)' : '1px solid var(--color-border-light)',
+        borderRadius: 16,
+        padding: isMain ? '3.5vh 2vw' : '2.5vh 1.5vw',
         position: 'relative',
         overflow: 'hidden',
+        boxShadow: isMain ? '0 15px 30px rgba(0,0,0,0.15)' : '0 5px 15px rgba(0,0,0,0.03)',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center'
       }}
     >
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '4px',
-        height: '100%',
-        background: ACCENT,
-      }} />
-      <div style={{ fontSize: T.micro + 1, letterSpacing: LS.widest, fontWeight: W.heavy, color: ACCENT, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ fontSize: 'min(1.8vh, 16px)', fontWeight: W.medium, color: TEXT_PRIMARY, lineHeight: 1.5 }}>{value}</div>
+      <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: accent ? ACCENT : (isMain ? ACCENT : 'var(--color-border-medium)') }} />
+      <div style={{ fontSize: T.micro, letterSpacing: LS.widest, fontWeight: W.heavy, color: isMain ? 'rgba(255,255,255,0.6)' : (accent ? ACCENT : TEXT_DIM), textTransform: 'uppercase', marginBottom: '1vh' }}>{role}</div>
+      <div style={{ fontSize: isMain ? 'min(3vh, 28px)' : 'min(2.2vh, 20px)', fontWeight: W.black, color: isMain ? '#fff' : TEXT_PRIMARY, letterSpacing: LS.tight, marginBottom: '0.6vh' }}>{title}</div>
+      <div style={{ fontSize: 'min(1.5vh, 14px)', color: isMain ? 'rgba(255,255,255,0.8)' : TEXT_DIM, lineHeight: 1.5, fontWeight: W.medium }}>{line}</div>
     </motion.div>
+  );
+}
+
+function TheAskSteps() {
+  const steps = [
+    { num: '01', role: 'MANDATE', title: 'Qai Green-Light', line: 'To enter formal MoU phase · Q3 2026' },
+    { num: '02', role: 'SITE', title: 'Joint Identification', line: 'Of the 100,000 m² parcel with MoCI · 90 days' },
+    { num: '03', role: 'CAPITAL', title: 'Anchor Co-investment', line: 'Ticket alongside Qatari family offices' },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', marginTop: '4vh', width: '100%' }}>
+      {steps.map((s, i) => (
+        <motion.div
+          key={s.num}
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 + i * 0.15, duration: 0.6, type: 'spring', bounce: 0.4 }}
+          whileHover={{ x: 10, borderColor: 'var(--color-border-medium)', boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '2.5vw',
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-border-light)',
+            borderRadius: 16,
+            padding: '3vh 2.5vw',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.02)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: ACCENT }} />
+          
+          {/* Huge Number */}
+          <div style={{ fontSize: 'min(7vh, 64px)', fontWeight: W.black, color: 'rgba(190, 18, 60, 0.15)', lineHeight: 1, fontFamily: 'monospace' }}>
+            {s.num}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            <div style={{ fontSize: T.micro, letterSpacing: LS.widest, fontWeight: W.heavy, color: ACCENT, textTransform: 'uppercase', marginBottom: '0.8vh' }}>{s.role}</div>
+            <div style={{ fontSize: 'min(2.8vh, 26px)', fontWeight: W.black, color: TEXT_PRIMARY, letterSpacing: LS.snug, marginBottom: '0.6vh' }}>{s.title}</div>
+            <div style={{ fontSize: 'min(1.7vh, 16px)', color: TEXT_DIM, fontWeight: W.medium }}>{s.line}</div>
+          </div>
+        </motion.div>
+      ))}
+
+      {/* Callout */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.6 }}
+        style={{ marginTop: '2.5vh', padding: '2.5vh 2vw', background: 'rgba(190, 18, 60, 0.05)', borderRadius: 12, borderLeft: `4px solid ${ACCENT}` }}
+      >
+        <div style={{ fontSize: 'min(2vh, 18px)', color: ACCENT, fontWeight: W.bold, letterSpacing: LS.wide }}>
+          First operations online · month 18 from signing.
+        </div>
+      </motion.div>
+    </div>
   );
 }
 
@@ -2056,7 +2143,7 @@ const S = {
     textTransform: 'uppercase',
   },
   splitTextLeft: {
-    flex: '0 0 55%',
+    flex: '0 0 66.66%',
     padding: L.splitPadL,
     display: 'flex',
     flexDirection: 'column',
@@ -2065,7 +2152,7 @@ const S = {
     zIndex: 3,
   },
   splitTextRight: {
-    flex: '0 0 55%',
+    flex: '0 0 66.66%',
     padding: L.splitPadR,
     display: 'flex',
     flexDirection: 'column',

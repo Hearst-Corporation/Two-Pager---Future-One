@@ -57,6 +57,7 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 | `/brochure` | Brochure A3 plié (P1 → P4, 4 vues) |
 | `/datacenter` | One-pager isolé ; logos footer `public/partners/*.svg`, filigranes `*-icon.svg` (alignement vertical calibré dans le viewBox) |
 | `/print` | Vue print A3 |
+| `/pitch` | Deck plein écran (navigation clavier, dots, zones clic) |
 
 **Landing `/`** — `components/landing/SectionMethod.jsx` : le conteneur `sticky` utilise `overflow: clip` plutôt que `hidden`, sinon WebKit peut traiter ce nœud comme scrollport et casser le « pin » + le défilement lié au track horizontal.
 

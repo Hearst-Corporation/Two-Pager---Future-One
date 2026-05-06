@@ -32,6 +32,8 @@ export const T = {
   h2Closing: 'min(10vh, 96px)',
   h3: 'min(4.5vh, 42px)',
   lead: 'min(2.2vh, 20px)',
+  /** Couverture pitch — entre body et lead */
+  subtitle: 'min(2vh, 18px)',
   body: 'min(1.7vh, 15px)',
   caption: 'min(1.5vh, 13px)',
   eyebrow: 12,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   S00Cover,
@@ -36,6 +36,7 @@ const SLIDES = [
 export default function Deck() {
   const [index, setIndex] = useState(0);
   const [showHint, setShowHint] = useState(true);
+  const wheelLockRef = useRef(null);
 
   const go = useCallback(
     (delta) => {
@@ -86,21 +87,31 @@ export default function Deck() {
     const onWheel = (e) => {
       // Empêche le scroll natif de la page entière (le rebond sur Mac)
       e.preventDefault();
-      
-      if (window.wheelTimeout) return;
-      
+
+      if (wheelLockRef.current) return;
+
       if (e.deltaY > 20) {
         go(1);
-        window.wheelTimeout = setTimeout(() => { window.wheelTimeout = null; }, 600);
+        wheelLockRef.current = setTimeout(() => {
+          wheelLockRef.current = null;
+        }, 600);
       } else if (e.deltaY < -20) {
         go(-1);
-        window.wheelTimeout = setTimeout(() => { window.wheelTimeout = null; }, 600);
+        wheelLockRef.current = setTimeout(() => {
+          wheelLockRef.current = null;
+        }, 600);
       }
     };
 
     // On attache l'événement en non-passif pour pouvoir faire e.preventDefault()
     window.addEventListener('wheel', onWheel, { passive: false });
-    return () => window.removeEventListener('wheel', onWheel);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      if (wheelLockRef.current) {
+        clearTimeout(wheelLockRef.current);
+        wheelLockRef.current = null;
+      }
+    };
   }, [go]);
 
   const Current = SLIDES[index].Component;
@@ -158,7 +169,7 @@ export default function Deck() {
 
       {showHint && (
         <div style={S.hint}>
-          ← → pour naviguer · F pour plein écran · 0–9 accès direct
+          ← → pour naviguer · F plein écran · 0–9 = slides 1–10 · Home / End pour début / fin
         </div>
       )}
     </div>
