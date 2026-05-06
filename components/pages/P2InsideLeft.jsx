@@ -179,7 +179,7 @@ const S = {
   heroOverlay: {
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(90deg, rgba(26,29,36,0.85) 0%, rgba(26,29,36,0.5) 45%, rgba(26,29,36,0) 100%)',
+    background: 'linear-gradient(90deg, color-mix(in srgb, var(--color-gray-900) 85%, transparent) 0%, color-mix(in srgb, var(--color-gray-900) 50%, transparent) 45%, transparent 100%)',
   },
   tag: {
     position: 'absolute',
@@ -247,10 +247,10 @@ const S = {
     textTransform: 'uppercase',
   },
 
-  /* DARK BAND (233px) */
+  /* DARK BAND (230px) */
   darkBand: {
     ...SECTION,
-    height: 233,
+    height: 230,
     display: 'flex',
   },
   logoBlock: {
@@ -345,10 +345,10 @@ const S = {
     backgroundPosition: 'center 50%',
   },
 
-  /* FOOTER (77px) */
+  /* FOOTER (80px) */
   footer: {
     ...SECTION,
-    height: 77,
+    height: 80,
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
     gap: 24,

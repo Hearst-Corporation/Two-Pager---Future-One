@@ -72,14 +72,8 @@ const S = {
   overlay: {
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(180deg, rgba(26,29,36,0.7) 0%, rgba(26,29,36,0.3) 50%, rgba(26,29,36,0.85) 100%)',
-    zIndex: 1,
-  },
-  overlay: {
-    position: 'absolute',
-    inset: 0,
     /* Voile subtil et élégant : juste assez pour détacher la citation blanche, sans tuer l'image */
-    background: 'linear-gradient(180deg, rgba(15,17,21,0.2) 0%, rgba(15,17,21,0.45) 50%, rgba(15,17,21,0.65) 100%)',
+    background: 'linear-gradient(180deg, color-mix(in srgb, var(--color-gray-900) 20%, transparent) 0%, color-mix(in srgb, var(--color-gray-900) 45%, transparent) 50%, color-mix(in srgb, var(--color-gray-900) 65%, transparent) 100%)',
     zIndex: 1,
   },
   topBar: {
@@ -135,7 +129,7 @@ const S = {
     display: 'flex',
     justifyContent: 'space-between',
     padding: '30px 0',
-    borderTop: '1px solid rgba(255,255,255,0.1)',
+    borderTop: '1px solid color-mix(in srgb, var(--color-surface) 10%, transparent)',
     margin: '0 30px',
   },
   contactBlock: {

@@ -67,14 +67,8 @@ const S = {
   overlay: {
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(180deg, rgba(26,29,36,0.1) 0%, rgba(26,29,36,0.6) 60%, rgba(26,29,36,0.85) 100%)',
-    zIndex: 1,
-  },
-  overlay: {
-    position: 'absolute',
-    inset: 0,
     /* Dégradé "Smart" premium : léger en haut pour les petits textes, 100% transparent au milieu pour la photo, assombri à 60% en bas pour le gros titre */
-    background: 'linear-gradient(180deg, rgba(15,17,21,0.3) 0%, rgba(15,17,21,0) 25%, rgba(15,17,21,0) 55%, rgba(15,17,21,0.65) 100%)',
+    background: 'linear-gradient(180deg, color-mix(in srgb, var(--color-gray-900) 30%, transparent) 0%, transparent 25%, transparent 55%, color-mix(in srgb, var(--color-gray-900) 65%, transparent) 100%)',
     zIndex: 1,
   },
   topBar: {
@@ -122,7 +116,7 @@ const S = {
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     padding: '30px 0',
-    borderTop: '1px solid rgba(255,255,255,0.1)',
+    borderTop: '1px solid color-mix(in srgb, var(--color-surface) 10%, transparent)',
     margin: '0 30px',
   },
   bottomText: {

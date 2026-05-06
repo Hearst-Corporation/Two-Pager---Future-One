@@ -206,12 +206,18 @@ export function S02Team() {
           initial="hidden"
           animate="show"
         >
-          <motion.h2 variants={fadeUpItem} style={S.h2}>
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+              CONSORTIUM · GLOBAL EXPERTISE
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
             Qatari-led. Globally proven.
             <br />
             <span style={{ color: ACCENT }}>Ready to execute.</span>
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
             FUTUR ONE is carried by a sovereign-aligned consortium — a Qatari principal,
             an industrial operator, a master architect, and execution partners who have
             already delivered for sovereign states.
@@ -280,7 +286,13 @@ export function S03TrackRecord() {
           initial="hidden"
           animate="show"
         >
-          <motion.h2 variants={fadeUpItem} style={S.h2}>
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+              TRACK RECORD · PROVEN DELIVERY
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
             Sovereign-grade delivery.
             <br />
             <span style={{ color: ACCENT }}>The risk is not theoretical.</span>
@@ -391,32 +403,51 @@ export function S05Masterplan() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 70%, transparent) 60%, transparent 100%)',
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 55%, transparent 100%)',
         }}
       />
       <SectionHeader number="05" title="The Masterplan" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <motion.div 
-          style={{ ...S.splitTextLeft, justifyContent: 'center' }}
+          style={{ flex: '0 0 45%', padding: L.splitPadL, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           variants={staggerContainer}
           initial="hidden"
           animate="show"
         >
-          <motion.h2 variants={fadeUpItem} style={S.h2}>
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+              MASTERPLAN · 100,000 M²
+            </div>
+          </motion.div>
+
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
             From <span style={{ color: ACCENT }}>sovereign compute</span>
             <br />
             to sovereign companies.
           </motion.h2>
 
-          <motion.div variants={fadeUpItem} style={S.bigStats}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 600, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: TEXT_DIM, lineHeight: 1.6 }}>
+            A self-contained principality of intelligence on Qatari soil. 
+            Six interconnected districts forming the most advanced founder ecosystem in the GCC.
+          </motion.p>
+
+          <motion.div variants={fadeUpItem} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3vh 2vw', marginTop: '5vh', maxWidth: 600 }}>
             <BigStat value="100K" label="m² campus" />
             <BigStat value="Tier-IV" label="high-density compute" />
             <BigStat value="4,000" label="residents" />
             <BigStat value="150" label="startups" />
           </motion.div>
+        </motion.div>
 
-          <motion.div variants={fadeUpItem}>
-            <MasterplanMap />
+        <motion.div 
+          style={{ flex: '0 0 55%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={fadeUpItem} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <MasterplanOrbital />
           </motion.div>
         </motion.div>
       </div>
@@ -455,12 +486,18 @@ export function S06RDI() {
           initial="hidden"
           animate="show"
         >
-          <motion.h2 variants={fadeUpItem} style={S.h2}>
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+              RDI BACKBONE · QATAR FOUNDATION
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
             Plugged into the
             <br />
             <span style={{ color: ACCENT }}>Qatari RDI backbone.</span>
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
             FUTUR ONE is the industrial bridge between Qatar's sovereign research
             backbone and the global founder ecosystem. Where research becomes
             companies. Where MNCs find a hubbed logistics platform to anchor their R&D.
@@ -571,42 +608,50 @@ export function S08Qatarisation() {
           initial="hidden"
           animate="show"
         >
-          <motion.h2 variants={fadeUpItem} style={S.h2}>
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+              QATARISATION · YEAR 1
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
             A <span style={{ color: ACCENT }}>30% Qatari floor</span>
             <br />
             from year one.
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: TEXT_DIM, lineHeight: 1.6 }}>
             Qatarisation is measured across capital, jobs, suppliers and founders.
-            A <strong>30% floor</strong> from year one ·
-            a path to <strong>50% by year five</strong>.
+            A <strong style={{ color: TEXT_PRIMARY }}>30% floor</strong> from year one ·
+            a path to <strong style={{ color: TEXT_PRIMARY }}>50% by year five</strong>.
           </motion.p>
 
-          <motion.div variants={fadeUpItem} style={S.qatGrid}>
-            <QatCard
-              pct="30%"
-              title="CAPITAL"
-              line="Reserved tranche for Qatari investors via QFC."
-            />
-            <QatCard
-              pct="30%"
-              title="WORKFORCE"
-              line="Tawteen-aligned · HBKU pipeline."
-              roadmap="→ 50% by Y5"
-            />
-            <QatCard
-              pct="30%"
-              title="PROCUREMENT"
-              line="Domestic supply chain first."
-            />
-            <QatCard
-              pct="30%"
-              title="FOUNDERS"
-              line="45 of 150 residency seats reserved."
-            />
-          </motion.div>
+          <motion.div variants={fadeUpItem} style={{ display: 'flex', flexDirection: 'column', gap: '4vh', marginTop: '4vh', width: '100%', maxWidth: 850 }}>
+            {/* Cards Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vh 2vw' }}>
+              <QatCard
+                pct="30%"
+                title="CAPITAL"
+                line="Reserved tranche for Qatari investors via QFC."
+              />
+              <QatCard
+                pct="30%"
+                title="WORKFORCE"
+                line="Tawteen-aligned · HBKU pipeline."
+                roadmap="→ 50% by Y5"
+              />
+              <QatCard
+                pct="30%"
+                title="PROCUREMENT"
+                line="Domestic supply chain first."
+              />
+              <QatCard
+                pct="30%"
+                title="FOUNDERS"
+                line="45 of 150 residency seats reserved."
+              />
+            </div>
 
-          <motion.div variants={fadeUpItem}>
+            {/* Curve */}
             <QatarisationCurve />
           </motion.div>
         </motion.div>
@@ -646,12 +691,18 @@ export function S09Governance() {
           initial="hidden"
           animate="show"
         >
-          <motion.h2 variants={fadeUpItem} style={S.h2}>
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+              GOVERNANCE · SOVEREIGN CONTROL
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
             <span style={{ color: ACCENT }}>Qatari control</span> with
             <br />
             world-class execution partners.
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
             FUTUR ONE is a Qatari-controlled holding at QFC — sovereign chair, sovereign capital,
             international expertise as contracted partners. Beyond compliance, FUTUR ONE
             stands as an example Vision 2030 offers to the rest of the world.
@@ -702,12 +753,18 @@ export function S10Ask() {
           initial="hidden"
           animate="show"
         >
-          <motion.h2 variants={fadeUpItem} style={S.h2}>
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+              NEXT STEPS · 90 DAYS
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
             Three decisions
             <br />
             <span style={{ color: ACCENT }}>to reach first operations.</span>
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
             Today's ask is alignment, not a funding decision. Capital follows diligence.
             Three concrete decisions, taken together, unlock the path to first operations.
           </motion.p>
@@ -788,75 +845,166 @@ export function S11Closing() {
 /* SUB-COMPONENTS                                               */
 /* ============================================================ */
 
-function MasterplanMap() {
-  return (
-    <div style={{ position: 'relative', width: '100%', aspectRatio: '800 / 360', marginTop: '4vh', maxWidth: 920 }}>
-      <svg width="100%" height="100%" viewBox="0 0 800 360" preserveAspectRatio="xMidYMid meet" style={{ position: 'absolute', inset: 0 }}>
-        {/* Draw lines */}
-        <motion.line x1="150" y1="80" x2="650" y2="80" stroke="var(--color-border-medium)" strokeWidth="2" strokeDasharray="4 4" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.2 }} />
-        <motion.line x1="150" y1="280" x2="650" y2="280" stroke="var(--color-border-medium)" strokeWidth="2" strokeDasharray="4 4" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.2 }} />
-        
-        <motion.line x1="150" y1="80" x2="150" y2="280" stroke="var(--color-border-medium)" strokeWidth="2" strokeDasharray="4 4" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.4 }} />
-        <motion.line x1="400" y1="80" x2="400" y2="280" stroke="var(--color-accent)" strokeWidth="2" strokeDasharray="4 4" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.4 }} />
-        <motion.line x1="650" y1="80" x2="650" y2="280" stroke="var(--color-border-medium)" strokeWidth="2" strokeDasharray="4 4" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1, delay: 0.4 }} />
-        
-        <motion.circle cx="400" cy="180" r="40" fill="none" stroke="var(--color-accent)" strokeWidth="1" strokeDasharray="2 4" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 0.5, scale: 1 }} transition={{ duration: 1, delay: 0.8 }} />
-        <motion.text x="400" y="184" textAnchor="middle" fill="var(--color-accent)" fontSize="10" fontWeight="900" letterSpacing="2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1, duration: 0.5 }}>PLAZA</motion.text>
-      </svg>
-      
-      {/* Absolute positioned HTML nodes */}
-      <MasterplanMapNode cx="18.75%" cy="22.22%" title="COMPUTE CORE" line="Liquid-cooled Tier-IV" icon={<IconCompute />} delay={0.5} />
-      <MasterplanMapNode cx="50%" cy="22.22%" title="INNOVATION HUB" line="150 startups · Labs" icon={<IconInnovation />} delay={0.6} />
-      <MasterplanMapNode cx="81.25%" cy="22.22%" title="LIVING QUARTERS" line="4,000 residents" icon={<IconLiving />} delay={0.7} />
-      <MasterplanMapNode cx="18.75%" cy="77.78%" title="CULTURE & ENT." line="Auditorium · Biennale" icon={<IconCulture />} delay={0.8} />
-      <MasterplanMapNode cx="50%" cy="77.78%" title="SPORT & WELLNESS" line="Esports arena · Padel" icon={<IconSport />} delay={0.9} />
-      <MasterplanMapNode cx="81.25%" cy="77.78%" title="HOSPITALITY" line="200 keys · QFC" icon={<IconHospitality />} delay={1.0} />
-    </div>
-  );
-}
+function MasterplanOrbital() {
+  const nodes = [
+    { angle: -90, icon: <IconCompute />, title: "COMPUTE CORE", line: "Sovereign GPU clusters" },
+    { angle: -30, icon: <IconInnovation />, title: "INNOVATION HUB", line: "150 startups · Labs" },
+    { angle: 30, icon: <IconLiving />, title: "LIVING QUARTERS", line: "4,000 residents" },
+    { angle: 90, icon: <IconHospitality />, title: "HOSPITALITY", line: "200 keys · QFC" },
+    { angle: 150, icon: <IconSport />, title: "SPORT & WELLNESS", line: "Esports arena · Padel" },
+    { angle: 210, icon: <IconCulture />, title: "CULTURE & ENT.", line: "Auditorium · Biennale" },
+  ];
 
-function MasterplanMapNode({ cx, cy, title, line, icon, delay }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay, duration: 0.5, type: 'spring', stiffness: 200, damping: 20 }}
-      style={{
-        position: 'absolute',
-        left: cx,
-        top: cy,
-        transform: 'translate(-50%, -50%)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center',
-        width: 160,
-      }}
-    >
-      <motion.div 
-        whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.1)' }}
+    <div style={{ position: 'relative', width: 'min(85vh, 900px)', height: 'min(85vh, 900px)', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      
+      {/* SVG Connections */}
+      <svg viewBox="0 0 1000 1000" style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 0 }}>
+        {/* Outer Ring */}
+        <motion.circle 
+          cx="500" cy="500" r="360" 
+          fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" strokeDasharray="10 20"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          style={{ transformOrigin: '500px 500px' }}
+        />
+        {/* Spokes */}
+        {nodes.map((n, i) => {
+          const rad = (n.angle * Math.PI) / 180;
+          const x = 500 + Math.cos(rad) * 360;
+          const y = 500 + Math.sin(rad) * 360;
+          return (
+            <motion.line
+              key={`spoke-${i}`}
+              x1="500" y1="500" x2={x} y2={y}
+              stroke={ACCENT}
+              strokeWidth="3"
+              strokeOpacity="0.4"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1, delay: 0.2 + i * 0.1 }}
+            />
+          );
+        })}
+      </svg>
+
+      {/* Central Node */}
+      <motion.div
+        initial={{ scale: 0, x: '-50%', y: '-50%' }}
+        animate={{ scale: 1, x: '-50%', y: '-50%' }}
+        transition={{ duration: 1, type: 'spring', bounce: 0.4 }}
         style={{
-          width: 64, height: 64, borderRadius: '50%', 
-          backgroundColor: 'rgba(0,0,0,0.4)',
-          border: '1px solid rgba(255,255,255,0.15)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          display: 'flex', justifyContent: 'center', alignItems: 'center',
-          color: ACCENT,
-          marginBottom: '1.2vh',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.4), inset 0 0 12px rgba(255,255,255,0.05)',
-          cursor: 'pointer',
+          position: 'absolute', top: '50%', left: '50%',
+          width: '28%', height: '28%', borderRadius: '50%',
+          background: 'rgba(190, 18, 60, 0.15)',
+          border: `3px solid ${ACCENT}`,
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+          boxShadow: `0 0 100px rgba(190, 18, 60, 0.6), inset 0 0 50px rgba(190, 18, 60, 0.4)`,
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          zIndex: 10
         }}
       >
-        {icon}
+        <div style={{ fontSize: 'min(4.5vh, 42px)', fontWeight: W.black, color: '#fff', letterSpacing: LS.wider, textAlign: 'center', lineHeight: 1 }}>FUTUR<br/>ONE</div>
+        <div style={{ fontSize: 'min(1.8vh, 16px)', color: ACCENT, fontWeight: W.heavy, letterSpacing: LS.widest, marginTop: '1vh' }}>MASTERPLAN</div>
       </motion.div>
-      <div style={{ fontSize: T.micro + 1, fontWeight: W.black, letterSpacing: LS.wider, color: TEXT_PRIMARY, textTransform: 'uppercase', marginBottom: '0.5vh', textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>
-        {title}
-      </div>
-      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.3, fontWeight: W.medium, textShadow: '0 2px 4px rgba(0,0,0,0.6)' }}>
-        {line}
-      </div>
-    </motion.div>
+
+      {/* Satellite Nodes */}
+      {nodes.map((n, i) => {
+        const rad = (n.angle * Math.PI) / 180;
+        // 36% from center gives radius 360/1000 in SVG
+        const left = 50 + Math.cos(rad) * 36;
+        const top = 50 + Math.sin(rad) * 36;
+        
+        // Determine text box positioning based on angle
+        let boxStyle = {};
+        let textAlign = 'left';
+        let alignItems = 'flex-start';
+        
+        if (n.angle === -90) { // Top
+          boxStyle = { bottom: 'calc(100% + 2vh)', left: '50%', transform: 'translateX(-50%)' };
+          textAlign = 'center';
+          alignItems = 'center';
+        } else if (n.angle === 90) { // Bottom
+          boxStyle = { top: 'calc(100% + 2vh)', left: '50%', transform: 'translateX(-50%)' };
+          textAlign = 'center';
+          alignItems = 'center';
+        } else if (n.angle < -90 || n.angle > 90) { // Left side (150, 210)
+          boxStyle = { right: 'calc(100% + 1.5vw)', top: '50%', transform: 'translateY(-50%)' };
+          textAlign = 'right';
+          alignItems = 'flex-end';
+        } else { // Right side (-30, 30)
+          boxStyle = { left: 'calc(100% + 1.5vw)', top: '50%', transform: 'translateY(-50%)' };
+          textAlign = 'left';
+          alignItems = 'flex-start';
+        }
+
+        return (
+          <motion.div
+            key={`node-${i}`}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4 + i * 0.15, duration: 0.8, type: 'spring', bounce: 0.4 }}
+            style={{
+              position: 'absolute',
+              left: `${left}%`,
+              top: `${top}%`,
+              zIndex: 15,
+            }}
+          >
+            <div style={{ position: 'relative' }}>
+              {/* Icon Circle (anchored at exactly center) */}
+              <motion.div 
+                whileHover={{ scale: 1.1, boxShadow: `0 0 50px ${ACCENT}` }}
+                style={{
+                  position: 'absolute',
+                  left: '50%', top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 'min(10vh, 70px)', height: 'min(10vh, 70px)', borderRadius: '50%', 
+                  background: 'rgba(20, 20, 20, 0.95)',
+                  border: `2px solid ${ACCENT}`,
+                  display: 'flex', justifyContent: 'center', alignItems: 'center',
+                  color: '#fff',
+                  boxShadow: '0 10px 20px rgba(0,0,0,0.5)',
+                  cursor: 'default',
+                  zIndex: 2,
+                }}
+              >
+                <div style={{ transform: 'scale(1.4)', color: ACCENT }}>{n.icon}</div>
+              </motion.div>
+              
+              {/* Text Box (positioned outward from icon) */}
+              <div style={{
+                position: 'absolute',
+                ...boxStyle,
+                background: 'rgba(20, 20, 20, 0.85)',
+                padding: '1.5vh 1.5vw',
+                borderRadius: 12,
+                border: '1px solid rgba(255,255,255,0.15)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                boxShadow: '0 15px 30px rgba(0,0,0,0.4)',
+                width: 'max-content',
+                minWidth: '220px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: alignItems,
+                justifyContent: 'center',
+                zIndex: 1,
+              }}>
+                <div style={{ fontSize: 'min(1.8vh, 16px)', fontWeight: W.black, color: '#fff', letterSpacing: LS.wider, marginBottom: '0.4vh', textTransform: 'uppercase' }}>
+                  {n.title}
+                </div>
+                <div style={{ fontSize: 'min(1.5vh, 13px)', color: 'rgba(255,255,255,0.7)', fontWeight: W.semibold, lineHeight: 1.4, textAlign: textAlign }}>
+                  {n.line}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -939,13 +1087,13 @@ function PremiumWhoStat({ value, label, location, bgImage }) {
         minHeight: '22vh',
         boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
         border: '1px solid rgba(255,255,255,0.08)',
-        backgroundColor: 'var(--color-gray-900)',
+        backgroundColor: 'var(--color-surface)',
         cursor: 'default',
       }}
     >
       <motion.div
         variants={{
-          hover: { scale: 1.05, filter: 'grayscale(0) brightness(0.8)' }
+          hover: { scale: 1.05, filter: 'grayscale(0) brightness(0.9)' }
         }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         style={{
@@ -954,7 +1102,7 @@ function PremiumWhoStat({ value, label, location, bgImage }) {
           backgroundImage: `url(${bgImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'grayscale(0.8) brightness(0.4)',
+          filter: 'grayscale(0.3) brightness(0.7)',
           zIndex: 0,
         }}
       />
@@ -962,7 +1110,7 @@ function PremiumWhoStat({ value, label, location, bgImage }) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 100%)',
+          background: 'linear-gradient(180deg, rgba(0,0,0,0) 10%, rgba(0,0,0,0.85) 100%)',
           zIndex: 1,
         }}
       />
@@ -1008,13 +1156,13 @@ function PremiumArchBlock({ title, line, icon, bgImage }) {
         minHeight: '15vh',
         boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
         border: '1px solid rgba(255,255,255,0.08)',
-        backgroundColor: 'var(--color-gray-900)',
+        backgroundColor: 'var(--color-surface)',
         cursor: 'default',
       }}
     >
       <motion.div
         variants={{
-          hover: { scale: 1.05, filter: 'grayscale(0) brightness(0.8)' }
+          hover: { scale: 1.05, filter: 'grayscale(0) brightness(0.9)' }
         }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         style={{
@@ -1023,7 +1171,7 @@ function PremiumArchBlock({ title, line, icon, bgImage }) {
           backgroundImage: `url(${bgImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'grayscale(0.8) brightness(0.3)',
+          filter: 'grayscale(0.3) brightness(0.65)',
           zIndex: 0,
         }}
       />
@@ -1031,7 +1179,7 @@ function PremiumArchBlock({ title, line, icon, bgImage }) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 100%)',
+          background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%)',
           zIndex: 1,
         }}
       />
@@ -1137,10 +1285,38 @@ function StackCard({ name, role, line1, line2 }) {
 
 function BigStat({ value, label }) {
   return (
-    <div style={S.bigStat}>
-      <div style={S.bigStatValue}>{value}</div>
-      <div style={S.bigStatLabel}>{label}</div>
-    </div>
+    <motion.div 
+      whileHover={{ y: -5, boxShadow: '0 20px 40px rgba(0,0,0,0.08)', borderColor: 'var(--color-border-medium)' }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      style={{
+        padding: '3vh 2vw',
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-border-light)',
+        borderRadius: 16,
+        boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1vh',
+        cursor: 'default',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '4px',
+        height: '100%',
+        background: ACCENT,
+      }} />
+      <div style={{ fontSize: 'min(4.8vh, 46px)', fontWeight: W.black, color: TEXT_PRIMARY, letterSpacing: LS.tight, lineHeight: 1 }}>
+        {value}
+      </div>
+      <div style={{ fontSize: T.micro + 2, color: TEXT_DIM, fontWeight: W.bold, textTransform: 'uppercase', letterSpacing: LS.wider }}>
+        {label}
+      </div>
+    </motion.div>
   );
 }
 
@@ -1168,13 +1344,13 @@ function PremiumTeamCard({ role, name, line, bgImage }) {
         minHeight: '22vh',
         boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
         border: '1px solid rgba(255,255,255,0.08)',
-        backgroundColor: 'var(--color-gray-900)',
+        backgroundColor: 'var(--color-surface)',
         cursor: 'default',
       }}
     >
       <motion.div
         variants={{
-          hover: { scale: 1.05, filter: 'grayscale(0) brightness(0.8)' }
+          hover: { scale: 1.05, filter: 'grayscale(0) brightness(0.9)' }
         }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         style={{
@@ -1183,7 +1359,7 @@ function PremiumTeamCard({ role, name, line, bgImage }) {
           backgroundImage: `url(${bgImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'grayscale(0.8) brightness(0.4)',
+          filter: 'grayscale(0.3) brightness(0.7)',
           zIndex: 0,
         }}
       />
@@ -1191,7 +1367,7 @@ function PremiumTeamCard({ role, name, line, bgImage }) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 100%)',
+          background: 'linear-gradient(180deg, rgba(0,0,0,0) 10%, rgba(0,0,0,0.85) 100%)',
           zIndex: 1,
         }}
       />
@@ -1396,107 +1572,117 @@ function PhaseStep({ stamp, title, line, accent }) {
 /* DualRail — two parallel timelines (Operations vs Infrastructure)
    sharing the same temporal milestones M0 / M12 / M24 / M36+. */
 function DualRail() {
-  const stamps = ['M0', 'M12', 'M24', 'M36+'];
-  const operations = [
-    { title: 'ONBOARDING', line: 'First cohort lands · revenue day one' },
-    { title: 'GROWTH', line: 'Cohorts scale · 150 founders pipeline' },
-    { title: 'HARVESTING', line: 'IP captured · exits · revenues compound' },
-    { title: 'VISIBILITY', line: 'Soft power · global brand · events' },
+  const steps = [
+    { 
+      stamp: 'M0', 
+      op: { title: 'ONBOARDING', line: 'First cohort lands · revenue day one' },
+      inf: { title: 'MODULAR LAUNCH', line: 'Modular DC + small founder hub live' }
+    },
+    { 
+      stamp: 'M12', 
+      op: { title: 'GROWTH', line: 'Cohorts scale · 150 founders pipeline' },
+      inf: { title: 'PHASE 1 ONLINE', line: 'First wings · innovation district' }
+    },
+    { 
+      stamp: 'M24', 
+      op: { title: 'HARVESTING', line: 'IP captured · exits · revenues compound' },
+      inf: { title: 'CAMPUS + LIFE', line: 'Living quarters · culture · sport' }
+    },
+    { 
+      stamp: 'M36+', 
+      op: { title: 'VISIBILITY', line: 'Soft power · global brand · events' },
+      inf: { title: 'ICONIC MONUMENT', line: 'Full campus · Foster signature' },
+      accent: true
+    },
   ];
-  const infrastructure = [
-    { title: 'MODULAR LAUNCH', line: 'Modular DC + small founder hub live' },
-    { title: 'PHASE 1 ONLINE', line: 'First wings · innovation district' },
-    { title: 'CAMPUS + LIFE', line: 'Living quarters · culture · sport' },
-    { title: 'ICONIC MONUMENT', line: 'Full campus · Foster signature' },
-  ];
+
   return (
-    <div style={S.dualRailWrap}>
-      {/* Top rail — OPERATIONS */}
-      <div style={S.railRow}>
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          style={S.railLabel}
-        >
-          OPERATIONS
-        </motion.div>
-        <div style={S.railTrack}>
-          <motion.div 
-            style={S.railLine} 
-            initial={{ scaleX: 0, transformOrigin: "left" }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
-          />
-          {operations.map((step, i) => (
-            <motion.div 
-              key={`op-${i}`} 
-              style={S.railStep}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 + i * 0.2, duration: 0.5 }}
-            >
-              <div style={{ ...S.railDot, ...(i === operations.length - 1 ? S.railDotAccent : null) }} />
-              <div style={{ ...S.railStepTitle, color: i === operations.length - 1 ? ACCENT : TEXT_PRIMARY }}>
-                {step.title}
-              </div>
-              <div style={S.railStepLine}>{step.line}</div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+    <div style={{ position: 'relative', marginTop: '6vh', width: '100%' }}>
+      {/* Labels Operations / Infrastructure */}
+      <div style={{ position: 'absolute', top: 0, left: 0, fontSize: T.micro + 2, letterSpacing: LS.widest, fontWeight: W.heavy, color: TEXT_FAINT, textTransform: 'uppercase' }}>OPERATIONS</div>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, fontSize: T.micro + 2, letterSpacing: LS.widest, fontWeight: W.heavy, color: TEXT_FAINT, textTransform: 'uppercase' }}>INFRASTRUCTURE</div>
 
-      {/* Centered milestones (shared timeline anchor) */}
-      <div style={S.railRow}>
-        <div style={S.railLabel} />
-        <div style={S.railStamps}>
-          {stamps.map((s, i) => (
-            <motion.div 
-              key={s} 
-              style={S.railStamp}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 + i * 0.2, duration: 0.4 }}
-            >
-              {s}
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom rail — INFRASTRUCTURE */}
-      <div style={S.railRow}>
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          style={S.railLabel}
-        >
-          INFRASTRUCTURE
-        </motion.div>
-        <div style={S.railTrack}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '3vw', paddingTop: '4vh', paddingBottom: '4vh' }}>
+        
+        {/* Central Axis */}
+        <div style={{ position: 'absolute', top: '50%', left: '4vw', right: '4vw', height: 3, background: 'var(--color-border-light)', transform: 'translateY(-50%)', zIndex: 0 }}>
           <motion.div 
-            style={S.railLine} 
-            initial={{ scaleX: 0, transformOrigin: "left" }}
+            initial={{ scaleX: 0, transformOrigin: 'left' }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
+            transition={{ duration: 1.5, ease: 'easeInOut' }}
+            style={{ position: 'absolute', inset: 0, background: ACCENT, boxShadow: `0 0 15px ${ACCENT}` }}
           />
-          {infrastructure.map((step, i) => (
-            <motion.div 
-              key={`infra-${i}`} 
-              style={S.railStep}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 + i * 0.2, duration: 0.5 }}
-            >
-              <div style={{ ...S.railDot, ...(i === infrastructure.length - 1 ? S.railDotAccent : null) }} />
-              <div style={{ ...S.railStepTitle, color: i === infrastructure.length - 1 ? ACCENT : TEXT_PRIMARY }}>
-                {step.title}
-              </div>
-              <div style={S.railStepLine}>{step.line}</div>
-            </motion.div>
-          ))}
         </div>
+
+        {steps.map((step, i) => (
+          <div key={`step-${i}`} style={{ display: 'grid', gridTemplateRows: '1fr auto 1fr', gap: '4vh', alignItems: 'center', justifyItems: 'center', zIndex: 1 }}>
+            
+            {/* Operations Card (Top) */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.15, duration: 0.5 }}
+              whileHover={{ y: -5, borderColor: 'var(--color-border-medium)', boxShadow: '0 25px 50px rgba(0,0,0,0.06)' }}
+              style={{
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border-light)',
+                borderRadius: 16,
+                padding: '3vh 2vw',
+                width: '100%',
+                boxShadow: '0 15px 30px rgba(0,0,0,0.04)',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                alignSelf: 'end'
+              }}
+            >
+              <div style={{ position: 'absolute', bottom: -16, left: '50%', transform: 'translateX(-50%)', width: 3, height: 16, background: step.accent ? ACCENT : 'var(--color-border-medium)' }} />
+              <div style={{ fontSize: 'min(2vh, 18px)', fontWeight: W.black, color: step.accent ? ACCENT : TEXT_PRIMARY, letterSpacing: LS.snug, marginBottom: '0.8vh', textTransform: 'uppercase' }}>{step.op.title}</div>
+              <div style={{ fontSize: 'min(1.7vh, 15px)', color: TEXT_DIM, lineHeight: 1.5, fontWeight: W.medium }}>{step.op.line}</div>
+            </motion.div>
+
+            {/* Timeline Node */}
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1 + i * 0.15, type: 'spring' }}
+              style={{
+                width: 'min(8vh, 72px)', height: 'min(8vh, 72px)', borderRadius: '50%', background: 'var(--color-bg-main)',
+                border: `4px solid ${step.accent ? ACCENT : TEXT_PRIMARY}`,
+                display: 'flex', justifyContent: 'center', alignItems: 'center',
+                boxShadow: step.accent ? `0 0 30px rgba(190, 18, 60, 0.3)` : '0 10px 20px rgba(0,0,0,0.06)',
+                zIndex: 2,
+              }}
+            >
+              <span style={{ fontSize: 'min(2.2vh, 20px)', fontWeight: W.black, color: step.accent ? ACCENT : TEXT_PRIMARY, letterSpacing: LS.wide }}>{step.stamp}</span>
+            </motion.div>
+
+            {/* Infrastructure Card (Bottom) */}
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.15, duration: 0.5 }}
+              whileHover={{ y: 5, borderColor: 'var(--color-border-medium)', boxShadow: '0 25px 50px rgba(0,0,0,0.06)' }}
+              style={{
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border-light)',
+                borderRadius: 16,
+                padding: '3vh 2vw',
+                width: '100%',
+                boxShadow: '0 15px 30px rgba(0,0,0,0.04)',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                alignSelf: 'start'
+              }}
+            >
+              <div style={{ position: 'absolute', top: -16, left: '50%', transform: 'translateX(-50%)', width: 3, height: 16, background: step.accent ? ACCENT : 'var(--color-border-medium)' }} />
+              <div style={{ fontSize: 'min(2vh, 18px)', fontWeight: W.black, color: step.accent ? ACCENT : TEXT_PRIMARY, letterSpacing: LS.snug, marginBottom: '0.8vh', textTransform: 'uppercase' }}>{step.inf.title}</div>
+              <div style={{ fontSize: 'min(1.7vh, 15px)', color: TEXT_DIM, lineHeight: 1.5, fontWeight: W.medium }}>{step.inf.line}</div>
+            </motion.div>
+
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -1504,26 +1690,49 @@ function DualRail() {
 
 function QatCard({ pct, title, line, roadmap }) {
   return (
-    <div style={S.qatCard}>
-      <div style={S.qatPct}>{pct}</div>
-      <div style={S.qatBody}>
-        <div style={S.qatTitle}>{title}</div>
-        <div style={S.qatLine}>{line}</div>
-        {roadmap && <div style={S.qatRoadmap}>{roadmap}</div>}
+    <motion.div 
+      whileHover={{ y: -4, borderColor: 'var(--color-border-medium)', boxShadow: '0 15px 30px rgba(0,0,0,0.06)' }}
+      transition={{ duration: 0.3 }}
+      style={{
+        padding: '2.5vh 2vw',
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-border-light)',
+        borderRadius: 16,
+        display: 'flex',
+        gap: '1.5vw',
+        alignItems: 'center',
+        boxShadow: '0 5px 15px rgba(0,0,0,0.02)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '4px',
+        height: '100%',
+        background: ACCENT,
+      }} />
+      <div style={{ fontSize: 'min(4.5vh, 42px)', fontWeight: W.black, color: ACCENT, letterSpacing: LS.tight, lineHeight: 1, flex: '0 0 auto' }}>{pct}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6vh' }}>
+        <div style={{ fontSize: T.micro + 2, letterSpacing: LS.wider, fontWeight: W.black, color: TEXT_PRIMARY, textTransform: 'uppercase' }}>{title}</div>
+        <div style={{ fontSize: 'min(1.5vh, 13px)', color: TEXT_DIM, lineHeight: 1.5, fontWeight: W.medium }}>{line}</div>
+        {roadmap && <div style={{ fontSize: 'min(1.3vh, 11px)', color: ACCENT, fontWeight: W.bold, marginTop: '0.3vh', letterSpacing: LS.wide }}>{roadmap}</div>}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 /* QatarisationCurve — Year-by-year ascent 30% → 50% over 5 years.
    Smooth SVG curve, dot per year, annotated. */
 function QatarisationCurve() {
-  const W_BOX = 600;
-  const H_BOX = 140;
-  const padL = 38;
-  const padR = 28;
-  const padT = 18;
-  const padB = 28;
+  const W_BOX = 850;
+  const H_BOX = 160;
+  const padL = 40;
+  const padR = 30;
+  const padT = 20;
+  const padB = 30;
   const years = [
     { label: 'Y1', pct: 30 },
     { label: 'Y2', pct: 35 },
@@ -1548,12 +1757,24 @@ function QatarisationCurve() {
   }
 
   return (
-    <div style={S.qatCurveWrap}>
-      <div style={S.qatCurveLabel}>TRAJECTORY · YEAR 1 → YEAR 5</div>
+    <motion.div 
+      whileHover={{ borderColor: 'var(--color-border-medium)', boxShadow: '0 15px 30px rgba(0,0,0,0.04)' }}
+      transition={{ duration: 0.3 }}
+      style={{
+        padding: '2vh 2vw',
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-border-light)',
+        borderRadius: 16,
+        boxShadow: '0 5px 15px rgba(0,0,0,0.02)',
+        position: 'relative',
+        width: '100%',
+      }}
+    >
+      <div style={{ fontSize: T.micro, fontWeight: W.heavy, letterSpacing: LS.widest, color: TEXT_FAINT, marginBottom: '2vh', textTransform: 'uppercase' }}>TRAJECTORY · YEAR 1 → YEAR 5</div>
       <svg
         viewBox={`0 0 ${W_BOX} ${H_BOX}`}
         style={{ width: '100%', height: 'auto', display: 'block' }}
-        preserveAspectRatio="none"
+        preserveAspectRatio="xMidYMid meet"
       >
         {/* Y-axis grid (30, 40, 50) */}
         {[30, 40, 50].map((v) => {
@@ -1567,14 +1788,14 @@ function QatarisationCurve() {
                 y2={yy}
                 stroke="var(--color-border-light)"
                 strokeWidth="1"
-                strokeDasharray="2 4"
+                strokeDasharray="4 6"
               />
               <text
-                x={padL - 8}
-                y={yy + 3}
+                x={padL - 10}
+                y={yy + 4}
                 textAnchor="end"
                 fill="var(--color-text-muted)"
-                fontSize="9"
+                fontSize="11"
                 fontWeight="700"
                 style={{ fontFamily: FONT_STACK }}
               >
@@ -1586,16 +1807,22 @@ function QatarisationCurve() {
         {/* Area under curve */}
         <motion.path
           d={`${path} L ${pts[pts.length - 1].x} ${H_BOX - padB} L ${pts[0].x} ${H_BOX - padB} Z`}
-          fill="var(--color-accent-strong)"
+          fill="url(#curve-gradient)"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.08 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
         />
+        <defs>
+          <linearGradient id="curve-gradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(190, 18, 60, 0.2)" />
+            <stop offset="100%" stopColor="rgba(190, 18, 60, 0)" />
+          </linearGradient>
+        </defs>
         {/* Curve */}
         <motion.path 
           d={path} 
-          stroke="var(--color-accent-strong)" 
-          strokeWidth="2.2" 
+          stroke={ACCENT} 
+          strokeWidth="3" 
           fill="none" 
           strokeLinecap="round" 
           initial={{ pathLength: 0 }}
@@ -1611,14 +1838,14 @@ function QatarisationCurve() {
             transition={{ delay: 1 + i * 0.15, duration: 0.4, type: "spring" }}
             style={{ transformOrigin: `${p.x}px ${p.y}px` }}
           >
-            <circle cx={p.x} cy={p.y} r="4.5" fill="var(--color-surface)" stroke="var(--color-accent-strong)" strokeWidth="2" />
+            <circle cx={p.x} cy={p.y} r="6" fill="var(--color-surface)" stroke={ACCENT} strokeWidth="2.5" />
             {(i === 0 || i === pts.length - 1) && (
               <text
                 x={p.x}
-                y={p.y - 12}
+                y={p.y - 16}
                 textAnchor="middle"
-                fill="var(--color-accent-strong)"
-                fontSize="11"
+                fill={TEXT_PRIMARY}
+                fontSize="13"
                 fontWeight="900"
                 style={{ fontFamily: FONT_STACK }}
               >
@@ -1627,12 +1854,12 @@ function QatarisationCurve() {
             )}
             <text
               x={p.x}
-              y={H_BOX - 8}
+              y={H_BOX - 5}
               textAnchor="middle"
-              fill="var(--color-text-muted)"
-              fontSize="9"
-              fontWeight="700"
-              letterSpacing="2"
+              fill={TEXT_PRIMARY}
+              fontSize="12"
+              fontWeight="800"
+              letterSpacing="1"
               style={{ fontFamily: FONT_STACK }}
             >
               {p.label}
@@ -1640,16 +1867,40 @@ function QatarisationCurve() {
           </motion.g>
         ))}
       </svg>
-    </div>
+    </motion.div>
   );
 }
 
 function GovRow({ label, value }) {
   return (
-    <div style={S.govRow}>
-      <div style={S.govLabel}>{label}</div>
-      <div style={S.govValue}>{value}</div>
-    </div>
+    <motion.div 
+      whileHover={{ x: 5, backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border-medium)', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}
+      transition={{ duration: 0.2 }}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '160px 1fr',
+        gap: '2vw',
+        padding: '2.5vh 2vw',
+        background: 'var(--color-surface)',
+        border: `1px solid var(--color-border-light)`,
+        alignItems: 'center',
+        borderRadius: 12,
+        marginBottom: '1vh',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '4px',
+        height: '100%',
+        background: ACCENT,
+      }} />
+      <div style={{ fontSize: T.micro + 1, letterSpacing: LS.widest, fontWeight: W.heavy, color: ACCENT, textTransform: 'uppercase' }}>{label}</div>
+      <div style={{ fontSize: 'min(1.8vh, 16px)', fontWeight: W.medium, color: TEXT_PRIMARY, lineHeight: 1.5 }}>{value}</div>
+    </motion.div>
   );
 }
 

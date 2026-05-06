@@ -270,7 +270,7 @@ function StatRow({ icon, value, label }) {
 }
 
 function RowIcon({ kind }) {
-  const stroke = 'rgba(255,255,255,.4)';
+  const stroke = 'color-mix(in srgb, var(--color-surface) 40%, transparent)';
   const sz = 16;
   if (kind === 'rack')
     return (
@@ -306,7 +306,7 @@ function RowIcon({ kind }) {
     );
   if (kind === 'bolt')
     return (
-      <div style={{ width: sz, height: sz, color: 'rgba(255,255,255,.6)', fontSize: 16, lineHeight: 1, fontWeight: 800, textAlign: 'center' }}>↯</div>
+      <div style={{ width: sz, height: sz, color: 'color-mix(in srgb, var(--color-surface) 60%, transparent)', fontSize: 16, lineHeight: 1, fontWeight: 800, textAlign: 'center' }}>↯</div>
     );
   return null;
 }
@@ -592,7 +592,7 @@ const S = {
   buildingOverlay: {
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(180deg, rgba(26,29,36,0) 0%, rgba(26,29,36,0.75) 100%)',
+    background: 'linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-gray-900) 75%, transparent) 100%)',
   },
   statsRow: {
     position: 'absolute',

@@ -70,6 +70,8 @@ Tous les tokens sont dans `app/globals.css`. Catégories :
 - `--color-text-*` — hiérarchie typographique
 - `--color-border-*` — bordures et lignes
 
-## Contraintes layout
-Les hauteurs de section sont verrouillées (total 680px par page).
-Voir `CLAUDE.md` pour les règles complètes.
+## Layout & Design Rules
+- **Hauteurs verrouillées** : Total 680px par page. Voir `CLAUDE.md`.
+- **Zéro Hardcoding** : Utiliser exclusivement les variables CSS (`var(--color-*)`) ou `color-mix` pour les transparences. Ne jamais utiliser de codes hex ou RGBA en dur dans les composants.
+
+## Lancer le projet
