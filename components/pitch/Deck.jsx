@@ -10,11 +10,12 @@ import {
   S04Monaco,
   S05Masterplan,
   S06RDI,
-  S07Method,
-  S08Qatarisation,
-  S09Governance,
-  S10Ask,
-  S11Closing,
+  S07Datacenter,
+  S08Method,
+  S09Qatarisation,
+  S10Governance,
+  S11Ask,
+  S12Closing,
 } from './slides';
 import { FONT_STACK } from './tokens';
 
@@ -26,11 +27,12 @@ const SLIDES = [
   { id: 4, Component: S04Monaco, label: 'Monaco of GCC' },
   { id: 5, Component: S05Masterplan, label: 'Masterplan' },
   { id: 6, Component: S06RDI, label: 'RDI Ecosystem' },
-  { id: 7, Component: S07Method, label: 'Method' },
-  { id: 8, Component: S08Qatarisation, label: '30% Qatari' },
-  { id: 9, Component: S09Governance, label: 'Governance' },
-  { id: 10, Component: S10Ask, label: 'The Ask' },
-  { id: 11, Component: S11Closing, label: 'Closing' },
+  { id: 7, Component: S07Datacenter, label: 'The Datacenter' },
+  { id: 8, Component: S08Method, label: 'Method' },
+  { id: 9, Component: S09Qatarisation, label: '30% Qatari' },
+  { id: 10, Component: S10Governance, label: 'Governance' },
+  { id: 11, Component: S11Ask, label: 'The Ask' },
+  { id: 12, Component: S12Closing, label: 'Closing' },
 ];
 
 export default function Deck() {

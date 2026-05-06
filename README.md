@@ -73,6 +73,7 @@ Tous les tokens sont dans `app/globals.css`. Catégories :
 
 ## Layout & Design Rules
 - **Hauteurs verrouillées** : Total 680px par page. Voir `CLAUDE.md`.
-- **Zéro Hardcoding** : Utiliser exclusivement les variables CSS (`var(--color-*)`) ou `color-mix` pour les transparences. Ne jamais utiliser de codes hex ou RGBA en dur dans les composants.
+- **Zéro hardcoding** : Utiliser exclusivement les variables CSS (`var(--color-*)`) ou `color-mix` pour les transparences. Ne jamais utiliser de codes hex ou RGBA en dur dans les composants.
+- **Pitch `/pitch`** : tokens dédiés et `color-mix` dans `components/pitch/tokens.js` (importés par `slides.jsx` et `Deck.jsx`) — mêmes `--color-*` que `globals.css`.
 
 ## Lancer le projet

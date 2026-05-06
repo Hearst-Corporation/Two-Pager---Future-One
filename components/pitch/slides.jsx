@@ -18,6 +18,49 @@ import {
   SURFACE,
   BORDER_LIGHT,
   BORDER_MEDIUM,
+  ACCENT_BG_15,
+  ACCENT_BG_20,
+  ACCENT_BG_05,
+  ACCENT_BORDER_1PX_40,
+  ACCENT_GLOW_30,
+  ACCENT_NODE_SHADOW,
+  INVERSE_85,
+  INVERSE_75,
+  INVERSE_70,
+  INVERSE_65,
+  INVERSE_60,
+  INVERSE_55,
+  INVERSE_50,
+  INVERSE_40,
+  INVERSE_20,
+  INVERSE_15,
+  BORDER_INVERSE_8,
+  BORDER_INVERSE_10,
+  BORDER_INVERSE_12,
+  BORDER_INVERSE_15,
+  BORDER_INVERSE_18,
+  BORDER_INVERSE_20,
+  GLASS_ON_PHOTO_BG,
+  GLASS_ON_PHOTO_BORDER,
+  PANEL_DARK_95,
+  PANEL_DARK_85,
+  SHADOW_ELEV_30,
+  SHADOW_ELEV_40,
+  SHADOW_ELEV_50,
+  SHADOW_ELEV_60,
+  SHADOW_ICON,
+  SHADOW_FLOAT_08,
+  SHADOW_FLOAT_06,
+  SHADOW_FLOAT_04,
+  SHADOW_FLOAT_03,
+  SHADOW_FLOAT_02,
+  SHADOW_HOVER_DARK,
+  SHADOW_CARD_MAIN,
+  PANEL_BACK_75,
+  SHADOW_PANEL_DEEP,
+  SHADOW_PANEL_MED,
+  INVERSE_80,
+  TEXT_SHADOW_CONFIDENTIAL,
   T,
   W,
   LS,
@@ -64,7 +107,7 @@ export function S00Cover() {
 
       <div style={S.topBar}>
         <div style={S.micro}>STATE OF QATAR</div>
-        <div style={{ ...S.micro, color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}>STRICTLY CONFIDENTIAL</div>
+        <div style={{ ...S.micro, color: INVERSE_85, textShadow: TEXT_SHADOW_CONFIDENTIAL }}>STRICTLY CONFIDENTIAL</div>
       </div>
 
       <div style={{ ...S.coverCenter, width: '55%' }}>
@@ -207,8 +250,8 @@ export function S02Team() {
           animate="show"
         >
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
-            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
               CONSORTIUM · GLOBAL EXPERTISE
             </div>
           </motion.div>
@@ -217,7 +260,7 @@ export function S02Team() {
             <br />
             <span style={{ color: ACCENT }}>Ready to execute.</span>
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: INVERSE_75, lineHeight: 1.6 }}>
             FUTUR ONE is carried by a sovereign-aligned consortium — a Qatari principal,
             an industrial operator, a master architect, and execution partners who have
             already delivered for sovereign states.
@@ -237,9 +280,9 @@ export function S02Team() {
               bgImage="/p2-building-16x9.jpg"
             />
             <PremiumTeamCard
-              role="ENGINEERING & BUILD"
-              name="Kontena · B-Global · Gatti"
-              line="Hyperscale-grade deployments · A*STAR Singapore"
+              role="DATACENTER"
+              name="Equinix"
+              line="Global DC operator · 260+ facilities · 33 countries · NYSE-listed"
               bgImage="/partners/hardware.jpg"
             />
             <PremiumTeamCard
@@ -287,48 +330,48 @@ export function S03TrackRecord() {
           animate="show"
         >
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
-            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
-              TRACK RECORD · PROVEN DELIVERY
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
+              TRACK RECORD · EQUINIX PARTNERSHIP
             </div>
           </motion.div>
           <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
-            Sovereign-grade delivery.
+            Backed by the world's
             <br />
-            <span style={{ color: ACCENT }}>The risk is not theoretical.</span>
+            <span style={{ color: ACCENT }}>leading datacenter platform.</span>
           </motion.h2>
 
           <motion.div variants={fadeUpItem} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vh 1.5vw', marginTop: '4vh' }}>
             <PremiumWhoStat
-              value="Hyperscale"
-              label="datacenter projects delivered"
-              location="Malaysia · Norway · Europe"
+              value="260+"
+              label="datacenters operated by Equinix"
+              location="The world's leading DC platform"
               bgImage="/partners/aerial-dc-campus.png"
             />
             <PremiumWhoStat
-              value="$270M"
-              label="A*STAR national supercomputer"
-              location="Singapore"
+              value="33"
+              label="countries · 70+ metros"
+              location="Global footprint"
               bgImage="/supercomputer-wide.png"
             />
             <PremiumWhoStat
-              value="260K m²"
-              label="Apple Park master campus"
-              location="Cupertino, USA"
+              value="NYSE"
+              label="Equinix REIT · ticker EQIX"
+              location="$70Bn+ market cap"
               bgImage="/aerial-white.png"
             />
             <PremiumWhoStat
-              value="10K"
-              label="compute machines under operation"
-              location="10 countries · 4 continents"
+              value="10K+"
+              label="enterprises connected on-platform"
+              location="2,000+ cloud & network providers"
               bgImage="/hub-interior.png"
             />
           </motion.div>
 
           <motion.div variants={fadeUpItem} style={S.callout}>
             <div style={S.calloutText}>
-              From Yondr to Sedenak. From Apple Park to A*STAR Singapore.
-              <strong> FUTUR ONE combines proven components, not untested promises.</strong>
+              <strong>The world's most trusted datacenter operator brings its platform to Doha.</strong>
+              {' '}FUTUR ONE plugs into the global Equinix network — not a project, an extension.
             </div>
           </motion.div>
         </motion.div>
@@ -370,8 +413,8 @@ export function S04Monaco() {
           animate="show"
         >
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
-            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
               POSITIONING · THE PRINCIPALITY
             </div>
           </motion.div>
@@ -424,8 +467,8 @@ export function S05Masterplan() {
           animate="show"
         >
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
-            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
               MASTERPLAN · 100,000 M²
             </div>
           </motion.div>
@@ -496,8 +539,8 @@ export function S06RDI() {
           animate="show"
         >
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
-            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
               RDI BACKBONE · QATAR FOUNDATION
             </div>
           </motion.div>
@@ -506,7 +549,7 @@ export function S06RDI() {
             <br />
             <span style={{ color: ACCENT }}>Qatari RDI backbone.</span>
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: INVERSE_75, lineHeight: 1.6 }}>
             FUTUR ONE is the industrial bridge between Qatar's sovereign research
             backbone and the global founder ecosystem. Where research becomes
             companies. Where MNCs find a hubbed logistics platform to anchor their R&D.
@@ -552,9 +595,80 @@ export function S06RDI() {
 }
 
 /* ============================================================ */
-/* SLIDE 7 — METHOD (timeline horizontale)                       */
+/* SLIDE 7 — THE DATACENTER (by Equinix · 3 piliers)             */
 /* ============================================================ */
-export function S07Method() {
+export function S07Datacenter() {
+  return (
+    <div style={S.slide}>
+      <motion.div
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        style={{
+          ...S.bg,
+          backgroundImage: "url('/partners/hardware.jpg')",
+          backgroundPosition: 'right center',
+        }}
+      />
+      <div
+        style={{
+          ...S.overlay,
+          background:
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 70%, transparent) 60%, transparent 100%)',
+        }}
+      />
+      <SectionHeader number="07" title="The Datacenter" />
+      <div style={{ ...S.splitLayout, zIndex: 3 }}>
+        <motion.div
+          style={{ ...S.splitTextLeft, justifyContent: 'center' }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
+              DATACENTER · BY EQUINIX
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
+            The world's <span style={{ color: ACCENT }}>#1 datacenter platform</span>
+            <br />
+            comes to Doha.
+          </motion.h2>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+            Equinix builds and operates the datacenter under contract.
+            FUTUR ONE plugs into Platform Equinix — instant access to a global network
+            of cloud, AI, and enterprise customers.
+          </motion.p>
+
+          <motion.div variants={fadeUpItem} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2vh', marginTop: '4vh' }}>
+            <DatacenterPillar
+              icon="T"
+              title="TECHNOLOGY"
+              line="Tier-IV / Tier-III hyperscale-grade · liquid cooling · AI-optimized · global standards of resilience and security."
+            />
+            <DatacenterPillar
+              icon="C"
+              title="COMMERCIALIZATION"
+              line="Platform Equinix · 10K+ enterprise customers · 2K+ cloud and network providers · anchor tenants from day one."
+            />
+            <DatacenterPillar
+              icon="F"
+              title="FINANCE"
+              line="Equinix REIT (NYSE: EQIX) carries the CAPEX · sovereign JV track record (PGIM, GIC) · Qatar funds the campus, not the metal."
+            />
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================ */
+/* SLIDE 8 — METHOD (timeline horizontale)                       */
+/* ============================================================ */
+export function S08Method() {
   return (
     <div style={S.slide}>
       <motion.div
@@ -575,7 +689,7 @@ export function S07Method() {
             'linear-gradient(90deg, color-mix(in srgb, var(--color-bg-main) 10%, transparent) 0%, color-mix(in srgb, var(--color-bg-main) 80%, transparent) 28%, var(--color-bg-main) 33.33%, var(--color-bg-main) 100%)',
         }}
       />
-      <SectionHeader number="07" title="The Method" />
+      <SectionHeader number="08" title="The Method" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <div style={{ flex: '0 0 30%' }} /> {/* Espace vide pour l'image (environ 1/3) */}
         
@@ -586,8 +700,8 @@ export function S07Method() {
           animate="show"
         >
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
-            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
               DELIVERY · PARALLEL TRACKS
             </div>
           </motion.div>
@@ -612,9 +726,9 @@ export function S07Method() {
 }
 
 /* ============================================================ */
-/* SLIDE 8 — 30% QATARISATION (le pivot moral)                   */
+/* SLIDE 9 — 30% QATARISATION (le pivot moral)                   */
 /* ============================================================ */
-export function S08Qatarisation() {
+export function S09Qatarisation() {
   return (
     <div style={S.slide}>
       <motion.div
@@ -634,7 +748,7 @@ export function S08Qatarisation() {
             'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 30%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 45%, transparent 100%)',
         }}
       />
-      <SectionHeader number="08" title="30% Qatarisation" />
+      <SectionHeader number="09" title="30% Qatarisation" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <motion.div 
           style={{ flex: '0 0 33.33%', padding: L.splitPadL, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
@@ -643,8 +757,8 @@ export function S08Qatarisation() {
           animate="show"
         >
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
-            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
               QATARISATION · YEAR 1
             </div>
           </motion.div>
@@ -674,9 +788,9 @@ export function S08Qatarisation() {
 }
 
 /* ============================================================ */
-/* SLIDE 9 — GOVERNANCE                                          */
+/* SLIDE 10 — GOVERNANCE                                         */
 /* ============================================================ */
-export function S09Governance() {
+export function S10Governance() {
   return (
     <div style={S.slide}>
       <motion.div
@@ -696,7 +810,7 @@ export function S09Governance() {
             'linear-gradient(270deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
-      <SectionHeader number="09" title="Governance" />
+      <SectionHeader number="10" title="Governance" />
       <div style={{ ...S.splitLayout, zIndex: 3, justifyContent: 'flex-end' }}>
         <motion.div 
           style={{ ...S.splitTextRight, justifyContent: 'center' }}
@@ -705,8 +819,8 @@ export function S09Governance() {
           animate="show"
         >
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
-            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
               GOVERNANCE · SOVEREIGN CONTROL
             </div>
           </motion.div>
@@ -715,7 +829,7 @@ export function S09Governance() {
             <br />
             world-class execution partners.
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: INVERSE_75, lineHeight: 1.6 }}>
             FUTUR ONE is a Qatari-controlled holding at QFC — sovereign chair, sovereign capital,
             international expertise as contracted partners. Beyond compliance, FUTUR ONE
             stands as an example Vision 2030 offers to the rest of the world.
@@ -731,9 +845,9 @@ export function S09Governance() {
 }
 
 /* ============================================================ */
-/* SLIDE 10 — THE ASK (3 décisions, 1 trimestre)                 */
+/* SLIDE 11 — THE ASK (3 décisions, 1 trimestre)                 */
 /* ============================================================ */
-export function S10Ask() {
+export function S11Ask() {
   return (
     <div style={S.slide}>
       <motion.div
@@ -753,7 +867,7 @@ export function S10Ask() {
             'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
-      <SectionHeader number="10" title="The Ask" />
+      <SectionHeader number="11" title="The Ask" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <motion.div 
           style={{ ...S.splitTextLeft, justifyContent: 'center' }}
@@ -762,8 +876,8 @@ export function S10Ask() {
           animate="show"
         >
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
-            <div style={{ display: 'inline-flex', padding: '0.8vh 1vw', background: 'rgba(190, 18, 60, 0.15)', border: `1px solid rgba(190, 18, 60, 0.4)`, borderRadius: 30, color: ACCENT, fontSize: T.micro + 1, fontWeight: W.bold, letterSpacing: LS.widest, textTransform: 'uppercase', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, boxShadow: `0 0 10px ${ACCENT}` }} />
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
               NEXT STEPS · 90 DAYS
             </div>
           </motion.div>
@@ -772,7 +886,7 @@ export function S10Ask() {
             <br />
             <span style={{ color: ACCENT }}>to reach first operations.</span>
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: INVERSE_75, lineHeight: 1.6 }}>
             Today's ask is alignment, not a funding decision. Capital follows diligence.
             Three concrete decisions, taken together, unlock the path to first operations.
           </motion.p>
@@ -787,9 +901,9 @@ export function S10Ask() {
 }
 
 /* ============================================================ */
-/* SLIDE 11 — CLOSING                                            */
+/* SLIDE 12 — CLOSING                                            */
 /* ============================================================ */
-export function S11Closing() {
+export function S12Closing() {
   return (
     <div style={S.slide}>
       <div
@@ -854,7 +968,7 @@ function MasterplanOrbital() {
         {/* Outer Ring */}
         <motion.circle 
           cx="500" cy="500" r="360" 
-          fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="3" strokeDasharray="10 20"
+          fill="none" stroke={INVERSE_20} strokeWidth="3" strokeDasharray="10 20"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
@@ -888,16 +1002,16 @@ function MasterplanOrbital() {
         style={{
           position: 'absolute', top: '50%', left: '50%',
           width: '28%', height: '28%', borderRadius: '50%',
-          background: 'rgba(190, 18, 60, 0.15)',
+          background: ACCENT_BG_15,
           border: `3px solid ${ACCENT}`,
           display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-          boxShadow: `0 0 100px rgba(190, 18, 60, 0.6), inset 0 0 50px rgba(190, 18, 60, 0.4)`,
+          boxShadow: ACCENT_NODE_SHADOW,
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           zIndex: 10
         }}
       >
-        <div style={{ fontSize: 'min(4.5vh, 42px)', fontWeight: W.black, color: '#fff', letterSpacing: LS.wider, textAlign: 'center', lineHeight: 1 }}>FUTUR<br/>ONE</div>
+        <div style={{ fontSize: 'min(4.5vh, 42px)', fontWeight: W.black, color: TEXT_INVERSE, letterSpacing: LS.wider, textAlign: 'center', lineHeight: 1 }}>FUTUR<br/>ONE</div>
         <div style={{ fontSize: 'min(1.8vh, 16px)', color: ACCENT, fontWeight: W.heavy, letterSpacing: LS.widest, marginTop: '1vh' }}>MASTERPLAN</div>
       </motion.div>
 
@@ -953,11 +1067,11 @@ function MasterplanOrbital() {
                   left: '50%', top: '50%',
                   transform: 'translate(-50%, -50%)',
                   width: 'min(10vh, 70px)', height: 'min(10vh, 70px)', borderRadius: '50%', 
-                  background: 'rgba(20, 20, 20, 0.95)',
+                  background: PANEL_DARK_95,
                   border: `2px solid ${ACCENT}`,
                   display: 'flex', justifyContent: 'center', alignItems: 'center',
-                  color: '#fff',
-                  boxShadow: '0 10px 20px rgba(0,0,0,0.5)',
+                  color: TEXT_INVERSE,
+                  boxShadow: SHADOW_ICON,
                   cursor: 'default',
                   zIndex: 2,
                 }}
@@ -969,13 +1083,13 @@ function MasterplanOrbital() {
               <div style={{
                 position: 'absolute',
                 ...boxStyle,
-                background: 'rgba(20, 20, 20, 0.85)',
+                background: PANEL_DARK_85,
                 padding: '1.5vh 1.5vw',
                 borderRadius: 12,
-                border: '1px solid rgba(255,255,255,0.15)',
+                border: BORDER_INVERSE_15,
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
-                boxShadow: '0 15px 30px rgba(0,0,0,0.4)',
+                boxShadow: SHADOW_ELEV_40,
                 width: 'max-content',
                 minWidth: '220px',
                 display: 'flex',
@@ -984,10 +1098,10 @@ function MasterplanOrbital() {
                 justifyContent: 'center',
                 zIndex: 1,
               }}>
-                <div style={{ fontSize: 'min(1.8vh, 16px)', fontWeight: W.black, color: '#fff', letterSpacing: LS.wider, marginBottom: '0.4vh', textTransform: 'uppercase' }}>
+                <div style={{ fontSize: 'min(1.8vh, 16px)', fontWeight: W.black, color: TEXT_INVERSE, letterSpacing: LS.wider, marginBottom: '0.4vh', textTransform: 'uppercase' }}>
                   {n.title}
                 </div>
-                <div style={{ fontSize: 'min(1.5vh, 13px)', color: 'rgba(255,255,255,0.7)', fontWeight: W.semibold, lineHeight: 1.4, textAlign: textAlign }}>
+                <div style={{ fontSize: 'min(1.5vh, 13px)', color: INVERSE_70, fontWeight: W.semibold, lineHeight: 1.4, textAlign: textAlign }}>
                   {n.line}
                 </div>
               </div>
@@ -1004,9 +1118,9 @@ function SectionHeader({ number, title, dark }) {
     <div
       style={{
         ...S.sectionHeader,
-        color: dark ? 'rgba(255,255,255,0.85)' : TEXT_PRIMARY,
+        color: dark ? INVERSE_85 : TEXT_PRIMARY,
         borderBottom: dark
-          ? '1px solid rgba(255,255,255,0.12)'
+          ? BORDER_INVERSE_12
           : `1px solid ${BORDER_LIGHT}`,
       }}
     >
@@ -1026,14 +1140,14 @@ function Pillar({ label, value, valueAccent, note, dark }) {
       style={{
         ...S.pillar,
         borderTop: dark
-          ? '1px solid rgba(255,255,255,0.18)'
+          ? BORDER_INVERSE_18
           : '1px solid var(--color-border-light)',
       }}
     >
       <div
         style={{
           ...S.pillarLabel,
-          color: dark ? 'rgba(255,255,255,0.55)' : TEXT_FAINT,
+          color: dark ? INVERSE_55 : TEXT_FAINT,
         }}
       >
         {label}
@@ -1054,7 +1168,7 @@ function Pillar({ label, value, valueAccent, note, dark }) {
       <div
         style={{
           ...S.pillarNote,
-          color: dark ? 'rgba(255,255,255,0.7)' : TEXT_DIM,
+          color: dark ? INVERSE_70 : TEXT_DIM,
         }}
       >
         {note}
@@ -1076,8 +1190,8 @@ function PremiumWhoStat({ value, label, location, bgImage }) {
         justifyContent: 'flex-end',
         padding: '2.5vh 1.5vw',
         minHeight: '22vh',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: SHADOW_ELEV_30,
+        border: BORDER_INVERSE_8,
         backgroundColor: 'var(--color-surface)',
         cursor: 'default',
       }}
@@ -1101,15 +1215,15 @@ function PremiumWhoStat({ value, label, location, bgImage }) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, rgba(0,0,0,0) 10%, rgba(0,0,0,0.85) 100%)',
+          background: G.scrimPhotoBottom,
           zIndex: 1,
         }}
       />
       <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: T.statM, fontWeight: W.black, color: '#fff', letterSpacing: LS.tight, lineHeight: 1, marginBottom: '1vh' }}>
+        <div style={{ fontSize: T.statM, fontWeight: W.black, color: TEXT_INVERSE, letterSpacing: LS.tight, lineHeight: 1, marginBottom: '1vh' }}>
           {value}
         </div>
-        <div style={{ fontSize: T.micro + 2, color: 'rgba(255,255,255,0.7)', fontWeight: W.semibold, letterSpacing: LS.wide, textTransform: 'uppercase', lineHeight: 1.4 }}>
+        <div style={{ fontSize: T.micro + 2, color: INVERSE_70, fontWeight: W.semibold, letterSpacing: LS.wide, textTransform: 'uppercase', lineHeight: 1.4 }}>
           {label}
         </div>
         {location && (
@@ -1145,8 +1259,8 @@ function PremiumArchBlock({ title, line, icon, bgImage }) {
         justifyContent: 'flex-start',
         padding: '2vh 1.5vw',
         minHeight: '15vh',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: SHADOW_ELEV_30,
+        border: BORDER_INVERSE_8,
         backgroundColor: 'var(--color-surface)',
         cursor: 'default',
       }}
@@ -1170,16 +1284,16 @@ function PremiumArchBlock({ title, line, icon, bgImage }) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%)',
+          background: G.scrimPhotoBottomTight,
           zIndex: 1,
         }}
       />
       <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
         {icon && <div style={{ color: ACCENT, marginBottom: '1vh', display: 'flex', alignItems: 'center' }}>{icon}</div>}
-        <div style={{ fontSize: T.micro + 2, letterSpacing: LS.wider, fontWeight: W.heavy, color: '#fff', marginBottom: '0.6vh', textTransform: 'uppercase' }}>
+        <div style={{ fontSize: T.micro + 2, letterSpacing: LS.wider, fontWeight: W.heavy, color: TEXT_INVERSE, marginBottom: '0.6vh', textTransform: 'uppercase' }}>
           {title}
         </div>
-        <div style={{ fontSize: 'clamp(10px, 1.4vh, 14px)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, fontWeight: W.medium }}>
+        <div style={{ fontSize: 'clamp(10px, 1.4vh, 14px)', color: INVERSE_70, lineHeight: 1.5, fontWeight: W.medium }}>
           {line}
         </div>
       </div>
@@ -1277,14 +1391,14 @@ function StackCard({ name, role, line1, line2 }) {
 function BigStat({ value, label }) {
   return (
     <motion.div 
-      whileHover={{ y: -5, boxShadow: '0 20px 40px rgba(0,0,0,0.08)', borderColor: 'var(--color-border-medium)' }}
+      whileHover={{ y: -5, boxShadow: SHADOW_FLOAT_08, borderColor: 'var(--color-border-medium)' }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       style={{
         padding: '3vh 2vw',
         background: 'var(--color-surface)',
         border: '1px solid var(--color-border-light)',
         borderRadius: 16,
-        boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+        boxShadow: SHADOW_FLOAT_03,
         display: 'flex',
         flexDirection: 'column',
         gap: '1vh',
@@ -1333,8 +1447,8 @@ function PremiumTeamCard({ role, name, line, bgImage }) {
         justifyContent: 'flex-end',
         padding: '2.5vh 1.5vw',
         minHeight: '22vh',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: SHADOW_ELEV_30,
+        border: BORDER_INVERSE_8,
         backgroundColor: 'var(--color-surface)',
         cursor: 'default',
       }}
@@ -1358,7 +1472,7 @@ function PremiumTeamCard({ role, name, line, bgImage }) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, rgba(0,0,0,0) 10%, rgba(0,0,0,0.85) 100%)',
+          background: G.scrimPhotoBottom,
           zIndex: 1,
         }}
       />
@@ -1366,10 +1480,10 @@ function PremiumTeamCard({ role, name, line, bgImage }) {
         <div style={{ fontSize: T.micro, letterSpacing: LS.widest, fontWeight: W.heavy, color: ACCENT, textTransform: 'uppercase' }}>
           {role}
         </div>
-        <div style={{ fontSize: 'min(2.4vh, 22px)', fontWeight: W.black, letterSpacing: LS.hairline, color: '#fff', lineHeight: 1.1 }}>
+        <div style={{ fontSize: 'min(2.4vh, 22px)', fontWeight: W.black, letterSpacing: LS.hairline, color: TEXT_INVERSE, lineHeight: 1.1 }}>
           {name}
         </div>
-        <div style={{ fontSize: 'min(1.4vh, 12px)', color: 'rgba(255,255,255,0.7)', fontWeight: W.medium, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 'min(1.4vh, 12px)', color: INVERSE_70, fontWeight: W.medium, lineHeight: 1.5 }}>
           {line}
         </div>
       </div>
@@ -1393,6 +1507,56 @@ function MonacoCard({ tag, line }) {
       <div style={S.monacoTag}>{tag}</div>
       <div style={S.monacoLine}>{line}</div>
     </div>
+  );
+}
+
+/* DatacenterPillar — 3 piliers Equinix : Technology / Commercialization / Finance.
+   Layout horizontal : grosse lettre accent + titre + ligne descriptive. */
+function DatacenterPillar({ icon, title, line }) {
+  return (
+    <motion.div
+      whileHover={{ x: 5, borderColor: 'rgba(255,255,255,0.18)' }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '2vw',
+        padding: '2.4vh 2vw',
+        background: 'rgba(15, 15, 15, 0.65)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 16,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: ACCENT, boxShadow: `0 0 12px ${ACCENT}` }} />
+      <div style={{
+        flex: '0 0 auto',
+        width: 'min(7vh, 60px)',
+        height: 'min(7vh, 60px)',
+        borderRadius: '50%',
+        border: `2px solid ${ACCENT}`,
+        background: 'rgba(190,18,60,0.12)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 'min(3.5vh, 28px)',
+        fontWeight: W.black,
+        color: ACCENT,
+        letterSpacing: 0,
+      }}>
+        {icon}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+        <div style={{ fontSize: 'min(2vh, 18px)', fontWeight: W.black, color: '#fff', letterSpacing: LS.wider, marginBottom: '0.6vh', textTransform: 'uppercase' }}>
+          {title}
+        </div>
+        <div style={{ fontSize: 'min(1.6vh, 14px)', color: 'rgba(255,255,255,0.72)', fontWeight: W.medium, lineHeight: 1.5 }}>
+          {line}
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -1475,7 +1639,7 @@ function MonacoRadial() {
             x={cx}
             y={cy - 14}
             textAnchor="middle"
-            fill="#fff"
+            fill={TEXT_INVERSE}
             fontSize="22"
             fontWeight="900"
             letterSpacing="-1"
@@ -1499,7 +1663,7 @@ function MonacoRadial() {
             x={cx}
             y={cy + 28}
             textAnchor="middle"
-            fill="rgba(255,255,255,0.65)"
+            fill={INVERSE_65}
             fontSize="9"
             fontWeight="600"
             letterSpacing="1"
@@ -1613,14 +1777,14 @@ function DualRail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + i * 0.15, duration: 0.5 }}
-              whileHover={{ y: -5, borderColor: 'var(--color-border-medium)', boxShadow: '0 25px 50px rgba(0,0,0,0.06)' }}
+              whileHover={{ y: -5, borderColor: 'var(--color-border-medium)', boxShadow: SHADOW_FLOAT_06 }}
               style={{
                 background: 'var(--color-surface)',
                 border: '1px solid var(--color-border-light)',
                 borderRadius: 16,
                 padding: '3vh 2vw',
                 width: '100%',
-                boxShadow: '0 15px 30px rgba(0,0,0,0.04)',
+                boxShadow: SHADOW_FLOAT_04,
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
@@ -1641,7 +1805,7 @@ function DualRail() {
                 width: 'min(8vh, 72px)', height: 'min(8vh, 72px)', borderRadius: '50%', background: 'var(--color-bg-main)',
                 border: `4px solid ${step.accent ? ACCENT : TEXT_PRIMARY}`,
                 display: 'flex', justifyContent: 'center', alignItems: 'center',
-                boxShadow: step.accent ? `0 0 30px rgba(190, 18, 60, 0.3)` : '0 10px 20px rgba(0,0,0,0.06)',
+                boxShadow: step.accent ? ACCENT_GLOW_30 : '0 10px 20px color-mix(in srgb, var(--color-gray-900) 6%, transparent)',
                 zIndex: 2,
               }}
             >
@@ -1653,14 +1817,14 @@ function DualRail() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + i * 0.15, duration: 0.5 }}
-              whileHover={{ y: 5, borderColor: 'var(--color-border-medium)', boxShadow: '0 25px 50px rgba(0,0,0,0.06)' }}
+              whileHover={{ y: 5, borderColor: 'var(--color-border-medium)', boxShadow: SHADOW_FLOAT_06 }}
               style={{
                 background: 'var(--color-surface)',
                 border: '1px solid var(--color-border-light)',
                 borderRadius: 16,
                 padding: '3vh 2vw',
                 width: '100%',
-                boxShadow: '0 15px 30px rgba(0,0,0,0.04)',
+                boxShadow: SHADOW_FLOAT_04,
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
@@ -1705,28 +1869,28 @@ function QatPremiumCard({ delay, title, line, roadmap }) {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay, type: 'spring', bounce: 0.4 }}
-      whileHover={{ y: -5, boxShadow: `0 25px 50px rgba(0,0,0,0.6)`, borderColor: 'rgba(255,255,255,0.2)' }}
+      whileHover={{ y: -5, boxShadow: SHADOW_ELEV_60, borderColor: BORDER_INVERSE_20 }}
       style={{
-        background: 'rgba(15, 15, 15, 0.75)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        background: PANEL_BACK_75,
+        border: BORDER_INVERSE_10,
         borderRadius: 16,
         padding: '3vh 2vw',
         backdropFilter: 'blur(30px)',
         WebkitBackdropFilter: 'blur(30px)',
-        boxShadow: '0 15px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+        boxShadow: SHADOW_PANEL_DEEP,
         position: 'relative',
         overflow: 'hidden',
       }}
     >
       <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: ACCENT, boxShadow: `0 0 15px ${ACCENT}` }} />
-      <div style={{ fontSize: 'min(2vh, 18px)', fontWeight: W.black, color: '#fff', letterSpacing: LS.wider, marginBottom: '1vh', textTransform: 'uppercase' }}>
+      <div style={{ fontSize: 'min(2vh, 18px)', fontWeight: W.black, color: TEXT_INVERSE, letterSpacing: LS.wider, marginBottom: '1vh', textTransform: 'uppercase' }}>
         {title}
       </div>
-      <div style={{ fontSize: 'min(1.5vh, 13px)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, fontWeight: W.medium }}>
+      <div style={{ fontSize: 'min(1.5vh, 13px)', color: INVERSE_70, lineHeight: 1.5, fontWeight: W.medium }}>
         {line}
       </div>
       {roadmap && (
-        <div style={{ display: 'inline-block', marginTop: '1.5vh', padding: '0.6vh 1vw', background: 'rgba(190, 18, 60, 0.2)', borderRadius: 6, color: ACCENT, fontSize: 'min(1.4vh, 12px)', fontWeight: W.bold, letterSpacing: LS.wide }}>
+        <div style={{ display: 'inline-block', marginTop: '1.5vh', padding: '0.6vh 1vw', background: ACCENT_BG_20, borderRadius: 6, color: ACCENT, fontSize: 'min(1.4vh, 12px)', fontWeight: W.bold, letterSpacing: LS.wide }}>
           {roadmap}
         </div>
       )}
@@ -1769,13 +1933,13 @@ function QatMassiveCurve() {
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.6 }}
-      whileHover={{ borderColor: 'rgba(255,255,255,0.2)', boxShadow: '0 25px 50px rgba(0,0,0,0.6)' }}
+      whileHover={{ borderColor: BORDER_INVERSE_20, boxShadow: SHADOW_ELEV_60 }}
       style={{
         padding: '3vh 2vw',
-        background: 'rgba(15, 15, 15, 0.75)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        background: PANEL_BACK_75,
+        border: BORDER_INVERSE_10,
         borderRadius: 20,
-        boxShadow: '0 15px 30px rgba(0,0,0,0.4)',
+        boxShadow: SHADOW_PANEL_MED,
         backdropFilter: 'blur(30px)',
         WebkitBackdropFilter: 'blur(30px)',
         position: 'relative',
@@ -1783,7 +1947,7 @@ function QatMassiveCurve() {
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2vh' }}>
-        <div style={{ fontSize: T.micro+2, fontWeight: W.heavy, letterSpacing: LS.widest, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>TRAJECTORY · YEAR 1 → YEAR 5</div>
+        <div style={{ fontSize: T.micro+2, fontWeight: W.heavy, letterSpacing: LS.widest, color: INVERSE_50, textTransform: 'uppercase' }}>TRAJECTORY · YEAR 1 → YEAR 5</div>
         <div style={{ fontSize: 'min(3.5vh, 28px)', fontWeight: W.black, color: ACCENT, lineHeight: 1, textShadow: `0 0 20px ${ACCENT}` }}>+20%</div>
       </div>
       <svg
@@ -1801,7 +1965,7 @@ function QatMassiveCurve() {
                 x2={W_BOX - padR}
                 y1={yy}
                 y2={yy}
-                stroke="rgba(255,255,255,0.15)"
+                stroke={INVERSE_15}
                 strokeWidth="1"
                 strokeDasharray="4 6"
               />
@@ -1809,7 +1973,7 @@ function QatMassiveCurve() {
                 x={padL - 10}
                 y={yy + 4}
                 textAnchor="end"
-                fill="rgba(255,255,255,0.4)"
+                fill={INVERSE_40}
                 fontSize="11"
                 fontWeight="700"
                 style={{ fontFamily: FONT_STACK }}
@@ -1829,8 +1993,8 @@ function QatMassiveCurve() {
         />
         <defs>
           <linearGradient id="curve-gradient-dark" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(190, 18, 60, 0.4)" />
-            <stop offset="100%" stopColor="rgba(190, 18, 60, 0)" />
+            <stop offset="0%" stopColor="var(--color-accent-strong)" stopOpacity={0.4} />
+            <stop offset="100%" stopColor="var(--color-accent-strong)" stopOpacity={0} />
           </linearGradient>
         </defs>
         {/* Curve */}
@@ -1854,13 +2018,13 @@ function QatMassiveCurve() {
             transition={{ delay: 1.2 + i * 0.15, duration: 0.4, type: "spring" }}
             style={{ transformOrigin: `${p.x}px ${p.y}px` }}
           >
-            <circle cx={p.x} cy={p.y} r="6" fill="#111" stroke={ACCENT} strokeWidth="3" />
+            <circle cx={p.x} cy={p.y} r="6" fill="var(--color-gray-900)" stroke={ACCENT} strokeWidth="3" />
             {(i === 0 || i === pts.length - 1) && (
               <text
                 x={p.x}
                 y={p.y - 18}
                 textAnchor="middle"
-                fill="#fff"
+                fill={TEXT_INVERSE}
                 fontSize="14"
                 fontWeight="900"
                 style={{ fontFamily: FONT_STACK }}
@@ -1872,7 +2036,7 @@ function QatMassiveCurve() {
               x={p.x}
               y={H_BOX - 5}
               textAnchor="middle"
-              fill="#fff"
+              fill={TEXT_INVERSE}
               fontSize="12"
               fontWeight="800"
               letterSpacing="1"
@@ -1900,10 +2064,13 @@ function GovernanceStructure() {
 
        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vw' }}>
          <GovBlock delay={0.5} role="CEO" title="Qatari National" line="Jointly appointed with Qai" />
-         <GovBlock delay={0.6} role="OPERATING PARTNER" title="Hearst Qatar" line="Operates under Qatari governance" />
+         <GovBlock delay={0.6} role="HUB OPERATOR" title="Hearst Qatar" line="Operates the founder hub under Qatari governance" />
        </div>
 
-       <GovBlock delay={0.7} role="VISION 2030" title="Global Blueprint" line="An open window onto the world · an example to follow" accent />
+       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vw' }}>
+         <GovBlock delay={0.7} role="DATACENTER PARTNER" title="Equinix" line="Builds and operates the DC under contract · NYSE-listed REIT" />
+         <GovBlock delay={0.8} role="VISION 2030" title="Global Blueprint" line="An open window onto the world · an example to follow" accent />
+       </div>
     </div>
   );
 }
@@ -1914,7 +2081,7 @@ function GovBlock({ role, title, line, isMain, accent, delay }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.6, type: 'spring', bounce: 0.4 }}
-      whileHover={{ y: -5, boxShadow: isMain ? '0 20px 40px rgba(0,0,0,0.2)' : '0 20px 40px rgba(0,0,0,0.08)', borderColor: accent ? ACCENT : (isMain ? 'var(--color-border-light)' : 'var(--color-border-medium)') }}
+      whileHover={{ y: -5, boxShadow: isMain ? SHADOW_HOVER_DARK : SHADOW_FLOAT_08, borderColor: accent ? ACCENT : (isMain ? 'var(--color-border-light)' : 'var(--color-border-medium)') }}
       style={{
         background: isMain ? 'var(--color-text-primary)' : 'var(--color-surface)',
         border: isMain ? '1px solid var(--color-border-medium)' : '1px solid var(--color-border-light)',
@@ -1922,14 +2089,14 @@ function GovBlock({ role, title, line, isMain, accent, delay }) {
         padding: isMain ? '3.5vh 2vw' : '2.5vh 1.5vw',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: isMain ? '0 15px 30px rgba(0,0,0,0.15)' : '0 5px 15px rgba(0,0,0,0.03)',
+        boxShadow: isMain ? SHADOW_CARD_MAIN : SHADOW_FLOAT_02,
         display: 'flex', flexDirection: 'column', justifyContent: 'center'
       }}
     >
       <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: accent ? ACCENT : (isMain ? ACCENT : 'var(--color-border-medium)') }} />
-      <div style={{ fontSize: T.micro, letterSpacing: LS.widest, fontWeight: W.heavy, color: isMain ? 'rgba(255,255,255,0.6)' : (accent ? ACCENT : TEXT_DIM), textTransform: 'uppercase', marginBottom: '1vh' }}>{role}</div>
-      <div style={{ fontSize: isMain ? 'min(3vh, 28px)' : 'min(2.2vh, 20px)', fontWeight: W.black, color: isMain ? '#fff' : TEXT_PRIMARY, letterSpacing: LS.tight, marginBottom: '0.6vh' }}>{title}</div>
-      <div style={{ fontSize: 'min(1.5vh, 14px)', color: isMain ? 'rgba(255,255,255,0.8)' : TEXT_DIM, lineHeight: 1.5, fontWeight: W.medium }}>{line}</div>
+      <div style={{ fontSize: T.micro, letterSpacing: LS.widest, fontWeight: W.heavy, color: isMain ? INVERSE_60 : (accent ? ACCENT : TEXT_DIM), textTransform: 'uppercase', marginBottom: '1vh' }}>{role}</div>
+      <div style={{ fontSize: isMain ? 'min(3vh, 28px)' : 'min(2.2vh, 20px)', fontWeight: W.black, color: isMain ? TEXT_INVERSE : TEXT_PRIMARY, letterSpacing: LS.tight, marginBottom: '0.6vh' }}>{title}</div>
+      <div style={{ fontSize: 'min(1.5vh, 14px)', color: isMain ? INVERSE_80 : TEXT_DIM, lineHeight: 1.5, fontWeight: W.medium }}>{line}</div>
     </motion.div>
   );
 }
@@ -1949,14 +2116,14 @@ function TheAskSteps() {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 + i * 0.15, duration: 0.6, type: 'spring', bounce: 0.4 }}
-          whileHover={{ x: 10, borderColor: 'var(--color-border-medium)', boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}
+          whileHover={{ x: 10, borderColor: 'var(--color-border-medium)', boxShadow: SHADOW_FLOAT_06 }}
           style={{
             display: 'flex', alignItems: 'center', gap: '2.5vw',
             background: 'var(--color-surface)',
             border: '1px solid var(--color-border-light)',
             borderRadius: 16,
             padding: '3vh 2.5vw',
-            boxShadow: '0 5px 15px rgba(0,0,0,0.02)',
+            boxShadow: SHADOW_FLOAT_02,
             position: 'relative',
             overflow: 'hidden'
           }}
@@ -1964,7 +2131,7 @@ function TheAskSteps() {
           <div style={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', background: ACCENT }} />
           
           {/* Huge Number */}
-          <div style={{ fontSize: 'min(7vh, 64px)', fontWeight: W.black, color: 'rgba(190, 18, 60, 0.15)', lineHeight: 1, fontFamily: 'monospace' }}>
+          <div style={{ fontSize: 'min(7vh, 64px)', fontWeight: W.black, color: ACCENT_BG_15, lineHeight: 1, fontFamily: 'monospace' }}>
             {s.num}
           </div>
 
@@ -1981,7 +2148,7 @@ function TheAskSteps() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.6 }}
-        style={{ marginTop: '2.5vh', padding: '2.5vh 2vw', background: 'rgba(190, 18, 60, 0.05)', borderRadius: 12, borderLeft: `4px solid ${ACCENT}` }}
+        style={{ marginTop: '2.5vh', padding: '2.5vh 2vw', background: ACCENT_BG_05, borderRadius: 12, borderLeft: `4px solid ${ACCENT}` }}
       >
         <div style={{ fontSize: 'min(2vh, 18px)', color: ACCENT, fontWeight: W.bold, letterSpacing: LS.wide }}>
           First operations online · month 18 from signing.
@@ -2002,9 +2169,9 @@ function VisionCard({ label, value, bgImage, isMain, period }) {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: isMain ? '4vh 2.5vw' : '2.5vh 2.5vw',
-        border: isMain ? `1px solid ${ACCENT}` : `1px solid rgba(255,255,255,0.08)`,
+        border: isMain ? `1px solid ${ACCENT}` : BORDER_INVERSE_8,
         transform: isMain ? 'translateX(-2vw)' : 'none',
-        boxShadow: isMain ? '0 20px 40px rgba(0,0,0,0.5)' : 'none',
+        boxShadow: isMain ? SHADOW_ELEV_50 : 'none',
         width: isMain ? '106%' : '100%',
         backgroundColor: 'var(--color-gray-900)',
       }}
@@ -2026,19 +2193,17 @@ function VisionCard({ label, value, bgImage, isMain, period }) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: isMain
-            ? 'linear-gradient(90deg, rgba(190,18,60,0.85) 0%, rgba(0,0,0,0.3) 100%)'
-            : 'linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 100%)',
+          background: isMain ? G.heroCardAccent : G.heroCardDark,
           zIndex: 1,
         }}
       />
 
       {/* Content (Left) */}
       <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-        <div style={{ fontSize: T.micro, letterSpacing: LS.widest, fontWeight: W.heavy, color: isMain ? '#fff' : TEXT_FAINT }}>
+        <div style={{ fontSize: T.micro, letterSpacing: LS.widest, fontWeight: W.heavy, color: isMain ? TEXT_INVERSE : TEXT_FAINT }}>
           {label}
         </div>
-        <div style={{ fontSize: isMain ? 'min(4vh, 32px)' : 'min(3vh, 24px)', fontWeight: W.black, letterSpacing: LS.snug, color: '#fff' }}>
+        <div style={{ fontSize: isMain ? 'min(4vh, 32px)' : 'min(3vh, 24px)', fontWeight: W.black, letterSpacing: LS.snug, color: TEXT_INVERSE }}>
           {value}
         </div>
       </div>
@@ -2051,7 +2216,7 @@ function VisionCard({ label, value, bgImage, isMain, period }) {
           fontSize: T.micro,
           letterSpacing: LS.widest,
           fontWeight: W.bold,
-          color: isMain ? '#fff' : TEXT_DIM,
+          color: isMain ? TEXT_INVERSE : TEXT_DIM,
           writingMode: 'vertical-rl',
           transform: 'rotate(180deg)',
           opacity: 0.8,
@@ -2097,6 +2262,27 @@ const S = {
     height: '100%',
     position: 'relative',
     zIndex: 2,
+  },
+  pillKicker: {
+    display: 'inline-flex',
+    padding: '0.8vh 1vw',
+    background: ACCENT_BG_15,
+    border: ACCENT_BORDER_1PX_40,
+    borderRadius: 30,
+    color: ACCENT,
+    fontSize: T.micro + 1,
+    fontWeight: W.bold,
+    letterSpacing: LS.widest,
+    textTransform: 'uppercase',
+    alignItems: 'center',
+    gap: 10,
+  },
+  pillDot: {
+    width: 6,
+    height: 6,
+    borderRadius: '50%',
+    background: ACCENT,
+    boxShadow: '0 0 10px color-mix(in srgb, var(--color-accent-strong) 50%, transparent)',
   },
 
   /* Section header (top of every content slide) */
@@ -2373,8 +2559,8 @@ const S = {
   },
   whoStat: {
     padding: '2vh 1.5vw',
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    background: GLASS_ON_PHOTO_BG,
+    border: GLASS_ON_PHOTO_BORDER,
     borderRadius: 8,
     backdropFilter: 'blur(10px)',
     WebkitBackdropFilter: 'blur(10px)',
@@ -2450,8 +2636,8 @@ const S = {
   },
   archCard: {
     padding: '2vh 1.5vw',
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    background: GLASS_ON_PHOTO_BG,
+    border: GLASS_ON_PHOTO_BORDER,
     borderRadius: 8,
     display: 'flex',
     flexDirection: 'column',
@@ -2540,8 +2726,8 @@ const S = {
   },
   bigStat: {
     padding: '2vh 1.5vw',
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    background: GLASS_ON_PHOTO_BG,
+    border: GLASS_ON_PHOTO_BORDER,
     borderRadius: 8,
     backdropFilter: 'blur(10px)',
     WebkitBackdropFilter: 'blur(10px)',
@@ -2598,8 +2784,8 @@ const S = {
   },
   teamCard: {
     padding: '2vh 1.5vw',
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    background: GLASS_ON_PHOTO_BG,
+    border: GLASS_ON_PHOTO_BORDER,
     borderRadius: 8,
     display: 'flex',
     flexDirection: 'column',
@@ -2833,8 +3019,8 @@ const S = {
   },
   qatCard: {
     padding: '2vh 1.5vw',
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    background: GLASS_ON_PHOTO_BG,
+    border: GLASS_ON_PHOTO_BORDER,
     borderRadius: 8,
     display: 'flex',
     gap: '1.5vw',
@@ -2902,8 +3088,8 @@ const S = {
     gridTemplateColumns: '180px 1fr',
     gap: '2vw',
     padding: '1.6vh 1.5vw',
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    background: GLASS_ON_PHOTO_BG,
+    border: GLASS_ON_PHOTO_BORDER,
     borderRadius: 8,
     alignItems: 'baseline',
     marginBottom: '1vh',
