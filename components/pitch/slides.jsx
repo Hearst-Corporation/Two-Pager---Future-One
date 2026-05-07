@@ -145,7 +145,7 @@ export function S01Vision2030() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 35%, color-mix(in srgb, var(--color-bg-main) 60%, transparent) 55%, transparent 100%)',
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
 
@@ -153,7 +153,7 @@ export function S01Vision2030() {
       
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <motion.div 
-          style={{ ...S.splitTextLeft, justifyContent: 'center', flex: '0 0 50%' }}
+          style={{ ...S.splitTextLeft, justifyContent: 'center', flex: '0 0 66.66%' }}
           variants={staggerContainer}
           initial="hidden"
           animate="show"
@@ -175,7 +175,7 @@ export function S01Vision2030() {
         <motion.div
           style={{
             ...S.splitTextRight,
-            flex: '0 0 50%',
+            flex: '0 0 33.33%',
             justifyContent: 'center',
             paddingRight: '8vw',
             paddingLeft: '2vw',
@@ -595,9 +595,9 @@ export function S06RDI() {
 }
 
 /* ============================================================ */
-/* SLIDE 7 — THE DATACENTER (by Equinix · 3 piliers)             */
+/* SLIDE 7 — THE DATACENTER · TECHNOLOGY                         */
 /* ============================================================ */
-export function S07Datacenter() {
+export function S07Technology() {
   return (
     <div style={S.slide}>
       <motion.div
@@ -614,10 +614,10 @@ export function S07Datacenter() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 40%, color-mix(in srgb, var(--color-bg-main) 70%, transparent) 60%, transparent 100%)',
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
-      <SectionHeader number="07" title="The Datacenter" />
+      <SectionHeader number="07" title="Technology" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <motion.div
           style={{ ...S.splitTextLeft, justifyContent: 'center' }}
@@ -628,35 +628,182 @@ export function S07Datacenter() {
           <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
             <div style={S.pillKicker}>
               <div style={S.pillDot} />
-              DATACENTER · BY EQUINIX
+              THE DATACENTER · TECHNOLOGY
             </div>
           </motion.div>
           <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
-            The world's <span style={{ color: ACCENT }}>#1 datacenter platform</span>
+            Hyperscale-grade.
             <br />
-            comes to Doha.
+            <span style={{ color: ACCENT }}>Built and operated by Equinix.</span>
           </motion.h2>
-          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
-            Equinix builds and operates the datacenter under contract.
-            FUTUR ONE plugs into Platform Equinix — instant access to a global network
-            of cloud, AI, and enterprise customers.
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: INVERSE_75, lineHeight: 1.6 }}>
+            Twenty-five years of global standards. Equinix designs, builds and operates
+            the datacenter under contract — nothing about the technology stack is improvised.
           </motion.p>
 
-          <motion.div variants={fadeUpItem} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2vh', marginTop: '4vh' }}>
-            <DatacenterPillar
-              icon="T"
-              title="TECHNOLOGY"
-              line="Tier-IV / Tier-III hyperscale-grade · liquid cooling · AI-optimized · global standards of resilience and security."
+          <motion.div variants={fadeUpItem} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vh 1.5vw', marginTop: '4vh' }}>
+            <TechSpec title="TIER-IV / TIER-III" line="Hyperscale resilience · 99.999% uptime SLA across the Equinix network" />
+            <TechSpec title="LIQUID COOLING" line="High-density GPU · AI-optimized whitespace · ready for next-gen workloads" />
+            <TechSpec title="GLOBAL SECURITY" line="ISO 27001 · SOC 2 · 24/7 NOC · sovereign data residency on Qatari soil" />
+            <TechSpec title="INTERCONNECTION" line="Native bridge to Platform Equinix · 470K+ cross-connects worldwide" />
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================ */
+/* SLIDE 8 — THE DATACENTER · COMMERCIALIZATION                  */
+/* ============================================================ */
+export function S08Commercialization() {
+  return (
+    <div style={S.slide}>
+      <motion.div
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        style={{
+          ...S.bg,
+          backgroundImage: "url('/aerial-campus-2.png')",
+          backgroundPosition: 'right center',
+        }}
+      />
+      <div
+        style={{
+          ...S.overlay,
+          background:
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
+        }}
+      />
+      <SectionHeader number="08" title="Commercialization" />
+      <div style={{ ...S.splitLayout, zIndex: 3 }}>
+        <motion.div
+          style={{ ...S.splitTextLeft, justifyContent: 'center' }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
+              THE DATACENTER · COMMERCIALIZATION
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
+            Plugged into Platform Equinix
+            <br />
+            <span style={{ color: ACCENT }}>from day one.</span>
+          </motion.h2>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: INVERSE_75, lineHeight: 1.6 }}>
+            FUTUR ONE doesn't sell colocation door-to-door. It activates Equinix's global
+            customer network — instant anchor tenants, instant relevance, instant revenue.
+          </motion.p>
+
+          <motion.div variants={fadeUpItem} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2vh 1.5vw', marginTop: '4vh' }}>
+            <PremiumWhoStat
+              value="10K+"
+              label="enterprises on Platform Equinix"
+              location="instant anchor pipeline"
+              bgImage="/partners/aerial-dc-campus.png"
             />
-            <DatacenterPillar
-              icon="C"
-              title="COMMERCIALIZATION"
-              line="Platform Equinix · 10K+ enterprise customers · 2K+ cloud and network providers · anchor tenants from day one."
+            <PremiumWhoStat
+              value="2K+"
+              label="cloud & network providers"
+              location="AWS · Azure · GCP · Oracle · NVIDIA"
+              bgImage="/supercomputer-wide.png"
             />
-            <DatacenterPillar
-              icon="F"
-              title="FINANCE"
-              line="Equinix REIT (NYSE: EQIX) carries the CAPEX · sovereign JV track record (PGIM, GIC) · Qatar funds the campus, not the metal."
+            <PremiumWhoStat
+              value="GCC"
+              label="market access · regional gateway"
+              location="UAE · KSA · Mumbai · Frankfurt"
+              bgImage="/aerial-white.png"
+            />
+            <PremiumWhoStat
+              value="Day 1"
+              label="revenue from anchor tenants"
+              location="No customer-acquisition build-up"
+              bgImage="/hub-interior.png"
+            />
+          </motion.div>
+
+          <motion.div variants={fadeUpItem} style={S.callout}>
+            <div style={S.calloutText}>
+              <strong>Multi-nationals that want to operate in the GCC will route through FUTUR ONE.</strong>
+              {' '}It is not a new market we open. It is an existing flow we capture.
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================ */
+/* SLIDE 9 — THE DATACENTER · FINANCE                            */
+/* ============================================================ */
+export function S09Finance() {
+  return (
+    <div style={S.slide}>
+      <motion.div
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        style={{
+          ...S.bg,
+          backgroundImage: "url('/vault.png')",
+          backgroundPosition: 'right center',
+        }}
+      />
+      <div
+        style={{
+          ...S.overlay,
+          background:
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
+        }}
+      />
+      <SectionHeader number="09" title="Finance" />
+      <div style={{ ...S.splitLayout, zIndex: 3 }}>
+        <motion.div
+          style={{ ...S.splitTextLeft, justifyContent: 'center' }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={fadeUpItem} style={{ marginBottom: '2.5vh' }}>
+            <div style={S.pillKicker}>
+              <div style={S.pillDot} />
+              THE DATACENTER · FINANCE
+            </div>
+          </motion.div>
+          <motion.h2 variants={fadeUpItem} style={{ ...S.h2, fontSize: 'min(6vh, 56px)', letterSpacing: LS.tight, lineHeight: 1.05 }}>
+            Equinix carries the CAPEX.
+            <br />
+            <span style={{ color: ACCENT }}>Qatar captures the value.</span>
+          </motion.h2>
+          <motion.p variants={fadeUpItem} style={{ ...S.lead, maxWidth: 800, marginTop: '3.5vh', fontSize: 'min(2.2vh, 20px)', color: INVERSE_75, lineHeight: 1.6 }}>
+            Equinix is a NYSE-listed REIT — datacenter financing is their core craft.
+            Qatar focuses sovereign capital on the campus, the hub and the founders.
+            The model is proven : Equinix has done it with PGIM, GIC, CPP, Mitsubishi Estate.
+          </motion.p>
+
+          <motion.div variants={fadeUpItem} style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.6vh', marginTop: '4vh', maxWidth: 900 }}>
+            <FinanceRow
+              tag="EQUINIX SCOPE"
+              line="Datacenter CAPEX · build-to-suit · long-term operations · interconnection revenue"
+            />
+            <FinanceRow
+              tag="QATAR SCOPE"
+              line="Campus land & infrastructure · founder hub operations · life and culture layer"
+            />
+            <FinanceRow
+              tag="JV TRACK RECORD"
+              line="PGIM Real Estate (US) · GIC Singapore (xScale) · CPP Investments (Canada) · Mitsubishi Estate (Japan)"
+              accent
+            />
+            <FinanceRow
+              tag="SOVEREIGN POSITIONING"
+              line="Qatar joins a club of four sovereign-grade Equinix partners worldwide"
             />
           </motion.div>
         </motion.div>
@@ -666,9 +813,9 @@ export function S07Datacenter() {
 }
 
 /* ============================================================ */
-/* SLIDE 8 — METHOD (timeline horizontale)                       */
+/* SLIDE 10 — METHOD (timeline horizontale)                      */
 /* ============================================================ */
-export function S08Method() {
+export function S10Method() {
   return (
     <div style={S.slide}>
       <motion.div
@@ -686,15 +833,15 @@ export function S08Method() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, color-mix(in srgb, var(--color-bg-main) 10%, transparent) 0%, color-mix(in srgb, var(--color-bg-main) 80%, transparent) 28%, var(--color-bg-main) 33.33%, var(--color-bg-main) 100%)',
+            'linear-gradient(270deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
-      <SectionHeader number="08" title="The Method" />
+      <SectionHeader number="10" title="The Method" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
-        <div style={{ flex: '0 0 30%' }} /> {/* Espace vide pour l'image (environ 1/3) */}
+        <div style={{ flex: '0 0 33.33%' }} /> {/* Espace vide pour l'image (1/3) */}
         
         <motion.div 
-          style={{ flex: '0 0 70%', padding: 'calc(56px + 6vh) 6vw 4vh 2vw', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+          style={{ flex: '0 0 66.66%', padding: L.splitPadR, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           variants={staggerContainer}
           initial="hidden"
           animate="show"
@@ -728,7 +875,7 @@ export function S08Method() {
 /* ============================================================ */
 /* SLIDE 9 — 30% QATARISATION (le pivot moral)                   */
 /* ============================================================ */
-export function S09Qatarisation() {
+export function S11Qatarisation() {
   return (
     <div style={S.slide}>
       <motion.div
@@ -745,10 +892,10 @@ export function S09Qatarisation() {
         style={{
           ...S.overlay,
           background:
-            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 30%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 45%, transparent 100%)',
+            'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
-      <SectionHeader number="09" title="30% Qatarisation" />
+      <SectionHeader number="11" title="30% Qatarisation" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <motion.div 
           style={{ flex: '0 0 33.33%', padding: L.splitPadL, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
@@ -790,7 +937,7 @@ export function S09Qatarisation() {
 /* ============================================================ */
 /* SLIDE 10 — GOVERNANCE                                         */
 /* ============================================================ */
-export function S10Governance() {
+export function S12Governance() {
   return (
     <div style={S.slide}>
       <motion.div
@@ -810,7 +957,7 @@ export function S10Governance() {
             'linear-gradient(270deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
-      <SectionHeader number="10" title="Governance" />
+      <SectionHeader number="12" title="Governance" />
       <div style={{ ...S.splitLayout, zIndex: 3, justifyContent: 'flex-end' }}>
         <motion.div 
           style={{ ...S.splitTextRight, justifyContent: 'center' }}
@@ -847,7 +994,7 @@ export function S10Governance() {
 /* ============================================================ */
 /* SLIDE 11 — THE ASK (3 décisions, 1 trimestre)                 */
 /* ============================================================ */
-export function S11Ask() {
+export function S13Ask() {
   return (
     <div style={S.slide}>
       <motion.div
@@ -867,7 +1014,7 @@ export function S11Ask() {
             'linear-gradient(90deg, var(--color-bg-main) 0%, var(--color-bg-main) 60%, color-mix(in srgb, var(--color-bg-main) 85%, transparent) 70%, transparent 100%)',
         }}
       />
-      <SectionHeader number="11" title="The Ask" />
+      <SectionHeader number="13" title="The Ask" />
       <div style={{ ...S.splitLayout, zIndex: 3 }}>
         <motion.div 
           style={{ ...S.splitTextLeft, justifyContent: 'center' }}
@@ -903,7 +1050,7 @@ export function S11Ask() {
 /* ============================================================ */
 /* SLIDE 12 — CLOSING                                            */
 /* ============================================================ */
-export function S12Closing() {
+export function S14Closing() {
   return (
     <div style={S.slide}>
       <div
@@ -961,7 +1108,7 @@ function MasterplanOrbital() {
   ];
 
   return (
-    <div style={{ position: 'relative', width: 'min(85vh, 900px)', height: 'min(85vh, 900px)', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{ position: 'relative', width: 'min(80vh, 850px)', height: 'min(80vh, 850px)', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       
       {/* SVG Connections */}
       <svg viewBox="0 0 1000 1000" style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 0 }}>
@@ -1515,14 +1662,14 @@ function MonacoCard({ tag, line }) {
 function DatacenterPillar({ icon, title, line }) {
   return (
     <motion.div
-      whileHover={{ x: 5, borderColor: 'rgba(255,255,255,0.18)' }}
+      whileHover={{ x: 5, borderColor: BORDER_INVERSE_18, boxShadow: SHADOW_ELEV_40 }}
       style={{
         display: 'flex',
         alignItems: 'center',
         gap: '2vw',
         padding: '2.4vh 2vw',
-        background: 'rgba(15, 15, 15, 0.65)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: PANEL_BACK_75,
+        border: BORDER_INVERSE_8,
         borderRadius: 16,
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
@@ -1537,7 +1684,7 @@ function DatacenterPillar({ icon, title, line }) {
         height: 'min(7vh, 60px)',
         borderRadius: '50%',
         border: `2px solid ${ACCENT}`,
-        background: 'rgba(190,18,60,0.12)',
+        background: ACCENT_BG_15,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -1549,10 +1696,10 @@ function DatacenterPillar({ icon, title, line }) {
         {icon}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ fontSize: 'min(2vh, 18px)', fontWeight: W.black, color: '#fff', letterSpacing: LS.wider, marginBottom: '0.6vh', textTransform: 'uppercase' }}>
+        <div style={{ fontSize: 'min(2vh, 18px)', fontWeight: W.black, color: TEXT_INVERSE, letterSpacing: LS.wider, marginBottom: '0.6vh', textTransform: 'uppercase' }}>
           {title}
         </div>
-        <div style={{ fontSize: 'min(1.6vh, 14px)', color: 'rgba(255,255,255,0.72)', fontWeight: W.medium, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 'min(1.6vh, 14px)', color: INVERSE_70, fontWeight: W.medium, lineHeight: 1.5 }}>
           {line}
         </div>
       </div>
@@ -2347,7 +2494,7 @@ const S = {
     zIndex: 3,
   },
   splitImage: {
-    flex: '0 0 45%',
+    flex: '0 0 33.33%',
     position: 'relative',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
