@@ -1,56 +1,50 @@
 'use client';
 
+/* ============================================================
+   FUTUR ONE × MISA — PILLAR DECK ENGINE
+   ------------------------------------------------------------
+   Drives the 10-slide pillar deck (DC / Mining / Hub).
+   Same UX as /pitch (keyboard, wheel, dots, fullscreen).
+   ============================================================ */
+
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   S00Cover,
-  S01Vision2030,
-  S02Team,
-  S03TrackRecord,
-  S04Monaco,
-  S05Masterplan,
-  S06RDI,
-  S07Technology,
-  S08Commercialization,
-  S09Finance,
-  S10Method,
-  S11Qatarisation,
-  S12Governance,
-  S13Ask,
-  S14Closing,
-} from './slides';
-import { FONT_STACK } from './tokens';
+  S01Pillar,
+  S02Thesis,
+  S03Operators,
+  S04Operator1,
+  S05Operator2,
+  S06Operator3,
+  S07Architecture,
+  S08Commercials,
+  S09Ask,
+} from './Slides';
+import { FONT_STACK } from '../../pitch/tokens';
 
 const SLIDES = [
   { id: 0, Component: S00Cover, label: 'Cover' },
-  { id: 1, Component: S01Vision2030, label: 'Conviction' },
-  { id: 2, Component: S02Team, label: 'The Team' },
-  { id: 3, Component: S03TrackRecord, label: 'Track Record' },
-  { id: 4, Component: S04Monaco, label: 'Monaco of GCC' },
-  { id: 5, Component: S05Masterplan, label: 'Masterplan' },
-  { id: 6, Component: S06RDI, label: 'RDI Ecosystem' },
-  { id: 7, Component: S07Technology, label: 'Technology' },
-  { id: 8, Component: S08Commercialization, label: 'Commercialization' },
-  { id: 9, Component: S09Finance, label: 'Finance' },
-  { id: 10, Component: S10Method, label: 'Method' },
-  { id: 11, Component: S11Qatarisation, label: '30% Qatari' },
-  { id: 12, Component: S12Governance, label: 'Governance' },
-  { id: 13, Component: S13Ask, label: 'The Ask' },
-  { id: 14, Component: S14Closing, label: 'Closing' },
+  { id: 1, Component: S01Pillar, label: 'Pillar' },
+  { id: 2, Component: S02Thesis, label: 'Thesis' },
+  { id: 3, Component: S03Operators, label: 'Operators' },
+  { id: 4, Component: S04Operator1, label: 'Operator 1' },
+  { id: 5, Component: S05Operator2, label: 'Operator 2' },
+  { id: 6, Component: S06Operator3, label: 'Operator 3' },
+  { id: 7, Component: S07Architecture, label: 'Integration' },
+  { id: 8, Component: S08Commercials, label: 'Commercials' },
+  { id: 9, Component: S09Ask, label: 'The Ask' },
 ];
 
-export default function Deck() {
+export default function PillarDeck({ pillar }) {
   const [index, setIndex] = useState(0);
   const [showHint, setShowHint] = useState(true);
   const wheelLockRef = useRef(null);
 
-  const go = useCallback(
-    (delta) => {
-      setIndex((i) => Math.max(0, Math.min(SLIDES.length - 1, i + delta)));
-      setShowHint(false);
-    },
-    [],
-  );
+  const go = useCallback((delta) => {
+    setIndex((i) => Math.max(0, Math.min(SLIDES.length - 1, i + delta)));
+    setShowHint(false);
+  }, []);
 
   const goTo = useCallback((i) => {
     setIndex(Math.max(0, Math.min(SLIDES.length - 1, i)));
@@ -91,25 +85,16 @@ export default function Deck() {
 
   useEffect(() => {
     const onWheel = (e) => {
-      // Empêche le scroll natif de la page entière (le rebond sur Mac)
       e.preventDefault();
-
       if (wheelLockRef.current) return;
-
       if (e.deltaY > 20) {
         go(1);
-        wheelLockRef.current = setTimeout(() => {
-          wheelLockRef.current = null;
-        }, 600);
+        wheelLockRef.current = setTimeout(() => { wheelLockRef.current = null; }, 600);
       } else if (e.deltaY < -20) {
         go(-1);
-        wheelLockRef.current = setTimeout(() => {
-          wheelLockRef.current = null;
-        }, 600);
+        wheelLockRef.current = setTimeout(() => { wheelLockRef.current = null; }, 600);
       }
     };
-
-    // On attache l'événement en non-passif pour pouvoir faire e.preventDefault()
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => {
       window.removeEventListener('wheel', onWheel);
@@ -133,38 +118,29 @@ export default function Deck() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           style={{ width: '100%', height: '100%', position: 'absolute' }}
         >
-          <Current />
+          <Current pillar={pillar} />
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation invisible — clics zones gauche/droite */}
-      <div
-        style={{ ...S.clickZone, ...S.clickLeft }}
-        onClick={() => go(-1)}
-        aria-label="Slide précédente"
-      />
-      <div
-        style={{ ...S.clickZone, ...S.clickRight }}
-        onClick={() => go(1)}
-        aria-label="Slide suivante"
-      />
+      <div style={{ ...S.clickZone, ...S.clickLeft }} onClick={() => go(-1)} aria-label="Previous slide" />
+      <div style={{ ...S.clickZone, ...S.clickRight }} onClick={() => go(1)} aria-label="Next slide" />
 
-      {/* Footer minimal — pagination + hint */}
       <div style={S.footer}>
         <div style={S.brand}>
           <span style={S.brandAccent}>FUTUR</span>
           <span style={{ marginLeft: 6 }}>ONE</span>
+          <span style={{ margin: '0 12px', opacity: 0.4 }}>×</span>
+          <span style={{ color: 'var(--color-text-secondary)' }}>MISA</span>
+          <span style={{ margin: '0 12px', opacity: 0.4 }}>·</span>
+          <span style={{ color: 'var(--color-text-muted)' }}>{pillar.label}</span>
         </div>
         <div style={S.dots}>
           {SLIDES.map((s, i) => (
             <button
               key={s.id}
               onClick={() => goTo(i)}
-              aria-label={`Aller à ${s.label}`}
-              style={{
-                ...S.dot,
-                ...(i === index ? S.dotActive : null),
-              }}
+              aria-label={`Go to ${s.label}`}
+              style={{ ...S.dot, ...(i === index ? S.dotActive : null) }}
             />
           ))}
         </div>
@@ -175,7 +151,7 @@ export default function Deck() {
 
       {showHint && (
         <div style={S.hint}>
-          ← → pour naviguer · F plein écran · 0–9 = slides 1–10 · Home / End pour début / fin
+          ← → to navigate · F fullscreen · 0–9 jump · Home / End
         </div>
       )}
     </div>

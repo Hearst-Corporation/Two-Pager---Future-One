@@ -1707,6 +1707,65 @@ function DatacenterPillar({ icon, title, line }) {
   );
 }
 
+/* TechSpec — carte 2x2 pour la slide Technology Equinix.
+   Compact : tag uppercase + ligne courte. Bordure top accent. */
+function TechSpec({ title, line }) {
+  return (
+    <motion.div
+      whileHover={{ y: -4, boxShadow: SHADOW_ELEV_40 }}
+      style={{
+        padding: '2.4vh 1.8vw',
+        background: PANEL_BACK_75,
+        border: BORDER_INVERSE_8,
+        borderTop: `2px solid ${ACCENT}`,
+        borderRadius: 12,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1vh',
+      }}
+    >
+      <div style={{ fontSize: T.micro + 1, fontWeight: W.black, color: ACCENT, letterSpacing: LS.widest, textTransform: 'uppercase' }}>
+        {title}
+      </div>
+      <div style={{ fontSize: 'min(1.6vh, 14px)', color: INVERSE_75, fontWeight: W.medium, lineHeight: 1.5 }}>
+        {line}
+      </div>
+    </motion.div>
+  );
+}
+
+/* FinanceRow — ligne empilée pour la slide Finance Equinix.
+   Tag à gauche, ligne descriptive à droite. Bordure gauche accent. */
+function FinanceRow({ tag, line, accent }) {
+  return (
+    <motion.div
+      whileHover={{ x: 5, borderColor: accent ? ACCENT : BORDER_INVERSE_18 }}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '200px 1fr',
+        alignItems: 'center',
+        gap: '2vw',
+        padding: '2vh 1.8vw',
+        background: accent ? ACCENT_BG_15 : PANEL_BACK_75,
+        border: accent ? `1px solid ${ACCENT}` : BORDER_INVERSE_8,
+        borderLeft: `4px solid ${ACCENT}`,
+        borderRadius: 12,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+      }}
+    >
+      <div style={{ fontSize: T.micro + 1, fontWeight: W.black, color: ACCENT, letterSpacing: LS.widest, textTransform: 'uppercase' }}>
+        {tag}
+      </div>
+      <div style={{ fontSize: 'min(1.7vh, 15px)', color: TEXT_INVERSE, fontWeight: W.medium, lineHeight: 1.5 }}>
+        {line}
+      </div>
+    </motion.div>
+  );
+}
+
 /* MonacoRadial — Schéma central avec 6 attributs autour du noyau FUTUR ONE.
    Utilise un SVG fixe pour les lignes et une grille CSS pour les nodes texte. */
 function MonacoRadial() {

@@ -2,22 +2,34 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { TilesRenderer, GlobeControls, WGS84_ELLIPSOID } from '3d-tiles-renderer';
+import { TilesRenderer, GlobeControls, WGS84_ELLIPSOID } from '3d-tiles-renderer/three';
 import { GoogleCloudAuthPlugin, TileCompressionPlugin, UpdateOnChangePlugin, TilesFadePlugin } from '3d-tiles-renderer/plugins';
 
 /**
  * QF Research & Development Complex — Education City, Doha
- * Coordinates from Google Maps satellite inspection
+ * Coordinates from OSM (centroid of HBKU Research B1 + B2 buildings)
+ *   B1 (QCRI): 25.321691, 51.425654
+ *   B2:        25.322264, 51.425770
  */
-const RDC_LAT = 25.31580;
-const RDC_LON = 51.43745;
-const RDC_HEIGHT = 0; // sea level reference
+const RDC_LAT = 25.321978;
+const RDC_LON = 51.425712;
+const RDC_HEIGHT = 12; // building roof level (≈12m above ground)
+
+/* Camera framing presets — distance / pitch combinations */
+const CAMERA_PRESETS = {
+  hero:    { distSouth: 180, altitude: 90,  label: 'Hero' },
+  aerial:  { distSouth: 350, altitude: 250, label: 'Aerial' },
+  facade:  { distSouth: 120, altitude: 30,  label: 'Façade' },
+  topdown: { distSouth: 1,   altitude: 320, label: 'Top-down' },
+};
 
 export default function RDCTilesViewer({ apiToken }) {
   const mountRef = useRef(null);
+  const stateRef = useRef({});
   const [error, setError] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [attributions, setAttributions] = useState('');
+  const [activePreset, setActivePreset] = useState('hero');
 
   useEffect(() => {
     if (!apiToken) {
@@ -40,8 +52,15 @@ export default function RDCTilesViewer({ apiToken }) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = 1.2;
     mount.appendChild(renderer.domElement);
+
+    /* ---------- Lighting (Google tiles ship without lights) ---------- */
+    const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambient);
+    const dirLight = new THREE.DirectionalLight(0xfff1d8, 1.2);
+    dirLight.position.set(0.5, 1, 0.5);
+    scene.add(dirLight);
 
     /* ---------- Tiles renderer (Google Photorealistic 3D Tiles) ---------- */
     const tiles = new TilesRenderer();
@@ -69,7 +88,7 @@ export default function RDCTilesViewer({ apiToken }) {
     scene.add(tiles.group);
 
     /* ---------- Position camera over the RDC building ---------- */
-    // Convert lat/lon to ECEF (Earth-Centered Earth-Fixed)
+    // 1. Convert lat/lon → ECEF (Earth-Centered Earth-Fixed) to get target point
     const target = new THREE.Vector3();
     WGS84_ELLIPSOID.getCartographicToPosition(
       THREE.MathUtils.degToRad(RDC_LAT),
@@ -78,30 +97,41 @@ export default function RDCTilesViewer({ apiToken }) {
       target,
     );
 
-    // Camera offset: place ~400m above and 600m south, looking at the building
-    const enuFrame = new THREE.Matrix4();
-    WGS84_ELLIPSOID.getEastNorthUpFrame(
+    // 2. Get ENU axes at the target so we can place the camera in local-tangent space.
+    const east = new THREE.Vector3();
+    const north = new THREE.Vector3();
+    const up = new THREE.Vector3();
+    WGS84_ELLIPSOID.getEastNorthUpAxes(
       THREE.MathUtils.degToRad(RDC_LAT),
       THREE.MathUtils.degToRad(RDC_LON),
-      RDC_HEIGHT,
-      enuFrame,
-    );
-    // ENU: X=east, Y=north, Z=up
-    const cameraOffsetLocal = new THREE.Vector3(0, -600, 400); // 600m south, 400m up
-    cameraOffsetLocal.applyMatrix4(enuFrame);
-    cameraOffsetLocal.sub(
-      new THREE.Vector3().setFromMatrixPosition(enuFrame),
+      east,
+      north,
+      up,
     );
 
-    camera.position.copy(target).add(cameraOffsetLocal);
-    camera.up.copy(new THREE.Vector3(0, 0, 1).applyMatrix4(enuFrame).normalize());
-    camera.lookAt(target);
+    /* Frame helper: position camera according to a preset, then re-aim at target */
+    const frameTo = (preset) => {
+      const { distSouth, altitude } = CAMERA_PRESETS[preset] || CAMERA_PRESETS.hero;
+      const camOffset = new THREE.Vector3()
+        .addScaledVector(north, -distSouth)
+        .addScaledVector(up, altitude);
+      camera.position.copy(target).add(camOffset);
+      camera.up.copy(up);
+      camera.lookAt(target);
+      camera.updateMatrixWorld();
+    };
+
+    // Start with the close "hero" view so building is large in frame
+    frameTo('hero');
+
+    // Expose to outer scope so React buttons can trigger reframing
+    stateRef.current.frameTo = frameTo;
 
     /* ---------- Globe controls (handles tilt/orbit/zoom on a globe) ---------- */
     const controls = new GlobeControls(scene, camera, renderer.domElement, tiles);
     controls.enableDamping = true;
-    controls.minDistance = 80;
-    controls.maxDistance = 8000;
+    controls.minDistance = 30;
+    controls.maxDistance = 4000;
 
     /* ---------- Animation loop ---------- */
     let frame;
@@ -210,6 +240,27 @@ export default function RDCTilesViewer({ apiToken }) {
       {/* Hint */}
       <div style={S.hint}>
         Drag · scroll to zoom · right-click to pan
+      </div>
+
+      {/* Camera preset buttons */}
+      <div style={S.presets}>
+        {Object.entries(CAMERA_PRESETS).map(([key, p]) => (
+          <button
+            key={key}
+            onClick={() => {
+              if (stateRef.current.frameTo) {
+                stateRef.current.frameTo(key);
+                setActivePreset(key);
+              }
+            }}
+            style={{
+              ...S.presetBtn,
+              ...(activePreset === key ? S.presetBtnActive : null),
+            }}
+          >
+            {p.label}
+          </button>
+        ))}
       </div>
 
       {/* Google attribution (REQUIRED by ToS) */}
@@ -366,6 +417,38 @@ const S = {
     color: 'rgba(255,255,255,0.55)',
     textTransform: 'uppercase',
     marginTop: 2,
+  },
+  presets: {
+    position: 'absolute',
+    bottom: 56,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    display: 'flex',
+    gap: 6,
+    padding: 6,
+    background: 'rgba(15,15,15,0.75)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    backdropFilter: 'blur(12px)',
+    borderRadius: 4,
+    zIndex: 30,
+  },
+  presetBtn: {
+    fontSize: 10,
+    fontWeight: 700,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.6)',
+    background: 'transparent',
+    border: 'none',
+    padding: '8px 14px',
+    cursor: 'pointer',
+    borderRadius: 3,
+    fontFamily: 'inherit',
+    transition: 'all 0.2s',
+  },
+  presetBtnActive: {
+    color: '#fff',
+    background: 'var(--color-accent-strong)',
   },
   hint: {
     position: 'absolute',
