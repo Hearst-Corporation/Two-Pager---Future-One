@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getAdminClient } from '@/lib/supabase-admin';
+import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 
 export async function GET() {
+  const r = await requireProfile('viewer');
+  if (r instanceof NextResponse) return r;
   const supa = getAdminClient();
   const { data, error } = await supa
     .from('operators')
@@ -14,9 +16,10 @@ export async function GET() {
 }
 
 export async function POST(req) {
+  const auth = await authedWrite('editor');
+  if (auth instanceof NextResponse) return auth;
   const body = await req.json();
-  const supa = getAdminClient();
-  const { data, error } = await supa.from('operators').insert(body).select().single();
+  const { data, error } = await auth.supa.from('operators').insert(body).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ operator: data });
 }

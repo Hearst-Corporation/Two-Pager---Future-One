@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getAdminClient } from '@/lib/supabase-admin';
+import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 
 export async function GET(_req, { params }) {
+  const r = await requireProfile('viewer');
+  if (r instanceof NextResponse) return r;
   const supa = getAdminClient();
   const [{ data: op, error: e1 }, { data: stake }, { data: ev }, { data: docs }] =
     await Promise.all([
@@ -20,9 +22,10 @@ export async function GET(_req, { params }) {
 }
 
 export async function PATCH(req, { params }) {
+  const auth = await authedWrite('editor');
+  if (auth instanceof NextResponse) return auth;
   const body = await req.json();
-  const supa = getAdminClient();
-  const { data, error } = await supa
+  const { data, error } = await auth.supa
     .from('operators')
     .update(body)
     .eq('id', params.id)
@@ -33,8 +36,9 @@ export async function PATCH(req, { params }) {
 }
 
 export async function DELETE(_req, { params }) {
-  const supa = getAdminClient();
-  const { error } = await supa.from('operators').update({ archived: true }).eq('id', params.id);
+  const auth = await authedWrite('admin');
+  if (auth instanceof NextResponse) return auth;
+  const { error } = await auth.supa.from('operators').update({ archived: true }).eq('id', params.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

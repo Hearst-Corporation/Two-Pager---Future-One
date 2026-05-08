@@ -90,3 +90,39 @@ button {
 a {
   color: inherit;
 }
+
+/* ============================================================
+   PRINT helpers — used by /admin/roadmap "Export PDF"
+   ============================================================ */
+.print-only { display: none; }
+
+@media print {
+  @page { size: A3 landscape; margin: 12mm; }
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Hide everything outside the roadmap shell when printing */
+  body * { visibility: hidden; }
+  .roadmap-print-root, .roadmap-print-root * { visibility: visible; }
+  .roadmap-print-root {
+    position: absolute !important;
+    inset: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    background: #fff !important;
+  }
+
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+
+  /* Workstream cards — keep them readable on paper */
+  .ws-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+}

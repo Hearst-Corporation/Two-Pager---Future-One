@@ -1,51 +1,98 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { getBrowserClient } from '@/lib/supabase-browser';
 
 export default function LoginPage() {
-  const router = useRouter();
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const sp = useSearchParams();
   const next = sp.get('next') || '/admin';
-  const [pw, setPw] = useState('');
-  const [err, setErr] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [mode, setMode] = useState('magic');
   const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
 
-  async function submit(e) {
+  async function sendMagicLink(e) {
     e.preventDefault();
-    setBusy(true);
-    setErr('');
-    const res = await fetch('/api/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw }),
+    setBusy(true); setErr(''); setMsg('');
+    const supa = getBrowserClient();
+    const { error } = await supa.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/admin/auth/callback?next=${encodeURIComponent(next)}`,
+      },
     });
     setBusy(false);
-    if (res.ok) {
-      router.push(next);
-      router.refresh();
-    } else {
-      setErr('Wrong password');
+    if (error) setErr(error.message);
+    else setMsg('Magic link sent. Check your inbox.');
+  }
+
+  async function signInWithPassword(e) {
+    e.preventDefault();
+    setBusy(true); setErr(''); setMsg('');
+    const supa = getBrowserClient();
+    const { error } = await supa.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    if (error) {
+      setErr(error.message);
+      return;
     }
+    window.location.href = next;
   }
 
   return (
     <div style={S.wrap}>
-      <form onSubmit={submit} style={S.card}>
+      <form onSubmit={mode === 'magic' ? sendMagicLink : signInWithPassword} style={S.card}>
         <div style={S.eyebrow}>FUTUR ONE × MISA</div>
-        <h1 style={S.title}>Admin access</h1>
-        <p style={S.sub}>Restricted area — internal pipeline.</p>
+        <h1 style={S.title}>Sign in</h1>
+        <p style={S.sub}>Restricted area — invite only.</p>
+
         <input
-          type="password"
+          type="email"
           autoFocus
-          value={pw}
-          onChange={(e) => setPw(e.target.value)}
-          placeholder="Password"
+          required
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@company.com"
           style={S.input}
         />
+
+        {mode === 'password' && (
+          <input
+            type="password"
+            required
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            style={S.input}
+          />
+        )}
+
         {err && <div style={S.err}>{err}</div>}
+        {msg && <div style={S.msg}>{msg}</div>}
+
         <button type="submit" disabled={busy} style={S.btn}>
-          {busy ? '…' : 'Enter'}
+          {busy ? '…' : mode === 'magic' ? 'Send magic link' : 'Sign in'}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => { setMode(mode === 'magic' ? 'password' : 'magic'); setErr(''); setMsg(''); }}
+          style={S.switch}
+        >
+          {mode === 'magic' ? 'Use password instead' : 'Use magic link instead'}
         </button>
       </form>
     </div>
@@ -59,22 +106,19 @@ const S = {
     display: 'grid',
     placeItems: 'center',
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    padding: 24,
   },
   card: {
-    width: 360,
+    width: 380,
+    maxWidth: '100%',
     padding: 40,
     background: 'var(--color-surface)',
     border: '1px solid var(--color-border-light)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 18,
+    gap: 16,
   },
-  eyebrow: {
-    fontSize: 11,
-    letterSpacing: 3,
-    fontWeight: 800,
-    color: 'var(--color-accent-strong)',
-  },
+  eyebrow: { fontSize: 11, letterSpacing: 3, fontWeight: 800, color: 'var(--color-accent-strong)' },
   title: { fontSize: 28, fontWeight: 800, letterSpacing: -1, margin: 0, color: 'var(--color-text-primary)' },
   sub: { fontSize: 13, margin: 0, color: 'var(--color-text-muted)' },
   input: {
@@ -95,6 +139,19 @@ const S = {
     fontWeight: 800,
     letterSpacing: 2,
     cursor: 'pointer',
+    fontFamily: 'inherit',
+  },
+  switch: {
+    background: 'transparent',
+    border: 0,
+    color: 'var(--color-text-muted)',
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: 1,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    padding: 4,
   },
   err: { fontSize: 12, color: 'var(--color-accent-strong)', fontWeight: 600 },
+  msg: { fontSize: 12, color: 'var(--color-success, #059669)', fontWeight: 600 },
 };

@@ -1,25 +1,32 @@
 import { NextResponse } from 'next/server';
-import { getAdminClient } from '@/lib/supabase-admin';
+import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 
 const BUCKET = 'crm-documents';
 
 export async function POST(req) {
+  const auth = await authedWrite('editor');
+  if (auth instanceof NextResponse) return auth;
   const form = await req.formData();
   const file = form.get('file');
-  const operator_id = form.get('operator_id');
+  const operator_id = form.get('operator_id') || null;
+  const partner_id = form.get('partner_id') || null;
   const kind = form.get('kind') || 'OTHER';
   const externalUrl = form.get('external_url');
 
-  if (!operator_id) return NextResponse.json({ error: 'Missing operator_id' }, { status: 400 });
+  if (!operator_id && !partner_id) {
+    return NextResponse.json({ error: 'operator_id or partner_id required' }, { status: 400 });
+  }
 
-  const supa = getAdminClient();
+  const supa = auth.supa;
+  const parent = { operator_id, partner_id };
+  const folder = operator_id ? `op/${operator_id}` : `partner/${partner_id}`;
 
   // External link mode (no file)
   if (!file && externalUrl) {
     const name = form.get('name') || externalUrl;
     const { data, error } = await supa
       .from('documents')
-      .insert({ operator_id, name, kind, external_url: externalUrl })
+      .insert({ ...parent, name, kind, external_url: externalUrl, actor_id: auth.actor })
       .select()
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -31,7 +38,7 @@ export async function POST(req) {
   }
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const path = `${operator_id}/${Date.now()}_${safeName}`;
+  const path = `${folder}/${Date.now()}_${safeName}`;
   const buf = Buffer.from(await file.arrayBuffer());
 
   const { error: upErr } = await supa.storage.from(BUCKET).upload(path, buf, {
@@ -42,7 +49,7 @@ export async function POST(req) {
 
   const { data, error } = await supa
     .from('documents')
-    .insert({ operator_id, name: file.name, kind, storage_path: path })
+    .insert({ ...parent, name: file.name, kind, storage_path: path, actor_id: auth.actor })
     .select()
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -51,8 +58,10 @@ export async function POST(req) {
 }
 
 export async function DELETE(req) {
+  const auth = await authedWrite('editor');
+  if (auth instanceof NextResponse) return auth;
   const { id } = await req.json();
-  const supa = getAdminClient();
+  const supa = auth.supa;
   const { data: doc } = await supa.from('documents').select('*').eq('id', id).single();
   if (doc?.storage_path) {
     await supa.storage.from(BUCKET).remove([doc.storage_path]);
@@ -64,6 +73,8 @@ export async function DELETE(req) {
 
 // Generate a signed URL for a private file
 export async function GET(req) {
+  const r = await requireProfile('viewer');
+  if (r instanceof NextResponse) return r;
   const id = new URL(req.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
   const supa = getAdminClient();
