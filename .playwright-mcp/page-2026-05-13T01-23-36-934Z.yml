@@ -1,0 +1,118 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary "Admin navigation" [ref=e3]:
+      - link "FUTUR ONE × MISA" [ref=e4] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]:
+          - generic [ref=e8]: F1
+        - generic [ref=e9]:
+          - generic [ref=e10]: FUTUR
+          - generic [ref=e11]: ONE
+          - generic [ref=e12]: ×
+          - generic [ref=e13]: MISA
+      - navigation [ref=e15]:
+        - link "Home" [ref=e16] [cursor=pointer]:
+          - /url: /admin
+          - img [ref=e17]
+          - generic [ref=e20]: Home
+        - link "Today" [ref=e21] [cursor=pointer]:
+          - /url: /admin/today
+          - img [ref=e22]
+          - generic [ref=e26]: Today
+        - link "Pipeline" [ref=e27] [cursor=pointer]:
+          - /url: /admin/pipeline
+          - img [ref=e28]
+          - generic [ref=e32]: Pipeline
+        - link "Roadmap" [ref=e33] [cursor=pointer]:
+          - /url: /admin/roadmap
+          - img [ref=e34]
+          - generic [ref=e39]: Roadmap
+        - link "Partners" [ref=e40] [cursor=pointer]:
+          - /url: /admin/partners
+          - img [ref=e41]
+          - generic [ref=e46]: Partners
+        - link "Team" [ref=e47] [cursor=pointer]:
+          - /url: /admin/team
+          - img [ref=e48]
+          - generic [ref=e53]: Team
+        - link "HEARST" [ref=e54] [cursor=pointer]:
+          - /url: /admin/hearst
+          - img [ref=e56]
+          - generic [ref=e59]: HEARST
+      - link "Notifications" [ref=e62] [cursor=pointer]:
+        - /url: /admin/notifications
+        - img [ref=e64]
+        - generic [ref=e67]: Notifications
+      - button "AD Adrien admin" [ref=e68] [cursor=pointer]:
+        - generic "Adrien" [ref=e69]: AD
+        - generic [ref=e70]:
+          - generic [ref=e71]: Adrien
+          - generic [ref=e72]: admin
+      - button "Collapse sidebar" [ref=e73] [cursor=pointer]:
+        - img [ref=e75]
+    - main [ref=e78]:
+      - generic [ref=e79]:
+        - generic [ref=e81]:
+          - generic [ref=e82]: HEARST
+          - generic [ref=e83]:
+            - generic [ref=e84]: Qatar AI & Data Center Hub
+            - generic [ref=e85]: Source-Backed Evidence Mode · every value must trace to a source
+        - generic [ref=e87]:
+          - link "How it works" [ref=e88] [cursor=pointer]:
+            - /url: /admin/hearst/about
+            - img [ref=e90]
+            - generic [ref=e93]: How it works
+          - link "Overview" [ref=e94] [cursor=pointer]:
+            - /url: /admin/hearst
+            - img [ref=e96]
+            - generic [ref=e99]: Overview
+          - link "Assumptions" [ref=e100] [cursor=pointer]:
+            - /url: /admin/hearst/assumptions
+            - img [ref=e102]
+            - generic [ref=e106]: Assumptions
+          - link "Source Ledger" [ref=e107] [cursor=pointer]:
+            - /url: /admin/hearst/sources
+            - img [ref=e109]
+            - generic [ref=e112]: Source Ledger
+          - link "Financial" [ref=e113] [cursor=pointer]:
+            - /url: /admin/hearst/financial
+            - img [ref=e115]
+            - generic [ref=e120]: Financial
+          - link "Data Room" [ref=e121] [cursor=pointer]:
+            - /url: /admin/hearst/data-room
+            - img [ref=e123]
+            - generic [ref=e125]: Data Room
+          - link "Contracts" [ref=e126] [cursor=pointer]:
+            - /url: /admin/hearst/contracts
+            - img [ref=e128]
+            - generic [ref=e132]: Contracts
+          - link "Pipeline" [ref=e133] [cursor=pointer]:
+            - /url: /admin/hearst/pipeline
+            - img [ref=e135]
+            - generic [ref=e139]: Pipeline
+          - link "Risks" [ref=e140] [cursor=pointer]:
+            - /url: /admin/hearst/risks
+            - img [ref=e142]
+            - generic [ref=e145]: Risks
+          - link "Timeline" [ref=e146] [cursor=pointer]:
+            - /url: /admin/hearst/timeline
+            - img [ref=e148]
+            - generic [ref=e151]: Timeline
+          - link "Scenarios" [ref=e152] [cursor=pointer]:
+            - /url: /admin/hearst/scenarios
+            - img [ref=e154]
+            - generic [ref=e158]: Scenarios
+          - link "Deal Simulator" [ref=e159] [cursor=pointer]:
+            - /url: /admin/hearst/deal-simulator
+            - img [ref=e161]
+            - generic [ref=e164]: Deal Simulator
+          - link "Reports" [ref=e165] [cursor=pointer]:
+            - /url: /admin/hearst/reports
+            - img [ref=e167]
+            - generic [ref=e169]: Reports
+          - link "Audit" [ref=e171] [cursor=pointer]:
+            - /url: /admin/hearst/audit
+            - img [ref=e173]
+            - generic [ref=e176]: Audit
+        - generic [ref=e178]: Loading report data…
+  - alert [ref=e179]

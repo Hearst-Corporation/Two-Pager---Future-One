@@ -1,0 +1,40 @@
+import { NextResponse } from 'next/server';
+import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
+
+export async function GET(req) {
+  const r = await requireProfile('viewer');
+  if (r instanceof NextResponse) return r;
+  const supa = getAdminClient();
+  const { searchParams } = new URL(req.url);
+  const project_id = searchParams.get('project_id');
+  if (!project_id) return NextResponse.json({ error: 'project_id required' }, { status: 400 });
+
+  const { data, error } = await supa
+    .from('hearst_scenarios')
+    .select('*')
+    .eq('project_id', project_id)
+    .order('created_at');
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Attach calculated projections and source scores
+  const enriched = (data || []).map((s) => {
+    const proj = generateProjection(s);
+    return { ...s, projection: proj, source_score: calcSourceScore(s) };
+  });
+
+  return NextResponse.json({ scenarios: enriched });
+}
+
+export async function POST(req) {
+  const auth = await authedWrite('editor');
+  if (auth instanceof NextResponse) return auth;
+  const body = await req.json();
+  const { data, error } = await auth.supa
+    .from('hearst_scenarios')
+    .insert({ ...body, created_by: auth.actor })
+    .select()
+    .single();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ scenario: data });
+}

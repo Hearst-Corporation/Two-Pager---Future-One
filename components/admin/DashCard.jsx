@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { C } from '@/lib/admin-tokens';
 
 export default function DashCard({
   icon,
@@ -122,18 +123,18 @@ const S = {
     gap: 6,
     marginTop: 12,
     padding: '5px 8px',
-    background: 'rgba(220,38,38,0.07)',
-    border: '1px solid rgba(220,38,38,0.18)',
+    background: C.errorTint,
+    border: `1px solid ${C.errorBorder}`,
     fontSize: 11,
     fontWeight: 700,
-    color: '#dc2626',
+    color: C.error,
     letterSpacing: 0.5,
   },
   alertBullet: {
     width: 6,
     height: 6,
     borderRadius: '50%',
-    background: '#dc2626',
+    background: C.error,
     flexShrink: 0,
   },
   body: { display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 },

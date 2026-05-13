@@ -44,10 +44,17 @@
   --color-accent-strong: #BE123C;
   --color-accent-soft: #E11D48;
 
-  /* Support / status */
+  /* Support / status — foreground */
   --color-success: #059669;
   --color-warning: #D97706;
-  --color-error: #DC2626;
+  --color-error:   #DC2626;
+  --color-info:    #2563EB;
+
+  /* Support / status — background tints */
+  --color-success-bg: #D1FAE5;
+  --color-warning-bg: #FFFBEB;
+  --color-error-bg:   #FEF2F2;
+  --color-info-bg:    #EFF6FF;
 
   /* Texte */
   --color-text-primary: #1A1D24;
