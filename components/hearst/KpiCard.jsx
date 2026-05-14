@@ -1,5 +1,6 @@
 'use client';
 import { MISSING_LABEL } from '@/lib/hearst-constants';
+import { C, T, W, LS } from '@/lib/admin-tokens';
 import SourceBadge from './SourceBadge';
 
 /**
@@ -13,7 +14,7 @@ export default function KpiCard({ label, value, format = 'number', source_type, 
   return (
     <div style={{ ...S.card, ...(highlight ? S.cardHighlight : {}), width }}>
       <div style={S.label}>{label}</div>
-      <div style={{ ...S.value, color: value == null ? 'var(--color-text-muted)' : (highlight ? '#fff' : 'var(--color-text-primary)') }}>
+      <div style={{ ...S.value, color: value == null ? C.textMuted : (highlight ? C.textInverse : C.textPrimary) }}>
         {display}
         {unit && value != null && <span style={S.unit}> {unit}</span>}
       </div>
@@ -45,8 +46,8 @@ function formatValue(value, format) {
 
 const S = {
   card: {
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
+    background: C.surface,
+    border: `1px solid ${C.borderLight}`,
     padding: '16px 20px',
     display: 'flex',
     flexDirection: 'column',
@@ -56,30 +57,30 @@ const S = {
   cardHighlight: {
     background: 'var(--color-accent-strong)',
     border: '1px solid var(--color-accent-strong)',
-    color: '#fff',
+    color: C.textInverse,
   },
   label: {
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: 0.8,
+    fontSize: T.caption,
+    fontWeight: W.bold,
+    letterSpacing: LS.wider,
     textTransform: 'uppercase',
-    color: 'var(--color-text-muted)',
+    color: C.textMuted,
   },
   value: {
-    fontSize: 24,
-    fontWeight: 800,
+    fontSize: T.h1,
+    fontWeight: W.heavy,
     letterSpacing: -0.5,
     lineHeight: 1.1,
     marginTop: 2,
   },
   unit: {
-    fontSize: 13,
-    fontWeight: 600,
+    fontSize: T.body,
+    fontWeight: W.semibold,
     opacity: 0.7,
   },
   sublabel: {
-    fontSize: 11,
-    color: 'var(--color-text-muted)',
+    fontSize: T.caption,
+    color: C.textMuted,
     marginTop: 2,
   },
 };

@@ -1,0 +1,83 @@
+/* ============================================================
+   OPENCLAW · DARK PREMIUM THEME
+   ------------------------------------------------------------
+   Hardware/monitoring dashboard dark theme.
+   Apply .openclaw-dark class on container for full effect.
+   ============================================================ */
+
+.openclaw-dark {
+  /* Backgrounds */
+  --oc-bg-base:       #05070d;
+  --oc-bg-elevated:   #080b14;
+  --oc-bg-surface:    #0b1020;
+  --oc-bg-surface-hi: #0f1528;
+
+  /* Cards */
+  --oc-card-bg:           rgba(255, 255, 255, 0.03);
+  --oc-card-bg-hover:     rgba(255, 255, 255, 0.06);
+  --oc-card-border:       rgba(255, 255, 255, 0.08);
+  --oc-card-border-hover: rgba(255, 255, 255, 0.12);
+
+  /* Text */
+  --oc-text-primary:   #f8fafc;
+  --oc-text-secondary: #94a3b8;
+  --oc-text-muted:     #64748b;
+  --oc-text-inverse:   #05070d;
+
+  /* Accent — cyan/electric blue */
+  --oc-accent:        #00b7ff;
+  --oc-accent-strong: #38bdf8;
+  --oc-accent-soft:   #7dd3fc;
+  --oc-accent-glow:   rgba(0, 183, 255, 0.15);
+
+  /* Status */
+  --oc-success: #22c55e;
+  --oc-warning: #f59e0b;
+  --oc-danger:  #ef4444;
+  --oc-info:    #3b82f6;
+
+  /* Borders */
+  --oc-border:        rgba(255, 255, 255, 0.08);
+  --oc-border-hover:  rgba(255, 255, 255, 0.14);
+  --oc-border-active: rgba(0, 183, 255, 0.35);
+
+  /* Glass */
+  --oc-glass-bg:       rgba(255, 255, 255, 0.03);
+  --oc-glass-border:   rgba(255, 255, 255, 0.08);
+  --oc-glass-backdrop: blur(12px) saturate(140%);
+
+  /* Scrollbar */
+  --oc-scrollbar-thumb:       rgba(255, 255, 255, 0.10);
+  --oc-scrollbar-thumb-hover: rgba(255, 255, 255, 0.18);
+}
+
+/* Scrollbar styling for dark theme */
+.openclaw-dark ::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.openclaw-dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.openclaw-dark ::-webkit-scrollbar-thumb {
+  background: var(--oc-scrollbar-thumb);
+  border-radius: 3px;
+}
+.openclaw-dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--oc-scrollbar-thumb-hover);
+}
+.openclaw-dark ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox scrollbar */
+.openclaw-dark * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--oc-scrollbar-thumb) transparent;
+}
+
+/* Selection in dark theme */
+.openclaw-dark ::selection {
+  background: rgba(0, 183, 255, 0.25);
+  color: #f8fafc;
+}

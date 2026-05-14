@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { C } from '@/lib/admin-tokens';
+import { C, T, W, LS } from '@/lib/admin-tokens';
 
 export default function DashCard({
   icon,
@@ -83,16 +83,16 @@ const S = {
   },
   icon: { fontSize: 20, lineHeight: 1, marginBottom: 6 },
   title: {
-    fontSize: 10,
-    fontWeight: 800,
-    letterSpacing: 2.5,
+    fontSize: T.mini,
+    fontWeight: W.heavy,
+    letterSpacing: LS.capsMax,
     textTransform: 'uppercase',
-    color: 'var(--color-text-muted)',
+    color: C.textMuted,
   },
   desc: {
-    fontSize: 12,
-    fontWeight: 500,
-    color: 'var(--color-text-secondary)',
+    fontSize: T.small,
+    fontWeight: W.medium,
+    color: C.textSecondary,
     marginTop: 2,
   },
   countBlock: {
@@ -102,17 +102,17 @@ const S = {
     flexShrink: 0,
   },
   bigNum: {
-    fontSize: 32,
-    fontWeight: 800,
+    fontSize: T.statM,
+    fontWeight: W.heavy,
     lineHeight: 1,
-    letterSpacing: -1,
+    letterSpacing: LS.tight,
     fontFamily: 'monospace',
   },
   countLabel: {
-    fontSize: 10,
-    fontWeight: 600,
-    letterSpacing: 1,
-    color: 'var(--color-text-muted)',
+    fontSize: T.mini,
+    fontWeight: W.semibold,
+    letterSpacing: LS.label,
+    color: C.textMuted,
     textTransform: 'uppercase',
     textAlign: 'right',
     marginTop: 3,
@@ -125,10 +125,10 @@ const S = {
     padding: '5px 8px',
     background: C.errorTint,
     border: `1px solid ${C.errorBorder}`,
-    fontSize: 11,
-    fontWeight: 700,
+    fontSize: T.caption,
+    fontWeight: W.bold,
     color: C.error,
-    letterSpacing: 0.5,
+    letterSpacing: LS.wide,
   },
   alertBullet: {
     width: 6,
@@ -141,17 +141,17 @@ const S = {
   empty: {
     padding: '32px 18px',
     textAlign: 'center',
-    fontSize: 12,
-    color: 'var(--color-text-muted)',
-    borderBottom: '1px solid var(--color-border-light)',
+    fontSize: T.small,
+    color: C.textMuted,
+    borderBottom: `1px solid ${C.borderLight}`,
   },
   footer: {
     display: 'block',
     padding: '12px 18px',
-    fontSize: 10,
-    fontWeight: 800,
-    letterSpacing: 2,
-    color: 'var(--color-text-muted)',
+    fontSize: T.mini,
+    fontWeight: W.heavy,
+    letterSpacing: LS.capsWide,
+    color: C.textMuted,
     textDecoration: 'none',
     textAlign: 'right',
   },

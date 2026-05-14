@@ -149,10 +149,10 @@ const S = {
   paragraph: { margin: '0 0 8px 0' },
   h1: { fontSize: 14, fontWeight: 800, margin: '6px 0 6px 0' },
   h2: { fontSize: 13, fontWeight: 700, margin: '6px 0 4px 0' },
-  h3: { fontSize: 12, fontWeight: 700, letterSpacing: 0.3, textTransform: 'uppercase', margin: '6px 0 4px 0', color: 'var(--color-text-muted, #6B7280)' },
+  h3: { fontSize: 12, fontWeight: 700, letterSpacing: 0.3, textTransform: 'uppercase', margin: '6px 0 4px 0', color: C.textMuted },
   list: { margin: '0 0 8px 16px', padding: 0 },
   li: { margin: '0 0 3px 0' },
-  codeInline: { background: 'rgba(0,0,0,0.06)', padding: '1px 4px', borderRadius: 3, fontFamily: 'ui-monospace, "SFMono-Regular", Menlo, monospace', fontSize: 11.5 },
-  codeBlock: { background: 'rgba(0,0,0,0.04)', padding: 8, borderRadius: 4, fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 11, overflowX: 'auto', margin: '4px 0' },
+  codeInline: { background: 'color-mix(in srgb, var(--color-gray-900) 6%, transparent)', padding: '1px 4px', borderRadius: 3, fontFamily: 'ui-monospace, "SFMono-Regular", Menlo, monospace', fontSize: 11.5 },
+  codeBlock: { background: 'color-mix(in srgb, var(--color-gray-900) 4%, transparent)', padding: 8, borderRadius: 4, fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 11, overflowX: 'auto', margin: '4px 0' },
   link: { color: C.info, textDecoration: 'underline' },
 };

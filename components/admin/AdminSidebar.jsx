@@ -27,7 +27,7 @@ const SIDEBAR_CSS = `
   font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
   padding: 5px 10px; border-radius: 5px; white-space: nowrap;
   opacity: 0; transition: opacity .14s ease, transform .14s ease; z-index: 60;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--color-gray-900) 20%, transparent);
 }
 .as-tooltip::before {
   content: ""; position: absolute; left: -3px; top: 50%; margin-top: -3px;
@@ -259,7 +259,6 @@ const S = {
     display: 'flex', flexDirection: 'column',
     padding: '14px 8px',
     zIndex: 50,
-    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
     transition: 'width .2s ease',
     overflow: 'visible',
   },
@@ -329,7 +328,7 @@ const S = {
     background: 'var(--color-surface)',
     border: '1px solid var(--color-border-light)',
     borderRadius: 8,
-    boxShadow: '0 20px 50px rgba(0,0,0,0.18)',
+    boxShadow: '0 20px 50px color-mix(in srgb, var(--color-gray-900) 18%, transparent)',
     padding: 8,
     zIndex: 60,
   },

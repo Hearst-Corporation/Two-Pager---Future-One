@@ -25,14 +25,16 @@ export default async function AdminLayout({ children }) {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        minHeight: '100dvh',
         background: 'var(--color-bg-main)',
         display: 'flex',
         alignItems: 'stretch',
       }}
     >
       <AdminSidebar me={session.profile} />
-      <main style={{ flex: 1, minWidth: 0 }}>{children}</main>
+      <main style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        {children}
+      </main>
     </div>
   );
 }
