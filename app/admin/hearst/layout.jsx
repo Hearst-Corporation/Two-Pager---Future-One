@@ -1,73 +1,53 @@
 'use client';
 /* ============================================================
-   OPENCLAW · HEARST LAYOUT
-   ------------------------------------------------------------
-   Stable shell for the HEARST module. Three-zone layout:
-   LeftContextPanel | ChatPanel (stable core) | RightContextPanel
-
-   The chat NEVER unmounts when navigating between HEARST pages.
-   Only the left/right panel content and the page content change.
-
-   Key design decisions:
-   - AdminSidebar is rendered by AdminLayout (parent). We receive it as children
-     alongside our content, so we DON'T render a second sidebar.
-   - The workspace fills the remaining width after AdminSidebar.
-   - Page content renders in the center panel, below the chat header area.
+   HEARST COCKPIT LAYOUT — pixel-near port
+   Left rail (88) | Center (chat + page) | Right rail (320)
+   Floating bottom bar (sub-menu) | Maroon glass theme
    ============================================================ */
 
-import HearstNavHeader from '@/components/layout/HearstNavHeader';
+import './cockpit.css';
 import ChatMount from '@/components/hearst/ChatMount';
-import LeftPanelContent from '@/components/hearst/LeftPanelContent';
-import RightPanelContent from '@/components/hearst/RightPanelContent';
-import { BG, LAYOUT, SP, BORDER } from '@/lib/design-system/tokens';
+import HearstIconRail from '@/components/hearst/HearstIconRail';
+import HearstRightRail from '@/components/hearst/HearstRightRail';
+import HearstBottomBar from '@/components/hearst/HearstBottomBar';
 
 export default function HearstLayout({ children }) {
   return (
-    <div className="openclaw-dark" style={S.darkWrap}>
-      {/* Top navigation header */}
-      <HearstNavHeader />
+    <div className="cockpit-root" style={S.root}>
+      <div className="cockpit-ambient-deep" />
+      <div className="cockpit-ambient-glow" />
 
-      {/* Three-panel workspace */}
       <div style={S.panelsRow}>
-        {/* Left context panel */}
-        <div style={S.leftPanel}>
-          <LeftPanelContent />
-        </div>
+        <HearstIconRail />
 
-        {/* Center: Chat (stable core) + Page content */}
         <div style={S.centerPanel}>
-          {/* Chat is always mounted, always visible */}
           <div style={S.chatArea}>
             <ChatMount />
           </div>
-
-          {/* Page content scrolls independently below chat */}
-          <div style={S.pageArea}>
-            {children}
-          </div>
+          <div style={S.pageArea}>{children}</div>
+          <HearstBottomBar />
         </div>
 
-        {/* Right context panel */}
-        <div style={S.rightPanel}>
-          <RightPanelContent />
-        </div>
+        <HearstRightRail />
       </div>
     </div>
   );
 }
 
 const S = {
-  darkWrap: {
+  root: {
+    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     flex: 1,
     minWidth: 0,
     height: '100%',
     overflow: 'hidden',
-    background: BG.base,
-    color: '#f8fafc',
+    color: '#f5f5f5',
   },
   panelsRow: {
+    position: 'relative',
+    zIndex: 10,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'stretch',
@@ -75,49 +55,28 @@ const S = {
     minHeight: 0,
     overflow: 'hidden',
   },
-  leftPanel: {
-    flexShrink: 0,
-    width: LAYOUT.leftPanelWidth,
-    height: '100%',
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    borderRight: `1px solid ${BORDER.color}`,
-    background: BG.elevated,
-  },
   centerPanel: {
+    position: 'relative',
     flex: 1,
-    minWidth: LAYOUT.chatMinWidth,
+    minWidth: 520,
     height: '100%',
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
-    background: BG.base,
   },
   chatArea: {
     flexShrink: 0,
-    height: '55%',
-    minHeight: 320,
+    height: '50%',
+    minHeight: 280,
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
-    borderBottom: `1px solid ${BORDER.color}`,
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
   },
   pageArea: {
     flex: 1,
     minHeight: 0,
     overflow: 'auto',
-    padding: `${SP[5]}px`,
-    background: BG.base,
-  },
-  rightPanel: {
-    flexShrink: 0,
-    width: LAYOUT.rightPanelWidth,
-    height: '100%',
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    borderLeft: `1px solid ${BORDER.color}`,
-    background: BG.elevated,
+    padding: '40px 64px 200px',
   },
 };

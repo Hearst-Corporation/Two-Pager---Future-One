@@ -1,0 +1,126 @@
+/* ============================================================
+   HEARST COCKPIT — pixel-near port of the reference shell
+   Maroon glass theme, inline-style friendly.
+   ============================================================ */
+
+.cockpit-root {
+  font-family: "Inter var", "Inter", -apple-system, BlinkMacSystemFont,
+    "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  font-feature-settings: "cv11", "ss03", "cv02";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --cp-bg-deep: #1A050B;
+  --cp-accent-maroon: #8A1538;
+  --cp-ink: #f5f5f5;
+  --cp-ink-strong: #ffffff;
+  --cp-fg-dim: rgba(245, 245, 245, 0.65);
+  --cp-fg-mute: rgba(245, 245, 245, 0.40);
+  --cp-fg-faint: rgba(245, 245, 245, 0.14);
+  --cp-fg-ghost: rgba(255, 255, 255, 0.08);
+  --cp-border-soft: rgba(255, 255, 255, 0.04);
+  --cp-border: rgba(255, 255, 255, 0.08);
+  --cp-border-strong: rgba(255, 255, 255, 0.12);
+}
+
+.cockpit-ambient-deep {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--cp-bg-deep);
+}
+.cockpit-ambient-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 30%,
+    var(--cp-accent-maroon) 0%,
+    transparent 70%
+  );
+}
+
+/* Reusable glass surface */
+.cockpit-glass {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(60px) saturate(110%) brightness(105%);
+  -webkit-backdrop-filter: blur(60px) saturate(110%) brightness(105%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    0 20px 60px -20px rgba(0, 0, 0, 0.6);
+}
+
+/* Buttons */
+.cockpit-btn-primary {
+  background: var(--cp-ink-strong);
+  color: var(--cp-bg-deep);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 500;
+  border: none;
+}
+
+.cockpit-btn-glass {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(150%) brightness(110%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%) brightness(110%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+.cockpit-btn-glass:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Segmented track */
+.cockpit-seg-track {
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+
+/* Rails (borders only, no background) */
+.cockpit-rail-left {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+.cockpit-rail-right {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Glass noise overlay */
+.cockpit-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.22'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+  opacity: 0.03;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+/* Scrollbars inside cockpit */
+.cockpit-root ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.cockpit-root ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cockpit-root ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+}
+.cockpit-root ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}

@@ -1,0 +1,114 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]: HEARST
+          - generic [ref=e8]:
+            - generic [ref=e9]: Qatar AI & Data Center Hub
+            - generic [ref=e10]: Source-Backed Evidence Mode
+        - link "How it works" [ref=e11] [cursor=pointer]:
+          - /url: /admin/hearst/about
+          - img [ref=e12]
+          - generic [ref=e15]: How it works
+      - generic [ref=e16]:
+        - link "Overview" [ref=e17] [cursor=pointer]:
+          - /url: /admin/hearst
+          - img [ref=e19]
+          - generic [ref=e22]: Overview
+        - link "Model" [ref=e24] [cursor=pointer]:
+          - /url: /admin/hearst/assumptions
+          - img [ref=e26]
+          - generic [ref=e30]: Model
+        - link "Deals & Docs" [ref=e31] [cursor=pointer]:
+          - /url: /admin/hearst/pipeline
+          - img [ref=e33]
+          - generic [ref=e35]: Deals & Docs
+        - link "Execution" [ref=e36] [cursor=pointer]:
+          - /url: /admin/hearst/risks
+          - img [ref=e38]
+          - generic [ref=e41]: Execution
+    - generic [ref=e42]:
+      - generic [ref=e44]:
+        - generic [ref=e46]:
+          - generic [ref=e47]: Overview
+          - generic [ref=e48]: Overview
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - generic [ref=e51]: Project
+            - button "Dashboard" [ref=e52] [cursor=pointer]:
+              - generic [ref=e53]: Dashboard
+            - button "Health Check" [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: Health Check
+            - button "Alerts 3" [ref=e56] [cursor=pointer]:
+              - generic [ref=e57]: Alerts
+              - generic [ref=e58]: "3"
+          - generic [ref=e59]:
+            - generic [ref=e60]: Scenarios
+            - generic [ref=e62]: Base Case, Upside, Downside...
+      - generic [ref=e63]:
+        - generic [ref=e65]:
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e69]:
+                - generic [ref=e70]: HEARST Advisor
+                - generic [ref=e71]: AI
+              - generic [ref=e72]: "Helping with: Overview"
+            - button "+" [ref=e74] [cursor=pointer]
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - button "Audit current state and give 3 next ..." [ref=e77] [cursor=pointer]
+              - button "Why is my IRR showing N/A?" [ref=e78] [cursor=pointer]
+              - button "Which sources should I add first to ..." [ref=e79] [cursor=pointer]
+            - generic [ref=e81]:
+              - generic [ref=e82]: Hi
+              - generic [ref=e83]:
+                - text: I have full context of the
+                - strong [ref=e84]: Overview
+                - text: page on
+                - strong [ref=e85]: HEARST
+                - text: . I can audit, fill, explain, source, stress-test, and export. Use a chip above or ask anything.
+            - generic [ref=e87]:
+              - textbox "Your message" [ref=e88]:
+                - /placeholder: Ask anything (Enter to send, Shift+Enter newline)
+              - button "Send" [disabled] [ref=e89] [cursor=pointer]
+        - generic [ref=e91]: Initializing HEARST module…
+      - generic [ref=e93]:
+        - generic [ref=e97]: Live Metrics
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - generic [ref=e100]: Source Score
+            - generic [ref=e101]:
+              - generic [ref=e102]: "72"
+              - generic [ref=e103]: /100
+            - generic [ref=e104]: ↑ +5%
+          - generic [ref=e105]:
+            - generic [ref=e106]: Data Room
+            - generic [ref=e107]:
+              - generic [ref=e108]: "18"
+              - generic [ref=e109]: /25 docs
+            - generic [ref=e110]: ↑ +2
+          - generic [ref=e111]:
+            - generic [ref=e112]: Project IRR
+            - generic [ref=e113]:
+              - generic [ref=e114]: "14.2"
+              - generic [ref=e115]: "%"
+          - generic [ref=e116]:
+            - generic [ref=e117]: MOIC
+            - generic [ref=e118]:
+              - generic [ref=e119]: "2.4"
+              - generic [ref=e120]: x
+          - generic [ref=e121]:
+            - generic [ref=e122]: Status
+            - generic [ref=e123]:
+              - generic [ref=e124]:
+                - generic [ref=e125]: On Track
+                - generic [ref=e126]: Base Case
+              - generic [ref=e127]:
+                - generic [ref=e128]: Review
+                - generic [ref=e129]: Sources
+          - button "Export Report" [ref=e130] [cursor=pointer]:
+            - generic [ref=e131]: Export Report
+          - button "Run Audit" [ref=e132] [cursor=pointer]:
+            - generic [ref=e133]: Run Audit
+  - alert [ref=e134]
