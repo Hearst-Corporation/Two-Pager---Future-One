@@ -52,6 +52,7 @@ export default function AuditPage() {
       }
     }
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadEntries(pid, lim, et) {

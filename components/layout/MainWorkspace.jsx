@@ -7,7 +7,7 @@
    Each panel scrolls independently.
    ============================================================ */
 
-import { BG, LAYOUT, BORDER, SP } from '@/lib/design-system/tokens';
+import { BG, LAYOUT, BORDER } from '@/lib/design-system/tokens';
 
 export default function MainWorkspace({ leftPanel, chatPanel, rightPanel }) {
   return (

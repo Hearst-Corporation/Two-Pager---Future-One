@@ -15,6 +15,10 @@ export async function middleware(req) {
   const { pathname } = req.nextUrl;
   if (!pathname.startsWith('/admin')) return NextResponse.next();
 
+  // Pass pathname to Server Components via request headers
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-pathname', pathname);
+
   if (DEV_AUTOLOGIN) {
     if (pathname === '/admin/login') {
       const url = req.nextUrl.clone();
@@ -22,10 +26,10 @@ export async function middleware(req) {
       url.search = '';
       return NextResponse.redirect(url);
     }
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  const res = NextResponse.next();
+  const res = NextResponse.next({ request: { headers: requestHeaders } });
   const supa = createServerClient(SUPABASE_URL, SUPABASE_ANON, {
     cookies: {
       get: (name) => req.cookies.get(name)?.value,

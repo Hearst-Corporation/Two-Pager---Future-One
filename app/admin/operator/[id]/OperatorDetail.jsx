@@ -1,7 +1,7 @@
 'use client';
+/* eslint-disable no-unused-vars */
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PILLAR_ACCENT } from '@/lib/admin-constants';
 import AssigneePicker from '@/components/admin/AssigneePicker';
@@ -38,28 +38,20 @@ export default function OperatorDetail({
   const router = useRouter();
   const [tab, setTab] = useState('overview');
   const [sendOpen, setSendOpen] = useState(false);
-  const accent = PILLAR_ACCENT[operator.pillar];
+  const accent = PILLAR_ACCENT[operator.pillar] || 'var(--color-text-primary)';
 
   const refresh = () => router.refresh();
 
-  const openTasks = tasks.filter((t) => !t.done).length;
-  const liveLinks = deckLinks.filter((l) => !l.revoked_at).length;
-
-  // Quick actions config
-  const opDeckPreview = `${operatorDeckRoute[operator.pillar]}?to=${encodeURIComponent(operator.name)}`;
-
-  // Tabs configuration - reduit à 4 onglets clairs
   const tabs = [
     {
       id: 'overview',
-      label: 'OVERVIEW',
-      badge: 0,
+      label: 'Overview',
       content: <OverviewTab operator={operator} accent={accent} onChange={refresh} />,
     },
     {
       id: 'activity',
-      label: 'ACTIVITY',
-      badge: openTasks + events.length,
+      label: 'Activity',
+      badge: tasks.filter((t) => !t.done).length,
       content: (
         <ActivityTab
           operator={operator}
@@ -75,11 +67,9 @@ export default function OperatorDetail({
     },
     {
       id: 'tracking',
-      label: 'TRACKING',
-      badge: liveLinks,
+      label: 'Tracking',
       content: (
         <TrackingTab
-          operator={operator}
           deckLinks={deckLinks}
           accent={accent}
           operatorDeckRoute={operatorDeckRoute}
@@ -90,8 +80,7 @@ export default function OperatorDetail({
     },
     {
       id: 'documents',
-      label: 'DOCUMENTS',
-      badge: documents.length,
+      label: 'Documents',
       content: <DocumentsTab operator={operator} documents={documents} accent={accent} onChange={refresh} />,
     },
   ];
@@ -103,7 +92,7 @@ export default function OperatorDetail({
         backLabel="← BACK TO PIPELINE"
 
         // Header
-        primaryTag={{ label: pillarLabel[operator.pillar].toUpperCase(), color: accent }}
+        primaryTag={{ label: (pillarLabel[operator.pillar] || 'Unknown').toUpperCase(), color: accent }}
         secondaryTag={{ label: operator.rank }}
         title={operator.name}
         subtitle={`${operator.country} · ${operator.role}`}
@@ -144,7 +133,7 @@ export default function OperatorDetail({
           <QuickActionButton key="3" href={pillarRoute[operator.pillar]} target="_blank" icon="↗">
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.5 }}>MISA DECK</span>
           </QuickActionButton>,
-          <QuickActionButton key="4" href={opDeckPreview} target="_blank" icon="👁">
+          <QuickActionButton key="4" href={operatorDeckRoute[operator.pillar]} target="_blank" icon="👁">
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.5 }}>OPERATOR DECK</span>
           </QuickActionButton>,
         ]}
@@ -619,7 +608,7 @@ function StakeholdersSection({ operator, stakeholders, accent, onChange }) {
 }
 
 /* ============================ TRACKING TAB ============================ */
-function TrackingTab({ operator, deckLinks, accent, operatorDeckRoute, onChange, onOpenSend }) {
+function TrackingTab({ deckLinks, accent, operatorDeckRoute, onChange, onOpenSend }) {
   return (
     <div>
       <div style={{ ...S.addBlock, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

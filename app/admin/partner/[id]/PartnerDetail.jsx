@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable no-unused-vars */
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -6,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { PARTNER_KIND_COLOR as KIND_COLOR } from '@/lib/admin-constants';
 import AssigneePicker from '@/components/admin/AssigneePicker';
 import CommentThread from '@/components/admin/CommentThread';
-import { EntityDetailLayout, QuickActionButton, LinkedItemCard } from '@/components/admin/layout/EntityDetail';
+import { EntityDetailLayout, QuickActionButton } from '@/components/admin/layout/EntityDetail';
 
 /**
  * Partner Detail - Pattern B: Entity Detail Layout
@@ -202,7 +203,6 @@ function OverviewTab({ partner, accent, onChange }) {
 function ActivityTab({ partner, tasks, events, stakeholders, me, accent, eventLabel, onChange }) {
   const [section, setSection] = useState('tasks'); // tasks | timeline | stakeholders | comments
   const openTasks = tasks.filter((t) => !t.done);
-  const doneTasks = tasks.filter((t) => t.done);
 
   return (
     <div>

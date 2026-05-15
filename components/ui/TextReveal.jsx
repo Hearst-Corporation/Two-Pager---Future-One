@@ -16,10 +16,11 @@ export default function TextReveal({ children, delay = 0, type = 'word' }) {
       return;
     }
 
+    let timer = null;
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setTimeout(() => setRevealed(true), delay);
+          timer = setTimeout(() => setRevealed(true), delay);
           obs.disconnect();
         }
       },
@@ -27,7 +28,10 @@ export default function TextReveal({ children, delay = 0, type = 'word' }) {
     );
 
     obs.observe(el);
-    return () => obs.disconnect();
+    return () => {
+      obs.disconnect();
+      if (timer) clearTimeout(timer);
+    };
   }, [delay]);
 
   if (typeof children !== 'string') {

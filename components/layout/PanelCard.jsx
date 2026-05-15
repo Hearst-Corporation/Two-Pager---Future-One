@@ -6,7 +6,7 @@
    Glassmorphism, subtle borders, hover states.
    ============================================================ */
 
-import { CARD, TEXT, SP, T, W, SHADOW } from '@/lib/design-system/tokens';
+import { CARD, TEXT, SP, T, W } from '@/lib/design-system/tokens';
 
 export default function PanelCard({ title, children, padding, onClick }) {
   return (

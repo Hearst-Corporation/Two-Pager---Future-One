@@ -7,7 +7,7 @@
    Height: 100dvh, no external scroll. Internal scroll per panel.
    ============================================================ */
 
-import { BG, LAYOUT, SP } from '@/lib/design-system/tokens';
+import { BG, LAYOUT } from '@/lib/design-system/tokens';
 
 export default function AppShell({ sidebar, children }) {
   return (

@@ -5,7 +5,7 @@ import { SOURCE_TYPES, MISSING_LABEL } from '@/lib/hearst-constants';
  * Shows the source classification of a value.
  * source_type: 'official_source' | 'uploaded_document' | 'admin_input' | 'calculated' | 'contract' | null
  */
-export default function SourceBadge({ source_type, size = 'sm', className }) {
+export default function SourceBadge({ source_type, size = 'sm' }) {
   if (!source_type) {
     return (
       <span style={{ ...S.badge, ...S.sm, background: '#FEE2E2', color: '#DC2626', ...sizeStyle(size) }}>

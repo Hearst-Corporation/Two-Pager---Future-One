@@ -9,9 +9,8 @@
 import { usePathname } from 'next/navigation';
 import LeftContextPanel, { PanelSection, PanelNavItem } from '@/components/layout/LeftContextPanel';
 import PanelCard from '@/components/layout/PanelCard';
-import DarkBadge from '@/components/ui/DarkBadge';
-import { getPanelKeysByPath, findPrimaryByPath, findChildByPath, PRIMARY_NAV } from '@/lib/design-system/navigation';
-import { TEXT, SP, T, W, ACCENT } from '@/lib/design-system/tokens';
+import { getPanelKeysByPath, findPrimaryByPath, findChildByPath } from '@/lib/design-system/navigation';
+import { TEXT, T, W } from '@/lib/design-system/tokens';
 
 export default function LeftPanelContent() {
   const pathname = usePathname();

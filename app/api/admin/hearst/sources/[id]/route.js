@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { authedWrite } from '@/lib/supabase-admin';
 
 export async function PATCH(req, { params }) {
   const auth = await authedWrite('editor');

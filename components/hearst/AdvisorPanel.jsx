@@ -7,7 +7,6 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import AdvisorMessage from './AdvisorMessage';
-import AdvisorToolCard from './AdvisorToolCard';
 
 const WRITE_TOOLS = new Set([
   'update_scenario', 'create_source', 'attach_source_to_scenario',
@@ -34,7 +33,6 @@ const ADVISOR_CSS = `
 
 export default function AdvisorPanel({
   project,
-  scenarios = [],
   pageContext,
   onMutationDetected,
 }) {

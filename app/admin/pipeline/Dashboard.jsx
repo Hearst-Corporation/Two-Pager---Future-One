@@ -18,7 +18,6 @@ export default function Dashboard({
   openTasks = [],
   liveLinks = [],
   wsHealth = [],
-  partnerCount = 0,
   pillarLabel,
   pillarRoute,
   operatorDeckRoute,

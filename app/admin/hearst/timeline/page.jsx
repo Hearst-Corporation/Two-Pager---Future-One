@@ -2,15 +2,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-const PHASES = [
-  { id: 'dev',          label: 'Development & Permitting', color: '#6B7280', months: 4 },
-  { id: 'finance',      label: 'Financial Close',           color: '#2563EB', months: 3 },
-  { id: 'construction', label: 'Construction',              color: '#D97706', months: 18 },
-  { id: 'commissioning',label: 'Commissioning & Testing',   color: '#7C3AED', months: 2 },
-  { id: 'operations',   label: 'Phase 1 Operations',        color: '#059669', months: 12 },
-  { id: 'expansion',    label: 'Phase 2 Expansion',         color: '#0891B2', months: 12 },
-];
-
 const MILESTONES = [
   { month: 0,  label: 'Project Kickoff',          phase: 'dev' },
   { month: 4,  label: 'Permits Secured',           phase: 'dev' },
@@ -23,11 +14,10 @@ const MILESTONES = [
   { month: 40, label: 'Phase 2 COD',              phase: 'expansion' },
 ];
 
-const TOTAL_MONTHS = 51;
 const MONTH_W = 18;
 
 export default function TimelinePage() {
-  const [project, setProject] = useState(null);
+  const [, setProject] = useState(null);
   const [scenario, setScenario] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -79,8 +69,6 @@ export default function TimelinePage() {
   const startYear = scenario?.planned_cod
     ? new Date(scenario.planned_cod).getFullYear() - Math.ceil(codOffset / 12)
     : new Date().getFullYear();
-
-  const MTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 
   return (
     <div style={S.wrap}>

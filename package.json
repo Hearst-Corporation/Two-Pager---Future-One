@@ -15,13 +15,16 @@
     "@supabase/supabase-js": "^2.105.3",
     "3d-tiles-renderer": "^0.4.24",
     "framer-motion": "^12.38.0",
-    "next": "14.2.5",
+    "next": "^14.2.35",
+    "openai": "^6.37.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "recharts": "^3.8.1",
     "three": "^0.184.0"
   },
   "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35",
     "puppeteer": "^24.42.0"
   }
 }

@@ -12,19 +12,27 @@ const RUNWAY_BASE = 'api.dev.runwayml.com';
 const RUNWAY_VERSION = '2024-11-06';
 const TASKS_LOG = path.join(__dirname, 'runway-tasks.log');
 
+// ── ALLOWED ORIGINS — never use '*' in production ──
+const ALLOWED_ORIGINS = [
+  'http://localhost:5005',
+  'http://localhost:3000',
+];
+
 function logTask(entry) {
   const line = JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n';
   fs.appendFileSync(TASKS_LOG, line);
 }
 
-function corsHeaders(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+function corsHeaders(res, origin) {
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  res.setHeader('Access-Control-Allow-Origin', allowed);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-API-Key');
 }
 
 const server = http.createServer((req, res) => {
-  corsHeaders(res);
+  const origin = req.headers.origin || '';
+  corsHeaders(res, origin);
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -32,9 +40,9 @@ const server = http.createServer((req, res) => {
   }
 
   const apiKey = req.headers['x-api-key'];
-  if (!apiKey) {
+  if (!apiKey || typeof apiKey !== 'string' || apiKey.length < 10) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ error: 'Missing X-API-Key header' }));
+    return res.end(JSON.stringify({ error: 'Missing or invalid X-API-Key header' }));
   }
 
   // ── POST /runway/generate → POST https://api.runwayml.com/v1/image_to_video
@@ -47,11 +55,17 @@ const server = http.createServer((req, res) => {
         res.writeHead(400); return res.end('Bad JSON');
       }
 
+      // Validate required fields
+      if (!payload.promptImage || typeof payload.promptImage !== 'string') {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'promptImage is required and must be a string' }));
+      }
+
       const runwayBody = JSON.stringify({
         model: payload.model || 'gen4_turbo',
         promptImage: payload.promptImage,
         promptText: payload.promptText || '',
-        duration: payload.duration || 10,
+        duration: Math.min(Math.max(Number(payload.duration) || 10, 1), 60),
         ratio: payload.ratio || '1280:768',
         watermark: false,
       });
@@ -72,10 +86,9 @@ const server = http.createServer((req, res) => {
         let data = '';
         proxyRes.on('data', chunk => data += chunk);
         proxyRes.on('end', () => {
-          corsHeaders(res);
+          corsHeaders(res, origin);
           res.writeHead(proxyRes.statusCode, { 'Content-Type': 'application/json' });
           res.end(data);
-          // PERSIST tasks → on garde l'UUID complet et le prompt pour pouvoir récupérer
           try {
             const parsed = JSON.parse(data);
             logTask({
@@ -106,6 +119,11 @@ const server = http.createServer((req, res) => {
   // ── GET /runway/status/:taskId → GET https://api.runwayml.com/v1/tasks/:id
   } else if (req.method === 'GET' && req.url.startsWith('/runway/status/')) {
     const taskId = req.url.split('/runway/status/')[1];
+    if (!taskId || !/^[a-zA-Z0-9_-]+$/.test(taskId)) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'Invalid taskId' }));
+    }
+
     const options = {
       hostname: RUNWAY_BASE,
       path: `/v1/tasks/${taskId}`,
@@ -120,7 +138,7 @@ const server = http.createServer((req, res) => {
       let data = '';
       proxyRes.on('data', chunk => data += chunk);
       proxyRes.on('end', () => {
-        corsHeaders(res);
+        corsHeaders(res, origin);
         res.writeHead(proxyRes.statusCode, { 'Content-Type': 'application/json' });
         res.end(data);
         try {

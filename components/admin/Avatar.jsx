@@ -43,7 +43,7 @@ export default function Avatar({ profile, size = 28, showRing = false, title }) 
       </span>
     );
   }
-  const seed = profile.email || profile.id || profile.full_name || '';
+  const seed = String(profile.email || profile.id || profile.full_name || '');
   const bg = hueFor(seed);
   const text = profile.avatar_url ? null : initialsFor(profile.full_name, profile.email);
   return (

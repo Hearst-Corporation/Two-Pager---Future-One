@@ -71,7 +71,6 @@ export default function HearstOverview() {
 
   const drTotal = dataRoom.length;
   const drApproved = dataRoom.filter(d => d.status === 'approved' || d.status === 'reviewed').length;
-  const drPct = drTotal ? Math.round((drApproved / drTotal) * 100) : 0;
   const sourceScore = base?.source_score ?? 0;
 
   const showWizard = !wizardDismissed && base && !base.total_mw && (proj.irr == null);

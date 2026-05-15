@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element */
 
 /**
  * DatacenterP2 — One-pager "Partner Stack" pour /datacenter.

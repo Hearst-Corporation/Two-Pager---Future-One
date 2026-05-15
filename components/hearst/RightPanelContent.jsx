@@ -12,7 +12,7 @@ import PanelCard from '@/components/layout/PanelCard';
 import DarkBadge from '@/components/ui/DarkBadge';
 import StatusIndicator from '@/components/ui/StatusIndicator';
 import { getPanelKeysByPath, findPrimaryByPath } from '@/lib/design-system/navigation';
-import { TEXT, SP, T, W, ACCENT } from '@/lib/design-system/tokens';
+import { TEXT, SP, T, W } from '@/lib/design-system/tokens';
 
 export default function RightPanelContent() {
   const pathname = usePathname();

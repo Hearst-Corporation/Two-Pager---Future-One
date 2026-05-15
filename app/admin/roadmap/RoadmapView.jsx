@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable no-unused-vars */
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -10,10 +11,8 @@ export default function RoadmapView({
   linksByInit,
   ownerLabel,
   ownerColor,
-  statusFlow,
   statusLabel,
   statusColor,
-  priorityLabel,
 }) {
   const router = useRouter();
   const [newOpen, setNewOpen] = useState(false);

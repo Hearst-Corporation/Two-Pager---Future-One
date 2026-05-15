@@ -128,7 +128,8 @@ export default function ContactModal() {
             <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, color: 'var(--color-text-secondary)' }}>WORK EMAIL</label>
             <input 
               required
-              type="email" 
+              type="text" 
+              name="fullName"
               style={{
                 width: '100%',
                 background: 'rgba(255,255,255,0.03)',
@@ -140,8 +141,8 @@ export default function ContactModal() {
                 transition: 'border-color 0.2s ease',
                 boxSizing: 'border-box'
               }}
-              onFocus={(e) => e.target.style.borderColor = 'var(--color-accent-strong)'}
-              onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--color-accent-strong)'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

@@ -1,0 +1,21 @@
+{
+  "extends": "next/core-web-vitals",
+  "ignorePatterns": [
+    "test-*.js",
+    "proxy.js",
+    "scripts/"
+  ],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": ["warn", { "allow": ["error"] }],
+    "react/no-unescaped-entities": "off"
+  },
+  "overrides": [
+    {
+      "files": ["components/pitch/tokens.js", "components/pitch/slides.jsx"],
+      "rules": {
+        "no-unused-vars": "off"
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@
    This panel NEVER unmounts when navigation changes.
    ============================================================ */
 
-import { BG, CARD, TEXT, SP, T, W, LS, BORDER, ACCENT } from '@/lib/design-system/tokens';
+import { BG, TEXT, SP, T, W, LS, BORDER, ACCENT } from '@/lib/design-system/tokens';
 
 export default function ChatPanel({ header, children }) {
   return (

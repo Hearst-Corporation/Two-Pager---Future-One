@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { getSessionProfile } from '@/lib/supabase-server';
 import NotificationsView from './NotificationsView';

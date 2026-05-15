@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { DEAL_ARCHETYPES, projectAllArchetypes } from '@/lib/hearst-deal-structures';
+import { projectAllArchetypes } from '@/lib/hearst-deal-structures';
 import { MISSING_LABEL } from '@/lib/hearst-constants';
 
 function fmtM(v) { if (v == null) return MISSING_LABEL; return '$' + (v / 1e6).toFixed(0) + 'M'; }
@@ -34,7 +34,7 @@ function ScoreBar({ value }) {
 }
 
 export default function DealSimulatorPage() {
-  const [project, setProject] = useState(null);
+  const [, setProject] = useState(null);
   const [scenarios, setScenarios] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [selected, setSelected] = useState('powered_shell');

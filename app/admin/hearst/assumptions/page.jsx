@@ -165,7 +165,7 @@ function FieldRow({ fieldDef, value, onSave, scenarioId }) {
 }
 
 export default function AssumptionsPage() {
-  const [project, setProject] = useState(null);
+  const [, setProject] = useState(null);
   const [scenarios, setScenarios] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [inputs, setInputs] = useState({});

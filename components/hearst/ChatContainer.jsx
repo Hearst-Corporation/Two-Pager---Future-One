@@ -10,9 +10,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import ChatPanel, { ChatHeader, ChatComposer } from '@/components/layout/ChatPanel';
 import PanelCard from '@/components/layout/PanelCard';
-import DarkBadge from '@/components/ui/DarkBadge';
 import StatusIndicator from '@/components/ui/StatusIndicator';
-import { TEXT, SP, T, W, LS, ACCENT, CARD, BORDER } from '@/lib/design-system/tokens';
+import { TEXT, SP, T, W, LS, ACCENT, CARD } from '@/lib/design-system/tokens';
 
 const WRITE_TOOLS = new Set([
   'update_scenario', 'create_source', 'attach_source_to_scenario',
@@ -28,7 +27,6 @@ const DEFAULT_PROMPTS = [
 
 export default function ChatContainer({
   project,
-  scenarios = [],
   pageContext,
   onMutationDetected,
 }) {

@@ -73,7 +73,7 @@ export default function OperatorDeck({ pillar }) {
     const KEY = `fto_session_${token}`;
     let s = window.sessionStorage.getItem(KEY);
     if (!s) {
-      s = (crypto.randomUUID && crypto.randomUUID()) || `${Math.random().toString(36).slice(2)}${Date.now()}`;
+      s = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' && crypto.randomUUID()) || `${Math.random().toString(36).slice(2)}${Date.now()}`;
       window.sessionStorage.setItem(KEY, s);
     }
     sessionRef.current = s;

@@ -23,8 +23,6 @@ export default function HeroIntroGate({ onEnter }) {
       return;
     }
 
-    const unlockScroll = () => {};
-
     const enter = () => {
       if (enteredRef.current) return;
       enteredRef.current = true;

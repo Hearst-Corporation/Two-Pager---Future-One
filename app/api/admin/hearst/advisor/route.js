@@ -1,19 +1,19 @@
 // app/api/admin/hearst/advisor/route.js
-// SSE endpoint for the HEARST Advisor (Claude Opus 4.7) with prompt caching + tool use loop.
+// SSE endpoint for the HEARST Advisor (OpenAI-compatible — Hyperbolic / Kimi / etc.)
 //
 // Request:  POST { project_id, conversation_id?, messages: [...] }
-//           messages are user-visible (role: 'user'|'assistant', content: string|array).
-//           Tool_use/tool_result blocks live inside `assistant`/`user` array contents per Anthropic schema.
+//           messages are stored in Anthropic format (role, content array/text).
+//           This route converts to/from OpenAI format on the fly.
 //
 // Response: text/event-stream
 //           Events: text_delta | tool_use | tool_result | message_done | done | error
 //           Each event payload is JSON, one line per SSE message.
 
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { authedWrite } from '@/lib/supabase-admin';
 import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
 import { detectAlerts } from '@/lib/hearst-alerts';
-import { TOOL_DEFS, runTool } from '@/lib/hearst-advisor-tools';
+import { TOOL_DEFS, toOpenAITools, runTool } from '@/lib/hearst-advisor-tools';
 import { buildSystemPrompt, buildStateSnapshot } from '@/lib/hearst-advisor-prompt';
 import { buildPageContextBlock } from '@/lib/hearst-page-context';
 import { NextResponse } from 'next/server';
@@ -22,8 +22,11 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
-const MODEL = 'claude-opus-4-7'; // Opus 4.7 — most capable for financial reasoning
-const FALLBACK_MODELS = ['claude-opus-4-5', 'claude-sonnet-4-6', 'claude-3-5-sonnet-latest'];
+// Model names for Kimi K2.5 / K2.6 on your endpoint
+const MODEL = 'kimi-k2.5';
+const FALLBACK_MODELS = ['kimi-k2.6'];
+
+const BASE_URL = 'https://api.hypercli.com/v1';
 
 // Simple in-memory rate limit (per process). Good enough for MVP single-tenant admin tool.
 const RATE_LIMIT = { windowMs: 60_000, maxPerWindow: 20 };
@@ -75,12 +78,90 @@ async function saveConversation(supa, { id, messages, title }) {
   await supa.from('hearst_advisor_conversations').update(updates).eq('id', id);
 }
 
+// ──────────────────────────────────────────────────────────────────────────
+// Format converters: Anthropic (DB storage) <-> OpenAI (API)
+// ──────────────────────────────────────────────────────────────────────────
+
+function toOpenAIMessages(anthropicMessages) {
+  const out = [];
+  for (const m of anthropicMessages) {
+    if (m.role === 'user') {
+      if (Array.isArray(m.content)) {
+        const toolResults = m.content.filter(c => c.type === 'tool_result');
+        const textParts = m.content.filter(c => c.type === 'text').map(c => c.text).join('');
+
+        if (toolResults.length > 0) {
+          for (const tr of toolResults) {
+            out.push({
+              role: 'tool',
+              tool_call_id: tr.tool_use_id,
+              content: typeof tr.content === 'string' ? tr.content : JSON.stringify(tr.content),
+            });
+          }
+        }
+        if (textParts) {
+          out.push({ role: 'user', content: textParts });
+        }
+      } else {
+        out.push({ role: 'user', content: m.content });
+      }
+    } else if (m.role === 'assistant') {
+      if (Array.isArray(m.content)) {
+        const textParts = m.content.filter(c => c.type === 'text').map(c => c.text).join('');
+        const toolUses = m.content.filter(c => c.type === 'tool_use');
+
+        if (toolUses.length > 0) {
+          out.push({
+            role: 'assistant',
+            content: textParts || null,
+            tool_calls: toolUses.map(tu => ({
+              id: tu.id,
+              type: 'function',
+              function: {
+                name: tu.name,
+                arguments: JSON.stringify(tu.input || {}),
+              },
+            })),
+          });
+        } else {
+          out.push({ role: 'assistant', content: textParts });
+        }
+      } else {
+        out.push({ role: 'assistant', content: m.content });
+      }
+    }
+  }
+  return out;
+}
+
+function openAIAssistantToAnthropic(msg) {
+  const blocks = [];
+  if (msg.content) {
+    blocks.push({ type: 'text', text: msg.content });
+  }
+  if (msg.tool_calls) {
+    for (const tc of msg.tool_calls) {
+      blocks.push({
+        type: 'tool_use',
+        id: tc.id,
+        name: tc.function.name,
+        input: JSON.parse(tc.function.arguments || '{}'),
+      });
+    }
+  }
+  return { role: 'assistant', content: blocks };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// POST handler
+// ──────────────────────────────────────────────────────────────────────────
+
 export async function POST(req) {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured on server' }, { status: 500 });
+  if (!process.env.HYPERBOLIC_API_KEY) {
+    return NextResponse.json({ error: 'HYPERBOLIC_API_KEY not configured on server' }, { status: 500 });
   }
 
   if (!checkRate(auth.actor)) {
@@ -113,15 +194,19 @@ export async function POST(req) {
     }
   }
 
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const pageBlock = buildPageContextBlock(page_context);
-  const systemBlocks = [
-    buildSystemPrompt(),       // persona, rules, vocab, public library, formulas, style — CACHED
-    buildStateSnapshot(state), // dynamic project + scenarios snapshot
-    ...(pageBlock ? [pageBlock] : []), // dynamic per-page context
-  ];
+  const openai = new OpenAI({
+    apiKey: process.env.HYPERBOLIC_API_KEY,
+    baseURL: BASE_URL,
+  });
 
-  // Normalize incoming messages: ensure structured content
+  const pageBlock = buildPageContextBlock(page_context);
+  const systemParts = [buildSystemPrompt(), buildStateSnapshot(state)];
+  if (pageBlock) {
+    systemParts.push(typeof pageBlock === 'string' ? pageBlock : pageBlock.text || JSON.stringify(pageBlock));
+  }
+  const systemPrompt = systemParts.join('\n\n');
+
+  // Normalize incoming messages: ensure structured content for DB storage
   let convo = incoming.map(m => ({ role: m.role, content: m.content }));
 
   const encoder = new TextEncoder();
@@ -133,17 +218,25 @@ export async function POST(req) {
       let model = MODEL;
       let turn = 0;
       const MAX_TURNS = 8;
+      let sentTextStart = false;
+      const sentToolStart = new Set(); // indexes
+
       try {
         while (turn < MAX_TURNS) {
           turn += 1;
-          let messageStream;
+
+          let openaiMessages = toOpenAIMessages(convo);
+          openaiMessages.unshift({ role: 'system', content: systemPrompt });
+
+          let responseStream;
           try {
-            messageStream = anthropic.messages.stream({
+            responseStream = await openai.chat.completions.create({
               model,
+              messages: openaiMessages,
+              tools: toOpenAITools(TOOL_DEFS),
+              tool_choice: 'auto',
               max_tokens: 8192,
-              system: systemBlocks,
-              tools: TOOL_DEFS,
-              messages: convo,
+              stream: true,
             });
           } catch (err) {
             // Try fallback models on bad model id
@@ -152,50 +245,83 @@ export async function POST(req) {
             throw err;
           }
 
-          let curBlockIdx = null;
-          let curBlockType = null;
-          let assistantBlocks = [];
-          let toolUseBuf = {}; // index -> { id, name, input_json }
+          let assistantMsg = { role: 'assistant', content: '', tool_calls: [] };
+          const toolCallBuffers = {}; // index -> { id, name, arguments }
 
-          for await (const event of messageStream) {
-            if (event.type === 'content_block_start') {
-              curBlockIdx = event.index;
-              curBlockType = event.content_block.type;
-              if (curBlockType === 'tool_use') {
-                toolUseBuf[curBlockIdx] = { id: event.content_block.id, name: event.content_block.name, input_json: '' };
-                send({ type: 'tool_use_start', id: event.content_block.id, name: event.content_block.name });
-              } else if (curBlockType === 'text') {
+          for await (const chunk of responseStream) {
+            const delta = chunk.choices[0]?.delta;
+            const finishReason = chunk.choices[0]?.finish_reason;
+
+            // Text streaming
+            if (delta?.content) {
+              if (!sentTextStart) {
                 send({ type: 'text_start' });
+                sentTextStart = true;
               }
-            } else if (event.type === 'content_block_delta') {
-              if (event.delta.type === 'text_delta') {
-                send({ type: 'text_delta', text: event.delta.text });
-              } else if (event.delta.type === 'input_json_delta') {
-                toolUseBuf[curBlockIdx].input_json += event.delta.partial_json;
+              assistantMsg.content += delta.content;
+              send({ type: 'text_delta', text: delta.content });
+            }
+
+            // Tool call streaming
+            if (delta?.tool_calls) {
+              for (const tcDelta of delta.tool_calls) {
+                const idx = tcDelta.index;
+                if (!toolCallBuffers[idx]) {
+                  toolCallBuffers[idx] = { id: '', name: '', arguments: '' };
+                }
+                if (tcDelta.id) toolCallBuffers[idx].id += tcDelta.id;
+                if (tcDelta.function?.name) {
+                  toolCallBuffers[idx].name += tcDelta.function.name;
+                }
+                if (tcDelta.function?.arguments) {
+                  toolCallBuffers[idx].arguments += tcDelta.function.arguments;
+                }
+
+                // Send tool_use_start once we have an id
+                if (toolCallBuffers[idx].id && !sentToolStart.has(idx)) {
+                  send({ type: 'tool_use_start', id: toolCallBuffers[idx].id, name: toolCallBuffers[idx].name || '' });
+                  sentToolStart.add(idx);
+                }
               }
-            } else if (event.type === 'content_block_stop') {
-              if (curBlockType === 'tool_use') {
-                const buf = toolUseBuf[curBlockIdx];
-                let parsed = {};
-                try { parsed = buf.input_json ? JSON.parse(buf.input_json) : {}; } catch { parsed = {}; }
-                send({ type: 'tool_use', id: buf.id, name: buf.name, input: parsed });
-              } else if (curBlockType === 'text') {
+            }
+
+            if (finishReason) {
+              // Build final tool_calls from buffers
+              const toolCalls = [];
+              const indices = Object.keys(toolCallBuffers).map(Number).sort((a, b) => a - b);
+              for (const idx of indices) {
+                const buf = toolCallBuffers[idx];
+                toolCalls.push({
+                  id: buf.id || `call_${idx}_${Date.now()}`,
+                  type: 'function',
+                  function: {
+                    name: buf.name,
+                    arguments: buf.arguments,
+                  },
+                });
+              }
+              assistantMsg.tool_calls = toolCalls;
+
+              if (finishReason === 'stop') {
                 send({ type: 'text_end' });
               }
-              curBlockIdx = null;
-              curBlockType = null;
             }
           }
 
-          const finalMsg = await messageStream.finalMessage();
-          assistantBlocks = finalMsg.content;
-          convo.push({ role: 'assistant', content: assistantBlocks });
+          // Convert OpenAI assistant message to Anthropic format for DB storage
+          const anthropicAssistantMsg = openAIAssistantToAnthropic(assistantMsg);
+          convo.push(anthropicAssistantMsg);
 
-          // No more tool calls? we're done with this turn.
-          const toolUses = assistantBlocks.filter(b => b.type === 'tool_use');
-          if (toolUses.length === 0 || finalMsg.stop_reason !== 'tool_use') {
-            send({ type: 'message_done', stop_reason: finalMsg.stop_reason, usage: finalMsg.usage });
+          // Check if we have tool calls
+          const toolUses = anthropicAssistantMsg.content.filter(b => b.type === 'tool_use');
+          if (toolUses.length === 0) {
+            send({ type: 'message_done', stop_reason: 'end_turn', usage: {} });
             break;
+          }
+
+          // Send tool_use events to frontend (with parsed input)
+          for (const tu of toolUses) {
+            send({ type: 'tool_use', id: tu.id, name: tu.name, input: tu.input });
           }
 
           // Run tools and feed results back
@@ -224,6 +350,10 @@ export async function POST(req) {
             });
           }
           convo.push({ role: 'user', content: toolResultBlocks });
+
+          // Reset streaming flags for next turn
+          sentTextStart = false;
+          sentToolStart.clear();
         }
 
         if (turn >= MAX_TURNS) {

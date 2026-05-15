@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable no-unused-vars */
 
 /* ============================================================
    FUTUR ONE — Pitch deck for Qai Chairman, 6 May 2026

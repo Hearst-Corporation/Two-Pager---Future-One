@@ -66,7 +66,7 @@ export default function HearstNavHeader() {
         <div style={S.secondaryNav}>
           <div style={S.secondaryTabs}>
             {childrenTabs.map(c => {
-              const active = pathname.startsWith(c.href);
+              const active = pathname === c.href || pathname.startsWith(c.href + '/');
               const Icon = getIconByKey(c.iconKey);
               return (
                 <Link

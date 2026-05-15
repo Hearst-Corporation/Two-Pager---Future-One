@@ -25,7 +25,8 @@ class ParticleSystem {
     this.plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
     this.normalizedCoords = [];
 
-    this.isMobile = matchMedia('(pointer: coarse)').matches;
+    this.isMobile = window.matchMedia('(pointer: coarse)').matches;
+    this._destroyed = false;
 
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onResize = this.onResize.bind(this);
@@ -53,6 +54,7 @@ class ParticleSystem {
       this.fadeDone = true;
     });
     canvas.addEventListener('webglcontextrestored', () => {
+      if (this._destroyed) return;
       this.initParticles();
       this.applyTargets();
       this.fadeDone = false;
@@ -86,6 +88,7 @@ class ParticleSystem {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.onload = () => {
+      if (this._destroyed) return;
       const offscreen = document.createElement('canvas');
       const size = 256;
       offscreen.width = size;
@@ -234,16 +237,20 @@ class ParticleSystem {
   }
 
   destroy() {
+    this._destroyed = true;
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener(PARTICLES_EXPLODE_EVENT, this.onExplodeEvent);
     if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
-    if (this.renderer && this.container.contains(this.renderer.domElement)) {
-      this.container.removeChild(this.renderer.domElement);
+    if (this.renderer) {
+      if (this.container && this.container.contains(this.renderer.domElement)) {
+        this.container.removeChild(this.renderer.domElement);
+      }
       this.renderer.dispose();
     }
     if (this.geometry) this.geometry.dispose();
     if (this.material) this.material.dispose();
+    if (this.points && this.scene) this.scene.remove(this.points);
   }
 }
 

@@ -101,7 +101,6 @@ export default function InitiativeDetail({
   }
 
   const accent = workstream?.accent || 'var(--color-accent-strong)';
-  const openTasks = tasks.filter((t) => !t.done).length;
 
   // Header subtitle avec meta info
   const subtitle = (
@@ -232,7 +231,6 @@ export default function InitiativeDetail({
 /* ============================ DETAILS TAB ============================ */
 function DetailsTab({
   initiative,
-  workstream,
   tasks,
   operators,
   partners,
