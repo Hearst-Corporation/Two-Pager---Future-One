@@ -1,0 +1,54 @@
+[     460ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[  146180ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  146319ms] [LOG] [Fast Refresh] done in 139ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  152641ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  152733ms] [LOG] [Fast Refresh] done in 93ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  153152ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[  183852ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  183957ms] [LOG] [Fast Refresh] done in 105ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  185413ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[  189758ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  190850ms] [LOG] [Fast Refresh] done in 1092ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  191340ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[  200634ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  200783ms] [LOG] [Fast Refresh] done in 149ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  211557ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  211669ms] [LOG] [Fast Refresh] done in 112ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  212118ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[  214367ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  214531ms] [LOG] [Fast Refresh] done in 165ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  214875ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/compiled/react-dom/cjs/react-dom.development.js:38559
+[  964922ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[  965028ms] [LOG] [Fast Refresh] done in 106ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[  965235ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[  968239ms] [WARNING] The resource http://localhost:5005/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5005/admin/hearst:0
+[  994934ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1024931ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1054922ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:186
+[ 1055031ms] [LOG] [Fast Refresh] done in 110ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/hot-reloader-client.js:43
+[ 1055136ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1058033ms] [WARNING] The resource http://localhost:5005/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5005/admin/hearst:0
+[ 1084955ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1114942ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1144928ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1174936ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1204933ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1234933ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1264930ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1294933ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1324942ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1354933ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1384932ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1414939ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1444940ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1474936ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1504934ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1534934ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1564933ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1594932ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1624934ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1654936ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1684936ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1714936ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1744942ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
+[ 1774932ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5005/api/admin/notifications?unread=1&limit=1:0
