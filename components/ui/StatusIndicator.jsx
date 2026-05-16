@@ -5,7 +5,7 @@
    Dot indicator with optional glow. For online/offline/active states.
    ============================================================ */
 
-import { SP, STATUS, ACCENT } from '@/lib/design-system/tokens';
+import { STATUS, ACCENT } from '@/lib/design-system/tokens';
 
 const VARIANTS = {
   online:  { color: STATUS.success, glow: 'rgba(34,197,94,0.30)' },

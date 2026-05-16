@@ -58,7 +58,7 @@ function SlideHeader({ pillar, num, label, inverse }) {
   );
 }
 
-function SlideFooter({ pillar, step, total, inverse, recipient }) {
+function SlideFooter({ step, total, inverse, recipient }) {
   const color = inverse ? INVERSE_55 : TEXT_FAINT;
   const tag = recipient
     ? `STRICTLY CONFIDENTIAL · PREPARED FOR ${recipient.toUpperCase()}`
@@ -155,7 +155,7 @@ export function S01Vision({ pillar, recipient }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={1} total={10} recipient={recipient} />
+      <SlideFooter step={1} total={10} recipient={recipient} />
     </div>
   );
 }
@@ -189,7 +189,7 @@ export function S02Project({ pillar, recipient }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={2} total={10} recipient={recipient} />
+      <SlideFooter step={2} total={10} recipient={recipient} />
     </div>
   );
 }
@@ -221,7 +221,7 @@ export function S03Site({ pillar, recipient }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={3} total={10} recipient={recipient} />
+      <SlideFooter step={3} total={10} recipient={recipient} />
     </div>
   );
 }
@@ -272,7 +272,7 @@ export function S04SlotIsReal({ pillar, recipient }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={4} total={10} inverse recipient={recipient} />
+      <SlideFooter step={4} total={10} inverse recipient={recipient} />
     </div>
   );
 }
@@ -315,7 +315,7 @@ export function S05YourRole({ pillar, recipient }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={5} total={10} recipient={recipient} />
+      <SlideFooter step={5} total={10} recipient={recipient} />
     </div>
   );
 }
@@ -376,7 +376,7 @@ export function S06WontDo({ pillar, recipient }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={6} total={10} recipient={recipient} />
+      <SlideFooter step={6} total={10} recipient={recipient} />
     </div>
   );
 }
@@ -426,7 +426,7 @@ export function S07Capital({ pillar, recipient }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={7} total={10} recipient={recipient} />
+      <SlideFooter step={7} total={10} recipient={recipient} />
     </div>
   );
 }
@@ -496,7 +496,7 @@ export function S08Risk({ pillar, recipient }) {
         </motion.div>
       </div>
 
-      <SlideFooter pillar={pillar} step={8} total={10} recipient={recipient} />
+      <SlideFooter step={8} total={10} recipient={recipient} />
     </div>
   );
 }
@@ -561,7 +561,7 @@ export function S09Path({ pillar, recipient }) {
         </motion.div>
       </div>
 
-      <SlideFooter pillar={pillar} step={9} total={10} inverse recipient={recipient} />
+      <SlideFooter step={9} total={10} inverse recipient={recipient} />
     </div>
   );
 }

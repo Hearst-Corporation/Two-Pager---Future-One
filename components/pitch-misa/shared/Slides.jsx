@@ -15,25 +15,17 @@ import {
   TEXT_DIM,
   TEXT_FAINT,
   TEXT_INVERSE,
-  SURFACE,
   BORDER_LIGHT,
-  ACCENT_BG_05,
   ACCENT_BG_15,
   ACCENT_BORDER_1PX_40,
   INVERSE_85,
   INVERSE_70,
   INVERSE_55,
-  INVERSE_40,
-  BORDER_INVERSE_8,
   BORDER_INVERSE_12,
-  BORDER_INVERSE_15,
-  BORDER_INVERSE_20,
-  PANEL_DARK_85,
   TEXT_SHADOW_CONFIDENTIAL,
   T,
   W,
   LS,
-  L,
 } from '../../pitch/tokens';
 
 const fadeUp = {
@@ -170,7 +162,7 @@ export function S01Pillar({ pillar }) {
         </motion.p>
       </div>
 
-      <SlideFooter pillar={pillar} step={1} total={10} />
+      <SlideFooter step={1} total={10} />
     </div>
   );
 }
@@ -209,7 +201,7 @@ export function S02Thesis({ pillar }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={2} total={10} />
+      <SlideFooter step={2} total={10} />
     </div>
   );
 }
@@ -254,7 +246,7 @@ export function S03Operators({ pillar }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={3} total={10} inverse />
+      <SlideFooter step={3} total={10} inverse />
     </div>
   );
 }
@@ -321,7 +313,7 @@ export function OperatorDeepDive({ pillar, idx, step }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={step} total={10} />
+      <SlideFooter step={step} total={10} />
     </div>
   );
 }
@@ -364,7 +356,7 @@ export function S07Architecture({ pillar }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={7} total={10} />
+      <SlideFooter step={7} total={10} />
     </div>
   );
 }
@@ -408,7 +400,7 @@ export function S08Commercials({ pillar }) {
         </div>
       </div>
 
-      <SlideFooter pillar={pillar} step={8} total={10} />
+      <SlideFooter step={8} total={10} />
     </div>
   );
 }
@@ -440,7 +432,7 @@ export function S09Ask({ pillar }) {
         </motion.div>
       </div>
 
-      <SlideFooter pillar={pillar} step={9} total={10} inverse />
+      <SlideFooter step={9} total={10} inverse />
     </div>
   );
 }
@@ -467,7 +459,7 @@ function SlideHeader({ pillar, num, label, inverse }) {
   );
 }
 
-function SlideFooter({ pillar, step, total, inverse }) {
+function SlideFooter({ step, total, inverse }) {
   const color = inverse ? INVERSE_55 : TEXT_FAINT;
   return (
     <div style={S.slideFooterMicro}>

@@ -51,6 +51,7 @@ export default function P2InsideLeft() {
         <div style={{ ...S.edgeText, ...S.edgeBottom }}>CAPITAL</div>
         <div style={{ ...S.edgeText, ...S.edgeLeft }}>TALENT</div>
 
+          {/* eslint-disable-next-line @next/next/no-img-element -- locked-layout: brochure A3 print page, fixed 480x680 (see CLAUDE.md). next/image breaks the pixel-locked design. */}
           <img src="/hearst-h.svg" alt="Hearst H" style={S.hearstLogo} />
         </div>
 
