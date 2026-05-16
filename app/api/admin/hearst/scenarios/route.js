@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
+import { withValidation } from '@/lib/validators/withValidation';
+import { ScenarioCreateSchema } from '@/lib/validators/hearst';
 
 export async function GET(req) {
   const r = await requireProfile('viewer');
@@ -26,10 +28,13 @@ export async function GET(req) {
   return NextResponse.json({ scenarios: enriched });
 }
 
-export async function POST(req) {
+export const POST = withValidation(ScenarioCreateSchema, async (req, parsed) => {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
-  const body = await req.json();
+  // Normalise `kind` -> `scenario_type` if only the alias was sent.
+  const body = { ...parsed };
+  if (!body.scenario_type && body.kind) body.scenario_type = body.kind;
+  delete body.kind;
   const { data, error } = await auth.supa
     .from('hearst_scenarios')
     .insert({ ...body, created_by: auth.actor })
@@ -37,4 +42,4 @@ export async function POST(req) {
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ scenario: data });
-}
+});

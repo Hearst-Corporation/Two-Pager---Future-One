@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
+import { withValidationPartial } from '@/lib/validators/withValidation';
+import { ScenarioUpdateSchema } from '@/lib/validators/hearst';
 
 export async function GET(req, { params }) {
   const r = await requireProfile('viewer');
@@ -12,10 +14,10 @@ export async function GET(req, { params }) {
   return NextResponse.json({ scenario: data, projection, source_score: calcSourceScore(data) });
 }
 
-export async function PATCH(req, { params }) {
+export const PATCH = withValidationPartial(ScenarioUpdateSchema, async (req, parsed, { params }) => {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
-  const body = await req.json();
+  const body = parsed;
 
   // Audit trail: record what changed
   const supa = getAdminClient();
@@ -49,7 +51,7 @@ export async function PATCH(req, { params }) {
 
   const projection = generateProjection(data);
   return NextResponse.json({ scenario: data, projection, source_score: calcSourceScore(data) });
-}
+});
 
 export async function DELETE(req, { params }) {
   const auth = await authedWrite('admin');

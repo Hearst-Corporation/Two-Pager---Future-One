@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { withValidation } from '@/lib/validators/withValidation';
+import { ContractCreateSchema } from '@/lib/validators/hearst';
 
 export async function GET(req) {
   const r = await requireProfile('viewer');
@@ -19,10 +21,10 @@ export async function GET(req) {
   return NextResponse.json({ contracts: data || [] });
 }
 
-export async function POST(req) {
+export const POST = withValidation(ContractCreateSchema, async (req, parsed) => {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
-  const body = await req.json();
+  const body = parsed;
   const { data, error } = await auth.supa
     .from('hearst_contracts')
     .insert({ ...body, created_by: auth.actor })
@@ -41,4 +43,4 @@ export async function POST(req) {
   });
 
   return NextResponse.json({ contract: data }, { status: 201 });
-}
+});

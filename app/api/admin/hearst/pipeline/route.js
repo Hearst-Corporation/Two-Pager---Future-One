@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { withValidation } from '@/lib/validators/withValidation';
+import { PipelineCreateSchema } from '@/lib/validators/hearst';
 
 export async function GET(req) {
   const r = await requireProfile('viewer');
@@ -17,10 +19,10 @@ export async function GET(req) {
   return NextResponse.json({ prospects: data || [] });
 }
 
-export async function POST(req) {
+export const POST = withValidation(PipelineCreateSchema, async (req, parsed) => {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
-  const body = await req.json();
+  const body = parsed;
   const { data, error } = await auth.supa
     .from('hearst_pipeline')
     .insert({ ...body, created_by: auth.actor })
@@ -28,4 +30,4 @@ export async function POST(req) {
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ prospect: data }, { status: 201 });
-}
+});

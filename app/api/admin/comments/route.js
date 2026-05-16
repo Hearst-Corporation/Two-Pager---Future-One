@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { requireRowOwnership } from '@/lib/auth-guards';
 
 const VALID = new Set(['operator', 'partner', 'initiative', 'task']);
 
@@ -74,12 +75,22 @@ export async function DELETE(req) {
   if (auth instanceof NextResponse) return auth;
   const { id } = await req.json();
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  const supa = auth.supa;
-  const { data: existing } = await supa.from('comments').select('author_id').eq('id', id).maybeSingle();
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  if (existing.author_id !== auth.actor && auth.profile.role !== 'admin') {
-    return NextResponse.json({ error: 'Only the author or an admin can delete this comment' }, { status: 403 });
+
+  // Authors can delete their own comments; admins can delete anything.
+  try {
+    await requireRowOwnership({
+      table: 'comments',
+      id,
+      actorId: auth.actor,
+      ownerColumn: 'author_id',
+      adminProfile: auth.profile,
+    });
+  } catch (err) {
+    if (err instanceof Response) return err;
+    throw err;
   }
+
+  const supa = auth.supa;
   const { error } = await supa.from('comments').delete().eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

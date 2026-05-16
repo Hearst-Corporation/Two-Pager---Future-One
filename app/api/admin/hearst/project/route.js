@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { DATA_ROOM_REQUIRED, PUBLIC_SOURCES_LIBRARY } from '@/lib/hearst-constants';
+import { withValidation } from '@/lib/validators/withValidation';
+import { ProjectUpdateSchema } from '@/lib/validators/hearst';
 
 /** GET — fetch or auto-create the single HEARST project */
 export async function GET() {
@@ -73,13 +75,11 @@ export async function GET() {
 }
 
 /** PATCH — update project meta */
-export async function PATCH(req) {
+export const PATCH = withValidation(ProjectUpdateSchema, async (req, parsed) => {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
-  const body = await req.json();
-  const { id, ...fields } = body;
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+  const { id, ...fields } = parsed;
   const { data, error } = await auth.supa.from('hearst_projects').update(fields).eq('id', id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ project: data });
-}
+});

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { withValidation } from '@/lib/validators/withValidation';
+import { SourceCreateSchema } from '@/lib/validators/hearst';
 
 export async function GET(req) {
   const r = await requireProfile('viewer');
@@ -21,10 +23,10 @@ export async function GET(req) {
   return NextResponse.json({ sources: data || [] });
 }
 
-export async function POST(req) {
+export const POST = withValidation(SourceCreateSchema, async (req, parsed) => {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
-  const body = await req.json();
+  const body = parsed;
   const { data, error } = await auth.supa
     .from('hearst_sources')
     .insert({ ...body, created_by: auth.actor })
@@ -44,4 +46,4 @@ export async function POST(req) {
   });
 
   return NextResponse.json({ source: data }, { status: 201 });
-}
+});

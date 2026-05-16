@@ -6,10 +6,54 @@ const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const PUBLIC_ROUTES = new Set(['/admin/login', '/admin/auth/callback']);
 
-// Dev-only autologin: when NODE_ENV=development AND ADMIN_DEV_AUTOLOGIN_EMAIL is set,
-// the middleware skips Supabase auth. supabase-server.js then loads the profile by email.
+// ---------------------------------------------------------------------------
+// Fail-closed guard: dev-autologin must NEVER be reachable in a deployed env.
+//
+// On Vercel preview deployments NODE_ENV is 'production', so the previous
+// NODE_ENV-only gate is insufficient. If ADMIN_DEV_AUTOLOGIN_EMAIL is set
+// alongside a Vercel production/preview signal, refuse to load the module so
+// the deployment fails fast rather than silently exposing autologin.
+// ---------------------------------------------------------------------------
+const VERCEL_ENV = process.env.VERCEL_ENV;
+const IS_VERCEL_DEPLOYED = VERCEL_ENV === 'production' || VERCEL_ENV === 'preview';
+if (process.env.ADMIN_DEV_AUTOLOGIN_EMAIL && IS_VERCEL_DEPLOYED) {
+  throw new Error(
+    '[middleware] FATAL: ADMIN_DEV_AUTOLOGIN_EMAIL is set in a Vercel ' +
+      `${VERCEL_ENV} environment. Dev autologin is forbidden outside local ` +
+      'development. Remove this env var from the Vercel project settings.'
+  );
+}
+
+// Dev-only autologin: only honored when we are NOT on a Vercel deployed env
+// AND NODE_ENV=development AND ADMIN_DEV_AUTOLOGIN_EMAIL is set.
+// supabase-server.js then loads the profile by email.
 const DEV_AUTOLOGIN =
-  process.env.NODE_ENV === 'development' && !!process.env.ADMIN_DEV_AUTOLOGIN_EMAIL;
+  !IS_VERCEL_DEPLOYED &&
+  process.env.NODE_ENV === 'development' &&
+  !!process.env.ADMIN_DEV_AUTOLOGIN_EMAIL;
+
+/**
+ * Sanitize a value destined for the `?next=` redirect param.
+ * Only allows same-origin paths (must start with a single `/`, not `//`).
+ * Anything else (absolute URL, protocol-relative, javascript:, etc.) is
+ * collapsed to `/admin`.
+ *
+ * Exported for unit testing.
+ */
+export function safeNextPath(path) {
+  if (typeof path !== 'string') return '/admin';
+  // Must start with `/` but NOT `//` (protocol-relative URL).
+  if (!/^\/[^/]/.test(path)) return '/admin';
+  return path;
+}
+
+// Cache-Control headers for auth redirects. Mitigates Next 14.2.35
+// GHSA-3g8h-86w9-wvmq (middleware/proxy redirect cache poisoning).
+function applyNoStore(response) {
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  response.headers.set('Pragma', 'no-cache');
+  return response;
+}
 
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
@@ -24,7 +68,7 @@ export async function middleware(req) {
       const url = req.nextUrl.clone();
       url.pathname = '/admin';
       url.search = '';
-      return NextResponse.redirect(url);
+      return applyNoStore(NextResponse.redirect(url));
     }
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
@@ -50,7 +94,7 @@ export async function middleware(req) {
       const url = req.nextUrl.clone();
       url.pathname = '/admin';
       url.search = '';
-      return NextResponse.redirect(url);
+      return applyNoStore(NextResponse.redirect(url));
     }
     return res;
   }
@@ -58,8 +102,8 @@ export async function middleware(req) {
   if (!user) {
     const url = req.nextUrl.clone();
     url.pathname = '/admin/login';
-    url.searchParams.set('next', pathname);
-    return NextResponse.redirect(url);
+    url.searchParams.set('next', safeNextPath(pathname));
+    return applyNoStore(NextResponse.redirect(url));
   }
 
   return res;

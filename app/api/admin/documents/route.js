@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { requireRowOwnership } from '@/lib/auth-guards';
 
 const BUCKET = 'crm-documents';
 
@@ -62,7 +63,22 @@ export async function DELETE(req) {
   if (auth instanceof NextResponse) return auth;
   const { id } = await req.json();
   const supa = auth.supa;
-  const { data: doc } = await supa.from('documents').select('*').eq('id', id).single();
+
+  // Enforce ownership: only the uploader (or admin) can delete a document.
+  let doc;
+  try {
+    doc = await requireRowOwnership({
+      table: 'documents',
+      id,
+      actorId: auth.actor,
+      ownerColumn: 'actor_id',
+      adminProfile: auth.profile,
+    });
+  } catch (err) {
+    if (err instanceof Response) return err;
+    throw err;
+  }
+
   if (doc?.storage_path) {
     await supa.storage.from(BUCKET).remove([doc.storage_path]);
   }
