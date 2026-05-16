@@ -244,7 +244,7 @@ export default function SectionHub() {
           <Reveal delay={150} y={28}>
             <div style={S.imgWrap}>
               <motion.video
-                src="/FUTUR-ONE-FINAL.mp4"
+                src="https://zrvlmhuymhyrzonnihce.supabase.co/storage/v1/object/public/landing-assets/FUTUR-ONE-FINAL.mp4"
                 autoPlay
                 muted
                 loop
