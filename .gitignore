@@ -40,3 +40,8 @@ m5-*.png
 coverage/
 playwright-report/
 test-results/
+
+# Large video assets — must be hosted externally (Supabase Storage / Vercel Blob)
+# See SectionHub.jsx for the src= URL that must be updated.
+public/FUTUR-ONE-FINAL.mp4
+public/FUTUR-ONE-FINAL.backup.mp4
