@@ -16,6 +16,7 @@ test('/admin without auth redirects to /admin/login', async ({ page }) => {
 });
 
 test('/admin/login renders the login form', async ({ page }) => {
+  test.skip(!!process.env.ADMIN_DEV_AUTOLOGIN_EMAIL, 'dev autologin is on — login form not shown');
   await page.goto('/admin/login');
   // Form has at least one email input
   await expect(page.locator('input[type="email"]').first()).toBeVisible({ timeout: 10_000 });
