@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { logger } from '@/lib/logger';
 
 /**
  * Public endpoint. Validates a deck token and logs one slide-view event.
@@ -37,6 +38,15 @@ export async function POST(req) {
     duration_ms: duration_ms ?? null,
     user_agent: ua.slice(0, 240),
     ip_hash: ipHash,
+  });
+
+  logger.info({
+    event: 'deck_view_tracked',
+    link_id: link.id,
+    operator_id: link.operator_id,
+    session_id,
+    slide_index,
+    slide_label: slide_label || null,
   });
 
   return NextResponse.json({ ok: true });

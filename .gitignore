@@ -21,3 +21,21 @@ futur-one-brochure.zip
 
 # Raw Midjourney source assets (use renamed versions instead)
 public/u2883995211_*
+
+# QA & audit artefacts (kept local, not versioned)
+.playwright-mcp/
+docs/audit/*.html
+cockpit-*.png
+cockpit-step*.png
+hearst-*.png
+advisor-*.png
+admin-dashboard-*.png
+prese-hub-*.png
+
+# Agent worktrees (Claude Code orchestrator)
+.claude/
+
+# Test outputs (vitest + playwright)
+coverage/
+playwright-report/
+test-results/
