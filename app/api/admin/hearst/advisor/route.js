@@ -621,7 +621,17 @@ export async function GET(req) {
       .eq('id', conversation_id)
       .eq('actor_id', auth.actor)
       .single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 404 });
+    // PGRST116 = PostgREST "no rows returned" from .single(). Treat as 404
+    // explicitly so an IDOR probe (valid id but belongs to another actor) is
+    // indistinguishable from a real not-found, and a genuine DB failure
+    // (table missing, network, etc.) surfaces as 500 instead of being
+    // misclassified as 404.
+    if (error?.code === 'PGRST116' || (!data && !error)) {
+      return NextResponse.json({ error: 'not_found' }, { status: 404 });
+    }
+    if (error) {
+      return NextResponse.json({ error: 'lookup_failed' }, { status: 500 });
+    }
     return NextResponse.json({ conversation: data });
   }
 
