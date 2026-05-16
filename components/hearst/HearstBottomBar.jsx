@@ -9,18 +9,17 @@ const ACTIONS = ['Audit', 'Recalculer', 'Exporter'];
 const MODES = ['Édition', 'Lecture'];
 
 function IconSlot({ filled = false }) {
+  if (filled) {
+    return (
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="5" cy="5" r="5" fill="currentColor" />
+      </svg>
+    );
+  }
   return (
-    <span
-      style={{
-        display: 'block',
-        width: 16,
-        height: 16,
-        borderRadius: 3,
-        ...(filled
-          ? { background: 'currentColor', opacity: 0.8 }
-          : { border: '1px solid currentColor', opacity: 0.4 }),
-      }}
-    />
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="5" cy="5" r="4" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />
+    </svg>
   );
 }
 
@@ -52,7 +51,7 @@ export default function HearstBottomBar() {
                 href={getPrimaryHref(group)}
                 className={active ? 'cockpit-btn-glass' : undefined}
                 style={{ ...S.segBtn, ...(active ? S.segBtnActive : {}) }}
-                aria-pressed={active}
+                aria-current={active ? 'page' : undefined}
               >
                 {group.label}
               </Link>
@@ -72,7 +71,7 @@ export default function HearstBottomBar() {
                 style={{ ...S.segBtn, ...(active ? S.segBtnActive : {}) }}
                 aria-pressed={active}
               >
-                <IconSlot />
+                <IconSlot filled={active} />
                 {label}
               </button>
             );
@@ -105,56 +104,59 @@ export default function HearstBottomBar() {
 const S = {
   bar: {
     position: 'absolute',
-    bottom: 32,
+    bottom: 'var(--cp-space-6)',
     left: '50%',
     transform: 'translateX(-50%)',
-    zIndex: 30,
+    zIndex: 'var(--cp-z-floating)',
     width: 'max-content',
-    padding: '20px 32px',
-    borderRadius: 9999,
+    maxWidth: 'calc(100% - var(--cp-space-9))',
+    padding: 'var(--cp-space-3) var(--cp-space-7)',
+    borderRadius: 'var(--cp-radius-pill)',
   },
   barInner: {
     position: 'relative',
     zIndex: 1,
     display: 'flex',
     alignItems: 'center',
-    gap: 32,
+    gap: 'var(--cp-space-5)',
   },
   status: {
     display: 'flex',
     alignItems: 'center',
-    gap: 12,
-    fontSize: 15,
-    fontWeight: 500,
-    color: 'rgba(245, 245, 245, 0.65)',
+    gap: 'var(--cp-space-3)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-medium)',
+    color: 'var(--cp-text-body)',
   },
   seg: {
     display: 'flex',
     alignItems: 'center',
-    gap: 4,
-    padding: 6,
+    gap: 'var(--cp-space-0)',
+    padding: 'var(--cp-space-1)',
   },
   segBtn: {
     appearance: 'none',
     border: 'none',
     background: 'transparent',
-    color: 'rgba(245, 245, 245, 0.40)',
-    padding: '8px 20px',
-    fontSize: 13,
-    fontWeight: 400,
-    borderRadius: 9999,
+    color: 'var(--cp-text-muted)',
+    padding: 'var(--cp-space-2) var(--cp-space-4)',
+    minHeight: 'var(--cp-icon-btn-size)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-regular)',
+    borderRadius: 'var(--cp-radius-pill)',
     cursor: 'pointer',
     textDecoration: 'none',
     whiteSpace: 'nowrap',
     display: 'inline-flex',
     alignItems: 'center',
-    gap: 8,
-    transition: 'color 0.15s ease, background 0.15s ease',
+    gap: 'var(--cp-space-2)',
+    transition: 'color var(--cp-dur-base) var(--cp-ease), background var(--cp-dur-base) var(--cp-ease)',
   },
   segBtnActive: {
-    color: '#ffffff',
+    color: 'var(--cp-text-strong)',
   },
   segBtnPrimary: {
-    fontWeight: 500,
+    color: 'var(--cp-bg-deep)',
+    fontWeight: 'var(--cp-weight-semibold)',
   },
 };

@@ -28,10 +28,11 @@ export default async function AdminLayout({ children }) {
     return (
       <div
         style={{
-          minHeight: '100dvh',
-          background: 'var(--color-bg-main)',
+          height: '100dvh',
+          background: 'var(--cp-bg-deep)',
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         {children}

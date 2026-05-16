@@ -1,7 +1,7 @@
 'use client';
 /* ============================================================
    HEARST COCKPIT LAYOUT — pixel-near port
-   Left rail (88) | Center (chat + page) | Right rail (320)
+   Left rail (88) | Center (page) | Right rail (420: chat + alerts)
    Floating bottom bar (sub-menu) | Maroon glass theme
    ============================================================ */
 
@@ -21,14 +21,13 @@ export default function HearstLayout({ children }) {
         <HearstIconRail />
 
         <div style={S.centerPanel}>
-          <div style={S.chatArea}>
-            <ChatMount />
-          </div>
           <div style={S.pageArea}>{children}</div>
           <HearstBottomBar />
         </div>
 
-        <HearstRightRail />
+        <HearstRightRail>
+          <ChatMount />
+        </HearstRightRail>
       </div>
     </div>
   );
@@ -43,11 +42,11 @@ const S = {
     minWidth: 0,
     height: '100%',
     overflow: 'hidden',
-    color: '#f5f5f5',
+    color: 'var(--cp-text-primary)',
   },
   panelsRow: {
     position: 'relative',
-    zIndex: 10,
+    zIndex: 'var(--cp-z-content)',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'stretch',
@@ -58,25 +57,16 @@ const S = {
   centerPanel: {
     position: 'relative',
     flex: 1,
-    minWidth: 520,
+    minWidth: 'var(--cp-min-center)',
     height: '100%',
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
   },
-  chatArea: {
-    flexShrink: 0,
-    height: '50%',
-    minHeight: 280,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-  },
   pageArea: {
     flex: 1,
     minHeight: 0,
     overflow: 'auto',
-    padding: '40px 64px 200px',
+    padding: 'var(--cp-space-7) var(--cp-space-8) var(--cp-space-12)',
   },
 };

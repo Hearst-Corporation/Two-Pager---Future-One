@@ -1,10 +1,9 @@
 'use client';
 /* ============================================================
-   OPENCLAW · CHAT MOUNT
+   HEARST ADVISOR — CHAT MOUNT
    ------------------------------------------------------------
-   Mount point for the central chat. Fetches project + scenarios
-   and passes them to ChatContainer. Lives in the layout so it
-   never unmounts between page navigations.
+   Mount point for the HEARST Advisor in the right rail.
+   Wraps ChatContainer with fetched project + page context.
    ============================================================ */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -15,7 +14,6 @@ import { getPageContext } from '@/lib/hearst-page-context';
 export default function ChatMount() {
   const pathname = usePathname();
   const [project, setProject] = useState(null);
-  const [scenarios, setScenarios] = useState([]);
   const [tick, setTick] = useState(0);
 
   const load = useCallback(async () => {
@@ -24,11 +22,6 @@ export default function ChatMount() {
       if (!pRes.ok) return;
       const { project: proj } = await pRes.json();
       setProject(proj);
-      const sRes = await fetch(`/api/admin/hearst/scenarios?project_id=${proj.id}`);
-      if (sRes.ok) {
-        const { scenarios: sc } = await sRes.json();
-        setScenarios(sc || []);
-      }
     } catch { /* silent */ }
   }, []);
 
@@ -39,7 +32,6 @@ export default function ChatMount() {
   return (
     <ChatContainer
       project={project}
-      scenarios={scenarios}
       pageContext={pageContext}
       onMutationDetected={() => setTick(t => t + 1)}
     />

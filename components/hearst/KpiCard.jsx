@@ -1,6 +1,5 @@
 'use client';
 import { MISSING_LABEL } from '@/lib/hearst-constants';
-import { C, T, W, LS } from '@/lib/admin-tokens';
 import SourceBadge from './SourceBadge';
 
 /**
@@ -8,19 +7,24 @@ import SourceBadge from './SourceBadge';
  * value: number|null — null triggers "N/A — Source Required" display.
  * format: 'currency' | 'number' | 'pct' | 'x' | 'years' | 'mw'
  */
-export default function KpiCard({ label, value, format = 'number', source_type, unit, sublabel, highlight, width }) {
+export default function KpiCard({ label, value, format = 'number', source_type, unit, sublabel, highlight }) {
   const display = formatValue(value, format);
 
   return (
-    <div style={{ ...S.card, ...(highlight ? S.cardHighlight : {}), width }}>
+    <div
+      className={`cp-card cp-card-hover${highlight ? ' cp-card-accent' : ''}`}
+      style={S.card}
+    >
       <div style={S.label}>{label}</div>
-      <div style={{ ...S.value, color: value == null ? C.textMuted : (highlight ? C.textInverse : C.textPrimary) }}>
+      <div style={{ ...S.value, color: value == null ? 'var(--cp-text-muted)' : 'var(--cp-text-strong)' }}>
         {display}
         {unit && value != null && <span style={S.unit}> {unit}</span>}
       </div>
       {sublabel && <div style={S.sublabel}>{sublabel}</div>}
       {source_type !== undefined && (
-        <div style={{ marginTop: 6 }}>
+        // opacity mutes the badge's own background + text together;
+        // switching to `color` alone would leave the badge background at full intensity.
+        <div style={{ marginTop: 'var(--cp-space-1)', opacity: 0.7 }}>
           <SourceBadge source_type={source_type} size="xs" />
         </div>
       )}
@@ -36,7 +40,7 @@ function formatValue(value, format) {
       if (Math.abs(value) >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
       if (Math.abs(value) >= 1e3) return `$${(value / 1e3).toFixed(0)}K`;
       return `$${value.toFixed(0)}`;
-    case 'pct':  return `${value.toFixed(1)}%`;
+    case 'pct':  return `${(value * 100).toFixed(1)}%`;
     case 'x':    return `${value.toFixed(1)}×`;
     case 'years':return `${value.toFixed(0)}y`;
     case 'mw':   return `${value.toFixed(1)} MW`;
@@ -46,41 +50,36 @@ function formatValue(value, format) {
 
 const S = {
   card: {
-    background: C.surface,
-    border: `1px solid ${C.borderLight}`,
-    padding: '16px 20px',
+    padding: 'var(--cp-space-4) var(--cp-space-5)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
-    minWidth: 140,
-  },
-  cardHighlight: {
-    background: 'var(--color-accent-strong)',
-    border: '1px solid var(--color-accent-strong)',
-    color: C.textInverse,
+    gap: 'var(--cp-space-1)',
+    minWidth: 'var(--cp-kpi-min-width)',
+    minHeight: 'var(--cp-space-12)',
   },
   label: {
-    fontSize: T.caption,
-    fontWeight: W.bold,
-    letterSpacing: LS.wider,
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
-    color: C.textMuted,
+    color: 'var(--cp-text-muted)',
   },
   value: {
-    fontSize: T.h1,
-    fontWeight: W.heavy,
-    letterSpacing: -0.5,
-    lineHeight: 1.1,
-    marginTop: 2,
+    fontSize: 'var(--cp-font-2xl)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-tight)',
+    lineHeight: 'var(--cp-leading-tight)',
+    marginTop: 'var(--cp-space-1)',
+    color: 'var(--cp-text-strong)',
   },
   unit: {
-    fontSize: T.body,
-    fontWeight: W.semibold,
-    opacity: 0.7,
+    fontSize: 'var(--cp-font-base)',
+    fontWeight: 'var(--cp-weight-semibold)',
+    color: 'var(--cp-text-muted)',
   },
   sublabel: {
-    fontSize: T.caption,
-    color: C.textMuted,
-    marginTop: 2,
+    fontSize: 'var(--cp-font-xs)',
+    color: 'var(--cp-text-muted)',
+    marginTop: 'var(--cp-space-1)',
   },
 };

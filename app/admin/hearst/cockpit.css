@@ -12,15 +12,143 @@
 
   --cp-bg-deep: #1A050B;
   --cp-accent-maroon: #8A1538;
-  --cp-ink: #f5f5f5;
-  --cp-ink-strong: #ffffff;
-  --cp-fg-dim: rgba(245, 245, 245, 0.65);
-  --cp-fg-mute: rgba(245, 245, 245, 0.40);
-  --cp-fg-faint: rgba(245, 245, 245, 0.14);
-  --cp-fg-ghost: rgba(255, 255, 255, 0.08);
-  --cp-border-soft: rgba(255, 255, 255, 0.04);
-  --cp-border: rgba(255, 255, 255, 0.08);
-  --cp-border-strong: rgba(255, 255, 255, 0.12);
+
+  /* === LAYOUT STRUCTURAL ================================ */
+  --cp-rail-left: 88px;
+  --cp-rail-right: 420px;
+  --cp-min-center: 520px;
+
+  /* === COMPOSANTS À DIMENSIONS FIXES =================== */
+  --cp-brand-size: 40px;
+  --cp-brand-inner: 16px;
+  --cp-icon-btn-size: 44px;
+  --cp-avatar-size: 40px;
+  --cp-badge-size: 16px;
+  --cp-kpi-min-width: 140px;
+
+  /* === SPACING (4px base) ============================ */
+  --cp-space-0: 0;
+  --cp-space-1: 4px;
+  --cp-space-2: 8px;
+  --cp-space-3: 12px;
+  --cp-space-4: 16px;
+  --cp-space-5: 20px;
+  --cp-space-6: 24px;
+  --cp-space-7: 32px;
+  --cp-space-8: 40px;
+  --cp-space-9: 48px;
+  --cp-space-10: 56px;
+  --cp-space-11: 64px;
+  --cp-space-12: 80px;
+
+  /* === RADIUS ======================================== */
+  --cp-radius-xs: 4px;
+  --cp-radius-sm: 6px;
+  --cp-radius-md: 8px;
+  --cp-radius-lg: 12px;
+  --cp-radius-xl: 16px;
+  --cp-radius-2xl: 20px;
+  --cp-radius-pill: 9999px;
+
+  /* === TYPO ========================================== */
+  --cp-font-micro: 10px;
+  --cp-font-xs: 11px;
+  --cp-font-sm: 12px;
+  --cp-font-base: 13px;
+  --cp-font-md: 14px;
+  --cp-font-lg: 16px;
+  --cp-font-xl: 20px;
+  --cp-font-2xl: 28px;
+  --cp-font-hero: 36px;
+
+  --cp-leading-tight: 1.15;
+  --cp-leading-normal: 1.4;
+  --cp-leading-relaxed: 1.6;
+
+  --cp-tracking-tight: -0.02em;
+  --cp-tracking-normal: 0;
+  --cp-tracking-wide: 0.04em;
+  --cp-tracking-wider: 0.08em;
+  --cp-tracking-eyebrow: 0.14em;
+
+  --cp-weight-regular: 400;
+  --cp-weight-medium: 500;
+  --cp-weight-semibold: 600;
+  --cp-weight-bold: 700;
+  --cp-weight-black: 800;
+
+  /* === SURFACE TONES (dark glass) ==================== */
+  --cp-surface-0: rgba(255, 255, 255, 0.02);
+  --cp-surface-1: rgba(255, 255, 255, 0.04);
+  --cp-surface-2: rgba(255, 255, 255, 0.06);
+  --cp-surface-3: rgba(255, 255, 255, 0.09);
+  --cp-surface-hover: rgba(255, 255, 255, 0.12);
+  --cp-surface-pressed: rgba(255, 255, 255, 0.16);
+
+  /* === TEXT ON DARK ================================== */
+  --cp-text-strong: #ffffff;
+  --cp-text-primary: rgba(245, 245, 245, 0.92);
+  --cp-text-body: rgba(245, 245, 245, 0.72);
+  --cp-text-muted: rgba(245, 245, 245, 0.48);
+  --cp-text-faint: rgba(245, 245, 245, 0.30);
+
+  /* === SEMANTIC DARK ================================= */
+  --cp-success: #34d399;
+  --cp-success-bg: rgba(52, 211, 153, 0.12);
+  --cp-warning: #fbbf24;
+  --cp-warning-bg: rgba(251, 191, 36, 0.12);
+  --cp-error: #fb7185;
+  --cp-error-bg: rgba(251, 113, 133, 0.12);
+  --cp-info: #60a5fa;
+  --cp-info-bg: rgba(96, 165, 250, 0.12);
+  --cp-violet: #7c3aed;
+  --cp-violet-bg: rgba(124, 58, 237, 0.18);
+  --cp-info-strong: #0891b2;
+  --cp-info-strong-bg: rgba(8, 145, 178, 0.18);
+
+  --cp-accent: #be123c;
+  --cp-accent-strong: #e11d48;
+  --cp-accent-soft: rgba(225, 29, 72, 0.18);
+
+  /* === SHADOWS ======================================= */
+  --cp-shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.2);
+  --cp-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --cp-shadow-md: 0 10px 24px -8px rgba(0, 0, 0, 0.45);
+  --cp-shadow-lg: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  --cp-shadow-depth:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 20px 60px -24px rgba(0, 0, 0, 0.65),
+    0 6px 14px -10px rgba(0, 0, 0, 0.4);
+  --cp-shadow-card-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 28px 70px -22px rgba(0, 0, 0, 0.7),
+    0 8px 18px -12px rgba(225, 29, 72, 0.25);
+
+  /* === BLURS ========================================= */
+  --cp-blur-md: blur(24px) saturate(150%);
+
+  /* === BORDER TONES ================================== */
+  --cp-border-soft: rgba(255, 255, 255, 0.06);
+  --cp-border: rgba(255, 255, 255, 0.10);
+  --cp-border-strong: rgba(255, 255, 255, 0.16);
+  --cp-border-accent: rgba(225, 29, 72, 0.55);
+
+  /* === MOTION ======================================== */
+  --cp-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --cp-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --cp-dur-fast: 120ms;
+  --cp-dur-base: 180ms;
+  --cp-dur-slow: 320ms;
+
+  /* === Z-INDEX ======================================= */
+  --cp-z-ambient: 0;
+  --cp-z-content: 10;
+  --cp-z-rails: 20;
+  --cp-z-floating: 30;
+  --cp-z-overlay: 40;
+  --cp-z-toast: 50;
 }
 
 .cockpit-ambient-deep {
@@ -45,8 +173,8 @@
 /* Reusable glass surface */
 .cockpit-glass {
   position: relative;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--cp-surface-2);
+  border: 1px solid var(--cp-border-strong);
   backdrop-filter: blur(60px) saturate(110%) brightness(105%);
   -webkit-backdrop-filter: blur(60px) saturate(110%) brightness(105%);
   box-shadow:
@@ -57,7 +185,7 @@
 
 /* Buttons */
 .cockpit-btn-primary {
-  background: var(--cp-ink-strong);
+  background: var(--cp-text-strong);
   color: var(--cp-bg-deep);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
@@ -87,13 +215,18 @@
   border-radius: 9999px;
 }
 
-/* Rails (borders only, no background) */
+/* Rails */
 .cockpit-rail-left {
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid var(--cp-border-strong);
 }
 .cockpit-rail-right {
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--cp-surface-2);
+  border-left: 1px solid var(--cp-border-strong);
+  backdrop-filter: var(--cp-blur-md);
+  -webkit-backdrop-filter: var(--cp-blur-md);
+  box-shadow:
+    inset 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 /* Glass noise overlay */
@@ -123,4 +256,84 @@
 }
 .cockpit-root ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.12);
+}
+
+/* === Focus visible global cockpit ==================== */
+.cockpit-root :focus-visible {
+  outline: 2px solid var(--cp-accent-strong);
+  outline-offset: 2px;
+  border-radius: var(--cp-radius-sm);
+}
+
+/* === Reduced motion ================================== */
+@media (prefers-reduced-motion: reduce) {
+  .cockpit-root,
+  .cockpit-root *,
+  .cockpit-root *::before,
+  .cockpit-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* === Surface dark glass card (réutilisable) ========== */
+.cp-card {
+  position: relative;
+  background: var(--cp-surface-1);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-lg);
+  box-shadow: var(--cp-shadow-depth);
+  backdrop-filter: var(--cp-blur-md);
+  -webkit-backdrop-filter: var(--cp-blur-md);
+  transition: transform var(--cp-dur-base) var(--cp-ease-out),
+              box-shadow var(--cp-dur-base) var(--cp-ease-out),
+              background var(--cp-dur-base) var(--cp-ease-out),
+              border-color var(--cp-dur-base) var(--cp-ease-out);
+}
+.cp-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cp-shadow-card-hover);
+  background: var(--cp-surface-2);
+  border-color: var(--cp-border-strong);
+}
+.cp-card-hover.cp-card-accent:hover {
+  background:
+    linear-gradient(180deg, rgba(225, 29, 72, 0.24) 0%, rgba(225, 29, 72, 0.06) 100%),
+    var(--cp-surface-2);
+  border-color: var(--cp-border-accent);
+}
+
+/* === Glow accent (IRR / hero highlight) ============== */
+.cp-card-accent {
+  background:
+    linear-gradient(180deg, rgba(225, 29, 72, 0.18) 0%, rgba(225, 29, 72, 0.04) 100%),
+    var(--cp-surface-2);
+  border-color: var(--cp-border-accent);
+}
+.cp-card-accent::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 4px 0 0 var(--cp-accent-strong),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 0 32px -8px rgba(225, 29, 72, 0.35);
+}
+
+/* === Pulse animation (used by Dot component) ========= */
+@keyframes cp-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* === Secondary stat divider (Stat in secondaryRow) ==== */
+.cp-stat {
+  border-right: 1px solid var(--cp-border-soft);
+}
+.cp-stat:last-child {
+  border-right: none;
 }

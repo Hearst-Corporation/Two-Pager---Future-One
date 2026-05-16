@@ -1,20 +1,18 @@
 'use client';
 
-import { C } from '@/lib/admin-tokens';
-
 /**
  * Inline alert banner for HEARST smart alerts.
  * severity: 'critical' | 'warning' | 'info'
  */
-export default function AlertBanner({ alerts = [], compact }) {
+export default function AlertBanner({ alerts = [] }) {
   if (!alerts.length) return null;
   return (
     <div style={S.wrap}>
       {alerts.map((a, i) => (
         <div key={a.id || i} style={{ ...S.row, ...severityStyle(a.severity) }}>
-          <span style={S.icon}>{severityIcon(a.severity)}</span>
+          <span style={S.icon} aria-hidden="true">{SeverityIcon(a.severity)}</span>
           <span style={S.msg}>{a.message}</span>
-          {a.mitigation && !compact && (
+          {a.mitigation && (
             <span style={S.mitigation}>→ {a.mitigation}</span>
           )}
         </div>
@@ -24,28 +22,58 @@ export default function AlertBanner({ alerts = [], compact }) {
 }
 
 function severityStyle(s) {
-  if (s === 'critical') return { borderLeftColor: C.error,   background: C.errorBg   };
-  if (s === 'warning')  return { borderLeftColor: C.warning, background: C.warningBg };
-  return                       { borderLeftColor: C.info,    background: C.infoBg    };
+  if (s === 'critical') return { borderLeftColor: 'var(--cp-error)',   background: 'var(--cp-error-bg)'   };
+  if (s === 'warning')  return { borderLeftColor: 'var(--cp-warning)', background: 'var(--cp-warning-bg)' };
+  return                       { borderLeftColor: 'var(--cp-info)',    background: 'var(--cp-info-bg)'    };
 }
 
-function severityIcon(s) {
-  if (s === 'critical') return '⛔';
-  if (s === 'warning')  return '⚠️';
-  return 'ℹ️';
+function SeverityIcon(s) {
+  if (s === 'critical') return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ color: 'var(--cp-error)' }}>
+      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="2" />
+      <path d="M5.5 5.5L10.5 10.5M10.5 5.5L5.5 10.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+  if (s === 'warning') return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ color: 'var(--cp-warning)' }}>
+      <path d="M8 2L14.5 13.5H1.5L8 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M8 6.5V9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="8" cy="11.5" r="0.75" fill="currentColor" />
+    </svg>
+  );
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ color: 'var(--cp-info)' }}>
+      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="2" />
+      <path d="M8 7V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="8" cy="4.5" r="0.75" fill="currentColor" />
+    </svg>
+  );
 }
 
 const S = {
-  wrap: { display: 'flex', flexDirection: 'column', gap: 6 },
+  wrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-2)',
+  },
   row: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: 10,
-    padding: '8px 12px',
+    gap: 'var(--cp-space-3)',
+    padding: 'var(--cp-space-3) var(--cp-space-4)',
     borderLeft: '3px solid',
-    fontSize: 12,
+    borderRadius: 'var(--cp-radius-md)',
+    fontSize: 'var(--cp-font-sm)',
+    lineHeight: 'var(--cp-leading-normal)',
   },
-  icon: { flexShrink: 0, marginTop: 1 },
-  msg: { fontWeight: 600, color: C.textPrimary },
-  mitigation: { color: C.textMuted, marginLeft: 'auto', flexShrink: 0 },
+  icon: { flexShrink: 0, display: 'flex', alignItems: 'center' },
+  msg: {
+    fontWeight: 'var(--cp-weight-semibold)',
+    color: 'var(--cp-text-primary)',
+  },
+  mitigation: {
+    color: 'var(--cp-text-muted)',
+    marginLeft: 'auto',
+    flexShrink: 0,
+  },
 };

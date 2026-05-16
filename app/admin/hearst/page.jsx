@@ -76,8 +76,8 @@ export default function HearstOverview() {
   const showWizard = !wizardDismissed && base && !base.total_mw && (proj.irr == null);
   const cta = pickContextualCta({ proj, sourceScore, drApproved, drTotal });
 
-  // Health pill color
-  const healthColor = sourceScore >= 70 ? 'var(--color-success)' : sourceScore >= 40 ? 'var(--color-warning)' : 'var(--color-error)';
+  // Health pill color — using cockpit semantic tokens
+  const healthColor = sourceScore >= 70 ? 'var(--cp-success)' : sourceScore >= 40 ? 'var(--cp-warning)' : 'var(--cp-error)';
 
   return (
     <>
@@ -90,7 +90,7 @@ export default function HearstOverview() {
     )}
     <div style={S.wrap}>
 
-      {/* Compact health pill — replaces the 4-item status bar */}
+      {/* Compact health pill */}
       <div style={S.healthRow}>
         <div style={S.healthPill}>
           <span style={S.healthLabel}>{base?.name || 'Project Health'}</span>
@@ -103,7 +103,7 @@ export default function HearstOverview() {
 
       {/* Smart Alerts — only the critical ones, max 3 */}
       {alerts.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 'var(--cp-space-6)' }}>
           <AlertBanner alerts={alerts.filter(a => a.severity === 'critical').slice(0, 3)} />
         </div>
       )}
@@ -112,11 +112,11 @@ export default function HearstOverview() {
       <div style={S.heroGrid}>
         <KpiCard label="Project IRR" value={proj.irr} format="pct" highlight={proj.irr != null} />
         <KpiCard label="Project NPV" value={proj.npv} format="currency" />
-        <KpiCard label="Stabilized EBITDA" value={proj.stabilized_ebitda} format="currency" note="Annual" />
-        <KpiCard label="MOIC" value={proj.moic} format="x" note="Exit multiple of money" />
+        <KpiCard label="Stabilized EBITDA" value={proj.stabilized_ebitda} format="currency" sublabel="Annual" />
+        <KpiCard label="MOIC" value={proj.moic} format="x" sublabel="Exit multiple of money" />
       </div>
 
-      {/* Secondary stats — compact line, no card chrome */}
+      {/* Secondary stats */}
       <div style={S.secondaryRow}>
         <Stat label="IT Capacity" value={base?.total_mw != null ? fmt(base.total_mw, 'mw') : '—'} />
         <Stat label="Total CAPEX" value={proj.total_capex != null ? fmt(proj.total_capex, 'currency') : '—'} />
@@ -133,10 +133,10 @@ export default function HearstOverview() {
           <div style={S.scenarioRow}>
             {scenarios.map(s => {
               const irr = s.projection?.irr;
-              const color = s.name?.toLowerCase().includes('upside') ? 'var(--color-success)'
-                : s.name?.toLowerCase().includes('down') ? 'var(--color-error)' : '#2563EB';
+              const color = s.name?.toLowerCase().includes('upside') ? 'var(--cp-success)'
+                : s.name?.toLowerCase().includes('down') ? 'var(--cp-error)' : 'var(--cp-info)';
               return (
-                <div key={s.id} style={{ ...S.scenarioChip, borderColor: color }}>
+                <div key={s.id} style={{ ...S.scenarioChip, boxShadow: `inset 0 0 0 1px ${color}` }}>
                   <div style={{ ...S.scenarioName, color }}>{s.name}</div>
                   <div style={{ ...S.scenarioIrr, color }}>{irr != null ? fmt(irr, 'pct') : 'N/A'}</div>
                   <div style={S.scenarioScore}>Score {s.source_score ?? 0}/100</div>
@@ -147,23 +147,29 @@ export default function HearstOverview() {
         </div>
       )}
 
-      {/* Single contextual CTA — replaces the 13-card module grid + the 2 status-bar buttons */}
+      {/* Single contextual CTA */}
       <div style={S.ctaWrap}>
         <div style={S.ctaCopy}>
           <div style={S.ctaEyebrow}>NEXT BEST ACTION</div>
           <div style={S.ctaTitle}>{cta.label}</div>
         </div>
-        <Link href={cta.href} style={{
-          ...S.ctaBtn,
-          background: cta.tone === 'critical' ? 'var(--color-error)' :
-                      cta.tone === 'warning'  ? 'var(--color-warning)' :
-                                                'var(--color-accent-strong)',
-        }}>
+        <Link
+          href={cta.href}
+          aria-label={`Aller : ${cta.label}`}
+          style={{
+            ...S.ctaBtn,
+            background: cta.tone === 'critical' ? 'var(--cp-error)' :
+                        cta.tone === 'warning'  ? 'var(--cp-warning)' :
+                                                  'var(--cp-accent)',
+            color:      cta.tone === 'warning'  ? 'var(--cp-bg-deep)' :
+                                                  'var(--cp-text-strong)',
+          }}
+        >
           Go →
         </Link>
       </div>
 
-      {/* Missing inputs warning — compact, only when present */}
+      {/* Missing inputs warning */}
       {proj.missing_inputs?.length > 0 && (
         <div style={S.missingWrap}>
           <div style={S.missingTitle}>MISSING INPUTS ({proj.missing_inputs.length})</div>
@@ -181,7 +187,7 @@ export default function HearstOverview() {
 
 function Stat({ label, value }) {
   return (
-    <div style={SStat.wrap}>
+    <div className="cp-stat" style={SStat.wrap}>
       <div style={SStat.label}>{label}</div>
       <div style={SStat.value}>{value}</div>
     </div>
@@ -189,93 +195,173 @@ function Stat({ label, value }) {
 }
 
 const SStat = {
-  wrap: { display: 'flex', flexDirection: 'column', gap: 2, padding: '4px 16px', borderRight: '1px solid var(--color-border-light)' },
-  label: { fontSize: 9, fontWeight: 700, letterSpacing: 1.4, color: 'var(--color-text-muted)', textTransform: 'uppercase' },
-  value: { fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' },
+  wrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-1)',
+    padding: 'var(--cp-space-1) var(--cp-space-4)',
+  },
+  label: {
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+  },
+  value: {
+    fontSize: 'var(--cp-font-md)',
+    fontWeight: 'var(--cp-weight-semibold)',
+    color: 'var(--cp-text-primary)',
+  },
 };
 
 const S = {
-  wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: 'var(--color-error)', fontSize: 13, background: 'var(--color-bg-secondary)', borderRadius: 6 },
-
-  healthRow: { marginBottom: 18 },
-  healthPill: {
-    display: 'inline-flex', alignItems: 'center', gap: 10,
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
-    borderRadius: 999,
-    padding: '6px 16px',
-    fontSize: 12,
-    fontWeight: 600,
-    color: 'var(--color-text-secondary)',
+  wrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-6)',
   },
-  healthLabel: { color: 'var(--color-text-primary)', fontWeight: 700 },
-  healthSep: { color: 'var(--color-border-medium)' },
-  healthStat: { fontWeight: 600 },
+  loading: {
+    padding: 'var(--cp-space-9)',
+    textAlign: 'center',
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-md)',
+  },
+  error: {
+    padding: 'var(--cp-space-6)',
+    color: 'var(--cp-error)',
+    fontSize: 'var(--cp-font-base)',
+    background: 'var(--cp-error-bg)',
+    borderRadius: 'var(--cp-radius-md)',
+  },
 
-  heroGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 16 },
+  healthRow: { marginBottom: 0 },
+  healthPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-2)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-pill)',
+    padding: 'var(--cp-space-1) var(--cp-space-4)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-semibold)',
+    color: 'var(--cp-text-body)',
+  },
+  healthLabel: { color: 'var(--cp-text-primary)', fontWeight: 'var(--cp-weight-bold)' },
+  healthSep: { color: 'var(--cp-text-faint)' },
+  healthStat: { fontWeight: 'var(--cp-weight-semibold)' },
+
+  heroGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: 'var(--cp-space-4)',
+  },
 
   secondaryRow: {
     display: 'flex',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
-    borderRadius: 8,
-    padding: '8px 0',
-    marginBottom: 24,
+    flexWrap: 'nowrap',
+    overflowX: 'auto',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-lg)',
+    padding: 'var(--cp-space-3) var(--cp-space-2)',
   },
 
   scenarioStrip: {
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
-    borderRadius: 8, padding: '14px 18px', marginBottom: 20,
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-lg)',
+    padding: 'var(--cp-space-4) var(--cp-space-5)',
   },
-  scenarioRow: { display: 'flex', gap: 12, marginTop: 10 },
+  scenarioRow: { display: 'flex', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-2)' },
   scenarioChip: {
-    flex: 1, border: '2px solid', borderRadius: 8, padding: '10px 14px',
-    background: 'var(--color-bg-main)',
+    flex: 1,
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md)',
+    padding: 'var(--cp-space-2) var(--cp-space-3)',
+    background: 'var(--cp-surface-1)',
+    transition: 'transform var(--cp-dur-base) var(--cp-ease-out)',
   },
-  scenarioName: { fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 },
-  scenarioIrr: { fontSize: 22, fontWeight: 900, marginBottom: 2 },
-  scenarioScore: { fontSize: 10, color: 'var(--color-text-muted)' },
-  sectionTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--color-text-muted)', textTransform: 'uppercase' },
+  scenarioName: {
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-wider)',
+    textTransform: 'uppercase',
+    marginBottom: 'var(--cp-space-1)',
+  },
+  scenarioIrr: {
+    fontSize: 'var(--cp-font-xl)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-tight)',
+    marginBottom: 'var(--cp-space-1)',
+  },
+  scenarioScore: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)' },
+  sectionTitle: {
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+  },
 
   ctaWrap: {
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
-    borderRadius: 8,
-    padding: '14px 20px',
-    marginBottom: 20,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 'var(--cp-space-4)',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-lg)',
+    padding: 'var(--cp-space-4) var(--cp-space-6)',
   },
-  ctaCopy: { display: 'flex', flexDirection: 'column', gap: 2 },
-  ctaEyebrow: { fontSize: 9, fontWeight: 800, letterSpacing: 2, color: 'var(--color-text-muted)', textTransform: 'uppercase' },
-  ctaTitle: { fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' },
+  ctaCopy: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
+  ctaEyebrow: {
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+  },
+  ctaTitle: {
+    fontSize: 'var(--cp-font-md)',
+    fontWeight: 'var(--cp-weight-bold)',
+    color: 'var(--cp-text-strong)',
+  },
   ctaBtn: {
-    display: 'inline-flex', alignItems: 'center', gap: 6,
-    fontSize: 12, fontWeight: 700, letterSpacing: 0.4,
-    color: 'var(--color-text-inverse)',
-    padding: '9px 18px', borderRadius: 6,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-1)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-wide)',
+    padding: 'var(--cp-space-2) var(--cp-space-5)',
+    borderRadius: 'var(--cp-radius-sm)',
     textDecoration: 'none',
-    transition: 'filter .12s ease',
+    transition: 'filter var(--cp-dur-fast) var(--cp-ease)',
   },
 
   missingWrap: {
-    background: 'var(--color-bg-secondary)',
-    border: '1px solid var(--color-border-light)',
-    borderLeft: '3px solid var(--color-error)',
-    borderRadius: 6,
-    padding: '12px 16px',
+    background: 'var(--cp-error-bg)',
+    borderLeft: '3px solid var(--cp-error)',
+    borderRadius: 'var(--cp-radius-md)',
+    padding: 'var(--cp-space-3) var(--cp-space-4)',
   },
-  missingTitle: { fontSize: 10, fontWeight: 700, color: 'var(--color-error)', marginBottom: 8, letterSpacing: 1.5 },
-  missingList: { display: 'flex', flexWrap: 'wrap', gap: 6 },
+  missingTitle: {
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    color: 'var(--cp-error)',
+    marginBottom: 'var(--cp-space-2)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+  },
+  missingList: { display: 'flex', flexWrap: 'wrap', gap: 'var(--cp-space-1)' },
   missingTag: {
-    fontSize: 11,
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-medium)',
-    color: 'var(--color-error)',
-    padding: '2px 8px', borderRadius: 4,
+    fontSize: 'var(--cp-font-xs)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    color: 'var(--cp-error)',
+    padding: 'var(--cp-space-0) var(--cp-space-2)',
+    borderRadius: 'var(--cp-radius-xs)',
   },
 };

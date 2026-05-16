@@ -1,30 +1,53 @@
 'use client';
 
+import { useState } from 'react';
+
 const ITEMS = [
   { id: 'sources', title: 'Score sources sous seuil', snippet: '0 % — seuil IC 70 %', hot: true },
   { id: 'data-room', title: 'Data room incomplète', snippet: '0/0 documents — 0 %' },
   { id: 'capex', title: 'CAPEX/MW sans source', snippet: 'Hypothèse critique non sourcée' },
 ];
 
-export default function HearstRightRail() {
+function RailItem({ item }) {
+  const [hover, setHover] = useState(false);
+  const isHot = item.hot;
   return (
-    <aside aria-label="Contexte" className="cockpit-rail-right" style={S.rail}>
-      <h3 style={S.title}>Alertes prioritaires</h3>
-      <div style={S.list}>
-        {ITEMS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            style={{ ...S.item, ...(item.hot ? S.itemHot : {}) }}
-          >
-            <span style={S.itemBody}>
-              {item.title}
-              <span style={{ ...S.itemSnippet, ...(item.hot ? S.itemSnippetHot : {}) }}>
-                {item.snippet}
-              </span>
-            </span>
-          </button>
-        ))}
+    <button
+      type="button"
+      aria-label={`${item.title}: ${item.snippet}`}
+      style={{
+        ...S.item,
+        ...(isHot ? S.itemHot : {}),
+        ...(hover ? S.itemHover : {}),
+      }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      <span style={S.itemBody}>
+        {item.title}
+        <span style={{ ...S.itemSnippet, ...(isHot ? S.itemSnippetHot : {}) }}>
+          {item.snippet}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+export default function HearstRightRail({ children }) {
+  return (
+    <aside aria-label="Advisor et alertes prioritaires" className="cockpit-rail-right" style={S.rail}>
+      {children && (
+        <div style={S.chatSlot}>
+          {children}
+        </div>
+      )}
+      <div style={S.alertsBlock}>
+        <h3 style={S.title}>Alertes prioritaires</h3>
+        <div style={S.list}>
+          {ITEMS.map((item) => (
+            <RailItem key={item.id} item={item} />
+          ))}
+        </div>
       </div>
     </aside>
   );
@@ -33,60 +56,78 @@ export default function HearstRightRail() {
 const S = {
   rail: {
     position: 'relative',
-    zIndex: 20,
-    width: 320,
+    zIndex: 'var(--cp-z-rails)',
+    width: 'var(--cp-rail-right)',
     flexShrink: 0,
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    gap: 8,
-    padding: '56px 32px',
+    padding: 0,
+  },
+  chatSlot: {
+    flex: 1,
+    minHeight: '200px',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    borderBottom: '1px solid var(--cp-border-strong)',
+  },
+  alertsBlock: {
+    flexShrink: 0,
+    padding: 'var(--cp-space-6) var(--cp-space-5) var(--cp-space-5)',
+    maxHeight: '320px',
     overflowY: 'auto',
   },
   title: {
-    fontSize: 13,
-    fontWeight: 500,
-    color: 'rgba(245, 245, 245, 0.40)',
-    paddingLeft: 16,
-    marginBottom: 16,
-    margin: '0 0 16px 0',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-medium)',
+    color: 'var(--cp-text-muted)',
+    letterSpacing: 'var(--cp-tracking-wide)',
+    textTransform: 'uppercase',
+    margin: '0 0 var(--cp-space-4) 0',
   },
   list: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 8,
+    gap: 'var(--cp-space-2)',
   },
   item: {
     appearance: 'none',
     border: 'none',
-    background: 'transparent',
-    color: 'rgba(245, 245, 245, 0.65)',
+    background: 'var(--cp-surface-0)',
+    color: 'var(--cp-text-body)',
     textAlign: 'left',
-    padding: 16,
-    borderRadius: 8,
-    fontSize: 15,
-    lineHeight: 1.35,
+    padding: 'var(--cp-space-3) var(--cp-space-4)',
+    borderRadius: 'var(--cp-radius-md)',
+    fontSize: 'var(--cp-font-sm)',
+    lineHeight: 'var(--cp-leading-normal)',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'flex-start',
-    gap: 16,
-    transition: 'background 0.15s ease, color 0.15s ease',
+    gap: 'var(--cp-space-4)',
+    transition: 'background var(--cp-dur-base) var(--cp-ease), color var(--cp-dur-base) var(--cp-ease)',
+  },
+  itemHover: {
+    background: 'var(--cp-surface-2)',
+    color: 'var(--cp-text-strong)',
   },
   itemHot: {
-    background: 'rgba(255, 255, 255, 0.08)',
-    color: '#ffffff',
+    background: 'var(--cp-surface-2)',
+    color: 'var(--cp-text-strong)',
+    borderLeft: '3px solid var(--cp-accent-strong)',
+    paddingLeft: 'calc(var(--cp-space-4) - 3px)',
   },
   itemBody: {
     display: 'block',
-    lineHeight: 1.35,
+    lineHeight: 'var(--cp-leading-normal)',
   },
   itemSnippet: {
     display: 'block',
-    marginTop: 4,
-    fontSize: 13,
-    color: 'rgba(245, 245, 245, 0.40)',
+    marginTop: 'var(--cp-space-1)',
+    fontSize: 'var(--cp-font-xs)',
+    color: 'var(--cp-text-faint)',
   },
   itemSnippetHot: {
-    color: 'rgba(245, 245, 245, 0.65)',
+    color: 'var(--cp-text-body)',
   },
 };

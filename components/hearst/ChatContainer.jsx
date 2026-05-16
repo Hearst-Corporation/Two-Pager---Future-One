@@ -1,17 +1,14 @@
 'use client';
 /* ============================================================
-   OPENCLAW · CHAT CONTAINER
+   HEARST ADVISOR — CHAT CONTAINER
    ------------------------------------------------------------
-   The central chat interface. Wraps the existing AdvisorPanel
-   into the stable ChatPanel layout.
-   This component NEVER unmounts when navigation changes.
+   Chat container rendered inside the right rail.
+   Streams responses from /api/admin/hearst/advisor.
+   Wrappers (LocalPanel, LocalHeader, LocalComposer, LocalCard)
+   are defined locally — do not import from @/components/layout.
    ============================================================ */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import ChatPanel, { ChatHeader, ChatComposer } from '@/components/layout/ChatPanel';
-import PanelCard from '@/components/layout/PanelCard';
-import StatusIndicator from '@/components/ui/StatusIndicator';
-import { TEXT, SP, T, W, LS, ACCENT, CARD } from '@/lib/design-system/tokens';
 
 const WRITE_TOOLS = new Set([
   'update_scenario', 'create_source', 'attach_source_to_scenario',
@@ -24,6 +21,142 @@ const DEFAULT_PROMPTS = [
   'Generate an investor report',
   'Run a stress test on the active scenario',
 ];
+
+/* ── Local dot indicator (replaces OpenClaw StatusIndicator) ── */
+function Dot({ variant = 'online', size = 8, pulse = false }) {
+  const color =
+    variant === 'active'  ? 'var(--cp-accent-strong)' :
+    variant === 'online'  ? 'var(--cp-success)' :
+    variant === 'away'    ? 'var(--cp-warning)' :
+    variant === 'busy'    ? 'var(--cp-error)' :
+                            'var(--cp-text-muted)';
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: color,
+        flexShrink: 0,
+        animation: pulse ? 'cp-pulse 2s ease-in-out infinite' : 'none',
+      }}
+    />
+  );
+}
+
+/* ── Local wrappers — cockpit glass ─────────────────────────── */
+
+function LocalPanel({ header, children }) {
+  return (
+    <div style={SW.panel}>
+      {header && <div style={SW.panelHeader}>{header}</div>}
+      <div style={SW.panelBody}>{children}</div>
+    </div>
+  );
+}
+
+function LocalHeader({ title, subtitle, badge, actions }) {
+  return (
+    <div style={SW.header}>
+      <div style={SW.headerLeft}>
+        <div style={SW.headerTitle}>{title}</div>
+        {subtitle && <div style={SW.headerSub}>{subtitle}</div>}
+      </div>
+      <div style={SW.headerRight}>
+        {badge && <span style={SW.badge}>{badge}</span>}
+        {actions}
+      </div>
+    </div>
+  );
+}
+
+function LocalComposer({ children }) {
+  return <div style={SW.composer}>{children}</div>;
+}
+
+function LocalCard({ children }) {
+  return <div style={SW.localCard}>{children}</div>;
+}
+
+/* Wrapper styles */
+const SW = {
+  panel: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    background: 'var(--cp-surface-0)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-lg)',
+    overflow: 'hidden',
+  },
+  panelHeader: {
+    flexShrink: 0,
+    borderBottom: '1px solid var(--cp-border)',
+    background: 'var(--cp-surface-1)',
+  },
+  panelBody: {
+    flex: 1,
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    padding: 'var(--cp-space-3)',
+  },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 'var(--cp-space-3)',
+    padding: 'var(--cp-space-3) var(--cp-space-4)',
+  },
+  headerLeft: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-1)',
+  },
+  headerTitle: {
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-wider)',
+    textTransform: 'uppercase',
+    color: 'var(--cp-text-strong)',
+  },
+  headerSub: {
+    fontSize: 'var(--cp-font-xs)',
+    color: 'var(--cp-text-muted)',
+  },
+  headerRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-2)',
+  },
+  badge: {
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-wider)',
+    textTransform: 'uppercase',
+    color: 'var(--cp-accent-strong)',
+    background: 'var(--cp-accent-soft)',
+    border: '1px solid var(--cp-border-accent)',
+    borderRadius: 'var(--cp-radius-xs)',
+    padding: '2px var(--cp-space-2)',
+  },
+  composer: {
+    flexShrink: 0,
+    borderTop: '1px solid var(--cp-border)',
+    padding: 'var(--cp-space-3)',
+    background: 'var(--cp-surface-1)',
+  },
+  localCard: {
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-lg)',
+    padding: 'var(--cp-space-4)',
+  },
+};
+
+/* ── Main component ─────────────────────────────────────────── */
 
 export default function ChatContainer({
   project,
@@ -182,114 +315,121 @@ export default function ChatContainer({
   };
 
   return (
-    <ChatPanel
+    <LocalPanel
       header={
-        <ChatHeader
+        <LocalHeader
           title="HEARST Advisor"
           subtitle={`Helping with: ${pageTitle}`}
           badge="AI"
           actions={
-            <>
-              <button onClick={newConversation} style={S.iconBtn} title="New conversation">+</button>
-            </>
+            <button
+              type="button"
+              onClick={newConversation}
+              className="cockpit-btn-glass"
+              style={S.iconBtn}
+              title="New conversation"
+              aria-label="New conversation"
+            >+</button>
           }
         />
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Quick prompt chips */}
-      <div style={S.chipsRow}>
-        {suggestedPrompts.map((prompt, i) => (
-          <button
-            key={i}
-            onClick={() => send(prompt)}
-            disabled={streaming}
-            style={{ ...S.chip, opacity: streaming ? 0.5 : 1 }}
-            title={prompt}
-          >
-            {prompt.length > 38 ? prompt.slice(0, 36) + '...' : prompt}
-          </button>
-        ))}
+
+        {/* Quick prompt chips */}
+        <div style={S.chipsRow}>
+          {suggestedPrompts.map((prompt) => (
+            <button
+              key={prompt}
+              onClick={() => send(prompt)}
+              disabled={streaming}
+              style={{ ...S.chip, opacity: streaming ? 0.5 : 1 }}
+              title={prompt}
+            >
+              {prompt.length > 38 ? prompt.slice(0, 36) + '...' : prompt}
+            </button>
+          ))}
+        </div>
+
+        {/* Messages area */}
+        <div ref={scrollRef} style={S.messages}>
+          {messages.length === 0 && !streaming && (
+            <LocalCard>
+              <div style={S.emptyTitle}>Hi</div>
+              <div style={S.emptyBody}>
+                I have full context of the <strong>{pageTitle}</strong> page on <strong>{project?.name || 'HEARST'}</strong>.
+                I can audit, fill, explain, source, stress-test, and export. Use a chip above or ask anything.
+              </div>
+            </LocalCard>
+          )}
+
+          {messages.map((m, idx) => (
+            <div key={idx} style={{ ...S.messageWrap, ...(m.role === 'user' ? S.messageUser : S.messageAssistant) }}>
+              <div style={S.messageMeta}>
+                <Dot variant={m.role === 'user' ? 'online' : 'active'} size={6} />
+                <span style={S.messageRole}>{m.role === 'user' ? 'You' : 'Advisor'}</span>
+              </div>
+              <div style={S.messageContent}>
+                {m.content?.map((block, bidx) => {
+                  if (block.type === 'text') return <span key={bidx}>{block.text}</span>;
+                  if (block.type === 'tool_use') return (
+                    <div key={bidx} style={S.toolCard}>
+                      <div style={S.toolName}>Tool: {block.name}</div>
+                      <div style={S.toolStatus}>{block.status}</div>
+                    </div>
+                  );
+                  return null;
+                })}
+              </div>
+            </div>
+          ))}
+
+          {streaming && (
+            <div style={S.streamingHint}>
+              <Dot variant="active" size={7} pulse />
+              <span style={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)' }}>Working...</span>
+            </div>
+          )}
+
+          {error && (
+            <div style={S.errorBox}>⚠ {error}</div>
+          )}
+
+          {hadMutation && !streaming && (
+            <div style={S.mutationHint}>
+              <span>Data updated.</span>
+              <button type="button" style={S.reloadBtn} onClick={() => onMutationDetected?.()} aria-label="Refresh data">Refresh</button>
+            </div>
+          )}
+        </div>
+
+        <div style={{ flex: 1, minHeight: 0 }} />
+
+        {/* Composer */}
+        <LocalComposer>
+          <form onSubmit={onSubmit} style={S.composerForm}>
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={onKeyDown}
+              placeholder={streaming ? 'Working...' : 'Ask anything (Enter to send, Shift+Enter newline)'}
+              rows={2}
+              disabled={streaming}
+              style={S.textarea}
+              aria-label="Your message"
+            />
+            <button
+              type="submit"
+              className="cockpit-btn-primary"
+              disabled={streaming || !input.trim()}
+              style={{ ...S.sendBtn, opacity: streaming || !input.trim() ? 0.4 : 1 }}
+            >
+              {streaming ? '...' : 'Send'}
+            </button>
+          </form>
+        </LocalComposer>
       </div>
-
-      {/* Messages area */}
-      <div ref={scrollRef} style={S.messages}>
-        {messages.length === 0 && !streaming && (
-          <PanelCard>
-            <div style={S.emptyTitle}>Hi</div>
-            <div style={S.emptyBody}>
-              I have full context of the <strong>{pageTitle}</strong> page on <strong>{project?.name || 'HEARST'}</strong>.
-              I can audit, fill, explain, source, stress-test, and export. Use a chip above or ask anything.
-            </div>
-          </PanelCard>
-        )}
-
-        {messages.map((m, idx) => (
-          <div key={idx} style={{ ...S.messageWrap, ...(m.role === 'user' ? S.messageUser : S.messageAssistant) }}>
-            <div style={S.messageMeta}>
-              <StatusIndicator variant={m.role === 'user' ? 'online' : 'active'} size={6} />
-              <span style={S.messageRole}>{m.role === 'user' ? 'You' : 'Advisor'}</span>
-            </div>
-            <div style={S.messageContent}>
-              {m.content?.map((block, bidx) => {
-                if (block.type === 'text') return <span key={bidx}>{block.text}</span>;
-                if (block.type === 'tool_use') return (
-                  <div key={bidx} style={S.toolCard}>
-                    <div style={S.toolName}>Tool: {block.name}</div>
-                    <div style={S.toolStatus}>{block.status}</div>
-                  </div>
-                );
-                return null;
-              })}
-            </div>
-          </div>
-        ))}
-
-        {streaming && (
-          <div style={S.streamingHint}>
-            <StatusIndicator variant="active" size={7} pulse />
-            <span style={{ color: TEXT.muted, fontSize: T.small }}>Working...</span>
-          </div>
-        )}
-
-        {error && (
-          <div style={S.errorBox}>⚠ {error}</div>
-        )}
-
-        {hadMutation && !streaming && (
-          <div style={S.mutationHint}>
-            <span>Data updated.</span>
-            <button style={S.reloadBtn} onClick={() => onMutationDetected?.()}>Refresh</button>
-          </div>
-        )}
-      </div>
-
-      <div style={{ flex: 1, minHeight: 0 }} />
-
-      {/* Composer */}
-      <ChatComposer>
-        <form onSubmit={onSubmit} style={S.composerForm}>
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder={streaming ? 'Working...' : 'Ask anything (Enter to send, Shift+Enter newline)'}
-            rows={2}
-            disabled={streaming}
-            style={S.textarea}
-            aria-label="Your message"
-          />
-          <button
-            type="submit"
-            disabled={streaming || !input.trim()}
-            style={{ ...S.sendBtn, opacity: streaming || !input.trim() ? 0.4 : 1 }}
-          >
-            {streaming ? '...' : 'Send'}
-          </button>
-        </form>
-      </ChatComposer>
-    </div>
-    </ChatPanel>
+    </LocalPanel>
   );
 }
 
@@ -297,39 +437,36 @@ const S = {
   iconBtn: {
     width: 26,
     height: 26,
-    borderRadius: 4,
-    border: 'none',
-    background: 'rgba(255,255,255,0.06)',
-    color: TEXT.primary,
+    borderRadius: 'var(--cp-radius-xs)',
     cursor: 'pointer',
-    fontSize: 14,
+    fontSize: 'var(--cp-font-md)',
     lineHeight: 1,
-    transition: 'background 0.12s ease',
+    transition: 'background var(--cp-dur-fast) var(--cp-ease)',
   },
   chipsRow: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: `${SP[2]}px`,
-    marginBottom: `${SP[4]}px`,
+    gap: 'var(--cp-space-2)',
+    marginBottom: 'var(--cp-space-3)',
     flexShrink: 0,
   },
   chip: {
-    fontSize: T.small,
-    fontWeight: 600,
-    background: 'rgba(255,255,255,0.04)',
-    border: `1px solid ${CARD.border}`,
-    color: TEXT.secondary,
-    padding: `${SP[2]}px ${SP[3]}px`,
-    borderRadius: 16,
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-semibold)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    color: 'var(--cp-text-body)',
+    padding: 'var(--cp-space-1) var(--cp-space-3)',
+    borderRadius: 'var(--cp-radius-pill)',
     cursor: 'pointer',
     fontFamily: 'inherit',
-    transition: 'background 0.12s ease, border-color 0.12s ease, color 0.12s ease',
+    transition: 'background var(--cp-dur-fast) var(--cp-ease), border-color var(--cp-dur-fast) var(--cp-ease), color var(--cp-dur-fast) var(--cp-ease)',
   },
   messages: {
     display: 'flex',
     flexDirection: 'column',
-    gap: `${SP[4]}px`,
-    paddingBottom: `${SP[4]}px`,
+    gap: 'var(--cp-space-3)',
+    paddingBottom: 'var(--cp-space-3)',
     overflowY: 'auto',
     flex: 1,
     minHeight: 0,
@@ -337,130 +474,127 @@ const S = {
   messageWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: `${SP[2]}px`,
-    padding: `${SP[3]}px`,
-    borderRadius: CARD.radiusSm,
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-3)',
+    borderRadius: 'var(--cp-radius-md)',
   },
   messageUser: {
-    background: 'rgba(0,183,255,0.06)',
-    borderLeft: `2px solid ${ACCENT.main}`,
+    background: 'var(--cp-surface-2)',
+    borderLeft: '2px solid var(--cp-accent-strong)',
   },
   messageAssistant: {
-    background: CARD.bg,
-    border: `1px solid ${CARD.border}`,
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
   },
   messageMeta: {
     display: 'flex',
     alignItems: 'center',
-    gap: `${SP[2]}px`,
+    gap: 'var(--cp-space-2)',
   },
   messageRole: {
-    fontSize: T.mini,
-    fontWeight: W.black,
-    letterSpacing: LS.caps,
-    color: TEXT.muted,
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-wider)',
+    color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
   },
   messageContent: {
-    fontSize: T.body,
+    fontSize: 'var(--cp-font-base)',
     lineHeight: 1.55,
-    color: TEXT.primary,
+    color: 'var(--cp-text-strong)',
     whiteSpace: 'pre-wrap',
   },
   toolCard: {
-    background: 'rgba(255,255,255,0.04)',
-    border: `1px solid ${CARD.border}`,
-    borderRadius: CARD.radiusSm,
-    padding: `${SP[3]}px`,
-    marginTop: `${SP[2]}px`,
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md)',
+    padding: 'var(--cp-space-3)',
+    marginTop: 'var(--cp-space-2)',
   },
   toolName: {
-    fontSize: T.caption,
-    fontWeight: W.bold,
-    color: ACCENT.strong,
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-bold)',
+    color: 'var(--cp-accent)',
   },
   toolStatus: {
-    fontSize: T.micro,
-    color: TEXT.muted,
+    fontSize: 'var(--cp-font-micro)',
+    color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
   },
   streamingHint: {
     display: 'flex',
     alignItems: 'center',
-    gap: `${SP[2]}px`,
-    padding: `${SP[3]}px`,
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-3)',
   },
   errorBox: {
-    fontSize: T.caption,
-    fontWeight: 600,
-    color: '#ef4444',
-    background: 'rgba(239,68,68,0.08)',
-    border: '1px solid rgba(239,68,68,0.20)',
-    padding: `${SP[3]}px`,
-    borderRadius: CARD.radiusSm,
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-semibold)',
+    color: 'var(--cp-error)',
+    background: 'var(--cp-error-bg)',
+    border: '1px solid var(--cp-error)',
+    padding: 'var(--cp-space-3)',
+    borderRadius: 'var(--cp-radius-md)',
   },
   mutationHint: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: `${SP[2]}px`,
-    padding: `${SP[3]}px`,
-    background: 'rgba(255,255,255,0.04)',
-    border: `1px solid ${CARD.border}`,
-    borderRadius: CARD.radiusSm,
-    fontSize: T.small,
-    color: TEXT.secondary,
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-3)',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md)',
+    fontSize: 'var(--cp-font-sm)',
+    color: 'var(--cp-text-body)',
   },
   reloadBtn: {
-    fontSize: T.caption,
-    fontWeight: W.bold,
-    background: ACCENT.main,
-    color: TEXT.inverse,
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-bold)',
+    background: 'var(--cp-accent-strong)',
+    color: 'var(--cp-text-strong)',
     border: 'none',
-    padding: `${SP[1]}px ${SP[3]}px`,
-    borderRadius: 4,
+    padding: 'var(--cp-space-1) var(--cp-space-3)',
+    borderRadius: 'var(--cp-radius-xs)',
     cursor: 'pointer',
   },
   emptyTitle: {
-    fontSize: T.h4,
-    fontWeight: W.bold,
-    marginBottom: `${SP[2]}px`,
-    color: TEXT.primary,
+    fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-bold)',
+    marginBottom: 'var(--cp-space-2)',
+    color: 'var(--cp-text-strong)',
   },
   emptyBody: {
-    color: TEXT.secondary,
+    color: 'var(--cp-text-body)',
     lineHeight: 1.5,
-    fontSize: T.body,
+    fontSize: 'var(--cp-font-base)',
   },
   composerForm: {
     display: 'flex',
     alignItems: 'flex-end',
-    gap: `${SP[2]}px`,
+    gap: 'var(--cp-space-2)',
   },
   textarea: {
     flex: 1,
     fontFamily: 'inherit',
-    fontSize: T.body,
-    background: 'rgba(255,255,255,0.04)',
-    border: `1px solid ${CARD.border}`,
-    borderRadius: CARD.radiusSm,
-    padding: `${SP[2]}px ${SP[3]}px`,
-    color: TEXT.primary,
+    fontSize: 'var(--cp-font-base)',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md)',
+    padding: 'var(--cp-space-2) var(--cp-space-3)',
+    color: 'var(--cp-text-strong)',
     resize: 'none',
-    outline: 'none',
     lineHeight: 1.45,
     minHeight: 40,
   },
   sendBtn: {
-    fontSize: T.small,
-    fontWeight: W.bold,
-    background: ACCENT.main,
-    color: TEXT.inverse,
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-bold)',
     border: 'none',
-    padding: `${SP[2]}px ${SP[4]}px`,
-    borderRadius: CARD.radiusSm,
+    padding: 'var(--cp-space-2) var(--cp-space-4)',
+    borderRadius: 'var(--cp-radius-md)',
     cursor: 'pointer',
-    transition: 'opacity 0.12s ease',
+    transition: 'opacity var(--cp-dur-fast) var(--cp-ease)',
     height: 40,
   },
 };

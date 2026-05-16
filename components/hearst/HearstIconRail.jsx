@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { getIconByKey } from '@/components/admin/AdminIcons';
 
 const RAIL_ITEMS = [
@@ -10,39 +11,62 @@ const RAIL_ITEMS = [
   { id: 'alerts',       label: 'Alerts',       iconKey: 'warning', href: '/admin/hearst?view=alerts', badge: 3 },
 ];
 
+function IconButton({ item, active }) {
+  const [hover, setHover] = useState(false);
+  const Icon = getIconByKey(item.iconKey);
+  return (
+    <Link
+      href={item.href}
+      title={item.label}
+      aria-label={item.badge ? `${item.label} — ${item.badge} alertes` : item.label}
+      aria-current={active ? 'page' : undefined}
+      style={{
+        ...S.iconBtn,
+        ...(active ? S.iconBtnActive : {}),
+        ...(hover && !active ? S.iconBtnHover : {}),
+      }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      {Icon && <Icon width={16} height={16} />}
+      {item.badge != null && (
+        <span style={S.badge} aria-hidden="true">
+          {item.badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
 export default function HearstIconRail() {
   const pathname = usePathname();
+  const [avatarHover, setAvatarHover] = useState(false);
 
   return (
     <aside aria-label="Navigation principale" style={S.outer}>
       <div className="cockpit-glass cockpit-rail-left" style={S.glass}>
         <div style={S.contentLayer}>
-          <Link href="/admin/hearst" style={S.brandDot} aria-label="HEARST">
+          <Link href="/admin/hearst" style={S.brandDot} aria-label="HEARST — Accueil">
             <span style={S.brandDotInner} />
           </Link>
 
           {RAIL_ITEMS.map((item) => {
-            const Icon = getIconByKey(item.iconKey);
             const active = item.id === 'dashboard' && pathname === '/admin/hearst';
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                title={item.label}
-                aria-label={item.label}
-                aria-current={active ? 'page' : undefined}
-                className={active ? 'cockpit-btn-glass' : undefined}
-                style={{ ...S.iconBtn, ...(active ? S.iconBtnActive : {}) }}
-              >
-                {Icon && <Icon width={16} height={16} />}
-                {item.badge != null && <span style={S.badge}>{item.badge}</span>}
-              </Link>
-            );
+            return <IconButton key={item.id} item={item} active={active} />;
           })}
 
           <div style={S.spacer} />
 
-          <div style={S.avatar} title="Adrien">AB</div>
+          <button
+            type="button"
+            style={{ ...S.avatar, ...(avatarHover ? S.avatarHover : {}) }}
+            title="Adrien"
+            aria-label="Profil utilisateur : Adrien"
+            onMouseEnter={() => setAvatarHover(true)}
+            onMouseLeave={() => setAvatarHover(false)}
+          >
+            AB
+          </button>
         </div>
       </div>
     </aside>
@@ -52,9 +76,9 @@ export default function HearstIconRail() {
 const S = {
   outer: {
     position: 'relative',
-    zIndex: 20,
+    zIndex: 'var(--cp-z-rails)',
     flexShrink: 0,
-    width: 88,
+    width: 'var(--cp-rail-left)',
     height: '100%',
   },
   glass: {
@@ -71,55 +95,60 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 12,
-    padding: '32px 0',
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-7) 0',
   },
   brandDot: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 'var(--cp-brand-size)',
+    height: 'var(--cp-brand-size)',
+    borderRadius: 'var(--cp-radius-lg)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'rgba(255, 255, 255, 0.1)',
-    boxShadow:
-      '0 8px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
-    marginBottom: 24,
+    background: 'var(--cp-surface-3)',
+    boxShadow: 'var(--cp-shadow-sm)',
+    marginBottom: 'var(--cp-space-6)',
     textDecoration: 'none',
+    transition: 'transform var(--cp-dur-base) var(--cp-ease-out)',
   },
   brandDotInner: {
-    width: 20,
-    height: 20,
-    borderRadius: '50%',
-    background: '#ffffff',
+    width: 'var(--cp-brand-inner)',
+    height: 'var(--cp-brand-inner)',
+    borderRadius: 'var(--cp-radius-pill)',
+    background: 'var(--cp-text-strong)',
   },
   iconBtn: {
     position: 'relative',
-    width: 56,
-    height: 56,
+    width: 'var(--cp-icon-btn-size)',
+    height: 'var(--cp-icon-btn-size)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
-    color: 'rgba(245, 245, 245, 0.40)',
+    borderRadius: 'var(--cp-radius-lg)',
+    color: 'var(--cp-text-muted)',
     textDecoration: 'none',
-    transition: 'background 0.3s ease, color 0.3s ease',
+    transition: 'background var(--cp-dur-base) var(--cp-ease), color var(--cp-dur-base) var(--cp-ease)',
+  },
+  iconBtnHover: {
+    color: 'var(--cp-text-strong)',
+    background: 'var(--cp-surface-2)',
   },
   iconBtnActive: {
-    color: '#ffffff',
-    zIndex: 10,
+    color: 'var(--cp-text-strong)',
+    background: 'var(--cp-surface-3)',
+    zIndex: 'var(--cp-z-content)',
   },
   badge: {
     position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 16,
-    height: 16,
-    borderRadius: '50%',
-    background: '#ffffff',
-    color: '#000000',
-    fontSize: 9,
-    fontWeight: 500,
+    top: 'var(--cp-space-1)',
+    right: 'var(--cp-space-1)',
+    width: 'var(--cp-badge-size)',
+    height: 'var(--cp-badge-size)',
+    borderRadius: 'var(--cp-radius-pill)',
+    background: 'var(--cp-accent-strong)',
+    color: 'var(--cp-text-strong)',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -127,18 +156,26 @@ const S = {
   },
   spacer: { flex: 1 },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: '50%',
-    background: 'rgba(255, 255, 255, 0.15)',
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: 500,
-    letterSpacing: 0.3,
+    width: 'var(--cp-avatar-size)',
+    height: 'var(--cp-avatar-size)',
+    borderRadius: 'var(--cp-radius-pill)',
+    background: 'var(--cp-surface-3)',
+    color: 'var(--cp-text-strong)',
+    fontSize: 'var(--cp-font-base)',
+    fontWeight: 'var(--cp-weight-medium)',
+    letterSpacing: 'var(--cp-tracking-wide)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 16,
-    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+    marginTop: 'var(--cp-space-3)',
+    boxShadow: 'var(--cp-shadow-xs)',
+    transition: 'transform var(--cp-dur-base) var(--cp-ease-out)',
+    cursor: 'default',
+    border: 'none',
+    padding: 0,
+    fontFamily: 'inherit',
+  },
+  avatarHover: {
+    transform: 'translateY(-1px)',
   },
 };
