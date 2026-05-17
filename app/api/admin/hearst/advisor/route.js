@@ -1,9 +1,8 @@
 // app/api/admin/hearst/advisor/route.js
-// SSE endpoint for the HEARST Advisor (OpenAI-compatible — Hyperbolic / Kimi / etc.)
+// SSE endpoint for the HEARST Advisor (Claude Sonnet 4.6, native Anthropic SDK).
 //
 // Request:  POST { project_id, conversation_id?, messages: [...] }
-//           messages are stored in Anthropic format (role, content array/text).
-//           This route converts to/from OpenAI format on the fly.
+//           messages are stored AND sent in Anthropic format (role, content blocks).
 //
 // Response: text/event-stream
 //           Events: text_delta | tool_use | tool_result | message_done | done | error
@@ -13,30 +12,26 @@
 //           as terminal.
 
 import { randomUUID } from 'node:crypto';
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { authedWrite } from '@/lib/supabase-admin';
 import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
 import { detectAlerts } from '@/lib/hearst-alerts';
-import { TOOL_DEFS, toOpenAITools, runTool } from '@/lib/hearst-advisor-tools';
+import { TOOL_DEFS, runTool } from '@/lib/hearst-advisor-tools';
 import { buildSystemPrompt, buildStateSnapshot } from '@/lib/hearst-advisor-prompt';
 import { buildPageContextBlock } from '@/lib/hearst-page-context';
 import { withValidation } from '@/lib/validators/withValidation';
 import { AdvisorRequestSchema } from '@/lib/validators/hearst';
 import { logger } from '@/lib/logger';
-import { toOpenAIMessages, openAIAssistantToAnthropic } from '@/lib/advisor-format';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
-// Model names for Kimi K2.5 / K2.6 on your endpoint
-const MODEL = 'kimi-k2.5';
-const FALLBACK_MODELS = ['kimi-k2.6'];
+const MODEL = 'claude-sonnet-4-6';
+const MAX_TOKENS = 8192;
 
-const BASE_URL = 'https://api.hypercli.com/v1';
-
-// Hard timeout for upstream OpenAI/Hyperbolic calls. Must be strictly < maxDuration
+// Hard timeout for upstream Anthropic calls. Must be strictly < maxDuration
 // so we surface a clean "upstream stalled" error before Vercel kills the lambda.
 const UPSTREAM_TIMEOUT_MS = 60_000;
 
@@ -51,21 +46,27 @@ const MAX_TOTAL_TOOL_CALLS = 15;
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX_PER_WINDOW = 20;
 
-// Pricing estimates for cost telemetry. These are PLACEHOLDERS — the
-// numbers below are illustrative, NOT confirmed against Hyperbolic's invoices.
-// TODO: confirm pricing with Hyperbolic dashboard before trusting cost_usd_estimate
-// in any external dashboard or budget alert.
-const KIMI_PRICING = {
-  'kimi-k2.5': { input: 0.0002 / 1000, output: 0.0008 / 1000 },
-  'kimi-k2.6': { input: 0.0003 / 1000, output: 0.001 / 1000 },
+// Sonnet 4.6 pricing: $3 / $15 per 1M tokens. Cache writes are 1.25× input
+// (ephemeral 5-min TTL); cache reads are 0.1× input.
+const SONNET_PRICING = {
+  input: 3 / 1_000_000,
+  output: 15 / 1_000_000,
+  cache_write: 3.75 / 1_000_000,
+  cache_read: 0.30 / 1_000_000,
 };
 
-function estimateCostUsd(model, inputTokens, outputTokens) {
-  const p = KIMI_PRICING[model];
-  if (!p) return null;
-  const inT = Number(inputTokens) || 0;
-  const outT = Number(outputTokens) || 0;
-  return Number((inT * p.input + outT * p.output).toFixed(6));
+function estimateCostUsd(usage) {
+  if (!usage) return null;
+  const input = Number(usage.input_tokens || 0);
+  const output = Number(usage.output_tokens || 0);
+  const cacheWrite = Number(usage.cache_creation_input_tokens || 0);
+  const cacheRead = Number(usage.cache_read_input_tokens || 0);
+  const cost =
+    input * SONNET_PRICING.input +
+    output * SONNET_PRICING.output +
+    cacheWrite * SONNET_PRICING.cache_write +
+    cacheRead * SONNET_PRICING.cache_read;
+  return Number(cost.toFixed(6));
 }
 
 // Postgres "undefined_table" SQLSTATE. We treat this as a missing migration
@@ -219,10 +220,6 @@ async function saveConversation(supa, { id, messages, title }) {
   await supa.from('hearst_advisor_conversations').update(updates).eq('id', id);
 }
 
-// Format converters between Anthropic blocks (DB storage) and OpenAI
-// chat-completion shape (upstream API) live in lib/advisor-format.js — they
-// are pure and unit-tested there.
-
 // ──────────────────────────────────────────────────────────────────────────
 // POST handler
 // ──────────────────────────────────────────────────────────────────────────
@@ -231,8 +228,8 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
 
-  if (!process.env.HYPERBOLIC_API_KEY) {
-    return NextResponse.json({ error: 'HYPERBOLIC_API_KEY not configured on server' }, { status: 500 });
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured on server' }, { status: 500 });
   }
 
   const rate = await checkRateLimit(auth.actor, auth.supa);
@@ -279,11 +276,10 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
 
   // Abort propagation:
   //   - request.signal (client disconnect) → aborts the controller
-  //   - the controller is passed to every openai.chat.completions.create({ signal })
-  //     so when the client disconnects, the upstream Hyperbolic request aborts
+  //   - the controller is passed to every anthropic.messages.stream({ signal })
+  //     so when the client disconnects the upstream Anthropic request aborts
   //     immediately instead of hanging until Vercel kills the lambda at maxDuration.
-  //   - SDK-level `timeout` + `maxRetries: 0` is the second line of defence: if the
-  //     upstream stalls without the client disconnecting, we still bail at 60s.
+  //   - SDK-level `timeout` + `maxRetries: 2` belt-and-suspenders for transient 5xx.
   const abortController = new AbortController();
   const onClientAbort = () => abortController.abort();
   if (req?.signal) {
@@ -291,21 +287,29 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
     else req.signal.addEventListener('abort', onClientAbort);
   }
 
-  const openai = new OpenAI({
-    apiKey: process.env.HYPERBOLIC_API_KEY,
-    baseURL: BASE_URL,
+  const anthropic = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
     timeout: UPSTREAM_TIMEOUT_MS,
-    maxRetries: 0,
+    maxRetries: 2,
   });
 
+  // System blocks with prompt-caching breakpoints.
+  // Render order is: tools → system → messages. A cache_control on a system
+  // block also caches everything before it (tools), so two breakpoints give:
+  //   #1 (after static prompt)  → tools + persona/rules (stable across all requests)
+  //   #2 (after state snapshot) → +state (stable across turns within one request)
+  // Page context comes last and is intentionally uncached (varies per request).
+  const systemBlocks = [
+    { type: 'text', text: buildSystemPrompt(), cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: buildStateSnapshot(state), cache_control: { type: 'ephemeral' } },
+  ];
   const pageBlock = buildPageContextBlock(page_context);
-  const systemParts = [buildSystemPrompt(), buildStateSnapshot(state)];
   if (pageBlock) {
-    systemParts.push(typeof pageBlock === 'string' ? pageBlock : pageBlock.text || JSON.stringify(pageBlock));
+    const pageText = typeof pageBlock === 'string' ? pageBlock : pageBlock.text || JSON.stringify(pageBlock);
+    systemBlocks.push({ type: 'text', text: pageText });
   }
-  const systemPrompt = systemParts.join('\n\n');
 
-  // Normalize incoming messages: ensure structured content for DB storage
+  // DB storage matches the API wire format — no conversion needed.
   let convo = incoming.map(m => ({ role: m.role, content: m.content }));
 
   // Run-level telemetry. We push to toolCallLog inside the loop and persist a
@@ -315,8 +319,12 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
   const runStartedAt = Date.now();
   const inputMessagesCount = incoming.length;
   const toolCallLog = []; // [{ name, args_summary, ok, duration_ms }]
-  let usageTotals = { input_tokens: 0, output_tokens: 0, total_tokens: 0 };
-  let modelUsed = MODEL;
+  let usageTotals = {
+    input_tokens: 0,
+    output_tokens: 0,
+    cache_creation_input_tokens: 0,
+    cache_read_input_tokens: 0,
+  };
   let runStatus = 'completed';
   let errorType = null;
   let errorMessage = null;
@@ -327,10 +335,7 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
       const send = (payload) => controller.enqueue(encoder.encode(sseLine(payload)));
       send({ type: 'conversation', conversation_id: conversation.id });
 
-      let model = MODEL;
       let turn = 0;
-      let sentTextStart = false;
-      const sentToolStart = new Set(); // indexes
       // Tracks the previous tool invocation to detect identical back-to-back calls.
       let prevToolSignature = null;
 
@@ -350,106 +355,75 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
             return;
           }
 
-          let openaiMessages = toOpenAIMessages(convo);
-          openaiMessages.unshift({ role: 'system', content: systemPrompt });
+          const messageStream = anthropic.messages.stream(
+            {
+              model: MODEL,
+              max_tokens: MAX_TOKENS,
+              system: systemBlocks,
+              tools: TOOL_DEFS,
+              messages: convo,
+            },
+            { signal: abortController.signal },
+          );
 
-          let responseStream;
-          try {
-            responseStream = await openai.chat.completions.create({
-              model,
-              messages: openaiMessages,
-              tools: toOpenAITools(TOOL_DEFS),
-              tool_choice: 'auto',
-              max_tokens: 8192,
-              stream: true,
-              stream_options: { include_usage: true },
-            }, { signal: abortController.signal });
-          } catch (err) {
-            // Try fallback models on bad model id
-            const fallback = FALLBACK_MODELS.find(m => m !== model);
-            const isBadModel = /model/i.test(err?.message || '') && /not.*found|invalid|bad/i.test(err?.message || '');
-            if (fallback && isBadModel) { model = fallback; modelUsed = fallback; turn -= 1; continue; }
-            throw err;
+          // Tool blocks accumulate their JSON across input_json_delta events.
+          // The block's id + name arrive on content_block_start so we can emit
+          // tool_use_start immediately, before the JSON is fully assembled.
+          const toolBlocks = {}; // index -> { id, name }
+          let sentTextStart = false;
+
+          for await (const event of messageStream) {
+            if (event.type === 'content_block_start') {
+              const block = event.content_block;
+              if (block.type === 'text') {
+                if (!sentTextStart) {
+                  send({ type: 'text_start' });
+                  sentTextStart = true;
+                }
+              } else if (block.type === 'tool_use') {
+                toolBlocks[event.index] = { id: block.id, name: block.name };
+                send({ type: 'tool_use_start', id: block.id, name: block.name });
+              }
+            } else if (event.type === 'content_block_delta') {
+              const delta = event.delta;
+              if (delta.type === 'text_delta') {
+                if (!sentTextStart) {
+                  send({ type: 'text_start' });
+                  sentTextStart = true;
+                }
+                send({ type: 'text_delta', text: delta.text });
+              }
+              // input_json_delta is accumulated by the SDK — we read the
+              // final parsed input from finalMessage().content[].input
+            }
+            // content_block_stop / message_delta / message_stop are reflected
+            // in finalMessage() — no per-event handling needed here.
           }
 
-          let assistantMsg = { role: 'assistant', content: '', tool_calls: [] };
-          const toolCallBuffers = {}; // index -> { id, name, arguments }
+          const finalMessage = await messageStream.finalMessage();
 
-          for await (const chunk of responseStream) {
-            // Capture usage if present (final chunk when stream_options.include_usage = true).
-            if (chunk.usage) {
-              usageTotals.input_tokens += Number(chunk.usage.prompt_tokens || 0);
-              usageTotals.output_tokens += Number(chunk.usage.completion_tokens || 0);
-              usageTotals.total_tokens += Number(chunk.usage.total_tokens || 0);
-            }
+          if (sentTextStart) send({ type: 'text_end' });
 
-            const delta = chunk.choices?.[0]?.delta;
-            const finishReason = chunk.choices?.[0]?.finish_reason;
+          // Accumulate usage (cache stats included). Note that Anthropic returns
+          // input_tokens as the count NOT served from cache — the cached prefix
+          // is reported separately under cache_read_input_tokens.
+          const u = finalMessage.usage || {};
+          usageTotals.input_tokens += Number(u.input_tokens || 0);
+          usageTotals.output_tokens += Number(u.output_tokens || 0);
+          usageTotals.cache_creation_input_tokens += Number(u.cache_creation_input_tokens || 0);
+          usageTotals.cache_read_input_tokens += Number(u.cache_read_input_tokens || 0);
 
-            // Text streaming
-            if (delta?.content) {
-              if (!sentTextStart) {
-                send({ type: 'text_start' });
-                sentTextStart = true;
-              }
-              assistantMsg.content += delta.content;
-              send({ type: 'text_delta', text: delta.content });
-            }
+          // finalMessage.content is already in Anthropic block format — store as-is.
+          const assistantBlocks = finalMessage.content;
+          convo.push({ role: 'assistant', content: assistantBlocks });
 
-            // Tool call streaming
-            if (delta?.tool_calls) {
-              for (const tcDelta of delta.tool_calls) {
-                const idx = tcDelta.index;
-                if (!toolCallBuffers[idx]) {
-                  toolCallBuffers[idx] = { id: '', name: '', arguments: '' };
-                }
-                if (tcDelta.id) toolCallBuffers[idx].id += tcDelta.id;
-                if (tcDelta.function?.name) {
-                  toolCallBuffers[idx].name += tcDelta.function.name;
-                }
-                if (tcDelta.function?.arguments) {
-                  toolCallBuffers[idx].arguments += tcDelta.function.arguments;
-                }
-
-                // Send tool_use_start once we have an id
-                if (toolCallBuffers[idx].id && !sentToolStart.has(idx)) {
-                  send({ type: 'tool_use_start', id: toolCallBuffers[idx].id, name: toolCallBuffers[idx].name || '' });
-                  sentToolStart.add(idx);
-                }
-              }
-            }
-
-            if (finishReason) {
-              // Build final tool_calls from buffers
-              const toolCalls = [];
-              const indices = Object.keys(toolCallBuffers).map(Number).sort((a, b) => a - b);
-              for (const idx of indices) {
-                const buf = toolCallBuffers[idx];
-                toolCalls.push({
-                  id: buf.id || `call_${idx}_${Date.now()}`,
-                  type: 'function',
-                  function: {
-                    name: buf.name,
-                    arguments: buf.arguments,
-                  },
-                });
-              }
-              assistantMsg.tool_calls = toolCalls;
-
-              if (finishReason === 'stop') {
-                send({ type: 'text_end' });
-              }
-            }
-          }
-
-          // Convert OpenAI assistant message to Anthropic format for DB storage
-          const anthropicAssistantMsg = openAIAssistantToAnthropic(assistantMsg);
-          convo.push(anthropicAssistantMsg);
-
-          // Check if we have tool calls
-          const toolUses = anthropicAssistantMsg.content.filter(b => b.type === 'tool_use');
+          const toolUses = assistantBlocks.filter(b => b.type === 'tool_use');
           if (toolUses.length === 0) {
-            send({ type: 'message_done', stop_reason: 'end_turn', usage: usageTotals || {} });
+            send({
+              type: 'message_done',
+              stop_reason: finalMessage.stop_reason || 'end_turn',
+              usage: usageTotals,
+            });
             break;
           }
 
@@ -517,8 +491,8 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
               // Surface tool-level `ok: false` (e.g., rationale_too_short) so it
               // shows up correctly in the audit log without breaking the stream.
               try {
-                const parsed = JSON.parse(resultStr);
-                if (parsed && (parsed.ok === false || parsed.error)) isError = true;
+                const parsedRes = JSON.parse(resultStr);
+                if (parsedRes && (parsedRes.ok === false || parsedRes.error)) isError = true;
               } catch { /* not JSON, treat as success */ }
             } catch (err) {
               isError = true;
@@ -540,10 +514,6 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
             });
           }
           convo.push({ role: 'user', content: toolResultBlocks });
-
-          // Reset streaming flags for next turn
-          sentTextStart = false;
-          sentToolStart.clear();
         }
 
         if (turn >= MAX_TOOL_TURNS && runStatus === 'completed') {
@@ -559,7 +529,7 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
       } catch (err) {
         const aborted = abortController.signal.aborted || /aborted|abort/i.test(err?.name || err?.message || '');
         runStatus = aborted ? 'aborted' : 'failed';
-        errorType = err?.name || (aborted ? 'AbortError' : 'UnknownError');
+        errorType = err?.name || err?.type || (aborted ? 'AbortError' : 'UnknownError');
         errorMessage = err?.message || String(err);
         send({ type: 'error', message: errorMessage });
       } finally {
@@ -578,17 +548,17 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
           conversation_id: conversation.id,
           project_id,
           run_id: runId,
-          model: modelUsed,
+          model: MODEL,
           status: runStatus,
           input_messages_count: inputMessagesCount,
           tool_calls: toolCallLog,
           input_tokens: usageTotals.input_tokens,
           output_tokens: usageTotals.output_tokens,
-          total_tokens: usageTotals.total_tokens,
+          total_tokens: usageTotals.input_tokens + usageTotals.output_tokens,
           latency_ms: Date.now() - runStartedAt,
           error_type: errorType,
           error_message: errorMessage,
-          cost_usd_estimate: estimateCostUsd(modelUsed, usageTotals.input_tokens, usageTotals.output_tokens),
+          cost_usd_estimate: estimateCostUsd(usageTotals),
           created_at: new Date(runStartedAt).toISOString(),
           completed_at: completedAt.toISOString(),
         });

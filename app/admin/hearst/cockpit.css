@@ -3,6 +3,12 @@
    Maroon glass theme, inline-style friendly.
    ============================================================ */
 
+/* Promote bg-deep to :root so it's available to layout wrappers that
+   render OUTSIDE .cockpit-root (e.g. app/admin/layout.jsx isHearst branch). */
+:root {
+  --cp-bg-deep: #1A050B;
+}
+
 .cockpit-root {
   font-family: "Inter var", "Inter", -apple-system, BlinkMacSystemFont,
     "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
@@ -11,6 +17,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   --cp-bg-deep: #1A050B;
+  /* used only by .cockpit-ambient-glow background radial */
   --cp-accent-maroon: #8A1538;
 
   /* === LAYOUT STRUCTURAL ================================ */
@@ -37,8 +44,6 @@
   --cp-space-7: 32px;
   --cp-space-8: 40px;
   --cp-space-9: 48px;
-  --cp-space-10: 56px;
-  --cp-space-11: 64px;
   --cp-space-12: 80px;
 
   /* === RADIUS ======================================== */
@@ -46,8 +51,6 @@
   --cp-radius-sm: 6px;
   --cp-radius-md: 8px;
   --cp-radius-lg: 12px;
-  --cp-radius-xl: 16px;
-  --cp-radius-2xl: 20px;
   --cp-radius-pill: 9999px;
 
   /* === TYPO ========================================== */
@@ -59,14 +62,11 @@
   --cp-font-lg: 16px;
   --cp-font-xl: 20px;
   --cp-font-2xl: 28px;
-  --cp-font-hero: 36px;
 
   --cp-leading-tight: 1.15;
   --cp-leading-normal: 1.4;
-  --cp-leading-relaxed: 1.6;
 
   --cp-tracking-tight: -0.02em;
-  --cp-tracking-normal: 0;
   --cp-tracking-wide: 0.04em;
   --cp-tracking-wider: 0.08em;
   --cp-tracking-eyebrow: 0.14em;
@@ -82,30 +82,38 @@
   --cp-surface-1: rgba(255, 255, 255, 0.04);
   --cp-surface-2: rgba(255, 255, 255, 0.06);
   --cp-surface-3: rgba(255, 255, 255, 0.09);
-  --cp-surface-hover: rgba(255, 255, 255, 0.12);
-  --cp-surface-pressed: rgba(255, 255, 255, 0.16);
-  --cp-scrim: rgba(10, 12, 16, 0.7);
+  --cp-tooltip-bg: #2a1118; /* solid maroon-tinted bg for Recharts floating tooltips */
 
   /* === TEXT ON DARK ================================== */
   --cp-text-strong: #ffffff;
   --cp-text-primary: rgba(245, 245, 245, 0.92);
   --cp-text-body: rgba(245, 245, 245, 0.72);
   --cp-text-muted: rgba(245, 245, 245, 0.48);
-  --cp-text-faint: rgba(245, 245, 245, 0.30);
+  --cp-text-faint: rgba(245, 245, 245, 0.40);
 
-  /* === SEMANTIC DARK ================================= */
-  --cp-success: #34d399;
-  --cp-success-bg: rgba(52, 211, 153, 0.12);
-  --cp-warning: #fbbf24;
-  --cp-warning-bg: rgba(251, 191, 36, 0.12);
-  --cp-error: #fb7185;
-  --cp-error-bg: rgba(251, 113, 133, 0.12);
-  --cp-info: #60a5fa;
-  --cp-info-bg: rgba(96, 165, 250, 0.12);
-  --cp-violet: #7c3aed;
-  --cp-violet-bg: rgba(124, 58, 237, 0.18);
-  --cp-info-strong: #0891b2;
-  --cp-info-strong-bg: rgba(8, 145, 178, 0.18);
+  /* === SEMANTIC DARK =================================
+     Naming convention:
+     - --cp-{type}        : tinted variant for chips, badges, status pills (light tone on dark)
+     - --cp-{type}-bg     : 12-18% alpha tint for backgrounds (badge fills, alert bands)
+     - --cp-{type}-strong : deeper tone for SOLID CTAs that need WCAG AA contrast with white text
+                            (exception: --cp-info-strong is teal, reserved for the 'contract'
+                             source-type badge — for CTAs use --cp-info-strong-cta instead) */
+  --cp-success: rgba(255, 255, 255, 0.90);
+  --cp-success-bg: rgba(255, 255, 255, 0.06);
+  --cp-warning: rgba(255, 255, 255, 0.70);
+  --cp-warning-bg: rgba(255, 255, 255, 0.05);
+  --cp-error: rgba(255, 255, 255, 0.60);
+  --cp-error-bg: rgba(255, 255, 255, 0.04);
+  --cp-info: rgba(255, 255, 255, 0.80);
+  --cp-info-bg: rgba(255, 255, 255, 0.05);
+  --cp-violet: rgba(255, 255, 255, 0.75);
+  --cp-violet-bg: rgba(255, 255, 255, 0.06);
+  --cp-info-strong: rgba(255, 255, 255, 0.85);
+  --cp-info-strong-bg: rgba(255, 255, 255, 0.07);
+  --cp-error-strong: rgba(255, 255, 255, 0.15);
+  --cp-success-strong: rgba(255, 255, 255, 0.15);
+  --cp-warning-strong: rgba(255, 255, 255, 0.15);
+  --cp-info-strong-cta: rgba(255, 255, 255, 0.15);
 
   --cp-accent: #be123c;
   --cp-accent-strong: #e11d48;
@@ -115,7 +123,6 @@
   --cp-shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.2);
   --cp-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
   --cp-shadow-md: 0 10px 24px -8px rgba(0, 0, 0, 0.45);
-  --cp-shadow-lg: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
   --cp-shadow-depth:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     inset 0 -1px 0 rgba(0, 0, 0, 0.45),
@@ -134,6 +141,7 @@
   --cp-border-soft: rgba(255, 255, 255, 0.06);
   --cp-border: rgba(255, 255, 255, 0.10);
   --cp-border-strong: rgba(255, 255, 255, 0.16);
+  --cp-grid-line: rgba(255, 255, 255, 0.08); /* Recharts CartesianGrid — distinct from border tokens (between -soft and base) */
   --cp-border-accent: rgba(225, 29, 72, 0.55);
 
   /* === MOTION ======================================== */
@@ -141,15 +149,11 @@
   --cp-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --cp-dur-fast: 120ms;
   --cp-dur-base: 180ms;
-  --cp-dur-slow: 320ms;
 
   /* === Z-INDEX ======================================= */
-  --cp-z-ambient: 0;
   --cp-z-content: 10;
   --cp-z-rails: 20;
   --cp-z-floating: 30;
-  --cp-z-overlay: 40;
-  --cp-z-toast: 50;
 }
 
 .cockpit-ambient-deep {
@@ -237,7 +241,8 @@
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.22'/%3E%3C/svg%3E");
   background-blend-mode: overlay;
-  opacity: 0.03;
+  /* bumped from 0.03 → 0.08: barely visible on the dark maroon surface at lower values */
+  opacity: 0.08;
   pointer-events: none;
   border-radius: inherit;
   z-index: 0;
@@ -299,9 +304,25 @@
   background: var(--cp-surface-2);
   border-color: var(--cp-border-strong);
 }
+
+/* === Button hover affordance — applies to solid CTA buttons that
+   sit on saturated semantic backgrounds. Pairs with -strong/-cta tokens. */
+.cp-btn-hover {
+  transition: filter var(--cp-dur-fast) var(--cp-ease),
+              transform var(--cp-dur-fast) var(--cp-ease);
+}
+.cp-btn-hover:hover {
+  filter: brightness(1.12);
+}
+.cp-btn-hover:active {
+  filter: brightness(0.95);
+  transform: translateY(1px);
+}
 .cp-card-hover.cp-card-accent:hover {
   background:
-    linear-gradient(180deg, rgba(225, 29, 72, 0.24) 0%, rgba(225, 29, 72, 0.06) 100%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--cp-accent-strong) 24%, transparent) 0%,
+      color-mix(in srgb, var(--cp-accent-strong) 6%, transparent) 100%),
     var(--cp-surface-2);
   border-color: var(--cp-border-accent);
 }
@@ -309,7 +330,9 @@
 /* === Glow accent (IRR / hero highlight) ============== */
 .cp-card-accent {
   background:
-    linear-gradient(180deg, rgba(225, 29, 72, 0.18) 0%, rgba(225, 29, 72, 0.04) 100%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--cp-accent-strong) 18%, transparent) 0%,
+      color-mix(in srgb, var(--cp-accent-strong) 4%, transparent) 100%),
     var(--cp-surface-2);
   border-color: var(--cp-border-accent);
 }
@@ -322,7 +345,7 @@
   box-shadow:
     inset 4px 0 0 var(--cp-accent-strong),
     inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    0 0 32px -8px rgba(225, 29, 72, 0.35);
+    0 0 32px -8px color-mix(in srgb, var(--cp-accent-strong) 35%, transparent);
 }
 
 /* === Pulse animation (used by Dot component) ========= */

@@ -96,7 +96,7 @@ export default function ContractsPage() {
     <div style={S.wrap}>
       <div style={S.topBar}>
         <div style={S.pageTitle}>Contract Library</div>
-        <button onClick={() => setShowAdd(v => !v)} style={S.addBtn}>{showAdd ? '✕' : '+ Add Contract'}</button>
+        <button onClick={() => setShowAdd(v => !v)} className="cp-btn-hover" style={S.addBtn}>{showAdd ? '✕' : '+ Add Contract'}</button>
       </div>
 
       {/* Summary */}
@@ -141,7 +141,17 @@ export default function ContractsPage() {
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end' }}>
             <button onClick={() => setShowAdd(false)} style={S.cancelBtn}>Cancel</button>
-            <button onClick={add} disabled={saving || !form.title} style={S.saveBtn}>{saving ? 'Saving…' : 'Add Contract'}</button>
+            <button
+              onClick={add}
+              disabled={saving || !form.title}
+              className="cp-btn-hover"
+              style={{
+                ...S.saveBtn,
+                ...((saving || !form.title) ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
+              }}
+            >
+              {saving ? 'Saving…' : 'Add Contract'}
+            </button>
           </div>
         </div>
       )}
@@ -206,7 +216,7 @@ const S = {
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
   summaryRow: { display: 'flex', gap: 14, marginBottom: 18 },
   summaryCard: { flex: 1, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '12px 16px' },
   summaryLabel: { fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)', marginBottom: 4 },
@@ -215,13 +225,13 @@ const S = {
   addTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 12 },
   addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px 14px' },
   lbl: { display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--cp-text-muted)', marginBottom: 3 },
-  inp: { width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-bg-deep)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  inp: { width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
   cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
   search: { width: '100%', padding: '8px 12px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', marginBottom: 14, boxSizing: 'border-box' },
   empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--cp-text-muted)', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 8, overflow: 'hidden' },
-  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 0.8, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', borderBottom: '1px solid var(--cp-border)' },
+  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 0.8, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   tr: { borderBottom: '1px solid var(--cp-border)' },
   td: { padding: '8px 12px', color: 'var(--cp-text-muted)', verticalAlign: 'middle' },
   tdBold: { padding: '8px 12px', fontWeight: 700, color: 'var(--cp-text-primary)', verticalAlign: 'middle', maxWidth: 200 },

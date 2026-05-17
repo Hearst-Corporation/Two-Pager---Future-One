@@ -1,7 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import AlertBanner from '@/components/hearst/AlertBanner';
-import { detectAlerts } from '@/lib/hearst-alerts';
 
 const RISK_CATEGORIES = [
   {
@@ -57,7 +55,7 @@ const RISK_CATEGORIES = [
 ];
 
 const SEVERITY = {
-  1: { label: 'Very Low',  color: 'var(--cp-text-muted)' },
+  1: { label: 'Very Low',  color: 'var(--cp-text-body)' },
   2: { label: 'Low',       color: 'var(--cp-success)' },
   3: { label: 'Medium',    color: 'var(--cp-warning)' },
   4: { label: 'High',      color: 'var(--cp-error)' },
@@ -75,7 +73,7 @@ function RiskRating({ value, onChange }) {
             width: 22, height: 22, borderRadius: 3, fontSize: 10, fontWeight: 700,
             border: '1px solid',
             background: value >= n ? SEVERITY[n]?.color : 'transparent',
-            color: value >= n ? '#fff' : SEVERITY[n]?.color,
+            color: value >= n ? 'var(--cp-bg-deep)' : SEVERITY[n]?.color,
             borderColor: SEVERITY[n]?.color,
             cursor: 'pointer',
           }}
@@ -145,9 +143,6 @@ export default function RisksPage() {
   if (loading) return <div style={S.loading}>Loading risk dashboard…</div>;
   if (error) return <div style={S.error}>Error: {error}</div>;
 
-  const base = scenarios.find(s => s.scenario_type === 'base' || s.name?.toLowerCase().includes('base')) || scenarios[0];
-  const smartAlerts = detectAlerts(base, project);
-
   const allRisks = RISK_CATEGORIES.flatMap(c => c.risks.map(r => ({ ...r, category: c.label, color: c.color })));
   const rated = allRisks.filter(r => riskRatings[r.id]?.severity);
   const avgSeverity = rated.length ? (rated.reduce((s, r) => s + riskRatings[r.id].severity, 0) / rated.length).toFixed(1) : null;
@@ -168,16 +163,6 @@ export default function RisksPage() {
             <div style={S.criticalBadge}>{critical} Critical Risk{critical > 1 ? 's' : ''}</div>
           )}
         </div>
-      </div>
-
-      {/* Smart alerts */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={S.sectionTitle}>SMART ALERTS</div>
-        {smartAlerts.length === 0 ? (
-          <div style={S.noAlerts}>No sourcing gaps detected for the active scenario.</div>
-        ) : (
-          <AlertBanner alerts={smartAlerts} />
-        )}
       </div>
 
       {/* Risk matrix */}
@@ -233,9 +218,9 @@ const S = {
   riskScoreVal: { fontSize: 22, fontWeight: 900 },
   criticalBadge: { fontSize: 11, fontWeight: 700, padding: '5px 12px', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', borderRadius: 6, border: '1px solid var(--cp-error)' },
   sectionTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 8 },
-  noAlerts: { fontSize: 12, color: 'var(--cp-success)', background: 'var(--cp-success-bg)', border: '1px solid var(--cp-success-bg)', borderRadius: 6, padding: '8px 14px' },
+  noAlerts: { fontSize: 12, color: 'var(--cp-success)', background: 'var(--cp-success-bg)', border: '1px solid var(--cp-success)', borderRadius: 6, padding: '8px 14px' },
   catCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, marginBottom: 16, overflow: 'hidden' },
-  catHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderLeft: '4px solid', background: 'var(--cp-bg-deep)', borderBottom: '1px solid var(--cp-border)' },
+  catHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderLeft: '4px solid', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   catName: { fontSize: 12, fontWeight: 700, letterSpacing: 0.5 },
   catCount: { fontSize: 10, color: 'var(--cp-text-muted)' },
   riskRow: { display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--cp-border)' },

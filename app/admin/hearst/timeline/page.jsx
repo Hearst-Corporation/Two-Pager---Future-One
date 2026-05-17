@@ -61,7 +61,7 @@ export default function TimelinePage() {
     { id: 'construction', label: 'Construction',              color: 'var(--cp-warning)', start: 7, duration: constructionMonths },
     { id: 'commissioning',label: 'Commissioning & Testing',   color: 'var(--cp-violet)', start: 7 + constructionMonths, duration: 2 },
     { id: 'phase1_ops',   label: 'Phase 1 Operations',        color: 'var(--cp-success)', start: 7 + constructionMonths + 2, duration: 12 },
-    { id: 'phase2',       label: 'Phase 2 Expansion',         color: 'var(--cp-info-strong)', start: 7 + constructionMonths + 2, duration: 14 },
+    { id: 'phase2',       label: 'Phase 2 Expansion',         color: 'var(--cp-success-strong)', start: 7 + constructionMonths + 2, duration: 14 },
   ];
 
   const totalMonths = Math.max(...dynamicPhases.map(p => p.start + p.duration)) + 4;
@@ -96,7 +96,7 @@ export default function TimelinePage() {
             {/* Month header */}
             <div style={{ display: 'flex', marginLeft: 200, marginBottom: 2 }}>
               {Array.from({ length: totalMonths }, (_, i) => (
-                <div key={i} style={{ width: MONTH_W, flexShrink: 0, fontSize: 8, color: 'var(--cp-text-muted)', textAlign: 'center', borderLeft: i % 12 === 0 ? '1px solid rgba(0,0,0,0.1)' : 'none' }}>
+                <div key={i} style={{ width: MONTH_W, flexShrink: 0, fontSize: 8, color: 'var(--cp-text-muted)', textAlign: 'center', borderLeft: i % 12 === 0 ? '1px solid var(--cp-border)' : 'none' }}>
                   {i % 3 === 0 ? 'M' + (i + 1) : ''}
                 </div>
               ))}
@@ -130,7 +130,7 @@ export default function TimelinePage() {
                     boxSizing: 'border-box',
                     overflow: 'hidden',
                   }}>
-                    <span style={{ fontSize: 9, color: '#fff', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: 9, color: 'var(--cp-bg-deep)', fontWeight: 700, whiteSpace: 'nowrap' }}>
                       {phase.duration}mo
                     </span>
                   </div>
@@ -197,17 +197,17 @@ const S = {
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
   codInfo: { fontSize: 12, color: 'var(--cp-text-muted)' },
-  warning: { fontSize: 12, color: 'var(--cp-warning)', background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning-bg)', borderRadius: 6, padding: '8px 14px', marginBottom: 20 },
+  warning: { fontSize: 12, color: 'var(--cp-warning)', background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning)', borderRadius: 6, padding: '8px 14px', marginBottom: 20 },
   chartWrap: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '20px 16px 12px', marginBottom: 20, overflowX: 'auto' },
   phaseLabel: { width: 200, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--cp-text-muted)', paddingRight: 12, textAlign: 'right', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
   legend: { display: 'flex', flexWrap: 'wrap', gap: '8px 20px', marginBottom: 20, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '12px 16px' },
   legendItem: { display: 'flex', alignItems: 'center', gap: 6 },
   legendLabel: { fontSize: 11, color: 'var(--cp-text-muted)' },
-  legendDur: { fontSize: 10, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', padding: '1px 6px', borderRadius: 10 },
+  legendDur: { fontSize: 10, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', padding: '1px 6px', borderRadius: 10 },
   criticalPath: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '16px 20px' },
   sectionTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 12 },
   cpRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  cpStep: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, background: 'var(--cp-bg-deep)', padding: '6px 12px', borderRadius: 20, color: 'var(--cp-text-muted)' },
-  cpNum: { width: 18, height: 18, borderRadius: '50%', background: 'var(--cp-info)', color: '#fff', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  cpStep: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, background: 'var(--cp-surface-0)', padding: '6px 12px', borderRadius: 20, color: 'var(--cp-text-muted)' },
+  cpNum: { width: 18, height: 18, borderRadius: '50%', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   cpArrow: { color: 'var(--cp-text-muted)', fontWeight: 700 },
 };

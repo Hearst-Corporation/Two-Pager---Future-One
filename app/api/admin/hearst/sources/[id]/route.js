@@ -8,6 +8,8 @@ export const PATCH = withValidationPartial(SourceUpdateSchema, async (req, parse
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
   const body = parsed;
+  const { data: existing } = await auth.supa.from('hearst_sources').select('id').eq('id', params.id).maybeSingle();
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const { data, error } = await auth.supa
     .from('hearst_sources')
     .update({ ...body, updated_at: new Date().toISOString() })

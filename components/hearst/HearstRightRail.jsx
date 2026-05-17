@@ -41,14 +41,6 @@ export default function HearstRightRail({ children }) {
           {children}
         </div>
       )}
-      <div style={S.alertsBlock}>
-        <h3 style={S.title}>Alertes prioritaires</h3>
-        <div style={S.list}>
-          {ITEMS.map((item) => (
-            <RailItem key={item.id} item={item} />
-          ))}
-        </div>
-      </div>
     </aside>
   );
 }

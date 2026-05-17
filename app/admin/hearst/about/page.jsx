@@ -454,7 +454,7 @@ const S = {
     fontSize: 11,
     fontWeight: 700,
     color: 'var(--cp-text-primary)',
-    background: 'var(--cp-bg-deep)',
+    background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
     borderRadius: 4,
     padding: '5px 10px',

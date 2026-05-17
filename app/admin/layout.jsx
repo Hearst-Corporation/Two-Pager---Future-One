@@ -12,7 +12,7 @@ export default async function AdminLayout({ children }) {
   const h = headers();
   const path = h.get('x-pathname') || '';
   const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(p));
-  const isHearst = path.startsWith('/admin/hearst');
+  const isHearst = path.startsWith('/admin/hearst') || path.startsWith('/admin/cockpit-template');
   const session = isPublic ? null : await getSessionProfile();
 
   if (isPublic || !session?.profile) {

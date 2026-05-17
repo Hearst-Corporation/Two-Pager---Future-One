@@ -10,9 +10,11 @@ import ChatMount from '@/components/hearst/ChatMount';
 import HearstIconRail from '@/components/hearst/HearstIconRail';
 import HearstRightRail from '@/components/hearst/HearstRightRail';
 import HearstBottomBar from '@/components/hearst/HearstBottomBar';
+import { SimulationProvider } from '@/lib/hearst-simulation-context';
 
 export default function HearstLayout({ children }) {
   return (
+    <SimulationProvider>
     <div className="cockpit-root" style={S.root}>
       <div className="cockpit-ambient-deep" />
       <div className="cockpit-ambient-glow" />
@@ -30,6 +32,7 @@ export default function HearstLayout({ children }) {
         </HearstRightRail>
       </div>
     </div>
+    </SimulationProvider>
   );
 }
 

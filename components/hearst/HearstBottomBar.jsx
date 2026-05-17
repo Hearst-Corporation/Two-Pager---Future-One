@@ -138,7 +138,7 @@ const S = {
     appearance: 'none',
     border: 'none',
     background: 'transparent',
-    color: 'var(--cp-text-muted)',
+    color: 'var(--cp-text-primary)',
     padding: 'var(--cp-space-2) var(--cp-space-4)',
     minHeight: 'var(--cp-icon-btn-size)',
     fontSize: 'var(--cp-font-sm)',
@@ -156,7 +156,7 @@ const S = {
     color: 'var(--cp-text-strong)',
   },
   segBtnPrimary: {
-    color: 'var(--cp-bg-deep)',
+    color: 'var(--cp-text-primary)',
     fontWeight: 'var(--cp-weight-semibold)',
   },
 };

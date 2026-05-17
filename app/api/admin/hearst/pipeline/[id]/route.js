@@ -7,6 +7,8 @@ export const PATCH = withValidationPartial(PipelineUpdateSchema, async (req, par
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
   const body = parsed;
+  const { data: existing } = await auth.supa.from('hearst_pipeline').select('id').eq('id', params.id).maybeSingle();
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const { data, error } = await auth.supa
     .from('hearst_pipeline')
     .update({ ...body, updated_at: new Date().toISOString() })
@@ -20,6 +22,8 @@ export const PATCH = withValidationPartial(PipelineUpdateSchema, async (req, par
 export async function DELETE(req, { params }) {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
+  const { data: existingRow } = await auth.supa.from('hearst_pipeline').select('id').eq('id', params.id).maybeSingle();
+  if (!existingRow) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const { error } = await auth.supa.from('hearst_pipeline').delete().eq('id', params.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

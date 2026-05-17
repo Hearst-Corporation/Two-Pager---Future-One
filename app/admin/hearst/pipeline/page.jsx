@@ -148,7 +148,7 @@ export default function PipelinePage() {
     <div style={S.wrap}>
       <div style={S.topBar}>
         <div style={S.pageTitle}>Commercial Pipeline</div>
-        <button onClick={() => setShowAdd(v => !v)} style={S.addBtn}>{showAdd ? '✕' : '+ Add Prospect'}</button>
+        <button onClick={() => setShowAdd(v => !v)} className="cp-btn-hover" style={S.addBtn}>{showAdd ? '✕' : '+ Add Prospect'}</button>
       </div>
 
       {/* Summary */}
@@ -169,14 +169,14 @@ export default function PipelinePage() {
 
       {/* Kanban stage tabs */}
       <div style={S.stageRow}>
-        <button onClick={() => setStageFilter('')} style={{ ...S.stagePill, background: !stageFilter ? 'var(--cp-text-body)' : 'transparent', color: !stageFilter ? '#fff' : 'var(--cp-text-muted)' }}>
+        <button onClick={() => setStageFilter('')} style={{ ...S.stagePill, background: !stageFilter ? 'var(--cp-text-body)' : 'transparent', color: !stageFilter ? 'var(--cp-bg-deep)' : 'var(--cp-text-muted)' }}>
           All ({prospects.length})
         </button>
         {STAGES.map(st => (
           <button
             key={st}
             onClick={() => setStageFilter(st === stageFilter ? '' : st)}
-            style={{ ...S.stagePill, borderColor: STAGE_META[st].color, background: stageFilter === st ? STAGE_META[st].color : 'transparent', color: stageFilter === st ? '#fff' : STAGE_META[st].color }}
+            style={{ ...S.stagePill, borderColor: STAGE_META[st].color, background: stageFilter === st ? STAGE_META[st].color : 'transparent', color: stageFilter === st ? 'var(--cp-bg-deep)' : STAGE_META[st].color }}
           >
             {STAGE_META[st].label} ({stageCounts[st] || 0})
           </button>
@@ -205,7 +205,17 @@ export default function PipelinePage() {
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end' }}>
             <button onClick={() => setShowAdd(false)} style={S.cancelBtn}>Cancel</button>
-            <button onClick={add} disabled={saving || !form.company_name} style={S.saveBtn}>{saving ? 'Saving…' : 'Add Prospect'}</button>
+            <button
+              onClick={add}
+              disabled={saving || !form.company_name}
+              className="cp-btn-hover"
+              style={{
+                ...S.saveBtn,
+                ...((saving || !form.company_name) ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
+              }}
+            >
+              {saving ? 'Saving…' : 'Add Prospect'}
+            </button>
           </div>
         </div>
       )}
@@ -305,7 +315,7 @@ const S = {
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
   summaryRow: { display: 'flex', gap: 14, marginBottom: 18 },
   sumCard: { flex: 1, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '12px 16px' },
   sumLabel: { fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)', marginBottom: 4 },
@@ -316,20 +326,20 @@ const S = {
   addTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 12 },
   addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px 14px' },
   lbl: { display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--cp-text-muted)', marginBottom: 3 },
-  inp: { width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-bg-deep)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  inp: { width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
   cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 8, overflow: 'hidden' },
-  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 0.8, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', borderBottom: '1px solid var(--cp-border)' },
+  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 0.8, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   tr: { borderBottom: '1px solid var(--cp-border)' },
   td: { padding: '8px 12px', color: 'var(--cp-text-muted)', verticalAlign: 'middle' },
   tdBold: { padding: '8px 12px', fontWeight: 700, color: 'var(--cp-text-primary)', verticalAlign: 'middle' },
   deleteBtn: { fontSize: 12, color: 'var(--cp-error)', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', padding: '2px 6px', borderRadius: 4 },
   editIcon: { fontSize: 12, color: 'var(--cp-text-body)', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', padding: '2px 6px', borderRadius: 4 },
-  confirmYes: { fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--cp-error)', border: 'none', cursor: 'pointer', padding: '3px 6px', borderRadius: 4 },
+  confirmYes: { fontSize: 11, fontWeight: 700, color: 'var(--cp-text-strong)', background: 'var(--cp-error-strong)', border: 'none', cursor: 'pointer', padding: '3px 6px', borderRadius: 4 },
   confirmNo: { fontSize: 10, color: 'var(--cp-text-muted)', background: 'transparent', border: '1px solid var(--cp-border)', cursor: 'pointer', padding: '3px 6px', borderRadius: 4 },
-  editInp: { width: '100%', fontSize: 11, padding: '4px 6px', border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-bg-deep)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
-  saveBtnSm: { fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--cp-success)', border: 'none', cursor: 'pointer', padding: '4px 10px', borderRadius: 4, marginRight: 4 },
+  editInp: { width: '100%', fontSize: 11, padding: '4px 6px', border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
+  saveBtnSm: { fontSize: 11, fontWeight: 700, color: 'var(--cp-text-strong)', background: 'var(--cp-success-strong)', border: 'none', cursor: 'pointer', padding: '4px 10px', borderRadius: 4, marginRight: 4 },
   cancelBtnSm: { fontSize: 11, color: 'var(--cp-text-muted)', background: 'transparent', border: '1px solid var(--cp-border)', cursor: 'pointer', padding: '4px 8px', borderRadius: 4 },
   empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--cp-text-muted)', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
 };

@@ -82,7 +82,7 @@ export default function ReportsPage() {
       <div style={{ ...S.actions, display: 'flex' }} className="no-print">
         <div style={S.pageTitle}>Reports & Export</div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={handlePrint} style={S.exportBtn}>
+          <button onClick={handlePrint} className="cp-btn-hover" style={S.exportBtn}>
             🖨 Print / Save PDF
           </button>
         </div>
@@ -93,7 +93,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Report content */}
-      <div style={S.reportDoc} id="hearst-report">
+      <div style={S.reportDoc} id="hearst-report" className="roadmap-print-root">
         {/* Cover */}
         <div style={S.reportHeader}>
           <div style={S.reportBadge}>CONFIDENTIAL</div>
@@ -131,8 +131,8 @@ export default function ReportsPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
                 <tr>
-                  <th style={{ padding: '6px 8px', textAlign: 'left', background: 'var(--cp-bg-deep)', fontSize: 10 }}>Metric</th>
-                  {scenarios.map(sc => <th key={sc.id} style={{ padding: '6px 8px', textAlign: 'center', background: 'var(--cp-bg-deep)', fontSize: 10 }}>{sc.name}</th>)}
+                  <th style={{ padding: '6px 8px', textAlign: 'left', background: 'var(--cp-surface-0)', fontSize: 10 }}>Metric</th>
+                  {scenarios.map(sc => <th key={sc.id} style={{ padding: '6px 8px', textAlign: 'center', background: 'var(--cp-surface-0)', fontSize: 10 }}>{sc.name}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -181,8 +181,8 @@ const S = {
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   actions: { alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  exportBtn: { fontSize: 12, fontWeight: 700, padding: '8px 18px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  hint: { fontSize: 12, color: 'var(--cp-warning)', background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning-bg)', borderRadius: 6, padding: '8px 14px', marginBottom: 20 },
+  exportBtn: { fontSize: 12, fontWeight: 700, padding: '8px 18px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  hint: { fontSize: 12, color: 'var(--cp-warning)', background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning)', borderRadius: 6, padding: '8px 14px', marginBottom: 20 },
   reportDoc: {
     background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)',
     borderRadius: 8, padding: '32px 40px', maxWidth: 820,

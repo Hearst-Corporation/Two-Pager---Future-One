@@ -415,7 +415,10 @@ export default function ChatContainer({
               placeholder={streaming ? 'Working...' : 'Ask anything (Enter to send, Shift+Enter newline)'}
               rows={2}
               disabled={streaming}
-              style={S.textarea}
+              style={{
+                ...S.textarea,
+                ...(streaming ? { opacity: 0.5, cursor: 'not-allowed' } : {})
+              }}
               aria-label="Your message"
             />
             <button
@@ -530,7 +533,7 @@ const S = {
   errorBox: {
     fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-semibold)',
-    color: 'var(--cp-error)',
+    color: 'var(--cp-text-strong)',
     background: 'var(--cp-error-bg)',
     border: '1px solid var(--cp-error)',
     padding: 'var(--cp-space-3)',

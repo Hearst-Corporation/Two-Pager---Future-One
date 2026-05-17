@@ -1,10 +1,9 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useDeferredValue, useRef } from 'react';
 import Link from 'next/link';
 import KpiCard from '@/components/hearst/KpiCard';
-import AlertBanner from '@/components/hearst/AlertBanner';
-import QuickStartWizard from '@/components/hearst/QuickStartWizard';
-import { detectAlerts } from '@/lib/hearst-alerts';
+import { generateProjection } from '@/lib/hearst-calculations';
+import { useSimulation } from '@/lib/hearst-simulation-context';
 
 function fmt(v, type) {
   if (v == null) return 'N/A';
@@ -29,68 +28,184 @@ function pickContextualCta({ proj, sourceScore, drApproved, drTotal }) {
   return { href: '/admin/hearst/financial', label: 'Review 10-year projection', tone: 'primary' };
 }
 
+const SLIDERS = [
+  { key: 'total_mw',               label: 'IT Capacity',     unit: 'MW',       min: 5,   max: 500,  step: 5,    fmt: v => `${v} MW` },
+  { key: 'target_occupancy_pct',   label: 'Occupancy',       unit: '%',        min: 30,  max: 100,  step: 1,    fmt: v => `${v}%` },
+  { key: 'price_hyperscale_kw_month', label: 'Hyperscale $/kW', unit: '$/kW/mo', min: 60, max: 250, step: 5,   fmt: v => `$${v}` },
+  { key: 'electricity_price_mwh',  label: 'Électricité',     unit: '$/MWh',    min: 20,  max: 120,  step: 1,    fmt: v => `$${v}` },
+  { key: 'exit_multiple',          label: 'Exit multiple',   unit: '×',        min: 8,   max: 30,   step: 0.5,  fmt: v => `${v}×` },
+  { key: 'debt_pct',               label: 'Levier dette',    unit: '%',        min: 0,   max: 90,   step: 1,    fmt: v => `${v}%` },
+];
+
+const KNOB_SIZE = 64;
+const KNOB_R = 28;
+const START_ANGLE = -135;
+const END_ANGLE = 135;
+
+function Knob({ def, value, onChange }) {
+  const pct = (value - def.min) / (def.max - def.min);
+  const angle = START_ANGLE + pct * (END_ANGLE - START_ANGLE);
+  const dragRef = useRef(null);
+
+  function polarToXY(deg, r) {
+    const rad = (deg - 90) * (Math.PI / 180);
+    const cx = KNOB_SIZE / 2;
+    return { x: cx + r * Math.cos(rad), y: cx + r * Math.sin(rad) };
+  }
+
+  function describeArc(from, to, r) {
+    const s = polarToXY(from, r);
+    const e = polarToXY(to, r);
+    const large = (to - from + 360) % 360 > 180 ? 1 : 0;
+    return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`;
+  }
+
+  function startDrag(e) {
+    e.preventDefault();
+    const startY = e.touches ? e.touches[0].clientY : e.clientY;
+    const startVal = value;
+    const range = def.max - def.min;
+
+    function onMove(ev) {
+      const clientY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      const delta = (startY - clientY) / 120;
+      const next = Math.min(def.max, Math.max(def.min,
+        Math.round((startVal + delta * range) / def.step) * def.step
+      ));
+      onChange(next);
+    }
+    function onUp() {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onUp);
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
+  }
+
+  const tick = polarToXY(angle, 18);
+  const cx = KNOB_SIZE / 2;
+
+  return (
+    <div style={SK.wrap}>
+      <svg
+        width={KNOB_SIZE} height={KNOB_SIZE}
+        style={SK.svg}
+        onMouseDown={startDrag}
+        onTouchStart={startDrag}
+        ref={dragRef}
+      >
+        {/* track arc */}
+        <path d={describeArc(START_ANGLE, END_ANGLE, KNOB_R)} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="3" strokeLinecap="round" />
+        {/* fill arc */}
+        {pct > 0 && <path d={describeArc(START_ANGLE, angle, KNOB_R)} fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="3" strokeLinecap="round" />}
+        {/* knob body */}
+        <circle cx={cx} cy={cx} r="20" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" />
+        {/* indicator dot */}
+        <circle cx={tick.x} cy={tick.y} r="2.5" fill="rgba(255,255,255,0.9)" />
+      </svg>
+      <div style={SK.label}>{def.label}</div>
+      <div style={SK.val}>{def.fmt(value)}</div>
+    </div>
+  );
+}
+
 export default function HearstOverview() {
-  const [project, setProject] = useState(null);
   const [scenarios, setScenarios] = useState([]);
   const [dataRoom, setDataRoom] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [wizardDismissed, setWizardDismissed] = useState(false);
+  const { overrides, setOverrides } = useSimulation();
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const load = useCallback(async () => {
     try {
       const pRes = await fetch('/api/admin/hearst/project');
       if (!pRes.ok) throw new Error('Failed to load project');
       const pData = await pRes.json();
-      const proj = pData.project;
-      setProject(proj);
-
       const [sRes, drRes] = await Promise.all([
-        fetch(`/api/admin/hearst/scenarios?project_id=${proj.id}`),
-        fetch(`/api/admin/hearst/data-room?project_id=${proj.id}`),
+        fetch(`/api/admin/hearst/scenarios?project_id=${pData.project.id}`),
+        fetch(`/api/admin/hearst/data-room?project_id=${pData.project.id}`),
       ]);
-      const sData = await sRes.json();
-      const drData = await drRes.json();
-      setScenarios(sData.scenarios || []);
-      setDataRoom(drData.items || []);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
+      const sc = (await sRes.json()).scenarios || [];
+      setScenarios(sc);
+      setDataRoom((await drRes.json()).items || []);
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
+  const base = scenarios.find(s => s.name?.toLowerCase().includes('base') || s.scenario_type === 'base') || scenarios[0];
+
+  useEffect(() => {
+    if (!base || overrides !== null) return;
+    const seed = {};
+    for (const sl of SLIDERS) seed[sl.key] = base[sl.key] ?? sl.min;
+    setOverrides(seed);
+  }, [base, overrides, setOverrides]);
+
+  const deferredOverrides = useDeferredValue(overrides);
+
+  const liveScenario = useMemo(() => {
+    if (!base || !deferredOverrides) return base;
+    return { ...base, ...deferredOverrides };
+  }, [base, deferredOverrides]);
+
+  const proj = useMemo(() => {
+    if (!liveScenario) return {};
+    return generateProjection(liveScenario);
+  }, [liveScenario]);
+
+  const isDirty = useMemo(() => {
+    if (!base || !overrides) return false;
+    return SLIDERS.some(sl => overrides[sl.key] !== (base[sl.key] ?? sl.min));
+  }, [base, overrides]);
+
+  async function saveOverrides() {
+    if (!base || !overrides || !isDirty) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/hearst/scenarios/${base.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(overrides),
+      });
+      if (!res.ok) throw new Error('Save failed');
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+      await load();
+    } catch {
+      // silent — sliders still work
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function resetOverrides() {
+    if (!base) return;
+    const seed = {};
+    for (const sl of SLIDERS) seed[sl.key] = base[sl.key] ?? sl.min;
+    setOverrides(seed);
+  }
+
   if (loading) return <div style={S.loading}>Initializing HEARST module…</div>;
   if (error) return <div style={S.error}>Error: {error}</div>;
-
-  const base = scenarios.find(s => s.name?.toLowerCase().includes('base') || s.scenario_type === 'base') || scenarios[0];
-  const proj = base?.projection || {};
-  const alerts = detectAlerts(base, project);
 
   const drTotal = dataRoom.length;
   const drApproved = dataRoom.filter(d => d.status === 'approved' || d.status === 'reviewed').length;
   const sourceScore = base?.source_score ?? 0;
-
-  const showWizard = !wizardDismissed && base && !base.total_mw && (proj.irr == null);
   const cta = pickContextualCta({ proj, sourceScore, drApproved, drTotal });
-
-  // Health pill color — using cockpit semantic tokens
   const healthColor = sourceScore >= 70 ? 'var(--cp-success)' : sourceScore >= 40 ? 'var(--cp-warning)' : 'var(--cp-error)';
 
   return (
-    <>
-    {showWizard && (
-      <QuickStartWizard
-        scenarioId={base.id}
-        onDone={() => { setWizardDismissed(true); load(); }}
-        onSkip={() => setWizardDismissed(true)}
-      />
-    )}
     <div style={S.wrap}>
 
-      {/* Compact health pill */}
+      {/* Health pill */}
       <div style={S.healthRow}>
         <div style={S.healthPill}>
           <span style={S.healthLabel}>{base?.name || 'Project Health'}</span>
@@ -99,95 +214,96 @@ export default function HearstOverview() {
           <span style={S.healthSep}>·</span>
           <span style={S.healthStat}>{drApproved}/{drTotal} docs</span>
         </div>
-      </div>
-
-      {/* Smart Alerts — only the critical ones, max 3 */}
-      {alerts.length > 0 && (
-        <div style={{ marginBottom: 'var(--cp-space-6)' }}>
-          <AlertBanner alerts={alerts.filter(a => a.severity === 'critical').slice(0, 3)} />
-        </div>
-      )}
-
-      {/* Hero KPIs — 4 only */}
-      <div style={S.heroGrid}>
-        <KpiCard label="Project IRR" value={proj.irr} format="pct" highlight={proj.irr != null} />
-        <KpiCard label="Project NPV" value={proj.npv} format="currency" />
-        <KpiCard label="Stabilized EBITDA" value={proj.stabilized_ebitda} format="currency" sublabel="Annual" />
-        <KpiCard label="MOIC" value={proj.moic} format="x" sublabel="Exit multiple of money" />
-      </div>
-
-      {/* Secondary stats */}
-      <div style={S.secondaryRow}>
-        <Stat label="IT Capacity" value={base?.total_mw != null ? fmt(base.total_mw, 'mw') : '—'} />
-        <Stat label="Total CAPEX" value={proj.total_capex != null ? fmt(proj.total_capex, 'currency') : '—'} />
-        <Stat label="Stab. Revenue" value={proj.stabilized_revenue != null ? fmt(proj.stabilized_revenue, 'currency') : '—'} />
-        <Stat label="DSCR (Stab.)" value={proj.dscr_stabilized != null ? fmt(proj.dscr_stabilized, 'x') : '—'} />
-        <Stat label="Payback" value={proj.payback_years != null ? fmt(proj.payback_years, 'years') : '—'} />
-        <Stat label="Terminal Value" value={proj.terminal_value != null ? fmt(proj.terminal_value, 'currency') : '—'} />
-      </div>
-
-      {/* Scenario comparison strip */}
-      {scenarios.length > 1 && (
-        <div style={S.scenarioStrip}>
-          <div style={S.sectionTitle}>SCENARIO COMPARISON · IRR</div>
-          <div style={S.scenarioRow}>
-            {scenarios.map(s => {
-              const irr = s.projection?.irr;
-              const color = s.name?.toLowerCase().includes('upside') ? 'var(--cp-success)'
-                : s.name?.toLowerCase().includes('down') ? 'var(--cp-error)' : 'var(--cp-info)';
-              return (
-                <div key={s.id} style={{ ...S.scenarioChip, boxShadow: `inset 0 0 0 1px ${color}` }}>
-                  <div style={{ ...S.scenarioName, color }}>{s.name}</div>
-                  <div style={{ ...S.scenarioIrr, color }}>{irr != null ? fmt(irr, 'pct') : 'N/A'}</div>
-                  <div style={S.scenarioScore}>Score {s.source_score ?? 0}/100</div>
-                </div>
-              );
-            })}
+        {isDirty && (
+          <div style={S.dirtyBar}>
+            <span style={S.dirtyLabel}>Simulation non sauvegardée</span>
+            <button onClick={resetOverrides} style={S.resetBtn}>Annuler</button>
+            <button onClick={saveOverrides} disabled={saving} style={S.saveBtn}>
+              {saved ? '✓ Sauvegardé' : saving ? 'Sauvegarde…' : 'Sauvegarder'}
+            </button>
           </div>
-        </div>
-      )}
-
-      {/* Single contextual CTA */}
-      <div style={S.ctaWrap}>
-        <div style={S.ctaCopy}>
-          <div style={S.ctaEyebrow}>NEXT BEST ACTION</div>
-          <div style={S.ctaTitle}>{cta.label}</div>
-        </div>
-        <Link
-          href={cta.href}
-          aria-label={`Aller : ${cta.label}`}
-          style={{
-            ...S.ctaBtn,
-            background: cta.tone === 'critical' ? 'var(--cp-error)' :
-                        cta.tone === 'warning'  ? 'var(--cp-warning)' :
-                                                  'var(--cp-accent)',
-            color:      cta.tone === 'warning'  ? 'var(--cp-bg-deep)' :
-                                                  'var(--cp-text-strong)',
-          }}
-        >
-          Go →
-        </Link>
+        )}
       </div>
 
-      {/* Missing inputs warning */}
-      {proj.missing_inputs?.length > 0 && (
-        <div style={S.missingWrap}>
-          <div style={S.missingTitle}>MISSING INPUTS ({proj.missing_inputs.length})</div>
-          <div style={S.missingList}>
-            {proj.missing_inputs.map((m, i) => (
-              <span key={i} style={S.missingTag}>{m}</span>
+
+
+      <div style={S.kpiCol}>
+        <div style={S.heroGrid}>
+          <KpiCard label="Project IRR" value={proj.irr} format="pct" highlight={proj.irr != null} />
+          <KpiCard label="Project NPV" value={proj.npv} format="currency" />
+          <KpiCard label="Stabilized EBITDA" value={proj.stabilized_ebitda} format="currency" sublabel="Annual" />
+          <KpiCard label="MOIC" value={proj.moic} format="x" sublabel="Exit multiple of money" />
+        </div>
+
+        <div style={S.secondaryRow}>
+          <Stat label="IT Capacity" value={liveScenario?.total_mw != null ? fmt(liveScenario.total_mw, 'mw') : '—'} />
+          <Stat label="Total CAPEX" value={proj.total_capex != null ? fmt(proj.total_capex, 'currency') : '—'} />
+          <Stat label="Stab. Revenue" value={proj.stabilized_revenue != null ? fmt(proj.stabilized_revenue, 'currency') : '—'} />
+          <Stat label="DSCR (Stab.)" value={proj.dscr_stabilized != null ? fmt(proj.dscr_stabilized, 'x') : '—'} />
+          <Stat label="Payback" value={proj.payback_years != null ? fmt(proj.payback_years, 'years') : '—'} />
+          <Stat label="Terminal Value" value={proj.terminal_value != null ? fmt(proj.terminal_value, 'currency') : '—'} />
+        </div>
+
+        {scenarios.length > 1 && (
+          <div style={S.scenarioStrip}>
+            <div style={S.sectionTitle}>SCENARIO COMPARISON · IRR</div>
+            <div style={S.scenarioRow}>
+              {scenarios.map(s => {
+                const irr = s.projection?.irr;
+                const color = 'var(--cp-text-primary)';
+                return (
+                  <div key={s.id} style={{ ...S.scenarioChip, boxShadow: `inset 0 0 0 1px var(--cp-border)` }}>
+                    <div style={{ ...S.scenarioName, color }}>{s.name}</div>
+                    <div style={{ ...S.scenarioIrr, color }}>{irr != null ? fmt(irr, 'pct') : 'N/A'}</div>
+                    <div style={S.scenarioScore}>Score {s.source_score ?? 0}/100</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div style={S.ctaWrap}>
+          <div style={S.ctaCopy}>
+            <div style={S.ctaEyebrow}>NEXT BEST ACTION</div>
+            <div style={S.ctaTitle}>{cta.label}</div>
+          </div>
+          <Link href={cta.href} aria-label={`Aller : ${cta.label}`} style={S.ctaBtn}>
+            Go →
+          </Link>
+        </div>
+      </div>
+
+      {overrides && (
+        <div style={S.sliderPanel}>
+          <div style={S.sliderTitle}>SIMULATION EN DIRECT</div>
+          <div style={S.sliderGrid}>
+            {SLIDERS.map(def => (
+              <Knob
+                key={def.key}
+                def={def}
+                value={overrides[def.key] ?? def.min}
+                onChange={v => setOverrides(o => ({ ...o, [def.key]: v }))}
+              />
             ))}
+            {isDirty && (
+              <div style={S.irrDelta}>
+                <span style={S.irrDeltaLabel}>IRR live</span>
+                <span style={{ ...S.irrDeltaVal, color: 'var(--cp-text-primary)' }}>
+                  {proj.irr != null ? fmt(proj.irr, 'pct') : 'N/A'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       )}
     </div>
-    </>
   );
 }
 
 function Stat({ label, value }) {
   return (
-    <div className="cp-stat" style={SStat.wrap}>
+    <div style={SStat.wrap}>
       <div style={SStat.label}>{label}</div>
       <div style={SStat.value}>{value}</div>
     </div>
@@ -195,173 +311,58 @@ function Stat({ label, value }) {
 }
 
 const SStat = {
-  wrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-1) var(--cp-space-4)',
-  },
-  label: {
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    color: 'var(--cp-text-muted)',
-    textTransform: 'uppercase',
-  },
-  value: {
-    fontSize: 'var(--cp-font-md)',
-    fontWeight: 'var(--cp-weight-semibold)',
-    color: 'var(--cp-text-primary)',
-  },
+  wrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', padding: 'var(--cp-space-1) var(--cp-space-4)' },
+  label: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
+  value: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)' },
+};
+
+const SK = {
+  wrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'ns-resize', userSelect: 'none' },
+  svg: { cursor: 'ns-resize', display: 'block' },
+  label: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', textAlign: 'center' },
+  val: { fontSize: 15, fontWeight: 800, color: 'rgba(255,255,255,0.90)', fontVariantNumeric: 'tabular-nums', textAlign: 'center' },
 };
 
 const S = {
-  wrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-6)',
-  },
-  loading: {
-    padding: 'var(--cp-space-9)',
-    textAlign: 'center',
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-md)',
-  },
-  error: {
-    padding: 'var(--cp-space-6)',
-    color: 'var(--cp-error)',
-    fontSize: 'var(--cp-font-base)',
-    background: 'var(--cp-error-bg)',
-    borderRadius: 'var(--cp-radius-md)',
-  },
+  wrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)' },
+  loading: { padding: 'var(--cp-space-9)', textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-md)' },
+  error: { padding: 'var(--cp-space-6)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-md)' },
 
-  healthRow: { marginBottom: 0 },
-  healthPill: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 'var(--cp-space-2)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-pill)',
-    padding: 'var(--cp-space-1) var(--cp-space-4)',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-semibold)',
-    color: 'var(--cp-text-body)',
-  },
+  healthRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
+  healthPill: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-pill)', padding: 'var(--cp-space-1) var(--cp-space-4)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-body)' },
   healthLabel: { color: 'var(--cp-text-primary)', fontWeight: 'var(--cp-weight-bold)' },
   healthSep: { color: 'var(--cp-text-faint)' },
   healthStat: { fontWeight: 'var(--cp-weight-semibold)' },
 
-  heroGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: 'var(--cp-space-4)',
-  },
+  dirtyBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginLeft: 'auto' },
+  dirtyLabel: { fontSize: 11, color: 'var(--cp-text-muted)', fontStyle: 'italic' },
+  resetBtn: { fontSize: 11, fontWeight: 600, padding: '4px 10px', border: '1px solid var(--cp-border)', borderRadius: 6, background: 'transparent', color: 'var(--cp-text-muted)', cursor: 'pointer' },
+  saveBtn: { fontSize: 11, fontWeight: 700, padding: '4px 12px', border: 'none', borderRadius: 6, background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', cursor: 'pointer' },
 
-  secondaryRow: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'nowrap',
-    overflowX: 'auto',
-    background: 'var(--cp-surface-1)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    padding: 'var(--cp-space-3) var(--cp-space-2)',
-  },
+  kpiCol: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-5)' },
+  heroGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--cp-space-4)' },
 
-  scenarioStrip: {
-    background: 'var(--cp-surface-1)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    padding: 'var(--cp-space-4) var(--cp-space-5)',
-  },
+  secondaryRow: { display: 'flex', alignItems: 'center', flexWrap: 'nowrap', overflowX: 'auto', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-lg)', padding: 'var(--cp-space-3) var(--cp-space-2)' },
+
+  scenarioStrip: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-lg)', padding: 'var(--cp-space-4) var(--cp-space-5)' },
   scenarioRow: { display: 'flex', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-2)' },
-  scenarioChip: {
-    flex: 1,
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    padding: 'var(--cp-space-2) var(--cp-space-3)',
-    background: 'var(--cp-surface-1)',
-    transition: 'transform var(--cp-dur-base) var(--cp-ease-out)',
-  },
-  scenarioName: {
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-wider)',
-    textTransform: 'uppercase',
-    marginBottom: 'var(--cp-space-1)',
-  },
-  scenarioIrr: {
-    fontSize: 'var(--cp-font-xl)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-tight)',
-    marginBottom: 'var(--cp-space-1)',
-  },
+  scenarioChip: { flex: 1, border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'var(--cp-surface-1)' },
+  scenarioName: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wider)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-1)' },
+  scenarioIrr: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-tight)', marginBottom: 'var(--cp-space-1)' },
   scenarioScore: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)' },
-  sectionTitle: {
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    color: 'var(--cp-text-muted)',
-    textTransform: 'uppercase',
-  },
+  sectionTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
 
-  ctaWrap: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 'var(--cp-space-4)',
-    background: 'var(--cp-surface-1)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    padding: 'var(--cp-space-4) var(--cp-space-6)',
-  },
+  ctaWrap: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--cp-space-4)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-lg)', padding: 'var(--cp-space-4) var(--cp-space-6)' },
   ctaCopy: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
-  ctaEyebrow: {
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    color: 'var(--cp-text-muted)',
-    textTransform: 'uppercase',
-  },
-  ctaTitle: {
-    fontSize: 'var(--cp-font-md)',
-    fontWeight: 'var(--cp-weight-bold)',
-    color: 'var(--cp-text-strong)',
-  },
-  ctaBtn: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 'var(--cp-space-1)',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-wide)',
-    padding: 'var(--cp-space-2) var(--cp-space-5)',
-    borderRadius: 'var(--cp-radius-sm)',
-    textDecoration: 'none',
-    transition: 'filter var(--cp-dur-fast) var(--cp-ease)',
-  },
+  ctaEyebrow: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
+  ctaTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)' },
+  ctaBtn: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wide)', padding: 'var(--cp-space-2) var(--cp-space-5)', borderRadius: 'var(--cp-radius-sm)', textDecoration: 'none' },
 
-  missingWrap: {
-    background: 'var(--cp-error-bg)',
-    borderLeft: '3px solid var(--cp-error)',
-    borderRadius: 'var(--cp-radius-md)',
-    padding: 'var(--cp-space-3) var(--cp-space-4)',
-  },
-  missingTitle: {
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-bold)',
-    color: 'var(--cp-error)',
-    marginBottom: 'var(--cp-space-2)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-  },
-  missingList: { display: 'flex', flexWrap: 'wrap', gap: 'var(--cp-space-1)' },
-  missingTag: {
-    fontSize: 'var(--cp-font-xs)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    color: 'var(--cp-error)',
-    padding: 'var(--cp-space-0) var(--cp-space-2)',
-    borderRadius: 'var(--cp-radius-xs)',
-  },
+  sliderPanel: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-lg)', padding: 'var(--cp-space-5) var(--cp-space-6)' },
+  sliderTitle: { fontSize: 10, fontWeight: 800, letterSpacing: 2, color: 'var(--cp-text-muted)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-4)' },
+  sliderGrid: { display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 'var(--cp-space-6)' },
+
+  irrDelta: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--cp-border)', paddingTop: 'var(--cp-space-3)', marginTop: 'var(--cp-space-1)' },
+  irrDeltaLabel: { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--cp-text-muted)' },
+  irrDeltaVal: { fontSize: 22, fontWeight: 800, fontVariantNumeric: 'tabular-nums' },
 };

@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import SourceBadge from '@/components/hearst/SourceBadge';
-import { MISSING_LABEL } from '@/lib/hearst-constants';
 
 const GROUPS = [
   {
@@ -150,13 +149,12 @@ function FieldRow({ fieldDef, value, onSave, scenarioId }) {
           </div>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={display ? { ...S.valueText, color: justSaved ? 'var(--cp-success)' : S.valueText.color, transition: 'color .3s' } : S.missingText}>
-              {display || MISSING_LABEL}
+            <span style={display ? { ...S.valueText, color: justSaved ? 'var(--cp-success)' : S.valueText.color, transition: 'color .3s' } : S.emptyText}>
+              {display || '—'}
               {justSaved && ' ✓'}
             </span>
-            {!display && <SourceBadge type="missing" />}
-            {display && <SourceBadge type="admin_input" />}
-            <button onClick={startEdit} style={S.editBtn}>Edit</button>
+            {display && <SourceBadge source_type="admin_input" />}
+            <button onClick={startEdit} style={S.editBtn}>{display ? 'Edit' : '+ Renseigner'}</button>
           </div>
         )}
       </div>
@@ -165,7 +163,6 @@ function FieldRow({ fieldDef, value, onSave, scenarioId }) {
 }
 
 export default function AssumptionsPage() {
-  const [, setProject] = useState(null);
   const [scenarios, setScenarios] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [inputs, setInputs] = useState({});
@@ -178,7 +175,6 @@ export default function AssumptionsPage() {
         const pRes = await fetch('/api/admin/hearst/project');
         if (!pRes.ok) throw new Error('Failed to load project');
         const { project: proj } = await pRes.json();
-        setProject(proj);
 
         const sRes = await fetch(`/api/admin/hearst/scenarios?project_id=${proj.id}`);
         const { scenarios: sc } = await sRes.json();
@@ -227,10 +223,6 @@ export default function AssumptionsPage() {
           ))}
         </div>
       </div>
-      <div style={S.infoBar}>
-        All fields require a source. Values shown as "{MISSING_LABEL}" must be filled in before financial projections can run.
-      </div>
-
       {GROUPS.map(group => (
         <div key={group.title} style={S.group}>
           <div style={S.groupTitle}>{group.title}</div>
@@ -250,26 +242,25 @@ export default function AssumptionsPage() {
 }
 
 const S = {
-  wrap: { fontFamily: '"Inter", sans-serif', maxWidth: 900 },
+  wrap: { fontFamily: '"Inter", sans-serif' },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
   tabs: { display: 'flex', gap: 6 },
   tab: { fontSize: 11, fontWeight: 700, padding: '5px 14px', borderRadius: 20, border: '1px solid var(--cp-border)', background: 'transparent', cursor: 'pointer', color: 'var(--cp-text-muted)' },
-  tabActive: { background: 'var(--cp-info)', color: 'var(--cp-text-strong)', borderColor: 'var(--cp-info)' },
-  infoBar: { fontSize: 11, color: 'var(--cp-warning)', background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning-bg)', borderRadius: 6, padding: '8px 14px', marginBottom: 24 },
+  tabActive: { background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', borderColor: 'var(--cp-info-strong-cta)' },
   group: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, marginBottom: 20, overflow: 'hidden' },
-  groupTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', padding: '8px 16px', borderBottom: '1px solid var(--cp-border)' },
+  groupTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', padding: '8px 16px', borderBottom: '1px solid var(--cp-border)' },
   fieldRow: { display: 'flex', alignItems: 'center', padding: '10px 16px', borderBottom: '1px solid var(--cp-border)' },
   fieldLeft: { flex: 1 },
   fieldLabel: { fontSize: 13, fontWeight: 600, color: 'var(--cp-text-primary)' },
   fieldNote: { fontSize: 11, color: 'var(--cp-text-muted)', marginTop: 2 },
   fieldRight: { flexShrink: 0, minWidth: 280, display: 'flex', justifyContent: 'flex-end' },
   valueText: { fontSize: 13, fontWeight: 600, color: 'var(--cp-text-primary)' },
-  missingText: { fontSize: 12, color: 'var(--cp-error)', fontStyle: 'italic' },
-  input: { fontSize: 12, padding: '4px 8px', border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-bg-deep)', color: 'var(--cp-text-primary)', width: 160 },
-  saveBtn: { fontSize: 11, fontWeight: 700, padding: '4px 12px', background: 'var(--cp-info)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 4, cursor: 'pointer' },
+  emptyText: { fontSize: 13, color: 'var(--cp-text-muted)', fontStyle: 'italic' },
+  input: { fontSize: 12, padding: '4px 8px', border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', width: 160 },
+  saveBtn: { fontSize: 11, fontWeight: 700, padding: '4px 12px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 4, cursor: 'pointer' },
   cancelBtn: { fontSize: 11, padding: '4px 10px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
   editBtn: { fontSize: 11, padding: '3px 10px', background: 'transparent', color: 'var(--cp-info)', border: '1px solid var(--cp-info)', borderRadius: 4, cursor: 'pointer' },
   saveError: { fontSize: 11, color: 'var(--cp-error)', fontWeight: 600, marginTop: 2 },

@@ -66,6 +66,37 @@
   --color-border-light: #E4E6EA;
   --color-border-medium: #C9CDD2;
   --color-border-strong: #2A2F36;
+
+  /* Operator color tokens — desaturated for dark cockpit legibility */
+  --cp-op-equinix:         #C41B1B;
+  --cp-op-digital_realty:  #0057A8;
+  --cp-op-ntt:             #009FDB;
+  --cp-op-vantage:         #6B3FA0;
+  --cp-op-coreweave:       #E05A1A;
+  --cp-op-lambda:          #4F5BD5;
+  --cp-op-aws:             #FF9900;
+  --cp-op-microsoft:       #00A4EF;
+  --cp-op-google:          #4285F4;
+  --cp-op-meta:            #1877F2;
+  --cp-op-oracle:          #C74634;
+  --cp-op-nvidia:          #76B900;
+  --cp-op-brookfield:      #2E7D32;
+  --cp-op-qia:             #8B1C1C;
+  --cp-op-qai:             #9C5A1D;
+  --cp-op-cbre:            #005B41;
+  --cp-op-jll:             #C41230;
+  --cp-op-turner_townsend: #C89A00;
+  --cp-op-cushman:         #7B0000;
+  --cp-op-kahramaa:        #006341;
+  --cp-op-cra:             #003087;
+  --cp-op-moct:            #5C0000;
+  --cp-op-ooredoo:         #C8003C;
+  --cp-op-vodafone_qatar:  #BF0000;
+  --cp-op-mayer_brown:     #003B5C;
+  --cp-op-baker_mckenzie:  #1C3A6B;
+  --cp-op-uptime:          #555555;
+  --cp-op-sec:             #1A3560;
+  --cp-op-default:         #4B5363;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -141,5 +172,23 @@ a {
     break-inside: avoid;
     border: 1px solid #ccc !important;
     box-shadow: none !important;
+  }
+
+  /* Force readable contrast for hearst printed content (overrides cockpit
+     inline styles using --cp-text-muted etc. which are near-invisible on
+     white paper). */
+  .roadmap-print-root,
+  .roadmap-print-root * {
+    color: #000 !important;
+    background: transparent !important;
+    border-color: #999 !important;
+    box-shadow: none !important;
+  }
+
+  /* Escape hatch: KPI values that NEED their semantic color (green/red/amber)
+     to convey meaning when printed (e.g. IRR delta, status pills). Opt-in via
+     className="print-keep-color" on the value span. */
+  .roadmap-print-root .print-keep-color {
+    color: inherit !important;
   }
 }

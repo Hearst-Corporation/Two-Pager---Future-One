@@ -136,7 +136,7 @@ export default function DataRoomPage() {
           <option value="">All statuses</option>
           {STATUS_ORDER.map(s => <option key={s} value={s}>{STATUS_META[s].label}</option>)}
         </select>
-        <button onClick={() => showAdd ? resetForm() : setShowAdd(true)} style={S.addBtn}>{showAdd ? '✕' : '+ Add Document'}</button>
+        <button onClick={() => showAdd ? resetForm() : setShowAdd(true)} className="cp-btn-hover" style={S.addBtn}>{showAdd ? '✕' : '+ Add Document'}</button>
       </div>
 
       {/* Add form */}
@@ -149,7 +149,15 @@ export default function DataRoomPage() {
             <option value="Other">Other</option>
           </select>
           <input placeholder="Notes" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} style={S.input} />
-          <button onClick={addItem} disabled={saving || !form.title || !form.category} style={{ ...S.saveBtn, opacity: saving || !form.title || !form.category ? 0.5 : 1, cursor: saving ? 'not-allowed' : 'pointer' }}>
+          <button
+            onClick={addItem}
+            disabled={saving || !form.title || !form.category}
+            className="cp-btn-hover"
+            style={{
+              ...S.saveBtn,
+              ...((saving || !form.title || !form.category) ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
+            }}
+          >
             {saving ? 'Adding…' : 'Add'}
           </button>
           <button onClick={resetForm} style={S.cancelBtn}>Cancel</button>
@@ -179,14 +187,18 @@ export default function DataRoomPage() {
                     {item.notes && <span style={S.docNote}>{item.notes}</span>}
                     <div style={{ display: 'flex', gap: 4 }}>
                       {prev && (
-                        <button onClick={() => updateStatus(item.id, prev)} style={S.statusBtn} disabled={updating === item.id}>
+                        <button
+                          onClick={() => updateStatus(item.id, prev)}
+                          style={{ ...S.statusBtn, ...(updating === item.id ? { opacity: 0.5, cursor: 'not-allowed' } : {}) }}
+                          disabled={updating === item.id}
+                        >
                           ← {STATUS_META[prev]?.label}
                         </button>
                       )}
                       {next && (
                         <button
                           onClick={() => updateStatus(item.id, next)}
-                          style={{ ...S.statusBtn, background: STATUS_META[next]?.bg, color: STATUS_META[next]?.color, borderColor: STATUS_META[next]?.color }}
+                          style={{ ...S.statusBtn, background: STATUS_META[next]?.bg, color: STATUS_META[next]?.color, borderColor: STATUS_META[next]?.color, ...(updating === item.id ? { opacity: 0.5, cursor: 'not-allowed' } : {}) }}
                           disabled={updating === item.id}
                         >
                           Mark {STATUS_META[next]?.label} →
@@ -222,13 +234,13 @@ const S = {
   missingAlert: { fontSize: 11, fontWeight: 700, color: 'var(--cp-error)', background: 'var(--cp-error-bg)', padding: '3px 10px', borderRadius: 20 },
   filterRow: { display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center' },
   select: { fontSize: 12, padding: '7px 10px', border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', marginLeft: 'auto' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer', marginLeft: 'auto' },
   addForm: { display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' },
   input: { flex: 1, minWidth: 160, padding: '7px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: 'var(--cp-success)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: 'var(--cp-success-strong)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
   cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
   catGroup: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, marginBottom: 16, overflow: 'hidden' },
-  catHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', background: 'var(--cp-bg-deep)', borderBottom: '1px solid var(--cp-border)' },
+  catHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   catName: { fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
   catCount: { fontSize: 11, fontWeight: 700, color: 'var(--cp-success)' },
   docRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid var(--cp-border)', transition: 'opacity .15s' },

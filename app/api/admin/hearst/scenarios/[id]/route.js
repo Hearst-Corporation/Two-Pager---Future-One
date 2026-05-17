@@ -22,6 +22,7 @@ export const PATCH = withValidationPartial(ScenarioUpdateSchema, async (req, par
   // Audit trail: record what changed
   const supa = getAdminClient();
   const { data: before } = await supa.from('hearst_scenarios').select('*').eq('id', params.id).single();
+  if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const { data, error } = await auth.supa
     .from('hearst_scenarios')
@@ -31,22 +32,19 @@ export const PATCH = withValidationPartial(ScenarioUpdateSchema, async (req, par
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Log changed fields
-  if (before) {
-    const changed = Object.keys(body).filter(k => body[k] !== before[k]);
-    if (changed.length > 0) {
-      const auditRows = changed.map((field) => ({
-        project_id: data.project_id,
-        actor_id: auth.actor,
-        action: 'update_scenario',
-        entity_type: 'scenario',
-        entity_id: params.id,
-        field_name: field,
-        previous_value: String(before[field] ?? ''),
-        new_value: String(body[field] ?? ''),
-      }));
-      await auth.supa.from('hearst_audit_log').insert(auditRows);
-    }
+  const changed = Object.keys(body).filter(k => body[k] !== before[k]);
+  if (changed.length > 0) {
+    const auditRows = changed.map((field) => ({
+      project_id: data.project_id,
+      actor_id: auth.actor,
+      action: 'update_scenario',
+      entity_type: 'scenario',
+      entity_id: params.id,
+      field_name: field,
+      previous_value: String(before[field] ?? ''),
+      new_value: String(body[field] ?? ''),
+    }));
+    await auth.supa.from('hearst_audit_log').insert(auditRows);
   }
 
   const projection = generateProjection(data);
@@ -56,6 +54,8 @@ export const PATCH = withValidationPartial(ScenarioUpdateSchema, async (req, par
 export async function DELETE(req, { params }) {
   const auth = await authedWrite('admin');
   if (auth instanceof NextResponse) return auth;
+  const { data: existing } = await auth.supa.from('hearst_scenarios').select('id').eq('id', params.id).maybeSingle();
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const { error } = await auth.supa.from('hearst_scenarios').delete().eq('id', params.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

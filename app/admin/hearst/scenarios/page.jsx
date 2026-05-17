@@ -130,7 +130,7 @@ export default function ScenariosPage() {
     <div style={S.wrap}>
       <div style={S.topBar}>
         <div style={S.pageTitle}>Scenario Comparison</div>
-        <button onClick={() => setShowAdd(v => !v)} style={S.addBtn}>{showAdd ? '✕' : '+ New Scenario'}</button>
+        <button onClick={() => setShowAdd(v => !v)} className="cp-btn-hover" style={S.addBtn}>{showAdd ? '✕' : '+ New Scenario'}</button>
       </div>
 
       {showAdd && (
@@ -145,7 +145,17 @@ export default function ScenariosPage() {
             <option value="">Start from scratch</option>
             {scenarios.map(s => <option key={s.id} value={s.id}>Clone from: {s.name}</option>)}
           </select>
-          <button onClick={addScenario} disabled={saving || !newName} style={S.saveBtn}>{saving ? 'Creating…' : 'Create'}</button>
+          <button
+            onClick={addScenario}
+            disabled={saving || !newName}
+            className="cp-btn-hover"
+            style={{
+              ...S.saveBtn,
+              ...((saving || !newName) ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
+            }}
+          >
+            {saving ? 'Creating…' : 'Create'}
+          </button>
           <button onClick={() => setShowAdd(false)} style={S.cancelBtn}>Cancel</button>
         </div>
       )}
@@ -177,7 +187,7 @@ export default function ScenariosPage() {
                 );
               }
               return (
-                <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.015)' }}>
+                <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'var(--cp-surface-0)' }}>
                   <td style={S.tdLabel}>{row.label}</td>
                   {scenarios.map(sc => {
                     let raw;
@@ -218,14 +228,14 @@ const S = {
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
   addForm: { display: 'flex', gap: 10, marginBottom: 16, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '14px 16px' },
-  inp: { flex: 1, padding: '7px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-bg-deep)', color: 'var(--cp-text-primary)' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  inp: { flex: 1, padding: '7px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
   cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
-  th: { padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', borderBottom: '2px solid var(--cp-border)' },
+  th: { padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '2px solid var(--cp-border)' },
   tdLabel: { padding: '9px 16px', fontWeight: 600, color: 'var(--cp-text-muted)', fontSize: 12, whiteSpace: 'nowrap', borderBottom: '1px solid var(--cp-border)', minWidth: 180 },
   td: { padding: '9px 16px', borderBottom: '1px solid var(--cp-border)' },
-  divider: { padding: '6px 16px', fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', textTransform: 'uppercase' },
+  divider: { padding: '6px 16px', fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', textTransform: 'uppercase' },
 };

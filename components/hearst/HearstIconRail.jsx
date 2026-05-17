@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -47,13 +48,8 @@ export default function HearstIconRail() {
       <div className="cockpit-glass cockpit-rail-left" style={S.glass}>
         <div style={S.contentLayer}>
           <Link href="/admin/hearst" style={S.brandDot} aria-label="HEARST — Accueil">
-            <span style={S.brandDotInner} />
+            <Image src="/hearst-h.svg" alt="HEARST" width={46} height={50} style={S.brandLogo} />
           </Link>
-
-          {RAIL_ITEMS.map((item) => {
-            const active = item.id === 'dashboard' && pathname === '/admin/hearst';
-            return <IconButton key={item.id} item={item} active={active} />;
-          })}
 
           <div style={S.spacer} />
 
@@ -99,23 +95,16 @@ const S = {
     padding: 'var(--cp-space-7) 0',
   },
   brandDot: {
-    width: 'var(--cp-brand-size)',
-    height: 'var(--cp-brand-size)',
-    borderRadius: 'var(--cp-radius-lg)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'var(--cp-surface-3)',
-    boxShadow: 'var(--cp-shadow-sm)',
     marginBottom: 'var(--cp-space-6)',
     textDecoration: 'none',
-    transition: 'transform var(--cp-dur-base) var(--cp-ease-out)',
+    transition: 'opacity var(--cp-dur-base) var(--cp-ease-out)',
   },
-  brandDotInner: {
-    width: 'var(--cp-brand-inner)',
-    height: 'var(--cp-brand-inner)',
-    borderRadius: 'var(--cp-radius-pill)',
-    background: 'var(--cp-text-strong)',
+  brandLogo: {
+    filter: 'brightness(0) invert(1)',
+    display: 'block',
   },
   iconBtn: {
     position: 'relative',

@@ -276,7 +276,7 @@ const S = {
   recoTag: {
     fontSize: 10, fontWeight: 800, letterSpacing: 1.5,
     color: 'var(--cp-accent-strong)',
-    background: 'var(--cp-bg-deep)',
+    background: 'var(--cp-surface-0)',
     padding: '3px 8px', borderRadius: 4, flexShrink: 0,
   },
   recoText: { fontSize: 12, color: 'var(--cp-text-primary)', lineHeight: 1.5 },
@@ -298,7 +298,7 @@ const S = {
 
   cardHead: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 },
   cardCode: {
-    fontSize: 12, fontWeight: 900, color: 'var(--cp-text-strong)',
+    fontSize: 12, fontWeight: 900, color: 'var(--cp-bg-deep)',
     background: 'var(--cp-text-primary)', padding: '3px 9px', borderRadius: 4,
   },
   cardScore: { fontSize: 12, fontWeight: 800, color: 'var(--cp-text-muted)' },
@@ -315,7 +315,7 @@ const S = {
   },
 
   cardKpis: {
-    background: 'var(--cp-bg-deep)',
+    background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
     borderRadius: 6, padding: '8px 10px', marginBottom: 12,
   },
@@ -346,11 +346,11 @@ const S = {
   termItem: { fontSize: 12, color: 'var(--cp-text-primary)', lineHeight: 1.6, marginBottom: 6 },
   compBox: {
     fontSize: 12, color: 'var(--cp-text-primary)', lineHeight: 1.5,
-    background: 'var(--cp-bg-deep)', border: '1px solid var(--cp-border)',
+    background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)',
     borderRadius: 6, padding: '8px 12px', fontStyle: 'italic',
   },
   miniGrid: {
-    background: 'var(--cp-bg-deep)', border: '1px solid var(--cp-border)',
+    background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)',
     borderRadius: 6, padding: '8px 12px',
   },
   miniRow: {
@@ -363,7 +363,7 @@ const S = {
   },
 
   methodBox: {
-    background: 'var(--cp-bg-deep)',
+    background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
     borderRadius: 6, padding: '12px 16px',
   },
