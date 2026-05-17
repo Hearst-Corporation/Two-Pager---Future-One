@@ -2,11 +2,11 @@
 import { useState, useEffect } from 'react';
 
 const STATUS_META = {
-  missing:     { label: 'Missing',     color: '#DC2626', bg: '#FEF2F2' },
-  in_progress: { label: 'In Progress', color: '#D97706', bg: '#FFFBEB' },
-  uploaded:    { label: 'Uploaded',    color: '#2563EB', bg: '#DBEAFE' },
-  reviewed:    { label: 'Reviewed',    color: '#7C3AED', bg: '#EDE9FE' },
-  approved:    { label: 'Approved',    color: '#059669', bg: '#D1FAE5' },
+  missing:     { label: 'Missing',     color: 'var(--cp-error)', bg: 'var(--cp-error-bg)' },
+  in_progress: { label: 'In Progress', color: 'var(--cp-warning)', bg: 'var(--cp-warning-bg)' },
+  uploaded:    { label: 'Uploaded',    color: 'var(--cp-info)', bg: 'var(--cp-info-bg)' },
+  reviewed:    { label: 'Reviewed',    color: 'var(--cp-violet)', bg: 'var(--cp-violet-bg)' },
+  approved:    { label: 'Approved',    color: 'var(--cp-success)', bg: 'var(--cp-success-bg)' },
 };
 
 const STATUS_ORDER = ['missing', 'in_progress', 'uploaded', 'reviewed', 'approved'];
@@ -122,7 +122,7 @@ export default function DataRoomPage() {
         <div style={S.progressBarWrap}>
           <div style={{ ...S.progressBar, width: pct + '%' }} />
         </div>
-        <div style={{ ...S.pct, color: pct >= 70 ? '#059669' : pct >= 40 ? '#D97706' : '#DC2626' }}>{pct}%</div>
+        <div style={{ ...S.pct, color: pct >= 70 ? 'var(--cp-success)' : pct >= 40 ? 'var(--cp-warning)' : 'var(--cp-error)' }}>{pct}%</div>
         {missing > 0 && <div style={S.missingAlert}>{missing} missing</div>}
       </div>
 
@@ -206,36 +206,36 @@ export default function DataRoomPage() {
 
 const S = {
   wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: '#DC2626', fontSize: 13, background: '#FEF2F2', borderRadius: 6 },
+  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   progressCard: {
     display: 'flex', alignItems: 'center', gap: 16,
-    background: 'var(--color-surface)', border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)',
     borderRadius: 8, padding: '14px 20px', marginBottom: 20,
   },
   progressInfo: { minWidth: 200 },
-  progressTitle: { fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' },
-  progressSub: { fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 },
-  progressBarWrap: { flex: 1, height: 8, background: 'var(--color-border-light)', borderRadius: 4, overflow: 'hidden' },
-  progressBar: { height: '100%', background: '#2563EB', borderRadius: 4, transition: 'width .3s' },
+  progressTitle: { fontSize: 13, fontWeight: 700, color: 'var(--cp-text-primary)' },
+  progressSub: { fontSize: 11, color: 'var(--cp-text-muted)', marginTop: 2 },
+  progressBarWrap: { flex: 1, height: 8, background: 'var(--cp-border)', borderRadius: 4, overflow: 'hidden' },
+  progressBar: { height: '100%', background: 'var(--cp-info)', borderRadius: 4, transition: 'width .3s' },
   pct: { fontSize: 18, fontWeight: 900, minWidth: 50 },
-  missingAlert: { fontSize: 11, fontWeight: 700, color: '#DC2626', background: '#FEF2F2', padding: '3px 10px', borderRadius: 20 },
+  missingAlert: { fontSize: 11, fontWeight: 700, color: 'var(--cp-error)', background: 'var(--cp-error-bg)', padding: '3px 10px', borderRadius: 20 },
   filterRow: { display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center' },
-  select: { fontSize: 12, padding: '7px 10px', border: '1px solid var(--color-border-light)', borderRadius: 6, background: 'var(--color-surface)', color: 'var(--color-text-primary)', cursor: 'pointer' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', marginLeft: 'auto' },
+  select: { fontSize: 12, padding: '7px 10px', border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', marginLeft: 'auto' },
   addForm: { display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' },
-  input: { flex: 1, minWidth: 160, padding: '7px 10px', fontSize: 12, border: '1px solid var(--color-border-light)', borderRadius: 6, background: 'var(--color-surface)', color: 'var(--color-text-primary)' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: '#059669', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-light)', borderRadius: 6, cursor: 'pointer' },
-  catGroup: { background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, marginBottom: 16, overflow: 'hidden' },
-  catHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', background: 'var(--color-bg-main)', borderBottom: '1px solid var(--color-border-light)' },
-  catName: { fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--color-text-muted)', textTransform: 'uppercase' },
-  catCount: { fontSize: 11, fontWeight: 700, color: '#059669' },
-  docRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid var(--color-border-light)', transition: 'opacity .15s' },
+  input: { flex: 1, minWidth: 160, padding: '7px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: 'var(--cp-success)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
+  catGroup: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, marginBottom: 16, overflow: 'hidden' },
+  catHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', background: 'var(--cp-bg-deep)', borderBottom: '1px solid var(--cp-border)' },
+  catName: { fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
+  catCount: { fontSize: 11, fontWeight: 700, color: 'var(--cp-success)' },
+  docRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid var(--cp-border)', transition: 'opacity .15s' },
   docLeft: { display: 'flex', alignItems: 'center', gap: 10, flex: 1 },
-  docTitle: { fontSize: 13, color: 'var(--color-text-primary)', fontWeight: 500 },
-  reqTag: { fontSize: 9, fontWeight: 700, letterSpacing: 1, color: '#7C3AED', background: '#EDE9FE', padding: '1px 6px', borderRadius: 10 },
+  docTitle: { fontSize: 13, color: 'var(--cp-text-primary)', fontWeight: 500 },
+  reqTag: { fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-violet)', background: 'var(--cp-violet-bg)', padding: '1px 6px', borderRadius: 10 },
   docRight: { display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 },
-  docNote: { fontSize: 11, color: 'var(--color-text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  statusBtn: { fontSize: 10, fontWeight: 600, padding: '4px 10px', border: '1px solid var(--color-border-light)', background: 'transparent', color: 'var(--color-text-muted)', borderRadius: 4, cursor: 'pointer' },
+  docNote: { fontSize: 11, color: 'var(--cp-text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  statusBtn: { fontSize: 10, fontWeight: 600, padding: '4px 10px', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 4, cursor: 'pointer' },
 };

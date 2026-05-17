@@ -9,7 +9,7 @@ import { MISSING_LABEL } from '@/lib/hearst-constants';
 import { detectAlerts } from '@/lib/hearst-alerts';
 import AlertBanner from '@/components/hearst/AlertBanner';
 
-const COLORS = { base: '#2563EB', downside: '#DC2626', upside: '#059669' };
+const COLORS = { base: 'var(--cp-info)', downside: 'var(--cp-error)', upside: 'var(--cp-success)' };
 
 function fmtM(v) { if (v == null) return 'N/A'; return '$' + (v / 1e6).toFixed(1) + 'M'; }
 function fmtPct(v) { if (v == null) return 'N/A'; return (v * 100).toFixed(1) + '%'; }
@@ -38,10 +38,10 @@ function SummaryKpi({ label, value, sub }) {
 }
 
 const SK = {
-  card: { background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, padding: '14px 18px' },
-  label: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: 6 },
-  value: { fontSize: 22, fontWeight: 900, color: 'var(--color-text-primary)' },
-  sub: { fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 },
+  card: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '14px 18px' },
+  label: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)', textTransform: 'uppercase', marginBottom: 6 },
+  value: { fontSize: 22, fontWeight: 900, color: 'var(--cp-text-primary)' },
+  sub: { fontSize: 11, color: 'var(--cp-text-muted)', marginTop: 2 },
 };
 
 export default function FinancialPage() {
@@ -171,7 +171,7 @@ export default function FinancialPage() {
                 <tr key={col.key}>
                   <td style={S.tdLabel}>{col.label}</td>
                   {(proj.years || []).map(y => (
-                    <td key={y.year} style={{ ...S.td, color: col.key === 'ebitda' || col.key === 'free_cash_flow' ? (y[col.key] >= 0 ? '#059669' : '#DC2626') : 'inherit' }}>
+                    <td key={y.year} style={{ ...S.td, color: col.key === 'ebitda' || col.key === 'free_cash_flow' ? (y[col.key] >= 0 ? 'var(--cp-success)' : 'var(--cp-error)') : 'inherit' }}>
                       {col.fmt(y[col.key])}
                     </td>
                   ))}
@@ -192,8 +192,8 @@ export default function FinancialPage() {
                 <YAxis style={{ fontSize: 11 }} tickFormatter={v => '$' + v + 'M'} />
                 <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} />
                 <Legend />
-                <Bar dataKey="Revenue" fill="#2563EB" opacity={0.8} />
-                <Line type="monotone" dataKey="EBITDA" stroke="#059669" strokeWidth={2} dot={false} />
+                <Bar dataKey="Revenue" fill="var(--cp-info)" opacity={0.8} />
+                <Line type="monotone" dataKey="EBITDA" stroke="var(--cp-success)" strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -205,7 +205,7 @@ export default function FinancialPage() {
                 <XAxis dataKey="year" style={{ fontSize: 11 }} />
                 <YAxis style={{ fontSize: 11 }} tickFormatter={v => '$' + v + 'M'} />
                 <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} />
-                <Area type="monotone" dataKey="Cum. FCF" stroke="#7C3AED" fill="#EDE9FE" strokeWidth={2} />
+                <Area type="monotone" dataKey="Cum. FCF" stroke="var(--cp-violet)" fill="var(--cp-violet-bg)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -225,26 +225,26 @@ export default function FinancialPage() {
 
 const S = {
   wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: '#DC2626', fontSize: 13, background: '#FEF2F2', borderRadius: 6 },
+  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--color-text-primary)' },
+  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
   scBtn: { fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 20, border: '2px solid', cursor: 'pointer', transition: 'all .15s' },
-  tabBtn: { fontSize: 11, fontWeight: 600, padding: '5px 12px', border: '1px solid var(--color-border-light)', background: 'transparent', color: 'var(--color-text-muted)', borderRadius: 4, cursor: 'pointer' },
-  tabBtnActive: { background: 'var(--color-text-primary)', color: 'var(--color-bg-main)' },
+  tabBtn: { fontSize: 11, fontWeight: 600, padding: '5px 12px', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 4, cursor: 'pointer' },
+  tabBtnActive: { background: 'var(--cp-text-primary)', color: 'var(--cp-bg-deep)' },
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 },
-  noData: { background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '28px 24px', textAlign: 'center', marginBottom: 24 },
-  noDataTitle: { fontSize: 15, fontWeight: 700, color: '#92400E', marginBottom: 8 },
-  noDataSub: { fontSize: 13, color: '#B45309' },
-  noDataLink: { color: '#1D4ED8', fontWeight: 700, textDecoration: 'underline' },
-  missingTag: { fontSize: 11, background: '#fff', border: '1px solid #FCA5A5', color: '#DC2626', padding: '2px 8px', borderRadius: 4 },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--color-surface)' },
-  th: { padding: '8px 12px', textAlign: 'right', fontSize: 10, fontWeight: 700, color: 'var(--color-text-muted)', background: 'var(--color-bg-main)', borderBottom: '1px solid var(--color-border-light)', whiteSpace: 'nowrap' },
-  td: { padding: '7px 12px', textAlign: 'right', borderBottom: '1px solid var(--color-border-light)', fontSize: 12 },
-  tdLabel: { padding: '7px 14px', fontWeight: 600, fontSize: 12, color: 'var(--color-text-primary)', background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border-light)', whiteSpace: 'nowrap', minWidth: 160 },
-  chartCard: { background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, padding: '16px 20px' },
-  chartTitle: { fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', marginBottom: 12, letterSpacing: 0.5 },
-  warnBox: { background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '14px 18px', marginTop: 20 },
-  warnTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: '#DC2626', marginBottom: 8 },
-  warnRow: { fontSize: 12, color: '#991B1B', padding: '3px 0', borderBottom: '1px solid rgba(220,38,38,0.1)' },
+  noData: { background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning-bg)', borderRadius: 8, padding: '28px 24px', textAlign: 'center', marginBottom: 24 },
+  noDataTitle: { fontSize: 15, fontWeight: 700, color: 'var(--cp-warning)', marginBottom: 8 },
+  noDataSub: { fontSize: 13, color: 'var(--cp-warning)' },
+  noDataLink: { color: 'var(--cp-info)', fontWeight: 700, textDecoration: 'underline' },
+  missingTag: { fontSize: 11, background: '#fff', border: '1px solid var(--cp-error)', color: 'var(--cp-error)', padding: '2px 8px', borderRadius: 4 },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)' },
+  th: { padding: '8px 12px', textAlign: 'right', fontSize: 10, fontWeight: 700, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
+  td: { padding: '7px 12px', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 12 },
+  tdLabel: { padding: '7px 14px', fontWeight: 600, fontSize: 12, color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
+  chartCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '16px 20px' },
+  chartTitle: { fontSize: 12, fontWeight: 700, color: 'var(--cp-text-muted)', marginBottom: 12, letterSpacing: 0.5 },
+  warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 8, padding: '14px 18px', marginTop: 20 },
+  warnTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-error)', marginBottom: 8 },
+  warnRow: { fontSize: 12, color: 'var(--cp-error)', padding: '3px 0', borderBottom: '1px solid var(--cp-error-bg)' },
 };

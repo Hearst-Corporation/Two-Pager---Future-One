@@ -25,7 +25,7 @@ function ScoreBar({ value }) {
           key={n}
           style={{
             ...S.scoreDot,
-            background: n <= value ? 'var(--color-accent-strong)' : 'var(--color-border-light)',
+            background: n <= value ? 'var(--cp-accent-strong)' : 'var(--cp-border)',
           }}
         />
       ))}
@@ -148,7 +148,7 @@ export default function DealSimulatorPage() {
                 </div>
                 <div style={S.kpiRow}>
                   <span style={S.kpiLabel}>IRR</span>
-                  <span style={{ ...S.kpiVal, color: p.irr != null && p.irr > 0.15 ? 'var(--color-success)' : p.irr != null && p.irr > 0.08 ? 'var(--color-warning)' : 'var(--color-text-primary)' }}>
+                  <span style={{ ...S.kpiVal, color: p.irr != null && p.irr > 0.15 ? 'var(--cp-success)' : p.irr != null && p.irr > 0.08 ? 'var(--cp-warning)' : 'var(--cp-text-primary)' }}>
                     {fmtPct(p.irr)}
                   </span>
                 </div>
@@ -179,7 +179,7 @@ export default function DealSimulatorPage() {
       {selectedResult && (
         <div style={S.detailWrap}>
           <div style={S.detailTitle}>
-            <span style={{ marginRight: 8, fontSize: 14, color: 'var(--color-text-muted)' }}>
+            <span style={{ marginRight: 8, fontSize: 14, color: 'var(--cp-text-muted)' }}>
               Archetype {selectedResult.archetype.code}
             </span>
             {selectedResult.archetype.label}
@@ -237,49 +237,49 @@ export default function DealSimulatorPage() {
 
 const S = {
   wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: 'var(--color-error)', fontSize: 13, background: 'var(--color-bg-secondary)', borderRadius: 6 },
+  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-surface-1)', borderRadius: 6 },
 
   topBar: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, marginBottom: 16, flexWrap: 'wrap' },
-  pageTitle: { fontSize: 18, fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: 4 },
-  subtitle: { fontSize: 12, color: 'var(--color-text-muted)', maxWidth: 640, lineHeight: 1.5 },
+  pageTitle: { fontSize: 18, fontWeight: 800, color: 'var(--cp-text-primary)', marginBottom: 4 },
+  subtitle: { fontSize: 12, color: 'var(--cp-text-muted)', maxWidth: 640, lineHeight: 1.5 },
   scenarioSwitch: { display: 'flex', gap: 6, flexShrink: 0 },
   scBtn: {
     fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 20,
-    border: '1px solid var(--color-border-light)', background: 'transparent',
-    color: 'var(--color-text-muted)', cursor: 'pointer',
+    border: '1px solid var(--cp-border)', background: 'transparent',
+    color: 'var(--cp-text-muted)', cursor: 'pointer',
   },
-  scBtnActive: { background: 'var(--color-text-primary)', color: 'var(--color-bg-main)', borderColor: 'var(--color-text-primary)' },
+  scBtnActive: { background: 'var(--cp-text-primary)', color: 'var(--cp-bg-deep)', borderColor: 'var(--cp-text-primary)' },
 
   warnBanner: {
     display: 'flex', alignItems: 'center', gap: 10,
-    background: 'var(--color-bg-secondary)',
-    border: '1px solid var(--color-border-medium)',
-    borderLeft: '3px solid var(--color-warning)',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border-strong)',
+    borderLeft: '3px solid var(--cp-warning)',
     padding: '10px 14px', borderRadius: 6, marginBottom: 12,
-    fontSize: 12, color: 'var(--color-text-primary)',
+    fontSize: 12, color: 'var(--cp-text-primary)',
   },
   warnIcon: {
     fontSize: 14, fontWeight: 800,
-    color: 'var(--color-warning)',
+    color: 'var(--cp-warning)',
     flexShrink: 0,
   },
-  warnText: { fontSize: 12, color: 'var(--color-text-primary)', lineHeight: 1.5 },
+  warnText: { fontSize: 12, color: 'var(--cp-text-primary)', lineHeight: 1.5 },
 
   recoBanner: {
     display: 'flex', alignItems: 'center', gap: 12,
-    background: 'var(--color-surface)',
-    borderLeft: '3px solid var(--color-accent-strong)',
-    border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-surface-2)',
+    borderLeft: '3px solid var(--cp-accent-strong)',
+    border: '1px solid var(--cp-border)',
     padding: '12px 16px', borderRadius: 6, marginBottom: 20,
   },
   recoTag: {
     fontSize: 10, fontWeight: 800, letterSpacing: 1.5,
-    color: 'var(--color-accent-strong)',
-    background: 'var(--color-bg-main)',
+    color: 'var(--cp-accent-strong)',
+    background: 'var(--cp-bg-deep)',
     padding: '3px 8px', borderRadius: 4, flexShrink: 0,
   },
-  recoText: { fontSize: 12, color: 'var(--color-text-primary)', lineHeight: 1.5 },
+  recoText: { fontSize: 12, color: 'var(--cp-text-primary)', lineHeight: 1.5 },
 
   grid: {
     display: 'grid',
@@ -287,89 +287,89 @@ const S = {
     gap: 12, marginBottom: 24,
   },
   card: {
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
     borderRadius: 8, padding: 16, cursor: 'pointer',
     transition: 'border-color .12s, transform .12s',
     display: 'flex', flexDirection: 'column', minHeight: 380,
   },
-  cardReco: { borderColor: 'var(--color-accent-strong)', borderWidth: 2 },
-  cardActive: { boxShadow: '0 0 0 2px var(--color-accent-strong)', transform: 'translateY(-1px)' },
+  cardReco: { borderColor: 'var(--cp-accent-strong)', borderWidth: 2 },
+  cardActive: { boxShadow: '0 0 0 2px var(--cp-accent-strong)', transform: 'translateY(-1px)' },
 
   cardHead: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 },
   cardCode: {
-    fontSize: 12, fontWeight: 900, color: 'var(--color-text-inverse)',
-    background: 'var(--color-text-primary)', padding: '3px 9px', borderRadius: 4,
+    fontSize: 12, fontWeight: 900, color: 'var(--cp-text-strong)',
+    background: 'var(--cp-text-primary)', padding: '3px 9px', borderRadius: 4,
   },
-  cardScore: { fontSize: 12, fontWeight: 800, color: 'var(--color-text-muted)' },
+  cardScore: { fontSize: 12, fontWeight: 800, color: 'var(--cp-text-muted)' },
   recoChip: {
     fontSize: 9, fontWeight: 800, letterSpacing: 1,
-    background: 'var(--color-accent-strong)', color: 'var(--color-text-inverse)',
+    background: 'var(--cp-accent-strong)', color: 'var(--cp-text-strong)',
     padding: '2px 7px', borderRadius: 3, marginLeft: 'auto',
   },
-  cardLabel: { fontSize: 14, fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: 2 },
-  cardShort: { fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 6 },
+  cardLabel: { fontSize: 14, fontWeight: 800, color: 'var(--cp-text-primary)', marginBottom: 2 },
+  cardShort: { fontSize: 11, color: 'var(--cp-text-muted)', marginBottom: 6 },
   cardRole: {
-    fontSize: 10, fontWeight: 700, color: 'var(--color-text-secondary)',
+    fontSize: 10, fontWeight: 700, color: 'var(--cp-text-body)',
     textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12,
   },
 
   cardKpis: {
-    background: 'var(--color-bg-main)',
-    border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-bg-deep)',
+    border: '1px solid var(--cp-border)',
     borderRadius: 6, padding: '8px 10px', marginBottom: 12,
   },
   kpiRow: { display: 'flex', justifyContent: 'space-between', padding: '2px 0', fontSize: 11 },
-  kpiLabel: { color: 'var(--color-text-muted)' },
-  kpiVal: { fontWeight: 700, color: 'var(--color-text-primary)' },
+  kpiLabel: { color: 'var(--cp-text-muted)' },
+  kpiVal: { fontWeight: 700, color: 'var(--cp-text-primary)' },
 
   scoreGrid: { display: 'flex', flexDirection: 'column', gap: 4 },
   scoreLine: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  scoreLabel: { fontSize: 10, color: 'var(--color-text-muted)' },
+  scoreLabel: { fontSize: 10, color: 'var(--cp-text-muted)' },
   scoreBar: { display: 'flex', gap: 3 },
   scoreDot: { width: 10, height: 4, borderRadius: 2 },
 
   detailWrap: {
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
     borderRadius: 8, padding: 20, marginBottom: 24,
   },
-  detailTitle: { fontSize: 16, fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: 6 },
-  detailDesc: { fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.6, marginBottom: 16 },
+  detailTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)', marginBottom: 6 },
+  detailDesc: { fontSize: 12, color: 'var(--cp-text-muted)', lineHeight: 1.6, marginBottom: 16 },
   detailCols: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 },
   detailCol: { minWidth: 0 },
   detailColTitle: {
     fontSize: 10, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase',
-    color: 'var(--color-text-muted)', marginBottom: 8,
+    color: 'var(--cp-text-muted)', marginBottom: 8,
   },
   termList: { paddingLeft: 18, margin: 0 },
-  termItem: { fontSize: 12, color: 'var(--color-text-primary)', lineHeight: 1.6, marginBottom: 6 },
+  termItem: { fontSize: 12, color: 'var(--cp-text-primary)', lineHeight: 1.6, marginBottom: 6 },
   compBox: {
-    fontSize: 12, color: 'var(--color-text-primary)', lineHeight: 1.5,
-    background: 'var(--color-bg-main)', border: '1px solid var(--color-border-light)',
+    fontSize: 12, color: 'var(--cp-text-primary)', lineHeight: 1.5,
+    background: 'var(--cp-bg-deep)', border: '1px solid var(--cp-border)',
     borderRadius: 6, padding: '8px 12px', fontStyle: 'italic',
   },
   miniGrid: {
-    background: 'var(--color-bg-main)', border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-bg-deep)', border: '1px solid var(--cp-border)',
     borderRadius: 6, padding: '8px 12px',
   },
   miniRow: {
     display: 'flex', justifyContent: 'space-between', padding: '3px 0',
-    borderBottom: '1px solid var(--color-border-light)', fontSize: 11, color: 'var(--color-text-muted)',
+    borderBottom: '1px solid var(--cp-border)', fontSize: 11, color: 'var(--cp-text-muted)',
   },
   missingBox: {
-    background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-medium)',
-    color: 'var(--color-warning)', padding: '8px 12px', borderRadius: 6, fontSize: 11, marginTop: 10,
+    background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)',
+    color: 'var(--cp-warning)', padding: '8px 12px', borderRadius: 6, fontSize: 11, marginTop: 10,
   },
 
   methodBox: {
-    background: 'var(--color-bg-main)',
-    border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-bg-deep)',
+    border: '1px solid var(--cp-border)',
     borderRadius: 6, padding: '12px 16px',
   },
   methodTitle: {
     fontSize: 10, fontWeight: 800, letterSpacing: 1.5, textTransform: 'uppercase',
-    color: 'var(--color-text-muted)', marginBottom: 6,
+    color: 'var(--cp-text-muted)', marginBottom: 6,
   },
-  methodText: { fontSize: 11, color: 'var(--color-text-secondary)', lineHeight: 1.6 },
+  methodText: { fontSize: 11, color: 'var(--cp-text-body)', lineHeight: 1.6 },
 };

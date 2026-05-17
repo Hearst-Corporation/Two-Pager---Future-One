@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 
 const STAGES = ['prospecting', 'qualified', 'proposal', 'negotiation', 'committed', 'lost'];
 const STAGE_META = {
-  prospecting: { label: 'Prospecting', color: '#6B7280' },
-  qualified:   { label: 'Qualified',   color: '#2563EB' },
-  proposal:    { label: 'Proposal',    color: '#D97706' },
-  negotiation: { label: 'Negotiation', color: '#7C3AED' },
-  committed:   { label: 'Committed',   color: '#059669' },
-  lost:        { label: 'Lost',        color: '#DC2626' },
+  prospecting: { label: 'Prospecting', color: 'var(--cp-text-muted)' },
+  qualified:   { label: 'Qualified',   color: 'var(--cp-info)' },
+  proposal:    { label: 'Proposal',    color: 'var(--cp-warning)' },
+  negotiation: { label: 'Negotiation', color: 'var(--cp-violet)' },
+  committed:   { label: 'Committed',   color: 'var(--cp-success)' },
+  lost:        { label: 'Lost',        color: 'var(--cp-error)' },
 };
 
 function fmtMw(v) { if (!v) return '—'; return v + ' MW'; }
@@ -155,11 +155,11 @@ export default function PipelinePage() {
       <div style={S.summaryRow}>
         <div style={S.sumCard}>
           <div style={S.sumLabel}>COMMITTED CAPACITY</div>
-          <div style={{ ...S.sumVal, color: '#059669' }}>{committedMw.toFixed(0)} MW</div>
+          <div style={{ ...S.sumVal, color: 'var(--cp-success)' }}>{committedMw.toFixed(0)} MW</div>
         </div>
         <div style={S.sumCard}>
           <div style={S.sumLabel}>WEIGHTED PIPELINE</div>
-          <div style={{ ...S.sumVal, color: '#2563EB' }}>{weightedMw.toFixed(1)} MW</div>
+          <div style={{ ...S.sumVal, color: 'var(--cp-info)' }}>{weightedMw.toFixed(1)} MW</div>
         </div>
         <div style={S.sumCard}>
           <div style={S.sumLabel}>TOTAL PROSPECTS</div>
@@ -169,7 +169,7 @@ export default function PipelinePage() {
 
       {/* Kanban stage tabs */}
       <div style={S.stageRow}>
-        <button onClick={() => setStageFilter('')} style={{ ...S.stagePill, background: !stageFilter ? '#1F2937' : 'transparent', color: !stageFilter ? '#fff' : 'var(--color-text-muted)' }}>
+        <button onClick={() => setStageFilter('')} style={{ ...S.stagePill, background: !stageFilter ? 'var(--cp-text-body)' : 'transparent', color: !stageFilter ? '#fff' : 'var(--cp-text-muted)' }}>
           All ({prospects.length})
         </button>
         {STAGES.map(st => (
@@ -232,7 +232,7 @@ export default function PipelinePage() {
               const sm = STAGE_META[p.stage] || STAGE_META.prospecting;
               if (editing === p.id) {
                 return (
-                  <tr key={p.id} style={{ ...S.tr, background: 'var(--color-bg-secondary)' }}>
+                  <tr key={p.id} style={{ ...S.tr, background: 'var(--cp-surface-1)' }}>
                     <td style={S.td}>
                       <input value={editDraft.prospect_name} onChange={e => setEditDraft(d => ({ ...d, prospect_name: e.target.value }))} placeholder="Prospect name" style={S.editInp} />
                       <input value={editDraft.prospect_type} onChange={e => setEditDraft(d => ({ ...d, prospect_type: e.target.value }))} placeholder="Type" style={{ ...S.editInp, marginTop: 4 }} />
@@ -258,18 +258,18 @@ export default function PipelinePage() {
                 <tr key={p.id} style={S.tr}>
                   <td style={S.tdBold}>
                     <div>{p.prospect_name || p.company_name || '—'}</div>
-                    {p.prospect_type && <div style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>{p.prospect_type}</div>}
+                    {p.prospect_type && <div style={{ fontSize: 10, color: 'var(--cp-text-muted)' }}>{p.prospect_type}</div>}
                   </td>
                   <td style={S.td}>
                     <select
                       value={p.stage}
                       onChange={e => updateProspect(p.id, { stage: e.target.value })}
-                      style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: sm.bg || '#F3F4F6', color: sm.color, border: `1px solid ${sm.color}`, cursor: 'pointer' }}
+                      style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 20, background: sm.bg || 'var(--cp-surface-1)', color: sm.color, border: `1px solid ${sm.color}`, cursor: 'pointer' }}
                     >
                       {STAGES.map(s => <option key={s} value={s}>{STAGE_META[s].label}</option>)}
                     </select>
                   </td>
-                  <td style={{ ...S.td, fontWeight: 700, color: p.probability_pct >= 70 ? '#059669' : p.probability_pct >= 40 ? '#D97706' : '#DC2626' }}>
+                  <td style={{ ...S.td, fontWeight: 700, color: p.probability_pct >= 70 ? 'var(--cp-success)' : p.probability_pct >= 40 ? 'var(--cp-warning)' : 'var(--cp-error)' }}>
                     {fmtPct(p.probability_pct)}
                   </td>
                   <td style={{ ...S.td, fontWeight: 700 }}>{fmtMw(p.mw_requested ?? p.capacity_mw)}</td>
@@ -301,35 +301,35 @@ export default function PipelinePage() {
 
 const S = {
   wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: '#DC2626', fontSize: 13, background: '#FEF2F2', borderRadius: 6 },
+  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--color-text-primary)' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
   summaryRow: { display: 'flex', gap: 14, marginBottom: 18 },
-  sumCard: { flex: 1, background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, padding: '12px 16px' },
-  sumLabel: { fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'var(--color-text-muted)', marginBottom: 4 },
-  sumVal: { fontSize: 22, fontWeight: 900, color: 'var(--color-text-primary)' },
+  sumCard: { flex: 1, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '12px 16px' },
+  sumLabel: { fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)', marginBottom: 4 },
+  sumVal: { fontSize: 22, fontWeight: 900, color: 'var(--cp-text-primary)' },
   stageRow: { display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 },
   stagePill: { fontSize: 10, fontWeight: 700, padding: '4px 12px', borderRadius: 20, border: '1px solid', cursor: 'pointer', transition: 'all .15s' },
-  addForm: { background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, padding: '16px 20px', marginBottom: 16 },
-  addTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--color-text-muted)', marginBottom: 12 },
+  addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '16px 20px', marginBottom: 16 },
+  addTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 12 },
   addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px 14px' },
-  lbl: { display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 3 },
-  inp: { width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--color-border-light)', borderRadius: 4, background: 'var(--color-bg-main)', color: 'var(--color-text-primary)', boxSizing: 'border-box' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-light)', borderRadius: 6, cursor: 'pointer' },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--color-surface)', borderRadius: 8, overflow: 'hidden' },
-  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 0.8, color: 'var(--color-text-muted)', background: 'var(--color-bg-main)', borderBottom: '1px solid var(--color-border-light)' },
-  tr: { borderBottom: '1px solid var(--color-border-light)' },
-  td: { padding: '8px 12px', color: 'var(--color-text-muted)', verticalAlign: 'middle' },
-  tdBold: { padding: '8px 12px', fontWeight: 700, color: 'var(--color-text-primary)', verticalAlign: 'middle' },
-  deleteBtn: { fontSize: 12, color: '#DC2626', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', padding: '2px 6px', borderRadius: 4 },
-  editIcon: { fontSize: 12, color: 'var(--color-text-secondary)', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', padding: '2px 6px', borderRadius: 4 },
-  confirmYes: { fontSize: 11, fontWeight: 700, color: '#fff', background: '#DC2626', border: 'none', cursor: 'pointer', padding: '3px 6px', borderRadius: 4 },
-  confirmNo: { fontSize: 10, color: 'var(--color-text-muted)', background: 'transparent', border: '1px solid var(--color-border-light)', cursor: 'pointer', padding: '3px 6px', borderRadius: 4 },
-  editInp: { width: '100%', fontSize: 11, padding: '4px 6px', border: '1px solid var(--color-border-light)', borderRadius: 4, background: 'var(--color-bg-main)', color: 'var(--color-text-primary)', boxSizing: 'border-box' },
-  saveBtnSm: { fontSize: 11, fontWeight: 700, color: '#fff', background: '#059669', border: 'none', cursor: 'pointer', padding: '4px 10px', borderRadius: 4, marginRight: 4 },
-  cancelBtnSm: { fontSize: 11, color: 'var(--color-text-muted)', background: 'transparent', border: '1px solid var(--color-border-light)', cursor: 'pointer', padding: '4px 8px', borderRadius: 4 },
-  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--color-text-muted)', fontSize: 13, background: 'var(--color-surface)', borderRadius: 8 },
+  lbl: { display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--cp-text-muted)', marginBottom: 3 },
+  inp: { width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-bg-deep)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 8, overflow: 'hidden' },
+  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 0.8, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', borderBottom: '1px solid var(--cp-border)' },
+  tr: { borderBottom: '1px solid var(--cp-border)' },
+  td: { padding: '8px 12px', color: 'var(--cp-text-muted)', verticalAlign: 'middle' },
+  tdBold: { padding: '8px 12px', fontWeight: 700, color: 'var(--cp-text-primary)', verticalAlign: 'middle' },
+  deleteBtn: { fontSize: 12, color: 'var(--cp-error)', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', padding: '2px 6px', borderRadius: 4 },
+  editIcon: { fontSize: 12, color: 'var(--cp-text-body)', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', padding: '2px 6px', borderRadius: 4 },
+  confirmYes: { fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--cp-error)', border: 'none', cursor: 'pointer', padding: '3px 6px', borderRadius: 4 },
+  confirmNo: { fontSize: 10, color: 'var(--cp-text-muted)', background: 'transparent', border: '1px solid var(--cp-border)', cursor: 'pointer', padding: '3px 6px', borderRadius: 4 },
+  editInp: { width: '100%', fontSize: 11, padding: '4px 6px', border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-bg-deep)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
+  saveBtnSm: { fontSize: 11, fontWeight: 700, color: '#fff', background: 'var(--cp-success)', border: 'none', cursor: 'pointer', padding: '4px 10px', borderRadius: 4, marginRight: 4 },
+  cancelBtnSm: { fontSize: 11, color: 'var(--cp-text-muted)', background: 'transparent', border: '1px solid var(--cp-border)', cursor: 'pointer', padding: '4px 8px', borderRadius: 4 },
+  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--cp-text-muted)', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
 };

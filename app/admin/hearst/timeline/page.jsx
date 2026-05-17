@@ -56,12 +56,12 @@ export default function TimelinePage() {
 
   // Build dynamic phases based on scenario inputs
   const dynamicPhases = [
-    { id: 'dev',          label: 'Development & Permitting', color: '#6B7280', start: 0, duration: 4 },
-    { id: 'finance',      label: 'Financial Close',           color: '#2563EB', start: 4, duration: 3 },
-    { id: 'construction', label: 'Construction',              color: '#D97706', start: 7, duration: constructionMonths },
-    { id: 'commissioning',label: 'Commissioning & Testing',   color: '#7C3AED', start: 7 + constructionMonths, duration: 2 },
-    { id: 'phase1_ops',   label: 'Phase 1 Operations',        color: '#059669', start: 7 + constructionMonths + 2, duration: 12 },
-    { id: 'phase2',       label: 'Phase 2 Expansion',         color: '#0891B2', start: 7 + constructionMonths + 2, duration: 14 },
+    { id: 'dev',          label: 'Development & Permitting', color: 'var(--cp-text-muted)', start: 0, duration: 4 },
+    { id: 'finance',      label: 'Financial Close',           color: 'var(--cp-info)', start: 4, duration: 3 },
+    { id: 'construction', label: 'Construction',              color: 'var(--cp-warning)', start: 7, duration: constructionMonths },
+    { id: 'commissioning',label: 'Commissioning & Testing',   color: 'var(--cp-violet)', start: 7 + constructionMonths, duration: 2 },
+    { id: 'phase1_ops',   label: 'Phase 1 Operations',        color: 'var(--cp-success)', start: 7 + constructionMonths + 2, duration: 12 },
+    { id: 'phase2',       label: 'Phase 2 Expansion',         color: 'var(--cp-info-strong)', start: 7 + constructionMonths + 2, duration: 14 },
   ];
 
   const totalMonths = Math.max(...dynamicPhases.map(p => p.start + p.duration)) + 4;
@@ -83,7 +83,7 @@ export default function TimelinePage() {
       {!scenario?.planned_cod && (
         <div style={S.warning}>
           Set Planned COD and Construction Duration in the{' '}
-          <Link href="/admin/hearst/assumptions" style={{ color: '#1D4ED8', fontWeight: 700, textDecoration: 'underline' }}>Assumptions tab →</Link>
+          <Link href="/admin/hearst/assumptions" style={{ color: 'var(--cp-info)', fontWeight: 700, textDecoration: 'underline' }}>Assumptions tab →</Link>
           {' '}to generate an accurate timeline.
         </div>
       )}
@@ -96,7 +96,7 @@ export default function TimelinePage() {
             {/* Month header */}
             <div style={{ display: 'flex', marginLeft: 200, marginBottom: 2 }}>
               {Array.from({ length: totalMonths }, (_, i) => (
-                <div key={i} style={{ width: MONTH_W, flexShrink: 0, fontSize: 8, color: 'var(--color-text-muted)', textAlign: 'center', borderLeft: i % 12 === 0 ? '1px solid rgba(0,0,0,0.1)' : 'none' }}>
+                <div key={i} style={{ width: MONTH_W, flexShrink: 0, fontSize: 8, color: 'var(--cp-text-muted)', textAlign: 'center', borderLeft: i % 12 === 0 ? '1px solid rgba(0,0,0,0.1)' : 'none' }}>
                   {i % 3 === 0 ? 'M' + (i + 1) : ''}
                 </div>
               ))}
@@ -105,7 +105,7 @@ export default function TimelinePage() {
             {/* Year markers */}
             <div style={{ display: 'flex', marginLeft: 200, marginBottom: 8 }}>
               {Array.from({ length: totalMonths }, (_, i) => (
-                <div key={i} style={{ width: MONTH_W, flexShrink: 0, fontSize: 9, color: '#2563EB', textAlign: 'center', fontWeight: i % 12 === 0 ? 700 : 400 }}>
+                <div key={i} style={{ width: MONTH_W, flexShrink: 0, fontSize: 9, color: 'var(--cp-info)', textAlign: 'center', fontWeight: i % 12 === 0 ? 700 : 400 }}>
                   {i % 12 === 0 ? startYear + Math.floor(i / 12) : ''}
                 </div>
               ))}
@@ -144,7 +144,7 @@ export default function TimelinePage() {
                 const month = m.month === 28 && m.phase === 'commissioning' ? 7 + constructionMonths : m.month;
                 const x = month * MONTH_W;
                 const phase = dynamicPhases.find(p => p.id === m.phase);
-                const color = phase?.color || '#6B7280';
+                const color = phase?.color || 'var(--cp-text-muted)';
                 return (
                   <div key={i} style={{ position: 'absolute', left: x, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <div style={{ width: 2, height: 16, background: color }} />
@@ -183,7 +183,7 @@ export default function TimelinePage() {
           <div style={S.cpArrow}>→</div>
           <div style={S.cpStep}><span style={S.cpNum}>4</span><span>Commissioning (2 mo)</span></div>
           <div style={S.cpArrow}>→</div>
-          <div style={{ ...S.cpStep, background: '#D1FAE5', color: '#059669', fontWeight: 800 }}>COD</div>
+          <div style={{ ...S.cpStep, background: 'var(--cp-success-bg)', color: 'var(--cp-success)', fontWeight: 800 }}>COD</div>
         </div>
       </div>
     </div>
@@ -192,22 +192,22 @@ export default function TimelinePage() {
 
 const S = {
   wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: '#DC2626', fontSize: 13, background: '#FEF2F2', borderRadius: 6 },
+  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--color-text-primary)' },
-  codInfo: { fontSize: 12, color: 'var(--color-text-muted)' },
-  warning: { fontSize: 12, color: '#92400E', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '8px 14px', marginBottom: 20 },
-  chartWrap: { background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, padding: '20px 16px 12px', marginBottom: 20, overflowX: 'auto' },
-  phaseLabel: { width: 200, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', paddingRight: 12, textAlign: 'right', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
-  legend: { display: 'flex', flexWrap: 'wrap', gap: '8px 20px', marginBottom: 20, background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, padding: '12px 16px' },
+  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  codInfo: { fontSize: 12, color: 'var(--cp-text-muted)' },
+  warning: { fontSize: 12, color: 'var(--cp-warning)', background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning-bg)', borderRadius: 6, padding: '8px 14px', marginBottom: 20 },
+  chartWrap: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '20px 16px 12px', marginBottom: 20, overflowX: 'auto' },
+  phaseLabel: { width: 200, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--cp-text-muted)', paddingRight: 12, textAlign: 'right', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
+  legend: { display: 'flex', flexWrap: 'wrap', gap: '8px 20px', marginBottom: 20, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '12px 16px' },
   legendItem: { display: 'flex', alignItems: 'center', gap: 6 },
-  legendLabel: { fontSize: 11, color: 'var(--color-text-muted)' },
-  legendDur: { fontSize: 10, color: 'var(--color-text-muted)', background: 'var(--color-bg-main)', padding: '1px 6px', borderRadius: 10 },
-  criticalPath: { background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, padding: '16px 20px' },
-  sectionTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--color-text-muted)', marginBottom: 12 },
+  legendLabel: { fontSize: 11, color: 'var(--cp-text-muted)' },
+  legendDur: { fontSize: 10, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', padding: '1px 6px', borderRadius: 10 },
+  criticalPath: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '16px 20px' },
+  sectionTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 12 },
   cpRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  cpStep: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, background: 'var(--color-bg-main)', padding: '6px 12px', borderRadius: 20, color: 'var(--color-text-muted)' },
-  cpNum: { width: 18, height: 18, borderRadius: '50%', background: '#2563EB', color: '#fff', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  cpArrow: { color: 'var(--color-text-muted)', fontWeight: 700 },
+  cpStep: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, background: 'var(--cp-bg-deep)', padding: '6px 12px', borderRadius: 20, color: 'var(--cp-text-muted)' },
+  cpNum: { width: 18, height: 18, borderRadius: '50%', background: 'var(--cp-info)', color: '#fff', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  cpArrow: { color: 'var(--cp-text-muted)', fontWeight: 700 },
 };

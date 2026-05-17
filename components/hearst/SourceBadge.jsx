@@ -8,7 +8,7 @@ import { SOURCE_TYPES, MISSING_LABEL } from '@/lib/hearst-constants';
 export default function SourceBadge({ source_type, size = 'sm' }) {
   if (!source_type) {
     return (
-      <span style={{ ...S.badge, ...S.sm, background: '#FEE2E2', color: '#DC2626', ...sizeStyle(size) }}>
+      <span style={{ ...S.badge, ...S.sm, background: 'var(--cp-error-bg)', color: 'var(--cp-error)', ...sizeStyle(size) }}>
         {MISSING_LABEL}
       </span>
     );

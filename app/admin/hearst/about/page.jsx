@@ -115,7 +115,7 @@ export default function HearstAboutPage() {
 
           <div style={S.lane}>
             <div style={S.laneHeader}>
-              <div style={{ ...S.laneDot, background: 'var(--color-accent-strong)' }} />
+              <div style={{ ...S.laneDot, background: 'var(--cp-accent-strong)' }} />
               <div style={S.laneName}>Hyperscalers</div>
               <div style={S.laneRole}>Tenants / buyers</div>
             </div>
@@ -140,7 +140,7 @@ export default function HearstAboutPage() {
 
           <div style={S.lane}>
             <div style={S.laneHeader}>
-              <div style={{ ...S.laneDot, background: 'var(--color-success)' }} />
+              <div style={{ ...S.laneDot, background: 'var(--cp-success)' }} />
               <div style={S.laneName}>Operators (colo brands)</div>
               <div style={S.laneRole}>Developers & managers</div>
             </div>
@@ -165,7 +165,7 @@ export default function HearstAboutPage() {
 
           <div style={S.lane}>
             <div style={S.laneHeader}>
-              <div style={{ ...S.laneDot, background: 'var(--color-warning)' }} />
+              <div style={{ ...S.laneDot, background: 'var(--cp-warning)' }} />
               <div style={S.laneName}>Neoclouds / GPU specialists</div>
               <div style={S.laneRole}>AI-era compute renters</div>
             </div>
@@ -371,18 +371,18 @@ const S = {
   pageHeader: {
     marginBottom: 40,
     paddingBottom: 24,
-    borderBottom: '1px solid var(--color-border-light)',
+    borderBottom: '1px solid var(--cp-border)',
   },
   pageTitle: {
     fontSize: 26,
     fontWeight: 900,
-    color: 'var(--color-text-primary)',
+    color: 'var(--cp-text-primary)',
     letterSpacing: -0.5,
     marginBottom: 8,
   },
   pageSubtitle: {
     fontSize: 14,
-    color: 'var(--color-text-muted)',
+    color: 'var(--cp-text-muted)',
     lineHeight: 1.6,
   },
 
@@ -400,20 +400,20 @@ const S = {
     fontSize: 11,
     fontWeight: 900,
     letterSpacing: 3,
-    color: 'var(--color-accent-strong)',
+    color: 'var(--cp-accent-strong)',
     marginTop: 4,
     minWidth: 28,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 800,
-    color: 'var(--color-text-primary)',
+    color: 'var(--cp-text-primary)',
     letterSpacing: -0.3,
     marginBottom: 6,
   },
   sectionLead: {
     fontSize: 13,
-    color: 'var(--color-text-muted)',
+    color: 'var(--cp-text-muted)',
     lineHeight: 1.65,
     maxWidth: 640,
   },
@@ -425,27 +425,27 @@ const S = {
     gap: 16,
   },
   card: {
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
     borderRadius: 8,
     padding: '20px 22px',
   },
   cardLabel: {
     fontSize: 14,
     fontWeight: 800,
-    color: 'var(--color-text-primary)',
+    color: 'var(--cp-text-primary)',
     marginBottom: 4,
   },
   cardTag: {
     fontSize: 11,
     fontWeight: 600,
-    color: 'var(--color-accent-strong)',
+    color: 'var(--cp-accent-strong)',
     letterSpacing: 0.3,
     marginBottom: 12,
   },
   cardBody: {
     fontSize: 13,
-    color: 'var(--color-text-muted)',
+    color: 'var(--cp-text-muted)',
     lineHeight: 1.7,
     margin: 0,
     marginBottom: 14,
@@ -453,9 +453,9 @@ const S = {
   cardStat: {
     fontSize: 11,
     fontWeight: 700,
-    color: 'var(--color-text-primary)',
-    background: 'var(--color-bg-main)',
-    border: '1px solid var(--color-border-light)',
+    color: 'var(--cp-text-primary)',
+    background: 'var(--cp-bg-deep)',
+    border: '1px solid var(--cp-border)',
     borderRadius: 4,
     padding: '5px 10px',
     display: 'inline-block',
@@ -468,8 +468,8 @@ const S = {
     gap: 16,
   },
   lane: {
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
     borderRadius: 8,
     padding: '20px 24px',
   },
@@ -488,19 +488,19 @@ const S = {
   laneName: {
     fontSize: 15,
     fontWeight: 800,
-    color: 'var(--color-text-primary)',
+    color: 'var(--cp-text-primary)',
   },
   laneRole: {
     fontSize: 11,
     fontWeight: 600,
-    color: 'var(--color-text-muted)',
+    color: 'var(--cp-text-muted)',
     letterSpacing: 0.2,
     marginLeft: 4,
   },
   laneNames: {
     fontSize: 12,
     fontWeight: 700,
-    color: 'var(--color-accent-strong)',
+    color: 'var(--cp-accent-strong)',
     letterSpacing: 0.3,
     marginBottom: 14,
     marginLeft: 18,
@@ -519,12 +519,12 @@ const S = {
   },
   laneKey: {
     fontWeight: 700,
-    color: 'var(--color-text-primary)',
+    color: 'var(--cp-text-primary)',
     minWidth: 120,
     flexShrink: 0,
   },
   laneVal: {
-    color: 'var(--color-text-muted)',
+    color: 'var(--cp-text-muted)',
     flex: 1,
   },
 
@@ -533,53 +533,53 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 0,
-    border: '1px solid var(--color-border-light)',
+    border: '1px solid var(--cp-border)',
     borderRadius: 8,
     overflow: 'hidden',
   },
   glossItem: {
     display: 'flex',
     gap: 0,
-    borderBottom: '1px solid var(--color-border-light)',
+    borderBottom: '1px solid var(--cp-border)',
   },
   glossLeft: {
     width: 180,
     flexShrink: 0,
     padding: '18px 20px',
-    background: 'var(--color-surface)',
-    borderRight: '1px solid var(--color-border-light)',
+    background: 'var(--cp-surface-2)',
+    borderRight: '1px solid var(--cp-border)',
   },
   glossRight: {
     flex: 1,
     padding: '18px 24px',
-    background: 'var(--color-bg-main)',
+    background: 'var(--cp-bg-deep)',
   },
   glossTerm: {
     fontSize: 14,
     fontWeight: 900,
-    color: 'var(--color-text-primary)',
+    color: 'var(--cp-text-primary)',
     letterSpacing: -0.2,
     marginBottom: 4,
   },
   glossTag: {
     fontSize: 10,
     fontWeight: 600,
-    color: 'var(--color-accent-strong)',
+    color: 'var(--cp-accent-strong)',
     letterSpacing: 0.5,
     lineHeight: 1.4,
   },
   glossPlain: {
     fontSize: 13,
-    color: 'var(--color-text-muted)',
+    color: 'var(--cp-text-muted)',
     lineHeight: 1.7,
     marginBottom: 10,
   },
   glossFormula: {
     fontSize: 12,
     fontFamily: '"SF Mono", "Fira Code", "Consolas", monospace',
-    color: 'var(--color-text-primary)',
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
+    color: 'var(--cp-text-primary)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
     borderRadius: 4,
     padding: '8px 12px',
     lineHeight: 1.6,

@@ -84,6 +84,7 @@
   --cp-surface-3: rgba(255, 255, 255, 0.09);
   --cp-surface-hover: rgba(255, 255, 255, 0.12);
   --cp-surface-pressed: rgba(255, 255, 255, 0.16);
+  --cp-scrim: rgba(10, 12, 16, 0.7);
 
   /* === TEXT ON DARK ================================== */
   --cp-text-strong: #ffffff;

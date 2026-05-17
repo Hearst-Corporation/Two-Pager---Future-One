@@ -35,9 +35,9 @@ const COMPARE_ROWS = [
 ];
 
 const SC_COLORS = {
-  base: { border: '#2563EB', bg: '#DBEAFE', label: '#1D4ED8' },
-  downside: { border: '#DC2626', bg: '#FEF2F2', label: '#B91C1C' },
-  upside: { border: '#059669', bg: '#D1FAE5', label: '#047857' },
+  base: { border: 'var(--cp-info)', bg: 'var(--cp-info-bg)', label: 'var(--cp-info)' },
+  downside: { border: 'var(--cp-error)', bg: 'var(--cp-error-bg)', label: 'var(--cp-error)' },
+  upside: { border: 'var(--cp-success)', bg: 'var(--cp-success-bg)', label: 'var(--cp-success)' },
 };
 
 function getColor(sc) {
@@ -197,7 +197,7 @@ export default function ScenariosPage() {
                     const isHighlighted = row.highlight && raw != null;
 
                     return (
-                      <td key={sc.id} style={{ ...S.td, textAlign: 'center', color: isMissing ? '#DC2626' : isHighlighted ? col.label : 'inherit', fontWeight: isHighlighted ? 800 : isMissing ? 400 : 'inherit', fontStyle: isMissing ? 'italic' : 'normal', fontSize: isMissing ? 11 : 13 }}>
+                      <td key={sc.id} style={{ ...S.td, textAlign: 'center', color: isMissing ? 'var(--cp-error)' : isHighlighted ? col.label : 'inherit', fontWeight: isHighlighted ? 800 : isMissing ? 400 : 'inherit', fontStyle: isMissing ? 'italic' : 'normal', fontSize: isMissing ? 11 : 13 }}>
                         {display}
                       </td>
                     );
@@ -214,18 +214,18 @@ export default function ScenariosPage() {
 
 const S = {
   wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: '#DC2626', fontSize: 13, background: '#FEF2F2', borderRadius: 6 },
+  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--color-text-primary)' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  addForm: { display: 'flex', gap: 10, marginBottom: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, padding: '14px 16px' },
-  inp: { flex: 1, padding: '7px 10px', fontSize: 12, border: '1px solid var(--color-border-light)', borderRadius: 6, background: 'var(--color-bg-main)', color: 'var(--color-text-primary)' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-light)', borderRadius: 6, cursor: 'pointer' },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 13, background: 'var(--color-surface)', borderRadius: 8 },
-  th: { padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: 'var(--color-text-muted)', background: 'var(--color-bg-main)', borderBottom: '2px solid var(--color-border-light)' },
-  tdLabel: { padding: '9px 16px', fontWeight: 600, color: 'var(--color-text-muted)', fontSize: 12, whiteSpace: 'nowrap', borderBottom: '1px solid var(--color-border-light)', minWidth: 180 },
-  td: { padding: '9px 16px', borderBottom: '1px solid var(--color-border-light)' },
-  divider: { padding: '6px 16px', fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--color-text-muted)', background: 'var(--color-bg-main)', textTransform: 'uppercase' },
+  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  addForm: { display: 'flex', gap: 10, marginBottom: 16, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '14px 16px' },
+  inp: { flex: 1, padding: '7px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-bg-deep)', color: 'var(--cp-text-primary)' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
+  th: { padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', borderBottom: '2px solid var(--cp-border)' },
+  tdLabel: { padding: '9px 16px', fontWeight: 600, color: 'var(--cp-text-muted)', fontSize: 12, whiteSpace: 'nowrap', borderBottom: '1px solid var(--cp-border)', minWidth: 180 },
+  td: { padding: '9px 16px', borderBottom: '1px solid var(--cp-border)' },
+  divider: { padding: '6px 16px', fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', textTransform: 'uppercase' },
 };

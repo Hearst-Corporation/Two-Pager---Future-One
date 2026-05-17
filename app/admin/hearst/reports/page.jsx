@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 function Section({ title, children }) {
   return (
     <div style={{ marginBottom: 28, pageBreakInside: 'avoid' }}>
-      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--color-text-muted)', textTransform: 'uppercase', borderBottom: '2px solid var(--color-border-light)', paddingBottom: 6, marginBottom: 14 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', textTransform: 'uppercase', borderBottom: '2px solid var(--cp-border)', paddingBottom: 6, marginBottom: 14 }}>
         {title}
       </div>
       {children}
@@ -14,9 +14,9 @@ function Section({ title, children }) {
 
 function KpiLine({ label, value }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--color-border-light)', fontSize: 13 }}>
-      <span style={{ color: 'var(--color-text-muted)' }}>{label}</span>
-      <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--cp-border)', fontSize: 13 }}>
+      <span style={{ color: 'var(--cp-text-muted)' }}>{label}</span>
+      <span style={{ fontWeight: 700, color: 'var(--cp-text-primary)' }}>{value}</span>
     </div>
   );
 }
@@ -131,8 +131,8 @@ export default function ReportsPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
                 <tr>
-                  <th style={{ padding: '6px 8px', textAlign: 'left', background: 'var(--color-bg-main)', fontSize: 10 }}>Metric</th>
-                  {scenarios.map(sc => <th key={sc.id} style={{ padding: '6px 8px', textAlign: 'center', background: 'var(--color-bg-main)', fontSize: 10 }}>{sc.name}</th>)}
+                  <th style={{ padding: '6px 8px', textAlign: 'left', background: 'var(--cp-bg-deep)', fontSize: 10 }}>Metric</th>
+                  {scenarios.map(sc => <th key={sc.id} style={{ padding: '6px 8px', textAlign: 'center', background: 'var(--cp-bg-deep)', fontSize: 10 }}>{sc.name}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -143,8 +143,8 @@ export default function ReportsPage() {
                   { label: 'DSCR', get: sc => sc.projection?.dscr_stabilized ? sc.projection.dscr_stabilized.toFixed(2) + 'x' : 'N/A' },
                   { label: 'Source Score', get: sc => (sc.source_score ?? 0) + '/100' },
                 ].map(row => (
-                  <tr key={row.label} style={{ borderBottom: '1px solid var(--color-border-light)' }}>
-                    <td style={{ padding: '5px 8px', fontWeight: 600, color: 'var(--color-text-muted)' }}>{row.label}</td>
+                  <tr key={row.label} style={{ borderBottom: '1px solid var(--cp-border)' }}>
+                    <td style={{ padding: '5px 8px', fontWeight: 600, color: 'var(--cp-text-muted)' }}>{row.label}</td>
                     {scenarios.map(sc => <td key={sc.id} style={{ padding: '5px 8px', textAlign: 'center', fontWeight: 700 }}>{row.get(sc)}</td>)}
                   </tr>
                 ))}
@@ -155,14 +155,14 @@ export default function ReportsPage() {
 
         {/* Disclaimers */}
         <Section title="Disclaimers & Source Statement">
-          <p style={{ fontSize: 11, color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
+          <p style={{ fontSize: 11, color: 'var(--cp-text-muted)', lineHeight: 1.6 }}>
             This report was generated in Source-Backed Evidence Mode. All financial projections are based solely on
             admin-entered inputs, uploaded documents, official public sources, and calculated values derived from those
             sourced inputs. Values marked "N/A — Source Required" have not been estimated or invented. This report does
             not constitute investment advice. Past performance of comparable projects is not indicative of future results.
             All projections are subject to change as inputs are updated and sources are verified.
           </p>
-          <p style={{ fontSize: 11, color: 'var(--color-text-muted)', lineHeight: 1.6, marginTop: 8 }}>
+          <p style={{ fontSize: 11, color: 'var(--cp-text-muted)', lineHeight: 1.6, marginTop: 8 }}>
             Source Compliance Score at time of generation: {base?.source_score ?? 0}/100.
             A score below 70 indicates material inputs remain unsourced and projections should be treated as indicative only.
           </p>
@@ -177,19 +177,19 @@ export default function ReportsPage() {
 
 const S = {
   wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: '#DC2626', fontSize: 13, background: '#FEF2F2', borderRadius: 6 },
+  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   actions: { alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--color-text-primary)' },
-  exportBtn: { fontSize: 12, fontWeight: 700, padding: '8px 18px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  hint: { fontSize: 12, color: '#D97706', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '8px 14px', marginBottom: 20 },
+  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  exportBtn: { fontSize: 12, fontWeight: 700, padding: '8px 18px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  hint: { fontSize: 12, color: 'var(--cp-warning)', background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning-bg)', borderRadius: 6, padding: '8px 14px', marginBottom: 20 },
   reportDoc: {
-    background: 'var(--color-surface)', border: '1px solid var(--color-border-light)',
+    background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)',
     borderRadius: 8, padding: '32px 40px', maxWidth: 820,
   },
-  reportHeader: { marginBottom: 32, paddingBottom: 24, borderBottom: '2px solid var(--color-border-light)' },
-  reportBadge: { fontSize: 9, fontWeight: 700, letterSpacing: 2, color: '#DC2626', background: '#FEF2F2', padding: '2px 10px', borderRadius: 20, display: 'inline-block', marginBottom: 12 },
-  reportTitle: { fontSize: 22, fontWeight: 900, color: 'var(--color-text-primary)', marginBottom: 4 },
-  reportSub: { fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 6 },
-  reportDate: { fontSize: 11, color: 'var(--color-text-muted)' },
+  reportHeader: { marginBottom: 32, paddingBottom: 24, borderBottom: '2px solid var(--cp-border)' },
+  reportBadge: { fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-error)', background: 'var(--cp-error-bg)', padding: '2px 10px', borderRadius: 20, display: 'inline-block', marginBottom: 12 },
+  reportTitle: { fontSize: 22, fontWeight: 900, color: 'var(--cp-text-primary)', marginBottom: 4 },
+  reportSub: { fontSize: 14, color: 'var(--cp-text-muted)', marginBottom: 6 },
+  reportDate: { fontSize: 11, color: 'var(--cp-text-muted)' },
 };

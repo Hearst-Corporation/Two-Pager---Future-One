@@ -2,12 +2,12 @@
 import { useState, useEffect } from 'react';
 
 const ENTITY_COLORS = {
-  scenario:  { color: '#2563EB', bg: '#DBEAFE' },
-  source:    { color: '#059669', bg: '#D1FAE5' },
-  contract:  { color: '#0891B2', bg: '#CFFAFE' },
-  data_room: { color: '#7C3AED', bg: '#EDE9FE' },
-  pipeline:  { color: '#D97706', bg: '#FFFBEB' },
-  project:   { color: '#6B7280', bg: '#F3F4F6' },
+  scenario:  { color: 'var(--cp-info)', bg: 'var(--cp-info-bg)' },
+  source:    { color: 'var(--cp-success)', bg: 'var(--cp-success-bg)' },
+  contract:  { color: 'var(--cp-info-strong)', bg: 'var(--cp-info-strong-bg)' },
+  data_room: { color: 'var(--cp-violet)', bg: 'var(--cp-violet-bg)' },
+  pipeline:  { color: 'var(--cp-warning)', bg: 'var(--cp-warning-bg)' },
+  project:   { color: 'var(--cp-text-muted)', bg: 'var(--cp-surface-1)' },
 };
 
 const ACTION_LABELS = {
@@ -88,7 +88,7 @@ export default function AuditPage() {
 
       {/* Filters */}
       <div style={S.filters}>
-        <button onClick={() => applyFilter('')} style={{ ...S.filterBtn, background: !typeFilter ? 'var(--color-text-primary)' : 'transparent', color: !typeFilter ? 'var(--color-bg-main)' : 'var(--color-text-muted)' }}>
+        <button onClick={() => applyFilter('')} style={{ ...S.filterBtn, background: !typeFilter ? 'var(--cp-text-primary)' : 'transparent', color: !typeFilter ? 'var(--cp-bg-deep)' : 'var(--cp-text-muted)' }}>
           All
         </button>
         {entityTypes.map(et => {
@@ -97,7 +97,7 @@ export default function AuditPage() {
             <button
               key={et}
               onClick={() => applyFilter(et)}
-              style={{ ...S.filterBtn, background: typeFilter === et ? meta.bg : 'transparent', color: typeFilter === et ? meta.color : 'var(--color-text-muted)', borderColor: meta.color }}
+              style={{ ...S.filterBtn, background: typeFilter === et ? meta.bg : 'transparent', color: typeFilter === et ? meta.color : 'var(--cp-text-muted)', borderColor: meta.color }}
             >
               {et}
             </button>
@@ -170,33 +170,33 @@ export default function AuditPage() {
 
 const S = {
   wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: '#DC2626', fontSize: 13, background: '#FEF2F2', borderRadius: 6 },
+  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--color-text-primary)' },
-  count: { fontSize: 12, color: 'var(--color-text-muted)', background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', padding: '3px 10px', borderRadius: 20 },
+  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  count: { fontSize: 12, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', padding: '3px 10px', borderRadius: 20 },
   filters: { display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 },
-  filterBtn: { fontSize: 10, fontWeight: 700, padding: '4px 12px', border: '1px solid var(--color-border-light)', borderRadius: 20, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: 0.5, transition: 'all .15s' },
-  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--color-text-muted)', fontSize: 13, background: 'var(--color-surface)', borderRadius: 8 },
+  filterBtn: { fontSize: 10, fontWeight: 700, padding: '4px 12px', border: '1px solid var(--cp-border)', borderRadius: 20, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: 0.5, transition: 'all .15s' },
+  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--cp-text-muted)', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
   timeline: { display: 'flex', flexDirection: 'column', gap: 0 },
   entry: { display: 'flex', gap: 16, paddingBottom: 0 },
   dotCol: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: 20, flexShrink: 0 },
   dot: { width: 10, height: 10, borderRadius: '50%', flexShrink: 0, marginTop: 4 },
-  line: { width: 2, flex: 1, background: 'var(--color-border-light)', minHeight: 20 },
-  entryContent: { flex: 1, paddingBottom: 16, borderBottom: '1px solid var(--color-border-light)', marginBottom: 0 },
+  line: { width: 2, flex: 1, background: 'var(--cp-border)', minHeight: 20 },
+  entryContent: { flex: 1, paddingBottom: 16, borderBottom: '1px solid var(--cp-border)', marginBottom: 0 },
   entryHeader: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 },
   actionIcon: { fontSize: 13 },
-  actionLabel: { fontSize: 12, fontWeight: 700, color: 'var(--color-text-primary)' },
+  actionLabel: { fontSize: 12, fontWeight: 700, color: 'var(--cp-text-primary)' },
   entityBadge: { fontSize: 9, fontWeight: 700, padding: '2px 8px', borderRadius: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
-  time: { fontSize: 10, color: 'var(--color-text-muted)', marginLeft: 'auto' },
-  entryBody: { fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 4, display: 'flex', gap: 8, flexWrap: 'wrap' },
+  time: { fontSize: 10, color: 'var(--cp-text-muted)', marginLeft: 'auto' },
+  entryBody: { fontSize: 12, color: 'var(--cp-text-muted)', marginBottom: 4, display: 'flex', gap: 8, flexWrap: 'wrap' },
   field: { display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' },
-  oldVal: { color: '#DC2626', textDecoration: 'line-through', fontSize: 11 },
-  arrow: { color: 'var(--color-text-muted)' },
-  newVal: { color: '#059669', fontWeight: 600, fontSize: 11 },
-  notes: { fontSize: 11, color: 'var(--color-text-muted)', fontStyle: 'italic' },
-  entryMeta: { display: 'flex', gap: 16, fontSize: 10, color: 'var(--color-text-muted)' },
+  oldVal: { color: 'var(--cp-error)', textDecoration: 'line-through', fontSize: 11 },
+  arrow: { color: 'var(--cp-text-muted)' },
+  newVal: { color: 'var(--cp-success)', fontWeight: 600, fontSize: 11 },
+  notes: { fontSize: 11, color: 'var(--cp-text-muted)', fontStyle: 'italic' },
+  entryMeta: { display: 'flex', gap: 16, fontSize: 10, color: 'var(--cp-text-muted)' },
   actor: { fontFamily: 'monospace' },
   timestamp: {},
-  loadMore: { fontSize: 12, padding: '8px 20px', background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 6, cursor: 'pointer', color: 'var(--color-text-muted)' },
+  loadMore: { fontSize: 12, padding: '8px 20px', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer', color: 'var(--cp-text-muted)' },
 };

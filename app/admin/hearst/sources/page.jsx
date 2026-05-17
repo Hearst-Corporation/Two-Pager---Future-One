@@ -117,7 +117,7 @@ export default function SourcesPage() {
           <button
             key={t}
             onClick={() => setTypeFilter(t === typeFilter ? '' : t)}
-            style={{ ...S.chip, background: typeFilter === t ? meta.bg : 'transparent', color: typeFilter === t ? meta.color : 'var(--color-text-muted)', borderColor: meta.color }}
+            style={{ ...S.chip, background: typeFilter === t ? meta.bg : 'transparent', color: typeFilter === t ? meta.color : 'var(--cp-text-muted)', borderColor: meta.color }}
           >
             {meta.label} ({counts[t] || 0})
           </button>
@@ -216,31 +216,31 @@ export default function SourcesPage() {
 
 const S = {
   wrap: { fontFamily: '"Inter", sans-serif' },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: '#DC2626', fontSize: 13, background: '#FEF2F2', borderRadius: 6 },
+  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--color-text-primary)' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
   chipRow: { display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 },
   chip: { fontSize: 11, fontWeight: 600, padding: '4px 10px', border: '1px solid', borderRadius: 20, cursor: 'pointer', transition: 'all .15s' },
-  chipActive: { background: 'var(--color-text-primary)', color: 'var(--color-bg-main)', borderColor: 'var(--color-text-primary)' },
-  search: { width: '100%', padding: '8px 12px', fontSize: 12, border: '1px solid var(--color-border-light)', borderRadius: 6, background: 'var(--color-surface)', color: 'var(--color-text-primary)', marginBottom: 16, boxSizing: 'border-box' },
-  addForm: { background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 8, padding: '18px 20px', marginBottom: 20 },
-  addFormTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--color-text-muted)', marginBottom: 14 },
+  chipActive: { background: 'var(--cp-text-primary)', color: 'var(--cp-bg-deep)', borderColor: 'var(--cp-text-primary)' },
+  search: { width: '100%', padding: '8px 12px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', marginBottom: 16, boxSizing: 'border-box' },
+  addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '18px 20px', marginBottom: 20 },
+  addFormTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 14 },
   addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 16px' },
-  fieldLabel: { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 3 },
-  input: { width: '100%', padding: '6px 10px', fontSize: 12, border: '1px solid var(--color-border-light)', borderRadius: 4, background: 'var(--color-bg-main)', color: 'var(--color-text-primary)', boxSizing: 'border-box' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 18px', background: '#2563EB', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  cancelBtn: { fontSize: 12, padding: '7px 14px', background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-light)', borderRadius: 6, cursor: 'pointer' },
-  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--color-text-muted)', fontSize: 13, background: 'var(--color-surface)', borderRadius: 8 },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--color-surface)', borderRadius: 8, overflow: 'hidden' },
-  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--color-text-muted)', background: 'var(--color-bg-main)', borderBottom: '1px solid var(--color-border-light)' },
-  tr: { borderBottom: '1px solid var(--color-border-light)' },
-  td: { padding: '8px 12px', color: 'var(--color-text-muted)', verticalAlign: 'middle' },
-  tdBold: { padding: '8px 12px', fontWeight: 700, color: 'var(--color-text-primary)', verticalAlign: 'middle', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis' },
-  tdNum: { padding: '8px 12px', fontFamily: 'monospace', color: 'var(--color-text-primary)', fontWeight: 700, verticalAlign: 'middle' },
-  link: { color: '#2563EB', fontSize: 14, textDecoration: 'none' },
-  deleteBtn: { fontSize: 12, color: '#DC2626', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', padding: '2px 6px', borderRadius: 4 },
-  confirmYes: { fontSize: 10, fontWeight: 700, color: '#fff', background: '#DC2626', border: 'none', cursor: 'pointer', padding: '3px 8px', borderRadius: 4 },
-  confirmNo: { fontSize: 10, color: 'var(--color-text-muted)', background: 'transparent', border: '1px solid var(--color-border-light)', cursor: 'pointer', padding: '3px 6px', borderRadius: 4 },
+  fieldLabel: { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--cp-text-muted)', marginBottom: 3 },
+  input: { width: '100%', padding: '6px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-bg-deep)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 18px', background: 'var(--cp-info)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  cancelBtn: { fontSize: 12, padding: '7px 14px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
+  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--cp-text-muted)', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 8, overflow: 'hidden' },
+  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-text-muted)', background: 'var(--cp-bg-deep)', borderBottom: '1px solid var(--cp-border)' },
+  tr: { borderBottom: '1px solid var(--cp-border)' },
+  td: { padding: '8px 12px', color: 'var(--cp-text-muted)', verticalAlign: 'middle' },
+  tdBold: { padding: '8px 12px', fontWeight: 700, color: 'var(--cp-text-primary)', verticalAlign: 'middle', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis' },
+  tdNum: { padding: '8px 12px', fontFamily: 'monospace', color: 'var(--cp-text-primary)', fontWeight: 700, verticalAlign: 'middle' },
+  link: { color: 'var(--cp-info)', fontSize: 14, textDecoration: 'none' },
+  deleteBtn: { fontSize: 12, color: 'var(--cp-error)', background: 'transparent', border: '1px solid transparent', cursor: 'pointer', padding: '2px 6px', borderRadius: 4 },
+  confirmYes: { fontSize: 10, fontWeight: 700, color: '#fff', background: 'var(--cp-error)', border: 'none', cursor: 'pointer', padding: '3px 8px', borderRadius: 4 },
+  confirmNo: { fontSize: 10, color: 'var(--cp-text-muted)', background: 'transparent', border: '1px solid var(--cp-border)', cursor: 'pointer', padding: '3px 6px', borderRadius: 4 },
 };
