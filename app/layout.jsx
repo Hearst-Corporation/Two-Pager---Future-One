@@ -1,5 +1,6 @@
 import './globals.css';
 import './dark-theme.css';
+import '@hearst/cockpit-shell/tokens.css';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({
