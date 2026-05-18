@@ -2,6 +2,10 @@
 
 Présentation commerciale A3 plié en 2, rendue dans le navigateur et exportable en PDF.
 
+> **Architecture** — Le projet contient deux systèmes complètement indépendants :
+> - **Brochure & Landing** (`/`, `/brochure`, `/print`) : présentation commerciale statique.
+> - **Cockpit HEARST** (`/admin/hearst/*`) : dashboard opérationnel et simulateur financier. Aucune dépendance vers la brochure ni la landing.
+
 ## Stack
 - **Next.js 14** (App Router)
 - **React** — inline styles uniquement, pas de Tailwind ni CSS modules
