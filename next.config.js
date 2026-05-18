@@ -12,7 +12,7 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-Content-Type-Options',
@@ -35,7 +35,7 @@ const nextConfig = {
               "img-src 'self' data: blob: https:",
               "font-src 'self'",
               "connect-src 'self' https://zrvlmhuymhyrzonnihce.supabase.co wss://zrvlmhuymhyrzonnihce.supabase.co https://maps.googleapis.com",
-              "frame-ancestors 'none'",
+              "frame-ancestors 'self' http://localhost:4200 http://localhost:4201",
               "base-uri 'self'",
               "form-action 'self'",
             ].join('; '),

@@ -4,12 +4,12 @@ import OperatorBadge from '@/components/hearst/OperatorBadge';
 import { OPERATORS, OPERATORS_BY_ID } from '@/lib/hearst-constants';
 
 const STAGES = [
-  { id: 'prospecting',     label: 'Prospecting',      color: '#4B5363', bg: '#23262E' },
-  { id: 'term_sheet_sent', label: 'Term Sheet Sent',   color: '#2563EB', bg: '#1E2A45' },
-  { id: 'due_diligence',   label: 'Due Diligence',     color: '#7C3AED', bg: '#251E3D' },
-  { id: 'negotiation',     label: 'Negotiation',       color: '#D97706', bg: '#2D2414' },
-  { id: 'signed',          label: 'Signed',            color: '#059669', bg: '#1A2D22' },
-  { id: 'live',            label: 'Live',              color: '#0891B2', bg: '#152530' },
+  { id: 'prospecting',     label: 'Prospecting',      color: 'var(--cp-text-muted)', bg: 'var(--cp-surface-1)' },
+  { id: 'term_sheet_sent', label: 'Term Sheet Sent',   color: 'var(--cp-info)', bg: 'var(--cp-info-bg)' },
+  { id: 'due_diligence',   label: 'Due Diligence',     color: 'var(--cp-violet)', bg: 'var(--cp-violet-bg)' },
+  { id: 'negotiation',     label: 'Negotiation',       color: 'var(--cp-warning)', bg: 'var(--cp-warning-bg)' },
+  { id: 'signed',          label: 'Signed',            color: 'var(--cp-success)', bg: 'var(--cp-success-bg)' },
+  { id: 'live',            label: 'Live',              color: 'var(--cp-accent)', bg: 'var(--cp-accent-soft)' },
 ];
 
 const DEAL_TYPES = [

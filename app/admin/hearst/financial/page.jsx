@@ -360,7 +360,7 @@ export default function FinancialPage() {
                 {Object.entries(waterfall.by_investor).filter(([k]) => k !== 'lender').map(([key, inv]) => (
                   <div key={key} style={SK.card}>
                     <div style={SK.label}>{key.toUpperCase()}</div>
-                    <div style={{ ...SK.value, fontSize: 16, color: key === 'hearst' ? '#8B1C1C' : key === 'brookfield' ? '#2E7D32' : '#9C5A1D' }}>
+                    <div style={{ ...SK.value, fontSize: 16, color: key === 'hearst' ? 'var(--cp-op-qia)' : key === 'brookfield' ? 'var(--cp-op-brookfield)' : 'var(--cp-op-qai)' }}>
                       {inv.irr != null ? (inv.irr * 100).toFixed(1) + '% IRR' : 'N/A'}
                     </div>
                     <div style={SK.sub}>MOIC: {inv.moic != null ? inv.moic + 'x' : 'N/A'} · Invested: {inv.equity_invested ? '$' + (inv.equity_invested / 1e6).toFixed(1) + 'M' : '—'}</div>
@@ -388,9 +388,9 @@ export default function FinancialPage() {
                     <YAxis tick={{ fill: 'var(--cp-text-body)', fontSize: 11 }} tickFormatter={v => '$' + v + 'M'} />
                     <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', borderRadius: 6 }} />
                     <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 11 }} />
-                    <Bar dataKey="HEARST" stackId="a" fill="#8B1C1C" />
-                    <Bar dataKey="Brookfield" stackId="a" fill="#2E7D32" />
-                    <Bar dataKey="Qatar" stackId="a" fill="#9C5A1D" />
+                    <Bar dataKey="HEARST" stackId="a" fill="var(--cp-op-qia)" />
+                    <Bar dataKey="Brookfield" stackId="a" fill="var(--cp-op-brookfield)" />
+                    <Bar dataKey="Qatar" stackId="a" fill="var(--cp-op-qai)" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -436,11 +436,11 @@ export default function FinancialPage() {
                         <td key={ci} style={{
                           ...S.td,
                           background: cell.irr == null ? 'var(--cp-surface-2)'
-                            : cell.irr < 0 ? '#4A0000'
-                            : cell.irr < 0.08 ? '#7B1D1D'
-                            : cell.irr < 0.12 ? '#854D0E'
-                            : cell.irr < 0.15 ? '#065F46'
-                            : '#064E3B',
+                            : cell.irr < 0 ? 'color-mix(in srgb, var(--color-error) 30%, black)'
+                            : cell.irr < 0.08 ? 'color-mix(in srgb, var(--color-error) 60%, black)'
+                            : cell.irr < 0.12 ? 'color-mix(in srgb, var(--color-warning) 50%, black)'
+                            : cell.irr < 0.15 ? 'color-mix(in srgb, var(--color-success) 50%, black)'
+                            : 'color-mix(in srgb, var(--color-success) 30%, black)',
                           color: 'var(--cp-text-primary)',
                           fontWeight: ri === 2 && ci === 2 ? 900 : 600,
                           fontSize: 11,
@@ -456,11 +456,11 @@ export default function FinancialPage() {
               </table>
               <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap' }}>
                 {[
-                  { bg: '#4A0000', label: '< 0% IRR' },
-                  { bg: '#7B1D1D', label: '0–8%' },
-                  { bg: '#854D0E', label: '8–12%' },
-                  { bg: '#065F46', label: '12–15%' },
-                  { bg: '#064E3B', label: '> 15%' },
+                  { bg: 'color-mix(in srgb, var(--color-error) 30%, black)', label: '< 0% IRR' },
+                  { bg: 'color-mix(in srgb, var(--color-error) 60%, black)', label: '0–8%' },
+                  { bg: 'color-mix(in srgb, var(--color-warning) 50%, black)', label: '8–12%' },
+                  { bg: 'color-mix(in srgb, var(--color-success) 50%, black)', label: '12–15%' },
+                  { bg: 'color-mix(in srgb, var(--color-success) 30%, black)', label: '> 15%' },
                 ].map(l => (
                   <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--cp-text-muted)' }}>
                     <span style={{ width: 12, height: 12, borderRadius: 2, background: l.bg, display: 'inline-block' }} />
