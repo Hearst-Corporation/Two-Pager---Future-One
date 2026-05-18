@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.96.0",
-    "@hearst/cockpit-shell": "file:/Users/adrienbeyondcrypto/Dev/Hearst Corporation/hub — Hearst-Hub/packages/cockpit-shell",
-    "@hearst/hub-sdk": "file:/Users/adrienbeyondcrypto/Dev/Hearst Corporation /packages/hub-sdk",
+    "@hearst/cockpit-shell": "file:./hearst-cockpit-shell-0.1.0.tgz",
+    "@hearst/hub-sdk": "file:./hearst-hub-sdk-0.1.0.tgz",
     "@sentry/nextjs": "^8",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.3",
