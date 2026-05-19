@@ -4,6 +4,7 @@ const { withSentryConfig } = require('@sentry/nextjs');
 const nextConfig = {
   transpilePackages: ['@hearst/cockpit-shell'],
   reactStrictMode: true,
+  devIndicators: false,
 
   // Security headers — applied to all routes
   async headers() {

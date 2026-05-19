@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.96.0",
-    "@hearst/cockpit-shell": "file:./hearst-cockpit-shell-0.1.0.tgz",
+    "@hearst/cockpit-shell": "file:./hearst-cockpit-shell-0.2.0.tgz",
     "@hearst/hub-sdk": "file:./hearst-hub-sdk-0.1.0.tgz",
     "@sentry/nextjs": "^8",
     "@supabase/ssr": "^0.10.3",
