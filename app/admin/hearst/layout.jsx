@@ -4,6 +4,7 @@ import '@hearst/cockpit-shell/tokens.css';
 import { CockpitShell } from '@hearst/cockpit-shell';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleBottomBar } from '@/components/OracleBottomBar';
+import { HubSessionBridge } from '@/components/HubSessionBridge';
 
 const ORACLE_PRODUCTS = [
   // eslint-disable-next-line no-restricted-syntax -- CockpitProduct.color contract requires a hex literal (shell consumes it via color-mix).
@@ -13,6 +14,7 @@ const ORACLE_PRODUCTS = [
 export default function HearstLayout({ children }) {
   return (
     <SimulationProvider>
+      <HubSessionBridge />
       <CockpitShell products={ORACLE_PRODUCTS} appId="oracle">
         {children}
         <OracleBottomBar />
