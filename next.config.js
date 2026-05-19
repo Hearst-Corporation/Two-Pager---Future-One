@@ -11,10 +11,8 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
+          // Pas de X-Frame-Options : il bloque toute embed cross-origin sans
+          // whitelist possible. Le CSP frame-ancestors plus bas suffit.
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
