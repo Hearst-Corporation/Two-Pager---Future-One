@@ -6,6 +6,12 @@ const nextConfig = {
   reactStrictMode: true,
   devIndicators: false,
 
+  async redirects() {
+    return [
+      { source: '/', destination: '/admin/hearst', permanent: false },
+    ];
+  },
+
   // Security headers — applied to all routes
   async headers() {
     return [
@@ -35,7 +41,7 @@ const nextConfig = {
               "img-src 'self' data: blob: https:",
               "font-src 'self'",
               "connect-src 'self' https://zrvlmhuymhyrzonnihce.supabase.co wss://zrvlmhuymhyrzonnihce.supabase.co https://maps.googleapis.com",
-              "frame-ancestors 'self' http://localhost:4200 http://localhost:4201",
+              "frame-ancestors 'self' http://localhost:4200 http://localhost:4201 https://oracle.hearst.app",
               "base-uri 'self'",
               "form-action 'self'",
             ].join('; '),
