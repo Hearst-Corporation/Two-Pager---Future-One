@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-unused-vars */
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -285,7 +284,6 @@ function OverviewTab({ operator, accent, onChange }) {
 function ActivityTab({ operator, tasks, events, stakeholders, me, accent, eventLabel, onChange }) {
   const [section, setSection] = useState('tasks'); // tasks | timeline | stakeholders | comments
   const openTasks = tasks.filter((t) => !t.done);
-  const doneTasks = tasks.filter((t) => t.done);
 
   return (
     <div>

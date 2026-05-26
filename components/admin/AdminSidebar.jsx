@@ -209,7 +209,7 @@ export default function AdminSidebar({ me }) {
                 )}
               </div>
             </div>
-            <Link href="/admin/profile" style={S.meItem} onClick={() => setMeOpen(false)}>
+            <Link href="/admin/hearst/profile" style={S.meItem} onClick={() => setMeOpen(false)}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" strokeWidth="1.5"/><path d="M2.5 13.5c0-2.485 2.462-4.5 5.5-4.5s5.5 2.015 5.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               <span>Profile</span>
             </Link>

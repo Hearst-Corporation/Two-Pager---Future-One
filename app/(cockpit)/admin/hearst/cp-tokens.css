@@ -1,0 +1,131 @@
+/* =====================================================================
+   cp-tokens.css — Bridge --cp-* → --ct-* + valeurs manquantes.
+   Importé uniquement dans app/admin/hearst/layout.jsx.
+   Source des valeurs : ~/.claude/assets/cockpit/tokens.css + cockpit-shell/tokens.css
+   ===================================================================== */
+
+:root {
+  /* ── Aliases directs vers --ct-* ── */
+  --cp-accent:          var(--ct-accent);
+  --cp-accent-maroon:   var(--ct-accent-maroon);
+  --cp-accent-soft:     var(--ct-accent-soft);
+  --cp-accent-strong:   var(--ct-accent-strong);
+  --cp-bg-deep:         var(--ct-bg-deep);
+  --cp-border:          var(--ct-border);
+  --cp-border-accent:   var(--ct-border-accent);
+  --cp-border-soft:     var(--ct-border-soft);
+  --cp-border-strong:   var(--ct-border-strong);
+  --cp-dur-base:        var(--ct-dur-base);
+  --cp-ease:            var(--ct-ease);
+  --cp-rail-left:       var(--ct-rail-left);
+  --cp-rail-right:      var(--ct-rail-right);
+  --cp-shadow-depth:    var(--ct-shadow-depth);
+  --cp-surface-0:       var(--ct-surface-0);
+  --cp-surface-1:       var(--ct-surface-1);
+  --cp-surface-2:       var(--ct-surface-2);
+  --cp-surface-3:       var(--ct-surface-3);
+  --cp-text-body:       var(--ct-text-body);
+  --cp-text-muted:      var(--ct-text-muted);
+  --cp-text-primary:    var(--ct-text-primary);
+  --cp-text-strong:     var(--ct-text-strong);
+
+  /* ── Tokens manquants dans --ct-* ── */
+  --cp-text-faint:      rgba(245,245,245,0.28);
+  --cp-tooltip-bg:      var(--ct-surface-3);
+  --cp-blur-md:         blur(12px);
+  --cp-dur-fast:        100ms;
+  --cp-ease-out:        cubic-bezier(0, 0, 0.2, 1);
+  --cp-grid-line:       1px solid var(--ct-border-soft);
+
+  /* ── Typographie ── */
+  --cp-font-micro:  10px;
+  --cp-font-xs:     11px;
+  --cp-font-sm:     12px;
+  --cp-font-base:   13px;
+  --cp-font-md:     14px;
+  --cp-font-lg:     16px;
+  --cp-font-xl:     20px;
+  --cp-font-2xl:    24px;
+
+  --cp-weight-regular:  400;
+  --cp-weight-medium:   500;
+  --cp-weight-semibold: 600;
+  --cp-weight-bold:     700;
+  --cp-weight-black:    800;
+
+  --cp-tracking-tight:   -0.02em;
+  --cp-tracking-wide:     0.06em;
+  --cp-tracking-wider:    0.10em;
+  --cp-tracking-eyebrow:  0.14em;
+
+  --cp-leading-tight:  1.3;
+  --cp-leading-normal: 1.6;
+
+  /* ── Espacement (base 4px) ── */
+  --cp-space-0:  0px;
+  --cp-space-1:  4px;
+  --cp-space-2:  8px;
+  --cp-space-3:  12px;
+  --cp-space-4:  16px;
+  --cp-space-5:  20px;
+  --cp-space-6:  24px;
+  --cp-space-7:  28px;
+  --cp-space-8:  32px;
+  --cp-space-9:  40px;
+  --cp-space-12: 48px;
+
+  /* ── Border radius ── */
+  --cp-radius-xs:   4px;
+  --cp-radius-sm:   6px;
+  --cp-radius-md:   10px;
+  --cp-radius-lg:   14px;
+  --cp-radius-pill: 9999px;
+
+  /* ── Ombres ── */
+  --cp-shadow-xs:        0 1px 3px rgba(0,0,0,0.30);
+  --cp-shadow-sm:        0 4px 12px rgba(0,0,0,0.35);
+  --cp-shadow-md:        0 8px 24px rgba(0,0,0,0.40);
+  --cp-shadow-card-hover:0 12px 40px rgba(0,0,0,0.45);
+
+  /* ── Couleurs sémantiques ── */
+  --cp-error:          #ef4444;
+  --cp-error-bg:       rgba(239,68,68,0.08);
+  --cp-error-strong:   #fca5a5;
+
+  --cp-success:        #10b981;
+  --cp-success-bg:     rgba(16,185,129,0.08);
+  --cp-success-strong: #6ee7b7;
+
+  --cp-warning:        #f59e0b;
+  --cp-warning-bg:     rgba(245,158,11,0.08);
+  --cp-warning-strong: #fcd34d;
+
+  --cp-info:           #3b82f6;
+  --cp-info-bg:        rgba(59,130,246,0.08);
+  --cp-info-strong:    #93c5fd;
+  --cp-info-strong-bg: rgba(59,130,246,0.15);
+  --cp-info-strong-cta:#3b82f6;
+
+  --cp-violet:         #8b5cf6;
+  --cp-violet-bg:      rgba(139,92,246,0.08);
+
+  /* ── Z-index ── */
+  --cp-z-content:  10;
+  --cp-z-rails:    20;
+  --cp-z-floating: 30;
+
+  /* ── Tailles de composants ── */
+  --cp-avatar-size:    32px;
+  --cp-badge-size:     18px;
+  --cp-brand-size:     36px;
+  --cp-brand-inner:    24px;
+  --cp-icon-btn-size:  32px;
+  --cp-kpi-min-width:  160px;
+  --cp-min-center:     520px;
+
+  /* ── Couleurs opérateurs ── */
+  --cp-op-default:    var(--ct-text-muted);
+  --cp-op-brookfield: #0ea5e9;
+  --cp-op-qai:        #6366f1;
+  --cp-op-qia:        #a855f7;
+}

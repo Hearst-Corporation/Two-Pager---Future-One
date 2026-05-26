@@ -12,15 +12,21 @@ export default function LoginPage() {
   );
 }
 
+const AUTH_ERROR_MESSAGES = {
+  otp_expired: 'This link has expired. Please request a new one.',
+  access_denied: 'Access denied. Please request a new magic link.',
+};
+
 function LoginForm() {
   const sp = useSearchParams();
   const next = sp.get('next') || '/admin';
+  const authError = sp.get('auth_error');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState('magic');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
-  const [err, setErr] = useState('');
+  const [err, setErr] = useState(AUTH_ERROR_MESSAGES[authError] || '');
 
   async function sendMagicLink(e) {
     e.preventDefault();

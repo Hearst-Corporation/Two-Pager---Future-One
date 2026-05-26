@@ -8,6 +8,18 @@ export async function GET(req) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
   const next = url.searchParams.get('next') || '/admin';
+  const error = url.searchParams.get('error');
+  const errorCode = url.searchParams.get('error_code');
+
+  // Supabase renvoie les erreurs OTP/magic-link dans les query params
+  if (error) {
+    const loginUrl = url.clone();
+    loginUrl.pathname = '/admin/login';
+    loginUrl.search = '';
+    loginUrl.searchParams.set('next', next);
+    loginUrl.searchParams.set('auth_error', errorCode || error);
+    return NextResponse.redirect(loginUrl);
+  }
 
   const target = url.clone();
   target.pathname = next;

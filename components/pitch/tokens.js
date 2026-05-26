@@ -20,7 +20,6 @@ export const TEXT_DIM = 'var(--color-text-secondary)';
 export const TEXT_FAINT = 'var(--color-text-muted)';
 export const TEXT_INVERSE = 'var(--color-text-inverse)';
 export const SURFACE = 'var(--color-surface)';
-export const BG_MAIN = 'var(--color-bg-main)';
 export const BORDER_LIGHT = 'var(--color-border-light)';
 export const BORDER_MEDIUM = 'var(--color-border-medium)';
 
@@ -66,7 +65,6 @@ export const BORDER_INVERSE_6 =
 /** Panneaux type « glass » sur images */
 export const GLASS_ON_PHOTO_BG =
   'color-mix(in srgb, var(--color-text-inverse) 3%, transparent)';
-export const GLASS_ON_PHOTO_BORDER = BORDER_INVERSE_6;
 
 /** Gris quasi-opaque sur nœuds masterplan */
 export const PANEL_DARK_95 =

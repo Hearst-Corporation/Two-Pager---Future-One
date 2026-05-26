@@ -7,7 +7,7 @@
     "scripts/"
   ],
   "rules": {
-    "no-unused-vars": "warn",
+    "no-unused-vars": ["warn", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }],
     "no-console": ["warn", { "allow": ["error"] }],
     "react/no-unescaped-entities": "off"
   },

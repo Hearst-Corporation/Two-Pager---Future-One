@@ -56,7 +56,7 @@ const S = {
     borderRadius: 3,
     fontWeight: 700,
     letterSpacing: 0.3,
-    fontFamily: '"Inter", sans-serif',
+    fontFamily: 'inherit',
     whiteSpace: 'nowrap',
   },
 };

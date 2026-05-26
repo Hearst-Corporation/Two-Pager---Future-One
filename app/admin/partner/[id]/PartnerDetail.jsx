@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-unused-vars */
 
 import { useState } from 'react';
 import Link from 'next/link';

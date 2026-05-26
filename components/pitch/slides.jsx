@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-unused-vars */
 
 /* ============================================================
    FUTUR ONE — Pitch deck for Qai Chairman, 6 May 2026
@@ -41,8 +40,8 @@ import {
   BORDER_INVERSE_15,
   BORDER_INVERSE_18,
   BORDER_INVERSE_20,
+  BORDER_INVERSE_6,
   GLASS_ON_PHOTO_BG,
-  GLASS_ON_PHOTO_BORDER,
   PANEL_DARK_95,
   PANEL_DARK_85,
   SHADOW_ELEV_30,
@@ -2767,7 +2766,7 @@ const S = {
   whoStat: {
     padding: '2vh 1.5vw',
     background: GLASS_ON_PHOTO_BG,
-    border: GLASS_ON_PHOTO_BORDER,
+    border: BORDER_INVERSE_6,
     borderRadius: 8,
     backdropFilter: 'blur(10px)',
     WebkitBackdropFilter: 'blur(10px)',
@@ -2844,7 +2843,7 @@ const S = {
   archCard: {
     padding: '2vh 1.5vw',
     background: GLASS_ON_PHOTO_BG,
-    border: GLASS_ON_PHOTO_BORDER,
+    border: BORDER_INVERSE_6,
     borderRadius: 8,
     display: 'flex',
     flexDirection: 'column',
@@ -2934,7 +2933,7 @@ const S = {
   bigStat: {
     padding: '2vh 1.5vw',
     background: GLASS_ON_PHOTO_BG,
-    border: GLASS_ON_PHOTO_BORDER,
+    border: BORDER_INVERSE_6,
     borderRadius: 8,
     backdropFilter: 'blur(10px)',
     WebkitBackdropFilter: 'blur(10px)',
@@ -2992,7 +2991,7 @@ const S = {
   teamCard: {
     padding: '2vh 1.5vw',
     background: GLASS_ON_PHOTO_BG,
-    border: GLASS_ON_PHOTO_BORDER,
+    border: BORDER_INVERSE_6,
     borderRadius: 8,
     display: 'flex',
     flexDirection: 'column',
@@ -3227,7 +3226,7 @@ const S = {
   qatCard: {
     padding: '2vh 1.5vw',
     background: GLASS_ON_PHOTO_BG,
-    border: GLASS_ON_PHOTO_BORDER,
+    border: BORDER_INVERSE_6,
     borderRadius: 8,
     display: 'flex',
     gap: '1.5vw',
@@ -3296,7 +3295,7 @@ const S = {
     gap: '2vw',
     padding: '1.6vh 1.5vw',
     background: GLASS_ON_PHOTO_BG,
-    border: GLASS_ON_PHOTO_BORDER,
+    border: BORDER_INVERSE_6,
     borderRadius: 8,
     alignItems: 'baseline',
     marginBottom: '1vh',

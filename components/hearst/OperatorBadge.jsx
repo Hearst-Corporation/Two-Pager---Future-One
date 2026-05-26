@@ -37,10 +37,10 @@ const S = {
   badge: {
     display: 'inline-flex',
     alignItems: 'center',
-    background: 'rgba(255,255,255,0.04)',
+    background: 'var(--cp-surface-1, rgba(255,255,255,0.04))',
     border: '1px solid',
     whiteSpace: 'nowrap',
-    fontFamily: '"Inter", sans-serif',
+    fontFamily: 'inherit',
   },
   dot: {
     borderRadius: '50%',
