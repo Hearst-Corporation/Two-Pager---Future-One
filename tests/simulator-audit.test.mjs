@@ -91,16 +91,23 @@ function simulate(payload) {
     };
   }
 
-  // Minority equity scaling (mirrors route.js): HEARST owns only equity_share of GPU revenue/capex
-  if (hardware_breakdown && archetype.compute_as === 'minority_equity') {
-    const share = archetype.equity_share || 0.20;  // 0.20 = DEFAULT_MINORITY_EQUITY_SHARE (route.js)
-    hardware_breakdown.revenue_ai_annual = (hardware_breakdown.revenue_ai_annual || 0) * share;
-    hardware_breakdown.capex_hardware = (hardware_breakdown.capex_hardware || 0) * share;
-    hardware_breakdown.total_gpus = Math.round((hardware_breakdown.total_gpus || 0) * share);
+  // Fix 3 (P1, iter 4 A10): Scale GPU economics by HEARST's effective share of the project.
+  // mirrors route.js — minority_equity uses equity_share; other archetypes use revenue_factor.
+  const DEFAULT_MINORITY_EQUITY_SHARE = 0.20;
+  if (hardware_breakdown) {
+    const hw_share = archetype.compute_as === 'minority_equity'
+      ? (archetype.equity_share || DEFAULT_MINORITY_EQUITY_SHARE)
+      : (archetype.revenue_factor ?? 1.0);
+    if (hw_share !== 1.0) {
+      hardware_breakdown.revenue_ai_annual = (hardware_breakdown.revenue_ai_annual || 0) * hw_share;
+      hardware_breakdown.capex_hardware    = (hardware_breakdown.capex_hardware || 0) * hw_share;
+      hardware_breakdown.total_gpus        = Math.round((hardware_breakdown.total_gpus || 0) * hw_share);
+    }
   }
 
   // foldGpuRevenue before debt_schedule + waterfall so they consume post-fold ebitda
-  if (hardware_breakdown?.revenue_ai_annual > 0) {
+  // Fix 5 (P1, iter 4 A10): also fold when capex_hardware > 0 but revenue=0 (orphan capex)
+  if (hardware_breakdown && (hardware_breakdown.revenue_ai_annual > 0 || hardware_breakdown.capex_hardware > 0)) {
     foldGpuRevenue(archResult.projection, hardware_breakdown, archResult.scenario, {
       rfs_year: archResult.scenario.phase1_complete_year || 3,
       ramp_years: 2,
@@ -258,7 +265,7 @@ console.log('══════════════════════�
   check('B1 — total_capex in 50MW × $7-12M = $350-600M band',
     r.projection.total_capex >= 200e6 && r.projection.total_capex <= 700e6,
     `got ${f$(r.projection.total_capex)}`);
-  check('B1 — IRR in range [5%, 30%] (sanity)',
+  check('B1 — IRR in range [5%, 40%] (sanity)',
     r.projection.irr != null && r.projection.irr >= 0.05 && r.projection.irr <= 0.40,
     `got ${fPct(r.projection.irr)}`);
   check('B1 — payback in [4, 12] yr',
@@ -414,25 +421,23 @@ console.log('══════════════════════�
     (rElec.projection.stabilized_ebitda ?? 0) < (rElecBase.projection.stabilized_ebitda ?? 0),
     `$32→${f$(rElecBase.projection.stabilized_ebitda)} vs $50→${f$(rElec.projection.stabilized_ebitda)}`);
 
-  // 7c — +30% debt_pct should change DSCR
+  // 7c — debt_pct change should change debt_service (pure percent convention: 20 = 20%)
   const rDebt0 = simulate({
     input_mode: 'mw_first', input_value: { total_mw: 50 }, archetype_id: 'branded_jv', business_model_id: 'hyperscale_lease',
-    scenario_overrides: { debt_pct: 0.20, debt_interest_rate: 0.065 },
+    scenario_overrides: { debt_pct: 20, debt_interest_rate: 6.5 },
   });
   const rDebt1 = simulate({
     input_mode: 'mw_first', input_value: { total_mw: 50 }, archetype_id: 'branded_jv', business_model_id: 'hyperscale_lease',
-    scenario_overrides: { debt_pct: 0.80, debt_interest_rate: 0.065 },
+    scenario_overrides: { debt_pct: 80, debt_interest_rate: 6.5 },
   });
-  console.log(`  debt_pct=0.20 → dscr=${rDebt0.projection.dscr_stabilized}, debt_service yr5=${f$(rDebt0.projection.years?.[4]?.debt_service)}`);
-  console.log(`  debt_pct=0.80 → dscr=${rDebt1.projection.dscr_stabilized}, debt_service yr5=${f$(rDebt1.projection.years?.[4]?.debt_service)}`);
-  // Test debt_pct interpreted as 0..100 with values 0.20 vs 0.80
-  // If engine treats as 0..100: debt is 0.2% vs 0.8% of capex — barely any difference.
-  // If engine treats as 0..1: debt is 20% vs 80% — major change.
+  console.log(`  debt_pct=20 → dscr=${rDebt0.projection.dscr_stabilized}, debt_service yr5=${f$(rDebt0.projection.years?.[4]?.debt_service)}`);
+  console.log(`  debt_pct=80 → dscr=${rDebt1.projection.dscr_stabilized}, debt_service yr5=${f$(rDebt1.projection.years?.[4]?.debt_service)}`);
+  // Pure percent convention: 20 = 20% debt, 80 = 80% debt — major difference in debt service.
   const ds_lo = rDebt0.projection.years?.[4]?.debt_service ?? 0;
   const ds_hi = rDebt1.projection.years?.[4]?.debt_service ?? 0;
-  check('B7.3 — DSCR responds to debt_pct change (input as 0..1 ratio)',
-    Math.abs(ds_hi - ds_lo) > 100, // expect millions of diff if scale right
-    `Δdebt_service=${f$(ds_hi - ds_lo)} (if tiny: debt_pct 0..1 scale being divided by 100 ⇒ debt service ~0)`);
+  check('B7.3 — DSCR responds to debt_pct change (pure percent 20 vs 80)',
+    Math.abs(ds_hi - ds_lo) > 100, // expect millions of diff at correct scale
+    `Δdebt_service=${f$(ds_hi - ds_lo)} (if tiny: percent inputs not being applied correctly)`);
 }
 
 // 8. Symétrie modes — capital_first vs mw_first

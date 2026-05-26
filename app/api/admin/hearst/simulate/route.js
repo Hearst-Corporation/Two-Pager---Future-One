@@ -147,19 +147,25 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
   // 5. Hardware breakdown (si fourni)
   const hardware_breakdown = calcHardwareBreakdown(archResult.scenario, hardware_mix);
 
-  // Minority equity scaling: HEARST owns only equity_share of the GPU pod, so revenue and
-  // capex are proportionally smaller — the facility description (mw_ai/classic/liquid) is
-  // unchanged because it reflects the full datacenter, not HEARST's stake.
-  if (hardware_breakdown && archetype.compute_as === 'minority_equity') {
-    const share = archetype.equity_share || DEFAULT_MINORITY_EQUITY_SHARE;
-    hardware_breakdown.revenue_ai_annual = (hardware_breakdown.revenue_ai_annual || 0) * share;
-    hardware_breakdown.capex_hardware = (hardware_breakdown.capex_hardware || 0) * share;
-    hardware_breakdown.total_gpus = Math.round((hardware_breakdown.total_gpus || 0) * share);
-    // mw_ai, mw_classic, mw_liquid stay as-is (describe the facility, not HEARST's share)
+  // Fix 3 (P1): Scale GPU economics by HEARST's effective share of the project:
+  // - minority_equity: explicit equity_share (typically 0.20)
+  // - other archetypes: revenue_factor (HEARST's revenue share post applyArchetype)
+  // powered_shell intentionally has revenue_factor=0.33 → GPU minimal (tenant owns gear in practice)
+  // mw_ai, mw_classic, mw_liquid stay as-is (describe the facility, not HEARST's stake)
+  if (hardware_breakdown) {
+    const hw_share = archetype.compute_as === 'minority_equity'
+      ? (archetype.equity_share || DEFAULT_MINORITY_EQUITY_SHARE)
+      : (archetype.revenue_factor ?? 1.0);
+    if (hw_share !== 1.0) {
+      hardware_breakdown.revenue_ai_annual = (hardware_breakdown.revenue_ai_annual || 0) * hw_share;
+      hardware_breakdown.capex_hardware    = (hardware_breakdown.capex_hardware || 0) * hw_share;
+      hardware_breakdown.total_gpus        = Math.round((hardware_breakdown.total_gpus || 0) * hw_share);
+    }
   }
 
   // 6. Fold GPU revenue into projection if hardware has AI component
-  if (hardware_breakdown?.revenue_ai_annual > 0) {
+  // Fix 5 (P1): also fold when capex_hardware > 0 but revenue=0 (orphan capex case)
+  if (hardware_breakdown && (hardware_breakdown.revenue_ai_annual > 0 || hardware_breakdown.capex_hardware > 0)) {
     foldGpuRevenue(projection, hardware_breakdown, archResult.scenario, {
       rfs_year: archResult.scenario.phase1_complete_year || 3,
       ramp_years: 2,

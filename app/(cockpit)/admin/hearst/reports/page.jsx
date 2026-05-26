@@ -113,7 +113,12 @@ export default function ReportsPage() {
 
         <Section title="Financial Summary — Base Case">
           <KpiLine label="Total CAPEX" value={fmtM(proj.total_capex)} />
-          <KpiLine label="Equity Required" value={(() => { const eq = (base?.equity_hearst_pct ?? 0) + (base?.equity_brookfield_pct ?? 0) + (base?.equity_qatar_pct ?? 0); return eq > 0 && proj.total_capex ? fmtM(proj.total_capex * eq / 100) : 'N/A'; })()} />
+          <KpiLine label="Equity Required" value={(() => {
+            // Equity Required = (1 - debt_pct/100) × total_capex.
+            // equity_*_pct fields are cap-table SHARES (must sum to 100), NOT equity sizing.
+            const equity_portion_pct = 100 - (base?.debt_pct ?? 0);
+            return proj.total_capex ? fmtM(proj.total_capex * equity_portion_pct / 100) : 'N/A';
+          })()} />
           <KpiLine label="Debt Financing" value={base?.debt_pct ? fmtM(proj.total_capex * base.debt_pct / 100) : 'N/A'} />
           <KpiLine label="Stabilized Annual Revenue" value={fmtM(proj.stabilized_revenue)} />
           <KpiLine label="Stabilized EBITDA" value={fmtM(proj.stabilized_ebitda)} />

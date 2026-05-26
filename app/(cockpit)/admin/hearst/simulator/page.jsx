@@ -368,7 +368,7 @@ function renderMemoMd(state, scenario, projection, archetypeOutcome) {
 - Energy efficiency (PUE): ${scenario.pue}
 - Electricity price: $${scenario.electricity_price_mwh}/MWh
 - Rental price (big tech): $${scenario.price_hyperscale_kw_month}/kW/month
-- Debt: ${(scenario.debt_pct * 100).toFixed(0)}% at ${scenario.debt_interest_rate}%
+- Debt: ${scenario.debt_pct.toFixed(0)}% at ${scenario.debt_interest_rate}%
 - Exit: ${scenario.exit_multiple}x yearly profit in year ${scenario.exit_year}
 
 ## Equipment mix

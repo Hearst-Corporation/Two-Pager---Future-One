@@ -25,8 +25,8 @@ describe('bootstrapScenarioFromSources', () => {
 
   it('garde defaults safe (équity split, contingency, escalation)', () => {
     const r = bootstrapScenarioFromSources({ geography: 'qatar' });
-    expect(r.scenario.capex_contingency_pct).toBe(0.10);
-    expect(r.scenario.annual_escalation_pct).toBe(0.02);
+    expect(r.scenario.capex_contingency_pct).toBe(10);   // A19: pure percent, was 0.10
+    expect(r.scenario.annual_escalation_pct).toBe(2);    // A19: pure percent, was 0.02
     expect(r.scenario.equity_hearst_pct).toBeGreaterThan(0);
     expect(r.scenario.equity_brookfield_pct).toBeGreaterThan(0);
     expect(r.scenario.equity_qatar_pct).toBeGreaterThan(0);

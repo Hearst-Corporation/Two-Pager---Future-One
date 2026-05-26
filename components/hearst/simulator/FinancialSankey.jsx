@@ -27,7 +27,7 @@ function buildSankeyData(scenario, projection) {
   const stab_ebt = Math.max(0.001, stab_ebitda - stab_debt);
 
   // Equity & debt shares
-  const debt_ratio = scenario.debt_pct || 0; // 0..1
+  const debt_ratio = (scenario.debt_pct || 0) / 100; // debt_pct is 0..100 percent → convert to ratio
   const eq_share_hearst = scenario.equity_hearst_pct || 0;
   const eq_share_bkf = scenario.equity_brookfield_pct || 0;
   const eq_share_qatar = scenario.equity_qatar_pct || 0;

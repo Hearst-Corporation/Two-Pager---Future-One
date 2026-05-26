@@ -240,8 +240,8 @@ Scoring 6 dims (brand / bankability / speed / control / margin / exit, 1–5) �
 - MOIC = (last_cumulative_fcf + terminal_value) / equity_invested.
 - NPV = Σ CF_t / (1+r)^t avec t=0 inclus (CF₀ = −capex).
 - IRR : Newton-Raphson 200 iter, tol 1e-8, guess 0.10, null si non-convergent.
-- Total Capex = (shell+mep+sub+cooling+grid+land+liquid_premium) × total_mw × (1+contingency_pct).
-- Projection 10Y : ramp MW linéaire P1/P2/P3 (années 2/4/6), occupancy ramp hardcodée [0, 0.25, 0.45, 0.60, 0.70, 0.78, 0.84, 0.88, 0.91, 0.93, 0.95], escalation 1.02^(y-1), maintenance 2% revenue.
+- Total Capex = (shell+mep+sub+cooling+grid+land+liquid_premium) × total_mw × (1 + capex_contingency_pct/100).
+- Projection 10Y : ramp MW linéaire P1/P2/P3 (années 2/4/6), occupancy ramp hardcodée [0, 0.25, 0.45, 0.60, 0.70, 0.78, 0.84, 0.88, 0.91, 0.93, 0.95], escalation (1 + annual_escalation_pct/100)^(y-1), maintenance 2% revenue.
 - Debt : annuité française PMT = (P×r)/(1−(1+r)^-n). IO window selon site_readiness (greenfield 2 / land_secured-power_reserved-substation_ready 1 / powered_shell-operational 0). Covenant breach <1.25 DSCR.
 - Waterfall 3-tier : Tier 1 lender → Tier 2 pref 8% compound → Tier 3 résiduel split par equity share + terminal value.
 

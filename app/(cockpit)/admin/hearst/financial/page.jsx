@@ -484,7 +484,11 @@ const SENSITIVITY_PARAM_OPTIONS = [
 ];
 
 function formatSensVal(v, unit) {
-  if (unit === 'ratio' || unit === '%') return (v * 100).toFixed(0) + '%';
+  // Two conventions coexist in SENSITIVITY_PARAMS:
+  //   unit='ratio' — PUE is a real number (1..5), NOT a percent. Display as-is with 2 decimals.
+  //   unit='%'     — all _pct params (debt_pct, target_occupancy_pct…) are pure 0..100; display as-is.
+  if (unit === 'ratio') return v.toFixed(2);
+  if (unit === '%') return v.toFixed(0) + '%';
   if (unit === '×') return v.toFixed(1) + 'x';
   if (unit === 'ratio/year') return (v * 100).toFixed(1) + '%/yr';
   if (unit?.includes('$/')) return '$' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v.toFixed(0));

@@ -22,7 +22,7 @@ const GROUPS = [
       { key: 'capex_cooling_per_mw', label: 'Cooling CAPEX', type: 'number', unit: '$/MW', note: 'Cooling systems per MW' },
       { key: 'capex_grid_per_mw', label: 'Grid Connection CAPEX', type: 'number', unit: '$/MW', note: 'Grid connection per MW' },
       { key: 'capex_land_per_mw', label: 'Land CAPEX', type: 'number', unit: '$/MW', note: 'Land cost per MW' },
-      { key: 'capex_contingency_pct', label: 'Contingency', type: 'number', unit: '%', note: 'As % of base CAPEX (e.g. 10 = 10%)' },
+      { key: 'capex_contingency_pct', label: 'Contingency', type: 'number', unit: '%', note: 'As % of base CAPEX' },
     ],
   },
   {
@@ -38,7 +38,7 @@ const GROUPS = [
       { key: 'price_wholesale_kw_month', label: 'Wholesale Colo Price', type: 'number', unit: '$/kW/month' },
       { key: 'price_hyperscale_kw_month', label: 'Hyperscale Price', type: 'number', unit: '$/kW/month' },
       { key: 'target_occupancy_pct', label: 'Target Occupancy', type: 'number', unit: '%', note: 'Stabilized occupancy' },
-      { key: 'annual_escalation_pct', label: 'Annual Price Escalation', type: 'number', unit: '%', note: 'Revenue escalation per year (e.g. 2 = 2%)' },
+      { key: 'annual_escalation_pct', label: 'Annual Price Escalation', type: 'number', unit: '%', note: 'Revenue escalation per year' },
       { key: 'ramp_months', label: 'Ramp-up Period', type: 'number', unit: 'months' },
     ],
   },

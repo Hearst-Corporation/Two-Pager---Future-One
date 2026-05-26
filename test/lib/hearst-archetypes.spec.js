@@ -19,20 +19,21 @@ const BASE_SCENARIO = {
   capex_cooling_per_mw: 1_500_000,
   capex_grid_per_mw: 0,
   capex_land_per_mw: 0,
-  capex_contingency_pct: 0.10,
+  capex_contingency_pct: 10, // A19: migrated to pure percent (0..100)
   price_hyperscale_kw_month: 115,
-  annual_escalation_pct: 0.02,
-  debt_pct: 0.60,
+  annual_escalation_pct: 2, // A19: migrated to pure percent (0..100)
+  // Post-A15: migrated to pure percent convention (0..100). Previous values reflected 0.60% leverage bug.
+  debt_pct: 60,
   debt_interest_rate: 6.5,
   debt_term_years: 12,
   exit_multiple: 16,
   exit_year: 10,
   start_year: 2026,
   commercial_split: { hyperscale_lease: 100 },
-  opex_maintenance_pct: 0.04,
-  opex_insurance_pct: 0.015,
-  opex_ga_pct: 0.03,
-  opex_operator_mgmt_fee_pct: 0.05,
+  opex_maintenance_pct: 4,
+  opex_insurance_pct: 1.5,
+  opex_ga_pct: 3,
+  opex_operator_mgmt_fee_pct: 5,
   opex_staff_annual_musd: 8,
 };
 
@@ -119,11 +120,11 @@ describe('applyArchetype — backwards compat (5 original archetypes)', () => {
     expect(s.capex_shell_per_mw).toBe(4_400_000);
   });
 
-  it('manage_only : applique operator_fee_pct=12 (stocké en ratio 0.12)', () => {
+  it('manage_only : applique operator_fee_pct=12 (stocké en percent 12)', () => {
     const a = ID_TO_ARCHETYPE.manage_only;
     const s = applyArchetype(BASE_SCENARIO, a);
-    // applyArchetype divides operator_fee_pct by 100 to align to ratio scale (P2-1).
-    // archetype.operator_fee_pct = 12 → s.opex_operator_mgmt_fee_pct = 0.12
-    expect(s.opex_operator_mgmt_fee_pct).toBeCloseTo(0.12, 5);
+    // applyArchetype stores operator_fee_pct as-is in percent scale (pure percent convention, A11).
+    // archetype.operator_fee_pct = 12 → s.opex_operator_mgmt_fee_pct = 12
+    expect(s.opex_operator_mgmt_fee_pct).toBe(12);
   });
 });

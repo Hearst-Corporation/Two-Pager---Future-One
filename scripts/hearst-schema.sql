@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS crm.hearst_scenarios (
     capex_cooling_source_id         uuid,
     capex_grid_per_mw               numeric,
     capex_grid_source_id            uuid,
-    capex_contingency_pct           numeric              DEFAULT 0.10,
+    capex_contingency_pct           numeric              DEFAULT 10,
     capex_liquid_cooling_premium_per_mw numeric,
     capex_land_per_mw               numeric,
     capex_land_source_id            uuid,
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS crm.hearst_scenarios (
     price_wholesale_source_id       uuid,
     price_hyperscale_kw_month       numeric,
     price_hyperscale_source_id      uuid,
-    annual_escalation_pct           numeric              DEFAULT 0.02,
+    annual_escalation_pct           numeric              DEFAULT 2,
 
     -- Capital structure
     equity_hearst_pct               numeric,
