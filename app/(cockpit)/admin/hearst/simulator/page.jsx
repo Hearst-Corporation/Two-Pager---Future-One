@@ -1,0 +1,488 @@
+'use client';
+
+import { useReducer, useState, useEffect, useMemo, useCallback, useDeferredValue, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+import {
+  INITIAL_STATE, ACTIONS, simulatorReducer,
+  buildSimulatePayload, serializeStateToUrl, parseStateFromUrl, QATAR_PRESETS,
+} from '@/lib/hearst-simulator-state';
+import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
+
+import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
+import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
+import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
+import HardwareMixer from '@/components/hearst/simulator/HardwareMixer';
+import ArchetypeRadar from '@/components/hearst/simulator/ArchetypeRadar';
+import B2BMatrix from '@/components/hearst/simulator/B2BMatrix';
+import OutputKpiStrip from '@/components/hearst/simulator/OutputKpiStrip';
+import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
+import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
+
+// Lazy-load les viz lourdes
+const EcosystemNetwork = dynamic(() => import('@/components/hearst/simulator/EcosystemNetwork'), {
+  ssr: false,
+  loading: () => <div style={{ height: 560, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading industry players…</div>,
+});
+const FinancialSankey = dynamic(() => import('@/components/hearst/simulator/FinancialSankey'), {
+  ssr: false,
+  loading: () => <div style={{ height: 380, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading money flow…</div>,
+});
+const GanttTimeline = dynamic(() => import('@/components/hearst/simulator/GanttTimeline'), {
+  ssr: false,
+  loading: () => <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading timeline…</div>,
+});
+
+const VIZ_TABS = [
+  { id: 'radar',   label: 'Strengths comparison' },
+  { id: 'network', label: 'Industry players' },
+  { id: 'matrix',  label: 'Who buys what' },
+  { id: 'sankey',  label: 'Money flow' },
+];
+
+const ARCH_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
+
+export default function SimulatorPage() {
+  const router = useRouter();
+
+  const [state, dispatch] = useReducer(simulatorReducer, INITIAL_STATE);
+  const deferredState = useDeferredValue(state);
+
+  // Hydrate state from URL after mount (avoids useSearchParams() SSR bailout).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const fromUrl = parseStateFromUrl(new URLSearchParams(window.location.search));
+    if (fromUrl) dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: fromUrl });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [simResult, setSimResult] = useState(null);
+  const [simError, setSimError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [savingState, setSavingState] = useState('idle');
+  const [projectId, setProjectId] = useState(null);
+  const [savedScenarioId, setSavedScenarioId] = useState(null);
+  const debounceRef = useRef(null);
+
+  // Charger le projet pour avoir le project_id (nécessaire pour Save as Scenario)
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch('/api/admin/hearst/project');
+        if (r.ok) {
+          const { project } = await r.json();
+          setProjectId(project?.id);
+        }
+      } catch {}
+    })();
+  }, []);
+
+  // Recompute simulation (debounced)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      setSimError(null);
+      try {
+        const payload = buildSimulatePayload(deferredState);
+        const r = await fetch('/api/admin/hearst/simulate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!r.ok) {
+          const body = await r.json().catch(() => ({}));
+          setSimError(body.error || `Simulate failed (${r.status})`);
+          setSimResult(null);
+        } else {
+          const data = await r.json();
+          setSimResult(data);
+          setSimError(null);
+        }
+      } catch (e) {
+        setSimError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [deferredState]);
+
+  // Sync URL
+  useEffect(() => {
+    const qs = serializeStateToUrl(state);
+    router.replace(`/admin/hearst/simulator?${qs}`, { scroll: false });
+  }, [state, router]);
+
+  // Archétypes pour le radar (primary + comparison)
+  const radarArchetypes = useMemo(() => {
+    const ids = new Set([state.primary_archetype_id, ...(state.compare_archetype_ids || [])]);
+    return Array.from(ids).map(id => ARCH_BY_ID[id]).filter(Boolean);
+  }, [state.primary_archetype_id, state.compare_archetype_ids]);
+
+  const projection = simResult?.projection;
+  const scenario = simResult?.scenario;
+  const archetypeOutcome = simResult?.archetype_outcome;
+
+  // Handlers
+  const onModeChange = useCallback((v) => dispatch({ type: ACTIONS.SET_MODE, value: v }), []);
+  const onSelectPrimary = useCallback((id) => dispatch({ type: ACTIONS.SET_PRIMARY_ARCHETYPE, value: id }), []);
+  const onToggleCompare = useCallback((id) => dispatch({ type: ACTIONS.TOGGLE_COMPARE_ARCHETYPE, value: id }), []);
+  const onPreset = useCallback((p) => {
+    const { id, label, ...payload } = p;
+    dispatch({ type: ACTIONS.APPLY_PRESET, value: payload });
+  }, []);
+  const onBootstrap = useCallback(() => {
+    // Bootstrap dispatch dummy : déclenche un refetch (les defaults Qatar sont
+    // appliqués côté serveur dans /simulate via bootstrapScenarioFromSources).
+    // On force juste un re-render en changeant geography (no-op si déjà Qatar).
+    dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: 'qatar' } });
+  }, []);
+  const onHwChange = useCallback((next) => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: next }), []);
+  const onCellClick = useCallback(({ businessModelId, clientTypeId }) => {
+    dispatch({ type: ACTIONS.SET_BUSINESS_MODEL, value: businessModelId });
+    dispatch({ type: ACTIONS.SET_CLIENT_TYPE, value: clientTypeId });
+  }, []);
+
+  // Input value pour le champ vedette
+  const inputValue = state.mode === 'capital_first' ? state.capital_usd
+    : state.mode === 'target_irr_first' ? state.target_irr_pct
+    : state.total_mw;
+  const onInputChange = useCallback((val) => {
+    if (state.mode === 'capital_first') dispatch({ type: ACTIONS.SET_CAPITAL, value: val });
+    else if (state.mode === 'target_irr_first') dispatch({ type: ACTIONS.SET_IRR_TARGET, value: val });
+    else dispatch({ type: ACTIONS.SET_MW, value: val });
+  }, [state.mode]);
+
+  // Save as Scenario
+  async function handleSave() {
+    if (!projectId || !scenario) return;
+    setSavingState('saving');
+    try {
+      // Whitelist via SCENARIO_WRITABLE_KEYS
+      const writable = {};
+      for (const k of SCENARIO_WRITABLE_KEYS) {
+        if (scenario[k] !== undefined) writable[k] = scenario[k];
+      }
+      const name = `Plan — ${archetypeOutcome?.label || 'Custom'} ${state.total_mw || ''}MW (${new Date().toISOString().slice(0, 10)})`;
+      const r = await fetch('/api/admin/hearst/scenarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: projectId,
+          name,
+          scenario_type: 'custom',
+          ...writable,
+          input_mode: state.mode,
+          input_value: buildSimulatePayload(state).input_value,
+          hardware_mix: state.hardware_mix,
+        }),
+      });
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}));
+        throw new Error(body.error || 'Save failed');
+      }
+      const data = await r.json();
+      setSavedScenarioId(data.scenario?.id);
+      setSavingState('saved');
+      setTimeout(() => setSavingState('idle'), 2500);
+    } catch (e) {
+      setSavingState('idle');
+      alert(`Save failed: ${e.message}`);
+    }
+  }
+
+  function handleOpenFinancial() {
+    if (savedScenarioId) {
+      router.push(`/admin/hearst/financial?scenario_id=${savedScenarioId}`);
+    } else {
+      router.push('/admin/hearst/financial');
+    }
+  }
+
+  function handleExportMd() {
+    if (!scenario || !projection) return;
+    const md = renderMemoMd(state, scenario, projection, archetypeOutcome);
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `simulator-memo-${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div style={S.wrap}>
+      <header style={S.header}>
+        <div>
+          <h1 style={S.title}>Investment Simulator</h1>
+          <div style={S.subtitle}>Pick your starting point. See the financials, timeline, and team you'll need.</div>
+        </div>
+        {loading && <div style={S.loadingBadge}>Calculating…</div>}
+      </header>
+
+      {/* Section A: Input */}
+      <InputModeSwitcher
+        mode={state.mode}
+        onChange={onModeChange}
+        presets={QATAR_PRESETS}
+        onPreset={onPreset}
+        onBootstrap={onBootstrap}
+      />
+      <InputFieldHero
+        mode={state.mode}
+        value={inputValue}
+        onChange={onInputChange}
+        derived={simResult?.derived}
+        solver={simResult?.solver}
+      />
+
+      {state.mode === 'target_irr_first' && (
+        <div style={S.leverPanel}>
+          <span style={S.leverLabel}>What to change:</span>
+          {[
+            { id: 'pricing',      label: 'Pricing' },
+            { id: 'capex_per_mw', label: 'Build cost' },
+            { id: 'leverage',     label: 'Debt level' },
+            { id: 'mw',           label: 'Size (MW)' },
+          ].map(l => (
+            <button
+              key={l.id}
+              type="button"
+              onClick={() => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: l.id })}
+              style={{ ...S.leverBtn, ...(state.target_irr_lever === l.id ? S.leverBtnActive : {}) }}>
+              {l.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {simError && <div style={S.error}>Error: {simError}</div>}
+
+      {/* Section B: Deal models */}
+      <section>
+        <h2 style={S.sectionTitle}>Deal models ({radarArchetypes.length} compared)</h2>
+        <ArchetypePicker
+          archetypes={DEAL_ARCHETYPES}
+          primaryId={state.primary_archetype_id}
+          compareIds={state.compare_archetype_ids}
+          onSelectPrimary={onSelectPrimary}
+          onToggleCompare={onToggleCompare}
+        />
+      </section>
+
+      {/* Section C: Equipment mix */}
+      <section>
+        <h2 style={S.sectionTitle}>Equipment mix</h2>
+        <HardwareMixer
+          totalMw={scenario?.total_mw || state.total_mw}
+          value={state.hardware_mix}
+          onChange={onHwChange}
+        />
+      </section>
+
+      {/* Section D: Visualisations */}
+      <section>
+        <div style={S.vizTabs}>
+          {VIZ_TABS.map(t => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value: t.id })}
+              style={{ ...S.vizTab, ...(state.active_viz === t.id ? S.vizTabActive : {}) }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div style={S.vizContainer}>
+          {state.active_viz === 'radar' && (
+            <ArchetypeRadar archetypes={radarArchetypes} height={400} />
+          )}
+          {state.active_viz === 'network' && (
+            <EcosystemNetwork activeArchetypeId={state.primary_archetype_id} />
+          )}
+          {state.active_viz === 'matrix' && (
+            <B2BMatrix
+              selected={{ businessModelId: state.business_model_id, clientTypeId: state.client_type_id }}
+              onCellClick={onCellClick}
+            />
+          )}
+          {state.active_viz === 'sankey' && (
+            <FinancialSankey scenario={scenario} projection={projection} height={420} />
+          )}
+        </div>
+      </section>
+
+      {/* Section E: Results */}
+      <section>
+        <h2 style={S.sectionTitle}>Results — Key numbers, timeline, projection</h2>
+        <OutputKpiStrip projection={projection} />
+        <div style={{ marginTop: 16 }}>
+          <GanttTimeline scenario={scenario || { site_readiness: 'greenfield' }} exit_year={scenario?.exit_year || 10} />
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <ProjectionChart years={projection?.years || []} />
+        </div>
+      </section>
+
+      {/* Section F: CTAs */}
+      <SimulatorCTABar
+        hasProjection={!!projection}
+        savingState={savingState}
+        onSave={handleSave}
+        onOpenFinancial={handleOpenFinancial}
+        onExportMd={handleExportMd}
+      />
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────
+// Memo MD generator
+// ────────────────────────────────────────────────────────────
+function renderMemoMd(state, scenario, projection, archetypeOutcome) {
+  const fmtUsd = (v) => v != null ? `$${(v / 1e6).toFixed(1)}M` : 'N/A';
+  const fmtPct = (v) => v != null ? `${(v * 100).toFixed(1)}%` : 'N/A';
+  const fmtX = (v) => v != null ? `${v.toFixed(2)}x` : 'N/A';
+
+  return `# Investment Plan — ${new Date().toISOString().slice(0, 10)}
+
+## Starting point
+- **Mode**: ${state.mode}
+- **Deal model**: ${archetypeOutcome?.label || state.primary_archetype_id} (${archetypeOutcome?.code || ''})
+- **Business model**: ${state.business_model_id}
+- **Customer type**: ${state.client_type_id}
+
+## Plan (key numbers)
+- Total size: ${scenario.total_mw} MW
+- Energy efficiency (PUE): ${scenario.pue}
+- Electricity price: $${scenario.electricity_price_mwh}/MWh
+- Rental price (big tech): $${scenario.price_hyperscale_kw_month}/kW/month
+- Debt: ${(scenario.debt_pct * 100).toFixed(0)}% at ${scenario.debt_interest_rate}%
+- Exit: ${scenario.exit_multiple}x yearly profit in year ${scenario.exit_year}
+
+## Equipment mix
+- Standard / High-density / AI clusters: ${state.hardware_mix.classic_pct}% / ${state.hardware_mix.liquid_pct}% / ${state.hardware_mix.ai_pct}%
+- AI chip model: ${state.hardware_mix.gpu_sku_id}
+- How busy: ${state.hardware_mix.utilization_pct}%
+- Rental price per hour: $${state.hardware_mix.gpu_hour_price}
+
+## Results (10-year projection)
+| Metric | Value |
+|---|---|
+| Total Build Cost | ${fmtUsd(projection.total_capex)} |
+| Yearly Revenue | ${fmtUsd(projection.stabilized_revenue)} |
+| Yearly Profit | ${fmtUsd(projection.stabilized_ebitda)} |
+| Annual Return | ${fmtPct(projection.irr)} |
+| Money Multiplier | ${fmtX(projection.moic)} |
+| Years to Break Even | ${projection.payback_years ?? 'N/A'} yr |
+| Debt Safety | ${fmtX(projection.dscr_stabilized)} |
+| Sale Value | ${fmtUsd(projection.terminal_value)} |
+| Net Value Today | ${fmtUsd(projection.npv)} |
+
+## Overall score
+${archetypeOutcome?.score ?? 'N/A'}/100
+
+---
+Generated by HEARST Investment Simulator (/admin/hearst/simulator).
+`;
+}
+
+const S = {
+  wrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+    padding: '0 4px',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    padding: '8px 0',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 800,
+    color: 'var(--cp-text-primary)',
+    margin: 0,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: 'var(--cp-text-muted)',
+    marginTop: 4,
+  },
+  loadingBadge: {
+    fontSize: 11,
+    padding: '4px 10px',
+    background: 'var(--cp-info-bg)',
+    color: 'var(--cp-info)',
+    borderRadius: 12,
+    fontWeight: 700,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: 800,
+    color: 'var(--cp-text-primary)',
+    margin: '0 0 10px 0',
+    letterSpacing: 0.5,
+  },
+  error: {
+    padding: 12,
+    background: 'var(--cp-error-bg)',
+    color: 'var(--cp-error)',
+    borderRadius: 6,
+    fontSize: 12,
+  },
+  leverPanel: {
+    display: 'flex',
+    gap: 8,
+    alignItems: 'center',
+    padding: '8px 14px',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 8,
+  },
+  leverLabel: { fontSize: 11, fontWeight: 700, color: 'var(--cp-text-muted)' },
+  leverBtn: {
+    fontSize: 11,
+    padding: '5px 12px',
+    background: 'transparent',
+    color: 'var(--cp-text-muted)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 16,
+    cursor: 'pointer',
+    fontWeight: 600,
+  },
+  leverBtnActive: {
+    background: 'var(--cp-accent-strong)',
+    color: 'var(--cp-text-strong)',
+    borderColor: 'var(--cp-accent-strong)',
+  },
+  vizTabs: {
+    display: 'flex',
+    gap: 4,
+    marginBottom: 12,
+    borderBottom: '1px solid var(--cp-border)',
+  },
+  vizTab: {
+    fontSize: 12,
+    padding: '8px 16px',
+    background: 'transparent',
+    color: 'var(--cp-text-muted)',
+    border: 'none',
+    borderBottom: '2px solid transparent',
+    cursor: 'pointer',
+    fontWeight: 600,
+  },
+  vizTabActive: {
+    color: 'var(--cp-text-primary)',
+    borderBottomColor: 'var(--cp-accent-strong)',
+  },
+  vizContainer: {
+    minHeight: 320,
+    padding: '12px 4px',
+  },
+};

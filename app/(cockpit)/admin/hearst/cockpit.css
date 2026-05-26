@@ -115,6 +115,21 @@
   --cp-warning-strong: rgba(255, 255, 255, 0.15);
   --cp-info-strong-cta: rgba(255, 255, 255, 0.15);
 
+  /* === CHROMATIC STATUS (for dots, charts, comparison tables) =================
+     Use these tokens when you need CHROMATIC distinction (red/green/amber/blue),
+     not just lightness modulation. Picked to remain readable on both
+     --cp-surface-2 (dark glass) and --cp-text-primary (near-white CTA state).
+     Saturated mid-tones — Tailwind-equivalent: emerald-400, rose-400, amber-400, sky-400.
+     For dimmed/background variants, use color-mix() inline or follow with -bg suffix. */
+  --cp-status-positive: #34d399;
+  --cp-status-positive-bg: rgba(52, 211, 153, 0.15);
+  --cp-status-negative: #f87171;
+  --cp-status-negative-bg: rgba(248, 113, 113, 0.15);
+  --cp-status-neutral: #fbbf24;
+  --cp-status-neutral-bg: rgba(251, 191, 36, 0.15);
+  --cp-status-cool: #60a5fa;
+  --cp-status-cool-bg: rgba(96, 165, 250, 0.15);
+
   --cp-accent: #be123c;
   --cp-accent-strong: #e11d48;
   --cp-accent-soft: rgba(225, 29, 72, 0.18);

@@ -109,6 +109,25 @@
   --cp-violet:         #8b5cf6;
   --cp-violet-bg:      rgba(139,92,246,0.08);
 
+  /* ── Status sémantiques (alias) ──
+     Utilisés par le simulator + viz pour décorrer la sémantique métier de la
+     couleur brute. Modifiez ces alias sans toucher aux couleurs sources. */
+  --cp-status-cool:        var(--cp-violet);
+  --cp-status-cool-bg:     var(--cp-violet-bg);
+  --cp-status-positive:    var(--cp-success);
+  --cp-status-positive-bg: var(--cp-success-bg);
+  --cp-status-negative:    var(--cp-error);
+  --cp-status-negative-bg: var(--cp-error-bg);
+
+  /* ── Brand colors operators (Radar archétypes simulator) ──
+     Couleurs marque (CoreWeave/hyperscaler/QIA) sans équivalent sémantique. */
+  --cp-op-neocloud:        #E05A1A;
+  --cp-op-neocloud-bg:     rgba(224,90,26,0.08);
+  --cp-op-hyperscaler:     #4F5BD5;
+  --cp-op-hyperscaler-bg:  rgba(79,91,213,0.08);
+  --cp-op-sovereign:       #8B1C1C;
+  --cp-op-sovereign-bg:    rgba(139,28,28,0.08);
+
   /* ── Z-index ── */
   --cp-z-content:  10;
   --cp-z-rails:    20;
