@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { adminFetch } from '@/lib/admin-fetch';
 import { PARTNER_KIND_COLOR as KIND_COLOR } from '@/lib/admin-constants';
 import AssigneePicker from '@/components/admin/AssigneePicker';
 import CommentThread from '@/components/admin/CommentThread';
@@ -38,7 +39,7 @@ export default function PartnerDetail({
   const refresh = () => router.refresh();
 
   async function setStatus(s) {
-    await fetch(`/api/admin/partners/${partner.id}`, {
+    await adminFetch(`/api/admin/partners/${partner.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: s }),
@@ -47,7 +48,7 @@ export default function PartnerDetail({
   }
 
   async function setAssignee(newId) {
-    const res = await fetch(`/api/admin/partners/${partner.id}`, {
+    const res = await adminFetch(`/api/admin/partners/${partner.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ assignee_id: newId }),
@@ -166,7 +167,7 @@ function OverviewTab({ partner, accent, onChange }) {
   const [notes, setNotes] = useState(partner.notes || '');
 
   async function save() {
-    await fetch(`/api/admin/partners/${partner.id}`, {
+    await adminFetch(`/api/admin/partners/${partner.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ owner: owner || null, next_step: next || null, next_step_due: due || null, notes }),
@@ -255,7 +256,7 @@ function TasksSection({ partner, tasks, accent, onChange }) {
   async function add() {
     if (!title) return;
     setBusy(true);
-    await fetch('/api/admin/tasks', {
+    await adminFetch('/api/admin/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ partner_id: partner.id, title, due_date: due || null }),
@@ -266,7 +267,7 @@ function TasksSection({ partner, tasks, accent, onChange }) {
   }
 
   async function toggle(t) {
-    await fetch('/api/admin/tasks', {
+    await adminFetch('/api/admin/tasks', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: t.id, done: !t.done }),
@@ -276,7 +277,7 @@ function TasksSection({ partner, tasks, accent, onChange }) {
 
   async function remove(id) {
     if (!confirm('Delete this task?')) return;
-    await fetch('/api/admin/tasks', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    await adminFetch('/api/admin/tasks', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     onChange();
   }
 
@@ -360,7 +361,7 @@ function TimelineSection({ partner, events, eventLabel, accent, onChange }) {
   async function add() {
     if (!subject && !body) return;
     setBusy(true);
-    await fetch('/api/admin/events', {
+    await adminFetch('/api/admin/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ partner_id: partner.id, type, subject, body }),
@@ -372,7 +373,7 @@ function TimelineSection({ partner, events, eventLabel, accent, onChange }) {
 
   async function remove(id) {
     if (!confirm('Delete this event?')) return;
-    await fetch('/api/admin/events', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    await adminFetch('/api/admin/events', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     onChange();
   }
 
@@ -430,7 +431,7 @@ function StakeholdersSection({ partner, stakeholders, accent, onChange }) {
   async function add() {
     if (!name) return;
     setBusy(true);
-    await fetch('/api/admin/stakeholders', {
+    await adminFetch('/api/admin/stakeholders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ partner_id: partner.id, name, title, email, phone }),
@@ -442,7 +443,7 @@ function StakeholdersSection({ partner, stakeholders, accent, onChange }) {
 
   async function remove(id) {
     if (!confirm('Delete this stakeholder?')) return;
-    await fetch('/api/admin/stakeholders', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    await adminFetch('/api/admin/stakeholders', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     onChange();
   }
 
@@ -537,7 +538,7 @@ function DocumentsTab({ partner, documents, accent, onChange }) {
     fd.append('partner_id', partner.id);
     fd.append('kind', kind);
     fd.append('file', file);
-    await fetch('/api/admin/documents', { method: 'POST', body: fd });
+    await adminFetch('/api/admin/documents', { method: 'POST', body: fd });
     setBusy(false);
     e.target.value = '';
     onChange();
@@ -551,7 +552,7 @@ function DocumentsTab({ partner, documents, accent, onChange }) {
     fd.append('kind', kind);
     fd.append('external_url', linkUrl);
     fd.append('name', linkName || linkUrl);
-    await fetch('/api/admin/documents', { method: 'POST', body: fd });
+    await adminFetch('/api/admin/documents', { method: 'POST', body: fd });
     setLinkUrl(''); setLinkName('');
     setBusy(false);
     onChange();
@@ -560,7 +561,7 @@ function DocumentsTab({ partner, documents, accent, onChange }) {
   async function open(id) {
     const win = window.open('', '_blank');
     try {
-      const r = await fetch(`/api/admin/documents?id=${id}`);
+      const r = await adminFetch(`/api/admin/documents?id=${id}`);
       const j = await r.json();
       if (j.url && win) win.location.href = j.url;
       else if (win) win.close();
@@ -571,7 +572,7 @@ function DocumentsTab({ partner, documents, accent, onChange }) {
 
   async function remove(id) {
     if (!confirm('Delete this document?')) return;
-    await fetch('/api/admin/documents', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+    await adminFetch('/api/admin/documents', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
     onChange();
   }
 

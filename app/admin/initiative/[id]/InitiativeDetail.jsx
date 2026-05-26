@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { adminFetch } from '@/lib/admin-fetch';
 import AssigneePicker from '@/components/admin/AssigneePicker';
 import CommentThread from '@/components/admin/CommentThread';
 import { EntityDetailLayout, QuickActionButton } from '@/components/admin/layout/EntityDetail';
@@ -46,7 +47,7 @@ export default function InitiativeDetail({
   });
 
   async function setStatus(s) {
-    await fetch(`/api/admin/initiatives/${initiative.id}`, {
+    await adminFetch(`/api/admin/initiatives/${initiative.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: s }),
@@ -55,7 +56,7 @@ export default function InitiativeDetail({
   }
 
   async function setAssignee(newId) {
-    const res = await fetch(`/api/admin/initiatives/${initiative.id}`, {
+    const res = await adminFetch(`/api/admin/initiatives/${initiative.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ assigned_to: newId }),
@@ -69,7 +70,7 @@ export default function InitiativeDetail({
   }
 
   async function save() {
-    await fetch(`/api/admin/initiatives/${initiative.id}`, {
+    await adminFetch(`/api/admin/initiatives/${initiative.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -83,7 +84,7 @@ export default function InitiativeDetail({
   }
 
   async function link(kind, target_id) {
-    await fetch(`/api/admin/initiatives/${initiative.id}/links`, {
+    await adminFetch(`/api/admin/initiatives/${initiative.id}/links`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ kind, target_id }),
@@ -92,7 +93,7 @@ export default function InitiativeDetail({
   }
 
   async function unlink(kind, target_id) {
-    await fetch(`/api/admin/initiatives/${initiative.id}/links`, {
+    await adminFetch(`/api/admin/initiatives/${initiative.id}/links`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ kind, target_id }),
@@ -429,7 +430,7 @@ function TasksBlock({ initiative, tasks, accent, onChange }) {
 
   async function add() {
     if (!title) return;
-    await fetch('/api/admin/tasks', {
+    await adminFetch('/api/admin/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ initiative_id: initiative.id, title, due_date: due || null }),
@@ -439,7 +440,7 @@ function TasksBlock({ initiative, tasks, accent, onChange }) {
   }
 
   async function toggle(t) {
-    await fetch('/api/admin/tasks', {
+    await adminFetch('/api/admin/tasks', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: t.id, done: !t.done }),
@@ -449,7 +450,7 @@ function TasksBlock({ initiative, tasks, accent, onChange }) {
 
   async function remove(id) {
     if (!confirm('Delete task?')) return;
-    await fetch('/api/admin/tasks', {
+    await adminFetch('/api/admin/tasks', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -552,7 +553,7 @@ function DependencyBlock({ items, candidates, initiativeId, accent, statusColor,
 
   async function attach() {
     if (!pick) return;
-    const res = await fetch(`/api/admin/initiatives/${initiativeId}/dependencies`, {
+    const res = await adminFetch(`/api/admin/initiatives/${initiativeId}/dependencies`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ depends_on_id: pick }),
@@ -567,7 +568,7 @@ function DependencyBlock({ items, candidates, initiativeId, accent, statusColor,
   }
 
   async function detach(id) {
-    await fetch(`/api/admin/initiatives/${initiativeId}/dependencies`, {
+    await adminFetch(`/api/admin/initiatives/${initiativeId}/dependencies`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ depends_on_id: id }),

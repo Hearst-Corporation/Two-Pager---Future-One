@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { adminFetch } from '@/lib/admin-fetch';
 import { PILLAR_ACCENT } from '@/lib/admin-constants';
 import { CommandCenterLayout, TaskWidgetItem, QuickStatWidget } from '@/components/admin/layout/CommandCenter';
 
@@ -70,7 +71,7 @@ export default function Dashboard({
 
   async function moveTo(operatorId, newStatus) {
     setDrag(null);
-    await fetch(`/api/admin/operators/${operatorId}`, {
+    await adminFetch(`/api/admin/operators/${operatorId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
@@ -79,7 +80,7 @@ export default function Dashboard({
   }
 
   async function toggleTask(id, done) {
-    await fetch('/api/admin/tasks', {
+    await adminFetch('/api/admin/tasks', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, done: !done }),

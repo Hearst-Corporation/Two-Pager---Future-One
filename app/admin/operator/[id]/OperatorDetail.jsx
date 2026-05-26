@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { adminFetch } from '@/lib/admin-fetch';
 import { PILLAR_ACCENT } from '@/lib/admin-constants';
 import AssigneePicker from '@/components/admin/AssigneePicker';
 import CommentThread from '@/components/admin/CommentThread';
@@ -101,7 +102,7 @@ export default function OperatorDetail({
             valueId={operator.assignee_id}
             size={32}
             onChange={async (newId) => {
-              const res = await fetch(`/api/admin/operators/${operator.id}`, {
+              const res = await adminFetch(`/api/admin/operators/${operator.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ assignee_id: newId }),
@@ -194,7 +195,7 @@ export default function OperatorDetail({
 function StatusBar({ operator, statusFlow, statusLabel, accent, onChange }) {
   const idx = statusFlow.indexOf(operator.status);
   async function setStatus(s) {
-    await fetch(`/api/admin/operators/${operator.id}`, {
+    await adminFetch(`/api/admin/operators/${operator.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: s }),
@@ -235,7 +236,7 @@ function OverviewTab({ operator, accent, onChange }) {
 
   async function save() {
     setBusy(true);
-    await fetch(`/api/admin/operators/${operator.id}`, {
+    await adminFetch(`/api/admin/operators/${operator.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -346,7 +347,7 @@ function TasksSection({ operator, tasks, accent, onChange }) {
   async function add() {
     if (!title) return;
     setBusy(true);
-    const res = await fetch('/api/admin/tasks', {
+    const res = await adminFetch('/api/admin/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ operator_id: operator.id, title, due_date: due || null, assigned_to: assignee }),
@@ -363,7 +364,7 @@ function TasksSection({ operator, tasks, accent, onChange }) {
   }
 
   async function toggle(task) {
-    await fetch('/api/admin/tasks', {
+    await adminFetch('/api/admin/tasks', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: task.id, done: !task.done }),
@@ -372,7 +373,7 @@ function TasksSection({ operator, tasks, accent, onChange }) {
   }
 
   async function patchTask(id, patch) {
-    await fetch('/api/admin/tasks', {
+    await adminFetch('/api/admin/tasks', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, ...patch }),
@@ -382,7 +383,7 @@ function TasksSection({ operator, tasks, accent, onChange }) {
 
   async function remove(id) {
     if (!confirm('Delete this task?')) return;
-    await fetch('/api/admin/tasks', {
+    await adminFetch('/api/admin/tasks', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -469,7 +470,7 @@ function TimelineSection({ operator, events, eventLabel, accent, onChange }) {
   async function add() {
     if (!subject && !body) return;
     setBusy(true);
-    await fetch('/api/admin/events', {
+    await adminFetch('/api/admin/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ operator_id: operator.id, type, subject, body }),
@@ -481,7 +482,7 @@ function TimelineSection({ operator, events, eventLabel, accent, onChange }) {
 
   async function remove(id) {
     if (!confirm('Delete this event?')) return;
-    await fetch('/api/admin/events', {
+    await adminFetch('/api/admin/events', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -548,7 +549,7 @@ function StakeholdersSection({ operator, stakeholders, accent, onChange }) {
   async function add() {
     if (!name) return;
     setBusy(true);
-    await fetch('/api/admin/stakeholders', {
+    await adminFetch('/api/admin/stakeholders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ operator_id: operator.id, name, title, email, phone }),
@@ -560,7 +561,7 @@ function StakeholdersSection({ operator, stakeholders, accent, onChange }) {
 
   async function remove(id) {
     if (!confirm('Delete this stakeholder?')) return;
-    await fetch('/api/admin/stakeholders', {
+    await adminFetch('/api/admin/stakeholders', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -646,7 +647,7 @@ function DeckLinkCard({ link, accent, operatorDeckRoute, onChange }) {
   async function load() {
     if (analytics || loading) return;
     setLoading(true);
-    const r = await fetch(`/api/admin/deck-links/${link.id}/analytics`);
+    const r = await adminFetch(`/api/admin/deck-links/${link.id}/analytics`);
     const j = await r.json();
     setAnalytics(j);
     setLoading(false);
@@ -654,7 +655,7 @@ function DeckLinkCard({ link, accent, operatorDeckRoute, onChange }) {
 
   async function revoke() {
     if (!confirm('Revoke this link? It will stop logging views.')) return;
-    await fetch('/api/admin/deck-links', {
+    await adminFetch('/api/admin/deck-links', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: link.id }),
@@ -769,7 +770,7 @@ function DocumentsTab({ operator, documents, accent, onChange }) {
     fd.append('operator_id', operator.id);
     fd.append('kind', kind);
     fd.append('file', file);
-    await fetch('/api/admin/documents', { method: 'POST', body: fd });
+    await adminFetch('/api/admin/documents', { method: 'POST', body: fd });
     setBusy(false);
     e.target.value = '';
     onChange();
@@ -783,7 +784,7 @@ function DocumentsTab({ operator, documents, accent, onChange }) {
     fd.append('kind', kind);
     fd.append('external_url', linkUrl);
     fd.append('name', linkName || linkUrl);
-    await fetch('/api/admin/documents', { method: 'POST', body: fd });
+    await adminFetch('/api/admin/documents', { method: 'POST', body: fd });
     setLinkUrl(''); setLinkName('');
     setBusy(false);
     onChange();
@@ -792,7 +793,7 @@ function DocumentsTab({ operator, documents, accent, onChange }) {
   async function open(id) {
     const win = window.open('', '_blank');
     try {
-      const r = await fetch(`/api/admin/documents?id=${id}`);
+      const r = await adminFetch(`/api/admin/documents?id=${id}`);
       const j = await r.json();
       if (j.url && win) win.location.href = j.url;
       else if (win) win.close();
@@ -803,7 +804,7 @@ function DocumentsTab({ operator, documents, accent, onChange }) {
 
   async function remove(id) {
     if (!confirm('Delete this document?')) return;
-    await fetch('/api/admin/documents', {
+    await adminFetch('/api/admin/documents', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -871,7 +872,7 @@ function SendDeckModal({ operator, accent, operatorDeckRoute, onClose }) {
 
   async function generate() {
     setBusy(true);
-    const res = await fetch('/api/admin/deck-links', {
+    const res = await adminFetch('/api/admin/deck-links', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1035,7 +1036,6 @@ const S = {
   },
 
   grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
-  fieldLabel: { fontSize: 10, fontWeight: 800, letterSpacing: 2, color: 'var(--color-text-muted)', marginBottom: 8 },
   input: {
     width: '100%',
     padding: '10px 12px',
