@@ -1,12 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
+import KpiCard from '@/components/hearst/KpiCard';
 
+// Monochrome workflow — only true negatives (expired/terminated) keep --cp-error.
 const CONTRACT_STATUSES = {
-  draft:      { label: 'Draft',      color: 'var(--cp-text-muted)', bg: 'var(--cp-surface-1)' },
-  negotiation:{ label: 'Negotiation',color: 'var(--cp-warning)', bg: 'var(--cp-warning-bg)' },
-  executed:   { label: 'Executed',   color: 'var(--cp-success)', bg: 'var(--cp-success-bg)' },
-  expired:    { label: 'Expired',    color: 'var(--cp-error)', bg: 'var(--cp-error-bg)' },
-  terminated: { label: 'Terminated', color: 'var(--cp-violet)', bg: 'var(--cp-violet-bg)' },
+  draft:      { label: 'Draft',      color: 'var(--cp-text-muted)',   bg: 'var(--cp-surface-1)' },
+  negotiation:{ label: 'Negotiation',color: 'var(--cp-text-body)',    bg: 'var(--cp-surface-2)' },
+  executed:   { label: 'Executed',   color: 'var(--cp-accent)',       bg: 'var(--cp-accent-soft)' },
+  expired:    { label: 'Expired',    color: 'var(--cp-error)',        bg: 'var(--cp-error-bg)' },
+  terminated: { label: 'Terminated', color: 'var(--cp-error)',        bg: 'var(--cp-error-bg)' },
 };
 
 function fmtVal(v) {
@@ -100,19 +102,10 @@ export default function ContractsPage() {
       </div>
 
       {/* Summary */}
-      <div style={S.summaryRow}>
-        <div style={S.summaryCard}>
-          <div style={S.summaryLabel}>EXECUTED VALUE</div>
-          <div style={{ ...S.summaryVal, color: 'var(--cp-success)' }}>{fmtVal(exVal)}</div>
-        </div>
-        <div style={S.summaryCard}>
-          <div style={S.summaryLabel}>IN NEGOTIATION</div>
-          <div style={{ ...S.summaryVal, color: 'var(--cp-warning)' }}>{fmtVal(negVal)}</div>
-        </div>
-        <div style={S.summaryCard}>
-          <div style={S.summaryLabel}>TOTAL CONTRACTS</div>
-          <div style={S.summaryVal}>{contracts.length}</div>
-        </div>
+      <div style={S.kpiStrip}>
+        <KpiCard label="Executed Value"  value={exVal}  format="currency" highlight />
+        <KpiCard label="In Negotiation"  value={negVal} format="currency" />
+        <KpiCard label="Total Contracts" value={contracts.length} format="number" />
       </div>
 
       {/* Add form */}
@@ -195,7 +188,7 @@ export default function ContractsPage() {
                     <select
                       value={c.status}
                       onChange={e => updateStatus(c.id, e.target.value)}
-                      style={{ fontSize: 10, padding: '3px 6px', border: '1px solid var(--cp-border)', borderRadius: 4, background: 'transparent', cursor: 'pointer' }}
+                      style={{ fontSize: 10, padding: '4px 6px', border: '1px solid var(--cp-border)', borderRadius: 4, background: 'transparent', cursor: 'pointer' }}
                     >
                       {Object.keys(CONTRACT_STATUSES).map(s => <option key={s} value={s}>{CONTRACT_STATUSES[s].label}</option>)}
                     </select>
@@ -211,26 +204,23 @@ export default function ContractsPage() {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
-  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  summaryRow: { display: 'flex', gap: 14, marginBottom: 18 },
-  summaryCard: { flex: 1, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '12px 16px' },
-  summaryLabel: { fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)', marginBottom: 4 },
-  summaryVal: { fontSize: 20, fontWeight: 900, color: 'var(--cp-text-primary)' },
-  addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '16px 20px', marginBottom: 16 },
+  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '8px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 },
+  addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 10, padding: '16px 20px', marginBottom: 16 },
   addTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 12 },
   addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px 14px' },
   lbl: { display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--cp-text-muted)', marginBottom: 3 },
   inp: { width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', boxSizing: 'border-box' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '8px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  cancelBtn: { fontSize: 12, padding: '8px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
   search: { width: '100%', padding: '8px 12px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', marginBottom: 14, boxSizing: 'border-box' },
-  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--cp-text-muted)', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 8, overflow: 'hidden' },
+  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--cp-text-muted)', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 10 },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 10, overflow: 'hidden' },
   th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 0.8, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   tr: { borderBottom: '1px solid var(--cp-border)' },
   td: { padding: '8px 12px', color: 'var(--cp-text-muted)', verticalAlign: 'middle' },

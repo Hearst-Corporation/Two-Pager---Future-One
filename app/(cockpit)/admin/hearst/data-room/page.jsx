@@ -1,12 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
 
+// Monochrome workflow — "missing" keeps --cp-error (real gap, not decorative),
+// other states progress neutral → accent as the doc reaches "approved".
 const STATUS_META = {
-  missing:     { label: 'Missing',     color: 'var(--cp-error)', bg: 'var(--cp-error-bg)' },
-  in_progress: { label: 'In Progress', color: 'var(--cp-warning)', bg: 'var(--cp-warning-bg)' },
-  uploaded:    { label: 'Uploaded',    color: 'var(--cp-info)', bg: 'var(--cp-info-bg)' },
-  reviewed:    { label: 'Reviewed',    color: 'var(--cp-violet)', bg: 'var(--cp-violet-bg)' },
-  approved:    { label: 'Approved',    color: 'var(--cp-success)', bg: 'var(--cp-success-bg)' },
+  missing:     { label: 'Missing',     color: 'var(--cp-error)',        bg: 'var(--cp-error-bg)' },
+  in_progress: { label: 'In Progress', color: 'var(--cp-text-muted)',   bg: 'var(--cp-surface-1)' },
+  uploaded:    { label: 'Uploaded',    color: 'var(--cp-text-body)',    bg: 'var(--cp-surface-2)' },
+  reviewed:    { label: 'Reviewed',    color: 'var(--cp-text-primary)', bg: 'var(--cp-surface-3)' },
+  approved:    { label: 'Approved',    color: 'var(--cp-accent)',       bg: 'var(--cp-accent-soft)' },
 };
 
 const STATUS_ORDER = ['missing', 'in_progress', 'uploaded', 'reviewed', 'approved'];
@@ -113,6 +115,14 @@ export default function DataRoomPage() {
 
   return (
     <div style={S.wrap}>
+      {/* Page header */}
+      <div style={S.topBar}>
+        <div>
+          <div style={S.pageTitle}>Data Room</div>
+          <div style={S.pageSubtitle}>Diligence document tracking</div>
+        </div>
+      </div>
+
       {/* Progress header */}
       <div style={S.progressCard}>
         <div style={S.progressInfo}>
@@ -122,7 +132,7 @@ export default function DataRoomPage() {
         <div style={S.progressBarWrap}>
           <div style={{ ...S.progressBar, width: pct + '%' }} />
         </div>
-        <div style={{ ...S.pct, color: pct >= 70 ? 'var(--cp-success)' : pct >= 40 ? 'var(--cp-warning)' : 'var(--cp-error)' }}>{pct}%</div>
+        <div style={{ ...S.pct, color: pct >= 70 ? 'var(--cp-accent)' : pct >= 40 ? 'var(--cp-text-body)' : 'var(--cp-error)' }}>{pct}%</div>
         {missing > 0 && <div style={S.missingAlert}>{missing} missing</div>}
       </div>
 
@@ -217,36 +227,39 @@ export default function DataRoomPage() {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
+  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
+  pageSubtitle: { fontSize: 13, lineHeight: '20px', fontWeight: 500, color: 'var(--cp-text-muted)', marginTop: 4 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   progressCard: {
     display: 'flex', alignItems: 'center', gap: 16,
     background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)',
-    borderRadius: 8, padding: '14px 20px', marginBottom: 20,
+    borderRadius: 10, padding: '16px 20px',
   },
   progressInfo: { minWidth: 200 },
   progressTitle: { fontSize: 13, fontWeight: 700, color: 'var(--cp-text-primary)' },
   progressSub: { fontSize: 11, color: 'var(--cp-text-muted)', marginTop: 2 },
   progressBarWrap: { flex: 1, height: 8, background: 'var(--cp-border)', borderRadius: 4, overflow: 'hidden' },
-  progressBar: { height: '100%', background: 'var(--cp-info)', borderRadius: 4, transition: 'width .3s' },
-  pct: { fontSize: 18, fontWeight: 900, minWidth: 50 },
-  missingAlert: { fontSize: 11, fontWeight: 700, color: 'var(--cp-error)', background: 'var(--cp-error-bg)', padding: '3px 10px', borderRadius: 20 },
-  filterRow: { display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center' },
-  select: { fontSize: 12, padding: '7px 10px', border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer', marginLeft: 'auto' },
-  addForm: { display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' },
-  input: { flex: 1, minWidth: 160, padding: '7px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 14px', background: 'var(--cp-success-strong)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
-  catGroup: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, marginBottom: 16, overflow: 'hidden' },
+  progressBar: { height: '100%', background: 'var(--cp-accent)', borderRadius: 4, transition: 'width .3s' },
+  pct: { fontSize: 18, fontWeight: 800, minWidth: 50 },
+  missingAlert: { fontSize: 11, fontWeight: 700, color: 'var(--cp-error)', background: 'var(--cp-error-bg)', padding: '4px 10px', borderRadius: 20 },
+  filterRow: { display: 'flex', gap: 8, alignItems: 'center' },
+  select: { fontSize: 12, padding: '8px 10px', border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '8px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer', marginLeft: 'auto' },
+  addForm: { display: 'flex', gap: 8, flexWrap: 'wrap' },
+  input: { flex: 1, minWidth: 160, padding: '8px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '8px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  cancelBtn: { fontSize: 12, padding: '8px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
+  catGroup: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 10, overflow: 'hidden' },
   catHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   catName: { fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
-  catCount: { fontSize: 11, fontWeight: 700, color: 'var(--cp-success)' },
+  catCount: { fontSize: 11, fontWeight: 700, color: 'var(--cp-accent)' },
   docRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid var(--cp-border)', transition: 'opacity .15s' },
   docLeft: { display: 'flex', alignItems: 'center', gap: 10, flex: 1 },
   docTitle: { fontSize: 13, color: 'var(--cp-text-primary)', fontWeight: 500 },
-  reqTag: { fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-violet)', background: 'var(--cp-violet-bg)', padding: '1px 6px', borderRadius: 10 },
+  reqTag: { fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-accent)', background: 'var(--cp-accent-soft)', padding: '1px 6px', borderRadius: 10 },
   docRight: { display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 },
   docNote: { fontSize: 11, color: 'var(--cp-text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   statusBtn: { fontSize: 10, fontWeight: 600, padding: '4px 10px', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 4, cursor: 'pointer' },

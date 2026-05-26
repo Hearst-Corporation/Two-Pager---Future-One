@@ -5,14 +5,16 @@ import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, Area, AreaChart, BarChart,
 } from 'recharts';
-import { MISSING_LABEL } from '@/lib/hearst-constants';
 import { detectAlerts } from '@/lib/hearst-alerts';
 import AlertBanner from '@/components/hearst/AlertBanner';
+import KpiCard from '@/components/hearst/KpiCard';
 import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
 
-const COLORS = { base: 'var(--cp-info)', downside: 'var(--cp-error)', upside: 'var(--cp-success)' };
+// Scenario palette : accent for upside, neutral for base, error only for downside
+// (downside is a true risk warning, not just a third color).
+const COLORS = { base: 'var(--cp-text-primary)', downside: 'var(--cp-error)', upside: 'var(--cp-accent)' };
 
 function fmtM(v) { if (v == null) return 'N/A'; return '$' + (v / 1e6).toFixed(1) + 'M'; }
 function fmtPct(v) { if (v == null) return 'N/A'; return (v * 100).toFixed(1) + '%'; }
@@ -30,22 +32,6 @@ const METRIC_COLS = [
   { key: 'occupancy_pct', label: 'Occupancy', fmt: v => v != null ? v.toFixed(0) + '%' : 'N/A' },
 ];
 
-function SummaryKpi({ label, value, sub }) {
-  return (
-    <div style={SK.card}>
-      <div style={SK.label}>{label}</div>
-      <div style={SK.value}>{value}</div>
-      {sub && <div style={SK.sub}>{sub}</div>}
-    </div>
-  );
-}
-
-const SK = {
-  card: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '14px 18px' },
-  label: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)', textTransform: 'uppercase', marginBottom: 6 },
-  value: { fontSize: 22, fontWeight: 900, color: 'var(--cp-text-primary)' },
-  sub: { fontSize: 11, color: 'var(--cp-text-muted)', marginTop: 2 },
-};
 
 export default function FinancialPage() {
   const [project, setProject] = useState(null);
@@ -183,14 +169,14 @@ export default function FinancialPage() {
 
       {/* Summary KPIs */}
       <div style={S.kpiGrid}>
-        <SummaryKpi label="Total CAPEX" value={proj.total_capex ? '$' + (proj.total_capex / 1e6).toFixed(0) + 'M' : MISSING_LABEL} />
-        <SummaryKpi label="Project IRR" value={fmtPct(proj.irr)} sub={base?.source_score != null ? `Source score: ${base.source_score}/100` : ''} />
-        <SummaryKpi label="NPV (10yr)" value={proj.npv ? '$' + (proj.npv / 1e6).toFixed(0) + 'M' : MISSING_LABEL} />
-        <SummaryKpi label="MOIC" value={proj.moic ? fmtX(proj.moic) : MISSING_LABEL} />
-        <SummaryKpi label="DSCR (Stab.)" value={proj.dscr_stabilized ? fmtX(proj.dscr_stabilized) : MISSING_LABEL} />
-        <SummaryKpi label="Payback" value={proj.payback_years ? proj.payback_years.toFixed(1) + ' yr' : MISSING_LABEL} />
-        <SummaryKpi label="Terminal Value" value={proj.terminal_value ? '$' + (proj.terminal_value / 1e6).toFixed(0) + 'M' : MISSING_LABEL} />
-        <SummaryKpi label="Stab. Revenue" value={proj.stabilized_revenue ? '$' + (proj.stabilized_revenue / 1e6).toFixed(0) + 'M/yr' : MISSING_LABEL} />
+        <KpiCard label="Total CAPEX" value={proj.total_capex} format="currency" />
+        <KpiCard label="Project IRR" value={proj.irr} format="pct" sublabel={base?.source_score != null ? `Source score: ${base.source_score}/100` : undefined} highlight={proj.irr != null} />
+        <KpiCard label="NPV (10yr)" value={proj.npv} format="currency" />
+        <KpiCard label="MOIC" value={proj.moic} format="x" />
+        <KpiCard label="DSCR (Stab.)" value={proj.dscr_stabilized} format="x" />
+        <KpiCard label="Payback" value={proj.payback_years} format="years" />
+        <KpiCard label="Terminal Value" value={proj.terminal_value} format="currency" />
+        <KpiCard label="Stab. Revenue" value={proj.stabilized_revenue} format="currency" sublabel="per year" />
       </div>
 
       {!hasProjection ? (
@@ -231,7 +217,7 @@ export default function FinancialPage() {
                 <tr key={col.key}>
                   <td style={S.tdLabel}>{col.label}</td>
                   {(proj.years || []).map(y => (
-                    <td key={y.year} style={{ ...S.td, color: col.key === 'ebitda' || col.key === 'free_cash_flow' ? (y[col.key] >= 0 ? 'var(--cp-success)' : 'var(--cp-error)') : 'inherit' }}>
+                    <td key={y.year} style={{ ...S.td, color: col.key === 'ebitda' || col.key === 'free_cash_flow' ? (y[col.key] >= 0 ? 'var(--cp-accent)' : 'var(--cp-error)') : 'inherit' }}>
                       {col.fmt(y[col.key])}
                     </td>
                   ))}
@@ -252,8 +238,8 @@ export default function FinancialPage() {
                 <YAxis style={{ fontSize: 11 }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
                 <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 6, boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 11 }} />
                 <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 11 }} />
-                <Bar dataKey="Revenue" fill="var(--cp-info)" opacity={0.8} />
-                <Line type="monotone" dataKey="EBITDA" stroke="var(--cp-success)" strokeWidth={2} dot={false} />
+                <Bar dataKey="Revenue" fill="var(--cp-text-primary)" opacity={0.6} />
+                <Line type="monotone" dataKey="EBITDA" stroke="var(--cp-accent)" strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -265,7 +251,7 @@ export default function FinancialPage() {
                 <XAxis dataKey="year" style={{ fontSize: 11 }} tick={{ fill: 'var(--cp-text-body)' }} />
                 <YAxis style={{ fontSize: 11 }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
                 <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 6, boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 11 }} />
-                <Area type="monotone" dataKey="Cum. FCF" stroke="var(--cp-violet)" fill="var(--cp-violet-bg)" fillOpacity={0.35} strokeWidth={2} />
+                <Area type="monotone" dataKey="Cum. FCF" stroke="var(--cp-accent)" fill="var(--cp-accent-soft)" fillOpacity={0.45} strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -292,10 +278,7 @@ export default function FinancialPage() {
                   { label: 'Avg DSCR', value: debtSchedule.summary.avg_dscr ? debtSchedule.summary.avg_dscr + 'x' : 'N/A' },
                   { label: 'Covenant Breaches', value: debtSchedule.summary.breach_years?.length ? debtSchedule.summary.breach_years.join(', ') : 'None' },
                 ].map(kpi => (
-                  <div key={kpi.label} style={SK.card}>
-                    <div style={SK.label}>{kpi.label}</div>
-                    <div style={{ ...SK.value, fontSize: 16 }}>{kpi.value}</div>
-                  </div>
+                  <KpiCard key={kpi.label} size="sm" label={kpi.label} value={kpi.value} format="number" />
                 ))}
               </div>
               <div style={{ marginBottom: 20 }}>
@@ -310,7 +293,7 @@ export default function FinancialPage() {
                       <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 6 }} />
                       <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 11 }} />
                       <Area yAxisId="balance" type="monotone" dataKey="Balance" stroke="var(--cp-error)" fill="var(--cp-error-bg)" strokeWidth={2} fillOpacity={0.3} />
-                      <Bar yAxisId="service" dataKey="Debt Service" fill="var(--cp-info)" opacity={0.7} />
+                      <Bar yAxisId="service" dataKey="Debt Service" fill="var(--cp-accent)" opacity={0.7} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
@@ -326,14 +309,14 @@ export default function FinancialPage() {
                   </thead>
                   <tbody>
                     {debtSchedule.schedule.map(r => (
-                      <tr key={r.year} style={{ background: r.is_io ? 'var(--cp-warning-bg)' : 'transparent' }}>
+                      <tr key={r.year} style={{ background: r.is_io ? 'var(--cp-surface-3)' : 'transparent' }}>
                         <td style={S.tdLabel}>Y{r.year}{r.is_io ? ' (IO)' : ''}</td>
                         <td style={S.td}>{fmtM(r.opening_balance)}</td>
                         <td style={S.td}>{fmtM(r.interest)}</td>
                         <td style={S.td}>{fmtM(r.principal)}</td>
                         <td style={S.td}>{fmtM(r.closing_balance)}</td>
                         <td style={S.td}>{fmtM(r.total_service)}</td>
-                        <td style={{ ...S.td, color: r.dscr == null ? 'var(--cp-text-muted)' : r.dscr < 1.25 ? 'var(--cp-error)' : r.dscr < 1.5 ? 'var(--cp-warning)' : 'var(--cp-success)' }}>
+                        <td style={{ ...S.td, color: r.dscr == null ? 'var(--cp-text-muted)' : r.dscr < 1.25 ? 'var(--cp-error)' : r.dscr < 1.5 ? 'var(--cp-text-body)' : 'var(--cp-accent)' }}>
                           {r.dscr != null ? r.dscr + 'x' : '—'}
                         </td>
                       </tr>
@@ -358,21 +341,24 @@ export default function FinancialPage() {
             <>
               <div style={S.debtSummary}>
                 {Object.entries(waterfall.by_investor).filter(([k]) => k !== 'lender').map(([key, inv]) => (
-                  <div key={key} style={SK.card}>
-                    <div style={SK.label}>{key.toUpperCase()}</div>
-                    <div style={{ ...SK.value, fontSize: 16, color: key === 'hearst' ? 'var(--cp-op-qia)' : key === 'brookfield' ? 'var(--cp-op-brookfield)' : 'var(--cp-op-qai)' }}>
-                      {inv.irr != null ? (inv.irr * 100).toFixed(1) + '% IRR' : 'N/A'}
-                    </div>
-                    <div style={SK.sub}>MOIC: {inv.moic != null ? inv.moic + 'x' : 'N/A'} · Invested: {inv.equity_invested ? '$' + (inv.equity_invested / 1e6).toFixed(1) + 'M' : '—'}</div>
-                  </div>
+                  <KpiCard
+                    key={key}
+                    size="sm"
+                    label={key.toUpperCase()}
+                    value={inv.irr != null ? (inv.irr * 100).toFixed(1) + '% IRR' : 'N/A'}
+                    format="number"
+                    sublabel={`MOIC: ${inv.moic != null ? inv.moic + 'x' : 'N/A'} · Invested: ${inv.equity_invested ? '$' + (inv.equity_invested / 1e6).toFixed(1) + 'M' : '—'}`}
+                    valueColor={inv.irr != null ? { hearst: 'var(--cp-op-qia)', brookfield: 'var(--cp-op-brookfield)' }[key] ?? 'var(--cp-op-qai)' : undefined}
+                  />
                 ))}
-                <div style={SK.card}>
-                  <div style={SK.label}>LENDER</div>
-                  <div style={{ ...SK.value, fontSize: 16, color: 'var(--cp-text-muted)' }}>
-                    {waterfall.by_investor.lender.total_repaid ? fmtM(waterfall.by_investor.lender.total_repaid) : '—'}
-                  </div>
-                  <div style={SK.sub}>Interest: {fmtM(waterfall.by_investor.lender.total_interest)} · Principal: {fmtM(waterfall.by_investor.lender.total_principal)}</div>
-                </div>
+                <KpiCard
+                  size="sm"
+                  label="LENDER"
+                  value={waterfall.by_investor.lender.total_repaid ? fmtM(waterfall.by_investor.lender.total_repaid) : '—'}
+                  format="number"
+                  sublabel={`Interest: ${fmtM(waterfall.by_investor.lender.total_interest)} · Principal: ${fmtM(waterfall.by_investor.lender.total_principal)}`}
+                  valueColor={waterfall.by_investor.lender.total_repaid ? 'var(--cp-text-muted)' : undefined}
+                />
               </div>
               <div style={S.chartCard}>
                 <div style={S.chartTitle}>Equity Distributions by Investor ($M)</div>
@@ -463,7 +449,7 @@ export default function FinancialPage() {
                   { bg: 'color-mix(in srgb, var(--color-success) 30%, black)', label: '> 15%' },
                 ].map(l => (
                   <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--cp-text-muted)' }}>
-                    <span style={{ width: 12, height: 12, borderRadius: 2, background: l.bg, display: 'inline-block' }} />
+                    <span style={{ width: 12, height: 12, borderRadius: 4, background: l.bg, display: 'inline-block' }} />
                     {l.label}
                   </div>
                 ))}
@@ -507,27 +493,27 @@ function formatSensVal(v, unit) {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
-  topBar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  topBar: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
   scBtn: { fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 20, border: '2px solid', cursor: 'pointer', transition: 'all .15s' },
   tabBtn: { fontSize: 11, fontWeight: 600, padding: '5px 12px', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 4, cursor: 'pointer' },
   tabBtnActive: { background: 'var(--cp-text-primary)', color: 'var(--cp-bg-deep)' },
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 },
-  noData: { background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning)', borderRadius: 8, padding: '28px 24px', textAlign: 'center', marginBottom: 24 },
-  noDataTitle: { fontSize: 15, fontWeight: 700, color: 'var(--cp-warning)', marginBottom: 8 },
-  noDataSub: { fontSize: 13, color: 'var(--cp-warning)' },
-  noDataLink: { color: 'var(--cp-info)', fontWeight: 700, textDecoration: 'underline' },
+  noData: { background: 'var(--cp-surface-2)', border: '1px dashed var(--cp-border-strong)', borderRadius: 10, padding: '28px 24px', textAlign: 'center', marginBottom: 24 },
+  noDataTitle: { fontSize: 15, fontWeight: 700, color: 'var(--cp-text-primary)', marginBottom: 8 },
+  noDataSub: { fontSize: 13, color: 'var(--cp-text-muted)' },
+  noDataLink: { color: 'var(--cp-accent)', fontWeight: 700, textDecoration: 'underline' },
   missingTag: { fontSize: 11, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-error)', color: 'var(--cp-error)', padding: '2px 8px', borderRadius: 4 },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)' },
   th: { padding: '8px 12px', textAlign: 'right', fontSize: 10, fontWeight: 700, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
-  td: { padding: '7px 12px', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 12 },
-  tdLabel: { padding: '7px 14px', fontWeight: 600, fontSize: 12, color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
-  chartCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '16px 20px' },
+  td: { padding: '8px 12px', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 12 },
+  tdLabel: { padding: '8px 16px', fontWeight: 600, fontSize: 12, color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
+  chartCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 10, padding: '16px 20px' },
   chartTitle: { fontSize: 12, fontWeight: 700, color: 'var(--cp-text-muted)', marginBottom: 12, letterSpacing: 0.5 },
-  warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 8, padding: '14px 18px', marginTop: 20 },
+  warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 10, padding: '16px 16px', marginTop: 20 },
   warnTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-error)', marginBottom: 8 },
   warnRow: { fontSize: 12, color: 'var(--cp-error)', padding: '3px 0', borderBottom: '1px solid var(--cp-error-bg)' },
   exportBtn: { fontSize: 11, fontWeight: 700, padding: '5px 12px', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },

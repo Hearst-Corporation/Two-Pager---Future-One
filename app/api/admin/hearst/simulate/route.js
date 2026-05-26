@@ -27,6 +27,7 @@ import {
   generateProjection,
   generateDebtSchedule,
   generateWaterfall,
+  foldGpuRevenue,
 } from '@/lib/hearst-calculations';
 import { solveScenarioForMode } from '@/lib/hearst-solver';
 import { bootstrapScenarioFromSources } from '@/lib/hearst-bootstrap';
@@ -38,6 +39,10 @@ import {
 } from '@/lib/hearst-gpu-catalog';
 
 const ARCHETYPE_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
+
+// Fallback equity share when archetype.equity_share is not set (minority_equity archetypes
+// always define equity_share, but this guards against future archetypes that forget it).
+const DEFAULT_MINORITY_EQUITY_SHARE = 0.20;
 
 /**
  * Calcule le breakdown hardware (densités + GPU) pour un mix donné.
@@ -139,7 +144,31 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
   const archResult = projectArchetype(solvedScenario, archetype);
   const projection = archResult.projection;
 
-  // 5. Debt schedule + waterfall (best effort — peut être null si inputs manquent)
+  // 5. Hardware breakdown (si fourni)
+  const hardware_breakdown = calcHardwareBreakdown(archResult.scenario, hardware_mix);
+
+  // Minority equity scaling: HEARST owns only equity_share of the GPU pod, so revenue and
+  // capex are proportionally smaller — the facility description (mw_ai/classic/liquid) is
+  // unchanged because it reflects the full datacenter, not HEARST's stake.
+  if (hardware_breakdown && archetype.compute_as === 'minority_equity') {
+    const share = archetype.equity_share || DEFAULT_MINORITY_EQUITY_SHARE;
+    hardware_breakdown.revenue_ai_annual = (hardware_breakdown.revenue_ai_annual || 0) * share;
+    hardware_breakdown.capex_hardware = (hardware_breakdown.capex_hardware || 0) * share;
+    hardware_breakdown.total_gpus = Math.round((hardware_breakdown.total_gpus || 0) * share);
+    // mw_ai, mw_classic, mw_liquid stay as-is (describe the facility, not HEARST's share)
+  }
+
+  // 6. Fold GPU revenue into projection if hardware has AI component
+  if (hardware_breakdown?.revenue_ai_annual > 0) {
+    foldGpuRevenue(projection, hardware_breakdown, archResult.scenario, {
+      rfs_year: archResult.scenario.phase1_complete_year || 3,
+      ramp_years: 2,
+      exit_year: archResult.scenario.exit_year || 10,
+      discount_rate_pct: archResult.scenario.discount_rate_pct ?? 10,
+    });
+  }
+
+  // 7. Debt schedule + waterfall (best effort — after fold so they consume post-fold ebitda)
   let debt_schedule = null;
   let waterfall = null;
   try {
@@ -154,9 +183,6 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
     // Les calculs auxiliaires ne doivent pas faire échouer la route
     console.warn('[simulate] debt/waterfall failed:', e?.message);
   }
-
-  // 6. Hardware breakdown (si fourni)
-  const hardware_breakdown = calcHardwareBreakdown(archResult.scenario, hardware_mix);
 
   return NextResponse.json({
     scenario: archResult.scenario,

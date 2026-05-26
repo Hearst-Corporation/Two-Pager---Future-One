@@ -149,7 +149,7 @@ function FieldRow({ fieldDef, value, onSave, scenarioId }) {
           </div>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={display ? { ...S.valueText, color: justSaved ? 'var(--cp-success)' : S.valueText.color, transition: 'color .3s' } : S.emptyText}>
+            <span style={display ? { ...S.valueText, color: justSaved ? 'var(--cp-accent)' : S.valueText.color, transition: 'color .3s' } : S.emptyText}>
               {display || '—'}
               {justSaved && ' ✓'}
             </span>
@@ -242,15 +242,15 @@ export default function AssumptionsPage() {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
-  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
   tabs: { display: 'flex', gap: 6 },
-  tab: { fontSize: 11, fontWeight: 700, padding: '5px 14px', borderRadius: 20, border: '1px solid var(--cp-border)', background: 'transparent', cursor: 'pointer', color: 'var(--cp-text-muted)' },
-  tabActive: { background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', borderColor: 'var(--cp-info-strong-cta)' },
-  group: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, marginBottom: 20, overflow: 'hidden' },
+  tab: { fontSize: 11, fontWeight: 700, padding: '5px 16px', borderRadius: 20, border: '1px solid var(--cp-border)', background: 'transparent', cursor: 'pointer', color: 'var(--cp-text-muted)' },
+  tabActive: { background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', borderColor: 'var(--cp-accent)' },
+  group: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 10, overflow: 'hidden' },
   groupTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', padding: '8px 16px', borderBottom: '1px solid var(--cp-border)' },
   fieldRow: { display: 'flex', alignItems: 'center', padding: '10px 16px', borderBottom: '1px solid var(--cp-border)' },
   fieldLeft: { flex: 1 },
@@ -260,8 +260,8 @@ const S = {
   valueText: { fontSize: 13, fontWeight: 600, color: 'var(--cp-text-primary)' },
   emptyText: { fontSize: 13, color: 'var(--cp-text-muted)', fontStyle: 'italic' },
   input: { fontSize: 12, padding: '4px 8px', border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', width: 160 },
-  saveBtn: { fontSize: 11, fontWeight: 700, padding: '4px 12px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 4, cursor: 'pointer' },
+  saveBtn: { fontSize: 11, fontWeight: 700, padding: '4px 12px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 4, cursor: 'pointer' },
   cancelBtn: { fontSize: 11, padding: '4px 10px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
-  editBtn: { fontSize: 11, padding: '3px 10px', background: 'transparent', color: 'var(--cp-info)', border: '1px solid var(--cp-info)', borderRadius: 4, cursor: 'pointer' },
+  editBtn: { fontSize: 11, padding: '4px 10px', background: 'transparent', color: 'var(--cp-accent)', border: '1px solid var(--cp-accent)', borderRadius: 4, cursor: 'pointer' },
   saveError: { fontSize: 11, color: 'var(--cp-error)', fontWeight: 600, marginTop: 2 },
 };

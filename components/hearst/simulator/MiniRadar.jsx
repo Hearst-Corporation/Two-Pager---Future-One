@@ -5,7 +5,7 @@
 
 const AXES = ['brand', 'bankability', 'speed', 'control', 'margin', 'exit'];
 
-export default function MiniRadar({ scores = {}, size = 88, color = 'var(--cp-accent-strong)' }) {
+export default function MiniRadar({ scores = {}, size = 88, color = 'var(--cp-accent-maroon)' }) {
   const cx = size / 2;
   const cy = size / 2;
   const maxR = size / 2 - 6;

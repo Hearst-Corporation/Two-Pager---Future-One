@@ -1,13 +1,16 @@
 'use client';
 import { useState, useEffect } from 'react';
 
+// Monochrome entity palette — differentiation handled by label + icon, not color.
+// Two intensity steps (neutral / accent) keep the audit log readable without
+// reintroducing blue/violet/warning.
 const ENTITY_COLORS = {
-  scenario:  { color: 'var(--cp-info)', bg: 'var(--cp-info-bg)' },
-  source:    { color: 'var(--cp-success)', bg: 'var(--cp-success-bg)' },
-  contract:  { color: 'var(--cp-info-strong)', bg: 'var(--cp-info-strong-bg)' },
-  data_room: { color: 'var(--cp-violet)', bg: 'var(--cp-violet-bg)' },
-  pipeline:  { color: 'var(--cp-warning)', bg: 'var(--cp-warning-bg)' },
-  project:   { color: 'var(--cp-text-muted)', bg: 'var(--cp-surface-1)' },
+  scenario:  { color: 'var(--cp-text-body)',    bg: 'var(--cp-surface-2)' },
+  source:    { color: 'var(--cp-text-primary)', bg: 'var(--cp-surface-3)' },
+  contract:  { color: 'var(--cp-accent)',       bg: 'var(--cp-accent-soft)' },
+  data_room: { color: 'var(--cp-text-body)',    bg: 'var(--cp-surface-2)' },
+  pipeline:  { color: 'var(--cp-text-primary)', bg: 'var(--cp-surface-3)' },
+  project:   { color: 'var(--cp-text-muted)',   bg: 'var(--cp-surface-1)' },
 };
 
 const ACTION_LABELS = {
@@ -169,15 +172,15 @@ export default function AuditPage() {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
-  topBar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  count: { fontSize: 12, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', padding: '3px 10px', borderRadius: 20 },
+  topBar: { display: 'flex', alignItems: 'center', gap: 12 },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
+  count: { fontSize: 12, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', padding: '4px 10px', borderRadius: 20 },
   filters: { display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 },
   filterBtn: { fontSize: 10, fontWeight: 700, padding: '4px 12px', border: '1px solid var(--cp-border)', borderRadius: 20, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: 0.5, transition: 'all .15s' },
-  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--cp-text-muted)', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
+  empty: { textAlign: 'center', padding: '40px 20px', color: 'var(--cp-text-muted)', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 10 },
   timeline: { display: 'flex', flexDirection: 'column', gap: 0 },
   entry: { display: 'flex', gap: 16, paddingBottom: 0 },
   dotCol: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: 20, flexShrink: 0 },
@@ -193,10 +196,10 @@ const S = {
   field: { display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' },
   oldVal: { color: 'var(--cp-error)', textDecoration: 'line-through', fontSize: 11 },
   arrow: { color: 'var(--cp-text-muted)' },
-  newVal: { color: 'var(--cp-success)', fontWeight: 600, fontSize: 11 },
+  newVal: { color: 'var(--cp-accent)', fontWeight: 600, fontSize: 11 },
   notes: { fontSize: 11, color: 'var(--cp-text-muted)', fontStyle: 'italic' },
   entryMeta: { display: 'flex', gap: 16, fontSize: 10, color: 'var(--cp-text-muted)' },
-  actor: { fontFamily: 'monospace' },
+  actor: {},
   timestamp: {},
   loadMore: { fontSize: 12, padding: '8px 20px', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer', color: 'var(--cp-text-muted)' },
 };

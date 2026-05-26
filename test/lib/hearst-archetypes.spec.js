@@ -63,10 +63,13 @@ describe('DEAL_ARCHETYPES — 3 nouveaux archétypes', () => {
     });
   });
 
-  it('sovereign_ai a brand_premium + bankability max', () => {
+  it('sovereign_ai a bankability max (brand_premium dropped — P1-2)', () => {
     const a = ID_TO_ARCHETYPE.sovereign_ai;
     expect(a.compute_as).toBe('recurring_revenue');
-    expect(a.brand_premium_pct).toBeGreaterThan(0);
+    // brand_premium_pct was removed: sovereign_ai now uses revenue_factor=0.90 only —
+    // brand_premium dropped to avoid stacking that pushed effective above merchant (intent violation).
+    // See docs/audit/simulator-audit-2026-05-26.md P1-2.
+    expect(a.brand_premium_pct).toBeUndefined();
     expect(a.scores.bankability).toBe(5);
     expect(a.scores.brand).toBe(5);
   });
@@ -92,8 +95,10 @@ describe('projectArchetype — compute_as branches', () => {
     const r = projectArchetype(BASE_SCENARIO, a);
     expect(r.projection.minority_equity).toBeFalsy();
     expect(r.projection.gpu_cloud_mode).toBeFalsy();
-    // Prix scaled par revenue_factor (0.90) puis × (1 + brand_premium 0.15)
-    expect(r.scenario.price_hyperscale_kw_month).toBeCloseTo(115 * 0.90 * 1.15, 2);
+    // sovereign_ai now uses revenue_factor=0.90 only — brand_premium dropped to avoid stacking
+    // that pushed effective above merchant (intent violation).
+    // See docs/audit/simulator-audit-2026-05-26.md P1-2.
+    expect(r.scenario.price_hyperscale_kw_month).toBeCloseTo(115 * 0.90, 2);
   });
 
   it('CAPEX total minority_equity est ~20% du baseline', () => {
@@ -114,9 +119,11 @@ describe('applyArchetype — backwards compat (5 original archetypes)', () => {
     expect(s.capex_shell_per_mw).toBe(4_400_000);
   });
 
-  it('manage_only : applique operator_fee_pct=12', () => {
+  it('manage_only : applique operator_fee_pct=12 (stocké en ratio 0.12)', () => {
     const a = ID_TO_ARCHETYPE.manage_only;
     const s = applyArchetype(BASE_SCENARIO, a);
-    expect(s.opex_operator_mgmt_fee_pct).toBe(12);
+    // applyArchetype divides operator_fee_pct by 100 to align to ratio scale (P2-1).
+    // archetype.operator_fee_pct = 12 → s.opex_operator_mgmt_fee_pct = 0.12
+    expect(s.opex_operator_mgmt_fee_pct).toBeCloseTo(0.12, 5);
   });
 });

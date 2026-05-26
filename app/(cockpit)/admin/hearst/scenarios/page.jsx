@@ -34,10 +34,11 @@ const COMPARE_ROWS = [
   { label: 'Missing Inputs', key: 'missing_count', src: 'computed', type: null, suffix: ' fields' },
 ];
 
+// Scenario palette : neutral base, accent upside, error downside (true risk semantic).
 const SC_COLORS = {
-  base: { border: 'var(--cp-info)', bg: 'var(--cp-info-bg)', label: 'var(--cp-info)' },
-  downside: { border: 'var(--cp-error)', bg: 'var(--cp-error-bg)', label: 'var(--cp-error)' },
-  upside: { border: 'var(--cp-success)', bg: 'var(--cp-success-bg)', label: 'var(--cp-success)' },
+  base:     { border: 'var(--cp-border-strong)', bg: 'var(--cp-surface-2)',  label: 'var(--cp-text-primary)' },
+  downside: { border: 'var(--cp-error)',         bg: 'var(--cp-error-bg)',   label: 'var(--cp-error)' },
+  upside:   { border: 'var(--cp-accent)',        bg: 'var(--cp-accent-soft)',label: 'var(--cp-accent)' },
 };
 
 function getColor(sc) {
@@ -223,17 +224,17 @@ export default function ScenariosPage() {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
-  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  addForm: { display: 'flex', gap: 10, marginBottom: 16, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, padding: '14px 16px' },
-  inp: { flex: 1, padding: '7px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)' },
-  saveBtn: { fontSize: 12, fontWeight: 700, padding: '7px 16px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  cancelBtn: { fontSize: 12, padding: '7px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 8 },
+  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '8px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  addForm: { display: 'flex', gap: 12, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 10, padding: '16px' },
+  inp: { flex: 1, padding: '8px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 6, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)' },
+  saveBtn: { fontSize: 12, fontWeight: 700, padding: '8px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  cancelBtn: { fontSize: 12, padding: '8px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 13, background: 'var(--cp-surface-2)', borderRadius: 10 },
   th: { padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '2px solid var(--cp-border)' },
   tdLabel: { padding: '9px 16px', fontWeight: 600, color: 'var(--cp-text-muted)', fontSize: 12, whiteSpace: 'nowrap', borderBottom: '1px solid var(--cp-border)', minWidth: 180 },
   td: { padding: '9px 16px', borderBottom: '1px solid var(--cp-border)' },

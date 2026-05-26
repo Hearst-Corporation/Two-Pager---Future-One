@@ -140,7 +140,7 @@ export default function HearstAboutPage() {
 
           <div style={S.lane}>
             <div style={S.laneHeader}>
-              <div style={{ ...S.laneDot, background: 'var(--cp-success)' }} />
+              <div style={{ ...S.laneDot, background: 'var(--cp-accent)' }} />
               <div style={S.laneName}>Operators (colo brands)</div>
               <div style={S.laneRole}>Developers & managers</div>
             </div>
@@ -165,7 +165,7 @@ export default function HearstAboutPage() {
 
           <div style={S.lane}>
             <div style={S.laneHeader}>
-              <div style={{ ...S.laneDot, background: 'var(--cp-warning)' }} />
+              <div style={{ ...S.laneDot, background: 'var(--cp-accent-strong)' }} />
               <div style={S.laneName}>Neoclouds / GPU specialists</div>
               <div style={S.laneRole}>AI-era compute renters</div>
             </div>
@@ -374,7 +374,7 @@ const S = {
   },
   pageTitle: {
     fontSize: 26,
-    fontWeight: 900,
+    fontWeight: 800,
     color: 'var(--cp-text-primary)',
     letterSpacing: -0.5,
     marginBottom: 8,
@@ -397,7 +397,7 @@ const S = {
   },
   sectionIndex: {
     fontSize: 11,
-    fontWeight: 900,
+    fontWeight: 800,
     letterSpacing: 3,
     color: 'var(--cp-accent-strong)',
     marginTop: 4,
@@ -426,7 +426,7 @@ const S = {
   card: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 8,
+    borderRadius: 10,
     padding: '20px 22px',
   },
   cardLabel: {
@@ -469,7 +469,7 @@ const S = {
   lane: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 8,
+    borderRadius: 10,
     padding: '20px 24px',
   },
   laneHeader: {
@@ -533,7 +533,7 @@ const S = {
     flexDirection: 'column',
     gap: 0,
     border: '1px solid var(--cp-border)',
-    borderRadius: 8,
+    borderRadius: 10,
     overflow: 'hidden',
   },
   glossItem: {
@@ -544,18 +544,18 @@ const S = {
   glossLeft: {
     width: 180,
     flexShrink: 0,
-    padding: '18px 20px',
+    padding: '16px 20px',
     background: 'var(--cp-surface-2)',
     borderRight: '1px solid var(--cp-border)',
   },
   glossRight: {
     flex: 1,
-    padding: '18px 24px',
+    padding: '16px 24px',
     background: 'var(--cp-bg-deep)',
   },
   glossTerm: {
     fontSize: 14,
-    fontWeight: 900,
+    fontWeight: 800,
     color: 'var(--cp-text-primary)',
     letterSpacing: -0.2,
     marginBottom: 4,
@@ -575,7 +575,7 @@ const S = {
   },
   glossFormula: {
     fontSize: 12,
-    fontFamily: '"SF Mono", "Fira Code", "Consolas", monospace',
+    fontVariantNumeric: 'tabular-nums',
     color: 'var(--cp-text-primary)',
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',

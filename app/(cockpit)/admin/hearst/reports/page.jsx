@@ -176,20 +176,20 @@ export default function ReportsPage() {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   actions: { alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  exportBtn: { fontSize: 12, fontWeight: 700, padding: '8px 18px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  hint: { fontSize: 12, color: 'var(--cp-warning)', background: 'var(--cp-warning-bg)', border: '1px solid var(--cp-warning)', borderRadius: 6, padding: '8px 14px', marginBottom: 20 },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
+  exportBtn: { fontSize: 12, fontWeight: 700, padding: '8px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
+  hint: { fontSize: 12, color: 'var(--cp-text-body)', background: 'var(--cp-surface-2)', border: '1px dashed var(--cp-border-strong)', borderRadius: 6, padding: '8px 16px', marginBottom: 20 },
   reportDoc: {
     background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)',
-    borderRadius: 8, padding: '32px 40px', maxWidth: 820,
+    borderRadius: 10, padding: '32px 40px', maxWidth: 820,
   },
   reportHeader: { marginBottom: 32, paddingBottom: 24, borderBottom: '2px solid var(--cp-border)' },
   reportBadge: { fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-error)', background: 'var(--cp-error-bg)', padding: '2px 10px', borderRadius: 20, display: 'inline-block', marginBottom: 12 },
-  reportTitle: { fontSize: 22, fontWeight: 900, color: 'var(--cp-text-primary)', marginBottom: 4 },
+  reportTitle: { fontSize: 22, fontWeight: 800, color: 'var(--cp-text-primary)', marginBottom: 4 },
   reportSub: { fontSize: 14, color: 'var(--cp-text-muted)', marginBottom: 6 },
   reportDate: { fontSize: 11, color: 'var(--cp-text-muted)' },
 };

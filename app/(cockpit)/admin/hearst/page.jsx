@@ -200,7 +200,7 @@ export default function HearstOverview() {
   const drApproved = dataRoom.filter(d => d.status === 'approved' || d.status === 'reviewed').length;
   const sourceScore = base?.source_score ?? 0;
   const cta = pickContextualCta({ proj, sourceScore, drApproved, drTotal });
-  const healthColor = sourceScore >= 70 ? 'var(--cp-success)' : sourceScore >= 40 ? 'var(--cp-warning)' : 'var(--cp-error)';
+  const healthColor = sourceScore >= 70 ? 'var(--cp-accent)' : sourceScore >= 40 ? 'var(--cp-text-body)' : 'var(--cp-error)';
 
   return (
     <div style={S.wrap}>
@@ -337,7 +337,7 @@ const S = {
   dirtyBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginLeft: 'auto' },
   dirtyLabel: { fontSize: 11, color: 'var(--cp-text-muted)', fontStyle: 'italic' },
   resetBtn: { fontSize: 11, fontWeight: 600, padding: '4px 10px', border: '1px solid var(--cp-border)', borderRadius: 6, background: 'transparent', color: 'var(--cp-text-muted)', cursor: 'pointer' },
-  saveBtn: { fontSize: 11, fontWeight: 700, padding: '4px 12px', border: 'none', borderRadius: 6, background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', cursor: 'pointer' },
+  saveBtn: { fontSize: 11, fontWeight: 700, padding: '4px 12px', border: 'none', borderRadius: 6, background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', cursor: 'pointer' },
 
   kpiCol: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-5)' },
   heroGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--cp-space-4)' },

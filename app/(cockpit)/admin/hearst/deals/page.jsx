@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { adminFetch } from '@/lib/admin-fetch';
+import KpiCard from '@/components/hearst/KpiCard';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
 import { OPERATORS, OPERATORS_BY_ID } from '@/lib/hearst-constants';
 
@@ -24,17 +25,6 @@ const DEAL_TYPES = [
   { id: 'manage_only',       label: 'Manage-Only' },
 ];
 
-function KpiCard({ label, value, unit, accent = false }) {
-  return (
-    <div style={S.kpiCard}>
-      <div style={S.kpiLabel}>{label}</div>
-      <div style={S.kpiValueRow}>
-        <span style={{ ...S.kpiValue, color: accent ? 'var(--cp-accent)' : 'var(--cp-text-primary)' }}>{value}</span>
-        {unit && <span style={S.kpiUnit}>{unit}</span>}
-      </div>
-    </div>
-  );
-}
 
 function DealCard({ deal, onDelete }) {
   const [dragging, setDragging] = useState(false);
@@ -270,10 +260,10 @@ export default function DealsPage() {
 
       {/* ZONE 2 — KPI Strip */}
       <section style={S.kpiStrip} aria-label="Pipeline summary">
-        <KpiCard label="Pipeline"     value={pipelineMW.toFixed(0)} unit="MW" />
-        <KpiCard label="Signed"       value={signedMW.toFixed(0)}   unit="MW" accent />
-        <KpiCard label="Active Deals" value={deals.length} />
-        <KpiCard label="Avg Price"    value={avgPrice != null ? '$' + avgPrice : '—'} unit={avgPrice != null ? '/kW/mo' : ''} />
+        <KpiCard label="Pipeline"     value={pipelineMW} format="mw" />
+        <KpiCard label="Signed"       value={signedMW}   format="mw" highlight />
+        <KpiCard label="Active Deals" value={deals.length} format="number" />
+        <KpiCard label="Avg Price"    value={avgPrice} format="currency" sublabel={avgPrice != null ? 'per kW/month' : undefined} />
       </section>
 
       {/* ZONE 3 — Toolbar */}
@@ -438,18 +428,6 @@ const S = {
   kpiStrip: {
     display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12,
   },
-  kpiCard: {
-    background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)',
-    borderRadius: 10, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8,
-    minHeight: 80,
-  },
-  kpiLabel: {
-    fontSize: 11, lineHeight: '14px', fontWeight: 700, letterSpacing: 0.6,
-    color: 'var(--cp-text-muted)', textTransform: 'uppercase',
-  },
-  kpiValueRow: { display: 'flex', alignItems: 'baseline', gap: 6 },
-  kpiValue:    { fontSize: 24, lineHeight: '28px', fontWeight: 800, fontVariantNumeric: 'tabular-nums' },
-  kpiUnit:     { fontSize: 12, lineHeight: '16px', fontWeight: 600, color: 'var(--cp-text-muted)' },
 
   // ── ZONE 3 — Toolbar ────────────────────────────────────
   toolbar: {

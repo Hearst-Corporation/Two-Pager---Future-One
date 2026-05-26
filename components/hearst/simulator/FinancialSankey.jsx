@@ -42,15 +42,15 @@ function buildSankeyData(scenario, projection) {
   const M = (v) => Math.max(0.01, v / 1e6);
 
   const nodes = [
-    { name: 'HEARST money',      fill: 'var(--cp-accent-strong)' },   // 0
-    { name: 'Brookfield money',  fill: 'var(--cp-violet)' },          // 1
-    { name: 'Qatar money',       fill: 'var(--cp-success)' },         // 2
-    { name: 'Bank loan',         fill: 'var(--cp-warning)' },         // 3
-    { name: 'Total Build Cost',  fill: 'var(--cp-info)' },            // 4
-    { name: 'Yearly Revenue',    fill: 'var(--cp-success)' },         // 5
-    { name: 'Running costs',     fill: 'var(--cp-error)' },           // 6
-    { name: 'Loan repayments',   fill: 'var(--cp-warning)' },         // 7
-    { name: 'Profit to owners',  fill: 'var(--cp-accent-strong)' },   // 8
+    { name: 'HEARST money',      fill: 'var(--cp-accent-maroon)' },   // 0
+    { name: 'Brookfield money',  fill: 'var(--cp-accent)' },          // 1
+    { name: 'Qatar money',       fill: 'var(--cp-accent-maroon)' },   // 2
+    { name: 'Bank loan',         fill: 'var(--cp-text-muted)' },      // 3
+    { name: 'Total Build Cost',  fill: 'var(--cp-text-primary)' },    // 4
+    { name: 'Yearly Revenue',    fill: 'var(--cp-accent-maroon)' },   // 5
+    { name: 'Running costs',     fill: 'var(--cp-text-muted)' },      // 6
+    { name: 'Loan repayments',   fill: 'var(--cp-accent-maroon)' },   // 7
+    { name: 'Profit to owners',  fill: 'var(--cp-text-strong)' },     // 8
   ];
 
   const links = [

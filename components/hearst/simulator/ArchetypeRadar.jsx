@@ -11,15 +11,18 @@ const AXES = [
   { key: 'exit',        label: 'Easy to sell later' },
 ];
 
+// Monochromatic palette — bordeaux + white tints only.
+// All archetypes use one of {accent-strong, accent, accent-maroon, text-*}
+// to differentiate by tone, never by hue.
 const ARCHETYPE_PALETTE = {
-  powered_shell:         'var(--cp-accent-strong)',
-  branded_jv:            'var(--cp-violet)',
-  manage_only:           'var(--cp-warning)',
-  white_label:           'var(--cp-info)',
-  sale_leaseback:        'var(--cp-text-faint)',
-  neocloud_gpu:          'var(--cp-op-neocloud)',
-  hyperscaler_self_build:'var(--cp-op-hyperscaler)',
-  sovereign_ai:          'var(--cp-op-sovereign)',
+  powered_shell:         'var(--cp-accent-maroon)',
+  branded_jv:            'var(--cp-accent)',
+  manage_only:           'var(--cp-accent-maroon)',
+  white_label:           'var(--cp-text-primary)',
+  sale_leaseback:        'var(--cp-text-muted)',
+  neocloud_gpu:          'var(--cp-accent-maroon)',
+  hyperscaler_self_build:'var(--cp-accent-maroon)',
+  sovereign_ai:          'var(--cp-text-primary)',
 };
 
 export default function ArchetypeRadar({ archetypes = [], highlighted = null, height = 320 }) {
@@ -51,7 +54,7 @@ export default function ArchetypeRadar({ archetypes = [], highlighted = null, he
           <PolarRadiusAxis domain={[0, 5]} tickCount={6} angle={90} tick={false} stroke="var(--cp-border-soft)" />
           {archetypes.map(a => {
             const isHi = !highlightSet || highlightSet.has(a.id);
-            const color = ARCHETYPE_PALETTE[a.id] || 'var(--cp-info)';
+            const color = ARCHETYPE_PALETTE[a.id] || 'var(--cp-accent-maroon)';
             return (
               <Radar
                 key={a.id}

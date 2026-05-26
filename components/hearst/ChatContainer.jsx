@@ -24,10 +24,11 @@ const DEFAULT_PROMPTS = [
 
 /* ── Local dot indicator (replaces OpenClaw StatusIndicator) ── */
 function Dot({ variant = 'online', size = 8, pulse = false }) {
+  // Status dot palette — single accent for active/online, neutral for away, error for busy.
   const color =
     variant === 'active'  ? 'var(--cp-accent-strong)' :
-    variant === 'online'  ? 'var(--cp-success)' :
-    variant === 'away'    ? 'var(--cp-warning)' :
+    variant === 'online'  ? 'var(--cp-accent)' :
+    variant === 'away'    ? 'var(--cp-text-muted)' :
     variant === 'busy'    ? 'var(--cp-error)' :
                             'var(--cp-text-muted)';
   return (

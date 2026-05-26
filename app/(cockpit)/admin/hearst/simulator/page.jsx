@@ -20,14 +20,13 @@ import OutputKpiStrip from '@/components/hearst/simulator/OutputKpiStrip';
 import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
 import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
 
-// Lazy-load les viz lourdes
 const EcosystemNetwork = dynamic(() => import('@/components/hearst/simulator/EcosystemNetwork'), {
   ssr: false,
-  loading: () => <div style={{ height: 560, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading industry players…</div>,
+  loading: () => <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading industry players…</div>,
 });
 const FinancialSankey = dynamic(() => import('@/components/hearst/simulator/FinancialSankey'), {
   ssr: false,
-  loading: () => <div style={{ height: 380, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading money flow…</div>,
+  loading: () => <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading money flow…</div>,
 });
 const GanttTimeline = dynamic(() => import('@/components/hearst/simulator/GanttTimeline'), {
   ssr: false,
@@ -35,7 +34,7 @@ const GanttTimeline = dynamic(() => import('@/components/hearst/simulator/GanttT
 });
 
 const VIZ_TABS = [
-  { id: 'radar',   label: 'Strengths comparison' },
+  { id: 'radar',   label: 'Strengths' },
   { id: 'network', label: 'Industry players' },
   { id: 'matrix',  label: 'Who buys what' },
   { id: 'sankey',  label: 'Money flow' },
@@ -49,7 +48,6 @@ export default function SimulatorPage() {
   const [state, dispatch] = useReducer(simulatorReducer, INITIAL_STATE);
   const deferredState = useDeferredValue(state);
 
-  // Hydrate state from URL after mount (avoids useSearchParams() SSR bailout).
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const fromUrl = parseStateFromUrl(new URLSearchParams(window.location.search));
@@ -65,7 +63,6 @@ export default function SimulatorPage() {
   const [savedScenarioId, setSavedScenarioId] = useState(null);
   const debounceRef = useRef(null);
 
-  // Charger le projet pour avoir le project_id (nécessaire pour Save as Scenario)
   useEffect(() => {
     (async () => {
       try {
@@ -78,7 +75,6 @@ export default function SimulatorPage() {
     })();
   }, []);
 
-  // Recompute simulation (debounced)
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
@@ -109,13 +105,11 @@ export default function SimulatorPage() {
     return () => clearTimeout(debounceRef.current);
   }, [deferredState]);
 
-  // Sync URL
   useEffect(() => {
     const qs = serializeStateToUrl(state);
     router.replace(`/admin/hearst/simulator?${qs}`, { scroll: false });
   }, [state, router]);
 
-  // Archétypes pour le radar (primary + comparison)
   const radarArchetypes = useMemo(() => {
     const ids = new Set([state.primary_archetype_id, ...(state.compare_archetype_ids || [])]);
     return Array.from(ids).map(id => ARCH_BY_ID[id]).filter(Boolean);
@@ -125,7 +119,6 @@ export default function SimulatorPage() {
   const scenario = simResult?.scenario;
   const archetypeOutcome = simResult?.archetype_outcome;
 
-  // Handlers
   const onModeChange = useCallback((v) => dispatch({ type: ACTIONS.SET_MODE, value: v }), []);
   const onSelectPrimary = useCallback((id) => dispatch({ type: ACTIONS.SET_PRIMARY_ARCHETYPE, value: id }), []);
   const onToggleCompare = useCallback((id) => dispatch({ type: ACTIONS.TOGGLE_COMPARE_ARCHETYPE, value: id }), []);
@@ -134,9 +127,6 @@ export default function SimulatorPage() {
     dispatch({ type: ACTIONS.APPLY_PRESET, value: payload });
   }, []);
   const onBootstrap = useCallback(() => {
-    // Bootstrap dispatch dummy : déclenche un refetch (les defaults Qatar sont
-    // appliqués côté serveur dans /simulate via bootstrapScenarioFromSources).
-    // On force juste un re-render en changeant geography (no-op si déjà Qatar).
     dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: 'qatar' } });
   }, []);
   const onHwChange = useCallback((next) => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: next }), []);
@@ -145,7 +135,6 @@ export default function SimulatorPage() {
     dispatch({ type: ACTIONS.SET_CLIENT_TYPE, value: clientTypeId });
   }, []);
 
-  // Input value pour le champ vedette
   const inputValue = state.mode === 'capital_first' ? state.capital_usd
     : state.mode === 'target_irr_first' ? state.target_irr_pct
     : state.total_mw;
@@ -155,12 +144,10 @@ export default function SimulatorPage() {
     else dispatch({ type: ACTIONS.SET_MW, value: val });
   }, [state.mode]);
 
-  // Save as Scenario
   async function handleSave() {
     if (!projectId || !scenario) return;
     setSavingState('saving');
     try {
-      // Whitelist via SCENARIO_WRITABLE_KEYS
       const writable = {};
       for (const k of SCENARIO_WRITABLE_KEYS) {
         if (scenario[k] !== undefined) writable[k] = scenario[k];
@@ -216,54 +203,61 @@ export default function SimulatorPage() {
   return (
     <div style={S.wrap}>
       <header style={S.header}>
-        <div>
+        <div style={S.headerText}>
           <h1 style={S.title}>Investment Simulator</h1>
           <div style={S.subtitle}>Pick your starting point. See the financials, timeline, and team you'll need.</div>
         </div>
         {loading && <div style={S.loadingBadge}>Calculating…</div>}
       </header>
 
-      {/* Section A: Input */}
-      <InputModeSwitcher
-        mode={state.mode}
-        onChange={onModeChange}
-        presets={QATAR_PRESETS}
-        onPreset={onPreset}
-        onBootstrap={onBootstrap}
-      />
-      <InputFieldHero
-        mode={state.mode}
-        value={inputValue}
-        onChange={onInputChange}
-        derived={simResult?.derived}
-        solver={simResult?.solver}
-      />
+      {/* ① INPUT — mode + hero field side-by-side */}
+      <section style={S.inputGrid}>
+        <InputModeSwitcher
+          mode={state.mode}
+          onChange={onModeChange}
+          presets={QATAR_PRESETS}
+          onPreset={onPreset}
+          onBootstrap={onBootstrap}
+        />
+        <InputFieldHero
+          mode={state.mode}
+          value={inputValue}
+          onChange={onInputChange}
+          derived={simResult?.derived}
+          solver={simResult?.solver}
+        />
+      </section>
 
       {state.mode === 'target_irr_first' && (
         <div style={S.leverPanel}>
-          <span style={S.leverLabel}>What to change:</span>
-          {[
-            { id: 'pricing',      label: 'Pricing' },
-            { id: 'capex_per_mw', label: 'Build cost' },
-            { id: 'leverage',     label: 'Debt level' },
-            { id: 'mw',           label: 'Size (MW)' },
-          ].map(l => (
-            <button
-              key={l.id}
-              type="button"
-              onClick={() => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: l.id })}
-              style={{ ...S.leverBtn, ...(state.target_irr_lever === l.id ? S.leverBtnActive : {}) }}>
-              {l.label}
-            </button>
-          ))}
+          <span style={S.leverLabel}>What to change</span>
+          <div style={S.leverPills}>
+            {[
+              { id: 'pricing',      label: 'Pricing' },
+              { id: 'capex_per_mw', label: 'Build cost' },
+              { id: 'leverage',     label: 'Debt level' },
+              { id: 'mw',           label: 'Size (MW)' },
+            ].map(l => (
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: l.id })}
+                style={{ ...S.leverBtn, ...(state.target_irr_lever === l.id ? S.leverBtnActive : {}) }}>
+                {l.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
       {simError && <div style={S.error}>Error: {simError}</div>}
 
-      {/* Section B: Deal models */}
-      <section>
-        <h2 style={S.sectionTitle}>Deal models ({radarArchetypes.length} compared)</h2>
+      {/* ② DEAL MODELS */}
+      <section style={S.section}>
+        <header style={S.sectionHead}>
+          <h2 style={S.sectionTitle}>Deal models</h2>
+          <span style={S.counterChip}>{radarArchetypes.length} compared</span>
+        </header>
         <ArchetypePicker
           archetypes={DEAL_ARCHETYPES}
           primaryId={state.primary_archetype_id}
@@ -273,9 +267,11 @@ export default function SimulatorPage() {
         />
       </section>
 
-      {/* Section C: Equipment mix */}
-      <section>
-        <h2 style={S.sectionTitle}>Equipment mix</h2>
+      {/* ③ EQUIPMENT MIX */}
+      <section style={S.section}>
+        <header style={S.sectionHead}>
+          <h2 style={S.sectionTitle}>Equipment mix</h2>
+        </header>
         <HardwareMixer
           totalMw={scenario?.total_mw || state.total_mw}
           value={state.hardware_mix}
@@ -283,19 +279,24 @@ export default function SimulatorPage() {
         />
       </section>
 
-      {/* Section D: Visualisations */}
-      <section>
-        <div style={S.vizTabs}>
-          {VIZ_TABS.map(t => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value: t.id })}
-              style={{ ...S.vizTab, ...(state.active_viz === t.id ? S.vizTabActive : {}) }}>
-              {t.label}
-            </button>
-          ))}
-        </div>
+      {/* ④ VISUALISATIONS */}
+      <section style={S.vizCard}>
+        <header style={S.sectionHead}>
+          <h2 style={S.sectionTitle}>Visualisations</h2>
+          <div style={S.vizTabs} role="tablist">
+            {VIZ_TABS.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={state.active_viz === t.id}
+                onClick={() => dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value: t.id })}
+                style={{ ...S.vizTab, ...(state.active_viz === t.id ? S.vizTabActive : {}) }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </header>
         <div style={S.vizContainer}>
           {state.active_viz === 'radar' && (
             <ArchetypeRadar archetypes={radarArchetypes} height={400} />
@@ -310,24 +311,31 @@ export default function SimulatorPage() {
             />
           )}
           {state.active_viz === 'sankey' && (
-            <FinancialSankey scenario={scenario} projection={projection} height={420} />
+            <FinancialSankey scenario={scenario} projection={projection} height={400} />
           )}
         </div>
       </section>
 
-      {/* Section E: Results */}
-      <section>
-        <h2 style={S.sectionTitle}>Results — Key numbers, timeline, projection</h2>
+      {/* ⑤ RESULTS */}
+      <section style={S.section}>
+        <header style={S.sectionHead}>
+          <h2 style={S.sectionTitle}>Results</h2>
+          <span style={S.sectionSubtitle}>Key numbers · timeline · 10-year projection</span>
+        </header>
+
         <OutputKpiStrip projection={projection} />
-        <div style={{ marginTop: 16 }}>
+
+        <div style={S.subsection}>
+          <h3 style={S.subTitle}>Build timeline</h3>
           <GanttTimeline scenario={scenario || { site_readiness: 'greenfield' }} exit_year={scenario?.exit_year || 10} />
         </div>
-        <div style={{ marginTop: 16 }}>
+
+        <div style={S.subsection}>
+          <h3 style={S.subTitle}>10-year financial projection</h3>
           <ProjectionChart years={projection?.years || []} />
         </div>
       </section>
 
-      {/* Section F: CTAs */}
       <SimulatorCTABar
         hasProjection={!!projection}
         savingState={savingState}
@@ -390,99 +398,185 @@ Generated by HEARST Investment Simulator (/admin/hearst/simulator).
 `;
 }
 
+// ────────────────────────────────────────────────────────────
+// Design tokens — local
+// spacing 4-base {4,8,16,24,32,48,96} · radius {8,12,999} · font {11,12,13,16,28,44}
+// ────────────────────────────────────────────────────────────
 const S = {
   wrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 16,
-    padding: '0 4px',
+    gap: 32,
+    maxWidth: 1280,
+    margin: '0 auto',
+    padding: '32px 32px 96px',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    padding: '8px 0',
+    gap: 16,
+    paddingBottom: 16,
+    borderBottom: '1px solid var(--cp-border)',
   },
+  headerText: { display: 'flex', flexDirection: 'column', gap: 4 },
   title: {
-    fontSize: 22,
+    fontSize: 28,
+    lineHeight: '36px',
     fontWeight: 800,
+    letterSpacing: -0.4,
     color: 'var(--cp-text-primary)',
     margin: 0,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 13,
+    lineHeight: '20px',
     color: 'var(--cp-text-muted)',
-    marginTop: 4,
   },
   loadingBadge: {
     fontSize: 11,
-    padding: '4px 10px',
-    background: 'var(--cp-info-bg)',
-    color: 'var(--cp-info)',
-    borderRadius: 12,
+    padding: '8px 16px',
+    background: 'var(--cp-accent-soft)',
+    color: 'var(--cp-text-strong)',
+    borderRadius: 999,
     fontWeight: 700,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    flexShrink: 0,
+  },
+
+  inputGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 16,
+    alignItems: 'stretch',
+    minHeight: 340,
+  },
+
+  section: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+  },
+  sectionHead: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    minHeight: 32,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: 800,
+    fontSize: 16,
+    lineHeight: '24px',
+    fontWeight: 700,
     color: 'var(--cp-text-primary)',
-    margin: '0 0 10px 0',
+    margin: 0,
+  },
+  sectionSubtitle: {
+    fontSize: 12,
+    color: 'var(--cp-text-muted)',
+  },
+  counterChip: {
+    fontSize: 11,
+    fontWeight: 700,
+    padding: '4px 12px',
+    background: 'var(--cp-surface-0)',
+    border: '1px solid var(--cp-border)',
+    color: 'var(--cp-text-muted)',
+    borderRadius: 999,
     letterSpacing: 0.5,
   },
-  error: {
-    padding: 12,
-    background: 'var(--cp-error-bg)',
-    color: 'var(--cp-error)',
-    borderRadius: 6,
-    fontSize: 12,
+  subsection: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 },
+  subTitle: {
+    fontSize: 13,
+    lineHeight: '20px',
+    fontWeight: 700,
+    color: 'var(--cp-text-primary)',
+    margin: 0,
+    letterSpacing: 0.2,
   },
-  leverPanel: {
-    display: 'flex',
-    gap: 8,
-    alignItems: 'center',
-    padding: '8px 14px',
+
+  vizCard: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 8,
-  },
-  leverLabel: { fontSize: 11, fontWeight: 700, color: 'var(--cp-text-muted)' },
-  leverBtn: {
-    fontSize: 11,
-    padding: '5px 12px',
-    background: 'transparent',
-    color: 'var(--cp-text-muted)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 16,
-    cursor: 'pointer',
-    fontWeight: 600,
-  },
-  leverBtnActive: {
-    background: 'var(--cp-accent-strong)',
-    color: 'var(--cp-text-strong)',
-    borderColor: 'var(--cp-accent-strong)',
+    borderRadius: 10,
+    padding: 24,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
   },
   vizTabs: {
     display: 'flex',
     gap: 4,
-    marginBottom: 12,
-    borderBottom: '1px solid var(--cp-border)',
+    marginLeft: 'auto',
+    padding: 4,
+    background: 'var(--cp-surface-0)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 999,
   },
   vizTab: {
-    fontSize: 12,
-    padding: '8px 16px',
+    fontSize: 11,
+    height: 32,
+    padding: '0 16px',
     background: 'transparent',
     color: 'var(--cp-text-muted)',
     border: 'none',
-    borderBottom: '2px solid transparent',
+    borderRadius: 999,
+    cursor: 'pointer',
+    fontWeight: 700,
+    letterSpacing: 0.3,
+    transition: 'all 0.15s ease',
+  },
+  vizTabActive: {
+    background: 'var(--cp-accent-maroon)',
+    color: 'var(--cp-text-strong)',
+  },
+  vizContainer: {
+    minHeight: 400,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+
+  error: {
+    padding: '12px 16px',
+    background: 'var(--cp-accent-soft)',
+    color: 'var(--cp-text-strong)',
+    border: '1px solid var(--cp-accent)',
+    borderRadius: 10,
+    fontSize: 12,
+    fontWeight: 600,
+  },
+
+  leverPanel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 16,
+    padding: '16px 24px',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 10,
+  },
+  leverLabel: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  leverPills: { display: 'flex', gap: 8, flexWrap: 'wrap' },
+  leverBtn: {
+    fontSize: 11,
+    height: 32,
+    padding: '0 16px',
+    background: 'transparent',
+    color: 'var(--cp-text-muted)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 999,
     cursor: 'pointer',
     fontWeight: 600,
   },
-  vizTabActive: {
-    color: 'var(--cp-text-primary)',
-    borderBottomColor: 'var(--cp-accent-strong)',
-  },
-  vizContainer: {
-    minHeight: 320,
-    padding: '12px 4px',
+  leverBtnActive: {
+    background: 'var(--cp-accent-maroon)',
+    color: 'var(--cp-text-strong)',
+    borderColor: 'var(--cp-accent-maroon)',
   },
 };

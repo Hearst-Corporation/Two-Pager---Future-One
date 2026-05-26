@@ -28,7 +28,7 @@ function polarToXY(angleDeg, r) {
 function layoutNodes() {
   const positions = {};
   // HEARST au centre
-  positions.hearst = { x: CX, y: CY, color: 'var(--cp-accent-strong)', type: 'self', label: 'HEARST', big: true };
+  positions.hearst = { x: CX, y: CY, color: 'var(--cp-accent-maroon)', type: 'self', label: 'HEARST', big: true };
 
   for (const group of TYPE_GROUPS) {
     const matches = OPERATORS.filter(o => o.type === group.type);

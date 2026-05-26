@@ -8,12 +8,14 @@ import { SOURCE_TYPES, MISSING_LABEL } from '@/lib/hearst-constants';
  * the dark glass cockpit. Override locally with --cp-* tokens; labels still
  * come from SOURCE_TYPES so non-cockpit consumers stay untouched.
  */
+// Monochrome source palette — differentiation by label only.
+// "official_source" gets the single accent (bordeaux) as the highest-trust source.
 export const SOURCE_TYPES_CP = {
-  official_source:   { bg: 'var(--cp-success-bg)',     color: 'var(--cp-success)'     },
-  uploaded_document: { bg: 'var(--cp-info-bg)',        color: 'var(--cp-info)'        },
-  admin_input:       { bg: 'var(--cp-warning-bg)',     color: 'var(--cp-warning)'     },
-  calculated:        { bg: 'var(--cp-violet-bg)',      color: 'var(--cp-violet)'      },
-  contract:          { bg: 'var(--cp-info-strong-bg)', color: 'var(--cp-info-strong)' },
+  official_source:   { bg: 'var(--cp-accent-soft)', color: 'var(--cp-accent)'        },
+  uploaded_document: { bg: 'var(--cp-surface-2)',   color: 'var(--cp-text-body)'     },
+  admin_input:       { bg: 'var(--cp-surface-3)',   color: 'var(--cp-text-primary)'  },
+  calculated:        { bg: 'var(--cp-surface-2)',   color: 'var(--cp-text-body)'     },
+  contract:          { bg: 'var(--cp-surface-3)',   color: 'var(--cp-text-primary)'  },
 };
 
 /**

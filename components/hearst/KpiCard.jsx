@@ -7,20 +7,34 @@ import SourceBadge from './SourceBadge';
  * value: number|null — null triggers "N/A — Source Required" display.
  * format: 'currency' | 'number' | 'pct' | 'x' | 'years' | 'mw'
  */
-export default function KpiCard({ label, value, format = 'number', source_type, unit, sublabel, highlight }) {
+export default function KpiCard({ label, value, format = 'number', source_type, unit, sublabel, highlight, size = 'md', valueColor }) {
   const display = formatValue(value, format);
+  const isSmall = size === 'sm';
+
+  const cardStyle = isSmall
+    ? { ...S.card, padding: 'var(--cp-space-3) var(--cp-space-4)' }
+    : S.card;
+
+  const valueStyle = {
+    ...(isSmall ? S.valueSm : S.value),
+    color: value == null ? 'var(--cp-text-muted)' : (valueColor ?? 'var(--cp-text-strong)'),
+  };
+
+  const sublabelStyle = isSmall
+    ? { ...S.sublabel, marginTop: 0 }
+    : S.sublabel;
 
   return (
     <div
       className={`cp-card cp-card-hover${highlight ? ' cp-card-accent' : ''}`}
-      style={S.card}
+      style={cardStyle}
     >
       <div style={S.label}>{label}</div>
-      <div style={{ ...S.value, color: value == null ? 'var(--cp-text-muted)' : 'var(--cp-text-strong)' }}>
+      <div style={valueStyle}>
         {display}
         {unit && value != null && <span style={S.unit}> {unit}</span>}
       </div>
-      {sublabel && <div style={S.sublabel}>{sublabel}</div>}
+      {sublabel && <div style={sublabelStyle}>{sublabel}</div>}
       {source_type !== undefined && (
         // opacity mutes the badge's own background + text together;
         // switching to `color` alone would leave the badge background at full intensity.
@@ -70,6 +84,13 @@ const S = {
     letterSpacing: 'var(--cp-tracking-tight)',
     lineHeight: 'var(--cp-leading-tight)',
     marginTop: 'var(--cp-space-1)',
+    color: 'var(--cp-text-strong)',
+  },
+  valueSm: {
+    fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-tight)',
+    lineHeight: 'var(--cp-leading-tight)',
     color: 'var(--cp-text-strong)',
   },
   unit: {

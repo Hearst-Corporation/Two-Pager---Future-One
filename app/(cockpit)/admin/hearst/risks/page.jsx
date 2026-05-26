@@ -5,7 +5,7 @@ const RISK_CATEGORIES = [
   {
     id: 'market',
     label: 'Market Risk',
-    color: 'var(--cp-info)',
+    color: 'var(--cp-text-body)',
     risks: [
       { id: 'demand_risk', label: 'Data Center Demand', desc: 'Qatar market adoption slower than projected' },
       { id: 'pricing_risk', label: 'Colocation Pricing', desc: 'Competitive pricing pressure from regional operators' },
@@ -15,7 +15,7 @@ const RISK_CATEGORIES = [
   {
     id: 'construction',
     label: 'Construction Risk',
-    color: 'var(--cp-warning)',
+    color: 'var(--cp-text-primary)',
     risks: [
       { id: 'cost_overrun', label: 'CAPEX Cost Overrun', desc: 'Construction costs exceed budget due to supply chain or labor' },
       { id: 'delay_risk', label: 'Construction Delay', desc: 'COD delayed beyond planned date' },
@@ -25,7 +25,7 @@ const RISK_CATEGORIES = [
   {
     id: 'power',
     label: 'Power & Infrastructure Risk',
-    color: 'var(--cp-violet)',
+    color: 'var(--cp-text-body)',
     risks: [
       { id: 'grid_risk', label: 'Grid Connection Delay', desc: 'Substation or grid connection delayed by utility' },
       { id: 'tariff_risk', label: 'Electricity Tariff Increase', desc: 'Qatar electricity tariff increase above base case' },
@@ -35,7 +35,7 @@ const RISK_CATEGORIES = [
   {
     id: 'regulatory',
     label: 'Regulatory & Political Risk',
-    color: 'var(--cp-success)',
+    color: 'var(--cp-accent)',
     risks: [
       { id: 'regulatory', label: 'Regulatory / Permitting', desc: 'Changes in Qatar data center or foreign ownership regulations' },
       { id: 'geopolitical', label: 'Geopolitical', desc: 'Regional geopolitical instability impacting operations' },
@@ -54,12 +54,14 @@ const RISK_CATEGORIES = [
   },
 ];
 
+// Severity scale — only High/Critical use --cp-error (true danger semantic).
+// Low = positive accent, Medium = neutral. Critical reinforced by intensity.
 const SEVERITY = {
-  1: { label: 'Very Low',  color: 'var(--cp-text-body)' },
-  2: { label: 'Low',       color: 'var(--cp-success)' },
-  3: { label: 'Medium',    color: 'var(--cp-warning)' },
+  1: { label: 'Very Low',  color: 'var(--cp-text-muted)' },
+  2: { label: 'Low',       color: 'var(--cp-accent)' },
+  3: { label: 'Medium',    color: 'var(--cp-text-body)' },
   4: { label: 'High',      color: 'var(--cp-error)' },
-  5: { label: 'Critical',  color: 'var(--cp-violet)' },
+  5: { label: 'Critical',  color: 'var(--cp-error-strong)' },
 };
 
 function RiskRating({ value, onChange }) {
@@ -70,7 +72,7 @@ function RiskRating({ value, onChange }) {
           key={n}
           onClick={() => onChange(n)}
           style={{
-            width: 22, height: 22, borderRadius: 3, fontSize: 10, fontWeight: 700,
+            width: 22, height: 22, borderRadius: 4, fontSize: 10, fontWeight: 700,
             border: '1px solid',
             background: value >= n ? SEVERITY[n]?.color : 'transparent',
             color: value >= n ? 'var(--cp-bg-deep)' : SEVERITY[n]?.color,
@@ -156,7 +158,7 @@ export default function RisksPage() {
           {avgSeverity && (
             <div style={S.riskScore}>
               <span style={S.riskScoreLabel}>AVG RISK SCORE</span>
-              <span style={{ ...S.riskScoreVal, color: avgSeverity >= 3.5 ? 'var(--cp-error)' : avgSeverity >= 2.5 ? 'var(--cp-warning)' : 'var(--cp-success)' }}>{avgSeverity}/5</span>
+              <span style={{ ...S.riskScoreVal, color: avgSeverity >= 3.5 ? 'var(--cp-error)' : avgSeverity >= 2.5 ? 'var(--cp-text-primary)' : 'var(--cp-accent)' }}>{avgSeverity}/5</span>
             </div>
           )}
           {critical > 0 && (
@@ -193,7 +195,7 @@ export default function RisksPage() {
                     <RiskRating value={rating.likelihood || 0} onChange={v => setLikelihood(risk.id, v)} />
                   </div>
                   {score > 0 && (
-                    <div style={{ ...S.riskScore2, background: score >= 15 ? 'var(--cp-error-bg)' : score >= 8 ? 'var(--cp-warning-bg)' : 'var(--cp-success-bg)', color: score >= 15 ? 'var(--cp-error)' : score >= 8 ? 'var(--cp-warning)' : 'var(--cp-success)' }}>
+                    <div style={{ ...S.riskScore2, background: score >= 15 ? 'var(--cp-error-bg)' : score >= 8 ? 'var(--cp-surface-3)' : 'var(--cp-accent-soft)', color: score >= 15 ? 'var(--cp-error)' : score >= 8 ? 'var(--cp-text-primary)' : 'var(--cp-accent)' }}>
                       Score {score}
                     </div>
                   )}
@@ -208,18 +210,18 @@ export default function RisksPage() {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
-  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
   riskScore: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end' },
   riskScoreLabel: { fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)' },
-  riskScoreVal: { fontSize: 22, fontWeight: 900 },
+  riskScoreVal: { fontSize: 22, fontWeight: 800 },
   criticalBadge: { fontSize: 11, fontWeight: 700, padding: '5px 12px', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', borderRadius: 6, border: '1px solid var(--cp-error)' },
   sectionTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 8 },
-  noAlerts: { fontSize: 12, color: 'var(--cp-success)', background: 'var(--cp-success-bg)', border: '1px solid var(--cp-success)', borderRadius: 6, padding: '8px 14px' },
-  catCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 8, marginBottom: 16, overflow: 'hidden' },
+  noAlerts: { fontSize: 12, color: 'var(--cp-accent)', background: 'var(--cp-accent-soft)', border: '1px solid var(--cp-accent)', borderRadius: 6, padding: '8px 16px' },
+  catCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 10, overflow: 'hidden' },
   catHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderLeft: '4px solid', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   catName: { fontSize: 12, fontWeight: 700, letterSpacing: 0.5 },
   catCount: { fontSize: 10, color: 'var(--cp-text-muted)' },
@@ -230,5 +232,5 @@ const S = {
   riskRight: { display: 'flex', alignItems: 'center', gap: 20, flexShrink: 0 },
   ratingGroup: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 },
   ratingLabel: { fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)' },
-  riskScore2: { fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 },
+  riskScore2: { fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20 },
 };

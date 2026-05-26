@@ -32,9 +32,9 @@ export default function ProjectionChart({ years = [], height = 280 }) {
           <Tooltip contentStyle={S.tooltip} formatter={(v) => `$${v.toFixed(1)}M`} />
           <Legend wrapperStyle={{ fontSize: 11 }} />
           <Area dataKey="cumFcf" name="Cumulative Cash" type="monotone"
-            stroke="var(--cp-info)" fill="var(--cp-info)" fillOpacity={0.15} />
-          <Bar dataKey="revenue" name="Revenue" fill="var(--cp-success)" opacity={0.7} />
-          <Line dataKey="ebitda" name="Yearly Profit" stroke="var(--cp-accent-strong)" strokeWidth={2} dot={{ r: 3 }} />
+            stroke="var(--cp-text-primary)" fill="var(--cp-text-primary)" fillOpacity={0.10} />
+          <Bar dataKey="revenue" name="Revenue" fill="var(--cp-accent-maroon)" opacity={0.85} />
+          <Line dataKey="ebitda" name="Yearly Profit" stroke="var(--cp-accent-maroon)" strokeWidth={2} dot={{ r: 3 }} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>

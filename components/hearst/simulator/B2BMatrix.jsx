@@ -7,9 +7,9 @@ const BM_ID_TO_LABEL = Object.fromEntries(BUSINESS_MODELS.map(b => [b.id, b.labe
 const CT_ID_TO_LABEL = Object.fromEntries(CLIENT_TYPES.map(c => [c.id, c.label]));
 
 const COL_GROUPS = [
-  { label: 'Businesses', ids: CLIENT_GROUPS.b2b, color: 'var(--cp-info)' },
-  { label: 'Government', ids: CLIENT_GROUPS.b2g, color: 'var(--cp-warning)' },
-  { label: 'Startups',   ids: CLIENT_GROUPS.b2c, color: 'var(--cp-violet)' },
+  { label: 'Businesses', ids: CLIENT_GROUPS.b2b, color: 'var(--cp-accent-maroon)' },
+  { label: 'Government', ids: CLIENT_GROUPS.b2g, color: 'var(--cp-accent-maroon)' },
+  { label: 'Startups',   ids: CLIENT_GROUPS.b2c, color: 'var(--cp-text-primary)' },
 ];
 
 const ROW_GROUPS = [
@@ -73,7 +73,7 @@ export default function B2BMatrix({ selected, onCellClick }) {
                         style={{
                           ...S.tdCell,
                           background: fitColor(fit.fit),
-                          outline: isSelected ? '2px solid var(--cp-accent-strong)' : 'none',
+                          outline: isSelected ? '2px solid var(--cp-accent-maroon)' : 'none',
                         }}
                         onClick={() => onCellClick?.({ businessModelId: bm, clientTypeId: ct, fit })}
                         title={fit.note}>

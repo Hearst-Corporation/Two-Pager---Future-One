@@ -48,7 +48,7 @@ function ConfidenceDots({ score }) {
   return (
     <span style={{ display: 'inline-flex', gap: 2 }}>
       {Array.from({ length: 5 }, (_, i) => (
-        <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: i < score ? 'var(--cp-success)' : 'var(--cp-surface-3)', display: 'inline-block' }} />
+        <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: i < score ? 'var(--cp-accent)' : 'var(--cp-surface-3)', display: 'inline-block' }} />
       ))}
     </span>
   );
@@ -225,7 +225,7 @@ export default function SourcesPage() {
             <tr key={src.id} style={S.tr}>
               <td style={S.td}><OperatorBadge operatorId={src.operator_id} size="sm" /></td>
               <td style={S.tdBold}>{src.metric_name}</td>
-              <td style={{ ...S.td, fontFamily: 'monospace', fontWeight: 700, color: 'var(--cp-text-primary)' }}>{fmtVal(src)}</td>
+              <td style={{ ...S.td, fontWeight: 700, color: 'var(--cp-text-primary)', fontVariantNumeric: 'tabular-nums' }}>{fmtVal(src)}</td>
               <td style={S.td}>
                 {src.url
                   ? <a href={src.url} target="_blank" rel="noopener noreferrer" style={S.link}>{src.source_name}</a>
@@ -295,7 +295,7 @@ export default function SourcesPage() {
                     <td style={S.tdBold}>{s.metric_id}</td>
                     <td style={S.td}><SourceBadge source_type={s.source_type} /></td>
                     <td style={S.td}>{s.source_name || '—'}</td>
-                    <td style={{ ...S.td, fontFamily: 'monospace', fontWeight: 700 }}>{s.value != null ? s.value : (s.value_text || '—')}{s.unit ? ' ' + s.unit : ''}</td>
+                    <td style={{ ...S.td, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{s.value != null ? s.value : (s.value_text || '—')}{s.unit ? ' ' + s.unit : ''}</td>
                     <td style={S.td}>{s.confidence_score != null ? s.confidence_score + '/5' : '—'}</td>
                     <td style={S.td}>{s.date_published || '—'}</td>
                     <td style={S.td}>{s.source_url ? <a href={s.source_url} target="_blank" rel="noopener noreferrer" style={S.link}>↗</a> : '—'}</td>
@@ -329,7 +329,7 @@ export default function SourcesPage() {
               <div style={S.modalRow}>
                 <OperatorBadge operatorId={uimSrc.operator_id} size="md" />
                 <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--cp-text-primary)', flex: 1 }}>{uimSrc.metric_name}</span>
-                <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: 16 }}>{fmtVal(uimSrc)}</span>
+                <span style={{ fontWeight: 800, fontSize: 16, fontVariantNumeric: 'tabular-nums' }}>{fmtVal(uimSrc)}</span>
               </div>
               <div style={{ fontSize: 11, color: 'var(--cp-text-muted)', marginBottom: 14 }}>
                 This adds the source to your source ledger. It does not automatically update scenario assumptions.
@@ -339,7 +339,7 @@ export default function SourcesPage() {
                 {scenarios.map(sc => <option key={sc.id} value={sc.id}>{sc.name}</option>)}
               </select>
               {uimDone ? (
-                <div style={{ color: 'var(--cp-success)', fontWeight: 700, textAlign: 'center', padding: 12 }}>Source added.</div>
+                <div style={{ color: 'var(--cp-accent)', fontWeight: 700, textAlign: 'center', padding: 12 }}>Source added.</div>
               ) : (
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                   <button onClick={() => setUimSrc(null)} style={S.cancelBtn}>Cancel</button>
@@ -357,26 +357,26 @@ export default function SourcesPage() {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 20, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
-  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  secBtn: { fontSize: 12, padding: '6px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 5, cursor: 'pointer' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '6px 14px', background: 'var(--cp-info-strong-cta)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 5, cursor: 'pointer' },
+  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
+  secBtn: { fontSize: 12, padding: '6px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
+  addBtn: { fontSize: 12, fontWeight: 700, padding: '6px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
   filterRow: { display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 },
   filterSelect: { fontSize: 11, padding: '5px 8px', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 4, color: 'var(--cp-text-primary)', cursor: 'pointer' },
   searchInput: { flex: 1, padding: '5px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', outline: 'none' },
   resultCount: { fontSize: 10, color: 'var(--cp-text-muted)', whiteSpace: 'nowrap' },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 8, overflow: 'hidden', marginBottom: 24 },
-  th: { padding: '7px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 10, overflow: 'hidden', marginBottom: 24 },
+  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   tr: { borderBottom: '1px solid var(--cp-border)' },
   td: { padding: '8px 12px', color: 'var(--cp-text-muted)', verticalAlign: 'middle' },
   tdBold: { padding: '8px 12px', fontWeight: 700, color: 'var(--cp-text-primary)', verticalAlign: 'middle' },
-  link: { color: 'var(--cp-info)', textDecoration: 'none' },
+  link: { color: 'var(--cp-accent)', textDecoration: 'none' },
   useBtn: { fontSize: 10, fontWeight: 700, padding: '4px 10px', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
   sectionLabel: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)', textTransform: 'uppercase', marginBottom: 12 },
-  addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 7, padding: '16px 18px', marginBottom: 16 },
+  addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 6, padding: '16px 16px', marginBottom: 16 },
   addFormTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 12 },
   addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 16px' },
   fieldLabel: { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--cp-text-muted)', marginBottom: 3 },
@@ -384,11 +384,11 @@ const S = {
   cancelBtn: { fontSize: 11, padding: '5px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
   empty: { padding: '20px', color: 'var(--cp-text-muted)', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 6, textAlign: 'center' },
   delBtn: { fontSize: 12, color: 'var(--cp-error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 6px' },
-  confirmYes: { fontSize: 10, fontWeight: 700, color: '#fff', background: 'var(--cp-error)', border: 'none', cursor: 'pointer', padding: '3px 8px', borderRadius: 4 },
+  confirmYes: { fontSize: 10, fontWeight: 700, color: 'var(--cp-text-strong)', background: 'var(--cp-error)', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 4 },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  modal: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)', borderRadius: 8, width: 440, maxWidth: '90vw', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' },
-  modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid var(--cp-border)' },
+  modal: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)', borderRadius: 10, width: 440, maxWidth: '90vw', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' },
+  modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 16px', borderBottom: '1px solid var(--cp-border)' },
   modalTitle: { fontSize: 13, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  modalBody: { padding: '18px 18px' },
-  modalRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, background: 'var(--cp-surface-2)', padding: '8px 12px', borderRadius: 5 },
+  modalBody: { padding: '16px 16px' },
+  modalRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, background: 'var(--cp-surface-2)', padding: '8px 12px', borderRadius: 6 },
 };

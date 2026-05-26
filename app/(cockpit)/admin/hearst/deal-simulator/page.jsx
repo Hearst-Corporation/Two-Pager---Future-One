@@ -412,7 +412,7 @@ ${projection.missing_inputs?.join(', ') || 'None'}
                 </div>
                 <div style={S.kpiRow}>
                   <span style={S.kpiLabel}>IRR</span>
-                  <span style={{ ...S.kpiVal, color: p.irr != null && p.irr > IRR_GREEN ? 'var(--cp-success)' : p.irr != null && p.irr > IRR_YELLOW ? 'var(--cp-warning)' : 'var(--cp-text-primary)' }}>
+                  <span style={{ ...S.kpiVal, color: p.irr != null && p.irr > IRR_GREEN ? 'var(--cp-accent)' : p.irr != null && p.irr > IRR_YELLOW ? 'var(--cp-text-body)' : 'var(--cp-text-primary)' }}>
                     {fmtPct(p.irr)}
                   </span>
                 </div>
@@ -600,13 +600,13 @@ const S = {
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-surface-1)', borderRadius: 6 },
 
-  topBar: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, marginBottom: 16, flexWrap: 'wrap' },
-  pageTitle: { fontSize: 18, fontWeight: 800, color: 'var(--cp-text-primary)', marginBottom: 4 },
+  topBar: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)', marginBottom: 4 },
   subtitle: { fontSize: 12, color: 'var(--cp-text-muted)', maxWidth: 640, lineHeight: 1.5 },
   scenarioSwitch: { display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' },
   scBtn: {
     display: 'inline-flex', alignItems: 'center',
-    fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 20,
+    fontSize: 11, fontWeight: 700, padding: '6px 16px', borderRadius: 20,
     border: '1px solid var(--cp-border)', background: 'transparent',
     color: 'var(--cp-text-muted)', cursor: 'pointer',
   },
@@ -616,13 +616,13 @@ const S = {
     display: 'flex', alignItems: 'center', gap: 10,
     background: 'var(--cp-surface-1)',
     border: '1px solid var(--cp-border-strong)',
-    borderLeft: '3px solid var(--cp-warning)',
-    padding: '10px 14px', borderRadius: 6, marginBottom: 12,
+    borderLeft: '3px solid var(--cp-accent)',
+    padding: '10px 16px', borderRadius: 6, marginBottom: 12,
     fontSize: 12, color: 'var(--cp-text-primary)',
   },
   warnIcon: {
     fontSize: 14, fontWeight: 800,
-    color: 'var(--cp-warning)',
+    color: 'var(--cp-accent)',
     flexShrink: 0,
   },
   warnText: { fontSize: 12, color: 'var(--cp-text-primary)', lineHeight: 1.5 },
@@ -638,7 +638,7 @@ const S = {
     fontSize: 10, fontWeight: 800, letterSpacing: 1.5,
     color: 'var(--cp-accent-strong)',
     background: 'var(--cp-surface-0)',
-    padding: '3px 8px', borderRadius: 4, flexShrink: 0,
+    padding: '4px 8px', borderRadius: 4, flexShrink: 0,
   },
   recoText: { fontSize: 12, color: 'var(--cp-text-primary)', lineHeight: 1.5 },
 
@@ -650,7 +650,7 @@ const S = {
   card: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 8, padding: 16, cursor: 'pointer',
+    borderRadius: 10, padding: 16, cursor: 'pointer',
     transition: 'border-color .12s, transform .12s',
     display: 'flex', flexDirection: 'column', minHeight: 380,
     textAlign: 'left', font: 'inherit', width: '100%',
@@ -660,19 +660,19 @@ const S = {
 
   cardHead: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 },
   cardCode: {
-    fontSize: 12, fontWeight: 900, color: 'var(--cp-bg-deep)',
-    background: 'var(--cp-text-primary)', padding: '3px 9px', borderRadius: 4,
+    fontSize: 12, fontWeight: 800, color: 'var(--cp-bg-deep)',
+    background: 'var(--cp-text-primary)', padding: '4px 9px', borderRadius: 4,
   },
   cardScore: { fontSize: 12, fontWeight: 800, color: 'var(--cp-text-muted)' },
   recoChip: {
     fontSize: 9, fontWeight: 800, letterSpacing: 1,
     background: 'var(--cp-accent-strong)', color: 'var(--cp-text-strong)',
-    padding: '2px 7px', borderRadius: 3, marginLeft: 'auto',
+    padding: '2px 7px', borderRadius: 4, marginLeft: 'auto',
   },
   exitChip: {
     fontSize: 9, fontWeight: 800, letterSpacing: 1,
-    background: 'var(--cp-warning)', color: 'var(--cp-bg-deep)',
-    padding: '2px 7px', borderRadius: 3, marginLeft: 'auto',
+    background: 'var(--cp-accent)', color: 'var(--cp-text-strong)',
+    padding: '2px 7px', borderRadius: 4, marginLeft: 'auto',
   },
   cardLabel: { fontSize: 14, fontWeight: 800, color: 'var(--cp-text-primary)', marginBottom: 2 },
   cardShort: { fontSize: 11, color: 'var(--cp-text-muted)', marginBottom: 6 },
@@ -694,7 +694,7 @@ const S = {
   scoreLine: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   scoreLabel: { fontSize: 10, color: 'var(--cp-text-muted)' },
   scoreBar: { display: 'flex', gap: 3 },
-  scoreDot: { width: 10, height: 4, borderRadius: 2 },
+  scoreDot: { width: 10, height: 4, borderRadius: 4 },
 
   // ─── S2.1: Diff table styles ───────────────────────────────────────────
   diffWrap: {
@@ -751,7 +751,7 @@ const S = {
   detailWrap: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 8, padding: 20, marginBottom: 24,
+    borderRadius: 10, padding: 20, marginBottom: 24,
   },
   detailTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)', marginBottom: 6 },
   detailDesc: { fontSize: 12, color: 'var(--cp-text-muted)', lineHeight: 1.6, marginBottom: 16 },
@@ -778,7 +778,7 @@ const S = {
   },
   missingBox: {
     background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)',
-    color: 'var(--cp-warning)', padding: '8px 12px', borderRadius: 6, fontSize: 11, marginTop: 10,
+    color: 'var(--cp-text-body)', padding: '8px 12px', borderRadius: 6, fontSize: 11, marginTop: 10,
   },
 
   // S3.2 — operator fee slider
@@ -867,9 +867,9 @@ const S = {
     marginTop: 'var(--cp-space-3)',
     padding: 'var(--cp-space-2) var(--cp-space-4)',
     borderRadius: 'var(--cp-radius-sm)',
-    background: 'var(--cp-success-bg)',
+    background: 'var(--cp-accent-soft)',
     border: '1px solid var(--cp-border)',
-    color: 'var(--cp-success)',
+    color: 'var(--cp-accent)',
     fontSize: 'var(--cp-font-xs)',
   },
 
@@ -887,7 +887,7 @@ const S = {
   emptyState: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 8, padding: 24, maxWidth: 480,
+    borderRadius: 10, padding: 24, maxWidth: 480,
     display: 'flex', flexDirection: 'column', gap: 12,
   },
   emptyCta: {

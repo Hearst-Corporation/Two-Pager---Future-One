@@ -10,9 +10,10 @@ const TEMPLATES = [
   { id: 'one-pager',   title: 'One-Pager Teaser',   format: 'PDF',   pages: '1p',  tags: 'Teaser · Quick',             route: '/api/admin/hearst/export/memo',        est: 4  },
 ];
 
+// Format badges — neutral palette, differentiation by label only.
 const FMT_COLORS = {
-  PDF:   { color: 'var(--cp-error)',   bg: 'var(--cp-error-bg)' },
-  Excel: { color: 'var(--cp-success)', bg: 'var(--cp-success-bg)' },
+  PDF:   { color: 'var(--cp-text-body)',    bg: 'var(--cp-surface-2)' },
+  Excel: { color: 'var(--cp-text-primary)', bg: 'var(--cp-surface-3)' },
 };
 
 export default function DocumentsPage() {
@@ -170,20 +171,20 @@ export default function DocumentsPage() {
 }
 
 const S = {
-  wrap: {},
+  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
-  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
-  pageTitle: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)' },
+  topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
   scLabel: { fontSize: 11, fontWeight: 600, color: 'var(--cp-text-muted)' },
   scSelect: { fontSize: 12, padding: '5px 8px', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 4, color: 'var(--cp-text-primary)', cursor: 'pointer' },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 8, overflow: 'hidden', marginBottom: 24 },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 10, overflow: 'hidden', marginBottom: 24 },
   th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   tr: { borderBottom: '1px solid var(--cp-border)' },
   td: { padding: '10px 12px', color: 'var(--cp-text-muted)', verticalAlign: 'middle' },
   tdBold: { padding: '10px 12px', fontWeight: 700, color: 'var(--cp-text-primary)', verticalAlign: 'middle' },
-  fmtBadge: { fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 3, letterSpacing: 0.4 },
-  genBtn: { fontSize: 11, fontWeight: 700, padding: '5px 14px', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
-  dlBtn: { fontSize: 11, fontWeight: 700, padding: '5px 14px', background: 'var(--cp-success)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' },
+  fmtBadge: { fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, letterSpacing: 0.4 },
+  genBtn: { fontSize: 11, fontWeight: 700, padding: '5px 16px', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
+  dlBtn: { fontSize: 11, fontWeight: 700, padding: '5px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 4, cursor: 'pointer' },
   resetBtn: { fontSize: 11, padding: '5px 8px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
   loadingText: { fontSize: 11, color: 'var(--cp-text-muted)', fontStyle: 'italic' },
   errText: { fontSize: 11, color: 'var(--cp-error)' },
