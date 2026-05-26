@@ -35,6 +35,11 @@ advisor-*.png
 admin-dashboard-*.png
 prese-hub-*.png
 m5-*.png
+dashboard-*.png
+smoketest-*.png
+test-*.png
+*.tgz
+.env.local.bak
 
 # Agent worktrees (Claude Code orchestrator)
 .claude/
