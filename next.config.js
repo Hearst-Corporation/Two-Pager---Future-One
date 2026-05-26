@@ -1,5 +1,17 @@
 const { withSentryConfig } = require('@sentry/nextjs');
 
+// Fail-fast env validation at build / boot time.
+// Skipped during `next lint` / type-only passes where the runtime env is absent.
+if (process.env.SKIP_ENV_VALIDATION !== 'true') {
+  try {
+    const { validateEnv } = require('./lib/env-validation.js');
+    validateEnv();
+  } catch (err) {
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV) throw err;
+    console.warn('[next.config] env validation skipped:', err.message);
+  }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@hearst/cockpit-shell'],

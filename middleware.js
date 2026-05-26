@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { safeNextPath } from '@/lib/url-helpers';
+
+export { safeNextPath };
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const PUBLIC_ROUTES = new Set(['/admin/login', '/admin/auth/callback']);
+const PUBLIC_API_ROUTES = new Set(['/api/admin/login']);
 
 // ---------------------------------------------------------------------------
 // Fail-closed guard: dev-autologin must NEVER be reachable in a deployed env.
@@ -32,21 +36,6 @@ const DEV_AUTOLOGIN =
   process.env.NODE_ENV === 'development' &&
   !!process.env.ADMIN_DEV_AUTOLOGIN_EMAIL;
 
-/**
- * Sanitize a value destined for the `?next=` redirect param.
- * Only allows same-origin paths (must start with a single `/`, not `//`).
- * Anything else (absolute URL, protocol-relative, javascript:, etc.) is
- * collapsed to `/admin`.
- *
- * Exported for unit testing.
- */
-export function safeNextPath(path) {
-  if (typeof path !== 'string') return '/admin';
-  // Must start with `/` but NOT `//` (protocol-relative URL).
-  if (!/^\/[^/]/.test(path)) return '/admin';
-  return path;
-}
-
 // Cache-Control headers for auth redirects. Mitigates Next 14.2.35
 // GHSA-3g8h-86w9-wvmq (middleware/proxy redirect cache poisoning).
 function applyNoStore(response) {
@@ -57,13 +46,16 @@ function applyNoStore(response) {
 
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
-  if (!pathname.startsWith('/admin')) return NextResponse.next();
+  if (!pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) return NextResponse.next();
 
   // Pass pathname to Server Components via request headers
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set('x-pathname', pathname);
 
   if (DEV_AUTOLOGIN) {
+    if (pathname.startsWith('/api/admin')) {
+      return NextResponse.next();
+    }
     if (pathname === '/admin/login') {
       const url = req.nextUrl.clone();
       url.pathname = '/admin';
@@ -88,8 +80,8 @@ export async function middleware(req) {
 
   const { data: { user } } = await supa.auth.getUser();
 
-  if (PUBLIC_ROUTES.has(pathname)) {
-    // Already logged in? bounce to /admin
+  if (PUBLIC_ROUTES.has(pathname) || PUBLIC_API_ROUTES.has(pathname)) {
+    // Already logged in? bounce to /admin (page routes only)
     if (user && pathname === '/admin/login') {
       const url = req.nextUrl.clone();
       url.pathname = '/admin';
@@ -100,6 +92,9 @@ export async function middleware(req) {
   }
 
   if (!user) {
+    if (pathname.startsWith('/api/admin') && !PUBLIC_API_ROUTES.has(pathname)) {
+      return applyNoStore(NextResponse.json({ error: 'unauthenticated' }, { status: 401 }));
+    }
     const url = req.nextUrl.clone();
     url.pathname = '/admin/login';
     url.searchParams.set('next', safeNextPath(pathname));
@@ -110,5 +105,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 };
