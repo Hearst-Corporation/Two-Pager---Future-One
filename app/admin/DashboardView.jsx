@@ -15,8 +15,8 @@ export default function DashboardView({ me, cards }) {
     <div style={S.wrap}>
       <header style={S.header}>
         <div style={S.headerLeft}>
-          <div style={S.dateLine}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase()}</div>
-          <h1 style={S.greet}>
+          <div style={S.dateLine} suppressHydrationWarning>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase()}</div>
+          <h1 style={S.greet} suppressHydrationWarning>
             {GREETING}, <span style={S.name}>{firstName}</span>.
           </h1>
           <p style={S.summary}>

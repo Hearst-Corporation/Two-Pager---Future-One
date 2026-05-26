@@ -26,8 +26,8 @@ export default function TodayView({ me, buckets, myInitiatives, myOps, myPartner
   return (
     <div style={S.wrap}>
       <header style={S.hello}>
-        <div style={S.dateLine}>{FORMATTED_DATE.toUpperCase()}</div>
-        <h1 style={S.greet}>
+        <div style={S.dateLine} suppressHydrationWarning>{FORMATTED_DATE.toUpperCase()}</div>
+        <h1 style={S.greet} suppressHydrationWarning>
           {GREETING}, <span style={S.greetName}>{(me.full_name || me.email).split(' ')[0]}.</span>
         </h1>
         <p style={S.summary}>

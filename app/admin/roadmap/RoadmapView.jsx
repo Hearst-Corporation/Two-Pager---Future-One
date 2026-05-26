@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-unused-vars */
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -68,10 +67,10 @@ export default function RoadmapView({
       {/* Print-only header — only visible on PDF export */}
       <div className="print-only" style={S.printHeader}>
         <div>
-          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: 3, color: '#666' }}>FUTUR ONE × MISA · STRATEGIC ROADMAP</div>
+          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: 3, color: 'var(--color-text-muted)' }}>FUTUR ONE × MISA · STRATEGIC ROADMAP</div>
           <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: -1, marginTop: 4 }}>Roadmap</div>
         </div>
-        <div style={{ fontSize: 10, color: '#666', textAlign: 'right' }}>
+        <div suppressHydrationWarning style={{ fontSize: 10, color: 'var(--color-text-muted)', textAlign: 'right' }}>
           {initiatives.length} initiatives · {workstreams.length} workstreams<br />
           Generated {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
@@ -213,7 +212,7 @@ function StreamsView({ workstreams, initiatives, stats, linksByInit, ownerLabel,
   );
 }
 
-function DraggableInitChip({ i, statusColor, ownerColor, ownerLabel, linksByInit, onDragStart, onDragEnd }) {
+function DraggableInitChip({ i, statusColor: _statusColor, ownerColor, ownerLabel, linksByInit, onDragStart, onDragEnd }) {
   const links = linksByInit[i.id] || { partners: [], operators: [] };
   return (
     <Link
@@ -389,7 +388,7 @@ function Stat({ n, l, color }) {
 }
 
 /* ============================ TIMELINE VIEW ============================ */
-function TimelineView({ initiatives, workstreams, statusColor, ownerColor, ownerLabel }) {
+function _TimelineView({ initiatives, workstreams, statusColor, ownerColor, ownerLabel }) {
   // Build a 9-month visible window starting from earliest start or today
   const today = new Date();
   const months = [];
@@ -484,7 +483,7 @@ function TimelineView({ initiatives, workstreams, statusColor, ownerColor, owner
 }
 
 /* ============================ LIST VIEW ============================ */
-function ListView({ initiatives, wsById, linksByInit, ownerLabel, ownerColor, statusLabel, statusColor, priorityLabel }) {
+function _ListView({ initiatives, wsById, linksByInit, ownerLabel, ownerColor, statusLabel, statusColor, priorityLabel }) {
   return (
     <div style={S.listWrap}>
       <div style={{ ...S.listRow, ...S.listHead }}>
@@ -537,7 +536,7 @@ function ListView({ initiatives, wsById, linksByInit, ownerLabel, ownerColor, st
   );
 }
 
-function SelectFilter({ value, onChange, label, options }) {
+function _SelectFilter({ value, onChange, label, options }) {
   return (
     <label style={S.filterLabel}>
       <span style={S.filterLabelText}>{label}</span>
@@ -686,12 +685,6 @@ const S = {
     color: 'var(--color-text-muted)',
     fontWeight: 700,
   },
-  linksChip: {
-    fontSize: 10,
-    color: 'var(--color-text-muted)',
-    fontWeight: 600,
-  },
-
   /* TIMELINE */
   timelineWrap: {
     background: 'var(--color-surface)',
