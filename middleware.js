@@ -139,5 +139,19 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  // Inclut /admin/*, /api/admin/* + les routes publiques qu'on veut couper
+  // sur le sous-domaine oracle.* (brochure / datacenter / pitch / print).
+  matcher: [
+    '/',
+    '/admin/:path*',
+    '/api/admin/:path*',
+    '/brochure/:path*',
+    '/brochure',
+    '/datacenter/:path*',
+    '/datacenter',
+    '/pitch/:path*',
+    '/pitch',
+    '/print/:path*',
+    '/print',
+  ],
 };
