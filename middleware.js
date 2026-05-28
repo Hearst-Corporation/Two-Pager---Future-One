@@ -44,8 +44,42 @@ function applyNoStore(response) {
   return response;
 }
 
+// Sous-domaine dédié admin : oracle.hearst.app (et alias *.vercel.app oracle-…)
+// On rewrite la racine vers /admin/hearst pour que les utilisateurs du
+// sous-domaine landent directement dans le cockpit sans voir l'URL changer.
+const ADMIN_HOSTS = new Set([
+  'oracle.hearst.app',
+  'oracle.hearst.io',
+]);
+
+function isAdminHost(host) {
+  if (!host) return false;
+  const h = host.toLowerCase().split(':')[0];
+  if (ADMIN_HOSTS.has(h)) return true;
+  // Preview deploys vercel : prese-* alias (= projet prese-hub) → reste public.
+  // L'admin dédié est sur oracle.*  uniquement.
+  return false;
+}
+
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
+  const host = req.headers.get('host') || '';
+
+  // Sous-domaine oracle : tout ce qui n'est pas /admin ou /api/admin est rewrite
+  // vers /admin/hearst (ou son sous-path) pour cacher la brochure publique.
+  if (isAdminHost(host)) {
+    if (pathname === '/' || pathname === '') {
+      const url = req.nextUrl.clone();
+      url.pathname = '/admin/hearst';
+      return NextResponse.rewrite(url);
+    }
+    // /brochure, /datacenter, /pitch, /print etc → 404 sur ce sous-domaine
+    const PUBLIC_PUBLISH = ['/brochure', '/datacenter', '/pitch', '/print'];
+    if (PUBLIC_PUBLISH.some(p => pathname === p || pathname.startsWith(p + '/'))) {
+      return new NextResponse('Not found on admin subdomain', { status: 404 });
+    }
+  }
+
   if (!pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) return NextResponse.next();
 
   // Pass pathname to Server Components via request headers
