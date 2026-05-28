@@ -25,6 +25,7 @@ import {
   estimateKimiCostUsd,
 } from "@hearst/review-mode";
 import { kimi, KIMI_MODEL, kimiChatStream } from "@/lib/llm/kimi";
+import { buildOracleSystemPrompt, inferOracleContextFromPath } from "@/lib/oracle-system-prompt";
 import { getSessionProfile } from "@/lib/supabase-server";
 import { getAdminChatMode, insertLlmRun } from "@/lib/review-mode/supabase-helpers";
 import {
@@ -329,7 +330,28 @@ export async function POST(req: Request) {
       console.warn("[cockpit-chat] tuning load failed", err);
     }
   }
-  const systemPrompt = baseSystemPrompt + tuningBlock;
+
+  // ── ORACLE constitutional reasoning layer (Sprint 0) ─────────────────
+  // Prefixe le system prompt pour aligner le raisonnement sur les 11 sections,
+  // 6 perspectives, stakeholder mode, region + overlays. Heuristique par
+  // pathname : /admin/hearst* → sovereign / qatar / Vision 2030 + Qatar AI.
+  const oracleCtxBase = body.productId ? {} : inferOracleContextFromPath("/admin/hearst");
+  const oracleCtx = {
+    ...oracleCtxBase,
+    // accepter override depuis le body (futur : front pourra envoyer stakeholder/region)
+    stakeholder: (raw as { oracle?: { stakeholder?: string } })?.oracle?.stakeholder
+      ?? oracleCtxBase.stakeholder,
+    region: (raw as { oracle?: { region?: string } })?.oracle?.region
+      ?? oracleCtxBase.region,
+    overlays: (raw as { oracle?: { overlays?: string[] } })?.oracle?.overlays
+      ?? oracleCtxBase.overlays,
+    brevity: mode === "review" ? "deep" as const : "standard" as const,
+    surface: "cockpit-chat" as const,
+    product_context: body.productId ? `product=${body.productId}` : "oracle cockpit",
+  };
+  const oraclePrefix = buildOracleSystemPrompt(oracleCtx);
+
+  const systemPrompt = oraclePrefix + "\n\n---\n\n" + baseSystemPrompt + tuningBlock;
   const promptHash = mode === "review" ? FACILITATOR_PROMPT_HASH : CONVERSATIONAL_PROMPT_HASH;
   const agentName = mode === "review" ? "cockpit-chat-review" : "cockpit-chat-normal";
 

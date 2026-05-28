@@ -18,6 +18,7 @@ import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
 import { detectAlerts } from '@/lib/hearst-alerts';
 import { TOOL_DEFS, runTool } from '@/lib/hearst-advisor-tools';
 import { buildSystemPrompt, buildStateSnapshot } from '@/lib/hearst-advisor-prompt';
+import { buildOracleSystemPrompt, inferOracleContextFromPath } from '@/lib/oracle-system-prompt';
 import { buildPageContextBlock } from '@/lib/hearst-page-context';
 import { withValidation } from '@/lib/validators/withValidation';
 import { AdvisorRequestSchema } from '@/lib/validators/hearst';
@@ -293,6 +294,20 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
     maxRetries: 2,
   });
 
+  // ── ORACLE constitutional reasoning layer (Sprint 0) ───────────────
+  // Inséré en tête du persona Advisor : aligne les 11 sections, 6 perspectives,
+  // stakeholder/region/overlays. Cache_control ephemeral ensure prompt-caching.
+  const oracleCtx = {
+    ...inferOracleContextFromPath('/admin/hearst'),
+    stakeholder: body?.oracle?.stakeholder,
+    region: body?.oracle?.region,
+    overlays: body?.oracle?.overlays,
+    brevity: 'standard',
+    surface: 'hearst-advisor',
+    product_context: 'Hearst Oracle — investment simulator + CRM pipeline',
+  };
+  const oraclePrefix = buildOracleSystemPrompt(oracleCtx);
+
   // System blocks with prompt-caching breakpoints.
   // Render order is: tools → system → messages. A cache_control on a system
   // block also caches everything before it (tools), so two breakpoints give:
@@ -300,6 +315,7 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
   //   #2 (after state snapshot) → +state (stable across turns within one request)
   // Page context comes last and is intentionally uncached (varies per request).
   const systemBlocks = [
+    { type: 'text', text: oraclePrefix, cache_control: { type: 'ephemeral' } },
     { type: 'text', text: buildSystemPrompt(), cache_control: { type: 'ephemeral' } },
     { type: 'text', text: buildStateSnapshot(state), cache_control: { type: 'ephemeral' } },
   ];
