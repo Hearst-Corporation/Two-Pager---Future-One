@@ -5,6 +5,7 @@ import './cp-tokens.css';
 import { CockpitShell } from '@hearst/cockpit-shell';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleBottomBar } from '@/components/OracleBottomBar';
+import HearstLeftRail from '@/components/hearst/HearstLeftRail';
 import { HubSessionBridge } from '@/components/HubSessionBridge';
 import { AdminReviewControls } from '@/components/admin/AdminReviewControls';
 import { ChatIdPersistor } from '@/components/admin/ChatIdPersistor';
@@ -31,6 +32,7 @@ export default function HearstLayout({ children }) {
       <HubSessionBridge />
       <ChatIdPersistor />
       <CockpitShell products={ORACLE_PRODUCTS} appId="oracle" chatConfig={ORACLE_CHAT_CONFIG}>
+        <HearstLeftRail />
         <OracleBottomBar />
         {children}
         <AdminReviewControls />

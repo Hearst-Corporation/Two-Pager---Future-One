@@ -56,6 +56,11 @@ export default function AdminSidebar({ me }) {
   const [meOpen, setMeOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // Le cockpit /admin/hearst/* a sa propre nav (HearstLeftRail + OracleBottomBar).
+  // Masquer la sidebar globale pour éviter le doublon visuel signalé par l'utilisateur.
+  // (Early return APRÈS tous les hooks pour respecter les règles React.)
+  const inCockpit = pathname?.startsWith('/admin/hearst');
+
   // Read collapsed pref from localStorage post-mount to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
@@ -94,6 +99,8 @@ export default function AdminSidebar({ me }) {
   }
 
   const W = collapsed ? W_COLLAPSED : W_EXPANDED;
+
+  if (inCockpit) return null;
 
   return (
     <>

@@ -4,6 +4,13 @@
    Source des valeurs : ~/.claude/assets/cockpit/tokens.css + cockpit-shell/tokens.css
    ===================================================================== */
 
+/* Hide the native CockpitShell bottom bar ("Overview" segment).
+   The Hearst cockpit uses its own horizontal OracleBottomBar (Brief / Sim / Hub / Library)
+   mounted in the layout, so the shell's hub-bar would be a visual duplicate. */
+.ct-hub-bar {
+  display: none !important;
+}
+
 :root {
   /* ── Aliases directs vers --ct-* ── */
   --cp-accent:          var(--ct-accent);
