@@ -18,6 +18,7 @@ import { NextResponse } from 'next/server';
 import { requireProfile } from '@/lib/supabase-admin';
 import { kimiChatCompletion, KIMI_MODEL } from '@/lib/llm/kimi';
 import { buildOracleSystemPrompt } from '@/lib/oracle-system-prompt';
+import { buildIntelligenceBrief } from '@/lib/oracle-intelligence';
 
 const RL_WINDOW = 60_000;
 const RL_MAX = 5;
@@ -77,7 +78,8 @@ const MEMO_SCHEMA_INSTRUCTIONS = `Return a JSON object with the following exact 
     "comparables": [
       { "name": "string", "metric": "string", "value": "string", "source": "string" },
       ...
-    ]
+    ],
+    "structural_differences": ["string (1-line callout per peer of WHY the headline metric is or isn't directly comparable)", ...]
   },
   "risks_constraints": {
     "items": [
@@ -100,14 +102,23 @@ const MEMO_SCHEMA_INSTRUCTIONS = `Return a JSON object with the following exact 
     "phases": [ { "label": "string", "months_from_t0": "string", "gating_events": ["string", ...] }, ... ],
     "reality_check_flags": ["string", ...]
   },
-  "long_term_strategic_value": { "ten_year_arc": "string", "speculative_branches": ["string", ...] }
+  "long_term_strategic_value": { "ten_year_arc": "string", "speculative_branches": ["string", ...] },
+  "decision_tensions": [
+    { "id": "string (from intelligence_brief.tensions[].id)", "verdict": "string explaining which pole the scenario tilts to and why" }
+  ],
+  "intelligence_sources": [
+    { "datapoint_id": "string (from intelligence_brief.datapoints[].id)", "used_for": "string", "trust": "HIGH|MEDIUM|LOW" }
+  ]
 }
 
 Strict rules :
 - Output ONLY valid JSON. No markdown fence, no prose around it.
 - Confidence tags are required where indicated.
-- Each metric in key_financial_metrics MUST have a source field (use "ASSUMED" if unsourced).
-- reality_check_flags in deployment_roadmap MUST surface any timeline that violates operational_realism benchmarks.
+- Each metric in key_financial_metrics MUST have a source field. Use a real datapoint_id from intelligence_brief.datapoints when possible; use "ASSUMED" only when no comparable exists.
+- market_benchmarking MUST cite at least 3 distinct entities from intelligence_brief.comparables, and structural_differences MUST explain WHY two peers aren't apples-to-apples (use intelligence_brief.comparables[].profile to anchor the WHY).
+- reality_check_flags in deployment_roadmap MUST include every entry from intelligence_brief.reality_violations verbatim, plus any others you detect.
+- decision_tensions MUST address every entry from intelligence_brief.tensions (verdict per tension, even if one pole is clearly preferred).
+- intelligence_sources : list at least 5 datapoint_ids you actually used, with the section name in used_for.
 - If a section is genuinely not material, set "skip": true (only allowed on strategic_context).
 - Max 5 items per items[] array. Quality over quantity.`;
 
@@ -162,9 +173,32 @@ export async function POST(req) {
     overlays: oracle.overlays,
     brevity: 'deep',
     surface: 'strategic-memo',
-    product_context: 'Hearst Oracle — strategic memo generator (Sprint 1)',
+    product_context: 'Hearst Oracle — strategic memo generator (Sprint 1) + intelligence layer (Sprint 2)',
   };
   const systemPrompt = buildOracleSystemPrompt(oracleCtx);
+
+  // ── Hydrate intelligence brief (Sprint 2) ──────────────────────────
+  // Detects archetype, region, GPU + cooling profile from the scenario
+  // and queries the structured intelligence layer for the most relevant
+  // datapoints, comparables, tensions, absorption and reality flags.
+  const archetypeId = payload?.archetype_outcome?.id || payload?.scenario?.archetype_id || null;
+  const gpuSku     = payload?.hardware_breakdown?.gpu?.id || payload?.hardware_breakdown?.gpu?.sku || null;
+  const liquidPct  = payload?.scenario?.hardware_mix?.liquid_pct || 0;
+  const aiPct      = payload?.scenario?.hardware_mix?.ai_pct || 0;
+  const hasLiquid  = liquidPct > 0 || aiPct > 30 || /gb200/i.test(gpuSku || '');
+  const monthsToCod = payload?.scenario?.phase1_complete_year
+    ? payload.scenario.phase1_complete_year * 12
+    : 24;
+
+  const intelligenceBrief = buildIntelligenceBrief({
+    region: oracle.region || 'qatar',
+    archetype_id: archetypeId,
+    gpu_focus: aiPct > 30 || archetypeId === 'neocloud_gpu',
+    sovereign_focus: oracle.stakeholder === 'sovereign' || (oracle.overlays || []).some(o => /VISION_|SOVEREIGN|NEOM|QATAR_NATIONAL/.test(o)),
+    months_to_cod: monthsToCod,
+    has_liquid_cooling: hasLiquid,
+    gpu_sku: gpuSku,
+  });
 
   const scenarioSummary = buildScenarioSummary(payload);
   const userMessage = [
@@ -172,8 +206,14 @@ export async function POST(req) {
       ? `User context : ${user_question}`
       : 'Produce a strategic memo for this scenario.',
     '',
-    'Computed scenario snapshot :',
+    '── Computed scenario snapshot ──',
     scenarioSummary,
+    '',
+    '── Intelligence brief (Sprint 2 intelligence layer) ──',
+    'Use this brief as your primary source of comparables, decision tensions and reality constraints.',
+    'Cite datapoints by their id in intelligence_sources, address every tension in decision_tensions, and surface every reality_violations entry in deployment_roadmap.reality_check_flags.',
+    '',
+    JSON.stringify(intelligenceBrief, null, 2),
     '',
     MEMO_SCHEMA_INSTRUCTIONS,
   ].join('\n');
@@ -209,6 +249,20 @@ export async function POST(req) {
         stakeholder: oracleCtx.stakeholder || 'operator',
         region: oracleCtx.region || 'qatar',
         overlays: oracleCtx.overlays || [],
+      },
+      intelligence_brief: {
+        datapoints_count: intelligenceBrief.datapoints.length,
+        comparables_count: intelligenceBrief.comparables.length,
+        tensions_count: intelligenceBrief.tensions.length,
+        reality_violations_count: intelligenceBrief.reality_violations.length,
+        intelligence_layer_version: intelligenceBrief.intelligence_layer_version,
+        // Include the brief itself so the UI can render badges + open
+        // datapoint panels without re-querying.
+        datapoints: intelligenceBrief.datapoints,
+        comparables: intelligenceBrief.comparables,
+        tensions: intelligenceBrief.tensions,
+        absorption: intelligenceBrief.absorption,
+        reality_violations: intelligenceBrief.reality_violations,
       },
     });
   } catch (e) {
