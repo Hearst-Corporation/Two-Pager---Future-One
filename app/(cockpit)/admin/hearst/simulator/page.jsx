@@ -14,6 +14,7 @@ import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-struc
 import SectionTabs from '@/components/hearst/SectionTabs';
 import { SIMULATOR_PARAM_EVENT } from '@/components/hearst/ChatContainer';
 import SimpleWizard from '@/components/hearst/simulator/SimpleWizard';
+import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
@@ -104,6 +105,7 @@ export default function SimulatorPage() {
   const [simError, setSimError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [savingState, setSavingState] = useState('idle');
+  const [memoOpen, setMemoOpen] = useState(false);
   const [projectId, setProjectId] = useState(null);
   const [savedScenarioId, setSavedScenarioId] = useState(null);
   const debounceRef = useRef(null);
@@ -426,6 +428,36 @@ export default function SimulatorPage() {
         onSave={handleSave}
         onOpenFinancial={handleOpenFinancial}
         onExportMd={handleExportMd}
+      />
+
+      {projection && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: -16 }}>
+          <button
+            type="button"
+            onClick={() => setMemoOpen(true)}
+            style={{
+              padding: '10px 22px',
+              background: 'var(--cp-accent-maroon, var(--cp-accent))',
+              color: 'var(--cp-text-strong)',
+              border: 'none',
+              borderRadius: 999,
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: 0.3,
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+            }}
+          >
+            Generate Strategic Memo
+          </button>
+        </div>
+      )}
+
+      <StrategicMemoModal
+        open={memoOpen}
+        onClose={() => setMemoOpen(false)}
+        payload={simResult}
+        title="Strategic Memo — Simulator scenario"
       />
       </>)}
     </div>

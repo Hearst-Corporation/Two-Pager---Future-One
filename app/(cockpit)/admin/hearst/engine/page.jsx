@@ -20,6 +20,7 @@ import { DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
 import { GPU_CATALOG } from '@/lib/hearst-gpu-catalog';
 import { FIT_MATRIX } from '@/lib/hearst-fit-matrix';
 import SectionTabs from '@/components/hearst/SectionTabs';
+import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
 
 const TABS = [
   { id: 'pipeline',  label: 'Pipeline' },
@@ -846,6 +847,7 @@ function TraceTab() {
   const [geography, setGeography] = useState('qatar');
   const [trace, setTrace] = useState(null);
   const [tracing, setTracing] = useState(false);
+  const [memoOpen, setMemoOpen] = useState(false);
   const [traceError, setTraceError] = useState(null);
 
   async function runTrace() {
@@ -937,6 +939,35 @@ function TraceTab() {
             <Kpi label="Payback" value={trace.projection?.payback_years ? `${trace.projection.payback_years} yr` : '—'} />
             <Kpi label="DSCR" value={trace.projection?.dscr_stabilized ? `${trace.projection.dscr_stabilized.toFixed(2)}×` : '—'} />
           </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 16 }}>
+            <button
+              type="button"
+              onClick={() => setMemoOpen(true)}
+              style={{
+                padding: '10px 22px',
+                background: 'var(--cp-accent-maroon, var(--cp-accent))',
+                color: 'var(--cp-text-strong)',
+                border: 'none',
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 800,
+                letterSpacing: 0.3,
+                cursor: 'pointer',
+                textTransform: 'uppercase',
+              }}
+            >
+              Generate Strategic Memo
+            </button>
+          </div>
+
+          <StrategicMemoModal
+            open={memoOpen}
+            onClose={() => setMemoOpen(false)}
+            payload={trace}
+            title="Strategic Memo — Engine live trace"
+          />
+
 
           <h3 style={S.h3}>Source map ({sourceMapEntries.length} fields resolved)</h3>
           <div style={S.tableWrap}>
