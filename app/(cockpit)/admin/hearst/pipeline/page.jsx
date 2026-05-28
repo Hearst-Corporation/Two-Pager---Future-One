@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import KpiCard from '@/components/hearst/KpiCard';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 const STAGES = ['prospecting', 'qualified', 'proposal', 'negotiation', 'committed', 'lost'];
 // Monochrome funnel progression — single accent (bordeaux) for final positive state.
@@ -149,6 +150,7 @@ export default function PipelinePage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="hub" />
       <div style={S.topBar}>
         <div style={S.pageTitle}>Commercial Pipeline</div>
         <button onClick={() => setShowAdd(v => !v)} className="cp-btn-hover" style={S.addBtn}>{showAdd ? '✕' : '+ Add Prospect'}</button>

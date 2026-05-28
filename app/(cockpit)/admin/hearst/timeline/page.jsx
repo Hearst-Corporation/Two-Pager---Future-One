@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 const MILESTONES = [
   { month: 0,  label: 'Project Kickoff',          phase: 'dev' },
@@ -73,6 +74,7 @@ export default function TimelinePage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="library" />
       <div style={S.topBar}>
         <div style={S.pageTitle}>Development Timeline</div>
         <div style={S.codInfo}>

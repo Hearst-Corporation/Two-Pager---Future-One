@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import SectionTabs from '@/components/hearst/SectionTabs';
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, Area, AreaChart, BarChart,
@@ -126,6 +127,7 @@ export default function FinancialPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="modeling" />
       {/* Scenario toggles */}
       <div style={S.topBar}>
         <div style={S.pageTitle}>10-Year Financial Projection</div>

@@ -24,7 +24,7 @@ import {
   estimateTokens,
   estimateKimiCostUsd,
 } from "@hearst/review-mode";
-import { kimi, KIMI_MODEL } from "@/lib/llm/kimi";
+import { kimi, KIMI_MODEL, kimiChatStream } from "@/lib/llm/kimi";
 import { getSessionProfile } from "@/lib/supabase-server";
 import { getAdminChatMode, insertLlmRun } from "@/lib/review-mode/supabase-helpers";
 import {
@@ -342,16 +342,16 @@ export async function POST(req: Request) {
   const inputTokens = estimateTokens(systemPrompt + history.map((h) => h.content).join("\n"));
   const startedAt = Date.now();
   let completion;
+  let modelUsed = KIMI_MODEL;
   try {
-    completion = await kimi.chat.completions.create(
-      { model: KIMI_MODEL, stream: true, messages },
-      { signal: req.signal },
-    );
+    const out = await kimiChatStream({ model: KIMI_MODEL, messages } as any);
+    completion = out.stream;
+    modelUsed = out.model_used;
   } catch (err) {
     const msg = err instanceof Error ? err.message : "LLM upstream error";
     await insertLlmRun({
       agentName,
-      model: KIMI_MODEL,
+      model: modelUsed,
       status: "failed",
       latencyMs: Date.now() - startedAt,
       userId,
@@ -392,7 +392,7 @@ export async function POST(req: Request) {
         controller.enqueue(enc.encode(`\0ERROR:${msg}`));
         await insertLlmRun({
           agentName,
-          model: KIMI_MODEL,
+          model: modelUsed,
           status: "failed",
           latencyMs: Date.now() - startedAt,
           userId,
@@ -428,7 +428,7 @@ export async function POST(req: Request) {
       });
       await insertLlmRun({
         agentName,
-        model: KIMI_MODEL,
+        model: modelUsed,
         status: "success",
         latencyMs,
         userId,

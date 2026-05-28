@@ -2,6 +2,7 @@
 
 import { useReducer, useState, useEffect, useMemo, useCallback, useDeferredValue, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
 import {
@@ -10,6 +11,9 @@ import {
 } from '@/lib/hearst-simulator-state';
 import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
 
+import SectionTabs from '@/components/hearst/SectionTabs';
+import { SIMULATOR_PARAM_EVENT } from '@/components/hearst/ChatContainer';
+import SimpleWizard from '@/components/hearst/simulator/SimpleWizard';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
@@ -53,6 +57,47 @@ export default function SimulatorPage() {
     const fromUrl = parseStateFromUrl(new URLSearchParams(window.location.search));
     if (fromUrl) dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: fromUrl });
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [uiMode, setUiMode] = useState('simple');
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = window.localStorage.getItem('hearst.simulator.uiMode');
+    if (stored === 'pro' || stored === 'simple') setUiMode(stored);
+  }, []);
+  const switchMode = useCallback((m) => {
+    setUiMode(m);
+    if (typeof window !== 'undefined') window.localStorage.setItem('hearst.simulator.uiMode', m);
+  }, []);
+
+  // AgentRail bridge: agent set_simulator_param → reducer dispatch
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    function handler(e) {
+      const { field, value } = e.detail || {};
+      if (!field) return;
+      switch (field) {
+        case 'total_mw':              return dispatch({ type: ACTIONS.SET_MW, value: Number(value) });
+        case 'capital_usd':           return dispatch({ type: ACTIONS.SET_CAPITAL, value: Number(value) });
+        case 'target_irr_pct':        return dispatch({ type: ACTIONS.SET_IRR_TARGET, value: Number(value) });
+        case 'primary_archetype_id':  return dispatch({ type: ACTIONS.SET_PRIMARY_ARCHETYPE, value: String(value) });
+        case 'business_model_id':     return dispatch({ type: ACTIONS.SET_BUSINESS_MODEL, value: String(value) });
+        case 'client_type_id':        return dispatch({ type: ACTIONS.SET_CLIENT_TYPE, value: String(value) });
+        case 'mode':                  return dispatch({ type: ACTIONS.SET_MODE, value: String(value) });
+        case 'hardware_mix.classic_pct':
+        case 'hardware_mix.liquid_pct':
+        case 'hardware_mix.ai_pct':
+        case 'hardware_mix.gpu_sku_id':
+        case 'hardware_mix.utilization_pct':
+        case 'hardware_mix.gpu_hour_price': {
+          const key = field.split('.')[1];
+          return dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: { [key]: typeof value === 'number' ? value : Number(value) || value } });
+        }
+        default: return;
+      }
+    }
+    window.addEventListener(SIMULATOR_PARAM_EVENT, handler);
+    return () => window.removeEventListener(SIMULATOR_PARAM_EVENT, handler);
   }, []);
 
   const [simResult, setSimResult] = useState(null);
@@ -202,14 +247,53 @@ export default function SimulatorPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="modeling" />
       <header style={S.header}>
         <div style={S.headerText}>
           <h1 style={S.title}>Investment Simulator</h1>
-          <div style={S.subtitle}>Pick your starting point. See the financials, timeline, and team you'll need.</div>
+          <div style={S.subtitle}>
+            {uiMode === 'simple'
+              ? '4 questions simples pour bâtir votre plan d\'investissement.'
+              : 'Pick your starting point. See the financials, timeline, and team you\'ll need.'}
+            {' · '}
+            <Link href="/admin/hearst/engine" style={{ color: 'var(--cp-accent)', textDecoration: 'none' }}>
+              audit engine →
+            </Link>
+          </div>
+        </div>
+        <div style={S.modeSwitch} role="tablist" aria-label="Simulator mode">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={uiMode === 'simple'}
+            onClick={() => switchMode('simple')}
+            style={{ ...S.modeBtn, ...(uiMode === 'simple' ? S.modeBtnActive : {}) }}
+          >
+            Simple
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={uiMode === 'pro'}
+            onClick={() => switchMode('pro')}
+            style={{ ...S.modeBtn, ...(uiMode === 'pro' ? S.modeBtnActive : {}) }}
+          >
+            Pro
+          </button>
         </div>
         {loading && <div style={S.loadingBadge}>Calculating…</div>}
       </header>
 
+      {uiMode === 'simple' && (
+        <SimpleWizard
+          state={state}
+          dispatch={dispatch}
+          simResult={simResult}
+          onSwitchToPro={() => switchMode('pro')}
+        />
+      )}
+
+      {uiMode === 'pro' && (<>
       {/* ① INPUT — mode + hero field side-by-side */}
       <section style={S.inputGrid}>
         <InputModeSwitcher
@@ -343,6 +427,7 @@ export default function SimulatorPage() {
         onOpenFinancial={handleOpenFinancial}
         onExportMd={handleExportMd}
       />
+      </>)}
     </div>
   );
 }
@@ -432,6 +517,22 @@ const S = {
     fontSize: 13,
     lineHeight: '20px',
     color: 'var(--cp-text-muted)',
+  },
+  modeSwitch: {
+    display: 'inline-flex', gap: 4, padding: 4,
+    background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)',
+    borderRadius: 999, flexShrink: 0,
+  },
+  modeBtn: {
+    height: 32, padding: '0 18px',
+    background: 'transparent', color: 'var(--cp-text-muted)',
+    border: 'none', borderRadius: 999, cursor: 'pointer',
+    fontSize: 12, fontWeight: 700, letterSpacing: 0.3,
+    transition: 'all 0.15s ease',
+  },
+  modeBtnActive: {
+    background: 'var(--cp-accent-maroon, var(--cp-accent))',
+    color: 'var(--cp-text-strong)',
   },
   loadingBadge: {
     fontSize: 11,

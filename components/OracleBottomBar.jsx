@@ -1,12 +1,25 @@
 'use client';
 
+// Rail vertical gauche du cockpit Hearst.
+// 5 sections regroupent toutes les pages du cockpit :
+//   - Brief    : dashboard informatif (vue d'ouverture)
+//   - Sim      : simulateur + engine + scenarios + financial + assumptions
+//   - Hub      : pipeline + deals + contracts + data-room (CRM ops)
+//   - Library  : sources + reports + timeline + risks + audit (référentiel)
+//   - Profile  : user profile (bas)
+//
+// Le nom de la classe (`OracleBottomBar`) est conservé pour ne pas casser
+// les imports existants (layout.jsx). La nav est désormais transversale par section.
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const NAV = [
+const SECTIONS = [
   {
+    id: 'brief',
     href: '/admin/hearst',
-    label: 'Dashboard',
+    label: 'Brief',
+    matchExact: '/admin/hearst',
     icon: (
       <>
         <rect x="2" y="2" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
@@ -17,8 +30,10 @@ const NAV = [
     ),
   },
   {
+    id: 'sim',
     href: '/admin/hearst/simulator',
     label: 'Simulator',
+    matchAny: ['/admin/hearst/simulator', '/admin/hearst/engine', '/admin/hearst/scenarios', '/admin/hearst/financial', '/admin/hearst/assumptions'],
     icon: (
       <>
         <path d="M10 1L3 10h5l-1 7 7-10H9l1-6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
@@ -26,8 +41,10 @@ const NAV = [
     ),
   },
   {
-    href: '/admin/hearst/deals',
-    label: 'Deals',
+    id: 'hub',
+    href: '/admin/hearst/hub',
+    label: 'Hub',
+    matchAny: ['/admin/hearst/hub', '/admin/hearst/pipeline', '/admin/hearst/deals', '/admin/hearst/contracts', '/admin/hearst/data-room'],
     icon: (
       <>
         <path d="M9 1.5l7.5 4.5v6L9 16.5 1.5 12V6L9 1.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
@@ -36,51 +53,23 @@ const NAV = [
     ),
   },
   {
-    href: '/admin/hearst/pipeline',
-    label: 'Pipeline',
+    id: 'library',
+    href: '/admin/hearst/library',
+    label: 'Library',
+    matchAny: ['/admin/hearst/library', '/admin/hearst/sources', '/admin/hearst/reports', '/admin/hearst/timeline', '/admin/hearst/risks', '/admin/hearst/audit', '/admin/hearst/documents'],
     icon: (
       <>
-        <path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="5" cy="4" r="1.5" fill="currentColor" />
-        <circle cx="11" cy="9" r="1.5" fill="currentColor" />
-        <circle cx="14" cy="14" r="1.5" fill="currentColor" />
-      </>
-    ),
-  },
-  {
-    href: '/admin/hearst/financial',
-    label: 'Financial',
-    icon: (
-      <>
-        <path d="M3 15V6M7 15V3M11 15V8M15 15V1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M2 16h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      </>
-    ),
-  },
-  {
-    href: '/admin/hearst/data-room',
-    label: 'Data Room',
-    icon: (
-      <>
-        <path d="M2 4a2 2 0 012-2h4l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4z" stroke="currentColor" strokeWidth="1.5" />
-      </>
-    ),
-  },
-  {
-    href: '/admin/hearst/sources',
-    label: 'Sources',
-    icon: (
-      <>
-        <circle cx="9" cy="9" r="7.25" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M1.75 9h14.5M9 1.75c1.8 2.2 2.8 4.7 2.8 7.25S10.8 13.9 9 16.25M9 1.75c-1.8 2.2-2.8 4.7-2.8 7.25S7.2 13.9 9 16.25" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M3 2h12v14H3z M3 5h12 M3 8h12 M3 11h12" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
       </>
     ),
   },
 ];
 
 const PROFILE = {
+  id: 'profile',
   href: '/admin/hearst/profile',
   label: 'Profile',
+  matchAny: ['/admin/hearst/profile'],
   icon: (
     <>
       <circle cx="9" cy="6.5" r="2.75" stroke="currentColor" strokeWidth="1.5" />
@@ -89,9 +78,12 @@ const PROFILE = {
   ),
 };
 
-function isActive(href, pathname) {
-  if (href === '/admin/hearst') return pathname === '/admin/hearst';
-  return pathname === href || pathname.startsWith(href + '/');
+function isSectionActive(section, pathname) {
+  if (section.matchExact && pathname === section.matchExact) return true;
+  if (section.matchAny) {
+    return section.matchAny.some(prefix => pathname === prefix || pathname.startsWith(prefix + '/') || pathname.startsWith(prefix + '?'));
+  }
+  return false;
 }
 
 function NavIcon({ href, label, icon, active }) {
@@ -100,11 +92,13 @@ function NavIcon({ href, label, icon, active }) {
       href={href}
       aria-label={label}
       title={label}
+      aria-current={active ? 'page' : undefined}
       style={{ ...S.item, ...(active ? S.itemActive : {}) }}
     >
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
         {icon}
       </svg>
+      <span style={S.itemLabel}>{label}</span>
     </Link>
   );
 }
@@ -113,13 +107,13 @@ export function OracleBottomBar() {
   const pathname = usePathname() ?? '/admin/hearst';
 
   return (
-    <nav style={S.rail} aria-label="Oracle sections">
+    <nav style={S.rail} aria-label="Hearst cockpit sections">
       <div style={S.stack}>
-        {NAV.map((item) => (
-          <NavIcon key={item.href} {...item} active={isActive(item.href, pathname)} />
+        {SECTIONS.map((section) => (
+          <NavIcon key={section.id} {...section} active={isSectionActive(section, pathname)} />
         ))}
       </div>
-      <NavIcon {...PROFILE} active={isActive(PROFILE.href, pathname)} />
+      <NavIcon {...PROFILE} active={isSectionActive(PROFILE, pathname)} />
     </nav>
   );
 }
@@ -143,23 +137,33 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     pointerEvents: 'auto',
   },
   item: {
     pointerEvents: 'auto',
-    width: 40,
-    height: 40,
+    width: 56,
+    minHeight: 56,
     display: 'inline-flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 2,
+    padding: '8px 4px',
     color: 'var(--cp-text-muted)',
-    borderRadius: 8,
+    borderRadius: 10,
     transition: 'color 150ms, background 150ms',
     textDecoration: 'none',
   },
   itemActive: {
     color: 'var(--cp-text-primary)',
     background: 'var(--cp-surface-2)',
+  },
+  itemLabel: {
+    fontSize: 9,
+    fontWeight: 700,
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+    lineHeight: 1,
   },
 };

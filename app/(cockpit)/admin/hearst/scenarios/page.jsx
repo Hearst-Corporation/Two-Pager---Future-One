@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { MISSING_LABEL } from '@/lib/hearst-constants';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 function fmtVal(v, type) {
   if (v == null) return MISSING_LABEL;
@@ -129,6 +130,7 @@ export default function ScenariosPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="modeling" />
       <div style={S.topBar}>
         <div style={S.pageTitle}>Scenario Comparison</div>
         <button onClick={() => setShowAdd(v => !v)} className="cp-btn-hover" style={S.addBtn}>{showAdd ? '✕' : '+ New Scenario'}</button>

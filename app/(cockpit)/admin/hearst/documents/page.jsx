@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 const TEMPLATES = [
   { id: 'memo',        title: 'Investment Memo',   format: 'PDF',   pages: '12p', tags: 'Investor · LP · Deal',        route: '/api/admin/hearst/export/memo',        est: 8  },
@@ -82,6 +83,7 @@ export default function DocumentsPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="library" />
       {/* Header */}
       <div style={S.topBar}>
         <div style={S.pageTitle}>Documents</div>

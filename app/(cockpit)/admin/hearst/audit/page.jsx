@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 // Monochrome entity palette — differentiation handled by label + icon, not color.
 // Two intensity steps (neutral / accent) keep the audit log readable without
@@ -84,6 +85,7 @@ export default function AuditPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="library" />
       <div style={S.topBar}>
         <div style={S.pageTitle}>Audit Trail</div>
         <div style={S.count}>{entries.length} entries</div>

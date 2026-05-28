@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 // Monochrome workflow — "missing" keeps --cp-error (real gap, not decorative),
 // other states progress neutral → accent as the doc reaches "approved".
@@ -115,6 +116,7 @@ export default function DataRoomPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="hub" />
       {/* Page header */}
       <div style={S.topBar}>
         <div>

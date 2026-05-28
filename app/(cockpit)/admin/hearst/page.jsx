@@ -1,368 +1,772 @@
 'use client';
-import { useState, useEffect, useCallback, useMemo, useDeferredValue, useRef } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import KpiCard from '@/components/hearst/KpiCard';
-import { generateProjection } from '@/lib/hearst-calculations';
-import { useSimulation } from '@/lib/hearst-simulation-context';
 
-function fmt(v, type) {
-  if (v == null) return 'N/A';
-  if (type === 'currency') return '$' + (v >= 1e9 ? (v / 1e9).toFixed(1) + 'B' : v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v.toLocaleString());
-  if (type === 'pct') return (v * 100).toFixed(1) + '%';
-  if (type === 'x') return v.toFixed(2) + 'x';
-  if (type === 'mw') return v.toFixed(0) + ' MW';
-  if (type === 'years') return v.toFixed(1) + ' yr';
-  return v;
+// ─── helpers ─────────────────────────────────────────────────
+function fmtUsd(v) {
+  if (v == null) return '—';
+  if (Math.abs(v) >= 1e9) return '$' + (v / 1e9).toFixed(1) + 'B';
+  if (Math.abs(v) >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M';
+  return '$' + v.toLocaleString();
+}
+function fmtPct(v) {
+  if (v == null) return '—';
+  return (v * 100).toFixed(1) + '%';
+}
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
 }
 
-function pickContextualCta({ proj, sourceScore, drApproved, drTotal }) {
-  if (proj.missing_inputs?.length > 0) {
-    return { href: '/admin/hearst/assumptions', label: `Fix ${proj.missing_inputs.length} missing input${proj.missing_inputs.length > 1 ? 's' : ''}`, tone: 'critical' };
-  }
-  if (sourceScore < 70) {
-    return { href: '/admin/hearst/sources', label: 'Improve source compliance', tone: 'warning' };
-  }
-  if (drTotal > 0 && drApproved / drTotal < 0.7) {
-    return { href: '/admin/hearst/data-room', label: `Upload ${drTotal - drApproved} remaining documents`, tone: 'warning' };
-  }
-  return { href: '/admin/hearst/financial', label: 'Review 10-year projection', tone: 'primary' };
-}
+const SEVERITY_COLOR = {
+  P0: 'var(--cp-error)',
+  P1: '#f59e0b',
+  P2: 'var(--cp-text-muted)',
+};
 
-const SLIDERS = [
-  { key: 'total_mw',               label: 'IT Capacity',     unit: 'MW',       min: 5,   max: 500,  step: 5,    fmt: v => `${v} MW` },
-  { key: 'target_occupancy_pct',   label: 'Occupancy',       unit: '%',        min: 30,  max: 100,  step: 1,    fmt: v => `${v}%` },
-  { key: 'price_hyperscale_kw_month', label: 'Hyperscale $/kW', unit: '$/kW/mo', min: 60, max: 250, step: 5,   fmt: v => `$${v}` },
-  { key: 'electricity_price_mwh',  label: 'Électricité',     unit: '$/MWh',    min: 20,  max: 120,  step: 1,    fmt: v => `$${v}` },
-  { key: 'exit_multiple',          label: 'Exit multiple',   unit: '×',        min: 8,   max: 30,   step: 0.5,  fmt: v => `${v}×` },
-  { key: 'debt_pct',               label: 'Levier dette',    unit: '%',        min: 0,   max: 90,   step: 1,    fmt: v => `${v}%` },
-];
+const STAGE_ORDER = ['lead', 'qualified', 'loi', 'diligence', 'committed', 'closed', 'rejected'];
 
-const KNOB_SIZE = 64;
-const KNOB_R = 28;
-const START_ANGLE = -135;
-const END_ANGLE = 135;
+// ─── sub-panels ──────────────────────────────────────────────
 
-function Knob({ def, value, onChange }) {
-  const pct = (value - def.min) / (def.max - def.min);
-  const angle = START_ANGLE + pct * (END_ANGLE - START_ANGLE);
-  const dragRef = useRef(null);
+function TodayPanel({ projectId }) {
+  const [deals, setDeals] = useState(null);
+  const [inventory, setInventory] = useState(null);
+  const [simResult, setSimResult] = useState(null);
+  const [recentLog, setRecentLog] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  function polarToXY(deg, r) {
-    const rad = (deg - 90) * (Math.PI / 180);
-    const cx = KNOB_SIZE / 2;
-    return { x: cx + r * Math.cos(rad), y: cx + r * Math.sin(rad) };
-  }
+  useEffect(() => {
+    if (!projectId) return;
+    setLoading(true);
+    Promise.all([
+      fetch(`/api/admin/hearst/deals?project_id=${projectId}`).then(r => r.json()),
+      fetch('/api/admin/hearst/audit/inventory').then(r => r.json()),
+      fetch(`/api/admin/hearst/audit?project_id=${projectId}&limit=6`).then(r => r.json()),
+      fetch('/api/admin/hearst/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ total_mw: 50, geography: 'qatar' }),
+      }).then(r => r.json()),
+    ])
+      .then(([d, inv, log, sim]) => {
+        setDeals(d.deals || []);
+        setInventory(inv);
+        setRecentLog(log.entries || []);
+        setSimResult(sim);
+      })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [projectId]);
 
-  function describeArc(from, to, r) {
-    const s = polarToXY(from, r);
-    const e = polarToXY(to, r);
-    const large = (to - from + 360) % 360 > 180 ? 1 : 0;
-    return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`;
-  }
+  if (loading) return <div style={S.panelLoading}>Loading…</div>;
+  if (error) return <div style={S.panelError}>Error: {error}</div>;
 
-  function startDrag(e) {
-    e.preventDefault();
-    const startY = e.touches ? e.touches[0].clientY : e.clientY;
-    const startVal = value;
-    const range = def.max - def.min;
+  // deals by stage
+  const stageCounts = {};
+  (deals || []).forEach(d => {
+    stageCounts[d.stage] = (stageCounts[d.stage] || 0) + 1;
+  });
 
-    function onMove(ev) {
-      const clientY = ev.touches ? ev.touches[0].clientY : ev.clientY;
-      const delta = (startY - clientY) / 120;
-      const next = Math.min(def.max, Math.max(def.min,
-        Math.round((startVal + delta * range) / def.step) * def.step
-      ));
-      onChange(next);
-    }
-    function onUp() {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onUp);
-    }
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('touchend', onUp);
-  }
-
-  const tick = polarToXY(angle, 18);
-  const cx = KNOB_SIZE / 2;
+  const proj = simResult?.projection || {};
+  const summary = inventory?.health_summary || {};
+  const warnings = (inventory?.health_warnings || [])
+    .filter(w => w.severity === 'P0' || w.severity === 'P1')
+    .slice(0, 5);
+  const allWarnings = inventory?.health_warnings || [];
+  const confidence = inventory?.confidence_score ?? null;
 
   return (
-    <div style={SK.wrap}>
-      <svg
-        width={KNOB_SIZE} height={KNOB_SIZE}
-        style={SK.svg}
-        onMouseDown={startDrag}
-        onTouchStart={startDrag}
-        ref={dragRef}
-      >
-        {/* track arc */}
-        <path d={describeArc(START_ANGLE, END_ANGLE, KNOB_R)} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="3" strokeLinecap="round" />
-        {/* fill arc */}
-        {pct > 0 && <path d={describeArc(START_ANGLE, angle, KNOB_R)} fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="3" strokeLinecap="round" />}
-        {/* knob body */}
-        <circle cx={cx} cy={cx} r="20" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" />
-        {/* indicator dot */}
-        <circle cx={tick.x} cy={tick.y} r="2.5" fill="rgba(255,255,255,0.9)" />
-      </svg>
-      <div style={SK.label}>{def.label}</div>
-      <div style={SK.val}>{def.fmt(value)}</div>
+    <div style={S.todayGrid}>
+      {/* Card 1 — Deals */}
+      <div style={S.card}>
+        <div style={S.cardHeader}>
+          <span style={S.cardTitle}>Deals en cours</span>
+          <span style={S.cardBadge}>{(deals || []).length}</span>
+        </div>
+        {(deals || []).length === 0 ? (
+          <div style={S.empty}>No deals yet.</div>
+        ) : (
+          <div style={S.stageList}>
+            {STAGE_ORDER.filter(s => stageCounts[s]).map(stage => (
+              <div key={stage} style={S.stageRow}>
+                <span style={S.stageName}>{stage}</span>
+                <span style={S.stageCount}>{stageCounts[stage]}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <Link href="/admin/hearst/pipeline" style={S.cta}>Open Pipeline →</Link>
+      </div>
+
+      {/* Card 2 — Project health */}
+      <div style={S.card}>
+        <div style={S.cardHeader}>
+          <span style={S.cardTitle}>Project health</span>
+          {confidence != null && (
+            <span style={{ ...S.cardBadge, background: confidence >= 70 ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: confidence >= 70 ? '#10b981' : '#f59e0b' }}>
+              {confidence}/100
+            </span>
+          )}
+        </div>
+        <div style={S.kpiGrid}>
+          <div style={S.kpi}>
+            <div style={S.kpiLabel}>Total CAPEX</div>
+            <div style={S.kpiValue}>{fmtUsd(proj.total_capex)}</div>
+          </div>
+          <div style={S.kpi}>
+            <div style={S.kpiLabel}>Stab. Revenue</div>
+            <div style={S.kpiValue}>{fmtUsd(proj.stabilized_revenue)}</div>
+          </div>
+          <div style={S.kpi}>
+            <div style={S.kpiLabel}>IRR</div>
+            <div style={S.kpiValue}>{fmtPct(proj.irr)}</div>
+          </div>
+          <div style={S.kpi}>
+            <div style={S.kpiLabel}>Confidence</div>
+            <div style={S.kpiValue}>{confidence != null ? `${confidence}/100` : '—'}</div>
+          </div>
+        </div>
+        <Link href="/admin/hearst/simulator" style={S.cta}>Open Simulator →</Link>
+      </div>
+
+      {/* Card 3 — Alerts */}
+      <div style={S.card}>
+        <div style={S.cardHeader}>
+          <span style={S.cardTitle}>Alertes</span>
+          <span style={{ ...S.cardBadge, background: allWarnings.filter(w => w.severity === 'P0').length > 0 ? 'rgba(239,68,68,0.15)' : undefined, color: allWarnings.filter(w => w.severity === 'P0').length > 0 ? 'var(--cp-error)' : undefined }}>
+            {allWarnings.filter(w => w.severity === 'P0' || w.severity === 'P1').length} P0/P1
+          </span>
+        </div>
+        {warnings.length === 0 ? (
+          <div style={S.empty}>No critical warnings.</div>
+        ) : (
+          <div style={S.alertList}>
+            {warnings.map((w, i) => (
+              <div key={i} style={S.alertRow}>
+                <span style={{ ...S.severityDot, background: SEVERITY_COLOR[w.severity] || 'var(--cp-text-muted)' }} />
+                <span style={S.alertMsg}>{w.message || w.field || 'Unknown warning'}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <Link href="/admin/hearst/engine?tab=health" style={S.cta}>Open Engine →</Link>
+      </div>
+
+      {/* Recent activity */}
+      <div style={S.activityBlock}>
+        <div style={S.activityTitle}>Recent activity</div>
+        {recentLog.length === 0 ? (
+          <div style={S.empty}>No recent audit entries.</div>
+        ) : (
+          <div style={S.activityList}>
+            {recentLog.map((entry, i) => (
+              <div key={i} style={S.activityRow}>
+                <span style={S.activityText}>
+                  {entry.field_name
+                    ? `${entry.field_name} updated`
+                    : entry.action || 'Entry'}
+                  {entry.table_name ? ` · ${entry.table_name}` : ''}
+                </span>
+                <span style={S.activityTime}>{timeAgo(entry.created_at)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-export default function HearstOverview() {
-  const [scenarios, setScenarios] = useState([]);
-  const [dataRoom, setDataRoom] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { overrides, setOverrides } = useSimulation();
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+const RELEVANCE_TONE = {
+  5: { bg: 'var(--cp-accent-soft)', fg: 'var(--cp-accent)' },
+  4: { bg: 'var(--cp-accent-soft)', fg: 'var(--cp-accent)' },
+  3: { bg: 'var(--cp-surface-2)',   fg: 'var(--cp-text-body)' },
+  2: { bg: 'var(--cp-surface-2)',   fg: 'var(--cp-text-muted)' },
+  1: { bg: 'var(--cp-surface-2)',   fg: 'var(--cp-text-muted)' },
+};
 
-  const load = useCallback(async () => {
+const CATEGORY_LABEL = {
+  hardware:    'HW',
+  energy:      'Energy',
+  policy:      'Policy',
+  market:      'Market',
+  partnership: 'Partnership',
+  other:       'Other',
+};
+
+function relTime(iso) {
+  if (!iso) return '—';
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 30 * 86400) return `${Math.floor(diff / 86400)}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function MarketPanel() {
+  const [signals, setSignals] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+  const [minScore, setMinScore] = useState(3);
+
+  const load = useCallback(async (score = minScore) => {
+    setLoading(true);
+    setError(null);
     try {
-      const pRes = await fetch('/api/admin/hearst/project');
-      if (!pRes.ok) throw new Error('Failed to load project');
-      const pData = await pRes.json();
-      const [sRes, drRes] = await Promise.all([
-        fetch(`/api/admin/hearst/scenarios?project_id=${pData.project.id}`),
-        fetch(`/api/admin/hearst/data-room?project_id=${pData.project.id}`),
-      ]);
-      const sc = (await sRes.json()).scenarios || [];
-      setScenarios(sc);
-      setDataRoom((await drRes.json()).items || []);
-    } catch (e) { setError(e.message); }
-    finally { setLoading(false); }
-  }, []);
+      const r = await fetch(`/api/admin/hearst/news?limit=50&min_score=${score}`);
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}));
+        throw new Error(body.error || `HTTP ${r.status}`);
+      }
+      const data = await r.json();
+      setSignals(data.signals || []);
+      setSummary(data.summary || null);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [minScore]);
 
   useEffect(() => { load(); }, [load]);
 
-  const base = scenarios.find(s => s.name?.toLowerCase().includes('base') || s.scenario_type === 'base') || scenarios[0];
-
-  useEffect(() => {
-    if (!base || overrides !== null) return;
-    const seed = {};
-    for (const sl of SLIDERS) seed[sl.key] = base[sl.key] ?? sl.min;
-    setOverrides(seed);
-  }, [base, overrides, setOverrides]);
-
-  const deferredOverrides = useDeferredValue(overrides);
-
-  const liveScenario = useMemo(() => {
-    if (!base || !deferredOverrides) return base;
-    return { ...base, ...deferredOverrides };
-  }, [base, deferredOverrides]);
-
-  const proj = useMemo(() => {
-    if (!liveScenario) return {};
-    return generateProjection(liveScenario);
-  }, [liveScenario]);
-
-  const isDirty = useMemo(() => {
-    if (!base || !overrides) return false;
-    return SLIDERS.some(sl => overrides[sl.key] !== (base[sl.key] ?? sl.min));
-  }, [base, overrides]);
-
-  async function saveOverrides() {
-    if (!base || !overrides || !isDirty) return;
-    setSaving(true);
+  async function refresh() {
+    setRefreshing(true);
+    setError(null);
     try {
-      const res = await fetch(`/api/admin/hearst/scenarios/${base.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(overrides),
-      });
-      if (!res.ok) throw new Error('Save failed');
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      const r = await fetch('/api/admin/hearst/news/refresh', { method: 'POST' });
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}));
+        if (r.status === 429) throw new Error(`Rate limited — retry in ${body.error || 'a few minutes'}.`);
+        throw new Error(body.error || `HTTP ${r.status}`);
+      }
       await load();
-    } catch {
-      // silent — sliders still work
+    } catch (e) {
+      setError(e.message);
     } finally {
-      setSaving(false);
+      setRefreshing(false);
     }
   }
 
-  function resetOverrides() {
-    if (!base) return;
-    const seed = {};
-    for (const sl of SLIDERS) seed[sl.key] = base[sl.key] ?? sl.min;
-    setOverrides(seed);
-  }
-
-  if (loading) return <div style={S.loading}>Initializing HEARST module…</div>;
-  if (error) return <div style={S.error}>Error: {error}</div>;
-
-  const drTotal = dataRoom.length;
-  const drApproved = dataRoom.filter(d => d.status === 'approved' || d.status === 'reviewed').length;
-  const sourceScore = base?.source_score ?? 0;
-  const cta = pickContextualCta({ proj, sourceScore, drApproved, drTotal });
-  const healthColor = sourceScore >= 70 ? 'var(--cp-accent)' : sourceScore >= 40 ? 'var(--cp-text-body)' : 'var(--cp-error)';
-
   return (
-    <div style={S.wrap}>
-
-      {/* Health pill */}
-      <div style={S.healthRow}>
-        <div style={S.healthPill}>
-          <span style={S.healthLabel}>{base?.name || 'Project Health'}</span>
-          <span style={S.healthSep}>·</span>
-          <span style={{ ...S.healthStat, color: healthColor }}>{sourceScore}/100 sourced</span>
-          <span style={S.healthSep}>·</span>
-          <span style={S.healthStat}>{drApproved}/{drTotal} docs</span>
-        </div>
-        {isDirty && (
-          <div style={S.dirtyBar}>
-            <span style={S.dirtyLabel}>Simulation non sauvegardée</span>
-            <button onClick={resetOverrides} style={S.resetBtn}>Annuler</button>
-            <button onClick={saveOverrides} disabled={saving} style={S.saveBtn}>
-              {saved ? '✓ Sauvegardé' : saving ? 'Sauvegarde…' : 'Sauvegarder'}
-            </button>
+    <div style={S.marketWrap}>
+      <header style={S.marketHead}>
+        <div>
+          <h2 style={S.marketTitle}>Market signals</h2>
+          <div style={S.marketSub}>
+            {summary?.total != null && `${summary.total} signaux`}
+            {summary?.last_fetched_at && ` · dernier fetch ${relTime(summary.last_fetched_at)}`}
           </div>
-        )}
-      </div>
-
-
-
-      <div style={S.kpiCol}>
-        <div style={S.heroGrid}>
-          <KpiCard label="Project IRR" value={proj.irr} format="pct" highlight={proj.irr != null} />
-          <KpiCard label="Project NPV" value={proj.npv} format="currency" />
-          <KpiCard label="Stabilized EBITDA" value={proj.stabilized_ebitda} format="currency" sublabel="Annual" />
-          <KpiCard label="MOIC" value={proj.moic} format="x" sublabel="Exit multiple of money" />
         </div>
-
-        <div style={S.secondaryRow}>
-          <Stat label="IT Capacity" value={liveScenario?.total_mw != null ? fmt(liveScenario.total_mw, 'mw') : '—'} />
-          <Stat label="Total CAPEX" value={proj.total_capex != null ? fmt(proj.total_capex, 'currency') : '—'} />
-          <Stat label="Stab. Revenue" value={proj.stabilized_revenue != null ? fmt(proj.stabilized_revenue, 'currency') : '—'} />
-          <Stat label="DSCR (Stab.)" value={proj.dscr_stabilized != null ? fmt(proj.dscr_stabilized, 'x') : '—'} />
-          <Stat label="Payback" value={proj.payback_years != null ? fmt(proj.payback_years, 'years') : '—'} />
-          <Stat label="Terminal Value" value={proj.terminal_value != null ? fmt(proj.terminal_value, 'currency') : '—'} />
+        <div style={S.marketActions}>
+          <select
+            value={minScore}
+            onChange={e => setMinScore(Number(e.target.value))}
+            style={S.marketSelect}
+            aria-label="Pertinence minimale"
+          >
+            <option value={1}>All</option>
+            <option value={3}>≥ 3</option>
+            <option value={4}>≥ 4</option>
+            <option value={5}>= 5 only</option>
+          </select>
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={refreshing}
+            style={{ ...S.marketBtn, opacity: refreshing ? 0.6 : 1 }}
+          >
+            {refreshing ? 'Fetching…' : 'Refresh'}
+          </button>
         </div>
+      </header>
 
-        {scenarios.length > 1 && (
-          <div style={S.scenarioStrip}>
-            <div style={S.sectionTitle}>SCENARIO COMPARISON · IRR</div>
-            <div style={S.scenarioRow}>
-              {scenarios.map(s => {
-                const irr = s.projection?.irr;
-                const color = 'var(--cp-text-primary)';
-                return (
-                  <div key={s.id} style={{ ...S.scenarioChip, boxShadow: `inset 0 0 0 1px var(--cp-border)` }}>
-                    <div style={{ ...S.scenarioName, color }}>{s.name}</div>
-                    <div style={{ ...S.scenarioIrr, color }}>{irr != null ? fmt(irr, 'pct') : 'N/A'}</div>
-                    <div style={S.scenarioScore}>Score {s.source_score ?? 0}/100</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+      {error && <div style={S.panelError}>{error}</div>}
 
-        <div style={S.ctaWrap}>
-          <div style={S.ctaCopy}>
-            <div style={S.ctaEyebrow}>NEXT BEST ACTION</div>
-            <div style={S.ctaTitle}>{cta.label}</div>
-          </div>
-          <Link href={cta.href} aria-label={`Aller : ${cta.label}`} style={S.ctaBtn}>
-            Go →
-          </Link>
+      {loading ? (
+        <div style={S.panelLoading}>Loading signals…</div>
+      ) : signals.length === 0 ? (
+        <div style={S.emptyPanel}>
+          <p style={S.emptyBody}>Aucun signal stocké encore.</p>
+          <p style={S.emptyMuted}>Clique « Refresh » pour fetcher DCD / NVIDIA / Tom&apos;s Hardware.</p>
         </div>
-      </div>
-
-      {overrides && (
-        <div style={S.sliderPanel}>
-          <div style={S.sliderTitle}>SIMULATION EN DIRECT</div>
-          <div style={S.sliderGrid}>
-            {SLIDERS.map(def => (
-              <Knob
-                key={def.key}
-                def={def}
-                value={overrides[def.key] ?? def.min}
-                onChange={v => setOverrides(o => ({ ...o, [def.key]: v }))}
-              />
-            ))}
-            {isDirty && (
-              <div style={S.irrDelta}>
-                <span style={S.irrDeltaLabel}>IRR live</span>
-                <span style={{ ...S.irrDeltaVal, color: 'var(--cp-text-primary)' }}>
-                  {proj.irr != null ? fmt(proj.irr, 'pct') : 'N/A'}
-                </span>
-              </div>
-            )}
-          </div>
+      ) : (
+        <div style={S.signalList}>
+          {signals.map(s => {
+            const tone = RELEVANCE_TONE[s.relevance_score] || RELEVANCE_TONE[3];
+            return (
+              <article key={s.id} style={S.signalCard}>
+                <header style={S.signalHead}>
+                  <span style={{ ...S.signalScore, background: tone.bg, color: tone.fg }}>
+                    {s.relevance_score}/5
+                  </span>
+                  <span style={S.signalSource}>{s.source_label || s.source}</span>
+                  {s.category && <span style={S.signalCategory}>{CATEGORY_LABEL[s.category] || s.category}</span>}
+                  {s.impacts_metric && <span style={S.signalImpact}>impacts: {s.impacts_metric}</span>}
+                  <span style={S.signalTime}>{relTime(s.published_at || s.fetched_at)}</span>
+                </header>
+                <h3 style={S.signalTitle}>
+                  {s.url
+                    ? <a href={s.url} target="_blank" rel="noreferrer" style={S.signalLink}>{s.title}</a>
+                    : s.title}
+                </h3>
+                {s.summary && <p style={S.signalSummary}>{s.summary}</p>}
+              </article>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
 
-function Stat({ label, value }) {
+function ActivityPanel({ projectId }) {
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!projectId) return;
+    fetch(`/api/admin/hearst/audit?project_id=${projectId}&limit=50`)
+      .then(r => r.json())
+      .then(d => setEntries(d.entries || []))
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [projectId]);
+
+  if (loading) return <div style={S.panelLoading}>Loading activity…</div>;
+  if (error) return <div style={S.panelError}>Error: {error}</div>;
+  if (entries.length === 0) return <div style={S.empty}>No audit entries found.</div>;
+
   return (
-    <div style={SStat.wrap}>
-      <div style={SStat.label}>{label}</div>
-      <div style={SStat.value}>{value}</div>
+    <div style={S.activityFullList}>
+      {entries.map((entry, i) => (
+        <div key={i} style={S.activityFullRow}>
+          <div style={S.activityFullLeft}>
+            <span style={S.activityFullField}>
+              {entry.field_name ? `${entry.field_name} updated` : entry.action || 'Entry'}
+            </span>
+            {entry.table_name && <span style={S.activityFullTable}>{entry.table_name}</span>}
+          </div>
+          <span style={S.activityTime}>{timeAgo(entry.created_at)}</span>
+        </div>
+      ))}
     </div>
   );
 }
 
-const SStat = {
-  wrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', padding: 'var(--cp-space-1) var(--cp-space-4)' },
-  label: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
-  value: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)' },
-};
+// ─── main page ───────────────────────────────────────────────
 
-const SK = {
-  wrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'ns-resize', userSelect: 'none' },
-  svg: { cursor: 'ns-resize', display: 'block' },
-  label: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', textAlign: 'center' },
-  val: { fontSize: 15, fontWeight: 800, color: 'rgba(255,255,255,0.90)', fontVariantNumeric: 'tabular-nums', textAlign: 'center' },
-};
+const TABS = [
+  { id: 'today',    label: 'Today' },
+  { id: 'market',   label: 'Market' },
+  { id: 'activity', label: 'Activity' },
+];
 
+export default function BriefPage() {
+  const [tab, setTab] = useState('today');
+  const [projectId, setProjectId] = useState(null);
+  const [projectLoading, setProjectLoading] = useState(true);
+  const [projectError, setProjectError] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/admin/hearst/project')
+      .then(r => r.json())
+      .then(d => setProjectId(d.project?.id || null))
+      .catch(e => setProjectError(e.message))
+      .finally(() => setProjectLoading(false));
+  }, []);
+
+  if (projectLoading) return <div style={S.loading}>Initializing HEARST module…</div>;
+  if (projectError) return <div style={S.error}>Error: {projectError}</div>;
+
+  return (
+    <div style={S.wrap}>
+      <header style={S.header}>
+        <div>
+          <h1 style={S.title}>Brief</h1>
+          <div style={S.subtitle}>Where the project stands today.</div>
+        </div>
+      </header>
+
+      <div style={S.tabBar} role="tablist">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            onClick={() => setTab(t.id)}
+            style={{ ...S.tabBtn, ...(tab === t.id ? S.tabBtnActive : {}) }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'today'    && <TodayPanel projectId={projectId} />}
+      {tab === 'market'   && <MarketPanel />}
+      {tab === 'activity' && <ActivityPanel projectId={projectId} />}
+    </div>
+  );
+}
+
+// ─── styles ──────────────────────────────────────────────────
 const S = {
-  wrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)' },
-  loading: { padding: 'var(--cp-space-9)', textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-md)' },
-  error: { padding: 'var(--cp-space-6)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-md)' },
+  wrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 24,
+    maxWidth: 1280,
+    margin: '0 auto',
+    padding: '32px 32px 96px',
+  },
 
-  healthRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
-  healthPill: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-pill)', padding: 'var(--cp-space-1) var(--cp-space-4)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-body)' },
-  healthLabel: { color: 'var(--cp-text-primary)', fontWeight: 'var(--cp-weight-bold)' },
-  healthSep: { color: 'var(--cp-text-faint)' },
-  healthStat: { fontWeight: 'var(--cp-weight-semibold)' },
+  // Market panel
+  marketWrap: { display: 'flex', flexDirection: 'column', gap: 16 },
+  marketHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' },
+  marketTitle: { fontSize: 18, fontWeight: 700, color: 'var(--cp-text-primary)', margin: 0 },
+  marketSub: { fontSize: 12, color: 'var(--cp-text-muted)', marginTop: 4 },
+  marketActions: { display: 'flex', gap: 8, alignItems: 'center' },
+  marketSelect: {
+    height: 32, padding: '0 10px',
+    background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)',
+    borderRadius: 8, color: 'var(--cp-text-primary)', fontSize: 12,
+  },
+  marketBtn: {
+    height: 32, padding: '0 16px',
+    background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none',
+    borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer', letterSpacing: 0.3,
+  },
+  signalList: { display: 'flex', flexDirection: 'column', gap: 8 },
+  signalCard: {
+    padding: 16,
+    background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)',
+    borderRadius: 10, display: 'flex', flexDirection: 'column', gap: 6,
+  },
+  signalHead: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', fontSize: 11 },
+  signalScore: { fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 999, letterSpacing: 0.5 },
+  signalSource: { fontSize: 11, fontWeight: 700, color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 0.5 },
+  signalCategory: {
+    fontSize: 10, fontWeight: 700, padding: '2px 8px',
+    background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)',
+    color: 'var(--cp-text-muted)', borderRadius: 999, letterSpacing: 0.5,
+  },
+  signalImpact: { fontSize: 10, color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
+  signalTime: { fontSize: 11, color: 'var(--cp-text-muted)', marginLeft: 'auto' },
+  signalTitle: { fontSize: 14, fontWeight: 700, color: 'var(--cp-text-primary)', margin: 0, lineHeight: 1.4 },
+  signalLink: { color: 'inherit', textDecoration: 'none' },
+  signalSummary: { fontSize: 12, color: 'var(--cp-text-body)', lineHeight: 1.5, margin: 0 },
 
-  dirtyBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginLeft: 'auto' },
-  dirtyLabel: { fontSize: 11, color: 'var(--cp-text-muted)', fontStyle: 'italic' },
-  resetBtn: { fontSize: 11, fontWeight: 600, padding: '4px 10px', border: '1px solid var(--cp-border)', borderRadius: 6, background: 'transparent', color: 'var(--cp-text-muted)', cursor: 'pointer' },
-  saveBtn: { fontSize: 11, fontWeight: 700, padding: '4px 12px', border: 'none', borderRadius: 6, background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', cursor: 'pointer' },
+  loading: {
+    padding: 48,
+    textAlign: 'center',
+    color: 'var(--cp-text-muted)',
+    fontSize: 14,
+  },
+  error: {
+    padding: '12px 16px',
+    color: 'var(--cp-error)',
+    background: 'var(--cp-error-bg)',
+    borderRadius: 10,
+    fontSize: 13,
+    fontWeight: 600,
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingBottom: 16,
+    borderBottom: '1px solid var(--cp-border)',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 800,
+    letterSpacing: -0.4,
+    color: 'var(--cp-text-primary)',
+    margin: 0,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: 'var(--cp-text-muted)',
+    marginTop: 4,
+  },
 
-  kpiCol: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-5)' },
-  heroGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--cp-space-4)' },
+  // tabs
+  tabBar: {
+    display: 'inline-flex',
+    gap: 4,
+    padding: 4,
+    background: 'var(--cp-surface-0)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 999,
+    alignSelf: 'flex-start',
+  },
+  tabBtn: {
+    fontSize: 12,
+    fontWeight: 700,
+    height: 32,
+    padding: '0 18px',
+    background: 'transparent',
+    color: 'var(--cp-text-muted)',
+    border: 'none',
+    borderRadius: 999,
+    cursor: 'pointer',
+    letterSpacing: 0.3,
+    transition: 'all 0.15s ease',
+  },
+  tabBtnActive: {
+    background: 'var(--cp-accent-maroon, var(--cp-accent))',
+    color: 'var(--cp-text-strong)',
+  },
 
-  secondaryRow: { display: 'flex', alignItems: 'center', flexWrap: 'nowrap', overflowX: 'auto', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-lg)', padding: 'var(--cp-space-3) var(--cp-space-2)' },
+  // today grid
+  todayGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+  },
 
-  scenarioStrip: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-lg)', padding: 'var(--cp-space-4) var(--cp-space-5)' },
-  scenarioRow: { display: 'flex', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-2)' },
-  scenarioChip: { flex: 1, border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'var(--cp-surface-1)' },
-  scenarioName: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wider)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-1)' },
-  scenarioIrr: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-tight)', marginBottom: 'var(--cp-space-1)' },
-  scenarioScore: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)' },
-  sectionTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
+  // cards row
+  card: {
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 10,
+    padding: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+  },
+  cardHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  cardTitle: {
+    fontSize: 13,
+    fontWeight: 700,
+    color: 'var(--cp-text-primary)',
+    letterSpacing: 0.2,
+  },
+  cardBadge: {
+    fontSize: 11,
+    fontWeight: 700,
+    padding: '3px 10px',
+    background: 'var(--cp-surface-0)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 999,
+    color: 'var(--cp-text-muted)',
+  },
 
-  ctaWrap: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--cp-space-4)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-lg)', padding: 'var(--cp-space-4) var(--cp-space-6)' },
-  ctaCopy: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
-  ctaEyebrow: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
-  ctaTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)' },
-  ctaBtn: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wide)', padding: 'var(--cp-space-2) var(--cp-space-5)', borderRadius: 'var(--cp-radius-sm)', textDecoration: 'none' },
+  // stage list
+  stageList: { display: 'flex', flexDirection: 'column', gap: 6 },
+  stageRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '4px 0',
+    borderBottom: '1px solid var(--cp-border)',
+  },
+  stageName: {
+    fontSize: 12,
+    fontWeight: 600,
+    color: 'var(--cp-text-body)',
+    textTransform: 'capitalize',
+  },
+  stageCount: {
+    fontSize: 13,
+    fontWeight: 800,
+    color: 'var(--cp-text-primary)',
+  },
 
-  sliderPanel: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-lg)', padding: 'var(--cp-space-5) var(--cp-space-6)' },
-  sliderTitle: { fontSize: 10, fontWeight: 800, letterSpacing: 2, color: 'var(--cp-text-muted)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-4)' },
-  sliderGrid: { display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 'var(--cp-space-6)' },
+  // kpi grid inside card
+  kpiGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 12,
+  },
+  kpi: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    background: 'var(--cp-surface-1)',
+    borderRadius: 8,
+    padding: '10px 12px',
+  },
+  kpiLabel: {
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: 'var(--cp-text-muted)',
+  },
+  kpiValue: {
+    fontSize: 18,
+    fontWeight: 800,
+    color: 'var(--cp-text-primary)',
+    fontVariantNumeric: 'tabular-nums',
+  },
 
-  irrDelta: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--cp-border)', paddingTop: 'var(--cp-space-3)', marginTop: 'var(--cp-space-1)' },
-  irrDeltaLabel: { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: 'var(--cp-text-muted)' },
-  irrDeltaVal: { fontSize: 22, fontWeight: 800, fontVariantNumeric: 'tabular-nums' },
+  // alerts
+  alertList: { display: 'flex', flexDirection: 'column', gap: 8 },
+  alertRow: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  severityDot: {
+    flexShrink: 0,
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    marginTop: 4,
+  },
+  alertMsg: {
+    fontSize: 12,
+    color: 'var(--cp-text-body)',
+    lineHeight: '18px',
+  },
+
+  // cta link
+  cta: {
+    display: 'inline-block',
+    marginTop: 'auto',
+    fontSize: 12,
+    fontWeight: 700,
+    color: 'var(--cp-accent)',
+    textDecoration: 'none',
+    letterSpacing: 0.3,
+  },
+
+  // empty state
+  empty: {
+    fontSize: 12,
+    color: 'var(--cp-text-faint)',
+    fontStyle: 'italic',
+  },
+
+  // recent activity (below the 3 cards)
+  activityBlock: {
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 10,
+    padding: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+  },
+  activityTitle: {
+    fontSize: 11,
+    fontWeight: 800,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    color: 'var(--cp-text-muted)',
+  },
+  activityList: { display: 'flex', flexDirection: 'column', gap: 6 },
+  activityRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
+    fontSize: 12,
+  },
+  activityText: { color: 'var(--cp-text-body)' },
+  activityTime: { color: 'var(--cp-text-faint)', flexShrink: 0 },
+
+  // market / empty panel
+  emptyPanel: {
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 10,
+    padding: '40px 32px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+    maxWidth: 560,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: 'var(--cp-text-primary)',
+    margin: 0,
+  },
+  emptyBody: {
+    fontSize: 13,
+    color: 'var(--cp-text-body)',
+    lineHeight: '20px',
+    margin: 0,
+  },
+  emptyMuted: {
+    fontSize: 12,
+    color: 'var(--cp-text-faint)',
+    margin: 0,
+  },
+
+  // panel level loading / error
+  panelLoading: {
+    padding: 32,
+    textAlign: 'center',
+    color: 'var(--cp-text-muted)',
+    fontSize: 13,
+  },
+  panelError: {
+    padding: '12px 16px',
+    color: 'var(--cp-error)',
+    background: 'var(--cp-error-bg)',
+    borderRadius: 8,
+    fontSize: 12,
+    fontWeight: 600,
+  },
+
+  // activity full panel
+  activityFullList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 0,
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  activityFullRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+    padding: '12px 20px',
+    borderBottom: '1px solid var(--cp-border)',
+    fontSize: 12,
+  },
+  activityFullLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'wrap',
+  },
+  activityFullField: {
+    color: 'var(--cp-text-body)',
+    fontWeight: 500,
+  },
+  activityFullTable: {
+    fontSize: 11,
+    fontWeight: 600,
+    padding: '2px 8px',
+    background: 'var(--cp-surface-0)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 999,
+    color: 'var(--cp-text-muted)',
+    letterSpacing: 0.3,
+  },
 };

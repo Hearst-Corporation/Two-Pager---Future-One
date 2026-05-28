@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import KpiCard from '@/components/hearst/KpiCard';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 // Monochrome workflow — only true negatives (expired/terminated) keep --cp-error.
 const CONTRACT_STATUSES = {
@@ -96,6 +97,7 @@ export default function ContractsPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="hub" />
       <div style={S.topBar}>
         <div style={S.pageTitle}>Contract Library</div>
         <button onClick={() => setShowAdd(v => !v)} className="cp-btn-hover" style={S.addBtn}>{showAdd ? '✕' : '+ Add Contract'}</button>

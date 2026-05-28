@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import SourceBadge from '@/components/hearst/SourceBadge';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 const GROUPS = [
   {
@@ -209,6 +210,7 @@ export default function AssumptionsPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="modeling" />
       <div style={S.topBar}>
         <div style={S.pageTitle}>Financial Assumptions</div>
         <div style={S.tabs}>

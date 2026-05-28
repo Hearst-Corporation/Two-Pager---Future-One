@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { adminFetch } from '@/lib/admin-fetch';
+import SectionTabs from '@/components/hearst/SectionTabs';
 import KpiCard from '@/components/hearst/KpiCard';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
 import { OPERATORS, OPERATORS_BY_ID } from '@/lib/hearst-constants';
@@ -245,6 +246,7 @@ export default function DealsPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="hub" />
       {/* ZONE 1 — Header */}
       <header style={S.header}>
         <div>

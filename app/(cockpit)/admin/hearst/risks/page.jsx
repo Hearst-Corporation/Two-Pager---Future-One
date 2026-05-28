@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 const RISK_CATEGORIES = [
   {
@@ -152,6 +153,7 @@ export default function RisksPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="library" />
       <div style={S.topBar}>
         <div style={S.pageTitle}>Risk Dashboard</div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>

@@ -9,11 +9,18 @@
    ============================================================ */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 const WRITE_TOOLS = new Set([
   'update_scenario', 'create_source', 'attach_source_to_scenario',
   'create_scenario', 'add_pipeline_prospect', 'update_data_room_item',
 ]);
+
+// Client-side tools — l'agent peut piloter la nav + injecter des params
+// dans le simulator. Cf. lib/hearst-advisor-tools.js (case 'navigate' / 'set_simulator_param').
+// Le tool_result contient { client_action: { type, ... } } que ChatContainer dispatch.
+const CLIENT_ACTION_TOOLS = new Set(['navigate', 'set_simulator_param']);
+export const SIMULATOR_PARAM_EVENT = 'hearst.simulator.set_param';
 
 const DEFAULT_PROMPTS = [
   'Audit gaps and give 3 next actions',
@@ -164,6 +171,7 @@ export default function ChatContainer({
   pageContext,
   onMutationDetected,
 }) {
+  const router = useRouter();
   const [messages, setMessages] = useState([]);
   const [streaming, setStreaming] = useState(false);
   const [input, setInput] = useState('');
@@ -276,6 +284,20 @@ export default function ChatContainer({
               assistantBlocks[t.idx].result = t.result;
               assistantBlocks[t.idx].is_error = event.is_error;
               if (!event.is_error && WRITE_TOOLS.has(t.name)) mutationSeen = true;
+              // Client-side tools: dispatch the action client-side.
+              if (!event.is_error && CLIENT_ACTION_TOOLS.has(t.name)) {
+                try {
+                  const parsed = typeof event.result === 'string' ? JSON.parse(event.result) : event.result;
+                  const action = parsed?.client_action;
+                  if (action?.type === 'navigate' && typeof action.path === 'string') {
+                    router.push(action.path);
+                  } else if (action?.type === 'set_simulator_param') {
+                    window.dispatchEvent(new CustomEvent(SIMULATOR_PARAM_EVENT, {
+                      detail: { field: action.field, value: action.value, why: action.why },
+                    }));
+                  }
+                } catch { /* swallow parse errors */ }
+              }
               flushAssistant();
             }
           }

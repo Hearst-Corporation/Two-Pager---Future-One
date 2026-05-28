@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import SectionTabs from '@/components/hearst/SectionTabs';
 
 function Section({ title, children }) {
   return (
@@ -78,6 +79,7 @@ export default function ReportsPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="library" />
       {/* Export actions (hidden in print) */}
       <div style={{ ...S.actions, display: 'flex' }} className="no-print">
         <div style={S.pageTitle}>Reports & Export</div>

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import SourceBadge, { SOURCE_TYPES_CP } from '@/components/hearst/SourceBadge';
+import SectionTabs from '@/components/hearst/SectionTabs';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
 import {
   SOURCE_TYPES, OPERATORS, OPERATORS_BY_ID,
@@ -168,6 +169,7 @@ export default function SourcesPage() {
 
   return (
     <div style={S.wrap}>
+      <SectionTabs section="library" />
       {/* Header */}
       <div style={S.topBar}>
         <div style={S.pageTitle}>Market Intelligence — {PUBLIC_SOURCES_LIBRARY.length} benchmarks</div>
