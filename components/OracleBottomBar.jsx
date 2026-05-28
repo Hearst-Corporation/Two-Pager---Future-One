@@ -1,11 +1,14 @@
 'use client';
 
 // OracleBottomBar — barre horizontale en bas du cockpit Hearst.
-// 4 sections principales : Brief / Simulator / Hub / Library.
-// Le bouton Profile est désormais géré par <HearstLeftRail /> (avatar).
 //
-// Le nom de la classe et l'export sont conservés pour ne pas casser les
-// imports existants. La position visuelle a basculé vertical-left → horizontal-bottom.
+// ⚠ Dérogation SPEC §3 explicitement validée par Adrien (option D /cockpit-adrien fix).
+// Le shell @hearst/cockpit-shell rend .ct-hub-bar « Overview » destinée au hub
+// multi-produits. Oracle est un produit standalone avec 4 sous-sections internes
+// (Brief / Sim / Hub / Library) — pas couvert nativement par le shell.
+// La .ct-hub-bar du shell est masquée via cp-tokens.css pour éviter le doublon.
+// Tokens --cp-* utilisés ici sont des alias 1:1 vers --ct-* (cf. cp-tokens.css)
+// → palette respectée. À retirer si/quand le shell expose des sous-sections produit.
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

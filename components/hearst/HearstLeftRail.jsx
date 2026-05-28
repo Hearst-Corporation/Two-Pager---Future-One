@@ -2,6 +2,13 @@
 
 // HearstLeftRail — rail vertical gauche minimaliste du cockpit Hearst.
 //
+// ⚠ Dérogation SPEC §3 explicitement validée par Adrien (option D /cockpit-adrien fix).
+// Le shell @hearst/cockpit-shell rend .ct-rail-left pour un hub multi-produits ;
+// Oracle est un produit standalone qui a besoin d'avatar + favoris + nav 4 sections,
+// fonctionnalités non couvertes nativement par le shell. Tokens --cp-* utilisés ici
+// sont des alias 1:1 vers --ct-* (cf. cp-tokens.css) → palette respectée.
+// À retirer si/quand le package shell expose un slot RailLeft custom.
+//
 // 3 zones :
 //   1. Avatar utilisateur en haut
 //      - 1 clic → /admin/hearst/profile

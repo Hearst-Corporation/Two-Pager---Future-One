@@ -26,8 +26,8 @@ function timeAgo(iso) {
 }
 
 const SEVERITY_COLOR = {
-  P0: 'var(--cp-error)',
-  P1: '#f59e0b',
+  P0: 'var(--ct-status-danger, var(--cp-error))',
+  P1: 'var(--ct-status-warning)',
   P2: 'var(--cp-text-muted)',
 };
 
@@ -111,7 +111,7 @@ function TodayPanel({ projectId }) {
         <div style={S.cardHeader}>
           <span style={S.cardTitle}>Project health</span>
           {confidence != null && (
-            <span style={{ ...S.cardBadge, background: confidence >= 70 ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: confidence >= 70 ? '#10b981' : '#f59e0b' }}>
+            <span style={{ ...S.cardBadge, background: confidence >= 70 ? 'var(--ct-status-success-soft, rgba(16,185,129,0.15))' : 'var(--ct-status-warning-soft, rgba(245,158,11,0.15))', color: confidence >= 70 ? 'var(--ct-status-success)' : 'var(--ct-status-warning)' }}>
               {confidence}/100
             </span>
           )}
@@ -141,7 +141,7 @@ function TodayPanel({ projectId }) {
       <div style={S.card}>
         <div style={S.cardHeader}>
           <span style={S.cardTitle}>Alertes</span>
-          <span style={{ ...S.cardBadge, background: allWarnings.filter(w => w.severity === 'P0').length > 0 ? 'rgba(239,68,68,0.15)' : undefined, color: allWarnings.filter(w => w.severity === 'P0').length > 0 ? 'var(--cp-error)' : undefined }}>
+          <span style={{ ...S.cardBadge, background: allWarnings.filter(w => w.severity === 'P0').length > 0 ? 'var(--ct-status-danger-soft)' : undefined, color: allWarnings.filter(w => w.severity === 'P0').length > 0 ? 'var(--ct-status-danger)' : undefined }}>
             {allWarnings.filter(w => w.severity === 'P0' || w.severity === 'P1').length} P0/P1
           </span>
         </div>

@@ -302,7 +302,7 @@ function HealthTab({ inventory }) {
       {p1.length > 0 && (
         <div style={S.healthGroup}>
           <div style={S.healthGroupHead}>
-            <span style={{ ...S.healthBadge, background: 'rgba(245,158,11,0.12)', color: '#d97706', border: '1px solid rgba(245,158,11,0.35)' }}>
+            <span style={{ ...S.healthBadge, background: 'var(--ct-status-warning-soft, rgba(245,158,11,0.12))', color: 'var(--ct-status-warning)', border: '1px solid var(--ct-status-warning-border, rgba(245,158,11,0.35))' }}>
               P1 · {p1.length}
             </span>
           </div>

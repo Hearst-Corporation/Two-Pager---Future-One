@@ -424,11 +424,11 @@ export default function FinancialPage() {
                         <td key={ci} style={{
                           ...S.td,
                           background: cell.irr == null ? 'var(--cp-surface-2)'
-                            : cell.irr < 0 ? 'color-mix(in srgb, var(--color-error) 30%, black)'
-                            : cell.irr < 0.08 ? 'color-mix(in srgb, var(--color-error) 60%, black)'
-                            : cell.irr < 0.12 ? 'color-mix(in srgb, var(--color-warning) 50%, black)'
-                            : cell.irr < 0.15 ? 'color-mix(in srgb, var(--color-success) 50%, black)'
-                            : 'color-mix(in srgb, var(--color-success) 30%, black)',
+                            : cell.irr < 0 ? 'color-mix(in srgb, var(--ct-status-danger) 30%, black)'
+                            : cell.irr < 0.08 ? 'color-mix(in srgb, var(--ct-status-danger) 60%, black)'
+                            : cell.irr < 0.12 ? 'color-mix(in srgb, var(--ct-status-warning) 50%, black)'
+                            : cell.irr < 0.15 ? 'color-mix(in srgb, var(--ct-status-success) 50%, black)'
+                            : 'color-mix(in srgb, var(--ct-status-success) 30%, black)',
                           color: 'var(--cp-text-primary)',
                           fontWeight: ri === 2 && ci === 2 ? 900 : 600,
                           fontSize: 11,
@@ -444,11 +444,11 @@ export default function FinancialPage() {
               </table>
               <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap' }}>
                 {[
-                  { bg: 'color-mix(in srgb, var(--color-error) 30%, black)', label: '< 0% IRR' },
-                  { bg: 'color-mix(in srgb, var(--color-error) 60%, black)', label: '0–8%' },
-                  { bg: 'color-mix(in srgb, var(--color-warning) 50%, black)', label: '8–12%' },
-                  { bg: 'color-mix(in srgb, var(--color-success) 50%, black)', label: '12–15%' },
-                  { bg: 'color-mix(in srgb, var(--color-success) 30%, black)', label: '> 15%' },
+                  { bg: 'color-mix(in srgb, var(--ct-status-danger) 30%, black)', label: '< 0% IRR' },
+                  { bg: 'color-mix(in srgb, var(--ct-status-danger) 60%, black)', label: '0–8%' },
+                  { bg: 'color-mix(in srgb, var(--ct-status-warning) 50%, black)', label: '8–12%' },
+                  { bg: 'color-mix(in srgb, var(--ct-status-success) 50%, black)', label: '12–15%' },
+                  { bg: 'color-mix(in srgb, var(--ct-status-success) 30%, black)', label: '> 15%' },
                 ].map(l => (
                   <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--cp-text-muted)' }}>
                     <span style={{ width: 12, height: 12, borderRadius: 4, background: l.bg, display: 'inline-block' }} />

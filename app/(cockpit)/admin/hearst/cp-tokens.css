@@ -4,11 +4,26 @@
    Source des valeurs : ~/.claude/assets/cockpit/tokens.css + cockpit-shell/tokens.css
    ===================================================================== */
 
-/* Hide the native CockpitShell bottom bar ("Overview" segment).
-   The Hearst cockpit uses its own horizontal OracleBottomBar (Brief / Sim / Hub / Library)
-   mounted in the layout, so the shell's hub-bar would be a visual duplicate. */
+/* Le shell rend une .ct-hub-bar « Overview » destinée au hub multi-produits.
+   Oracle est un produit standalone avec 4 sections internes propres
+   (Brief / Sim / Hub / Library) — la bottom-bar Cockpit locale les remplace.
+   La native est masquée pour éviter le doublon visuel signalé. */
 .ct-hub-bar {
   display: none !important;
+}
+
+/* Status tokens — absents du package cockpit-shell.tokens.css aujourd'hui.
+   Définis ici en attendant un upstream propre. Couleurs ambient maintenues. */
+:root {
+  --ct-status-success:        rgb(16, 185, 129);
+  --ct-status-success-soft:   rgba(16, 185, 129, 0.15);
+  --ct-status-success-border: rgba(16, 185, 129, 0.40);
+  --ct-status-warning:        rgb(217, 119, 6);
+  --ct-status-warning-soft:   rgba(245, 158, 11, 0.12);
+  --ct-status-warning-border: rgba(245, 158, 11, 0.35);
+  --ct-status-danger:         rgb(239, 68, 68);
+  --ct-status-danger-soft:    rgba(239, 68, 68, 0.12);
+  --ct-status-danger-border:  rgba(239, 68, 68, 0.40);
 }
 
 :root {
