@@ -140,7 +140,12 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
       }
       const data = await r.json();
       setMemo(data.memo);
-      setMeta({ model_used: data.model_used, generated_at: data.generated_at, oracle_ctx: data.oracle_ctx });
+      setMeta({
+        model_used: data.model_used,
+        generated_at: data.generated_at,
+        oracle_ctx: data.oracle_ctx,
+        intelligence_brief: data.intelligence_brief || null,
+      });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -190,6 +195,26 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
                 {meta.oracle_ctx.overlays?.length > 0 && <span> · {meta.oracle_ctx.overlays.join(', ')}</span>}
                 <span> · {meta.model_used}</span>
                 <span> · {new Date(meta.generated_at).toLocaleString()}</span>
+              </div>
+            )}
+            {meta?.intelligence_brief && (
+              <div style={S.intelChips}>
+                <span style={S.intelChip} title="Datapoints injected from the intelligence layer">
+                  {meta.intelligence_brief.datapoints_count} sources
+                </span>
+                <span style={S.intelChip} title="Comparable peer profiles">
+                  {meta.intelligence_brief.comparables_count} comparables
+                </span>
+                <span style={S.intelChip} title="Decision tensions surfaced">
+                  {meta.intelligence_brief.tensions_count} tensions
+                </span>
+                {meta.intelligence_brief.reality_violations_count > 0 && (
+                  <span style={{ ...S.intelChip, background: 'var(--ct-status-warning-soft)', color: 'var(--ct-status-warning)', border: '1px solid var(--ct-status-warning-border)' }}
+                    title="Reality-layer violations detected (operationally constrained)"
+                  >
+                    {meta.intelligence_brief.reality_violations_count} reality flags
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -389,6 +414,87 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
                   )}
                 </Section>
               )}
+
+              {/* Decision Tensions — explicit tradeoffs */}
+              {memo.decision_tensions?.length > 0 && (
+                <Section id="tensions" label="Decision tensions · explicit tradeoffs">
+                  <ul style={S.tensionList}>
+                    {memo.decision_tensions.map((t, i) => {
+                      const brief = meta?.intelligence_brief?.tensions?.find(x => x.id === t.id);
+                      return (
+                        <li key={i} style={S.tensionItem}>
+                          <div style={S.tensionLabel}>{brief?.label || t.id}</div>
+                          {brief && (
+                            <div style={S.tensionPoles}>
+                              <span style={S.poleA}>A · {brief.pole_a?.name}</span>
+                              <span style={S.poleSep}>vs</span>
+                              <span style={S.poleB}>B · {brief.pole_b?.name}</span>
+                            </div>
+                          )}
+                          <div style={S.tensionVerdict}>{t.verdict}</div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </Section>
+              )}
+
+              {/* Intelligence layer sources actually used */}
+              {meta?.intelligence_brief && (
+                <Section id="intel" label="Intelligence layer · sources used">
+                  {memo.intelligence_sources?.length > 0 && (
+                    <>
+                      <div style={S.sublabel}>Datapoints cited</div>
+                      <ul style={S.sourceList}>
+                        {memo.intelligence_sources.map((s, i) => {
+                          const dp = meta.intelligence_brief.datapoints?.find(x => x.id === s.datapoint_id);
+                          return (
+                            <li key={i} style={S.sourceItem}>
+                              <span style={S.sourceId}>{s.datapoint_id}</span>
+                              <ConfidenceTag level={s.trust} />
+                              <span style={S.sourceUsed}>· {s.used_for}</span>
+                              {dp?.source_name && (
+                                <span style={S.sourceMeta}>
+                                  · {dp.source_name}
+                                  {dp.url && <> · <a href={dp.url} target="_blank" rel="noreferrer" style={S.sourceLink}>↗</a></>}
+                                </span>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </>
+                  )}
+                  {meta.intelligence_brief.comparables?.length > 0 && (
+                    <>
+                      <div style={{ ...S.sublabel, marginTop: 12 }}>Comparable peers (full profiles)</div>
+                      <ul style={S.compFullList}>
+                        {meta.intelligence_brief.comparables.map((c, i) => (
+                          <li key={i} style={S.compFullItem}>
+                            <strong>{c.entity_id}</strong>
+                            <ul style={S.compDim}>
+                              {Object.entries(c.profile || {}).slice(0, 5).map(([k, v]) => (
+                                <li key={k}><em style={S.compKey}>{k}</em> : {v}</li>
+                              ))}
+                            </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {meta.intelligence_brief.absorption && (
+                    <>
+                      <div style={{ ...S.sublabel, marginTop: 12 }}>Commercial absorption · {meta.intelligence_brief.absorption.label}</div>
+                      <div style={S.absorption}>
+                        <div>Demand maturity : <strong>{meta.intelligence_brief.absorption.demand_maturity}</strong></div>
+                        <div>Realistic pipeline 2030 : <strong>{meta.intelligence_brief.absorption.realistic_pipeline_2030_mw} MW</strong></div>
+                        <div>Oversupply risk 2027 : <strong>{meta.intelligence_brief.absorption.oversupply_risk_2027}</strong></div>
+                        <div>Customer concentration risk : <strong>{meta.intelligence_brief.absorption.customer_concentration_risk}</strong></div>
+                      </div>
+                    </>
+                  )}
+                </Section>
+              )}
             </article>
           )}
         </div>
@@ -469,4 +575,33 @@ const S = {
   realityFlags: { marginTop: 12, padding: 12, background: 'var(--ct-status-warning-soft)', border: '1px solid var(--ct-status-warning-border)', borderRadius: 10 },
   realityLabel: { fontSize: 10, fontWeight: 800, color: 'var(--ct-status-warning)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 },
   realityFlag: { fontSize: 12, color: 'var(--ct-status-warning)', lineHeight: 1.5, padding: '4px 0' },
+
+  // Intelligence chips in header
+  intelChips: { display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 },
+  intelChip: { fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', letterSpacing: 0.3, fontFamily: 'ui-monospace, monospace' },
+
+  // Tensions block
+  tensionList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 12 },
+  tensionItem: { borderLeft: '3px solid var(--cp-accent)', paddingLeft: 12 },
+  tensionLabel: { fontSize: 12, fontWeight: 800, color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 0.5 },
+  tensionPoles: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--cp-text-muted)', marginTop: 2, fontFamily: 'ui-monospace, monospace' },
+  poleA: {},
+  poleB: {},
+  poleSep: { color: 'var(--cp-text-faint)' },
+  tensionVerdict: { fontSize: 12, color: 'var(--cp-text-body)', marginTop: 4, lineHeight: 1.5 },
+
+  // Intelligence sources block
+  sourceList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11 },
+  sourceItem: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  sourceId: { fontFamily: 'ui-monospace, monospace', color: 'var(--cp-text-primary)', fontSize: 11 },
+  sourceUsed: { color: 'var(--cp-text-muted)' },
+  sourceMeta: { color: 'var(--cp-text-muted)', fontSize: 11 },
+  sourceLink: { color: 'var(--cp-accent)', textDecoration: 'none' },
+
+  compFullList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 },
+  compFullItem: { paddingLeft: 12, borderLeft: '2px solid var(--cp-border)' },
+  compDim: { margin: '4px 0 0', paddingLeft: 16, fontSize: 11, color: 'var(--cp-text-body)', lineHeight: 1.5 },
+  compKey: { color: 'var(--cp-text-muted)', fontStyle: 'italic' },
+
+  absorption: { fontSize: 12, color: 'var(--cp-text-body)', lineHeight: 1.6, padding: '8px 12px', background: 'var(--cp-surface-0)', borderRadius: 8, border: '1px solid var(--cp-border)' },
 };
