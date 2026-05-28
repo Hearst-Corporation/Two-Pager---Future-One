@@ -16,12 +16,11 @@
 //   2. Favoris — liens raccourcis configurables (stockés en localStorage)
 //   3. Bouton "+" en bas pour ajouter un favori (modal)
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 const STORAGE_KEY = 'hearst.left-rail.favorites';
-const DOUBLE_CLICK_MS = 400;
 
 // Liste des destinations possibles pour les favoris.
 // Le user choisit parmi cette liste dans le modal.
@@ -54,20 +53,10 @@ function initials(name, email) {
 }
 
 export default function HearstLeftRail() {
-  const router = useRouter();
   const pathname = usePathname();
 
-  const [me, setMe] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [addOpen, setAddOpen] = useState(false);
-  const clickTimerRef = useRef(null);
-
-  useEffect(() => {
-    fetch('/api/admin/profile/me')
-      .then(r => r.ok ? r.json() : null)
-      .then(d => setMe(d?.profile || d?.me || d))
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -85,26 +74,6 @@ export default function HearstLeftRail() {
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
   }, []);
 
-  // Avatar — single click = profile, double click = logout.
-  const onAvatarClick = useCallback(() => {
-    if (clickTimerRef.current) {
-      // Second click within window → logout
-      clearTimeout(clickTimerRef.current);
-      clickTimerRef.current = null;
-      (async () => {
-        try {
-          await fetch('/api/admin/login', { method: 'DELETE' });
-        } catch {}
-        router.push('/admin/login');
-      })();
-      return;
-    }
-    clickTimerRef.current = setTimeout(() => {
-      clickTimerRef.current = null;
-      router.push('/admin/hearst/profile');
-    }, DOUBLE_CLICK_MS);
-  }, [router]);
-
   function addFavorite(dest) {
     if (favorites.some(f => f.href === dest.href)) return;
     persistFavorites([...favorites, dest]);
@@ -115,23 +84,13 @@ export default function HearstLeftRail() {
     persistFavorites(favorites.filter(f => f.href !== href));
   }
 
-  const initialsText = initials(me?.name || me?.full_name, me?.email);
-  const isProfileActive = pathname === '/admin/hearst/profile';
   const availableDest = ALL_DESTINATIONS.filter(d => !favorites.some(f => f.href === d.href));
 
   return (
     <>
       <aside aria-label="Hearst left rail" style={S.rail}>
-        {/* Avatar — single click = profile, double click = logout */}
-        <button
-          type="button"
-          onClick={onAvatarClick}
-          aria-label={`${me?.name || me?.email || 'Profile'} — 1 clic = profil · 2 clics = déconnexion`}
-          title="1 clic : profil · 2 clics : déconnexion"
-          style={{ ...S.avatar, ...(isProfileActive ? S.avatarActive : {}) }}
-        >
-          {initialsText}
-        </button>
+        {/* Avatar retiré — le shell CockpitShell rend déjà .ct-avatar en bas du rail-left.
+            HearstLeftRail garde uniquement la fonctionnalité Favoris non-native. */}
 
         {/* Favoris */}
         <div style={S.favList} role="list" aria-label="Favoris">
@@ -223,24 +182,6 @@ const S = {
     gap: 12,
     padding: '12px 0 16px',
     pointerEvents: 'auto',
-  },
-
-  // Avatar
-  avatar: {
-    width: 44, height: 44,
-    borderRadius: '50%',
-    background: 'var(--cp-accent-maroon, var(--cp-accent))',
-    color: 'var(--cp-text-strong)',
-    border: 'none',
-    fontSize: 14, fontWeight: 800, letterSpacing: 0.3,
-    cursor: 'pointer',
-    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.18)',
-    flexShrink: 0,
-  },
-  avatarActive: {
-    outline: '2px solid var(--cp-accent)',
-    outlineOffset: 2,
   },
 
   // Favoris
