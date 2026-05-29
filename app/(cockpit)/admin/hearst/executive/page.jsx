@@ -52,7 +52,7 @@ export default function ExecutiveDashboard() {
 
   // Recommended next actions — computed from real state
   const actions = [];
-  if (drafts > 0) actions.push({ t: `${drafts} report${drafts > 1 ? 's' : ''} in DRAFT`, d: 'Review and move to Approved before the committee.', href: '/admin/hearst/library' });
+  if (drafts > 0) actions.push({ t: `${drafts} report${drafts > 1 ? 's' : ''} in DRAFT`, d: 'Review and approve in the Dossier before the committee.', href: '/admin/hearst/dossier' });
   if (scenarios.length > memos.length) actions.push({ t: `${scenarios.length - memos.length} scenario(s) without a report`, d: 'Generate a strategic memo to complete the dossier.', href: '/admin/hearst/simulator' });
   if (dataAsOf) actions.push({ t: `Benchmark data as of ${dataAsOf}`, d: 'Re-source high-volatility inputs before an institutional presentation.', href: '/admin/hearst/sources' });
   actions.push({ t: 'Export board pack', d: 'Open the dossier and export PDFs for each scenario.', href: '/admin/hearst/dossier' });

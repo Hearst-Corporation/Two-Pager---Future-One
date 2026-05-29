@@ -11,6 +11,16 @@ const STATUS_OPTS = ['draft', 'reviewed', 'approved', 'archived'];
 
 function fmtDate(s) { try { return new Date(s).toLocaleString(); } catch { return s; } }
 
+// Read-only status badge tone (mutation happens in the Dossier, not here).
+function statusTone(s) {
+  switch (s) {
+    case 'approved': return { background: 'var(--ct-status-success-soft, rgba(16,185,129,0.15))', color: 'var(--ct-status-success, #10b981)' };
+    case 'reviewed': return { background: 'var(--cp-info-bg, rgba(59,130,246,0.12))', color: 'var(--cp-info, #3b82f6)' };
+    case 'archived': return { background: 'var(--cp-surface-0)', color: 'var(--cp-text-faint)' };
+    default:         return { background: 'var(--cp-surface-2)', color: 'var(--cp-text-muted)' };
+  }
+}
+
 export default function ReportsLibrary() {
   const [memos, setMemos] = useState(null);
   const [err, setErr] = useState(null);
@@ -33,18 +43,14 @@ export default function ReportsLibrary() {
   const regions = useMemo(() => [...new Set((memos || []).map(m => m.region).filter(Boolean))], [memos]);
   const stakeholders = useMemo(() => [...new Set((memos || []).map(m => m.stakeholder).filter(Boolean))], [memos]);
 
-  async function setStatus(id, status) {
-    await fetch(`/api/admin/hearst/strategic-memos/${id}`, {
-      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status }),
-    });
-    load();
-  }
+  // Wave B — Library is a read-only archive. Status mutation (review/approve)
+  // lives ONLY in the Dossier (the canonical reader/approver). No PATCH here.
 
   return (
     <div style={S.wrap}>
       <header style={S.head}>
-        <h1 style={S.h1}>Reports Library</h1>
-        <p style={S.sub}>Every generated strategic memo, retained · versioned · exportable. AI-assisted, indicative — human review required.</p>
+        <h1 style={S.h1}>Report Library</h1>
+        <p style={S.sub}>Archive of every strategic memo · versioned · filterable · exportable. Review &amp; approve in the Dossier.</p>
       </header>
 
       <div style={S.filters}>
@@ -81,12 +87,11 @@ export default function ReportsLibrary() {
                 <td style={S.td}>v{m.version}</td>
                 <td style={S.td}>{m.provider_used || '—'}</td>
                 <td style={S.td}><span style={S.conf}>{m.confidence_level || '—'}</span></td>
+                <td style={S.td}><span style={{ ...S.statusBadge, ...statusTone(m.status) }}>{m.status}</span></td>
                 <td style={S.td}>
-                  <select style={S.statusSel} value={m.status} onChange={e => setStatus(m.id, e.target.value)}>
-                    {STATUS_OPTS.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  <Link href={`/admin/hearst/dossier?memo=${m.id}`} style={S.reviewLink}>Review in Dossier →</Link>
+                  <a style={S.pdf} href={`/api/admin/hearst/strategic-memos/${m.id}/pdf`} target="_blank" rel="noreferrer">PDF ↓</a>
                 </td>
-                <td style={S.td}><a style={S.pdf} href={`/api/admin/hearst/strategic-memos/${m.id}/pdf`} target="_blank" rel="noreferrer">PDF ↓</a></td>
               </tr>
             ))}
           </tbody>
@@ -111,7 +116,8 @@ const S = {
   link: { color: 'var(--cp-accent)', textDecoration: 'none' },
   muted: { color: 'var(--cp-text-faint)' },
   conf: { fontWeight: 600 },
-  statusSel: { padding: '3px 6px', borderRadius: 6, border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-body)', fontSize: 12 },
+  statusBadge: { display: 'inline-block', padding: '2px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 },
+  reviewLink: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 600, marginRight: 14, whiteSpace: 'nowrap' },
   pdf: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 600 },
   err: { padding: 12, borderRadius: 8, background: 'var(--cp-error-bg, #3a1a1f)', color: 'var(--cp-text-body)', marginBottom: 12 },
   empty: { padding: 24, color: 'var(--cp-text-muted)', textAlign: 'center' },
