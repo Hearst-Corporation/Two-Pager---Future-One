@@ -549,7 +549,7 @@ export default function StrategicMemoModal(_legacyProps) {
                   return <span style={{ ...S.tag, ...tone }}>{tag || 'NO_LIVE_DATA'}</span>;
                 };
                 return (
-                  <Section id="live-intel" label="Live Intelligence Layer">
+                  <Section id="live-intel" label="Infrastructure Intelligence">
                     {li ? (
                       <>
                         <div style={S.liveRow}>

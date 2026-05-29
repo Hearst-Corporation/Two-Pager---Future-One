@@ -27,6 +27,7 @@ import {
 import { kimi, KIMI_MODEL, kimiChatStream } from "@/lib/llm/kimi";
 import { buildOracleSystemPrompt, inferOracleContextFromPath } from "@/lib/oracle-system-prompt";
 import { getSessionProfile } from "@/lib/supabase-server";
+import { isSafeDemoMode, DEMO_DISABLED_RESPONSE } from "@/lib/demo-mode";
 import { getAdminChatMode, insertLlmRun } from "@/lib/review-mode/supabase-helpers";
 import {
   parseTuningCommand,
@@ -154,6 +155,13 @@ function genId(): string {
 }
 
 export async function POST(req: Request) {
+  // Wave 1 — SAFE_DEMO_MODE: the cockpit chat is ungrounded and can fabricate
+  // figures. Disable it during presentations.
+  if (isSafeDemoMode()) {
+    return new Response(JSON.stringify(DEMO_DISABLED_RESPONSE), {
+      status: 503, headers: { "content-type": "application/json" },
+    });
+  }
   // ── Parse body ──────────────────────────────────────────────────────────
   let raw: unknown;
   try {

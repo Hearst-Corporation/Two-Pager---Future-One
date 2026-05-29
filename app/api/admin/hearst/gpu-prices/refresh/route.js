@@ -21,6 +21,7 @@
 import { NextResponse } from 'next/server';
 import { requireProfile, getAdminClient } from '@/lib/supabase-admin.js';
 import { runDailyRefresh } from '@/lib/oracle-live/refresh-pipeline.js';
+import { isSafeDemoMode, DEMO_DISABLED_RESPONSE } from '@/lib/demo-mode';
 
 // ─── Rate limiter (in-memory, per-actor, production only) ────────────────────
 
@@ -51,6 +52,9 @@ function checkRateLimit(actorId) {
 // ─── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(req) {
+  // Wave 1 — SAFE_DEMO_MODE: disable the live refresh trigger during presentations.
+  if (isSafeDemoMode()) return NextResponse.json(DEMO_DISABLED_RESPONSE, { status: 503 });
+
   // Auth — editor role required for write/trigger operations.
   const auth = await requireProfile('editor');
   if (auth instanceof NextResponse) return auth;

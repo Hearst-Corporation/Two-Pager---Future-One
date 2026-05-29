@@ -14,6 +14,7 @@
 import { randomUUID } from 'node:crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { authedWrite } from '@/lib/supabase-admin';
+import { isSafeDemoMode, DEMO_DISABLED_RESPONSE } from '@/lib/demo-mode';
 import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
 import { detectAlerts } from '@/lib/hearst-alerts';
 import { TOOL_DEFS, runTool } from '@/lib/hearst-advisor-tools';
@@ -226,6 +227,9 @@ async function saveConversation(supa, { id, messages, title }) {
 // ──────────────────────────────────────────────────────────────────────────
 
 export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => {
+  // Wave 1 — SAFE_DEMO_MODE: disable the advisor during presentations.
+  if (isSafeDemoMode()) return NextResponse.json(DEMO_DISABLED_RESPONSE, { status: 503 });
+
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
 
@@ -297,11 +301,16 @@ export const POST = withValidation(AdvisorRequestSchema, async (req, parsed) => 
   // ── ORACLE constitutional reasoning layer (Sprint 0) ───────────────
   // Inséré en tête du persona Advisor : aligne les 11 sections, 6 perspectives,
   // stakeholder/region/overlays. Cache_control ephemeral ensure prompt-caching.
+  // Wave 1 (C3): `body` was never declared — referencing it threw a
+  // ReferenceError on every request, taking the advisor offline. The validated
+  // request object is `parsed`; optional-chaining keeps these undefined-safe
+  // (AdvisorRequestSchema is .strict() with no `oracle` key today, so these
+  // fall back to the inferOracleContextFromPath defaults — intended behavior).
   const oracleCtx = {
     ...inferOracleContextFromPath('/admin/hearst'),
-    stakeholder: body?.oracle?.stakeholder,
-    region: body?.oracle?.region,
-    overlays: body?.oracle?.overlays,
+    stakeholder: parsed?.oracle?.stakeholder,
+    region: parsed?.oracle?.region,
+    overlays: parsed?.oracle?.overlays,
     brevity: 'standard',
     surface: 'hearst-advisor',
     product_context: 'Hearst Oracle — investment simulator + CRM pipeline',

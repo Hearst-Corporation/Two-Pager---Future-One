@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { requireRowOwnership } from '@/lib/auth-guards';
+import { validateUpload } from '@/lib/upload-validation';
 
 const BUCKET = 'crm-documents';
 
@@ -38,12 +39,23 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Missing file' }, { status: 400 });
   }
 
+  // Wave 1 (C15): reject oversized files before buffering them into memory.
+  if (typeof file.size === 'number') {
+    const sizeCheck = validateUpload({ size: file.size, type: file.type });
+    if (!sizeCheck.ok) return NextResponse.json({ error: sizeCheck.error }, { status: sizeCheck.status });
+  }
+
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const path = `${folder}/${Date.now()}_${safeName}`;
   const buf = Buffer.from(await file.arrayBuffer());
 
+  // Wave 1 (C15): enforce size + MIME allowlist + magic-byte match. The
+  // declared content-type is no longer trusted blindly.
+  const upCheck = validateUpload({ size: buf.length, type: file.type, buffer: buf });
+  if (!upCheck.ok) return NextResponse.json({ error: upCheck.error }, { status: upCheck.status });
+
   const { error: upErr } = await supa.storage.from(BUCKET).upload(path, buf, {
-    contentType: file.type || 'application/octet-stream',
+    contentType: upCheck.mime,
     upsert: false,
   });
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });

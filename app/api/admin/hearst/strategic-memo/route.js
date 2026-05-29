@@ -22,6 +22,12 @@ import { buildIntelligenceBrief } from '@/lib/oracle-intelligence';
 import { getGpuPricingBrief, getEnergyBrief, getInfrastructureSignals, getLiveInfrastructureBrief } from '@/lib/oracle-live';
 import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from '@/lib/oracle-visualization';
 import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
+import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, computeConfidenceBlock } from '@/lib/memo-confidence';
+
+// Wave 1 (C18) — the LLM cascade (4 Hypercli models → Claude → OpenAI) can run
+// several minutes in the worst case. Without this the route inherits the Vercel
+// default (~10-15s) and 504s mid-generation on any fallback. 300s = plan max.
+export const maxDuration = 300;
 
 const RL_WINDOW = 60_000;
 const RL_MAX = 5;
@@ -279,12 +285,28 @@ export async function POST(req) {
     gpu_sku: gpuSku,
   });
 
-  // ── Live intelligence layer (Sprint 3) ────────────────────────────
-  const liveBrief = {
-    gpu_pricing: getGpuPricingBrief({ region: oracleCtx.region || 'qatar' }),
-    energy: getEnergyBrief({ region: oracleCtx.region || 'qatar', archetype_id: archetypeId }),
-    signals: getInfrastructureSignals({ region: oracleCtx.region || 'qatar', archetype_id: archetypeId, min_severity: 'medium' }),
-  };
+  // ── Infrastructure intelligence layer (live where available) ───────
+  // Wave 1 (C1): these briefs are async — they MUST be awaited. Previously they
+  // were assigned unresolved, so JSON.stringify produced {} and every "live"
+  // figure was hallucinated. Await all three, then assert none stayed a Promise.
+  const [gpuPricing, energyBrief, signalBrief] = await Promise.all([
+    getGpuPricingBrief({ region: oracleCtx.region || 'qatar' }),
+    getEnergyBrief({ region: oracleCtx.region || 'qatar', archetype_id: archetypeId }),
+    getInfrastructureSignals({ region: oracleCtx.region || 'qatar', archetype_id: archetypeId, min_severity: 'medium' }),
+  ]);
+  const liveBrief = { gpu_pricing: gpuPricing, energy: energyBrief, signals: signalBrief };
+  assertNoPromises(liveBrief, 'liveBrief');
+
+  // ── Wave 1 (C7 + C11/C12) — server-computed confidence + freshness ─
+  // Computed from real trust/freshness scores on the selected datapoints, BEFORE
+  // the LLM runs, and re-applied after parse so the model cannot override them.
+  const computedConfidence = computeConfidenceBlock(intelligenceBrief.datapoints);
+  const dataFreshness = computeDataFreshness(intelligenceBrief.datapoints);
+  // Surface a per-datapoint freshness status to the model so it can label stale
+  // figures honestly instead of quoting year-old numbers as current.
+  intelligenceBrief.datapoints = intelligenceBrief.datapoints.map(d => ({
+    ...d, freshness_status: freshnessStatusFromTimestamp(d.timestamp),
+  }));
   const visualization = {
     floorplan: build2DDiagramSpec(payload),
     topology:  buildTopologySpec(payload),
@@ -318,8 +340,16 @@ export async function POST(req) {
     '',
     JSON.stringify(intelligenceBrief, null, 2),
     '',
-    '── Live intelligence layer (Sprint 3) ──',
-    'These are real-time signals fetched at memo generation time. Cite freshness tags and infrastructure signals in the relevant sections (live_intelligence block). If data is unavailable, surface it as a known unknown rather than fabricating a value.',
+    '── Authoritative confidence (computed server-side — DO NOT alter) ──',
+    'These values are computed from datapoint trust + freshness scores. Copy confidence_block.confidence_level and confidence_block.source_density VERBATIM from here. You MAY write estimation_quality and known_unknowns as explanation, but you must NOT invent the confidence level or source density.',
+    JSON.stringify(computedConfidence, null, 2),
+    '',
+    '── Data freshness (computed server-side — DO NOT alter) ──',
+    `Display "Data as of ${dataFreshness.data_as_of}" prominently in the memo. Overall data status: ${dataFreshness.overall_status}. Never present a STALE or EXPIRED datapoint as current — label any dated figure explicitly (e.g. "as of <date>, may have moved").`,
+    JSON.stringify(dataFreshness, null, 2),
+    '',
+    '── Infrastructure intelligence (curated benchmarks + live data where available) ──',
+    'These are infrastructure intelligence signals. Cite freshness tags and signals in the relevant sections (live_intelligence block). Where live data is unavailable, surface it as a known unknown rather than fabricating a value. Do not describe figures as "real-time" unless the freshness_tag is FRESH.',
     `Audience for this memo: ${audience}. Use the explainability_seed jargon_translations to simplify technical terms in the explainability section.`,
     `- explainability.simplified_takeaways MUST exclude every term flagged by lib/oracle-explainability.detectJargon() for the chosen audience. Re-write any takeaway that contains banned jargon.`,
     `- explainability.why_this_recommendation MUST start with "We recommend X because Y supported by [datapoint_id Z]." Not "This is an opportunity to..."`,
@@ -359,6 +389,23 @@ export async function POST(req) {
         model_used,
       }, { status: 502 });
     }
+
+    // ── Wave 1 (C7) — overwrite model-graded confidence with server values.
+    // The LLM keeps estimation_quality + known_unknowns (explanation), but
+    // confidence_level / source_density now ORIGINATE from code, not the model.
+    memo.confidence_block = {
+      ...(memo.confidence_block || {}),
+      confidence_level: computedConfidence.confidence_level,
+      source_density: computedConfidence.source_density,
+      mean_trust_score: computedConfidence.mean_trust_score,
+      mean_freshness_score: computedConfidence.mean_freshness_score,
+      computed_by: 'server',
+    };
+    if (memo.executive_summary) {
+      memo.executive_summary.overall_confidence = computedConfidence.confidence_level;
+    }
+    // ── Wave 1 (C11/C12) — attach authoritative freshness to the memo.
+    memo.data_freshness = dataFreshness;
 
     // ── Post-Kimi server-side quality checks (Sprint 3.1) ─────────────
     const bannedPhrases = [
@@ -421,6 +468,9 @@ export async function POST(req) {
       },
       // Strip raw_excerpt before shipping to client (debug-only HTML payload).
       live_intelligence: sanitizeLiveBriefForClient(liveBrief),
+      // Wave 1 (C7 + C11/C12) — server-authoritative confidence + freshness.
+      confidence: computedConfidence,
+      data_freshness: dataFreshness,
       visualization,
       explainability_seed,
       audience,

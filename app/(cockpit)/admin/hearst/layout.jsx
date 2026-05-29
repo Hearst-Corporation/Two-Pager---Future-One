@@ -10,6 +10,7 @@ import ChatToggleFAB from '@/components/hearst/ChatToggleFAB';
 import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
 import MemoJobBadge from '@/components/hearst/MemoJobBadge';
 import MemoToast from '@/components/hearst/MemoToast';
+import DemoModeBadge from '@/components/hearst/DemoModeBadge';
 import { HubSessionBridge } from '@/components/HubSessionBridge';
 import { AdminReviewControls } from '@/components/admin/AdminReviewControls';
 import { ChatIdPersistor } from '@/components/admin/ChatIdPersistor';
@@ -48,6 +49,7 @@ export default function HearstLayout({ children }) {
         <StrategicMemoModal />
         <MemoJobBadge />
         <MemoToast />
+        <DemoModeBadge />
       </CockpitShell>
     </SimulationProvider>
   );

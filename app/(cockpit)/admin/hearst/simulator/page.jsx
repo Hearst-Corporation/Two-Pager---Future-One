@@ -60,7 +60,11 @@ export default function SimulatorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [uiMode, setUiMode] = useState('simple');
+  // Wave 1 (C17): default to 'pro' (English) instead of 'simple'. The
+  // SimpleWizard novice flow is still French-only; until it is translated it
+  // must not be the first screen an English/Arabic-speaking stakeholder sees.
+  // A returning user who explicitly chose 'simple' is still respected below.
+  const [uiMode, setUiMode] = useState('pro');
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = window.localStorage.getItem('hearst.simulator.uiMode');

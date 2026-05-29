@@ -20,6 +20,7 @@
 
 import { NextResponse } from 'next/server';
 import { requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { isSafeDemoMode, DEMO_DISABLED_RESPONSE } from '@/lib/demo-mode';
 import { kimi, KIMI_MODEL, kimiChatCompletion } from '@/lib/llm/kimi';
 import { PUBLIC_SOURCES_LIBRARY } from '@/lib/hearst-constants';
 
@@ -269,6 +270,9 @@ STYLE DE RÉPONSE :
 // Handler
 // ────────────────────────────────────────────────────────────
 export async function POST(req) {
+  // Wave 1 — SAFE_DEMO_MODE: disable the agent chat during presentations.
+  if (isSafeDemoMode()) return NextResponse.json(DEMO_DISABLED_RESPONSE, { status: 503 });
+
   const auth = await requireProfile('viewer');
   if (auth instanceof NextResponse) return auth;
 

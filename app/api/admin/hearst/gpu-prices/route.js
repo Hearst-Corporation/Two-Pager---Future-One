@@ -21,6 +21,7 @@
 import { NextResponse } from 'next/server';
 import { requireProfile } from '@/lib/supabase-admin';
 import { getGpuPricingBrief, GPU_SKUS, PROVIDERS } from '@/lib/oracle-live/gpu-pricing.js';
+import { isSafeDemoMode, DEMO_DISABLED_RESPONSE } from '@/lib/demo-mode';
 
 // ─── Rate limiter (in-memory, per-actor, production only) ────────────────────
 
@@ -60,6 +61,9 @@ function checkRateLimit(actorId) {
 // ─── Route handler ───────────────────────────────────────────────────────────
 
 export async function GET(req) {
+  // Wave 1 — SAFE_DEMO_MODE: disable the gpu-prices surface during presentations.
+  if (isSafeDemoMode()) return NextResponse.json(DEMO_DISABLED_RESPONSE, { status: 503 });
+
   // Auth — requires at minimum viewer role.
   const auth = await requireProfile('viewer');
   if (auth instanceof NextResponse) return auth;
