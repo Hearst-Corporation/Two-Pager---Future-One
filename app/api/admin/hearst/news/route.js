@@ -3,7 +3,8 @@
 // Phase 2 — list des signaux marché ingérés par /api/admin/hearst/news/refresh.
 // Query params :
 //   - limit        : 1-100 (default 25)
-//   - min_score    : 1-5  (default 1)
+//   - min_score    : 1-5  (default 3 — institutional relevance floor; the
+//                    Executive dashboard shows infrastructure signals only)
 //   - source       : filtre par source ('dcd', 'nvidia', 'toms', ...)
 //   - category     : filtre par category
 //   - impacts      : filtre par impacts_metric
@@ -19,7 +20,7 @@ export async function GET(req) {
 
   const { searchParams } = new URL(req.url);
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
-  const minScore = Math.max(1, Math.min(5, parseInt(searchParams.get('min_score') || '1', 10) || 1));
+  const minScore = Math.max(1, Math.min(5, parseInt(searchParams.get('min_score') || '3', 10) || 3));
   const source = searchParams.get('source');
   const category = searchParams.get('category');
   const impacts = searchParams.get('impacts');
@@ -29,6 +30,10 @@ export async function GET(req) {
     .from('hearst_market_signals')
     .select('id, source, source_label, title, url, summary, relevance_score, category, impacts_metric, published_at, fetched_at')
     .gte('relevance_score', minScore)
+    // Institutional relevance first — rank by the score Kimi computed at
+    // ingestion (previously discarded; the panel showed the most RECENT items
+    // regardless of relevance, surfacing off-topic consumer-tech news).
+    .order('relevance_score', { ascending: false, nullsFirst: false })
     .order('published_at', { ascending: false, nullsFirst: false })
     .order('fetched_at',   { ascending: false })
     .limit(limit);

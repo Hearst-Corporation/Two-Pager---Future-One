@@ -1,7 +1,7 @@
 // POST /api/admin/hearst/news/refresh
 //
 // Phase 2 — Brief news scraper.
-// Fetch 3 flux RSS publics + envoie chaque item à Kimi (Hypercli) pour scoring
+// Fetch les flux RSS infra + envoie chaque item à Kimi (Hypercli) pour scoring
 // de pertinence (1-5) + résumé court + classification (category, impacts_metric),
 // puis upsert dans crm.hearst_market_signals (unique sur URL).
 //
@@ -16,11 +16,15 @@ import { NextResponse } from 'next/server';
 import { requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { kimi, KIMI_MODEL, kimiChatCompletion } from '@/lib/llm/kimi';
 
+// Institutional relevance: infrastructure-grade sources only.
+// Ars Technica + The Verge REMOVED — general consumer-tech feeds (cars, space,
+// gadgets, gaming) that surfaced off-topic items (Audi RS5, rocket explosion) to
+// a sovereign DC-investment board. NVIDIA = core GPU/AI-infra (KEEP). Tom's
+// Hardware kept but DOWNRANKED by the read-path relevance floor (min_score>=3)
+// so its consumer/gaming noise never reaches the Executive dashboard.
 const FEEDS = [
   { source: 'nvidia',    label: 'NVIDIA Blog',          url: 'https://blogs.nvidia.com/feed/' },
   { source: 'toms',      label: "Tom's Hardware",       url: 'https://www.tomshardware.com/feeds/all' },
-  { source: 'arstech',   label: 'Ars Technica',         url: 'https://feeds.arstechnica.com/arstechnica/index' },
-  { source: 'theverge',  label: 'The Verge',            url: 'https://www.theverge.com/rss/index.xml' },
 ];
 
 const MAX_ITEMS_PER_FEED = 10;
