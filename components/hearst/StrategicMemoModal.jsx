@@ -19,6 +19,13 @@
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import ScenarioVisualizer from '@/components/hearst/ScenarioVisualizer';
+import {
+  useMemoJob,
+  startMemoJob,
+  hideMemoModal,
+  formatElapsed,
+  estimateCurrentStage,
+} from '@/lib/hearst-memo-job-store';
 
 const CONFIDENCE_TONE = {
   HIGH:   { color: 'var(--ct-status-success)',  bg: 'var(--ct-status-success-soft)',  border: 'var(--ct-status-success-border)' },
@@ -54,6 +61,62 @@ function Section({ id, label, defaultOpen = false, children }) {
       </button>
       {open && <div style={S.sectionBody}>{children}</div>}
     </section>
+  );
+}
+
+/**
+ * Timeline live affichée pendant le loading.
+ *
+ * Montre :
+ *   - Temps écoulé (mm:ss), mis à jour chaque seconde via le store
+ *   - Stage estimé dans la cascade Hypercli (kimi-k2.6 → k2.5 → glm-5 → minimax-m2.5)
+ *   - Hint : la modale peut être fermée, le job continue en background
+ */
+function MemoTimeline({ elapsedMs, cascade }) {
+  const currentStage = estimateCurrentStage(elapsedMs);
+  return (
+    <div style={S.timelineWrap}>
+      <div style={S.timelineHeader}>
+        <span style={S.timelineSpinner} />
+        <span style={S.timelineLabel}>Generating strategic memo…</span>
+        <span style={S.timelineElapsed}>{formatElapsed(elapsedMs)}</span>
+      </div>
+      <div style={S.timelineCascade}>
+        {cascade.map((model, i) => {
+          const idx = cascade.indexOf(currentStage);
+          const isPast = i < idx;
+          const isActive = model === currentStage;
+          return (
+            <div key={model} style={S.timelineStep}>
+              <span
+                style={{
+                  ...S.timelineDot,
+                  background: isActive
+                    ? 'var(--cp-accent-maroon, var(--cp-accent))'
+                    : isPast
+                      ? 'var(--cp-text-muted)'
+                      : 'var(--cp-border)',
+                  ...(isActive ? S.timelineDotActive : {}),
+                }}
+              />
+              <span
+                style={{
+                  ...S.timelineModel,
+                  color: isActive ? 'var(--cp-text-strong)' : 'var(--cp-text-muted)',
+                  fontWeight: isActive ? 700 : 400,
+                }}
+              >
+                {model}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div style={S.timelineHint}>
+        Vous pouvez fermer cette fenêtre — le memo continue d'être généré en arrière-plan.
+        Vous serez notifié quand il sera prêt.
+      </div>
+    </div>
   );
 }
 
@@ -120,55 +183,39 @@ function toMarkdown(memo, meta) {
   return lines.join('\n');
 }
 
-export default function StrategicMemoModal({ open, onClose, payload, oracle, userQuestion, audience: audienceProp, title = 'Strategic Memo' }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
-  const [memo, setMemo]       = useState(null);
-  const [meta, setMeta]       = useState(null);
+/**
+ * StrategicMemoModal — view layer pour le store memo-job global.
+ *
+ * Le state (loading / memo / error / elapsed) est désormais dans
+ * lib/hearst-memo-job-store.js → le job survit à la fermeture de la modale,
+ * un badge bottom-right reprend le relais visuel, et un toast s'affiche au
+ * done.
+ *
+ * Props legacy `open` / `onClose` / `payload` / `oracle` / `userQuestion`
+ * / `audience` / `title` restent acceptés pour ne pas casser les callers,
+ * mais ils sont ignorés silencieusement — c'est `startMemoJob({...})` qui
+ * pilote l'ouverture et le payload désormais.
+ */
+export default function StrategicMemoModal(_legacyProps) {
+  const job = useMemoJob();
+  const open    = job.modal_visible;
+  const loading = job.status === 'loading';
+  const error   = job.status === 'error' ? job.error : null;
+  const memo    = job.result?.memo || null;
+  const meta    = job.result?.meta || null;
+  const title   = job.request?.title || 'Strategic Memo';
 
-  const fetchMemo = useCallback(async () => {
-    setLoading(true); setError(null); setMemo(null); setMeta(null);
-    try {
-      const r = await fetch('/api/admin/hearst/strategic-memo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload, oracle, user_question: userQuestion, audience: audienceProp }),
-      });
-      if (!r.ok) {
-        const body = await r.json().catch(() => ({}));
-        if (r.status === 429) throw new Error('Rate limited. Wait a minute and retry.');
-        throw new Error(body.error || `HTTP ${r.status}`);
-      }
-      const data = await r.json();
-      setMemo(data.memo);
-      setMeta({
-        model_used: data.model_used,
-        generated_at: data.generated_at,
-        oracle_ctx: data.oracle_ctx,
-        intelligence_brief: data.intelligence_brief || null,
-        live_intelligence: data.live_intelligence || null,
-        visualization: data.visualization || null,
-        explainability_seed: data.explainability_seed || null,
-        audience: data.audience || audienceProp || 'investor',
-      });
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [payload, oracle, userQuestion, audienceProp]);
+  const refetch = useCallback(() => {
+    if (job.request) startMemoJob(job.request);
+  }, [job.request]);
 
-  useEffect(() => {
-    if (open && payload && !memo && !loading) fetchMemo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
+  // ESC ferme la modale (sans tuer le job)
   useEffect(() => {
     if (!open) return;
-    function onKey(e) { if (e.key === 'Escape') onClose?.(); }
+    function onKey(e) { if (e.key === 'Escape') hideMemoModal(); }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open]);
 
   const md = useMemo(() => toMarkdown(memo, meta), [memo, meta]);
 
@@ -188,8 +235,10 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
 
   if (!open) return null;
 
+  // Backdrop click : ferme la modale visuellement mais NE TUE PAS le job en cours.
+  // Le badge bottom-right + toast prennent le relais. Click intérieur stopPropagation.
   return (
-    <div style={S.backdrop} role="dialog" aria-label={title} onClick={() => onClose?.()}>
+    <div style={S.backdrop} role="dialog" aria-label={title} onClick={hideMemoModal}>
       <div style={S.modal} onClick={e => e.stopPropagation()}>
         <header style={S.head}>
           <div>
@@ -251,16 +300,16 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
             )}
           </div>
           <div style={S.actions}>
-            <button type="button" onClick={fetchMemo} disabled={loading} style={S.actionBtn} title="Regenerate">↻</button>
+            <button type="button" onClick={refetch} disabled={loading} style={S.actionBtn} title="Regenerate">↻</button>
             <button type="button" onClick={copyMd} disabled={!memo} style={S.actionBtn} title="Copy markdown">⧉</button>
             <button type="button" onClick={downloadMd} disabled={!memo} style={S.actionBtn} title="Download .md">↓</button>
             <button type="button" onClick={printMemo} disabled={!memo} style={S.actionBtn} title="Print / Save PDF">⎙</button>
-            <button type="button" onClick={() => onClose?.()} style={S.closeBtn} aria-label="Close">×</button>
+            <button type="button" onClick={hideMemoModal} style={S.closeBtn} aria-label="Close (job continues in background)">×</button>
           </div>
         </header>
 
         <div style={S.body}>
-          {loading && <div style={S.loading}>Generating strategic memo… (this can take 30–90s while Hypercli routes through the cascade)</div>}
+          {loading && <MemoTimeline elapsedMs={job.elapsed_ms} cascade={job.cascade} />}
           {error && <div style={S.error}>Error : {error}</div>}
           {memo && (
             <article style={S.memo}>
@@ -669,6 +718,79 @@ const S = {
 
   body: { padding: 20, overflowY: 'auto', flex: 1 },
   loading: { padding: 32, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 13 },
+
+  // Timeline (loading state) — visible transparency
+  timelineWrap: {
+    padding: '24px 20px',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 12,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+  },
+  timelineHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    fontSize: 13,
+    fontWeight: 700,
+    color: 'var(--cp-text-primary)',
+  },
+  timelineSpinner: {
+    display: 'inline-block',
+    width: 14,
+    height: 14,
+    borderRadius: '50%',
+    border: '2px solid var(--cp-border)',
+    borderTopColor: 'var(--cp-accent-maroon, var(--cp-accent))',
+    animation: 'memo-spin 0.9s linear infinite',
+  },
+  timelineLabel: { flex: 1 },
+  timelineElapsed: {
+    fontFamily: 'ui-monospace, monospace',
+    fontSize: 12,
+    fontWeight: 800,
+    color: 'var(--cp-text-strong)',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  timelineCascade: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 0,
+    flexWrap: 'wrap',
+  },
+  timelineStep: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    paddingRight: 16,
+  },
+  timelineDot: {
+    display: 'inline-block',
+    width: 10,
+    height: 10,
+    borderRadius: '50%',
+    flexShrink: 0,
+    transition: 'background 200ms ease',
+  },
+  timelineDotActive: {
+    boxShadow: '0 0 0 4px color-mix(in srgb, var(--cp-accent) 25%, transparent)',
+    animation: 'memo-pulse 1.2s ease-in-out infinite',
+  },
+  timelineModel: {
+    fontSize: 11,
+    fontFamily: 'ui-monospace, monospace',
+    letterSpacing: 0.2,
+  },
+  timelineHint: {
+    fontSize: 11,
+    color: 'var(--cp-text-muted)',
+    fontStyle: 'italic',
+    lineHeight: 1.5,
+    paddingTop: 8,
+    borderTop: '1px dashed var(--cp-border)',
+  },
   error: { padding: 16, background: 'var(--ct-status-danger-soft)', color: 'var(--ct-status-danger)', border: '1px solid var(--ct-status-danger-border)', borderRadius: 10, fontSize: 12, fontWeight: 600 },
 
   memo: { display: 'flex', flexDirection: 'column', gap: 16 },

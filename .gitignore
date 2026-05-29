@@ -41,6 +41,7 @@ test-*.png
 qa-*.png
 qa-fix-*.png
 qa-validate-*.png
+memo-*.png
 *.tgz
 .env.local.bak
 

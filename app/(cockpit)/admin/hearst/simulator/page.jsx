@@ -14,7 +14,7 @@ import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-struc
 import SectionTabs from '@/components/hearst/SectionTabs';
 import { SIMULATOR_PARAM_EVENT } from '@/components/hearst/ChatContainer';
 import SimpleWizard from '@/components/hearst/simulator/SimpleWizard';
-import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
+import { startMemoJob } from '@/lib/hearst-memo-job-store';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
@@ -105,7 +105,7 @@ export default function SimulatorPage() {
   const [simError, setSimError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [savingState, setSavingState] = useState('idle');
-  const [memoOpen, setMemoOpen] = useState(false);
+  // memo job piloté par le store global — plus de state local
   const [projectId, setProjectId] = useState(null);
   const [savedScenarioId, setSavedScenarioId] = useState(null);
   const debounceRef = useRef(null);
@@ -434,7 +434,11 @@ export default function SimulatorPage() {
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: -16 }}>
           <button
             type="button"
-            onClick={() => setMemoOpen(true)}
+            onClick={() => startMemoJob({
+              payload: simResult,
+              title: 'Strategic Memo — Simulator scenario',
+              scenarioLabel: 'Simulator scenario',
+            })}
             style={{
               padding: '10px 22px',
               background: 'var(--cp-accent-maroon, var(--cp-accent))',
@@ -452,13 +456,7 @@ export default function SimulatorPage() {
           </button>
         </div>
       )}
-
-      <StrategicMemoModal
-        open={memoOpen}
-        onClose={() => setMemoOpen(false)}
-        payload={simResult}
-        title="Strategic Memo — Simulator scenario"
-      />
+      {/* Modal/badge/toast mountés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
       </>)}
     </div>
   );

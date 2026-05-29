@@ -20,7 +20,7 @@ import { DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
 import { GPU_CATALOG } from '@/lib/hearst-gpu-catalog';
 import { FIT_MATRIX } from '@/lib/hearst-fit-matrix';
 import SectionTabs from '@/components/hearst/SectionTabs';
-import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
+import { startMemoJob } from '@/lib/hearst-memo-job-store';
 
 const TABS = [
   { id: 'pipeline',  label: 'Pipeline' },
@@ -847,7 +847,7 @@ function TraceTab() {
   const [geography, setGeography] = useState('qatar');
   const [trace, setTrace] = useState(null);
   const [tracing, setTracing] = useState(false);
-  const [memoOpen, setMemoOpen] = useState(false);
+  // memo job piloté par le store global — plus de state local
   const [traceError, setTraceError] = useState(null);
 
   async function runTrace() {
@@ -943,7 +943,11 @@ function TraceTab() {
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 16 }}>
             <button
               type="button"
-              onClick={() => setMemoOpen(true)}
+              onClick={() => startMemoJob({
+                payload: trace,
+                title: 'Strategic Memo — Engine live trace',
+                scenarioLabel: 'Engine live trace',
+              })}
               style={{
                 padding: '10px 22px',
                 background: 'var(--cp-accent-maroon, var(--cp-accent))',
@@ -961,12 +965,7 @@ function TraceTab() {
             </button>
           </div>
 
-          <StrategicMemoModal
-            open={memoOpen}
-            onClose={() => setMemoOpen(false)}
-            payload={trace}
-            title="Strategic Memo — Engine live trace"
-          />
+          {/* Modal/badge/toast mountés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
 
 
           <h3 style={S.h3}>Source map ({sourceMapEntries.length} fields resolved)</h3>

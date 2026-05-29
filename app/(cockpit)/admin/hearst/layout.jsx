@@ -7,6 +7,9 @@ import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleBottomBar } from '@/components/OracleBottomBar';
 import HearstLeftRail from '@/components/hearst/HearstLeftRail';
 import ChatToggleFAB from '@/components/hearst/ChatToggleFAB';
+import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
+import MemoJobBadge from '@/components/hearst/MemoJobBadge';
+import MemoToast from '@/components/hearst/MemoToast';
 import { HubSessionBridge } from '@/components/HubSessionBridge';
 import { AdminReviewControls } from '@/components/admin/AdminReviewControls';
 import { ChatIdPersistor } from '@/components/admin/ChatIdPersistor';
@@ -38,6 +41,13 @@ export default function HearstLayout({ children }) {
         {children}
         <AdminReviewControls />
         <ChatToggleFAB />
+        {/* Strategic Memo : modale + badge persistant + toast pilotés par
+            le store global lib/hearst-memo-job-store.js. Le job survit à
+            la fermeture de la modale, badge bottom-right reprend le relais,
+            toast à la fin. Mountés UNE seule fois ici. */}
+        <StrategicMemoModal />
+        <MemoJobBadge />
+        <MemoToast />
       </CockpitShell>
     </SimulationProvider>
   );
