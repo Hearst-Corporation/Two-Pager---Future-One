@@ -6,6 +6,7 @@ import { CockpitShell } from '@hearst/cockpit-shell';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleBottomBar } from '@/components/OracleBottomBar';
 import HearstLeftRail from '@/components/hearst/HearstLeftRail';
+import ChatToggleFAB from '@/components/hearst/ChatToggleFAB';
 import { HubSessionBridge } from '@/components/HubSessionBridge';
 import { AdminReviewControls } from '@/components/admin/AdminReviewControls';
 import { ChatIdPersistor } from '@/components/admin/ChatIdPersistor';
@@ -36,6 +37,7 @@ export default function HearstLayout({ children }) {
         <OracleBottomBar />
         {children}
         <AdminReviewControls />
+        <ChatToggleFAB />
       </CockpitShell>
     </SimulationProvider>
   );
