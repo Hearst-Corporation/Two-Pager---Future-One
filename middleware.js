@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { safeNextPath } from '@/lib/url-helpers';
+import { safeNextPath, ORACLE_HOME } from '@/lib/url-helpers';
 
 export { safeNextPath };
 
@@ -92,7 +92,7 @@ export async function middleware(req) {
     }
     if (pathname === '/admin/login') {
       const url = req.nextUrl.clone();
-      url.pathname = '/admin';
+      url.pathname = ORACLE_HOME;
       url.search = '';
       return applyNoStore(NextResponse.redirect(url));
     }
@@ -115,10 +115,10 @@ export async function middleware(req) {
   const { data: { user } } = await supa.auth.getUser();
 
   if (PUBLIC_ROUTES.has(pathname) || PUBLIC_API_ROUTES.has(pathname)) {
-    // Already logged in? bounce to /admin (page routes only)
+    // Already logged in? bounce to ORACLE home (page routes only)
     if (user && pathname === '/admin/login') {
       const url = req.nextUrl.clone();
-      url.pathname = '/admin';
+      url.pathname = ORACLE_HOME;
       url.search = '';
       return applyNoStore(NextResponse.redirect(url));
     }

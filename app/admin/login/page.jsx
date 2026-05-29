@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getBrowserClient } from '@/lib/supabase-browser';
+import { ORACLE_HOME } from '@/lib/url-helpers';
 
 export default function LoginPage() {
   return (
@@ -19,7 +20,7 @@ const AUTH_ERROR_MESSAGES = {
 
 function LoginForm() {
   const sp = useSearchParams();
-  const next = sp.get('next') || '/admin';
+  const next = sp.get('next') || ORACLE_HOME;
   const authError = sp.get('auth_error');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

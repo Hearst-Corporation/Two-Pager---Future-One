@@ -41,7 +41,6 @@ export default function FinancialPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tab, setTab] = useState('table');
-  const [exporting, setExporting] = useState(null); // 'xlsx' | 'memo' | null
   const [sensitivityX, setSensitivityX] = useState('target_occupancy_pct');
   const [sensitivityY, setSensitivityY] = useState('electricity_price_mwh');
 
@@ -89,29 +88,9 @@ export default function FinancialPage() {
   if (loading) return <div style={S.loading}>Loading financial model…</div>;
   if (error) return <div style={S.error}>Error: {error}</div>;
 
-  async function handleExport(type) {
-    if (!base) return;
-    setExporting(type);
-    try {
-      const res = await fetch(`/api/admin/hearst/export/${type}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenario_id: base.id, project_id: project?.id }),
-      });
-      if (!res.ok) { alert('Export failed — route not yet implemented'); return; }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = type === 'xlsx'
-        ? `hearst-financial-model-${Date.now()}.xlsx`
-        : `hearst-investment-memo-${Date.now()}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } finally {
-      setExporting(null);
-    }
-  }
+  // Export: the memo PDF lives in the Dossier (the working per-memo PDF route).
+  // Excel/server-side exports are not built yet, so we don't pretend — the
+  // button is disabled with an honest label rather than hitting a 404 route.
 
   // Build chart data from base scenario years
   const chartData = (proj.years || []).map(y => ({
@@ -160,12 +139,16 @@ export default function FinancialPage() {
             </button>
           ))}
           <div style={{ width: 1, background: 'var(--cp-border)', margin: '0 4px' }} />
-          <button onClick={() => handleExport('xlsx')} disabled={!!exporting || !hasProjection} style={{ ...S.exportBtn, opacity: exporting === 'xlsx' ? 0.6 : 1 }}>
-            {exporting === 'xlsx' ? '…' : '⬇ Excel'}
+          <button disabled title="Excel export is not available yet" style={{ ...S.exportBtn, opacity: 0.5, cursor: 'not-allowed' }}>
+            Excel (soon)
           </button>
-          <button onClick={() => handleExport('memo')} disabled={!!exporting || !hasProjection} style={{ ...S.exportBtn, opacity: exporting === 'memo' ? 0.6 : 1 }}>
-            {exporting === 'memo' ? '…' : '⬇ Memo PDF'}
-          </button>
+          <Link
+            href={base ? `/admin/hearst/dossier?scenario=${base.id}` : '/admin/hearst/dossier'}
+            style={{ ...S.exportBtn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+            title="Open this scenario's strategic memo in the Dossier (PDF export available there)"
+          >
+            Memo →
+          </Link>
         </div>
       </div>
 

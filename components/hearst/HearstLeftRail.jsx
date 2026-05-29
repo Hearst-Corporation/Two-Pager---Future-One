@@ -25,6 +25,7 @@ const STORAGE_KEY = 'hearst.left-rail.favorites';
 // Liste des destinations possibles pour les favoris.
 // Le user choisit parmi cette liste dans le modal.
 const ALL_DESTINATIONS = [
+  { href: '/admin/hearst/executive',    label: 'Executive' },
   { href: '/admin/hearst',              label: 'Brief' },
   { href: '/admin/hearst/simulator',    label: 'Simulator' },
   { href: '/admin/hearst/engine',       label: 'Engine' },
@@ -35,8 +36,8 @@ const ALL_DESTINATIONS = [
   { href: '/admin/hearst/deals',        label: 'Deals' },
   { href: '/admin/hearst/contracts',    label: 'Contracts' },
   { href: '/admin/hearst/data-room',    label: 'Data Room' },
+  { href: '/admin/hearst/dossier',      label: 'Dossier' },
   { href: '/admin/hearst/sources',      label: 'Sources' },
-  { href: '/admin/hearst/reports',      label: 'Reports' },
   { href: '/admin/hearst/documents',    label: 'Exports' },
   { href: '/admin/hearst/timeline',     label: 'Timeline' },
   { href: '/admin/hearst/risks',        label: 'Risks' },
