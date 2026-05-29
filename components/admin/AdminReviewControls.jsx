@@ -197,17 +197,17 @@ export function AdminReviewControls() {
 const styles = {
   dock: {
     position: 'fixed',
-    top: 12,
-    // Sit just left of the cockpit-shell right rail (which is ~360-400px wide
-    // when open) so we don't intercept clicks on the chat rail header buttons
-    // (Historique / Réglages / Replier). 420px clears the rail in both
-    // expanded and collapsed states across common viewport widths.
-    right: 420,
+    // Docked at the BOTTOM of the chat rail, just above the message composer —
+    // the only rail zone that never overlaps the chat header icons nor the
+    // (package-rendered) settings panel header. Slim single row. Sits inside
+    // the right rail width via the rail token, right-aligned.
+    bottom: 88,
+    right: 16,
     zIndex: 50,
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    gap: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     fontFamily:
       "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
     pointerEvents: 'auto',
@@ -226,29 +226,30 @@ const styles = {
     background: 'transparent',
     color: 'rgba(255,255,255,0.7)',
     border: 0,
-    padding: '6px 14px',
+    padding: '4px 10px',
     borderRadius: 999,
-    fontSize: 12,
+    fontSize: 11,
     cursor: 'pointer',
     fontWeight: 500,
     letterSpacing: 0.2,
   },
   toggleBtnActive: {
-    background: 'var(--ct-accent, #4361EE)',
+    // Cockpit bordeaux accent (was a stray blue #4361EE / blue glow).
+    background: 'var(--ct-accent, #be123c)',
     color: '#fff',
-    boxShadow: '0 2px 6px rgba(67,97,238,0.4)',
+    boxShadow: '0 2px 6px color-mix(in srgb, var(--ct-accent, #be123c) 45%, transparent)',
   },
   generateBtn: {
     appearance: 'none',
-    background: 'var(--ct-accent, #4361EE)',
+    background: 'var(--ct-accent, #be123c)',
     color: '#fff',
     border: 0,
-    padding: '8px 14px',
+    padding: '6px 12px',
     borderRadius: 8,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 600,
     cursor: 'pointer',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+    boxShadow: '0 6px 18px color-mix(in srgb, var(--ct-accent, #be123c) 30%, transparent)',
   },
   generateBtnDisabled: {
     opacity: 0.6,

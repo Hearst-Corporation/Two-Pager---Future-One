@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Avatar from '@/components/admin/Avatar';
 
 const ROLE_LABEL = { admin: 'Admin', editor: 'Editor', viewer: 'Viewer' };
-const ROLE_COLOR = { admin: '#be123c', editor: '#3b82f6', viewer: '#64748b' };
+const ROLE_COLOR = { admin: 'var(--cp-accent)', editor: 'var(--cp-info)', viewer: '#64748b' };
 
 export default function TeamView({ members, me }) {
   const router = useRouter();

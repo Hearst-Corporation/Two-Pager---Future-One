@@ -121,8 +121,8 @@ export default function ExecutiveDashboard() {
           ))}
         </Panel>
 
-        {/* 6 — Recommended Next Actions */}
-        <Panel title="Recommended Next Actions" wide>
+        {/* 6 — Recommended Next Actions — pairs with Key Risks in a symmetric 2-col row */}
+        <Panel title="Recommended Next Actions">
           {actions.map((a, i) => (
             <Link key={i} href={a.href} style={S.action}>
               <span style={S.actionDot}>→</span>

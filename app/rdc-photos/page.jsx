@@ -188,7 +188,7 @@ export default function RDCPhotosPage() {
 const S = {
   page: {
     minHeight: '100vh',
-    background: '#0a0a0a',
+    background: 'var(--color-dark-surface)',
     color: 'rgba(255,255,255,0.92)',
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     padding: '40px 6vw 80px',
@@ -308,7 +308,7 @@ const S = {
   },
   figure: {
     margin: 0,
-    background: '#141414',
+    background: 'var(--color-dark-surface)',
     border: '1px solid rgba(255,255,255,0.06)',
     borderRadius: 4,
     overflow: 'hidden',
@@ -319,7 +319,7 @@ const S = {
     width: '100%',
     aspectRatio: '4 / 3',
     overflow: 'hidden',
-    background: '#222',
+    background: 'var(--color-gray-800)',
   },
   img: {
     width: '100%',

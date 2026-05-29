@@ -277,7 +277,7 @@ const S = {
     position: 'absolute',
     inset: 0,
     overflow: 'hidden',
-    background: '#0a0a0a',
+    background: 'var(--color-dark-surface)',
     cursor: 'grab',
     fontFamily: '"Inter", -apple-system, sans-serif',
   },
@@ -332,7 +332,7 @@ const S = {
     letterSpacing: 0.3,
   },
   code: {
-    background: '#000',
+    background: 'var(--color-dark-contrast)',
     border: '1px solid rgba(255,255,255,0.1)',
     padding: '12px 14px',
     fontSize: 11,

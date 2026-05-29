@@ -474,8 +474,8 @@ const S = {
     color: 'var(--color-text-muted)',
     flexWrap: 'wrap',
   },
-  healthLive: { color: '#f59e0b' },
-  healthBlocked: { color: '#ef4444' },
+  healthLive: { color: 'var(--cp-warning)' },
+  healthBlocked: { color: 'var(--cp-error)' },
 
   /* DECK HUB */
   deckHub: { marginBottom: 40 },

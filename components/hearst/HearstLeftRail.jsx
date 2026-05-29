@@ -26,7 +26,6 @@ const STORAGE_KEY = 'hearst.left-rail.favorites';
 // Le user choisit parmi cette liste dans le modal.
 const ALL_DESTINATIONS = [
   { href: '/admin/hearst/executive',    label: 'Executive' },
-  { href: '/admin/hearst',              label: 'Brief' },
   { href: '/admin/hearst/simulator',    label: 'Simulator' },
   { href: '/admin/hearst/engine',       label: 'Engine' },
   { href: '/admin/hearst/scenarios',    label: 'Scenarios' },
@@ -98,7 +97,13 @@ export default function HearstLeftRail() {
           {favorites.map(f => {
             const active = pathname === f.href || pathname?.startsWith(f.href + '/');
             return (
-              <div key={f.href} style={S.favItem} role="listitem">
+              <div
+                key={f.href}
+                style={S.favItem}
+                role="listitem"
+                onContextMenu={(e) => { e.preventDefault(); removeFavorite(f.href); }}
+                title={`${f.label} — clic droit pour retirer du rail`}
+              >
                 <Link
                   href={f.href}
                   aria-label={f.label}
@@ -236,15 +241,21 @@ const S = {
   // Modal
   modalBackdrop: {
     position: 'fixed', inset: 0, zIndex: 60,
-    background: 'rgba(0,0,0,0.5)',
+    background: 'rgba(0,0,0,0.65)',
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     padding: 16,
   },
   modal: {
     width: '100%', maxWidth: 440,
-    background: 'var(--cp-surface-1, var(--cp-surface-2))',
-    border: '1px solid var(--cp-border)',
+    // OPAQUE : surface translucide compositée sur le fond profond opaque
+    // (--cp-surface-* seul est ~96% transparent → le contenu transparaissait).
+    background: 'var(--cp-bg-deep, #1A050B)',
+    backgroundImage: 'linear-gradient(var(--cp-surface-2), var(--cp-surface-2))',
+    border: '1px solid var(--cp-border-strong, var(--cp-border))',
     borderRadius: 14,
+    boxShadow: '0 24px 80px -20px rgba(0,0,0,0.7)',
     display: 'flex', flexDirection: 'column',
     maxHeight: '70vh',
   },

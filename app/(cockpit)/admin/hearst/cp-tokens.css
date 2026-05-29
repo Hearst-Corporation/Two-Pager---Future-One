@@ -170,3 +170,85 @@
   --cp-op-qai:        #6366f1;
   --cp-op-qia:        #a855f7;
 }
+
+/* =====================================================================
+   Bottom bar — CANONIQUE, porté tel quel de la référence Cockpit
+   (~/.claude/assets/cockpit/cockpit-template.html §BOTTOM BAR).
+   Remplace l'ancienne pilule inline-styled de OracleBottomBar.
+   Positionnée fixe, centrée sur la zone CONTENU (offset des deux rails
+   via --ct-rail-left / --ct-rail-right) pour ne pas chevaucher le chat.
+   ===================================================================== */
+.ct-bottom-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  /* recentre sur le contenu : décalage = (rail gauche − rail droit) / 2 */
+  transform: translateX(calc(-50% + (var(--ct-rail-left, 88px) - var(--ct-rail-right, 420px)) / 2));
+  z-index: 30;
+  width: max-content;
+  max-width: calc(100% - 48px);
+  padding: 12px 28px;
+  border-radius: 9999px;
+  background: var(--ct-surface-2);
+  border: 1px solid var(--ct-border-strong);
+  backdrop-filter: blur(60px) saturate(110%) brightness(105%);
+  -webkit-backdrop-filter: blur(60px) saturate(110%) brightness(105%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    0 20px 60px -20px rgba(0, 0, 0, 0.6);
+}
+.ct-bottom-bar-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.ct-bottom-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ct-text-body);
+  white-space: nowrap;
+}
+.ct-seg-track {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+.ct-seg-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--ct-text-primary);
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  border-radius: 9999px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background var(--ct-dur-base, 150ms) var(--ct-ease, ease),
+    color var(--ct-dur-base, 150ms) var(--ct-ease, ease);
+}
+.ct-seg-btn:hover { background: rgba(255, 255, 255, 0.05); }
+.ct-seg-btn.active {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Responsive : sous 720px de contenu, on masque le label et on resserre. */
+@media (max-width: 900px) {
+  .ct-bottom-bar { padding: 10px 16px; transform: translateX(-50%); }
+  .ct-bottom-label { display: none; }
+  .ct-seg-btn { padding: 8px 12px; }
+}
