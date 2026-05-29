@@ -146,7 +146,58 @@ Strict rules :
 - Max 5 items per items[] array. Quality over quantity.
 - live_intelligence, visualization, explainability are OPTIONAL blocks — include them if the live layer provided usable data. If a live data field is unavailable, use freshness_tag "NO_LIVE_DATA" and set summary to "No live data available".
 - explainability.audience MUST match the audience provided in the live intelligence layer section.
-- live_intelligence.signals: include only signals actually present in the live brief (do not fabricate).`;
+- live_intelligence.signals: include only signals actually present in the live brief (do not fabricate).
+
+ANTI-GENERIC RULES (must be enforced) :
+- BANNED phrases (the memo MUST NOT use): "transformational", "best-in-class", "unlock", "world-leading", "innovative", "cutting-edge", "industry-leading", "next-generation" (unless quoting a real product name).
+- Every BANNED phrase auto-disqualifies the section. If the LLM uses any of these, it must regenerate.
+- Each metric in key_financial_metrics MUST cite an intelligence_brief.datapoints[].id (not just "ASSUMED"). If no comparable exists in the brief, mark explicitly "no public comparable - LOW VISIBILITY".
+
+EVERY RECOMMENDATION MUST INCLUDE (in recommended_architecture.rationale AND in strategic_opportunities[].execution_path):
+- Why this choice (anchored on a brief datapoint or signal)
+- What alternatives were considered (at least 1)
+- What risk is accepted (specific, not "execution risk")
+- What metric will tell us if we were right (e.g. "DSCR > 1.4 after Year 2 stabilization")
+
+TRADEOFFS MANDATORY (in infrastructure_analysis.tradeoffs AND decision_tensions.verdict) :
+- Each tradeoff explicit, no euphemisms
+- Format: "Choosing X over Y because Z, accepting [specific cost]"
+
+NUMERIC ANCHORING :
+- Every claim about pricing, capex, occupancy, IRR, ramp speed MUST have a number with confidence tag.
+- Replace soft language like "may improve" with "expected to add X-Y bps to IRR under [assumption]".
+- Replace "significant" with the actual % or $ figure.
+
+STAKEHOLDER MATCH :
+- The memo language MUST match oracle_ctx.stakeholder.
+- Sovereign brief → strategic + long-horizon
+- Investor brief → returns + risk + exit
+- Operator brief → contract structure + opex
+- If wrong audience tone, memo is invalid.
+
+EXPLAINABILITY RULES :
+- explainability.simplified_takeaways MUST exclude every term flagged by lib/oracle-explainability.detectJargon() for the chosen audience. Re-write any takeaway that contains banned jargon.
+- explainability.why_this_recommendation MUST start with "We recommend X because Y supported by [datapoint_id Z]." Not "This is an opportunity to..."`;
+
+// Strip raw_excerpt + any debug payload from the live brief before sending to
+// the client. raw_excerpt carries the first 200 chars of provider HTML, useful
+// for server-side debug but pure noise (and a small leak surface) in the API
+// response.
+function sanitizeLiveBriefForClient(brief) {
+  if (!brief || typeof brief !== 'object') return brief;
+  const stripExcerpt = (o) => {
+    if (!o || typeof o !== 'object') return o;
+    const { raw_excerpt, ...rest } = o;
+    return rest;
+  };
+  return {
+    ...brief,
+    gpu_pricing: brief.gpu_pricing && {
+      ...brief.gpu_pricing,
+      prices: (brief.gpu_pricing.prices || []).map(stripExcerpt),
+    },
+  };
+}
 
 function buildScenarioSummary(payload) {
   const { scenario, projection, archetype_outcome, hardware_breakdown, source_map, confidence_score } = payload;
@@ -270,6 +321,8 @@ export async function POST(req) {
     '── Live intelligence layer (Sprint 3) ──',
     'These are real-time signals fetched at memo generation time. Cite freshness tags and infrastructure signals in the relevant sections (live_intelligence block). If data is unavailable, surface it as a known unknown rather than fabricating a value.',
     `Audience for this memo: ${audience}. Use the explainability_seed jargon_translations to simplify technical terms in the explainability section.`,
+    `- explainability.simplified_takeaways MUST exclude every term flagged by lib/oracle-explainability.detectJargon() for the chosen audience. Re-write any takeaway that contains banned jargon.`,
+    `- explainability.why_this_recommendation MUST start with "We recommend X because Y supported by [datapoint_id Z]." Not "This is an opportunity to..."`,
     '',
     JSON.stringify(liveBrief, null, 2),
     '',
@@ -299,6 +352,38 @@ export async function POST(req) {
       }, { status: 502 });
     }
 
+    // ── Post-Kimi server-side quality checks (Sprint 3.1) ─────────────
+    const bannedPhrases = [
+      'transformational', 'best-in-class', 'unlock', 'world-leading',
+      'innovative', 'cutting-edge', 'industry-leading', 'next-generation',
+    ];
+    const memoText = JSON.stringify(memo).toLowerCase();
+    const bannedFound = bannedPhrases.filter(p => memoText.includes(p));
+
+    const hasDatapointCitations = (memo.intelligence_sources?.length || 0) >= 5;
+    const hasTradeoffs = (memo.infrastructure_analysis?.tradeoffs?.length || 0) >= 2;
+    const tensionsAddressed = (memo.decision_tensions?.length || 0) >= 2;
+
+    const gradeScore = [
+      bannedFound.length === 0,
+      hasDatapointCitations,
+      hasTradeoffs,
+      tensionsAddressed,
+    ].filter(Boolean).length;
+    const overall_grade = gradeScore === 4 ? 'A' : gradeScore === 3 ? 'B' : gradeScore === 2 ? 'C' : 'D';
+
+    if (bannedFound.length > 0) {
+      console.warn('[strategic-memo] quality: banned phrases detected:', bannedFound);
+    }
+
+    const memo_quality = {
+      banned_phrases_detected: bannedFound,
+      has_5plus_datapoint_citations: hasDatapointCitations,
+      has_explicit_tradeoffs: hasTradeoffs,
+      tensions_addressed: tensionsAddressed,
+      overall_grade,
+    };
+
     return NextResponse.json({
       memo,
       generated_at: new Date().toISOString(),
@@ -322,10 +407,12 @@ export async function POST(req) {
         absorption: intelligenceBrief.absorption,
         reality_violations: intelligenceBrief.reality_violations,
       },
-      live_intelligence: liveBrief,
+      // Strip raw_excerpt before shipping to client (debug-only HTML payload).
+      live_intelligence: sanitizeLiveBriefForClient(liveBrief),
       visualization,
       explainability_seed,
       audience,
+      memo_quality,
     });
   } catch (e) {
     console.error('[strategic-memo] error:', e?.message);

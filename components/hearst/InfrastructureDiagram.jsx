@@ -101,7 +101,7 @@ function FloorplanView({ spec, vw, vh }) {
           />
           {/* MW label */}
           <text
-            x={sx(b.x + b.w / 2)} y={sy(b.y + b.h / 2) - Math.max(6, sy(10))}
+            x={sx(b.x + b.w / 2)} y={sy(b.y + b.h / 2) - Math.max(8, sy(14))}
             textAnchor="middle" dominantBaseline="middle"
             fontSize={Math.max(9, sy(16))}
             fill={KIND_STROKE[b.kind] ?? 'var(--cp-surface-1)'}
@@ -109,8 +109,9 @@ function FloorplanView({ spec, vw, vh }) {
           >
             {b.mw} MW
           </text>
+          {/* Kind label */}
           <text
-            x={sx(b.x + b.w / 2)} y={sy(b.y + b.h / 2) + Math.max(6, sy(10))}
+            x={sx(b.x + b.w / 2)} y={sy(b.y + b.h / 2)}
             textAnchor="middle" dominantBaseline="middle"
             fontSize={Math.max(7, sy(11))}
             fill={KIND_STROKE[b.kind] ?? 'var(--cp-surface-1)'}
@@ -118,18 +119,31 @@ function FloorplanView({ spec, vw, vh }) {
           >
             {b.kind.charAt(0).toUpperCase() + b.kind.slice(1)}
           </text>
+          {/* Density label — 9-10px muted, shown when spec carries the field */}
+          {b.density_kw_per_rack != null && (
+            <text
+              x={sx(b.x + b.w / 2)} y={sy(b.y + b.h / 2) + Math.max(8, sy(13))}
+              textAnchor="middle" dominantBaseline="middle"
+              fontSize={Math.max(7, sy(10))}
+              fill="var(--cp-text-muted, var(--cp-accent))"
+              opacity="0.55"
+            >
+              {b.density_kw_per_rack} kW/rack
+            </text>
+          )}
         </g>
       ))}
 
-      {/* Cooling zones */}
+      {/* Cooling zones — distinct visual per kind */}
       {spec.cooling_zones.map((z, i) => (
         <g key={`cz-${i}`}>
           <rect
             x={sx(z.x)} y={sy(z.y)} width={sx(z.w)} height={sy(z.h)}
             fill={KIND_STROKE[z.kind] ?? 'var(--cp-surface-1)'}
-            fillOpacity="0.15"
+            fillOpacity={z.kind === 'liquid' ? 0.25 : z.kind === 'hybrid' ? 0.2 : 0.1}
             stroke={KIND_STROKE[z.kind] ?? 'var(--cp-surface-1)'}
-            strokeWidth="1"
+            strokeWidth={z.kind === 'air' ? 1 : 1.5}
+            strokeDasharray={z.kind === 'air' ? '3 3' : z.kind === 'hybrid' ? '6 2' : 'none'}
           />
           <text
             x={sx(z.x + z.w / 2)} y={sy(z.y + z.h / 2)}
@@ -138,7 +152,7 @@ function FloorplanView({ spec, vw, vh }) {
             fill={KIND_STROKE[z.kind] ?? 'var(--cp-surface-1)'}
             opacity="0.8"
           >
-            {z.kind}
+            {z.label ?? z.kind}
           </text>
         </g>
       ))}
@@ -232,12 +246,12 @@ function TopologyView({ spec, vw, vh }) {
   );
 }
 
-/** Gantt phases — horizontal bars */
+/** Gantt phases — horizontal bars with gating event mini-labels */
 function GanttView({ spec, vw, vh }) {
-  const total = spec.total_months || 1;
+  const total  = spec.total_months || 1;
   const phases = spec.phases || [];
-  const BAR_H  = Math.max(16, (vh / (phases.length + 2)) * 0.6);
-  const GAP    = Math.max(6,  (vh / (phases.length + 2)) * 0.4);
+  const BAR_H   = Math.max(16, (vh / (phases.length + 2)) * 0.6);
+  const GAP     = Math.max(6,  (vh / (phases.length + 2)) * 0.4);
   const LABEL_W = vw * 0.25;
   const BAR_W   = vw - LABEL_W - 8;
   const TOP_PAD = Math.max(10, vh * 0.08);
@@ -265,9 +279,12 @@ function GanttView({ spec, vw, vh }) {
         const fill = PHASE_FILL[i % PHASE_FILL.length];
         const fs   = Math.max(7, BAR_H * 0.5);
 
+        // Gating events: up to 2 mini-labels beneath the bar
+        const gatingLabels = (p.gating_events ?? []).slice(0, 2);
+
         return (
           <g key={`phase-${p.id}`}>
-            {/* Label */}
+            {/* Phase label */}
             <text
               x={LABEL_W - 6} y={barY + BAR_H / 2}
               textAnchor="end" dominantBaseline="middle"
@@ -296,10 +313,46 @@ function GanttView({ spec, vw, vh }) {
                 {p.duration_months}m
               </text>
             )}
+            {/* Gating event mini-labels below bar */}
+            {gatingLabels.map((ev, gi) => (
+              <text
+                key={`gate-${i}-${gi}`}
+                x={barX + 4}
+                y={barY + BAR_H + Math.max(7, fs * 0.75) * (gi + 1) + 1}
+                fontSize={Math.max(5, fs * 0.65)}
+                fill="var(--cp-text-muted, var(--cp-accent))"
+                opacity="0.45"
+              >
+                {'>'} {ev}
+              </text>
+            ))}
           </g>
         );
       })}
     </g>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// DiagramHeader — 1-line mini-summary strip above the SVG
+// ---------------------------------------------------------------------------
+function DiagramHeader({ summary }) {
+  if (!summary) return null;
+  return (
+    <div style={{
+      padding:      '3px 10px',
+      fontSize:     10,
+      fontWeight:   500,
+      color:        'var(--cp-accent)',
+      opacity:      0.7,
+      letterSpacing:'0.03em',
+      borderBottom: '1px solid var(--cp-accent)',
+      whiteSpace:   'nowrap',
+      overflow:     'hidden',
+      textOverflow: 'ellipsis',
+    }}>
+      {summary}
+    </div>
   );
 }
 
@@ -323,22 +376,25 @@ export default function InfrastructureDiagram({ spec, height = 280 }) {
   const vh = height;
 
   return (
-    <svg
-      width="100%"
-      height={height}
-      viewBox={`0 0 ${vw} ${vh}`}
-      preserveAspectRatio="xMidYMid meet"
-      style={{ display: 'block', overflow: 'visible' }}
-      aria-label={spec.type ?? 'infrastructure diagram'}
-    >
-      {spec.type === '2d_floorplan' && <FloorplanView spec={spec} vw={vw} vh={vh} />}
-      {spec.type === 'topology'     && <TopologyView  spec={spec} vw={vw} vh={vh} />}
-      {spec.type === 'gantt_phases' && <GanttView     spec={spec} vw={vw} vh={vh} />}
-      {!['2d_floorplan','topology','gantt_phases'].includes(spec.type) && (
-        <text x={vw / 2} y={vh / 2} textAnchor="middle" dominantBaseline="middle" fontSize="12" fill="var(--cp-accent)" opacity="0.5">
-          Unknown spec type: {spec.type}
-        </text>
-      )}
-    </svg>
+    <div style={{ transition: 'all 220ms var(--cp-ease, ease)', width: '100%' }}>
+      <DiagramHeader summary={spec.summary} />
+      <svg
+        width="100%"
+        height={height}
+        viewBox={`0 0 ${vw} ${vh}`}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ display: 'block', overflow: 'visible' }}
+        aria-label={spec.type ?? 'infrastructure diagram'}
+      >
+        {spec.type === '2d_floorplan' && <FloorplanView spec={spec} vw={vw} vh={vh} />}
+        {spec.type === 'topology'     && <TopologyView  spec={spec} vw={vw} vh={vh} />}
+        {spec.type === 'gantt_phases' && <GanttView     spec={spec} vw={vw} vh={vh} />}
+        {!['2d_floorplan','topology','gantt_phases'].includes(spec.type) && (
+          <text x={vw / 2} y={vh / 2} textAnchor="middle" dominantBaseline="middle" fontSize="12" fill="var(--cp-accent)" opacity="0.5">
+            Unknown spec type: {spec.type}
+          </text>
+        )}
+      </svg>
+    </div>
   );
 }

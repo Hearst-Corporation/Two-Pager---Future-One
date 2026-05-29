@@ -20,16 +20,15 @@ import {
 } from '../../lib/oracle-visualization/index';
 
 // ---------------------------------------------------------------------------
-// Section wrapper with collapse toggle
+// Section wrapper with collapse toggle + counter badge
 // ---------------------------------------------------------------------------
-function CollapsibleSection({ title, children, defaultOpen = true }) {
+function CollapsibleSection({ title, counter, children, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
     <div style={{
-      marginBottom: 10,
+      marginBottom: 8,
       border: '1px solid var(--cp-accent)',
-      borderOpacity: 0.25,
       borderRadius: 6,
       overflow: 'hidden',
     }}>
@@ -41,12 +40,12 @@ function CollapsibleSection({ title, children, defaultOpen = true }) {
           alignItems:      'center',
           justifyContent:  'space-between',
           width:           '100%',
-          padding:         '6px 12px',
+          padding:         '5px 10px',
           background:      'transparent',
           border:          'none',
           cursor:          'pointer',
           color:           'var(--cp-accent)',
-          fontSize:        11,
+          fontSize:        10,
           fontWeight:      600,
           letterSpacing:   '0.05em',
           textTransform:   'uppercase',
@@ -55,7 +54,14 @@ function CollapsibleSection({ title, children, defaultOpen = true }) {
         }}
       >
         <span>{title}</span>
-        <span style={{ fontSize: 9, opacity: 0.6 }}>{open ? 'hide' : 'show'}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {counter && (
+            <span style={{ fontSize: 9, fontWeight: 400, opacity: 0.5, textTransform: 'none', letterSpacing: 0 }}>
+              {counter}
+            </span>
+          )}
+          <span style={{ fontSize: 9, opacity: 0.5 }}>{open ? 'hide' : 'show'}</span>
+        </span>
       </button>
       {open && (
         <div style={{ padding: '4px 8px 8px' }}>
@@ -106,19 +112,42 @@ export default function ScenarioVisualizer({ simulation, mode = 'auto' }) {
     return <InfrastructureDiagram spec={phasesSpec} height={DIAGRAM_HEIGHT} />;
   }
 
+  // Counters for each section
+  const floorCounter = `${floorplanSpec.cooling_zones.length} zones · ${floorplanSpec.rack_blocks.length} rack blocks`;
+  const topoCounter  = `${topologySpec.nodes.length} nodes · ${topologySpec.edges.length} edges`;
+  const phasCounter  = `${phasesSpec.phases.length} phases · ${phasesSpec.total_months} mo`;
+
   // Auto mode — all three sections
   return (
     <div style={{
-      width:    '100%',
-      maxWidth: 620,
+      width:      '100%',
+      maxWidth:   620,
       fontFamily: 'var(--cp-font-sans, sans-serif)',
     }}>
-      <CollapsibleSection title="Infrastructure Floorplan" defaultOpen={true}>
+      {/* Bandeau preview */}
+      <div style={{
+        fontSize:      9,
+        fontWeight:    600,
+        color:         'var(--cp-accent)',
+        opacity:       0.4,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        marginBottom:  8,
+        paddingLeft:   2,
+      }}>
+        Visualization Preview · what we're building
+      </div>
+
+      <CollapsibleSection
+        title="Infrastructure Floorplan"
+        counter={floorCounter}
+        defaultOpen={true}
+      >
         <InfrastructureDiagram spec={floorplanSpec} height={DIAGRAM_HEIGHT} />
-        <div style={{ display: 'flex', gap: 12, marginTop: 4, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 10, marginTop: 4, flexWrap: 'wrap' }}>
           {floorplanSpec.legend.map(item => (
             <span key={item.kind} style={{
-              fontSize:    10,
+              fontSize:    9,
               color:       'var(--cp-accent)',
               opacity:     0.65,
               display:     'flex',
@@ -126,12 +155,13 @@ export default function ScenarioVisualizer({ simulation, mode = 'auto' }) {
               gap:         4,
             }}>
               <span style={{
-                display:         'inline-block',
-                width:           10,
-                height:          10,
-                background:      item.color_token,
-                borderRadius:    2,
-                opacity:         0.7,
+                display:      'inline-block',
+                width:        9,
+                height:       9,
+                background:   item.color_token,
+                borderRadius: 2,
+                opacity:      0.7,
+                flexShrink:   0,
               }} />
               {item.label}
             </span>
@@ -139,18 +169,20 @@ export default function ScenarioVisualizer({ simulation, mode = 'auto' }) {
         </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Power & Network Topology" defaultOpen={false}>
+      <CollapsibleSection
+        title="Power & Network Topology"
+        counter={topoCounter}
+        defaultOpen={false}
+      >
         <InfrastructureDiagram spec={topologySpec} height={DIAGRAM_HEIGHT} />
-        <div style={{ marginTop: 4, fontSize: 10, color: 'var(--cp-accent)', opacity: 0.5 }}>
-          {topologySpec.nodes.length} nodes — {topologySpec.edges.length} edges
-        </div>
       </CollapsibleSection>
 
-      <CollapsibleSection title="Deployment Phases" defaultOpen={false}>
+      <CollapsibleSection
+        title="Deployment Phases"
+        counter={phasCounter}
+        defaultOpen={false}
+      >
         <InfrastructureDiagram spec={phasesSpec} height={Math.max(160, phasesSpec.phases.length * 38 + 40)} />
-        <div style={{ marginTop: 4, fontSize: 10, color: 'var(--cp-accent)', opacity: 0.5 }}>
-          {phasesSpec.total_months} months total — {phasesSpec.phases.length} phases
-        </div>
       </CollapsibleSection>
     </div>
   );

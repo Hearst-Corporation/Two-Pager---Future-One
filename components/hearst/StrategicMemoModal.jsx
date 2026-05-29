@@ -210,13 +210,15 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
                     {meta.audience}
                   </span>
                 )}
+                {/* Reduced to 3 chips max (audience already above) :
+                    sources + tensions + memo_quality grade. Reality flags
+                    surface only when present (warning-toned). Comparables
+                    and live signals counts dropped — visible in their
+                    respective sections. */}
                 {meta.intelligence_brief && (
                   <>
                     <span style={S.intelChip} title="Datapoints injected from the intelligence layer">
                       {meta.intelligence_brief.datapoints_count} sources
-                    </span>
-                    <span style={S.intelChip} title="Comparable peer profiles">
-                      {meta.intelligence_brief.comparables_count} comparables
                     </span>
                     <span style={S.intelChip} title="Decision tensions surfaced">
                       {meta.intelligence_brief.tensions_count} tensions
@@ -230,15 +232,21 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
                     )}
                   </>
                 )}
-                {(() => {
-                  const signalsCount = (memo?.live_intelligence?.signals || meta?.live_intelligence?.signals || []).length;
-                  return signalsCount > 0 ? (
-                    <span style={{ ...S.intelChip, background: 'var(--ct-status-info-soft, var(--cp-surface-0))', color: 'var(--ct-status-info, var(--cp-text-muted))', border: '1px solid var(--ct-status-info-border, var(--cp-border))' }}
-                      title="Live infrastructure signals detected">
-                      live signals: {signalsCount}
-                    </span>
-                  ) : null;
-                })()}
+                {memo?.memo_quality?.overall_grade && (
+                  <span style={{
+                    ...S.intelChip,
+                    background: memo.memo_quality.overall_grade === 'A' ? 'var(--ct-status-success-soft)'
+                      : memo.memo_quality.overall_grade === 'B' ? 'var(--cp-surface-0)'
+                      : 'var(--ct-status-warning-soft)',
+                    color: memo.memo_quality.overall_grade === 'A' ? 'var(--ct-status-success)'
+                      : memo.memo_quality.overall_grade === 'B' ? 'var(--cp-text-muted)'
+                      : 'var(--ct-status-warning)',
+                    border: '1px solid var(--cp-border)',
+                  }}
+                    title="Memo quality grade (banned phrases + citations + tradeoffs + tensions)">
+                    grade {memo.memo_quality.overall_grade}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -293,14 +301,14 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
 
               {/* Strategic Context */}
               {memo.strategic_context && !memo.strategic_context.skip && (
-                <Section id="ctx" label="02 · Strategic Context" defaultOpen={true}>
+                <Section id="ctx" label="02 · Strategic Context">
                   <p>{memo.strategic_context.body}</p>
                 </Section>
               )}
 
               {/* Key Financial Metrics */}
               {memo.key_financial_metrics && (
-                <Section id="fin" label="03 · Key Financial Metrics" defaultOpen={true}>
+                <Section id="fin" label="03 · Key Financial Metrics">
                   <table style={S.table}>
                     <thead><tr><th style={S.th}>Metric</th><th style={S.th}>Value</th><th style={S.th}>Conf.</th><th style={S.th}>Source</th></tr></thead>
                     <tbody>
@@ -404,7 +412,7 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
 
               {/* Deployment Roadmap */}
               {memo.deployment_roadmap && (
-                <Section id="roadmap" label="10 · Deployment Roadmap" defaultOpen={true}>
+                <Section id="roadmap" label="10 · Deployment Roadmap">
                   <ol style={S.phaseList}>
                     {(memo.deployment_roadmap.phases || []).map((p, i) => (
                       <li key={i}>
