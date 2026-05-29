@@ -15,10 +15,12 @@ import { usePathname } from 'next/navigation';
 
 const SECTIONS = [
   {
-    id: 'brief',
-    href: '/admin/hearst',
-    label: 'Brief',
+    id: 'executive',
+    href: '/admin/hearst/executive',
+    label: 'Executive',
+    // Board landing. Also highlights on the Brief index (operational twin).
     matchExact: '/admin/hearst',
+    matchAny: ['/admin/hearst/executive'],
     icon: (
       <>
         <rect x="2" y="2" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
@@ -52,10 +54,12 @@ const SECTIONS = [
     ),
   },
   {
-    id: 'library',
-    href: '/admin/hearst/library',
-    label: 'Library',
-    matchAny: ['/admin/hearst/library', '/admin/hearst/sources', '/admin/hearst/reports', '/admin/hearst/timeline', '/admin/hearst/risks', '/admin/hearst/audit', '/admin/hearst/documents'],
+    id: 'dossier',
+    href: '/admin/hearst/dossier',
+    label: 'Dossier',
+    // Canonical memo/report reader. Group spans the reporting/output area
+    // (dossier · library archive · sources · timeline · risks · changelog · exports).
+    matchAny: ['/admin/hearst/dossier', '/admin/hearst/library', '/admin/hearst/sources', '/admin/hearst/reports', '/admin/hearst/timeline', '/admin/hearst/risks', '/admin/hearst/audit', '/admin/hearst/documents'],
     icon: (
       <>
         <path d="M3 2h12v14H3z M3 5h12 M3 8h12 M3 11h12" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />

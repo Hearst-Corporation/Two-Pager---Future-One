@@ -1,14 +1,19 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import SectionTabs from '@/components/hearst/SectionTabs';
 
+// Only the Investment Memo has a working generator today: the per-memo PDF
+// served from the Dossier (strategic-memos/[id]/pdf). The other templates have
+// no server-side export route yet, so they are shown as "not available yet"
+// rather than wired to missing endpoints (which would 404). No fake exports.
 const TEMPLATES = [
-  { id: 'memo',        title: 'Investment Memo',   format: 'PDF',   pages: '12p', tags: 'Investor · LP · Deal',        route: '/api/admin/hearst/export/memo',        est: 8  },
-  { id: 'term-sheet',  title: 'Term Sheet',         format: 'PDF',   pages: '4p',  tags: 'Legal · Deal · Operator',     route: '/api/admin/hearst/export/term-sheet',  est: 6  },
-  { id: 'xlsx',        title: 'Financial Model',    format: 'Excel', pages: '4 tabs', tags: 'Finance · Model',          route: '/api/admin/hearst/export/xlsx',         est: 3  },
-  { id: 'capex',       title: 'CAPEX Schedule',     format: 'Excel', pages: '2 tabs', tags: 'Construction · Cost',      route: '/api/admin/hearst/export/xlsx',         est: 3  },
-  { id: 'lender-pack', title: 'Lender Package',     format: 'PDF',   pages: '18p', tags: 'Debt · Lender · Credit',      route: '/api/admin/hearst/export/memo',        est: 10 },
-  { id: 'one-pager',   title: 'One-Pager Teaser',   format: 'PDF',   pages: '1p',  tags: 'Teaser · Quick',             route: '/api/admin/hearst/export/memo',        est: 4  },
+  { id: 'memo',        title: 'Investment Memo',   format: 'PDF',   pages: '—',      tags: 'Investor · LP · Deal',    available: true  },
+  { id: 'term-sheet',  title: 'Term Sheet',         format: 'PDF',   pages: '—',      tags: 'Legal · Deal · Operator', available: false },
+  { id: 'xlsx',        title: 'Financial Model',    format: 'Excel', pages: '—',      tags: 'Finance · Model',         available: false },
+  { id: 'capex',       title: 'CAPEX Schedule',     format: 'Excel', pages: '—',      tags: 'Construction · Cost',     available: false },
+  { id: 'lender-pack', title: 'Lender Package',     format: 'PDF',   pages: '—',      tags: 'Debt · Lender · Credit',  available: false },
+  { id: 'one-pager',   title: 'One-Pager Teaser',   format: 'PDF',   pages: '—',      tags: 'Teaser · Quick',          available: false },
 ];
 
 // Format badges — neutral palette, differentiation by label only.
@@ -22,11 +27,6 @@ export default function DocumentsPage() {
   const [scenarios, setScenarios]           = useState([]);
   const [selectedScenarioId, setSelected]   = useState('');
   const [loading, setLoading]               = useState(true);
-  const [states, setStates]                 = useState({}); // { [tplId]: 'idle'|'loading'|'ready'|'error' }
-  const [dlUrls, setDlUrls]                 = useState({}); // { [tplId]: { url, name } }
-  const [recent, setRecent]                 = useState(() => {
-    try { return JSON.parse(localStorage.getItem('hearst_docs_recent') || '[]'); } catch { return []; }
-  });
 
   useEffect(() => {
     async function load() {
@@ -45,39 +45,6 @@ export default function DocumentsPage() {
     }
     load();
   }, []);
-
-  async function generate(tpl) {
-    if (!project || !selectedScenarioId) return;
-    setStates(p => ({ ...p, [tpl.id]: 'loading' }));
-    try {
-      const res = await fetch(tpl.route, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenario_id: selectedScenarioId, project_id: project.id }),
-      });
-      if (!res.ok) throw new Error('Export failed (' + res.status + ')');
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const cd = res.headers.get('content-disposition') || '';
-      const m = cd.match(/filename="?([^"]+)"?/);
-      const name = m ? m[1] : tpl.id + '-export';
-      setDlUrls(p => ({ ...p, [tpl.id]: { url, name } }));
-      setStates(p => ({ ...p, [tpl.id]: 'ready' }));
-      const entry = { tplId: tpl.id, title: tpl.title, name, at: new Date().toISOString() };
-      const next = [entry, ...recent].slice(0, 8);
-      setRecent(next);
-      try { localStorage.setItem('hearst_docs_recent', JSON.stringify(next)); } catch {}
-    } catch (e) {
-      setStates(p => ({ ...p, [tpl.id]: 'error:' + e.message }));
-    }
-  }
-
-  function download(tplId) {
-    const dl = dlUrls[tplId];
-    if (!dl) return;
-    const a = document.createElement('a');
-    a.href = dl.url; a.download = dl.name; a.click();
-  }
 
   if (loading) return <div style={S.loading}>Loading…</div>;
 
@@ -103,16 +70,12 @@ export default function DocumentsPage() {
             <th style={S.th}>Format</th>
             <th style={S.th}>Length</th>
             <th style={S.th}>Tags</th>
-            <th style={S.th}>Est.</th>
+            <th style={S.th}>Status</th>
             <th style={S.th}></th>
           </tr>
         </thead>
         <tbody>
           {TEMPLATES.map(tpl => {
-            const state = states[tpl.id] || 'idle';
-            const isLoading = state === 'loading';
-            const isReady   = state === 'ready';
-            const isError   = state.startsWith('error:');
             const fmt = FMT_COLORS[tpl.format] || {};
             return (
               <tr key={tpl.id} style={S.tr}>
@@ -122,20 +85,22 @@ export default function DocumentsPage() {
                 </td>
                 <td style={S.td}>{tpl.pages}</td>
                 <td style={{ ...S.td, color: 'var(--cp-text-muted)', fontSize: 11 }}>{tpl.tags}</td>
-                <td style={S.td}>~{tpl.est}s</td>
+                <td style={{ ...S.td, color: 'var(--cp-text-muted)', fontSize: 11 }}>
+                  {tpl.available ? 'PDF in Dossier' : 'Not available yet'}
+                </td>
                 <td style={{ ...S.td, textAlign: 'right' }}>
-                  {isError && <span style={S.errText}>{state.replace('error:', '')} — </span>}
-                  {isLoading && <span style={S.loadingText}>Generating…</span>}
-                  {!isLoading && !isReady && (
-                    <button onClick={() => generate(tpl)} disabled={!selectedScenarioId} style={S.genBtn}>
-                      Generate
+                  {tpl.available ? (
+                    <Link
+                      href={selectedScenarioId ? `/admin/hearst/dossier?scenario=${selectedScenarioId}` : '/admin/hearst/dossier'}
+                      style={{ ...S.genBtn, textDecoration: 'none' }}
+                      title="Open this scenario's strategic memo in the Dossier (PDF export available there)"
+                    >
+                      Open in Dossier →
+                    </Link>
+                  ) : (
+                    <button disabled title="Server-side export for this template is not available yet" style={S.disabledBtn}>
+                      Not available yet
                     </button>
-                  )}
-                  {isReady && (
-                    <span style={{ display: 'inline-flex', gap: 6 }}>
-                      <button onClick={() => download(tpl.id)} style={S.dlBtn}>Download</button>
-                      <button onClick={() => setStates(p => ({ ...p, [tpl.id]: 'idle' }))} style={S.resetBtn}>↺</button>
-                    </span>
                   )}
                 </td>
               </tr>
@@ -144,30 +109,10 @@ export default function DocumentsPage() {
         </tbody>
       </table>
 
-      {/* Recently generated */}
-      {recent.length > 0 && (
-        <div style={S.recentSection}>
-          <div style={S.sectionLabel}>Recently Generated</div>
-          <table style={S.table}>
-            <thead>
-              <tr>
-                <th style={S.th}>Document</th>
-                <th style={S.th}>Filename</th>
-                <th style={S.th}>Generated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recent.map((r, i) => (
-                <tr key={i} style={S.tr}>
-                  <td style={S.tdBold}>{r.title}</td>
-                  <td style={S.td}>{r.name}</td>
-                  <td style={S.td}>{new Date(r.at).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div style={S.note}>
+        The Investment Memo opens in the Dossier, where the per-memo PDF export is available.
+        Other document templates are not generated yet and are marked accordingly.
+      </div>
     </div>
   );
 }
@@ -186,6 +131,8 @@ const S = {
   tdBold: { padding: '10px 12px', fontWeight: 700, color: 'var(--cp-text-primary)', verticalAlign: 'middle' },
   fmtBadge: { fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, letterSpacing: 0.4 },
   genBtn: { fontSize: 11, fontWeight: 700, padding: '5px 16px', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
+  disabledBtn: { fontSize: 11, fontWeight: 700, padding: '5px 16px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'not-allowed', opacity: 0.6 },
+  note: { fontSize: 11, color: 'var(--cp-text-muted)', lineHeight: 1.5, maxWidth: 560 },
   dlBtn: { fontSize: 11, fontWeight: 700, padding: '5px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 4, cursor: 'pointer' },
   resetBtn: { fontSize: 11, padding: '5px 8px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
   loadingText: { fontSize: 11, color: 'var(--cp-text-muted)', fontStyle: 'italic' },

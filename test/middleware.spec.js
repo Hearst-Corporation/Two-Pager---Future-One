@@ -44,25 +44,25 @@ describe('safeNextPath', () => {
     expect(safeNextPath('/admin/hearst')).toBe('/admin/hearst');
   });
 
-  it('collapses protocol-relative paths to /admin', () => {
-    expect(safeNextPath('//evil.com/x')).toBe('/admin');
+  it('collapses protocol-relative paths to ORACLE_HOME', () => {
+    expect(safeNextPath('//evil.com/x')).toBe('/admin/hearst/executive');
   });
 
   it('rejects absolute http(s) URLs', () => {
-    expect(safeNextPath('http://evil.com')).toBe('/admin');
-    expect(safeNextPath('https://evil.com/admin')).toBe('/admin');
+    expect(safeNextPath('http://evil.com')).toBe('/admin/hearst/executive');
+    expect(safeNextPath('https://evil.com/admin')).toBe('/admin/hearst/executive');
   });
 
   it('rejects javascript: URIs', () => {
-    expect(safeNextPath('javascript:alert(1)')).toBe('/admin');
+    expect(safeNextPath('javascript:alert(1)')).toBe('/admin/hearst/executive');
   });
 
-  it('rejects empty / non-string / bare-slash input', () => {
-    expect(safeNextPath('')).toBe('/admin');
-    expect(safeNextPath('/')).toBe('/admin'); // `/` alone fails /^\/[^/]/
-    expect(safeNextPath(undefined)).toBe('/admin');
-    expect(safeNextPath(null)).toBe('/admin');
-    expect(safeNextPath(42)).toBe('/admin');
+  it('rejects empty / non-string / bare-slash input (falls back to ORACLE_HOME)', () => {
+    expect(safeNextPath('')).toBe('/admin/hearst/executive');
+    expect(safeNextPath('/')).toBe('/admin/hearst/executive'); // `/` alone fails /^\/[^/]/
+    expect(safeNextPath(undefined)).toBe('/admin/hearst/executive');
+    expect(safeNextPath(null)).toBe('/admin/hearst/executive');
+    expect(safeNextPath(42)).toBe('/admin/hearst/executive');
   });
 });
 
