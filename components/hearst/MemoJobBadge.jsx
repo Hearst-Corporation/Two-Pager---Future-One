@@ -25,12 +25,12 @@ export default function MemoJobBadge() {
     <button
       type="button"
       onClick={showMemoModal}
-      aria-label="Rouvrir le memo en cours de génération"
+      aria-label="Reopen the memo being generated"
       style={S.badge}
     >
       <span style={S.spinner} />
       <span style={S.body}>
-        <span style={S.title}>Memo en cours</span>
+        <span style={S.title}>Memo in progress</span>
         <span style={{ ...S.sub, color: isSlowish ? 'var(--ct-status-warning)' : 'var(--cp-text-muted)' }}>
           {formatElapsed(job.elapsed_ms)}{isSlowish ? ' · cascade fallback' : ''}
         </span>

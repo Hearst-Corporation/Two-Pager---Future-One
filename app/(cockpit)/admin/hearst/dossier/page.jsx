@@ -1,74 +1,201 @@
 'use client';
 
-// /admin/hearst/dossier — Project Dossier (Critical Deliverables P8).
+// /admin/hearst/dossier — Project Dossier · Decision Canvas (Critical Deliverables P8).
+//
+// A board user must understand the decision in 10 seconds: verdict → KPIs →
+// category → risks → recommendation → next action, all above the fold. The full
+// written memo lives below as continuous analytics; raw detail collapses into an
+// appendix. No accordion wall.
 //
 // Modes:
-//   ?memo=<id>      → fetch single memo, render inline with full sections 01-11
-//   ?scenario=<id>  → list all memos for that scenario, click to open one
-//   (no params)     → list all memos, each row clicks to ?memo=<id>
+//   ?memo=<id>      → fetch single memo, render the Decision Canvas
+//   ?scenario=<id>  → list all memos for that scenario
+//   (no params)     → list all memos
+//
+// Design: sober, near-monochrome, cockpit-canon typography. ONE bordeaux accent
+// (--cp-accent) reserved for the primary action + the verdict keyline. No status
+// colours, no badges/pills/chips. Tokens only — no hardcoded hex/rgb. Responsive
+// via auto-fit grids + intrinsic wrapping.
+//
+// Rendering / UX only — reads existing memo_json (+ _exec_projection), scenario
+// and report data. No financial-engine, memo-generation or approval-API changes.
 
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import {
+  deriveVerdict, deriveCategory, deriveKpis, topRisks, deriveDecision,
+  deriveCapitalStack, fmtUsd,
+} from '@/lib/dossier-derive';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function fmtDate(s) { try { return new Date(s).toLocaleString(); } catch { return s; } }
 function fmtDateShort(s) { try { return new Date(s).toLocaleDateString(); } catch { return s; } }
 
+const CATEGORY_DESC = {
+  'Powered Shell':          'Landlord delivers shell + power; tenant fits out and operates. NNN lease, real-estate risk profile.',
+  'Hyperscale Campus':      'Multi-building campus leased to hyperscale operators at scale.',
+  'AI Factory':             'Dense GPU training / inference cluster, liquid-cooled.',
+  'GPU Cloud':              'Owned GPUs rented as compute — utilization and obsolescence exposure.',
+  'Enterprise Colocation':  'Retail / wholesale colocation for enterprise tenants.',
+  'Sovereign Compute':      'State-anchored sovereign AI / compute capacity.',
+  'Edge Campus':            'Distributed edge sites positioned close to demand.',
+};
+
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-function ConfidenceTag({ level }) {
+// Confidence rendered as a quiet typographic label (no badge / no colour).
+function ConfidenceLabel({ level }) {
   const lvl = (level || 'MEDIUM').toUpperCase();
-  const MAP = {
-    HIGH:   { bg: 'var(--ct-status-success-soft)',  color: 'var(--ct-status-success)',  border: 'var(--ct-status-success-border)' },
-    MEDIUM: { bg: 'var(--ct-status-warning-soft)',  color: 'var(--ct-status-warning)',  border: 'var(--ct-status-warning-border)' },
-    MED:    { bg: 'var(--ct-status-warning-soft)',  color: 'var(--ct-status-warning)',  border: 'var(--ct-status-warning-border)' },
-    LOW:    { bg: 'var(--ct-status-danger-soft)',   color: 'var(--ct-status-danger)',   border: 'var(--ct-status-danger-border)' },
-  };
-  const tone = MAP[lvl] || MAP.MEDIUM;
-  const label = lvl === 'HIGH' ? 'HIGH' : lvl === 'LOW' ? 'LOW VIS' : 'MED';
-  return (
-    <span style={{ ...S.tag, background: tone.bg, color: tone.color, border: `1px solid ${tone.border}` }}>
-      {label}
-    </span>
-  );
+  const label = lvl === 'HIGH' ? 'High conf.' : lvl === 'LOW' ? 'Low vis.' : 'Med conf.';
+  return <span style={S.confLabel}>{label}</span>;
 }
 
-function AccordionSection({ id, label, defaultOpen = false, children }) {
+function Collapsible({ label, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <section style={S.accordionSection} aria-labelledby={`ds-${id}`}>
-      <button
-        type="button"
-        id={`ds-${id}`}
-        onClick={() => setOpen(o => !o)}
-        aria-expanded={open}
-        style={S.accordionBtn}
-      >
-        <span style={S.accordionLabel}>{label}</span>
-        <span style={S.accordionChevron}>{open ? '−' : '+'}</span>
+    <section style={S.appendix}>
+      <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open} style={S.appendixBtn}>
+        <span style={S.appendixLabel}>{label}</span>
+        <span style={S.appendixChevron}>{open ? '−' : '+'}</span>
       </button>
-      {open && <div style={S.accordionBody}>{children}</div>}
+      {open && <div style={S.appendixBody}>{children}</div>}
     </section>
   );
 }
 
-// ─── Full Memo Renderer (inline, no modal) ────────────────────────────────────
+function SectionHeading({ children, hint }) {
+  return (
+    <div style={S.headingWrap}>
+      <h2 style={S.heading}>{children}</h2>
+      {hint && <span style={S.headingHint}>{hint}</span>}
+    </div>
+  );
+}
 
-function MemoViewer({ memo, scenario, versions, onVersionSelect, onStatusChange }) {
-  const SEVERITY_TONE = {
-    HIGH:   { color: 'var(--ct-status-danger)' },
-    MED:    { color: 'var(--ct-status-warning)' },
-    MEDIUM: { color: 'var(--ct-status-warning)' },
-    LOW:    { color: 'var(--ct-status-success)' },
-  };
+function Placeholder({ children }) {
+  return <div style={S.placeholder}>{children || 'Not available for this memo version'}</div>;
+}
 
+// ─── Visual Story blocks ─────────────────────────────────────────────────────
+
+function CapitalStack({ stack }) {
+  if (!stack) return <Placeholder>Capital structure not available for this memo version</Placeholder>;
+  return (
+    <div>
+      <div style={S.stackBar}>
+        <div style={{ ...S.stackSeg, width: `${stack.debtPct}%`, background: 'var(--cp-text-muted)' }} title={`Debt ${stack.debtPct}%`} />
+        <div style={{ ...S.stackSeg, width: `${stack.equityPct}%`, background: 'var(--cp-accent)' }} title={`Equity ${stack.equityPct}%`} />
+      </div>
+      <div style={S.stackLegend}>
+        <span><span style={{ ...S.dot, background: 'var(--cp-text-muted)' }} /> Debt {stack.debtPct}%</span>
+        <span><span style={{ ...S.dot, background: 'var(--cp-accent)' }} /> Equity {stack.equityPct}%</span>
+      </div>
+      {stack.split.length > 0 && (
+        <div style={S.splitWrap}>
+          <div style={S.eyebrow}>Equity sponsors</div>
+          {stack.split.map(s => (
+            <div key={s.name} style={S.splitRow}>
+              <span style={S.splitName}>{s.name}</span>
+              <div style={S.splitTrack}><div style={{ ...S.splitFill, width: `${s.pct}%` }} /></div>
+              <span style={S.splitPct}>{s.pct}%</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function parseMonths(v) {
+  if (v == null) return null;
+  const nums = String(v).match(/\d+(\.\d+)?/g);
+  if (!nums) return null;
+  const a = parseFloat(nums[0]);
+  const b = nums[1] != null ? parseFloat(nums[1]) : a;
+  return { start: Math.min(a, b), end: Math.max(a, b) };
+}
+
+function DeploymentTimeline({ phases }) {
+  if (!phases?.length) return <Placeholder>Deployment timeline not available for this memo version</Placeholder>;
+  const ranges = phases.map(p => parseMonths(p.months_from_t0));
+  const maxMonth = Math.max(...ranges.map(r => r?.end || 0), 1);
+  return (
+    <div style={S.timeline}>
+      {phases.map((p, i) => {
+        const r = ranges[i] || { start: 0, end: maxMonth };
+        const left = (r.start / maxMonth) * 100;
+        const width = Math.max(2, ((r.end - r.start) / maxMonth) * 100);
+        return (
+          <div key={i} style={S.tlRow}>
+            <div style={S.tlLabel} title={p.label}>{p.label}</div>
+            <div style={S.tlTrack}>
+              <div style={{ ...S.tlBar, left: `${left}%`, width: `${width}%` }} />
+            </div>
+            <div style={S.tlMonths}>{p.months_from_t0 != null ? `${p.months_from_t0} mo` : '—'}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BenchmarkPosition({ comparables }) {
+  if (!comparables?.length) return <Placeholder>No comparable peers cited in this memo version</Placeholder>;
+  return (
+    <ul style={S.benchList}>
+      {comparables.map((c, i) => (
+        <li key={i} style={S.benchRow}>
+          <span style={S.benchName}>{c.name}</span>
+          <span style={S.benchMetric}>{c.metric}</span>
+          <span style={S.benchValue}>{c.value}</span>
+          {c.source && <span style={S.benchSrc}>{c.source}</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Cashflow({ years }) {
+  if (!years?.length) return <Placeholder>Year-by-year cashflow not available for this memo version</Placeholder>;
+  const vals = years.flatMap(y => [y.rev, y.ebitda, y.fcf].filter(v => v != null));
+  const max = Math.max(...vals.map(Math.abs), 1);
+  return (
+    <div style={S.cashWrap}>
+      {years.map((y, i) => {
+        const h = (v) => `${Math.max(2, (Math.abs(v || 0) / max) * 100)}%`;
+        return (
+          <div key={i} style={S.cashCol}>
+            <div style={S.cashBars}>
+              <div style={{ ...S.cashBar, height: h(y.rev), background: 'var(--cp-accent)' }} title={`Revenue ${fmtUsd(y.rev) || '—'}`} />
+              <div style={{ ...S.cashBar, height: h(y.ebitda), background: 'var(--cp-text-muted)' }} title={`EBITDA ${fmtUsd(y.ebitda) || '—'}`} />
+              <div style={{ ...S.cashBar, height: h(y.fcf), background: 'var(--cp-text-faint)' }} title={`FCF ${fmtUsd(y.fcf) || '—'}`} />
+            </div>
+            <div style={S.cashYr}>Y{y.y}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Decision Canvas ──────────────────────────────────────────────────────────
+
+function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusChange }) {
   const m = memo.memo_json || {};
-  const meta = memo.meta_json || {};
+  const verdict = deriveVerdict(m);
+  const category = deriveCategory(m);
+  const kpis = deriveKpis(m);
+  const risks = topRisks(m, 5);
+  const decision = deriveDecision(m, memo.status);
+  const capStack = deriveCapitalStack(m, scenario);
+  const fresh = m.data_freshness || {};
+  const phases = m.deployment_roadmap?.phases || [];
+  const comparables = m.market_benchmarking?.comparables || [];
 
-  // Wave A — institutional approval. Buttons PATCH the status (server enforces
-  // the state machine + attributes who/when + writes the audit trail), then reload.
+  // Approval — buttons PATCH the status (server enforces the state machine +
+  // attributes who/when + writes the audit trail), then reload.
   const [govBusy, setGovBusy] = useState(false);
   const [govErr, setGovErr] = useState(null);
   async function transition(next) {
@@ -85,287 +212,212 @@ function MemoViewer({ memo, scenario, versions, onVersionSelect, onStatusChange 
     } catch (e) { setGovErr(String(e)); } finally { setGovBusy(false); }
   }
 
+  // Quiet identity line — region · version · status · data freshness · provider.
+  const ident = [
+    memo.region,
+    `v${memo.version}`,
+    memo.status,
+    fresh.data_as_of ? `Data as of ${fresh.data_as_of}${fresh.overall_status ? ` (${fresh.overall_status})` : ''}` : null,
+    memo.provider_used,
+  ].filter(Boolean);
+
   return (
-    <div style={S.memoViewer}>
-      {/* ── Memo header ─────────────────────────────────────── */}
-      <div style={S.memoHeader}>
-        <div style={S.memoHeaderLeft}>
-          <h2 style={S.memoTitle}>{memo.title}</h2>
-          <div style={S.memoMeta}>
-            {memo.provider_used && <span style={S.metaChip}>{memo.provider_used}</span>}
-            {memo.confidence_level && <ConfidenceTag level={memo.confidence_level} />}
-            {memo.region && <span style={S.metaChip}>{memo.region}</span>}
-            {memo.stakeholder && <span style={S.metaChip}>{memo.stakeholder}</span>}
-            {memo.audience && <span style={S.metaChip}>{memo.audience}</span>}
-            <span style={S.metaChipMuted}>{fmtDate(memo.created_at)}</span>
-            {memo.data_as_of && <span style={S.metaChipMuted}>data as of {memo.data_as_of}</span>}
+    <div style={S.canvas}>
+      {/* ── HERO VERDICT ──────────────────────────────────────────── */}
+      <section style={S.hero}>
+        <div style={S.heroTop}>
+          <div style={S.heroIdent}>
+            <div style={S.identLine}>{ident.join('  ·  ')}</div>
+            <h1 style={S.heroTitle}>{memo.title}</h1>
           </div>
-          {scenario && (
-            <div style={S.scenarioLink}>
-              Scenario ·{' '}
-              <Link href={`/admin/hearst/dossier?scenario=${scenario.id}`} style={S.link}>
-                {scenario.name || scenario.title || scenario.id.slice(0, 8) + '…'}
-              </Link>
-            </div>
-          )}
-        </div>
-        <div style={S.memoHeaderRight}>
-          <a
-            style={S.pdfBtn}
-            href={`/api/admin/hearst/strategic-memos/${memo.id}/pdf`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            PDF ↓
-          </a>
-          {memo.scenario_id && (
-            <Link
-              href={`/admin/hearst/dossier?scenario=${memo.scenario_id}`}
-              style={S.compareBtn}
-            >
-              Compare versions
-            </Link>
-          )}
-          {/* ── Wave A: institutional approval controls ── */}
-          <div style={S.govRow}>
-            {memo.status === 'draft' && (
-              <button type="button" disabled={govBusy} onClick={() => transition('reviewed')} style={S.govBtn}>Mark reviewed</button>
-            )}
-            {memo.status === 'reviewed' && (
-              <>
-                <button type="button" disabled={govBusy} onClick={() => transition('approved')} style={S.govBtnPrimary}>Approve</button>
-                <button type="button" disabled={govBusy} onClick={() => transition('draft')} style={S.govBtn}>Send back</button>
-              </>
-            )}
-            {memo.status === 'approved' && (
-              <button type="button" disabled={govBusy} onClick={() => transition('archived')} style={S.govBtn}>Archive</button>
-            )}
-            {memo.status === 'archived' && (
-              <button type="button" disabled={govBusy} onClick={() => transition('draft')} style={S.govBtn}>Reopen</button>
-            )}
-          </div>
-          {(memo.approved_at || memo.reviewed_at) && (
-            <div style={S.govBadge}>
-              {memo.approved_at
-                ? `Approved · ${fmtDate(memo.approved_at)}`
-                : `Reviewed · ${fmtDate(memo.reviewed_at)}`}
-            </div>
-          )}
-          {govErr && <div style={S.govErr}>{govErr}</div>}
-        </div>
-      </div>
 
-      {/* ── Version selector ────────────────────────────────── */}
-      {versions && versions.length > 1 && (
-        <div style={S.versionBar}>
-          <span style={S.versionBarLabel}>Versions ·</span>
-          {versions.map(v => (
-            <button
-              key={v.id}
-              type="button"
-              onClick={() => onVersionSelect(v.id)}
-              style={{
-                ...S.versionChip,
-                ...(v.id === memo.id ? S.versionChipActive : {}),
-              }}
-            >
-              v{v.version}
-              {v.status && <span style={S.versionStatus}> · {v.status}</span>}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* ── Stats strip ─────────────────────────────────────── */}
-      <div style={S.statsStrip}>
-        <div style={S.statBox}><div style={S.statN}>v{memo.version}</div><div style={S.statL}>Version</div></div>
-        <div style={S.statBox}><div style={S.statN}>{memo.status}</div><div style={S.statL}>Status</div></div>
-        <div style={S.statBox}>
-          <div style={S.statN}>{memo.confidence_level || '—'}</div>
-          <div style={S.statL}>Confidence</div>
-        </div>
-        {memo.generation_time_ms && (
-          <div style={S.statBox}>
-            <div style={S.statN}>{(memo.generation_time_ms / 1000).toFixed(1)}s</div>
-            <div style={S.statL}>Gen time</div>
-          </div>
-        )}
-        {meta?.intelligence_brief?.datapoints_count != null && (
-          <div style={S.statBox}>
-            <div style={S.statN}>{meta.intelligence_brief.datapoints_count}</div>
-            <div style={S.statL}>Sources</div>
-          </div>
-        )}
-      </div>
-
-      {/* ── Memo content ────────────────────────────────────── */}
-      <div style={S.memoContent}>
-
-        {/* 01 — Executive Summary (expanded by default) */}
-        {m.executive_summary && (
-          <AccordionSection id="exec" label="01 · Executive Summary" defaultOpen>
-            {m.executive_summary.headline && (
-              <p style={S.headline}>{m.executive_summary.headline}</p>
-            )}
-            <div style={S.confRow}>
-              <ConfidenceTag level={m.executive_summary.overall_confidence} />
-            </div>
-            <ul style={S.bullets}>
-              {(m.executive_summary.bullets || []).map((b, i) => <li key={i}>{b}</li>)}
-            </ul>
-          </AccordionSection>
-        )}
-
-        {/* Confidence block — always show if present */}
-        {m.confidence_block && (
-          <div style={S.confBlock}>
-            <div style={S.confBlockHead}>
-              <span style={S.confBlockLabel}>Confidence</span>
-              <ConfidenceTag level={m.confidence_block.confidence_level} />
-              {m.confidence_block.source_density && (
-                <span style={S.confDensity}>{m.confidence_block.source_density}</span>
+          <div style={S.heroActions}>
+            <a style={S.pdfBtn} href={`/api/admin/hearst/strategic-memos/${memo.id}/pdf`} target="_blank" rel="noreferrer">
+              Export PDF
+            </a>
+            <div style={S.govRow}>
+              {memo.status === 'draft' && (
+                <button type="button" disabled={govBusy} onClick={() => transition('reviewed')} style={S.govBtn}>Mark reviewed</button>
+              )}
+              {memo.status === 'reviewed' && (
+                <>
+                  <button type="button" disabled={govBusy} onClick={() => transition('approved')} style={S.govBtn}>Approve</button>
+                  <button type="button" disabled={govBusy} onClick={() => transition('draft')} style={S.govBtn}>Send back</button>
+                </>
+              )}
+              {memo.status === 'approved' && (
+                <button type="button" disabled={govBusy} onClick={() => transition('archived')} style={S.govBtn}>Archive</button>
+              )}
+              {memo.status === 'archived' && (
+                <button type="button" disabled={govBusy} onClick={() => transition('draft')} style={S.govBtn}>Reopen</button>
               )}
             </div>
-            {m.confidence_block.estimation_quality && (
-              <p style={S.confEst}>{m.confidence_block.estimation_quality}</p>
-            )}
-            {m.confidence_block.known_unknowns?.length > 0 && (
-              <div style={S.unknownsWrap}>
-                <div style={S.unknownsLabel}>Known unknowns</div>
-                <ul style={S.bullets}>
-                  {m.confidence_block.known_unknowns.map((u, i) => <li key={i}>{u}</li>)}
-                </ul>
+            {(memo.approved_at || memo.reviewed_at) && (
+              <div style={S.govNote}>
+                {memo.approved_at ? `Approved · ${fmtDate(memo.approved_at)}` : `Reviewed · ${fmtDate(memo.reviewed_at)}`}
               </div>
             )}
+            {govErr && <div style={S.govErr}>{govErr}</div>}
           </div>
-        )}
+        </div>
 
-        {/* 02 — Strategic Context */}
+        <div style={S.verdictRow}>
+          <div style={S.verdictBadge}>{verdict.label}</div>
+          <div style={S.verdictMeta}>
+            <span style={S.eyebrow}>Investment verdict</span>
+            {verdict.drivers?.length > 0 && <span style={S.verdictDrivers}>{verdict.drivers.join('  ·  ')}</span>}
+            <span style={S.verdictNote}>Synthesized from return, risk, freshness &amp; confidence signals</span>
+          </div>
+        </div>
+
+        {decision.recommendation && <p style={S.heroLead}>{decision.recommendation}</p>}
+      </section>
+
+      {/* ── KPI STRIP ─────────────────────────────────────────────── */}
+      <section style={S.kpiStrip}>
+        {kpis.map(k => (
+          <div key={k.key} style={S.kpiCard}>
+            <div style={S.kpiLabel}>{k.label}</div>
+            <div style={S.kpiValue}>{k.value || '—'}</div>
+            {k.sub && <div style={S.kpiSub}>{k.sub}</div>}
+          </div>
+        ))}
+      </section>
+
+      {/* ── OPPORTUNITY CATEGORY ──────────────────────────────────── */}
+      <section style={S.categoryBand}>
+        <span style={S.eyebrow}>Opportunity type</span>
+        <span style={S.categoryName}>{category || 'Not classified'}</span>
+        <span style={S.categoryDesc}>
+          {category ? CATEGORY_DESC[category] : 'Archetype could not be inferred from this memo version.'}
+        </span>
+      </section>
+
+      {/* ── DECISION CARD + RISK CARDS ────────────────────────────── */}
+      <section style={S.twoCol}>
+        <div style={S.decisionCard}>
+          <SectionHeading>Recommendation</SectionHeading>
+          {decision.why && <p style={S.body}>{decision.why}</p>}
+          {decision.conditions.length > 0 && (
+            <div style={S.condWrap}>
+              <div style={S.eyebrow}>Conditions before approval</div>
+              <ul style={S.condList}>
+                {decision.conditions.map((c, i) => <li key={i}>{c}</li>)}
+              </ul>
+            </div>
+          )}
+          <div style={S.nextAction}>
+            <div style={S.eyebrow}>Next action</div>
+            <div style={S.nextPrimary}>{decision.nextAction.primary}</div>
+            <div style={S.nextDetail}>{decision.nextAction.detail}</div>
+          </div>
+        </div>
+
+        <div style={S.riskCol}>
+          <SectionHeading hint={`${risks.length} shown`}>Top risks</SectionHeading>
+          {risks.length === 0 && <Placeholder>No risks logged for this memo version</Placeholder>}
+          <div style={S.riskGrid}>
+            {risks.map((r, i) => {
+              const sv = (r.severity || 'MED').toUpperCase();
+              return (
+                <div key={i} style={S.riskCard}>
+                  <div style={S.riskHead}>
+                    <span style={S.sevLabel}>{sv === 'MEDIUM' ? 'MED' : sv}</span>
+                    {r.category && <span style={S.riskCat}>{r.category}</span>}
+                  </div>
+                  <div style={S.riskTitle}>{r.label}</div>
+                  {r.dependency && <div style={S.riskWhy}>Why it matters · {r.dependency}</div>}
+                  {r.mitigation && <div style={S.riskMit}>Mitigation · {r.mitigation}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── VISUAL STORY ──────────────────────────────────────────── */}
+      <section>
+        <SectionHeading hint="from existing projection data">Visual story</SectionHeading>
+        <div style={S.vizGrid}>
+          <div style={S.vizCard}>
+            <div style={S.vizTitle}>Capital stack</div>
+            <CapitalStack stack={capStack} />
+          </div>
+          <div style={S.vizCard}>
+            <div style={S.vizTitle}>Deployment timeline</div>
+            <DeploymentTimeline phases={phases} />
+          </div>
+          <div style={S.vizCard}>
+            <div style={S.vizTitle}>Benchmark position</div>
+            <BenchmarkPosition comparables={comparables} />
+          </div>
+          <div style={S.vizCard}>
+            <div style={S.vizTitle}>Cashflow trajectory</div>
+            <Cashflow years={m._exec_projection?.years} />
+          </div>
+        </div>
+      </section>
+
+      {/* ── ANALYTICS (continuous) ────────────────────────────────── */}
+      <section style={S.analytics}>
+        <SectionHeading hint="full written memo · continuous">Analytics</SectionHeading>
+
         {m.strategic_context && !m.strategic_context.skip && (
-          <AccordionSection id="ctx" label="02 · Strategic Context">
-            <p style={S.narrative}>{m.strategic_context.body}</p>
-          </AccordionSection>
+          <AnalyticsBlock title="Strategic context">
+            <p style={S.body}>{m.strategic_context.body}</p>
+          </AnalyticsBlock>
         )}
 
-        {/* 03 — Key Financial Metrics */}
         {m.key_financial_metrics && (
-          <AccordionSection id="fin" label="03 · Key Financial Metrics">
+          <AnalyticsBlock title="Financial metrics">
             <table style={S.table}>
-              <thead>
-                <tr>
-                  {['Metric', 'Value', 'Conf.', 'Source'].map(h => (
-                    <th key={h} style={S.th}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
+              <thead><tr>{['Metric', 'Value', 'Conf.', 'Source'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
               <tbody>
                 {(m.key_financial_metrics.metrics || []).map((row, i) => (
                   <tr key={i}>
                     <td style={S.td}>{row.label}</td>
                     <td style={S.td}><strong>{row.value}</strong>{row.unit && <span style={S.unit}> {row.unit}</span>}</td>
-                    <td style={S.td}><ConfidenceTag level={row.confidence} /></td>
-                    <td style={{ ...S.td, color: 'var(--cp-text-muted)', fontSize: 11 }}>{row.source || '—'}</td>
+                    <td style={S.td}><ConfidenceLabel level={row.confidence} /></td>
+                    <td style={{ ...S.td, color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)' }}>{row.source || '—'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {m.key_financial_metrics.narrative && (
-              <p style={S.narrative}>{m.key_financial_metrics.narrative}</p>
-            )}
-          </AccordionSection>
+            {m.key_financial_metrics.narrative && <p style={S.body}>{m.key_financial_metrics.narrative}</p>}
+          </AnalyticsBlock>
         )}
 
-        {/* 04 — Infrastructure Analysis */}
         {m.infrastructure_analysis && (
-          <AccordionSection id="infra" label="04 · Infrastructure Analysis">
-            {m.infrastructure_analysis.body && (
-              <p style={S.narrative}>{m.infrastructure_analysis.body}</p>
-            )}
+          <AnalyticsBlock title="Infrastructure">
+            {m.infrastructure_analysis.body && <p style={S.body}>{m.infrastructure_analysis.body}</p>}
             {m.infrastructure_analysis.tradeoffs?.length > 0 && (
               <>
-                <div style={S.sublabel}>Trade-offs</div>
-                <ul style={S.bullets}>
-                  {m.infrastructure_analysis.tradeoffs.map((t, i) => <li key={i}>{t}</li>)}
-                </ul>
+                <div style={S.eyebrow}>Trade-offs</div>
+                <ul style={S.bullets}>{m.infrastructure_analysis.tradeoffs.map((t, i) => <li key={i}>{t}</li>)}</ul>
               </>
             )}
-          </AccordionSection>
-        )}
-
-        {/* 05 — Market Benchmarking */}
-        {m.market_benchmarking && (
-          <AccordionSection id="bench" label="05 · Market Benchmarking">
-            <ul style={S.compList}>
-              {(m.market_benchmarking.comparables || []).map((c, i) => (
-                <li key={i}>
-                  <strong>{c.name}</strong> — {c.metric} : <strong>{c.value}</strong>
-                  {c.source && <span style={S.cite}> ({c.source})</span>}
-                </li>
-              ))}
-            </ul>
-          </AccordionSection>
-        )}
-
-        {/* 06 — Risks & Constraints */}
-        {m.risks_constraints && (
-          <AccordionSection id="risks" label="06 · Risks & Constraints">
-            <ul style={S.riskList}>
-              {(m.risks_constraints.items || []).map((r, i) => {
-                const sev = (r.severity || 'MED').toUpperCase();
-                const tone = SEVERITY_TONE[sev] || SEVERITY_TONE.MED;
-                return (
-                  <li key={i} style={{ ...S.riskItem, borderLeftColor: tone.color }}>
-                    <div><strong>{r.label}</strong> <span style={S.catLabel}>· {r.category}</span></div>
-                    {r.mitigation && <div style={S.mit}>Mitigation : {r.mitigation}</div>}
-                    {r.dependency && <div style={S.dep}>Dependency : {r.dependency}</div>}
-                  </li>
-                );
-              })}
-            </ul>
-          </AccordionSection>
-        )}
-
-        {/* 07 — Strategic Opportunities */}
-        {m.strategic_opportunities && (
-          <AccordionSection id="opp" label="07 · Strategic Opportunities">
-            <ul style={S.oppList}>
-              {(m.strategic_opportunities.items || []).map((o, i) => (
-                <li key={i} style={S.oppItem}>
-                  <div style={S.oppHead}>
-                    <strong>{o.label}</strong>
-                    {o.confidence && <ConfidenceTag level={o.confidence} />}
-                  </div>
-                  {o.execution_path && <div style={S.mit}>Execution : {o.execution_path}</div>}
-                </li>
-              ))}
-            </ul>
-          </AccordionSection>
-        )}
-
-        {/* 08 — Recommended Architecture */}
-        {m.recommended_architecture && (
-          <AccordionSection id="arch" label="08 · Recommended Architecture">
-            {Object.keys(m.recommended_architecture.config || {}).length > 0 && (
+            {Object.keys(m.recommended_architecture?.config || {}).length > 0 && (
               <table style={S.configTable}>
                 <tbody>
                   {Object.entries(m.recommended_architecture.config).map(([k, v]) => (
-                    <tr key={k}>
-                      <td style={S.configKey}>{k}</td>
-                      <td style={S.configVal}>{v}</td>
-                    </tr>
+                    <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
                   ))}
                 </tbody>
               </table>
             )}
-            {m.recommended_architecture.rationale && (
-              <p style={S.narrative}>{m.recommended_architecture.rationale}</p>
-            )}
-          </AccordionSection>
+            {m.recommended_architecture?.rationale && <p style={S.body}>{m.recommended_architecture.rationale}</p>}
+          </AnalyticsBlock>
         )}
 
-        {/* 09 — Commercialization Strategy */}
+        {m.market_benchmarking?.structural_differences?.length > 0 && (
+          <AnalyticsBlock title="Market benchmarking">
+            <div style={S.eyebrow}>Why peers aren&apos;t directly comparable</div>
+            <ul style={S.bullets}>{m.market_benchmarking.structural_differences.map((d, i) => <li key={i}>{d}</li>)}</ul>
+          </AnalyticsBlock>
+        )}
+
         {m.commercialization_strategy && (
-          <AccordionSection id="comm" label="09 · Commercialization Strategy">
+          <AnalyticsBlock title="Commercialization">
             <table style={S.configTable}>
               <tbody>
                 {[
@@ -378,86 +430,96 @@ function MemoViewer({ memo, scenario, versions, onVersionSelect, onStatusChange 
                 ))}
               </tbody>
             </table>
-          </AccordionSection>
+          </AnalyticsBlock>
         )}
 
-        {/* 10 — Deployment Roadmap */}
-        {m.deployment_roadmap && (
-          <AccordionSection id="roadmap" label="10 · Deployment Roadmap">
-            <ol style={S.phaseList}>
-              {(m.deployment_roadmap.phases || []).map((p, i) => (
-                <li key={i}>
-                  <strong>{p.label}</strong>
-                  {p.months_from_t0 != null && (
-                    <span style={S.phaseTime}> +{p.months_from_t0} mo</span>
-                  )}
-                  {p.gating_events?.length > 0 && (
-                    <ul style={S.gating}>
-                      {p.gating_events.map((g, j) => <li key={j}>{g}</li>)}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ol>
-            {m.deployment_roadmap.reality_check_flags?.length > 0 && (
-              <div style={S.realityFlags}>
-                <div style={S.realityFlagsLabel}>Reality-check flags</div>
-                {m.deployment_roadmap.reality_check_flags.map((f, i) => (
-                  <div key={i} style={S.realityFlag}>⚠ {f}</div>
-                ))}
-              </div>
-            )}
-          </AccordionSection>
-        )}
-
-        {/* 11 — Long-Term Strategic Value */}
         {m.long_term_strategic_value && (
-          <AccordionSection id="lt" label="11 · Long-Term Strategic Value">
-            {m.long_term_strategic_value.ten_year_arc && (
-              <p style={S.narrative}>{m.long_term_strategic_value.ten_year_arc}</p>
-            )}
+          <AnalyticsBlock title="Long-term value">
+            {m.long_term_strategic_value.ten_year_arc && <p style={S.body}>{m.long_term_strategic_value.ten_year_arc}</p>}
             {m.long_term_strategic_value.speculative_branches?.length > 0 && (
               <>
-                <div style={S.sublabel}>Speculative branches <ConfidenceTag level="LOW" /></div>
-                <ul style={S.bullets}>
-                  {m.long_term_strategic_value.speculative_branches.map((s, i) => (
-                    <li key={i}>{s}</li>
-                  ))}
-                </ul>
+                <div style={S.eyebrow}>Speculative branches · low visibility</div>
+                <ul style={S.bullets}>{m.long_term_strategic_value.speculative_branches.map((s, i) => <li key={i}>{s}</li>)}</ul>
               </>
             )}
-          </AccordionSection>
+          </AnalyticsBlock>
         )}
 
-        {/* Decision Tensions */}
-        {m.decision_tensions?.length > 0 && (
-          <AccordionSection id="tensions" label="Decision tensions">
-            <ul style={S.tensionList}>
-              {m.decision_tensions.map((t, i) => (
-                <li key={i} style={S.tensionItem}>
-                  <div style={S.tensionId}>{t.id}</div>
-                  <div style={S.tensionVerdict}>{t.verdict}</div>
-                </li>
-              ))}
-            </ul>
-          </AccordionSection>
-        )}
-
-        {/* Intelligence Sources */}
         {m.intelligence_sources?.length > 0 && (
-          <AccordionSection id="sources" label="Intelligence sources">
+          <AnalyticsBlock title="Sources">
             <ul style={S.sourceList}>
               {m.intelligence_sources.map((s, i) => (
                 <li key={i} style={S.sourceItem}>
                   <span style={S.sourceId}>{s.datapoint_id}</span>
-                  <ConfidenceTag level={s.trust} />
+                  <ConfidenceLabel level={s.trust} />
                   <span style={S.sourceMeta}>· {s.used_for}</span>
                 </li>
               ))}
             </ul>
-          </AccordionSection>
+          </AnalyticsBlock>
         )}
-      </div>
+      </section>
+
+      {/* ── APPENDIX (collapsed) ──────────────────────────────────── */}
+      {versions && versions.length > 1 && (
+        <div style={S.versionBar}>
+          <span style={S.eyebrow}>Versions</span>
+          {versions.map(v => (
+            <button key={v.id} type="button" onClick={() => onVersionSelect(v.id)}
+              style={{ ...S.versionChip, ...(v.id === memo.id ? S.versionChipActive : {}) }}>
+              v{v.version}{v.status ? ` · ${v.status}` : ''}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <Collapsible label="Appendix · raw detail, metadata & audit">
+        {m.decision_tensions?.length > 0 && (
+          <div>
+            <div style={S.eyebrow}>Decision tensions</div>
+            <ul style={S.tensionList}>
+              {m.decision_tensions.map((t, i) => (
+                <li key={i} style={S.tensionItem}>
+                  <div style={S.tensionId}>{t.id}</div>
+                  <div style={S.body}>{t.verdict}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div>
+          <div style={S.eyebrow}>Generation metadata</div>
+          <table style={S.configTable}>
+            <tbody>
+              {[
+                ['Provider', memo.provider_used],
+                ['Confidence', memo.confidence_level],
+                ['Stakeholder', memo.stakeholder],
+                ['Audience', memo.audience],
+                ['Generation time', memo.generation_time_ms != null ? `${(memo.generation_time_ms / 1000).toFixed(1)}s` : null],
+                ['Created', fmtDate(memo.created_at)],
+                ['Data as of', memo.data_as_of],
+                ['Scenario', memo.scenario_id || '—'],
+              ].filter(([, v]) => v != null).map(([k, v]) => (
+                <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div style={S.eyebrow}>Full memo JSON</div>
+          <pre style={S.pre}>{JSON.stringify(m, null, 2)}</pre>
+        </div>
+      </Collapsible>
+    </div>
+  );
+}
+
+function AnalyticsBlock({ title, children }) {
+  return (
+    <div style={S.analyticsBlock}>
+      <h3 style={S.analyticsTitle}>{title}</h3>
+      {children}
     </div>
   );
 }
@@ -499,33 +561,24 @@ function ScenarioView({ scenarioId }) {
       </div>
 
       <header style={S.sectionHeader}>
-        <h2 style={S.h2}>
-          Scenario · {scenario?.name || scenario?.title || scenarioId.slice(0, 8) + '…'}
-        </h2>
+        <h2 style={S.h2}>Scenario · {scenario?.name || scenario?.title || scenarioId.slice(0, 8) + '…'}</h2>
         <p style={S.sub}>{memos.length} report version{memos.length !== 1 ? 's' : ''}</p>
       </header>
 
-      {memos.length === 0 && (
-        <div style={S.empty}>No reports for this scenario yet.</div>
-      )}
+      {memos.length === 0 && <div style={S.empty}>No reports for this scenario yet.</div>}
 
       <div style={S.memoCardList}>
-        {memos.map(m => (
-          <button
-            key={m.id}
-            type="button"
-            onClick={() => router.push(`/admin/hearst/dossier?memo=${m.id}`)}
-            style={S.memoCard}
-          >
+        {memos.map(mm => (
+          <button key={mm.id} type="button" onClick={() => router.push(`/admin/hearst/dossier?memo=${mm.id}`)} style={S.memoCard}>
             <div style={S.memoCardTop}>
-              <span style={S.memoCardVersion}>v{m.version}</span>
-              <ConfidenceTag level={m.confidence_level} />
-              <span style={S.memoCardStatus}>{m.status}</span>
+              <span style={S.memoCardVersion}>v{mm.version}</span>
+              <ConfidenceLabel level={mm.confidence_level} />
+              <span style={S.memoCardStatus}>{mm.status}</span>
             </div>
-            <div style={S.memoCardTitle}>{m.title}</div>
+            <div style={S.memoCardTitle}>{mm.title}</div>
             <div style={S.memoCardMeta}>
-              {m.provider_used && <span>{m.provider_used}</span>}
-              <span>{fmtDateShort(m.created_at)}</span>
+              {mm.provider_used && <span>{mm.provider_used}</span>}
+              <span>{fmtDateShort(mm.created_at)}</span>
             </div>
           </button>
         ))}
@@ -542,8 +595,7 @@ function MemoDetailView({ memoId }) {
   const [err, setErr] = useState(null);
 
   const load = useCallback(async (id) => {
-    setData(null);
-    setErr(null);
+    setData(null); setErr(null);
     try {
       const r = await fetch(`/api/admin/hearst/strategic-memos/${id}`);
       const j = await r.json();
@@ -564,12 +616,7 @@ function MemoDetailView({ memoId }) {
         {data.memo?.scenario_id && (
           <>
             <span style={S.breadcrumbSep}>/</span>
-            <Link
-              href={`/admin/hearst/dossier?scenario=${data.memo.scenario_id}`}
-              style={S.breadcrumbLink}
-            >
-              Scenario
-            </Link>
+            <Link href={`/admin/hearst/dossier?scenario=${data.memo.scenario_id}`} style={S.breadcrumbLink}>Scenario</Link>
           </>
         )}
         <span style={S.breadcrumbSep}>/</span>
@@ -577,7 +624,7 @@ function MemoDetailView({ memoId }) {
       </div>
 
       {data.memo && (
-        <MemoViewer
+        <DecisionCanvas
           memo={data.memo}
           scenario={data.scenario}
           versions={data.versions}
@@ -619,14 +666,14 @@ function AllMemosView() {
     return s?.name || s?.title || id.slice(0, 8) + '…';
   }, [scenarios]);
 
-  const approvedCount = (memos || []).filter(m => m.status === 'approved').length;
+  const approvedCount = (memos || []).filter(mm => mm.status === 'approved').length;
 
   return (
     <div>
       <header style={S.sectionHeader}>
         <div>
           <h1 style={S.h1}>Project Dossier</h1>
-          <p style={S.sub}>All strategic memos · versioned · exportable. Click any row to open inline.</p>
+          <p style={S.sub}>Decision-first strategic reports · versioned · exportable. Open any report for its Decision Canvas.</p>
         </div>
       </header>
 
@@ -638,41 +685,28 @@ function AllMemosView() {
 
       {err && <div style={S.err}>Error: {err}</div>}
       {memos === null && <div style={S.empty}>Loading memos…</div>}
-      {memos && memos.length === 0 && (
-        <div style={S.empty}>No reports yet. Generate a strategic memo from the Simulator.</div>
-      )}
+      {memos && memos.length === 0 && <div style={S.empty}>No reports yet. Generate a strategic memo from the Simulator.</div>}
 
       {memos && memos.length > 0 && (
         <table style={S.table}>
           <thead>
-            <tr>
-              {['Title', 'Scenario', 'Date', 'v', 'Provider', 'Confidence', 'Status', ''].map(h => (
-                <th key={h} style={S.th}>{h}</th>
-              ))}
-            </tr>
+            <tr>{['Title', 'Scenario', 'Date', 'v', 'Provider', 'Confidence', 'Status', ''].map(h => <th key={h} style={S.th}>{h}</th>)}</tr>
           </thead>
           <tbody>
-            {memos.map(m => (
-              <tr key={m.id} style={S.tr}>
+            {memos.map(mm => (
+              <tr key={mm.id} style={S.tr}>
+                <td style={S.td}><Link href={`/admin/hearst/dossier?memo=${mm.id}`} style={S.link}>{mm.title}</Link></td>
                 <td style={S.td}>
-                  <Link href={`/admin/hearst/dossier?memo=${m.id}`} style={S.link}>
-                    {m.title}
-                  </Link>
+                  {mm.scenario_id
+                    ? <Link href={`/admin/hearst/dossier?scenario=${mm.scenario_id}`} style={S.link}>{scenarioName(mm.scenario_id)}</Link>
+                    : <span style={S.muted}>—</span>}
                 </td>
-                <td style={S.td}>
-                  {m.scenario_id
-                    ? <Link href={`/admin/hearst/dossier?scenario=${m.scenario_id}`} style={S.link}>{scenarioName(m.scenario_id)}</Link>
-                    : <span style={S.muted}>—</span>
-                  }
-                </td>
-                <td style={S.td}>{fmtDateShort(m.created_at)}</td>
-                <td style={S.td}>v{m.version}</td>
-                <td style={S.td}>{m.provider_used || '—'}</td>
-                <td style={S.td}><ConfidenceTag level={m.confidence_level} /></td>
-                <td style={S.td}><span style={S.statusBadge}>{m.status}</span></td>
-                <td style={S.td}>
-                  <a style={S.pdf} href={`/api/admin/hearst/strategic-memos/${m.id}/pdf`} target="_blank" rel="noreferrer">PDF ↓</a>
-                </td>
+                <td style={S.td}>{fmtDateShort(mm.created_at)}</td>
+                <td style={S.td}>v{mm.version}</td>
+                <td style={S.td}>{mm.provider_used || '—'}</td>
+                <td style={S.td}><ConfidenceLabel level={mm.confidence_level} /></td>
+                <td style={S.td}><span style={S.statusText}>{mm.status}</span></td>
+                <td style={S.td}><a style={S.pdf} href={`/api/admin/hearst/strategic-memos/${mm.id}/pdf`} target="_blank" rel="noreferrer">PDF ↓</a></td>
               </tr>
             ))}
           </tbody>
@@ -686,19 +720,17 @@ function AllMemosView() {
 
 function DossierInner() {
   const sp = useSearchParams();
-  const memoId    = sp.get('memo');
+  const memoId = sp.get('memo');
   const scenarioId = sp.get('scenario');
 
   return (
     <div style={S.wrap}>
-      {memoId     && <MemoDetailView memoId={memoId} />}
+      {memoId && <MemoDetailView memoId={memoId} />}
       {!memoId && scenarioId && <ScenarioView scenarioId={scenarioId} />}
       {!memoId && !scenarioId && <AllMemosView />}
     </div>
   );
 }
-
-// ─── Page export ─────────────────────────────────────────────────────────────
 
 export default function DossierPage() {
   return (
@@ -708,148 +740,179 @@ export default function DossierPage() {
   );
 }
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
+// ─── Styles — tokens only, cockpit canon (H1 20/800 · H2 13/700 · eyebrow 10/800 CAPS) ─
+
+const EYEBROW = {
+  fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-muted)',
+  textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)',
+};
 
 const S = {
-  wrap: { maxWidth: 1280, margin: '0 auto', padding: '32px 32px 96px' },
+  wrap: { maxWidth: 1280, margin: '0 auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-space-12)' },
 
-  // Typography
-  h1: { fontSize: 'var(--cp-font-2xl, 28px)', fontWeight: 700, color: 'var(--cp-text-primary)', margin: 0 },
-  h2: { fontSize: 'var(--cp-font-xl, 22px)', fontWeight: 700, color: 'var(--cp-text-primary)', margin: 0 },
-  sub: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', marginTop: 6 },
-  narrative: { margin: '6px 0', fontSize: 13, color: 'var(--cp-text-body)', lineHeight: 1.6 },
-  headline: { fontSize: 16, fontWeight: 700, color: 'var(--cp-text-primary)', lineHeight: 1.4, margin: '4px 0 12px' },
-  sublabel: { fontSize: 10, fontWeight: 700, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 12, marginBottom: 4 },
+  // Typography / shared (canon)
+  h1: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0 },
+  h2: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0 },
+  sub: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-1)' },
+  body: { margin: 'var(--cp-space-1) 0', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
+  eyebrow: { ...EYEBROW, display: 'block', marginBottom: 'var(--cp-space-1)' },
+  confLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)', whiteSpace: 'nowrap' },
 
-  // Layout
-  sectionHeader: { marginBottom: 20 },
-  statRow: { display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' },
-  statBox: { padding: '12px 18px', borderRadius: 10, background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', minWidth: 110 },
-  statN: { fontSize: 22, fontWeight: 700, color: 'var(--cp-text-primary)' },
-  statL: { fontSize: 11, color: 'var(--cp-text-muted)', textTransform: 'uppercase', marginTop: 2 },
+  // Canvas
+  canvas: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)' },
 
-  // Table (list view)
+  // ── Hero ── (single bordeaux accent = left keyline)
+  hero: { padding: 'var(--cp-space-6)', borderRadius: 'var(--cp-radius-lg)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
+  heroTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
+  heroIdent: { flex: '1 1 320px', minWidth: 0 },
+  identLine: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'capitalize', marginBottom: 'var(--cp-space-2)' },
+  heroTitle: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0, lineHeight: 'var(--cp-leading-tight)' },
+  heroActions: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)', alignItems: 'flex-end', flexShrink: 0 },
+  heroLead: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', margin: 0, maxWidth: 900 },
+
+  verdictRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
+  verdictBadge: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 'var(--cp-leading-tight)', paddingLeft: 'var(--cp-space-4)', borderLeft: '3px solid var(--cp-accent)' },
+  verdictMeta: { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 },
+  verdictDrivers: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-body)' },
+  verdictNote: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
+
+  pdfBtn: { padding: 'var(--cp-space-2) var(--cp-space-4)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', textDecoration: 'none', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', whiteSpace: 'nowrap' },
+  govRow: { display: 'flex', gap: 'var(--cp-space-1)', justifyContent: 'flex-end', flexWrap: 'wrap' },
+  govBtn: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-body)', border: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', cursor: 'pointer' },
+  govNote: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)' },
+  govErr: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-error)', maxWidth: 220, textAlign: 'right' },
+
+  // ── KPI strip (auto-fit grid → responsive) ──
+  kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--cp-space-3)' },
+  kpiCard: { padding: 'var(--cp-space-4) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
+  kpiLabel: { ...EYEBROW, marginBottom: 'var(--cp-space-2)' },
+  kpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' },
+  kpiSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
+
+  // ── Category band ──
+  categoryBand: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-4)', flexWrap: 'wrap', padding: 'var(--cp-space-3) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)' },
+  categoryName: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
+  categoryDesc: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', flex: '1 1 240px' },
+
+  // ── Two-col (decision + risks) ──
+  twoCol: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--cp-space-4)', alignItems: 'start' },
+  decisionCard: { padding: 'var(--cp-space-5)', borderRadius: 'var(--cp-radius-lg)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
+  condWrap: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', margin: 'var(--cp-space-3) 0' },
+  condList: { margin: 0, paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', lineHeight: 1.45 },
+  nextAction: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-accent)' },
+  nextPrimary: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', marginTop: 2 },
+  nextDetail: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', marginTop: 2, lineHeight: 1.45 },
+
+  riskCol: { minWidth: 0 },
+  riskGrid: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
+  riskCard: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-border-strong)' },
+  riskHead: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
+  sevLabel: { ...EYEBROW, color: 'var(--cp-text-primary)' },
+  riskCat: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' },
+  riskTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 1.35 },
+  riskWhy: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)', lineHeight: 1.4 },
+  riskMit: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', marginTop: 2, lineHeight: 1.4 },
+
+  // ── Section headings (canon H2 13/700) ──
+  headingWrap: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', paddingBottom: 'var(--cp-space-2)' },
+  heading: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 0 },
+  headingHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
+
+  // ── Visual story ──
+  vizGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--cp-space-3)' },
+  vizCard: { padding: 'var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
+  vizTitle: { ...EYEBROW, marginBottom: 'var(--cp-space-3)' },
+  placeholder: { padding: 'var(--cp-space-4) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', fontStyle: 'italic', textAlign: 'center' },
+
+  // Capital stack
+  stackBar: { display: 'flex', height: 22, borderRadius: 'var(--cp-radius-sm)', overflow: 'hidden', border: '1px solid var(--cp-border)' },
+  stackSeg: { height: '100%' },
+  stackLegend: { display: 'flex', gap: 'var(--cp-space-4)', marginTop: 'var(--cp-space-2)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)' },
+  dot: { display: 'inline-block', width: 10, height: 10, borderRadius: 'var(--cp-radius-xs)', marginRight: 'var(--cp-space-1)', verticalAlign: 'middle' },
+  splitWrap: { marginTop: 'var(--cp-space-3)' },
+  splitRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
+  splitName: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', width: 84, flexShrink: 0 },
+  splitTrack: { flex: 1, height: 8, borderRadius: 'var(--cp-radius-pill)', background: 'var(--cp-surface-0)', overflow: 'hidden' },
+  splitFill: { height: '100%', background: 'var(--cp-accent)', borderRadius: 'var(--cp-radius-pill)' },
+  splitPct: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', width: 36, textAlign: 'right', fontFamily: 'ui-monospace, monospace' },
+
+  // Timeline
+  timeline: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
+  tlRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' },
+  tlLabel: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', flex: '0 0 38%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  tlTrack: { position: 'relative', flex: 1, height: 10, borderRadius: 'var(--cp-radius-pill)', background: 'var(--cp-surface-0)' },
+  tlBar: { position: 'absolute', top: 0, height: '100%', background: 'var(--cp-accent)', borderRadius: 'var(--cp-radius-pill)' },
+  tlMonths: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', flex: '0 0 56px', textAlign: 'right' },
+
+  // Benchmark
+  benchList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
+  benchRow: { display: 'grid', gridTemplateColumns: '1fr auto', gap: '0 var(--cp-space-2)', alignItems: 'baseline', paddingBottom: 'var(--cp-space-1)', borderBottom: '1px solid var(--cp-border)' },
+  benchName: { fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' },
+  benchValue: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
+  benchMetric: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' },
+  benchSrc: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-faint)', fontFamily: 'ui-monospace, monospace', gridColumn: '1 / -1' },
+
+  // Cashflow
+  cashWrap: { display: 'flex', alignItems: 'flex-end', gap: 'var(--cp-space-1)', height: 120 },
+  cashCol: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--cp-space-1)', height: '100%' },
+  cashBars: { display: 'flex', alignItems: 'flex-end', gap: 2, flex: 1, width: '100%', justifyContent: 'center' },
+  cashBar: { width: 7, borderRadius: 'var(--cp-radius-xs) var(--cp-radius-xs) 0 0', minHeight: 2 },
+  cashYr: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
+
+  // ── Analytics ──
+  analytics: { display: 'flex', flexDirection: 'column' },
+  analyticsBlock: { padding: 'var(--cp-space-4) 0', borderBottom: '1px solid var(--cp-border)' },
+  analyticsTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: '0 0 var(--cp-space-2)' },
+  bullets: { margin: 'var(--cp-space-1) 0', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.5 },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)' },
-  th: { textAlign: 'left', padding: '8px 10px', color: 'var(--cp-text-muted)', borderBottom: '1px solid var(--cp-border)', fontWeight: 600, textTransform: 'uppercase', fontSize: 11 },
-  tr: { borderBottom: '1px solid var(--cp-border)', cursor: 'pointer' },
-  td: { padding: '8px 10px', color: 'var(--cp-text-body)', verticalAlign: 'middle' },
-
-  // Links & actions
-  link: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 500 },
-  muted: { color: 'var(--cp-text-faint)' },
-  pdf: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 600, fontSize: 12 },
-  statusBadge: { fontSize: 11, padding: '2px 7px', borderRadius: 6, background: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)' },
-
-  // Breadcrumb
-  breadcrumb: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--cp-text-muted)', marginBottom: 20 },
-  breadcrumbLink: { color: 'var(--cp-accent)', textDecoration: 'none' },
-  breadcrumbSep: { color: 'var(--cp-text-faint)' },
-
-  // Memo viewer
-  memoViewer: { display: 'flex', flexDirection: 'column', gap: 16 },
-  memoHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, padding: '20px', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 12 },
-  memoHeaderLeft: { flex: 1 },
-  memoHeaderRight: { display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end', flexShrink: 0 },
-  memoTitle: { fontSize: 20, fontWeight: 800, color: 'var(--cp-text-primary)', margin: '0 0 8px' },
-  memoMeta: { display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
-  metaChip: { fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', fontFamily: 'ui-monospace, monospace', letterSpacing: 0.3 },
-  metaChipMuted: { fontSize: 10, color: 'var(--cp-text-faint)', fontFamily: 'ui-monospace, monospace', alignSelf: 'center' },
-  scenarioLink: { fontSize: 12, color: 'var(--cp-text-muted)', marginTop: 4 },
-  pdfBtn: { padding: '7px 14px', borderRadius: 8, background: 'var(--cp-accent)', color: '#fff', textDecoration: 'none', fontSize: 12, fontWeight: 700 },
-  compareBtn: { padding: '6px 12px', borderRadius: 8, background: 'var(--cp-surface-0)', color: 'var(--cp-accent)', border: '1px solid var(--cp-border)', textDecoration: 'none', fontSize: 12, fontWeight: 600 },
-  // Wave A — institutional approval controls
-  govRow: { display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' },
-  govBtn: { padding: '6px 12px', borderRadius: 8, background: 'var(--cp-surface-0)', color: 'var(--cp-text-body)', border: '1px solid var(--cp-border)', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
-  govBtnPrimary: { padding: '6px 12px', borderRadius: 8, background: 'var(--ct-status-success, var(--cp-success))', color: '#fff', border: '1px solid var(--ct-status-success-border, var(--cp-border))', fontSize: 12, fontWeight: 700, cursor: 'pointer' },
-  govBadge: { fontSize: 11, fontWeight: 700, color: 'var(--ct-status-success, var(--cp-success))', letterSpacing: 0.2 },
-  govErr: { fontSize: 11, color: 'var(--cp-error, #ef4444)', maxWidth: 220, textAlign: 'right' },
-
-  // Version bar
-  versionBar: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '10px 16px', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderRadius: 10 },
-  versionBarLabel: { fontSize: 11, color: 'var(--cp-text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 },
-  versionChip: { padding: '4px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600, border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', cursor: 'pointer' },
-  versionChipActive: { background: 'var(--cp-accent)', color: '#fff', borderColor: 'var(--cp-accent)' },
-  versionStatus: { fontWeight: 400, fontSize: 10 },
-
-  // Stats strip
-  statsStrip: { display: 'flex', gap: 10, flexWrap: 'wrap' },
-
-  // Memo content
-  memoContent: { display: 'flex', flexDirection: 'column', gap: 8 },
-
-  // Confidence row
-  confRow: { marginBottom: 8 },
-
-  // Confidence block (always-visible summary)
-  confBlock: { padding: 14, background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', borderRadius: 10 },
-  confBlockHead: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 },
-  confBlockLabel: { fontSize: 10, fontWeight: 800, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 },
-  confDensity: { fontSize: 11, color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', marginLeft: 'auto' },
-  confEst: { fontSize: 12, color: 'var(--cp-text-body)', margin: '4px 0', lineHeight: 1.5 },
-  unknownsWrap: { marginTop: 8 },
-  unknownsLabel: { fontSize: 10, fontWeight: 700, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
-
-  // Accordion
-  accordionSection: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 10, overflow: 'hidden' },
-  accordionBtn: { width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' },
-  accordionLabel: { fontSize: 12, fontWeight: 800, color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 0.5 },
-  accordionChevron: { fontSize: 18, color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
-  accordionBody: { padding: '0 16px 16px', fontSize: 13, color: 'var(--cp-text-body)', lineHeight: 1.6 },
-
-  // Bullets & lists
-  bullets: { margin: '6px 0', paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 5 },
-  compList: { margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12 },
-  cite: { color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11 },
-  unit: { fontSize: 10, color: 'var(--cp-text-muted)' },
-
-  // Risk items
-  riskList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 },
-  riskItem: { borderLeft: '3px solid var(--cp-border)', paddingLeft: 10 },
-  catLabel: { fontSize: 10, color: 'var(--cp-text-muted)' },
-  mit: { fontSize: 12, color: 'var(--cp-text-body)', marginTop: 2 },
-  dep: { fontSize: 11, color: 'var(--cp-text-muted)', marginTop: 2 },
-
-  // Opportunities
-  oppList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 },
-  oppItem: {},
-  oppHead: { display: 'flex', alignItems: 'center', gap: 8 },
-
-  // Config table (arch / comm)
-  configTable: { width: '100%', borderCollapse: 'collapse', fontSize: 12 },
-  configKey: { padding: '6px 10px', borderBottom: '1px solid var(--cp-border)', fontSize: 10, fontWeight: 700, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, width: 160, verticalAlign: 'top' },
-  configVal: { padding: '6px 10px', borderBottom: '1px solid var(--cp-border)', color: 'var(--cp-text-primary)' },
-
-  // Roadmap
-  phaseList: { margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 },
-  phaseTime: { fontSize: 10, color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', marginLeft: 8 },
-  gating: { margin: '4px 0 0', paddingLeft: 18, fontSize: 11, color: 'var(--cp-text-muted)' },
-  realityFlags: { marginTop: 12, padding: 12, background: 'var(--ct-status-warning-soft)', border: '1px solid var(--ct-status-warning-border)', borderRadius: 10 },
-  realityFlagsLabel: { fontSize: 10, fontWeight: 800, color: 'var(--ct-status-warning)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 },
-  realityFlag: { fontSize: 12, color: 'var(--ct-status-warning)', lineHeight: 1.5, padding: '4px 0' },
-
-  // Tensions
-  tensionList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 },
-  tensionItem: { borderLeft: '3px solid var(--cp-accent)', paddingLeft: 12 },
-  tensionId: { fontSize: 11, fontWeight: 800, color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: 'ui-monospace, monospace' },
-  tensionVerdict: { fontSize: 12, color: 'var(--cp-text-body)', marginTop: 4, lineHeight: 1.5 },
-
-  // Sources
-  sourceList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 },
-  sourceItem: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 11 },
-  sourceId: { fontFamily: 'ui-monospace, monospace', color: 'var(--cp-text-primary)', fontSize: 11 },
+  th: { textAlign: 'left', padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-muted)', borderBottom: '1px solid var(--cp-border)', fontWeight: 'var(--cp-weight-semibold)', textTransform: 'uppercase', fontSize: 'var(--cp-font-xs)' },
+  td: { padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-body)', verticalAlign: 'middle', borderBottom: '1px solid var(--cp-border)' },
+  unit: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)' },
+  configTable: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-2)' },
+  configKey: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', ...EYEBROW, width: 160, verticalAlign: 'top' },
+  configVal: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-sm)' },
+  sourceList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
+  sourceItem: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-1)', flexWrap: 'wrap', fontSize: 'var(--cp-font-xs)' },
+  sourceId: { fontFamily: 'ui-monospace, monospace', color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-xs)' },
   sourceMeta: { color: 'var(--cp-text-muted)' },
 
-  // Scenario card list
-  memoCardList: { display: 'flex', flexDirection: 'column', gap: 10 },
-  memoCard: { padding: '14px 16px', borderRadius: 10, border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', cursor: 'pointer', textAlign: 'left', width: '100%', font: 'inherit', color: 'inherit', transition: 'border-color 0.15s' },
-  memoCardTop: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 },
-  memoCardVersion: { fontSize: 11, fontWeight: 700, color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
-  memoCardStatus: { fontSize: 10, padding: '2px 7px', borderRadius: 6, background: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', fontWeight: 600 },
-  memoCardTitle: { fontSize: 14, fontWeight: 700, color: 'var(--cp-text-primary)', marginBottom: 4 },
-  memoCardMeta: { display: 'flex', gap: 10, fontSize: 11, color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
+  // ── Version bar + appendix ──
+  versionBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', flexWrap: 'wrap', padding: 'var(--cp-space-2) var(--cp-space-4)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' },
+  versionChip: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', cursor: 'pointer' },
+  versionChipActive: { background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', borderColor: 'var(--cp-border-strong)' },
 
-  // Shared
-  tag: { display: 'inline-block', fontSize: 9, fontWeight: 800, padding: '3px 8px', borderRadius: 999, letterSpacing: 0.5, whiteSpace: 'nowrap' },
-  err: { padding: 12, borderRadius: 8, background: 'var(--ct-status-danger-soft, #3a1a1f)', color: 'var(--ct-status-danger)', border: '1px solid var(--ct-status-danger-border)', marginBottom: 12 },
-  empty: { padding: 40, color: 'var(--cp-text-muted)', textAlign: 'center', fontSize: 14 },
+  appendix: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', overflow: 'hidden' },
+  appendixBtn: { width: '100%', padding: 'var(--cp-space-3) var(--cp-space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' },
+  appendixLabel: { ...EYEBROW },
+  appendixChevron: { fontSize: 'var(--cp-font-lg)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
+  appendixBody: { padding: '0 var(--cp-space-4) var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
+  pre: { margin: 0, padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)', lineHeight: 1.5, overflowX: 'auto', maxHeight: 380, fontFamily: 'ui-monospace, monospace' },
+  tensionList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
+  tensionItem: { borderLeft: '3px solid var(--cp-border-strong)', paddingLeft: 'var(--cp-space-3)' },
+  tensionId: { ...EYEBROW, color: 'var(--cp-text-primary)', fontFamily: 'ui-monospace, monospace' },
+
+  // ── Shared (list/scenario views) ──
+  sectionHeader: { marginBottom: 'var(--cp-space-5)' },
+  statRow: { display: 'flex', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-6)', flexWrap: 'wrap' },
+  statBox: { padding: 'var(--cp-space-3) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', minWidth: 110 },
+  statN: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
+  statL: { ...EYEBROW, marginTop: 2 },
+  tr: { borderBottom: '1px solid var(--cp-border)', cursor: 'pointer' },
+  link: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-medium)' },
+  muted: { color: 'var(--cp-text-faint)' },
+  pdf: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)' },
+  statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
+  breadcrumb: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-5)' },
+  breadcrumbLink: { color: 'var(--cp-accent)', textDecoration: 'none' },
+  breadcrumbSep: { color: 'var(--cp-text-faint)' },
+  memoCardList: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
+  memoCard: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', cursor: 'pointer', textAlign: 'left', width: '100%', font: 'inherit', color: 'inherit' },
+  memoCardTop: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
+  memoCardVersion: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
+  memoCardStatus: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
+  memoCardTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-1)' },
+  memoCardMeta: { display: 'flex', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
+
+  err: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-3)' },
+  empty: { padding: 'var(--cp-space-9)', color: 'var(--cp-text-muted)', textAlign: 'center', fontSize: 'var(--cp-font-md)' },
 };

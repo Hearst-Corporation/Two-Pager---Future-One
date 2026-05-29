@@ -12,7 +12,7 @@ import { createPortal } from 'react-dom';
  *   - GET /api/admin/review-mode on mount to fetch current mode (gates render
  *     to admins only — 401/403 → render nothing).
  *   - Toggle Normal | Review → POST /api/admin/review-mode.
- *   - When mode='review' the "Générer le memo" button is visible. Click :
+ *   - When mode='review' the "Generate memo" button is visible. Click :
  *       POST /api/admin/review-document?chatId=<current> (streaming text)
  *       → modal with the markdown content + Copy / Download .md actions.
  *   - chatId is read from `localStorage.cockpitChatId` (set by the shell's
@@ -150,7 +150,7 @@ export function AdminReviewControls() {
   // Native settings section injected into the chat settings panel.
   const reviewSection = (
     <section className="ct-chat-settings-section" data-oracle-review-controls>
-      <div className="ct-chat-settings-label">Mode de review</div>
+      <div className="ct-chat-settings-label">Review mode</div>
       <div style={styles.seg} role="group" aria-label="Chat mode">
         <button
           type="button"
@@ -173,12 +173,12 @@ export function AdminReviewControls() {
           onClick={generate}
           disabled={generating}
           style={generating ? { ...styles.generateBtn, ...styles.generateBtnDisabled } : styles.generateBtn}
-          title={generating ? 'Génération en cours…' : 'Générer le document MD+JSON'}
+          title={generating ? 'Generating…' : 'Generate the MD+JSON document'}
         >
-          {generating ? 'Génération…' : 'Générer le memo'}
+          {generating ? 'Generating…' : 'Generate memo'}
         </button>
       )}
-      <div className="ct-chat-settings-hint">Le mode Review génère un document MD+JSON depuis la conversation courante.</div>
+      <div className="ct-chat-settings-hint">Review mode generates an MD+JSON document from the current conversation.</div>
       {error && <div style={styles.error}>{error}</div>}
     </section>
   );
@@ -193,8 +193,8 @@ export function AdminReviewControls() {
             <div style={styles.modalHeader}>
               <strong>Review document</strong>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button type="button" style={styles.modalAction} onClick={onCopy}>Copier</button>
-                <button type="button" style={styles.modalAction} onClick={onDownload}>Télécharger .md</button>
+                <button type="button" style={styles.modalAction} onClick={onCopy}>Copy</button>
+                <button type="button" style={styles.modalAction} onClick={onDownload}>Download .md</button>
                 <button
                   type="button"
                   style={styles.modalAction}
@@ -203,7 +203,7 @@ export function AdminReviewControls() {
                     setModalContent(null);
                   }}
                 >
-                  Fermer
+                  Close
                 </button>
               </div>
             </div>

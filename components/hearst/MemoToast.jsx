@@ -40,23 +40,23 @@ export default function MemoToast() {
         type="button"
         onClick={showMemoModal}
         style={S.body}
-        aria-label={isDone ? 'Ouvrir le memo prêt' : 'Voir l\'erreur memo'}
+        aria-label={isDone ? 'Open the ready memo' : 'View memo error'}
       >
         <span style={S.title}>
-          {isDone ? 'Strategic Memo prêt' : 'Strategic Memo · erreur'}
+          {isDone ? 'Strategic Memo ready' : 'Strategic Memo · error'}
         </span>
         <span style={S.sub}>
           {isDone
-            ? `généré en ${formatElapsed(job.elapsed_ms)} · click pour ouvrir`
-            : (job.error || 'Erreur inconnue')}
+            ? `generated in ${formatElapsed(job.elapsed_ms)} · click to open`
+            : (job.error || 'Unknown error')}
         </span>
       </button>
       <button
         type="button"
         onClick={isErr ? clearMemoJob : markSeenDone}
         style={S.dismiss}
-        aria-label="Acquitter la notification"
-        title="Acquitter"
+        aria-label="Dismiss notification"
+        title="Dismiss"
       >
         ×
       </button>
