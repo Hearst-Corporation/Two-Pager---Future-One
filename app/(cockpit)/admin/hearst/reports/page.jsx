@@ -99,13 +99,13 @@ export default function ReportsPage() {
         {/* Cover */}
         <div style={S.reportHeader}>
           <div style={S.reportBadge}>CONFIDENTIAL</div>
-          <div style={S.reportTitle}>HEARST Qatar AI & Data Center Hub</div>
+          <div style={S.reportTitle}>{project?.name || 'HEARST Qatar AI & Data Center Hub'}</div>
           <div style={S.reportSub}>Investment Summary Report</div>
           <div style={S.reportDate}>Generated {today} · Source-Backed Evidence Mode</div>
         </div>
 
         <Section title="Project Overview">
-          <KpiLine label="Project Name" value={project?.name || 'HEARST Qatar Data Center Hub'} />
+          <KpiLine label="Project Name" value={project?.name || 'HEARST Qatar AI & Data Center Hub'} />
           <KpiLine label="Location" value={base?.location || 'Qatar'} />
           <KpiLine label="Total IT Capacity" value={base?.total_mw ? base.total_mw + ' MW' : 'N/A'} />
           <KpiLine label="Planned COD" value={base?.planned_cod || 'N/A — Set in Assumptions'} />

@@ -1,7 +1,27 @@
 # TICKET — Hardcode Elimination Audit
 
-**Status:** OPEN · inventory only (no development)
+**Status:** VERIFIED & TRIAGED · 2026-05-29 (audit pass complete)
 **Opened:** 2026-05-29
+
+---
+
+## RÉSULTATS DE VÉRIFICATION (pass 2026-05-29)
+
+Vérification depuis le code (pas de confiance au ticket). Conclusion : **ORACLE est déjà largement véridique.** Les vues institutionnelles tirent 100% de leurs données des API/DB ou du moteur.
+
+| Axe | Verdict | Preuve |
+|---|---|---|
+| **B2 — DEMO_* fuite ?** | ✅ AUCUNE | Seul `visuals-preview` importe `DEMO_SCENARIOS`/`DEMO_PHASES` |
+| **G2 — valeurs hors-moteur ?** | ✅ AUCUNE | executive/dossier/library = `fetch()` DB ; simulator = `projection` issu de `/api/.../simulate` |
+| **F2 — GCC en dur en prod ?** | ✅ AUCUNE | `regions` dérivé de `memos.map(m=>m.region)` ; `Location` fallback honnête `'Qatar'` |
+| **D2 — dates figées en prod ?** | ✅ AUCUNE | aucune année/Q en dur hors `visuals-preview` (démo) |
+| **C2 — providers fake en prod ?** | ✅ AUCUNE | tokens couleur uniquement (non rendus comme données) |
+| **E2 — labels "live" trompeurs ?** | ✅ AUCUN | "Live" = statut de deal / trace moteur réelle ; "No live signals loaded" = état vide honnête |
+
+### Finding réel unique → CORRIGÉ
+**FIX1** — `reports/page.jsx` : nom de projet en dur. Ligne 102 (titre PDF CONFIDENTIAL, **sans fallback**) + ligne 108 (variante incohérente `'HEARST Qatar Data Center Hub'` sans "AI &"). Le nom canonique vit en DB (`project/route.js:19`, auto-créé). **Corrigé** : ligne 102 branchée sur `project?.name`, ligne 108 alignée sur la chaîne canonique. Le titre du PDF reflète désormais la DB ; incohérence de label éliminée.
+
+
 **Freeze commit:** `a4f3024` — `feat(spatial): freeze checkpoint after placeholder architecture cleanup`
 **Scope:** institutional ORACLE views (`/admin/hearst/*`) + spatial visual layer. Excludes standalone `/pitch-*` and `/rdc-*` marketing routes.
 
