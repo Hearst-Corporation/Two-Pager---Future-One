@@ -315,5 +315,3 @@ const styles = {
     background: '#0f0d12',
   },
 };
-
-export default AdminReviewControls;

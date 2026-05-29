@@ -3,7 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getBrowserClient } from '@/lib/supabase-browser';
-import { ORACLE_HOME } from '@/lib/url-helpers';
+import { safeNextPath } from '@/lib/url-helpers';
 
 export default function LoginPage() {
   return (
@@ -20,7 +20,10 @@ const AUTH_ERROR_MESSAGES = {
 
 function LoginForm() {
   const sp = useSearchParams();
-  const next = sp.get('next') || ORACLE_HOME;
+  // Sanitize `next` at the source: safeNextPath rejects absolute URLs,
+  // protocol-relative (//evil.com) and javascript: schemes, falling back to
+  // ORACLE_HOME. Covers both the password redirect and the magic-link emailRedirectTo.
+  const next = safeNextPath(sp.get('next'));
   const authError = sp.get('auth_error');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
