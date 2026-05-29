@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
  * AdminReviewControls — fixed-position toggle + "Generate memo" launcher
@@ -130,41 +131,61 @@ export function AdminReviewControls() {
     URL.revokeObjectURL(url);
   }, [modalContent]);
 
+  // Portal target — the cockpit-shell chat SETTINGS panel. We inject a NATIVE
+  // settings section (same .ct-chat-settings-section classes) so Review mode
+  // lives among the other settings (Clé API · Modèle · Affichage), never floating.
+  const [settingsEl, setSettingsEl] = useState(null);
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const find = () => setSettingsEl(document.querySelector('.ct-chat-settings') || null);
+    find();
+    const obs = new MutationObserver(find);
+    obs.observe(document.body, { childList: true, subtree: true });
+    return () => obs.disconnect();
+  }, []);
+
   if (isAdmin !== true || mode === null) return null;
 
   // ── Render ───────────────────────────────────────────────────────────
+  // Native settings section injected into the chat settings panel.
+  const reviewSection = (
+    <section className="ct-chat-settings-section" data-oracle-review-controls>
+      <div className="ct-chat-settings-label">Mode de review</div>
+      <div style={styles.seg} role="group" aria-label="Chat mode">
+        <button
+          type="button"
+          onClick={() => setModeRemote('normal')}
+          style={mode === 'normal' ? { ...styles.segBtn, ...styles.segBtnActive } : styles.segBtn}
+        >
+          Conversation
+        </button>
+        <button
+          type="button"
+          onClick={() => setModeRemote('review')}
+          style={mode === 'review' ? { ...styles.segBtn, ...styles.segBtnActive } : styles.segBtn}
+        >
+          Review
+        </button>
+      </div>
+      {mode === 'review' && (
+        <button
+          type="button"
+          onClick={generate}
+          disabled={generating}
+          style={generating ? { ...styles.generateBtn, ...styles.generateBtnDisabled } : styles.generateBtn}
+          title={generating ? 'Génération en cours…' : 'Générer le document MD+JSON'}
+        >
+          {generating ? 'Génération…' : 'Générer le memo'}
+        </button>
+      )}
+      <div className="ct-chat-settings-hint">Le mode Review génère un document MD+JSON depuis la conversation courante.</div>
+      {error && <div style={styles.error}>{error}</div>}
+    </section>
+  );
+
   return (
     <>
-      <div style={styles.dock} data-oracle-review-controls>
-        <div style={styles.toggleGroup} role="group" aria-label="Chat mode">
-          <button
-            type="button"
-            onClick={() => setModeRemote('normal')}
-            style={mode === 'normal' ? { ...styles.toggleBtn, ...styles.toggleBtnActive } : styles.toggleBtn}
-          >
-            Conversation
-          </button>
-          <button
-            type="button"
-            onClick={() => setModeRemote('review')}
-            style={mode === 'review' ? { ...styles.toggleBtn, ...styles.toggleBtnActive } : styles.toggleBtn}
-          >
-            Review
-          </button>
-        </div>
-        {mode === 'review' && (
-          <button
-            type="button"
-            onClick={generate}
-            disabled={generating}
-            style={generating ? { ...styles.generateBtn, ...styles.generateBtnDisabled } : styles.generateBtn}
-            title={generating ? 'Génération en cours…' : 'Générer le document MD+JSON'}
-          >
-            {generating ? 'Génération…' : 'Générer le memo'}
-          </button>
-        )}
-        {error && <div style={styles.error}>{error}</div>}
-      </div>
+      {settingsEl && createPortal(reviewSection, settingsEl)}
 
       {modalContent !== null && (
         <div style={styles.modalOverlay} onClick={() => !generating && setModalContent(null)}>
@@ -195,60 +216,46 @@ export function AdminReviewControls() {
 }
 
 const styles = {
-  dock: {
-    position: 'fixed',
-    // Docked at the BOTTOM of the chat rail, just above the message composer —
-    // the only rail zone that never overlaps the chat header icons nor the
-    // (package-rendered) settings panel header. Slim single row. Sits inside
-    // the right rail width via the rail token, right-aligned.
-    bottom: 88,
-    right: 16,
-    zIndex: 50,
+  // Segmented control rendered inside the native chat-settings section.
+  seg: {
     display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    fontFamily:
-      "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    pointerEvents: 'auto',
-  },
-  toggleGroup: {
-    display: 'inline-flex',
-    background: 'rgba(20, 18, 22, 0.85)',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 999,
+    gap: 4,
     padding: 3,
-    boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+    background: 'rgba(0,0,0,0.25)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 8,
   },
-  toggleBtn: {
+  segBtn: {
+    flex: 1,
     appearance: 'none',
     background: 'transparent',
-    color: 'rgba(255,255,255,0.7)',
+    color: 'var(--cp-text-muted, rgba(255,255,255,0.7))',
     border: 0,
-    padding: '4px 10px',
-    borderRadius: 999,
-    fontSize: 11,
-    cursor: 'pointer',
+    padding: '6px 10px',
+    borderRadius: 6,
+    fontSize: 12,
     fontWeight: 500,
-    letterSpacing: 0.2,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
   },
-  toggleBtnActive: {
-    // Cockpit bordeaux accent (was a stray blue #4361EE / blue glow).
+  segBtnActive: {
     background: 'var(--ct-accent, #be123c)',
     color: '#fff',
-    boxShadow: '0 2px 6px color-mix(in srgb, var(--ct-accent, #be123c) 45%, transparent)',
+    boxShadow: '0 1px 4px color-mix(in srgb, var(--ct-accent, #be123c) 45%, transparent)',
   },
   generateBtn: {
     appearance: 'none',
+    width: '100%',
+    marginTop: 8,
     background: 'var(--ct-accent, #be123c)',
     color: '#fff',
     border: 0,
-    padding: '6px 12px',
+    padding: '8px 12px',
     borderRadius: 8,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 600,
     cursor: 'pointer',
+    fontFamily: 'inherit',
     boxShadow: '0 6px 18px color-mix(in srgb, var(--ct-accent, #be123c) 30%, transparent)',
   },
   generateBtnDisabled: {
