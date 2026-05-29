@@ -23,6 +23,7 @@ import { getGpuPricingBrief, getEnergyBrief, getInfrastructureSignals, getLiveIn
 import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from '@/lib/oracle-visualization';
 import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
 import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, computeConfidenceBlock } from '@/lib/memo-confidence';
+import { persistMemo } from '@/lib/strategic-memo-store';
 
 // Wave 1 (C18) — the LLM cascade (4 Hypercli models → Claude → OpenAI) can run
 // several minutes in the worst case. Without this the route inherits the Vercel
@@ -245,7 +246,7 @@ export async function POST(req) {
   try { body = await req.json(); }
   catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
 
-  const { payload, oracle = {}, user_question } = body || {};
+  const { payload, oracle = {}, user_question, project_id = null, scenario_id = null, title = null } = body || {};
   if (!payload || (!payload.scenario && !payload.projection)) {
     return NextResponse.json({ error: 'payload.scenario or payload.projection required' }, { status: 400 });
   }
@@ -407,6 +408,23 @@ export async function POST(req) {
     // ── Wave 1 (C11/C12) — attach authoritative freshness to the memo.
     memo.data_freshness = dataFreshness;
 
+    // ── Boardroom report — attach a compact projection snapshot (display only,
+    // no recomputation) so the PDF/scorecard can render real cashflow/waterfall
+    // charts from the already-computed projection. Rides inside memo_json.
+    memo._exec_projection = (() => {
+      const pj = payload?.projection; const sc = payload?.scenario;
+      if (!pj) return null;
+      return {
+        total_capex: pj.total_capex, terminal_value: pj.terminal_value, irr: pj.irr, npv: pj.npv,
+        moic: pj.moic, payback_years: pj.payback_years, dscr_stabilized: pj.dscr_stabilized,
+        total_mw: sc?.total_mw ?? null, pue: sc?.pue ?? null,
+        capex_per_mw: (pj.total_capex && sc?.total_mw) ? pj.total_capex / sc.total_mw : null,
+        cod_offset_months: pj.cod_offset_months ?? null,
+        capex_reconciliation: pj.capex_reconciliation ?? null,
+        years: (pj.years || []).map(y => ({ y: y.year, rev: y.revenue, ebitda: y.ebitda, fcf: y.free_cash_flow, cum: y.cumulative_fcf })),
+      };
+    })();
+
     // ── Post-Kimi server-side quality checks (Sprint 3.1) ─────────────
     const bannedPhrases = [
       'transformational', 'best-in-class', 'unlock', 'world-leading',
@@ -439,9 +457,31 @@ export async function POST(req) {
       overall_grade,
     };
 
+    const generated_at = new Date().toISOString();
+
+    // ── Persist the memo as a permanent, versioned institutional asset ──
+    // No user action required: every successful generation creates a row.
+    // DB failure must NOT lose the generated memo — we still return it and
+    // surface the persistence error.
+    let persisted = null;
+    try {
+      persisted = await persistMemo({
+        memo,
+        meta: {
+          generated_at, provider_used: model_used, generation_time_ms: llmDurationMs,
+          stakeholder: oracleCtx.stakeholder || 'operator', region: oracleCtx.region || 'qatar', audience,
+        },
+        project_id, scenario_id, title,
+        actor_id: auth.profile?.id || null,
+      });
+    } catch (e) {
+      persisted = { error: e?.message || 'persist_failed' };
+    }
+
     return NextResponse.json({
       memo,
-      generated_at: new Date().toISOString(),
+      persisted,
+      generated_at,
       model_used,
       timing_ms: {
         llm: llmDurationMs,
