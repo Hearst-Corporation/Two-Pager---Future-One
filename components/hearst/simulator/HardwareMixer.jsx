@@ -215,7 +215,9 @@ const S = {
   gpuCard: {
     padding: 10,
     background: 'var(--cp-surface-0)',
-    border: '1px solid var(--cp-border)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--cp-border)',
     borderRadius: 6,
     cursor: 'pointer',
     textAlign: 'left',
