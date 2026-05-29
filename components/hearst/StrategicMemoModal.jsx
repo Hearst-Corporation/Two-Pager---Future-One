@@ -18,6 +18,7 @@
 // Aucune refonte d'autre composant. Pure addition.
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import ScenarioVisualizer from '@/components/hearst/ScenarioVisualizer';
 
 const CONFIDENCE_TONE = {
   HIGH:   { color: 'var(--ct-status-success)',  bg: 'var(--ct-status-success-soft)',  border: 'var(--ct-status-success-border)' },
@@ -119,7 +120,7 @@ function toMarkdown(memo, meta) {
   return lines.join('\n');
 }
 
-export default function StrategicMemoModal({ open, onClose, payload, oracle, userQuestion, title = 'Strategic Memo' }) {
+export default function StrategicMemoModal({ open, onClose, payload, oracle, userQuestion, audience: audienceProp, title = 'Strategic Memo' }) {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
   const [memo, setMemo]       = useState(null);
@@ -131,7 +132,7 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
       const r = await fetch('/api/admin/hearst/strategic-memo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload, oracle, user_question: userQuestion }),
+        body: JSON.stringify({ payload, oracle, user_question: userQuestion, audience: audienceProp }),
       });
       if (!r.ok) {
         const body = await r.json().catch(() => ({}));
@@ -145,13 +146,17 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
         generated_at: data.generated_at,
         oracle_ctx: data.oracle_ctx,
         intelligence_brief: data.intelligence_brief || null,
+        live_intelligence: data.live_intelligence || null,
+        visualization: data.visualization || null,
+        explainability_seed: data.explainability_seed || null,
+        audience: data.audience || audienceProp || 'investor',
       });
     } catch (e) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
-  }, [payload, oracle, userQuestion]);
+  }, [payload, oracle, userQuestion, audienceProp]);
 
   useEffect(() => {
     if (open && payload && !memo && !loading) fetchMemo();
@@ -197,24 +202,43 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
                 <span> · {new Date(meta.generated_at).toLocaleString()}</span>
               </div>
             )}
-            {meta?.intelligence_brief && (
+            {meta && (
               <div style={S.intelChips}>
-                <span style={S.intelChip} title="Datapoints injected from the intelligence layer">
-                  {meta.intelligence_brief.datapoints_count} sources
-                </span>
-                <span style={S.intelChip} title="Comparable peer profiles">
-                  {meta.intelligence_brief.comparables_count} comparables
-                </span>
-                <span style={S.intelChip} title="Decision tensions surfaced">
-                  {meta.intelligence_brief.tensions_count} tensions
-                </span>
-                {meta.intelligence_brief.reality_violations_count > 0 && (
-                  <span style={{ ...S.intelChip, background: 'var(--ct-status-warning-soft)', color: 'var(--ct-status-warning)', border: '1px solid var(--ct-status-warning-border)' }}
-                    title="Reality-layer violations detected (operationally constrained)"
-                  >
-                    {meta.intelligence_brief.reality_violations_count} reality flags
+                {meta.audience && (
+                  <span style={{ ...S.intelChip, background: 'var(--cp-accent-soft, var(--cp-surface-0))', color: 'var(--cp-accent)', border: '1px solid var(--cp-accent-border, var(--cp-border))' }}
+                    title="Memo audience profile">
+                    {meta.audience}
                   </span>
                 )}
+                {meta.intelligence_brief && (
+                  <>
+                    <span style={S.intelChip} title="Datapoints injected from the intelligence layer">
+                      {meta.intelligence_brief.datapoints_count} sources
+                    </span>
+                    <span style={S.intelChip} title="Comparable peer profiles">
+                      {meta.intelligence_brief.comparables_count} comparables
+                    </span>
+                    <span style={S.intelChip} title="Decision tensions surfaced">
+                      {meta.intelligence_brief.tensions_count} tensions
+                    </span>
+                    {meta.intelligence_brief.reality_violations_count > 0 && (
+                      <span style={{ ...S.intelChip, background: 'var(--ct-status-warning-soft)', color: 'var(--ct-status-warning)', border: '1px solid var(--ct-status-warning-border)' }}
+                        title="Reality-layer violations detected (operationally constrained)"
+                      >
+                        {meta.intelligence_brief.reality_violations_count} reality flags
+                      </span>
+                    )}
+                  </>
+                )}
+                {(() => {
+                  const signalsCount = (memo?.live_intelligence?.signals || meta?.live_intelligence?.signals || []).length;
+                  return signalsCount > 0 ? (
+                    <span style={{ ...S.intelChip, background: 'var(--ct-status-info-soft, var(--cp-surface-0))', color: 'var(--ct-status-info, var(--cp-text-muted))', border: '1px solid var(--ct-status-info-border, var(--cp-border))' }}
+                      title="Live infrastructure signals detected">
+                      live signals: {signalsCount}
+                    </span>
+                  ) : null;
+                })()}
               </div>
             )}
           </div>
@@ -439,6 +463,126 @@ export default function StrategicMemoModal({ open, onClose, payload, oracle, use
                 </Section>
               )}
 
+              {/* Live Intelligence Block */}
+              {(() => {
+                const li = memo?.live_intelligence || null;
+                const freshnessTag = (tag) => {
+                  const MAP = {
+                    FRESH: { bg: 'var(--ct-status-success-soft)', color: 'var(--ct-status-success)', border: 'var(--ct-status-success-border)' },
+                    OK: { bg: 'var(--ct-status-success-soft)', color: 'var(--ct-status-success)', border: 'var(--ct-status-success-border)' },
+                    STALE: { bg: 'var(--ct-status-warning-soft)', color: 'var(--ct-status-warning)', border: 'var(--ct-status-warning-border)' },
+                    EXPIRED: { bg: 'var(--ct-status-danger-soft)', color: 'var(--ct-status-danger)', border: 'var(--ct-status-danger-border)' },
+                    NO_LIVE_DATA: { bg: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: 'var(--cp-border)' },
+                  };
+                  const tone = MAP[(tag || 'NO_LIVE_DATA').toUpperCase()] || MAP.NO_LIVE_DATA;
+                  return <span style={{ ...S.tag, ...tone }}>{tag || 'NO_LIVE_DATA'}</span>;
+                };
+                return (
+                  <Section id="live-intel" label="Live Intelligence Layer">
+                    {li ? (
+                      <>
+                        <div style={S.liveRow}>
+                          <span style={S.liveLabel}>GPU Pricing</span>
+                          {freshnessTag(li.gpu_pricing?.freshness_tag)}
+                          <span style={S.liveVal}>{li.gpu_pricing?.summary || 'No summary'}</span>
+                        </div>
+                        <div style={S.liveRow}>
+                          <span style={S.liveLabel}>Energy</span>
+                          {freshnessTag(li.energy?.freshness_tag)}
+                          <span style={S.liveVal}>{li.energy?.summary || 'No summary'}</span>
+                          {li.energy?.tariff_used && <span style={S.cite}>tariff: {li.energy.tariff_used}</span>}
+                        </div>
+                        {li.signals?.length > 0 && (
+                          <div style={{ marginTop: 10 }}>
+                            <div style={S.sublabel}>Infrastructure signals</div>
+                            <ul style={S.riskList}>
+                              {li.signals.map((sig, i) => {
+                                const tone = SEVERITY_TONE[(sig.severity || 'MEDIUM').toUpperCase()] || SEVERITY_TONE.MEDIUM;
+                                return (
+                                  <li key={i} style={{ borderLeft: `3px solid ${tone.color}`, paddingLeft: 10 }}>
+                                    <div><strong>{sig.title}</strong> <span style={S.cat}>· {sig.severity}</span></div>
+                                    {sig.implication && <div style={S.mit}>{sig.implication}</div>}
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        )}
+                        {li.freshness_summary && <p style={{ ...S.narrative, fontStyle: 'italic', marginTop: 10 }}>{li.freshness_summary}</p>}
+                        {li.volatility_summary && <p style={{ ...S.narrative, fontStyle: 'italic' }}>{li.volatility_summary}</p>}
+                      </>
+                    ) : (
+                      <div style={S.liveNoData}>
+                        Live data layer wired but not yet active.{' '}
+                        <a href="/api/admin/hearst/gpu-prices" target="_blank" rel="noreferrer" style={S.sourceLink}>
+                          Check /api/admin/hearst/gpu-prices
+                        </a>
+                      </div>
+                    )}
+                  </Section>
+                );
+              })()}
+
+              {/* Visualization Preview Block */}
+              {(() => {
+                const vizMeta = memo?.visualization || meta?.visualization || null;
+                const hasViz = vizMeta != null;
+                return hasViz ? (
+                  <Section id="viz" label="Visualization Preview">
+                    {vizMeta.summary && <p style={S.narrative}>{vizMeta.summary}</p>}
+                    {vizMeta.topology_summary && <p style={S.narrative}>{vizMeta.topology_summary}</p>}
+                    <div style={S.vizWrapper}>
+                      <ScenarioVisualizer simulation={payload} mode="auto" />
+                    </div>
+                  </Section>
+                ) : null;
+              })()}
+
+              {/* Beginner Explanation Block */}
+              {(() => {
+                const exp = memo?.explainability || null;
+                if (!exp) return null;
+                return (
+                  <Section id="explain" label="Explanation · plain language">
+                    <div style={S.audienceChipRow}>
+                      <span style={S.sublabel}>Audience</span>
+                      <span style={{ ...S.tag, background: 'var(--cp-accent-soft, var(--cp-surface-0))', color: 'var(--cp-accent)', border: '1px solid var(--cp-accent-border, var(--cp-border))' }}>
+                        {exp.audience || meta?.audience || 'investor'}
+                      </span>
+                    </div>
+                    {exp.simplified_takeaways?.length > 0 && (
+                      <>
+                        <div style={S.sublabel}>Key takeaways</div>
+                        <ul style={S.bullets}>
+                          {exp.simplified_takeaways.map((t, i) => <li key={i}>{t}</li>)}
+                        </ul>
+                      </>
+                    )}
+                    {exp.jargon_translations && Object.keys(exp.jargon_translations).length > 0 && (
+                      <>
+                        <div style={{ ...S.sublabel, marginTop: 12 }}>Glossary</div>
+                        <table style={S.table}>
+                          <tbody>
+                            {Object.entries(exp.jargon_translations).map(([term, def]) => (
+                              <tr key={term}>
+                                <td style={S.configKey}>{term}</td>
+                                <td style={S.configVal}>{def}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </>
+                    )}
+                    {exp.why_this_recommendation && (
+                      <div style={S.whyBox}>
+                        <div style={S.sublabel}>Why this recommendation</div>
+                        <p style={S.narrative}>{exp.why_this_recommendation}</p>
+                      </div>
+                    )}
+                  </Section>
+                );
+              })()}
+
               {/* Intelligence layer sources actually used */}
               {meta?.intelligence_brief && (
                 <Section id="intel" label="Intelligence layer · sources used">
@@ -604,4 +748,17 @@ const S = {
   compKey: { color: 'var(--cp-text-muted)', fontStyle: 'italic' },
 
   absorption: { fontSize: 12, color: 'var(--cp-text-body)', lineHeight: 1.6, padding: '8px 12px', background: 'var(--cp-surface-0)', borderRadius: 8, border: '1px solid var(--cp-border)' },
+
+  // Live intelligence block
+  liveRow: { display: 'flex', alignItems: 'flex-start', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--cp-border)', flexWrap: 'wrap' },
+  liveLabel: { fontSize: 10, fontWeight: 800, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, width: 90, flexShrink: 0, paddingTop: 2 },
+  liveVal: { fontSize: 12, color: 'var(--cp-text-body)', lineHeight: 1.5, flex: 1 },
+  liveNoData: { fontSize: 12, color: 'var(--cp-text-muted)', fontStyle: 'italic', padding: '8px 0' },
+
+  // Visualization block
+  vizWrapper: { marginTop: 12, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--cp-border)' },
+
+  // Explainability block
+  audienceChipRow: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 },
+  whyBox: { marginTop: 12, padding: '12px 14px', background: 'var(--cp-surface-0)', borderRadius: 10, border: '1px solid var(--cp-border)' },
 };

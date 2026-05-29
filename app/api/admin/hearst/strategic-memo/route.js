@@ -19,6 +19,9 @@ import { requireProfile } from '@/lib/supabase-admin';
 import { kimiChatCompletion, KIMI_MODEL } from '@/lib/llm/kimi';
 import { buildOracleSystemPrompt } from '@/lib/oracle-system-prompt';
 import { buildIntelligenceBrief } from '@/lib/oracle-intelligence';
+import { getGpuPricingBrief, getEnergyBrief, getInfrastructureSignals, getLiveInfrastructureBrief } from '@/lib/oracle-live';
+import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from '@/lib/oracle-visualization';
+import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
 
 const RL_WINDOW = 60_000;
 const RL_MAX = 5;
@@ -108,7 +111,27 @@ const MEMO_SCHEMA_INSTRUCTIONS = `Return a JSON object with the following exact 
   ],
   "intelligence_sources": [
     { "datapoint_id": "string (from intelligence_brief.datapoints[].id)", "used_for": "string", "trust": "HIGH|MEDIUM|LOW" }
-  ]
+  ],
+  "live_intelligence": {
+    "gpu_pricing": { "summary": "string", "freshness_tag": "FRESH|OK|STALE|EXPIRED|NO_LIVE_DATA", "median_observed": "string|null" },
+    "energy": { "summary": "string", "tariff_used": "string", "freshness_tag": "FRESH|OK|STALE|EXPIRED|NO_LIVE_DATA" },
+    "signals": [
+      { "id": "string (from live brief signals)", "title": "string", "severity": "HIGH|MEDIUM|LOW", "implication": "string" }
+    ],
+    "freshness_summary": "1-line overall freshness assessment",
+    "volatility_summary": "1-line overall volatility assessment"
+  },
+  "visualization": {
+    "diagram_type": "floorplan|topology|gantt",
+    "summary": "1-2 lines explaining what the diagram shows",
+    "topology_summary": "1-line topology interpretation"
+  },
+  "explainability": {
+    "audience": "beginner|investor|minister|operator",
+    "simplified_takeaways": ["string (3-5 lines, plain language)"],
+    "jargon_translations": { "IRR": "string", "PUE": "string", "DSCR": "string", "payback": "string" },
+    "why_this_recommendation": "1-paragraph explaining the rationale in language matching audience"
+  }
 }
 
 Strict rules :
@@ -120,7 +143,10 @@ Strict rules :
 - decision_tensions MUST address every entry from intelligence_brief.tensions (verdict per tension, even if one pole is clearly preferred).
 - intelligence_sources : list at least 5 datapoint_ids you actually used, with the section name in used_for.
 - If a section is genuinely not material, set "skip": true (only allowed on strategic_context).
-- Max 5 items per items[] array. Quality over quantity.`;
+- Max 5 items per items[] array. Quality over quantity.
+- live_intelligence, visualization, explainability are OPTIONAL blocks — include them if the live layer provided usable data. If a live data field is unavailable, use freshness_tag "NO_LIVE_DATA" and set summary to "No live data available".
+- explainability.audience MUST match the audience provided in the live intelligence layer section.
+- live_intelligence.signals: include only signals actually present in the live brief (do not fabricate).`;
 
 function buildScenarioSummary(payload) {
   const { scenario, projection, archetype_outcome, hardware_breakdown, source_map, confidence_score } = payload;
@@ -167,6 +193,8 @@ export async function POST(req) {
     return NextResponse.json({ error: 'payload.scenario or payload.projection required' }, { status: 400 });
   }
 
+  const audience = SUPPORTED_AUDIENCES.includes(body?.audience) ? body.audience : 'investor';
+
   const oracleCtx = {
     stakeholder: oracle.stakeholder,
     region: oracle.region,
@@ -200,6 +228,30 @@ export async function POST(req) {
     gpu_sku: gpuSku,
   });
 
+  // ── Live intelligence layer (Sprint 3) ────────────────────────────
+  const liveBrief = {
+    gpu_pricing: getGpuPricingBrief({ region: oracleCtx.region || 'qatar' }),
+    energy: getEnergyBrief({ region: oracleCtx.region || 'qatar', archetype_id: archetypeId }),
+    signals: getInfrastructureSignals({ region: oracleCtx.region || 'qatar', archetype_id: archetypeId, min_severity: 'medium' }),
+  };
+  const visualization = {
+    floorplan: build2DDiagramSpec(payload),
+    topology:  buildTopologySpec(payload),
+    phases:    buildDeploymentPhaseSpec(payload),
+  };
+  const explainability_seed = {
+    audience,
+    jargon_translations: {
+      IRR: explainMetric('IRR', audience).short,
+      PUE: explainMetric('PUE', audience).short,
+      DSCR: explainMetric('DSCR', audience).short,
+      payback: explainMetric('payback', audience).short,
+      powered_shell: simplifyTechnicalTerm('powered_shell', audience),
+      liquid_cooling: simplifyTechnicalTerm('liquid_cooling', audience),
+      tier_iii: simplifyTechnicalTerm('tier_iii', audience),
+    },
+  };
+
   const scenarioSummary = buildScenarioSummary(payload);
   const userMessage = [
     user_question
@@ -214,6 +266,12 @@ export async function POST(req) {
     'Cite datapoints by their id in intelligence_sources, address every tension in decision_tensions, and surface every reality_violations entry in deployment_roadmap.reality_check_flags.',
     '',
     JSON.stringify(intelligenceBrief, null, 2),
+    '',
+    '── Live intelligence layer (Sprint 3) ──',
+    'These are real-time signals fetched at memo generation time. Cite freshness tags and infrastructure signals in the relevant sections (live_intelligence block). If data is unavailable, surface it as a known unknown rather than fabricating a value.',
+    `Audience for this memo: ${audience}. Use the explainability_seed jargon_translations to simplify technical terms in the explainability section.`,
+    '',
+    JSON.stringify(liveBrief, null, 2),
     '',
     MEMO_SCHEMA_INSTRUCTIONS,
   ].join('\n');
@@ -264,6 +322,10 @@ export async function POST(req) {
         absorption: intelligenceBrief.absorption,
         reality_violations: intelligenceBrief.reality_violations,
       },
+      live_intelligence: liveBrief,
+      visualization,
+      explainability_seed,
+      audience,
     });
   } catch (e) {
     console.error('[strategic-memo] error:', e?.message);
