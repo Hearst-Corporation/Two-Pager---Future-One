@@ -56,7 +56,7 @@ function AccordionSection({ id, label, defaultOpen = false, children }) {
 
 // ─── Full Memo Renderer (inline, no modal) ────────────────────────────────────
 
-function MemoViewer({ memo, scenario, versions, onVersionSelect }) {
+function MemoViewer({ memo, scenario, versions, onVersionSelect, onStatusChange }) {
   const SEVERITY_TONE = {
     HIGH:   { color: 'var(--ct-status-danger)' },
     MED:    { color: 'var(--ct-status-warning)' },
@@ -66,6 +66,24 @@ function MemoViewer({ memo, scenario, versions, onVersionSelect }) {
 
   const m = memo.memo_json || {};
   const meta = memo.meta_json || {};
+
+  // Wave A — institutional approval. Buttons PATCH the status (server enforces
+  // the state machine + attributes who/when + writes the audit trail), then reload.
+  const [govBusy, setGovBusy] = useState(false);
+  const [govErr, setGovErr] = useState(null);
+  async function transition(next) {
+    setGovBusy(true); setGovErr(null);
+    try {
+      const r = await fetch(`/api/admin/hearst/strategic-memos/${memo.id}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ status: next }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { setGovErr(j.error || `HTTP ${r.status}`); return; }
+      onStatusChange && onStatusChange();
+    } catch (e) { setGovErr(String(e)); } finally { setGovBusy(false); }
+  }
 
   return (
     <div style={S.memoViewer}>
@@ -108,6 +126,32 @@ function MemoViewer({ memo, scenario, versions, onVersionSelect }) {
               Compare versions
             </Link>
           )}
+          {/* ── Wave A: institutional approval controls ── */}
+          <div style={S.govRow}>
+            {memo.status === 'draft' && (
+              <button type="button" disabled={govBusy} onClick={() => transition('reviewed')} style={S.govBtn}>Mark reviewed</button>
+            )}
+            {memo.status === 'reviewed' && (
+              <>
+                <button type="button" disabled={govBusy} onClick={() => transition('approved')} style={S.govBtnPrimary}>Approve</button>
+                <button type="button" disabled={govBusy} onClick={() => transition('draft')} style={S.govBtn}>Send back</button>
+              </>
+            )}
+            {memo.status === 'approved' && (
+              <button type="button" disabled={govBusy} onClick={() => transition('archived')} style={S.govBtn}>Archive</button>
+            )}
+            {memo.status === 'archived' && (
+              <button type="button" disabled={govBusy} onClick={() => transition('draft')} style={S.govBtn}>Reopen</button>
+            )}
+          </div>
+          {(memo.approved_at || memo.reviewed_at) && (
+            <div style={S.govBadge}>
+              {memo.approved_at
+                ? `Approved · ${fmtDate(memo.approved_at)}`
+                : `Reviewed · ${fmtDate(memo.reviewed_at)}`}
+            </div>
+          )}
+          {govErr && <div style={S.govErr}>{govErr}</div>}
         </div>
       </div>
 
@@ -538,6 +582,7 @@ function MemoDetailView({ memoId }) {
           scenario={data.scenario}
           versions={data.versions}
           onVersionSelect={id => router.push(`/admin/hearst/dossier?memo=${id}`)}
+          onStatusChange={() => load(memoId)}
         />
       )}
     </div>
@@ -712,6 +757,12 @@ const S = {
   scenarioLink: { fontSize: 12, color: 'var(--cp-text-muted)', marginTop: 4 },
   pdfBtn: { padding: '7px 14px', borderRadius: 8, background: 'var(--cp-accent)', color: '#fff', textDecoration: 'none', fontSize: 12, fontWeight: 700 },
   compareBtn: { padding: '6px 12px', borderRadius: 8, background: 'var(--cp-surface-0)', color: 'var(--cp-accent)', border: '1px solid var(--cp-border)', textDecoration: 'none', fontSize: 12, fontWeight: 600 },
+  // Wave A — institutional approval controls
+  govRow: { display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' },
+  govBtn: { padding: '6px 12px', borderRadius: 8, background: 'var(--cp-surface-0)', color: 'var(--cp-text-body)', border: '1px solid var(--cp-border)', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
+  govBtnPrimary: { padding: '6px 12px', borderRadius: 8, background: 'var(--ct-status-success, var(--cp-success))', color: '#fff', border: '1px solid var(--ct-status-success-border, var(--cp-border))', fontSize: 12, fontWeight: 700, cursor: 'pointer' },
+  govBadge: { fontSize: 11, fontWeight: 700, color: 'var(--ct-status-success, var(--cp-success))', letterSpacing: 0.2 },
+  govErr: { fontSize: 11, color: 'var(--cp-error, #ef4444)', maxWidth: 220, textAlign: 'right' },
 
   // Version bar
   versionBar: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '10px 16px', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderRadius: 10 },
