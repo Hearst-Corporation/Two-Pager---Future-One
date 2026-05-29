@@ -372,23 +372,34 @@ export async function POST(req) {
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userMessage },
       ],
-      temperature: 0.2,
-      max_tokens: 8000,
+      temperature: 0.0,
+      max_tokens: 16000,
       response_format: { type: 'json_object' },
     });
     const llmDurationMs = Date.now() - llmStart;
     console.log(`[strategic-memo] LLM call completed in ${llmDurationMs}ms via ${model_used}`);
 
-    const content = response.choices?.[0]?.message?.content || '';
+    const rawContent = response.choices?.[0]?.message?.content || '';
+    // Strip markdown fences (Claude sometimes wraps JSON in ```json ... ``` despite instructions)
+    const content = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
     let memo;
     try { memo = JSON.parse(content); }
     catch (e) {
-      console.warn('[strategic-memo] JSON parse failed, raw output kept');
-      return NextResponse.json({
-        error: 'memo_parse_failed',
-        raw: content.slice(0, 2000),
-        model_used,
-      }, { status: 502 });
+      // Second attempt: extract first {...} block in case of surrounding text
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try { memo = JSON.parse(jsonMatch[0]); }
+        catch { /* fall through to error */ }
+      }
+      if (!memo) {
+        console.warn('[strategic-memo] JSON parse failed, raw output kept');
+        console.warn('[strategic-memo] raw tail:', rawContent.slice(-300));
+        return NextResponse.json({
+          error: 'memo_parse_failed',
+          raw: rawContent.slice(0, 2000),
+          model_used,
+        }, { status: 502 });
+      }
     }
 
     // ── Wave 1 (C7) — overwrite model-graded confidence with server values.

@@ -33,7 +33,7 @@ export const kimi = new OpenAI({
 
 export const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || "build-placeholder",
-  timeout: 120_000,
+  timeout: Number(process.env.LLM_CLAUDE_TIMEOUT_MS || 300_000),
   maxRetries: 0,
 });
 
@@ -100,25 +100,39 @@ function buildAnthropicPayload(params: any) {
   const userMsgs = messages.filter(m => m.role === "user").map(m => ({ role: "user" as const, content: m.content }));
   const asstMsgs = messages.filter(m => m.role === "assistant").map(m => ({ role: "assistant" as const, content: m.content }));
 
-  const jsonGuard = params?.response_format?.type === "json_object"
-    ? "\n\nIMPORTANT : Respond with ONLY a valid JSON object. No markdown, no code fences, no prose. Start your response with { and end with }."
+  const needsJson = params?.response_format?.type === "json_object";
+  const jsonGuard = needsJson
+    ? "\n\nYou MUST respond with ONLY a valid JSON object. No prose, no markdown, no code fences. Begin your response immediately with { and end with }."
     : "";
 
   const system = [...systemMsgs, jsonGuard].filter(Boolean).join("\n\n");
   const interleaved: Array<{ role: "user" | "assistant"; content: string }> = [];
-  // Interleave preserving original order
   for (const m of messages) {
     if (m.role === "user") interleaved.push({ role: "user", content: m.content });
     else if (m.role === "assistant") interleaved.push({ role: "assistant", content: m.content });
   }
 
-  return {
+  const finalMessages = interleaved.length > 0 ? interleaved : userMsgs;
+
+  // Anthropic prefill trick: force JSON mode by prefilling the assistant turn.
+  // Opus 4.x does NOT support prefill — skip it for Opus.
+  const isOpusModel = CLAUDE_FALLBACK_MODEL.includes("opus");
+  if (needsJson && !isOpusModel) {
+    finalMessages.push({ role: "assistant", content: "{" });
+  }
+
+  const isOpus = CLAUDE_FALLBACK_MODEL.includes("opus");
+  const payload: any = {
     model: CLAUDE_FALLBACK_MODEL,
     system: system || undefined,
-    messages: interleaved.length > 0 ? interleaved : userMsgs,
+    messages: finalMessages,
     max_tokens: Number(params.max_tokens || 8000),
-    temperature: typeof params.temperature === "number" ? params.temperature : 0.2,
   };
+  // Opus 4.x: temperature is deprecated — omit it entirely
+  if (!isOpus) {
+    payload.temperature = typeof params.temperature === "number" ? params.temperature : 0.2;
+  }
+  return payload;
 }
 
 /**
@@ -182,8 +196,10 @@ export async function kimiChatCompletion(
   let lastError: any;
   const overallStart = Date.now();
 
-  // Cascade Hypercli
-  for (const model of chain) {
+  // Cascade Hypercli — skip si LLM_SKIP_HYPERCLI=1 (ex : quota épuisé)
+  const skipHypercli = process.env.LLM_SKIP_HYPERCLI === "1";
+
+  for (const model of skipHypercli ? [] : chain) {
     const stepStart = Date.now();
     try {
       const response = await attemptKimi(model, params, MODEL_TIMEOUT_MS);
@@ -210,11 +226,17 @@ export async function kimiChatCompletion(
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), CLAUDE_TIMEOUT_MS);
       try {
-        const anthropicResp = await anthropic.messages.create(
-          buildAnthropicPayload(params),
-          { signal: ctrl.signal },
-        );
+        const anthropicPayload = buildAnthropicPayload(params);
+        const anthropicResp = await anthropic.messages.create(anthropicPayload, { signal: ctrl.signal });
         const adapted = adaptAnthropicResponse(anthropicResp);
+        // Re-inject the prefill `{` if we used the JSON prefill trick
+        const usedPrefill = params?.response_format?.type === "json_object";
+        if (usedPrefill && adapted.choices?.[0]?.message?.content) {
+          const c = adapted.choices[0].message.content;
+          if (!c.trimStart().startsWith("{")) {
+            adapted.choices[0].message.content = "{" + c;
+          }
+        }
         const elapsed = Date.now() - stepStart;
         console.log(`[kimi] claude fallback succeeded in ${elapsed}ms`);
         return { response: adapted as any, model_used: CLAUDE_FALLBACK_MODEL };
@@ -229,9 +251,8 @@ export async function kimiChatCompletion(
     console.warn(`[kimi] no ANTHROPIC_API_KEY set, skipping Claude fallback`);
   }
 
-  // Fallback ultime OpenAI — utile si Hypercli ET Anthropic sont KO
-  // (panne / credit balance / etc.)
-  if (process.env.OPENAI_API_KEY) {
+  // Fallback ultime OpenAI — désactivé si LLM_SKIP_OPENAI=1
+  if (process.env.OPENAI_API_KEY && process.env.LLM_SKIP_OPENAI !== "1") {
     const stepStart = Date.now();
     try {
       console.warn(`[kimi] Claude fallback also failed, trying OpenAI ${OPENAI_FALLBACK_MODEL}`);
@@ -268,8 +289,10 @@ export async function kimiChatStream(
   params: Omit<Parameters<typeof kimi.chat.completions.create>[0], "stream">,
 ) {
   const chain = buildModelChain(params.model);
+  const skipHypercli = process.env.LLM_SKIP_HYPERCLI === "1";
   let lastError: any;
-  for (const model of chain) {
+
+  for (const model of skipHypercli ? [] : chain) {
     try {
       const stream = await kimi.chat.completions.create({ ...params, model, stream: true });
       return { stream, model_used: model };
@@ -279,5 +302,20 @@ export async function kimiChatStream(
       console.warn(`[kimi-stream] ${model} failed (${(e as any)?.status || "?"}), trying next fallback...`);
     }
   }
-  throw lastError;
+
+  // Fallback Claude — via OpenAI-compat wrapper (openai SDK → Anthropic baseURL non dispo,
+  // on passe par kimiChatCompletion non-streaming et on l'enveloppe en stream synthétique)
+  if (process.env.ANTHROPIC_API_KEY) {
+    console.warn(`[kimi-stream] falling back to Claude ${CLAUDE_FALLBACK_MODEL} (non-streaming)`);
+    const { response, model_used } = await kimiChatCompletion(params as any);
+    const text = response.choices?.[0]?.message?.content ?? "";
+    // Synthétise un stream OpenAI-compatible à partir de la réponse complète
+    async function* syntheticStream() {
+      yield { choices: [{ delta: { content: text }, finish_reason: null }] };
+      yield { choices: [{ delta: {}, finish_reason: "stop" }] };
+    }
+    return { stream: syntheticStream() as any, model_used };
+  }
+
+  throw lastError ?? new Error("No LLM available");
 }

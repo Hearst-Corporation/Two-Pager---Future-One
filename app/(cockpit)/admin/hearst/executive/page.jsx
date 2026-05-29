@@ -22,7 +22,10 @@ export default function ExecutiveDashboard() {
     const [memos, scenarios, news] = await Promise.allSettled([
       fetch('/api/admin/hearst/strategic-memos?limit=100').then(r => r.json()),
       pid ? fetch(`/api/admin/hearst/scenarios?project_id=${pid}`).then(r => r.json()) : Promise.resolve({}),
-      fetch('/api/admin/hearst/news').then(r => r.json()).catch(() => ({})),
+      Promise.race([
+        fetch('/api/admin/hearst/news').then(r => r.json()).catch(() => ({})),
+        new Promise(res => setTimeout(() => res({}), 5000)),
+      ]),
     ]);
     const ms = memos.status === 'fulfilled' ? (memos.value.memos || []) : [];
     let risks = [];

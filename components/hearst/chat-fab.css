@@ -1,0 +1,86 @@
+/* chat-fab.css — self-contained styles for ChatToggleFAB.
+   The FAB + backdrop are HIDDEN on desktop (the Kimi rail is docked natively)
+   and become a fixed bottom-right drawer toggle on tablet/mobile (<900px).
+   These rules were orphaned in the legacy app/(cockpit)/admin/hearst/cockpit.css
+   (a superseded full-shell port that is no longer imported); extracted here so
+   they actually load, without re-introducing that file's duplicate --cp-* tokens. */
+
+/* === Chat drawer FAB — hidden by default (desktop) === */
+.cp-chat-drawer-fab,
+.cp-chat-drawer-backdrop {
+  display: none;
+}
+
+/* === Responsive — tablet & mobile ==================== */
+@media (max-width: 900px) {
+  /* Shell rail-right (chat Kimi) → drawer slide-in from the right */
+  .ct-rail-right {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(420px, 92vw);
+    z-index: 1001;
+    transform: translateX(100%);
+    transition: transform 240ms cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: -8px 0 32px -8px rgba(0, 0, 0, 0.4);
+  }
+  body.cp-chat-drawer-open .ct-rail-right {
+    transform: translateX(0);
+  }
+  body.cp-chat-drawer-open .ct-rail-right.collapsed {
+    width: min(420px, 92vw);
+  }
+  body.cp-chat-drawer-open .ct-rail-right.collapsed .ct-rail-right-body {
+    display: flex;
+  }
+
+  /* Backdrop : visible when drawer open */
+  .cp-chat-drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease;
+  }
+  .cp-chat-drawer-backdrop[data-open="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* FAB : fixed bottom-right, above the BottomBar */
+  .cp-chat-drawer-fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    right: 16px;
+    bottom: calc(var(--cp-bar-bottom, 64px) + 16px);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    z-index: 1002;
+    background: var(--cp-accent-maroon, var(--cp-accent, #8A1538));
+    color: var(--cp-text-strong, #fff);
+    border: 1px solid var(--cp-border-strong, rgba(255, 255, 255, 0.16));
+    box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    cursor: pointer;
+    transition: transform 150ms ease, background 150ms ease;
+  }
+  .cp-chat-drawer-fab:hover {
+    transform: translateY(-2px);
+  }
+  .cp-chat-drawer-fab:active {
+    transform: translateY(0);
+  }
+  .cp-chat-drawer-fab[data-open="true"] {
+    background: var(--cp-surface-2, #2a0d13);
+    color: var(--cp-text-primary, #fff);
+  }
+}

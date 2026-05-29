@@ -11,6 +11,7 @@
 // de conversation au open/close).
 
 import { useEffect, useState, useCallback } from 'react';
+import './chat-fab.css';
 
 const BODY_CLASS = 'cp-chat-drawer-open';
 
