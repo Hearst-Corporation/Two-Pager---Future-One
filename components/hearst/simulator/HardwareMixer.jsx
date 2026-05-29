@@ -123,7 +123,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
 
       {v.ai_pct > 0 && (
         <div style={S.summary}>
-          <SumKpi label="AI chips" value={total_gpus.toLocaleString()} />
+          <SumKpi label="AI chips" value={total_gpus.toLocaleString('en-US')} />
           <SumKpi label="Racks" value={racks_used} />
           <SumKpi label="Equipment cost" value={`$${(capex_hw / 1e6).toFixed(1)}M`} />
           <SumKpi label="AI revenue / yr" value={`$${(revenue_ai / 1e6).toFixed(1)}M`} accent />

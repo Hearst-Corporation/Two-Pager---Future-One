@@ -57,3 +57,13 @@ test-results/
 # See SectionHub.jsx for the src= URL that must be updated.
 public/FUTUR-ONE-FINAL.mp4
 public/FUTUR-ONE-FINAL.backup.mp4
+
+# Runway / orchestrator state artefacts (local only)
+runway-state.json
+runway-state-final.json
+runway-tasks.log
+
+# debug screenshots
+simulator-*.png
+A[0-9]-*.png
+*-simulator*.png
