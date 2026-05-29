@@ -28,7 +28,7 @@ function CollapsibleSection({ title, children, defaultOpen = true }) {
   return (
     <div style={{
       marginBottom: 10,
-      border: '1px solid var(--cp-accent, #8b1a2f)',
+      border: '1px solid var(--cp-accent)',
       borderOpacity: 0.25,
       borderRadius: 6,
       overflow: 'hidden',
