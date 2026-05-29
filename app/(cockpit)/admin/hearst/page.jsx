@@ -53,7 +53,12 @@ function TodayPanel({ projectId }) {
       fetch('/api/admin/hearst/simulate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ total_mw: 50, geography: 'qatar' }),
+        body: JSON.stringify({
+          input_mode: 'mw_first',
+          input_value: { total_mw: 50 },
+          archetype_id: 'powered_shell',
+          geography: 'qatar',
+        }),
       }).then(r => r.json()),
     ])
       .then(([d, inv, log, sim]) => {
@@ -152,7 +157,7 @@ function TodayPanel({ projectId }) {
             {warnings.map((w, i) => (
               <div key={i} style={S.alertRow}>
                 <span style={{ ...S.severityDot, background: SEVERITY_COLOR[w.severity] || 'var(--cp-text-muted)' }} />
-                <span style={S.alertMsg}>{w.message || w.field || 'Unknown warning'}</span>
+                <span style={S.alertMsg}>{w.message || (w.field ? `${w.field} needs attention` : `${w.severity} alert`)}</span>
               </div>
             ))}
           </div>

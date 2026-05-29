@@ -533,6 +533,7 @@ const S = {
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     gap: 16,
+    flexWrap: 'wrap',
     paddingBottom: 16,
     borderBottom: '1px solid var(--cp-border)',
   },

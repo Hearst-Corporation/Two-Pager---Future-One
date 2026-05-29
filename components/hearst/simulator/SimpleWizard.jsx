@@ -367,12 +367,12 @@ function NavRow({ backLabel, onBack, nextLabel, onNext }) {
 const S = {
   wrap: { display: 'flex', flexDirection: 'column', gap: 32 },
 
-  stepper: { display: 'flex', alignItems: 'center', gap: 0, listStyle: 'none', padding: 0, margin: 0 },
-  stepperItem: { display: 'flex', alignItems: 'center', gap: 8, flex: 1 },
+  stepper: { display: 'flex', alignItems: 'center', gap: 0, listStyle: 'none', padding: 0, margin: 0, overflowX: 'auto' },
+  stepperItem: { display: 'flex', alignItems: 'center', gap: 6, flex: '0 0 auto' },
   stepDot: {
-    width: 32, height: 32, borderRadius: '50%',
+    width: 28, height: 28, borderRadius: '50%',
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: 12, fontWeight: 700,
+    fontSize: 11, fontWeight: 700,
     background: 'var(--cp-surface-2)', color: 'var(--cp-text-muted)',
     border: '1px solid var(--cp-border)', flexShrink: 0,
   },
@@ -380,18 +380,18 @@ const S = {
   stepDotDone: { background: 'var(--cp-text-primary)', color: 'var(--cp-bg-deep, #000)' },
   stepLabel: { fontSize: 11, fontWeight: 700, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, whiteSpace: 'nowrap' },
   stepLabelActive: { color: 'var(--cp-text-primary)' },
-  stepLine: { flex: 1, height: 1, background: 'var(--cp-border)' },
+  stepLine: { flex: '0 0 16px', height: 1, background: 'var(--cp-border)' },
 
   step: {
-    display: 'flex', flexDirection: 'column', gap: 24,
-    padding: '48px 32px',
+    display: 'flex', flexDirection: 'column', gap: 20,
+    padding: 'clamp(20px, 5vw, 48px) clamp(16px, 4vw, 32px)',
     background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)',
     borderRadius: 14,
   },
-  q: { fontSize: 28, fontWeight: 800, color: 'var(--cp-text-primary)', margin: 0, lineHeight: 1.2 },
-  qSub: { fontSize: 14, color: 'var(--cp-text-muted)', margin: 0 },
+  q: { fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: 800, color: 'var(--cp-text-primary)', margin: 0, lineHeight: 1.2 },
+  qSub: { fontSize: 13, color: 'var(--cp-text-muted)', margin: 0 },
 
-  heroValue: { fontSize: 52, fontWeight: 800, color: 'var(--cp-text-primary)', textAlign: 'center', padding: '24px 0', fontVariantNumeric: 'tabular-nums' },
+  heroValue: { fontSize: 'clamp(32px, 10vw, 52px)', fontWeight: 800, color: 'var(--cp-text-primary)', textAlign: 'center', padding: '16px 0', fontVariantNumeric: 'tabular-nums' },
   slider: { width: '100%', accentColor: 'var(--cp-accent)' },
   scaleRow: { display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--cp-text-muted)', marginTop: -8 },
   tip: { padding: 16, background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderRadius: 10, fontSize: 13, color: 'var(--cp-text-body)', lineHeight: 1.6 },

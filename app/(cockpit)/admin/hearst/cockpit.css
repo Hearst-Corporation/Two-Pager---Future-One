@@ -376,3 +376,23 @@
 .cp-stat:last-child {
   border-right: none;
 }
+
+/* === Responsive — tablet & mobile ==================== */
+@media (max-width: 900px) {
+  .cockpit-root {
+    --cp-rail-right: 0px;
+    --cp-rail-left: 64px;
+  }
+  .cockpit-rail-right {
+    display: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .cockpit-root {
+    --cp-rail-left: 0px;
+  }
+  .cockpit-rail-left {
+    display: none !important;
+  }
+}

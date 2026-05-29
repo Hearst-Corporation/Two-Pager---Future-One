@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { authedWrite, requireProfile } from '@/lib/supabase-admin';
+import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { DealCreateSchema } from '@/lib/validators/hearst';
 
 export async function GET(req) {
@@ -10,15 +10,18 @@ export async function GET(req) {
     const project_id = searchParams.get('project_id');
     if (!project_id) return NextResponse.json({ error: 'project_id required' }, { status: 400 });
 
-    const { data, error } = await r.supa
+    const supa = getAdminClient();
+    const { data, error } = await supa
       .from('hearst_deals')
       .select('*')
       .eq('project_id', project_id)
       .order('created_at', { ascending: false });
 
     if (error) {
-      // Table may not exist yet — return empty array gracefully
-      if (error.code === '42P01') return NextResponse.json({ deals: [] });
+      // Table may not exist yet or RLS/permission issue — return empty array gracefully
+      if (error.code === '42P01' || error.code === '42501' || error.code === 'PGRST116') {
+        return NextResponse.json({ deals: [] });
+      }
       throw error;
     }
     return NextResponse.json({ deals: data || [] });

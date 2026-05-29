@@ -47,7 +47,7 @@ export default function KpiCard({ label, value, format = 'number', source_type, 
 }
 
 function formatValue(value, format) {
-  if (value == null) return MISSING_LABEL;
+  if (value == null) return '—';
   switch (format) {
     case 'currency':
       if (Math.abs(value) >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
