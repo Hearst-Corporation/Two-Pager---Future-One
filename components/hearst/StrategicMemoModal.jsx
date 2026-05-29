@@ -705,8 +705,36 @@ export default function StrategicMemoModal(_legacyProps) {
 }
 
 const S = {
-  backdrop: { position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'stretch', justifyContent: 'center', padding: '32px 16px' },
-  modal: { width: '100%', maxWidth: 960, display: 'flex', flexDirection: 'column', background: 'var(--cp-surface-1, var(--cp-surface-2))', border: '1px solid var(--cp-border)', borderRadius: 14, overflow: 'hidden' },
+  // Backdrop : z-index 1010 pour passer au-dessus du FAB chat (1002), badge (1002),
+  // toast (1003) et chat rail droit. Couleur sombre + blur pour occulter le contenu.
+  backdrop: {
+    position: 'fixed',
+    inset: 0,
+    zIndex: 1010,
+    background: 'rgba(0, 0, 0, 0.72)',
+    backdropFilter: 'blur(6px)',
+    WebkitBackdropFilter: 'blur(6px)',
+    display: 'flex',
+    alignItems: 'stretch',
+    justifyContent: 'center',
+    padding: '32px 16px',
+  },
+  // Modal : fond OPAQUE (--ct-bg-deep est solide #1A050B, contrairement à
+  // --cp-surface-* qui sont des rgba quasi-transparents). On empile :
+  //   1. --cp-bg-deep en base (opaque)
+  //   2. --cp-surface-2 par-dessus (légère élévation)
+  // → boardroom-grade sans transparence parasite.
+  modal: {
+    width: '100%',
+    maxWidth: 960,
+    display: 'flex',
+    flexDirection: 'column',
+    background: 'linear-gradient(var(--cp-surface-2), var(--cp-surface-2)), var(--cp-bg-deep)',
+    border: '1px solid var(--cp-border-strong, var(--cp-border))',
+    borderRadius: 14,
+    overflow: 'hidden',
+    boxShadow: '0 24px 64px -16px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06) inset',
+  },
 
   head: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderBottom: '1px solid var(--cp-border)' },
   title: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)', margin: 0, letterSpacing: 0.3 },
