@@ -24,7 +24,6 @@ import {
   startMemoJob,
   hideMemoModal,
   formatElapsed,
-  estimateCurrentStage,
 } from '@/lib/hearst-memo-job-store';
 
 const CONFIDENCE_TONE = {
@@ -67,13 +66,36 @@ function Section({ id, label, defaultOpen = false, children }) {
 /**
  * Timeline live affichée pendant le loading.
  *
- * Montre :
- *   - Temps écoulé (mm:ss), mis à jour chaque seconde via le store
- *   - Stage estimé dans la cascade Hypercli (kimi-k2.6 → k2.5 → glm-5 → minimax-m2.5)
- *   - Hint : la modale peut être fermée, le job continue en background
+ * Sprint 3.2 — Honnêteté :
+ *   On NE PEUT PAS savoir côté client où en est la cascade serveur (pas de
+ *   SSE pour l'instant). Donc :
+ *     - On affiche l'elapsed time (vrai)
+ *     - On affiche tous les modèles de la cascade en énumération sans
+ *       marquer un actif (on mentirait)
+ *     - On ajoute une jauge de progression vs SLA cible (90s) pour donner
+ *       au user un signal de "normal vs anormal"
+ *   Quand le memo est done, meta.model_used montre le vrai modèle qui a
+ *   répondu, et meta.timing_ms.llm donne la vraie durée.
  */
+const SLA_TARGET_MS = 60_000;   // Cible normale : <60s
+const SLA_WARNING_MS = 120_000; // Au-delà : c'est lent
+const SLA_DANGER_MS = 240_000;  // Au-delà : très anormal
+
 function MemoTimeline({ elapsedMs, cascade }) {
-  const currentStage = estimateCurrentStage(elapsedMs);
+  const pct = Math.min(100, (elapsedMs / SLA_DANGER_MS) * 100);
+  const slaTone =
+    elapsedMs < SLA_TARGET_MS ? 'normal' :
+    elapsedMs < SLA_WARNING_MS ? 'warning' :
+    'danger';
+  const slaLabel =
+    slaTone === 'normal' ? 'within target' :
+    slaTone === 'warning' ? 'slower than usual' :
+    'cascade fallback in progress';
+  const slaColor =
+    slaTone === 'normal' ? 'var(--ct-status-success)' :
+    slaTone === 'warning' ? 'var(--ct-status-warning)' :
+    'var(--ct-status-danger)';
+
   return (
     <div style={S.timelineWrap}>
       <div style={S.timelineHeader}>
@@ -81,37 +103,29 @@ function MemoTimeline({ elapsedMs, cascade }) {
         <span style={S.timelineLabel}>Generating strategic memo…</span>
         <span style={S.timelineElapsed}>{formatElapsed(elapsedMs)}</span>
       </div>
-      <div style={S.timelineCascade}>
-        {cascade.map((model, i) => {
-          const idx = cascade.indexOf(currentStage);
-          const isPast = i < idx;
-          const isActive = model === currentStage;
-          return (
-            <div key={model} style={S.timelineStep}>
-              <span
-                style={{
-                  ...S.timelineDot,
-                  background: isActive
-                    ? 'var(--cp-accent-maroon, var(--cp-accent))'
-                    : isPast
-                      ? 'var(--cp-text-muted)'
-                      : 'var(--cp-border)',
-                  ...(isActive ? S.timelineDotActive : {}),
-                }}
-              />
-              <span
-                style={{
-                  ...S.timelineModel,
-                  color: isActive ? 'var(--cp-text-strong)' : 'var(--cp-text-muted)',
-                  fontWeight: isActive ? 700 : 400,
-                }}
-              >
-                {model}
-              </span>
-            </div>
-          );
-        })}
+
+      {/* Jauge SLA — vraie information sur la latence vs target */}
+      <div style={S.slaWrap}>
+        <div style={S.slaBar}>
+          <div style={{ ...S.slaFill, width: `${pct}%`, background: slaColor }} />
+          <div style={{ ...S.slaTarget, left: `${(SLA_TARGET_MS / SLA_DANGER_MS) * 100}%` }} />
+        </div>
+        <div style={{ ...S.slaLabel, color: slaColor }}>{slaLabel}</div>
       </div>
+
+      {/* Cascade énumérée sans mensonge sur le stage actuel.
+          Le vrai modèle utilisé sera révélé quand le memo arrive (meta.model_used). */}
+      <div style={S.cascadeWrap}>
+        <div style={S.cascadeLabel}>Fallback chain :</div>
+        <div style={S.cascadeList}>
+          {cascade.map((model) => (
+            <span key={model} style={S.cascadeChip}>{model}</span>
+          ))}
+          <span style={{ ...S.cascadeChip, ...S.cascadeChipFallback }}>claude-sonnet-4-6</span>
+          <span style={{ ...S.cascadeChip, ...S.cascadeChipFallback }}>gpt-4o</span>
+        </div>
+      </div>
+
       <div style={S.timelineHint}>
         Vous pouvez fermer cette fenêtre — le memo continue d'être généré en arrière-plan.
         Vous serez notifié quand il sera prêt.
@@ -589,7 +603,7 @@ export default function StrategicMemoModal(_legacyProps) {
                     {vizMeta.summary && <p style={S.narrative}>{vizMeta.summary}</p>}
                     {vizMeta.topology_summary && <p style={S.narrative}>{vizMeta.topology_summary}</p>}
                     <div style={S.vizWrapper}>
-                      <ScenarioVisualizer simulation={payload} mode="auto" />
+                      <ScenarioVisualizer simulation={job.request?.payload} mode="auto" />
                     </div>
                   </Section>
                 ) : null;
@@ -782,35 +796,69 @@ const S = {
     color: 'var(--cp-text-strong)',
     fontVariantNumeric: 'tabular-nums',
   },
-  timelineCascade: {
+  // SLA bar — vraie info sur latence vs target
+  slaWrap: { display: 'flex', flexDirection: 'column', gap: 4 },
+  slaBar: {
+    position: 'relative',
+    height: 6,
+    background: 'var(--cp-surface-0)',
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  slaFill: {
+    position: 'absolute',
+    inset: 0,
+    right: 'auto',
+    height: '100%',
+    borderRadius: 999,
+    transition: 'width 1s linear, background 300ms ease',
+  },
+  slaTarget: {
+    position: 'absolute',
+    top: -2,
+    height: 10,
+    width: 2,
+    background: 'var(--cp-border-strong)',
+  },
+  slaLabel: {
+    fontSize: 10,
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+
+  // Cascade enumeration (no false "active" stage — we don't have SSE)
+  cascadeWrap: { display: 'flex', flexDirection: 'column', gap: 6 },
+  cascadeLabel: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  cascadeList: {
     display: 'flex',
-    alignItems: 'center',
-    gap: 0,
+    gap: 6,
     flexWrap: 'wrap',
   },
-  timelineStep: {
-    display: 'flex',
+  cascadeChip: {
+    display: 'inline-flex',
     alignItems: 'center',
-    gap: 6,
-    paddingRight: 16,
-  },
-  timelineDot: {
-    display: 'inline-block',
-    width: 10,
-    height: 10,
-    borderRadius: '50%',
-    flexShrink: 0,
-    transition: 'background 200ms ease',
-  },
-  timelineDotActive: {
-    boxShadow: '0 0 0 4px color-mix(in srgb, var(--cp-accent) 25%, transparent)',
-    animation: 'memo-pulse 1.2s ease-in-out infinite',
-  },
-  timelineModel: {
-    fontSize: 11,
+    padding: '3px 8px',
+    background: 'var(--cp-surface-0)',
+    color: 'var(--cp-text-muted)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 999,
+    fontSize: 10,
     fontFamily: 'ui-monospace, monospace',
     letterSpacing: 0.2,
   },
+  cascadeChipFallback: {
+    background: 'var(--cp-accent-soft, var(--cp-surface-0))',
+    color: 'var(--cp-accent)',
+    borderColor: 'var(--cp-accent-border, var(--cp-border))',
+  },
+
   timelineHint: {
     fontSize: 11,
     color: 'var(--cp-text-muted)',

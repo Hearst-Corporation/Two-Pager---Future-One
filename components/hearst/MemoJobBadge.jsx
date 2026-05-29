@@ -10,15 +10,16 @@ import {
   useMemoJob,
   showMemoModal,
   formatElapsed,
-  estimateCurrentStage,
 } from '@/lib/hearst-memo-job-store';
+
+const SLA_WARNING_MS = 120_000;
 
 export default function MemoJobBadge() {
   const job = useMemoJob();
 
   if (job.status !== 'loading' || job.modal_visible) return null;
 
-  const stage = estimateCurrentStage(job.elapsed_ms);
+  const isSlowish = job.elapsed_ms > SLA_WARNING_MS;
 
   return (
     <button
@@ -30,8 +31,8 @@ export default function MemoJobBadge() {
       <span style={S.spinner} />
       <span style={S.body}>
         <span style={S.title}>Memo en cours</span>
-        <span style={S.sub}>
-          {formatElapsed(job.elapsed_ms)} · {stage}
+        <span style={{ ...S.sub, color: isSlowish ? 'var(--ct-status-warning)' : 'var(--cp-text-muted)' }}>
+          {formatElapsed(job.elapsed_ms)}{isSlowish ? ' · cascade fallback' : ''}
         </span>
       </span>
       <span style={S.chevron}>›</span>

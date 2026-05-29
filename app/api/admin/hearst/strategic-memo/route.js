@@ -330,6 +330,11 @@ export async function POST(req) {
   ].join('\n');
 
   try {
+    // Timing transparent — pour identifier les hotspots et donner au caller
+    // une indication de durée par étape (visible dans la réponse `timing`).
+    const promptSize = systemPrompt.length + userMessage.length;
+    console.log(`[strategic-memo] prompt size: ${promptSize} chars (system: ${systemPrompt.length}, user: ${userMessage.length})`);
+    const llmStart = Date.now();
     const { response, model_used } = await kimiChatCompletion({
       model: KIMI_MODEL,
       messages: [
@@ -337,8 +342,11 @@ export async function POST(req) {
         { role: 'user',   content: userMessage },
       ],
       temperature: 0.2,
+      max_tokens: 8000,
       response_format: { type: 'json_object' },
     });
+    const llmDurationMs = Date.now() - llmStart;
+    console.log(`[strategic-memo] LLM call completed in ${llmDurationMs}ms via ${model_used}`);
 
     const content = response.choices?.[0]?.message?.content || '';
     let memo;
@@ -388,6 +396,10 @@ export async function POST(req) {
       memo,
       generated_at: new Date().toISOString(),
       model_used,
+      timing_ms: {
+        llm: llmDurationMs,
+        prompt_chars: promptSize,
+      },
       oracle_ctx: {
         stakeholder: oracleCtx.stakeholder || 'operator',
         region: oracleCtx.region || 'qatar',
