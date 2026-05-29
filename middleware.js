@@ -70,7 +70,7 @@ export async function middleware(req) {
   if (isAdminHost(host)) {
     if (pathname === '/' || pathname === '') {
       const url = req.nextUrl.clone();
-      url.pathname = '/admin/hearst';
+      url.pathname = '/admin/hearst/executive';
       return NextResponse.rewrite(url);
     }
     // /brochure, /datacenter, /pitch, /print etc → 404 sur ce sous-domaine

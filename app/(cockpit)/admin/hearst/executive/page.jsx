@@ -99,14 +99,14 @@ export default function ExecutiveDashboard() {
         <Panel title="Recent Reports" wide>
           {memos.length === 0 && <div style={S.muted}>No reports yet.</div>}
           {memos.slice(0, 5).map(m => (
-            <Link key={m.id} href={`/admin/hearst/dossier?memo=${m.id}`} style={S.report}>
-              <div style={S.reportMain}>
+            <div key={m.id} style={S.report}>
+              <Link href={`/admin/hearst/dossier?memo=${m.id}`} style={{ ...S.reportMain, flex: 1, minWidth: 0, textDecoration: 'none' }}>
                 <span style={S.reportTitle}>{m.title}</span>
                 <span style={S.reportMeta}>{m.region} · v{m.version} · {fmtDate(m.created_at)}</span>
-              </div>
+              </Link>
               <span style={{ ...S.statusChip, ...statusStyle(m.status) }}>{m.status}</span>
-              <a href={`/api/admin/hearst/strategic-memos/${m.id}/pdf`} target="_blank" rel="noreferrer" style={S.pdf} onClick={e => e.stopPropagation()}>PDF↓</a>
-            </Link>
+              <a href={`/api/admin/hearst/strategic-memos/${m.id}/pdf`} target="_blank" rel="noreferrer" style={S.pdf}>PDF↓</a>
+            </div>
           ))}
         </Panel>
 
