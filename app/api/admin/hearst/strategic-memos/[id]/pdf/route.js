@@ -860,8 +860,24 @@ export async function GET(_req, { params }) {
 
   let browser;
   try {
-    const puppeteer = (await import('puppeteer')).default;
-    browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    // On Vercel (read-only fs, no bundled Chrome), use @sparticuz/chromium + puppeteer-core.
+    // Locally, fall back to the full puppeteer package which ships its own Chrome.
+    const isVercel = !!process.env.VERCEL;
+    let puppeteer, launchOptions;
+    if (isVercel) {
+      const chromium   = (await import('@sparticuz/chromium')).default;
+      puppeteer        = (await import('puppeteer-core')).default;
+      launchOptions    = {
+        args:            chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath:  await chromium.executablePath(),
+        headless:        chromium.headless,
+      };
+    } else {
+      puppeteer     = (await import('puppeteer')).default;
+      launchOptions = { headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] };
+    }
+    browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
     await page.setContent(buildHtml(row), { waitUntil: 'networkidle0' });
     const pdf = await page.pdf({ format: 'A4', printBackground: true });
