@@ -1,11 +1,12 @@
 // GET /api/admin/hearst/strategic-memos/[id]/pdf
 //
 // Board Memo PDF — Concept B template.
-// Renders memo_json data into the approved 8-page A4 institutional layout.
+// Renders memo_json data into the approved 6-page (+ cover) A4 institutional layout.
 // Pipeline unchanged: auth → Supabase → buildHtml → Puppeteer → PDF response.
 
 import { NextResponse } from 'next/server';
 import { requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { deriveVerdict, deriveRiskLevel, fmtPct as ddPct } from '@/lib/dossier-derive';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -15,6 +16,10 @@ export const maxDuration = 60;
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+// Helper: render null from dossier-derive formatters as 'N/A'
+const orNA = (x) => x == null ? 'N/A' : x;
+
+// Local layout formatters — kept for display (different signature to dd* variants)
 const fmtUsd = (v, unit = 'M') => {
   if (v == null) return 'N/A';
   const n = unit === 'M' ? v / 1e6 : unit === 'B' ? v / 1e9 : v;
@@ -36,83 +41,33 @@ function regionLabel(r) {
   return REGION_MAP[(r || '').toLowerCase()] || esc(r || 'MENA');
 }
 
-function deriveVerdict(exsum, risks) {
-  const bullets = exsum?.bullets || [];
-  const hl = (exsum?.headline || '').toUpperCase();
-  if (hl.includes('PROCEED') || hl.includes('APPROVE')) return 'PROCEED';
-  if (hl.includes('HOLD') || hl.includes('NOT RECOMMEND')) return 'HOLD';
-  const highRisks = (risks?.items || []).filter(r => r.severity === 'HIGH').length;
-  if (highRisks >= 3) return 'PROCEED WITH CONDITIONS';
-  if (highRisks >= 1) return 'PROCEED WITH CONDITIONS';
-  return 'PROCEED';
-}
-
-function deriveRiskLevel(risks) {
-  const items = risks?.items || [];
-  const highs = items.filter(r => r.severity === 'HIGH').length;
-  if (highs >= 3) return 'High';
-  if (highs >= 1) return 'Moderate';
-  return 'Low';
-}
-
-// Sensitivity band from IRR ± stress — base only, no stress model available
-function sensBand(irr) {
-  if (irr == null) return null;
-  const base = irr > 1 ? irr / 100 : irr;
-  return { base, down: Math.max(base - 0.06, 0.05), up: base + 0.065 };
-}
-
-// Sensitivity SVG track
+// IRR sensitivity — base case only, no stress engine available
 function sensLine(irr) {
-  if (irr == null) return '<div class="muted-note">IRR sensitivity — base case only</div>';
-  const band = sensBand(irr);
+  if (irr == null) return '<div class="muted-note">IRR sensitivity — base case only. No value shown.</div>';
+  const base = irr > 1 ? irr / 100 : irr;
   const scale = { min: 0.05, max: 0.35 };
   const toPos = v => 8 + ((v - scale.min) / (scale.max - scale.min)) * 84;
-  const basePos = toPos(band.base).toFixed(1);
-  const leftPos = toPos(band.down).toFixed(1);
-  const rightPos = (100 - toPos(band.up)).toFixed(1);
+  const basePos = toPos(base).toFixed(1);
   return `
   <div class="sens-line">
-    <div class="sens-band" style="left:${leftPos}%; right:${rightPos}%;"></div>
     <div class="sens-base" style="left:${basePos}%;">
-      <span class="sb-lbl">Base ${fmtPctRaw(band.base)}</span>
+      <span class="sb-lbl">Base ${fmtPctRaw(base)}</span>
     </div>
   </div>
-  <div class="sens-ends">
-    <span class="se">Downside &nbsp;<b class="tnum">${fmtPctRaw(band.down)}</b></span>
-    <span class="se"><b class="tnum">${fmtPctRaw(band.up)}</b>&nbsp; Upside</span>
-  </div>
-  <p class="sens-note">Base case IRR <b>${fmtPctRaw(band.base)}</b>. Stress band ±6 pts (power price + utilization envelope). Downside remains above 10% WACC hurdle.</p>`;
+  <div class="muted-note" style="margin-top:6mm;">Base case IRR ${orNA(ddPct(irr))}. Sensitivity analysis pending stress engine.</div>`;
 }
 
-// CAPEX breakdown from key_financial_metrics or fallback from total_capex
-function capexRows(snap, finMetrics) {
+// CAPEX — total only (component breakdown not modeled)
+function capexRows(snap) {
   const total = snap?.total_capex;
   if (!total) return '<div class="muted-note">Capex detail not available.</div>';
-  // Try to extract from fin_metrics metrics array
-  const metrics = finMetrics?.metrics || [];
-  const debtMetric = metrics.find(m => m.label === 'Debt / leverage');
-  const debtPct = debtMetric ? parseFloat(debtMetric.value) / 100 : 0.60;
-
-  const facilities = total * 0.656;
-  const power      = total * 0.250;
-  const contingency = total * 0.094;
-  const rows = [
-    { name: 'Facilities', share: '65.6%', val: fmtUsd(facilities) },
-    { name: 'Power', share: '25.0%', val: fmtUsd(power) },
-    { name: 'Contingency', share: '9.4%', val: fmtUsd(contingency) },
-  ];
-  return rows.map(r => `
-    <div class="cap-row">
-      <span class="cr-name">${esc(r.name)}</span>
-      <span class="cr-share tnum">${r.share}</span>
-      <span class="cr-val tnum">${r.val}</span>
-    </div>`).join('') + `
+  return `
     <div class="cap-total">
       <span class="ct-name">Total CAPEX</span>
-      <span class="ct-share tnum">100%</span>
+      <span class="ct-share tnum"></span>
       <span class="ct-val tnum">${fmtUsd(total)}</span>
-    </div>`;
+    </div>
+    <div class="muted-note" style="margin-top:4mm;">Component breakdown not modeled.</div>`;
 }
 
 // Risk table rows (max 5)
@@ -191,11 +146,11 @@ function assumptions(snap, finMetrics) {
     { k: 'WACC',          v: '10%' },
     { k: 'Hold period',   v: `${snap?.exit_year || 7} years` },
     { k: 'Total CAPEX',   v: fmtUsd(snap?.total_capex) },
-    { k: 'Debt',          v: debt ? `${debt.value}% @ ${debt.unit.replace('% @ ', '') || '6.5%'}` : '60% @ 6.5%' },
+    { k: 'Debt',          v: debt ? `${debt.value}% @ ${debt.unit.replace('% @ ', '') || '6.5%'}` : 'not specified' },
     { k: 'IRR (base)',    v: fmtPct(snap?.irr) },
     { k: 'NPV',           v: fmtUsd(snap?.npv) },
     { k: 'Payback',       v: fmtYr(snap?.payback_years) },
-    { k: 'Utilization',   v: '85% base case' },
+    { k: 'Utilization',   v: 'not specified' },
   ];
   return rows.map(r => `
     <li><span class="al-k">${esc(r.k)}</span><span class="al-v tnum">${esc(r.v)}</span></li>`).join('');
@@ -216,10 +171,10 @@ function contractTable(finMetrics) {
   const rent  = m.find(r => r.label === 'Hyperscale rent');
   const debt  = m.find(r => r.label === 'Debt / leverage');
   const rows = [
-    { item: 'Anchor offtake',        terms: '15-yr NNN take-or-pay' },
-    { item: 'Contracted before FID', terms: '≥ 60% capacity' },
+    { item: 'Anchor offtake',        terms: 'not specified' },
+    { item: 'Contracted before FID', terms: 'not specified' },
     { item: 'Rental rate',           terms: rent ? `$${rent.value}/kW/mo` : 'N/A' },
-    { item: 'Debt structure',        terms: debt ? `${debt.value} ${debt.unit}` : '60% @ 6.5%' },
+    { item: 'Debt structure',        terms: debt ? `${debt.value} ${debt.unit}` : 'not specified' },
   ];
   return rows.map(r => `<tr><td>${esc(r.item)}</td><td class="r">${esc(r.terms)}</td></tr>`).join('');
 }
@@ -239,8 +194,9 @@ function buildHtml(row) {
   const fin    = m.key_financial_metrics || {};
   const comm   = m.commercialization_strategy || {};
 
-  const verdict   = deriveVerdict(exsum, risks);
-  const riskLevel = deriveRiskLevel(risks);
+  // Verdict and risk level from single source of truth (dossier-derive)
+  const verdict   = deriveVerdict(m).label;
+  const riskLevel = deriveRiskLevel(m).label;
   const projDate  = fmtDate(row.created_at);
   const location  = regionLabel(row.region);
 
@@ -248,9 +204,9 @@ function buildHtml(row) {
   const rentMetric = (fin.metrics || []).find(r => r.label === 'Hyperscale rent');
   const revenueNote = rentMetric ? `$${rentMetric.value}/kW/mo NNN` : (comm.pricing ? comm.pricing.slice(0, 60) + '…' : 'N/A');
 
-  // EBITDA margin proxy
+  // EBITDA margin — only show if real metric exists
   const ebitdaMetric = (fin.metrics || []).find(r => r.label?.includes('EBITDA'));
-  const ebitdaNote = ebitdaMetric ? `${ebitdaMetric.value}% landlord EBITDA margin` : '55–65% (estimated)';
+  const ebitdaNote = ebitdaMetric ? `${ebitdaMetric.value}% landlord EBITDA margin` : null;
 
   // Recommendation body — from arch rationale + commercialization
   const approveBody = arch.rationale
@@ -387,11 +343,8 @@ p { margin: 0; }
 .sens-wrap { }
 .sens-title { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 5mm; }
 .sens-line { position: relative; height: 6px; background: var(--hair-soft); border-radius: 3px; margin-bottom: 3mm; }
-.sens-band { position: absolute; top: 0; bottom: 0; background: var(--hair); border-radius: 3px; }
 .sens-base { position: absolute; top: -8px; transform: translateX(-50%); }
 .sb-lbl { font-size: 7.5pt; font-weight: 700; color: var(--oxblood); white-space: nowrap; }
-.sens-ends { display: flex; justify-content: space-between; font-size: 8.5pt; color: var(--gray-1); margin-top: 4mm; }
-.se b { color: var(--ink); }
 .sens-note { font-size: 8.5pt; color: var(--gray-1); line-height: 1.5; margin-top: 4mm; }
 
 /* RISKS */
@@ -598,8 +551,8 @@ p { margin: 0; }
     <span class="rh-class">Strictly Private &amp; Confidential</span>
   </div>
   <div class="frame">
-    <p class="eyebrow"><span class="num">03</span>Financial Summary</p>
-    <h2 class="headline smaller">${ebitdaNote} built on the lowest marginal cost of power.</h2>
+    <p class="eyebrow"><span class="num">02</span>Financial Summary</p>
+    <h2 class="headline smaller">Financial summary — built on the lowest marginal cost of power.</h2>
     <div class="fin-hero">
       <div class="fin-kpi">
         <div class="fk">Revenue (NNN)</div>
@@ -608,7 +561,7 @@ p { margin: 0; }
       </div>
       <div class="fin-kpi">
         <div class="fk">EBITDA Margin</div>
-        <div class="fv tnum">${esc(ebitdaNote.split('%')[0])}%</div>
+        <div class="fv tnum">${ebitdaMetric ? `${esc(String(ebitdaMetric.value))}%` : 'N/A'}</div>
         <div class="fs">Landlord NNN</div>
       </div>
       <div class="fin-kpi">
@@ -625,7 +578,7 @@ p { margin: 0; }
     <div class="fin-body">
       <div class="break-avoid">
         <div class="cap-title">CAPEX — ${fmtUsd(snap.total_capex)}${snap.total_mw ? ` · ${snap.total_mw} MW` : ''}</div>
-        ${capexRows(snap, fin)}
+        ${capexRows(snap)}
       </div>
       <div class="sens-wrap">
         <div class="sens-title">IRR Sensitivity — Power Price &amp; Utilization</div>
@@ -634,20 +587,20 @@ p { margin: 0; }
     </div>
   </div>
   <div class="runfoot">
-    <span class="rf-pg">03</span>
+    <span class="rf-pg">02</span>
     <span class="rf-conf">Strictly Private &amp; Confidential</span>
     <span>${esc(projDate)}</span>
   </div>
 </section>
 
-<!-- PAGE 4 — RISKS -->
+<!-- PAGE 3 — RISKS -->
 <section class="page">
   <div class="runhead">
     <span class="rh-name">${esc(row.title)}</span>
     <span class="rh-class">Strictly Private &amp; Confidential</span>
   </div>
   <div class="frame">
-    <p class="eyebrow"><span class="num">04</span>Risk Assessment</p>
+    <p class="eyebrow"><span class="num">03</span>Risk Assessment</p>
     <h2 class="headline smaller">${(risks?.items || []).length} principal risks — each mitigated to the boundary of acceptance.</h2>
     <hr class="accentline" />
     <div class="risk-table">
@@ -661,30 +614,30 @@ p { margin: 0; }
     </div>
   </div>
   <div class="runfoot">
-    <span class="rf-pg">04</span>
+    <span class="rf-pg">03</span>
     <span class="rf-conf">Strictly Private &amp; Confidential</span>
     <span>${esc(projDate)}</span>
   </div>
 </section>
 
-<!-- PAGE 5 — SCENARIO ANALYSIS -->
+<!-- PAGE 4 — SCENARIO ANALYSIS -->
 <section class="page">
   <div class="runhead">
     <span class="rh-name">${esc(row.title)}</span>
     <span class="rh-class">Strictly Private &amp; Confidential</span>
   </div>
   <div class="frame">
-    <p class="eyebrow"><span class="num">05</span>Scenario Analysis</p>
-    <h2 class="headline smaller">Three cases. The base case clears the hurdle — stress-test data pending.</h2>
+    <p class="eyebrow"><span class="num">04</span>Scenario Analysis</p>
+    <h2 class="headline smaller">Base case — the underwriting case for FID. Stress scenarios pending.</h2>
     <div class="scen-grid">
       <div class="scen">
         <div class="sc-name">Downside</div>
-        <div class="sc-tag">Delayed offtake, utilization 55%. Asset remains accretive above WACC. <span style="font-size:8pt;color:var(--gray-2)">(Estimated — stress model pending)</span></div>
-        <div class="sc-irr-k">IRR (est.)</div>
-        <div class="sc-irr tnum">${snap.irr ? fmtPctRaw(snap.irr > 1 ? snap.irr / 100 - 0.06 : snap.irr - 0.06) : 'N/A'}</div>
+        <div class="sc-tag">Not modeled — pending stress engine.</div>
+        <div class="sc-irr-k">IRR</div>
+        <div class="sc-irr tnum muted-note" style="font-size:14pt;">Not modeled</div>
         <div class="sc-rows">
-          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum">55%</span></div>
-          <div class="sc-line"><span class="sc-lk">NPV (est.)</span><span class="sc-lv tnum">${snap.npv ? fmtUsd(snap.npv * 0.35) : 'N/A'}</span></div>
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum muted-note">not specified</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum muted-note">not modeled</span></div>
         </div>
       </div>
       <div class="scen base">
@@ -693,43 +646,42 @@ p { margin: 0; }
         <div class="sc-irr-k">IRR</div>
         <div class="sc-irr tnum">${fmtPct(snap.irr)}</div>
         <div class="sc-rows">
-          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum">85%</span></div>
           <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum">${fmtUsd(snap.npv)}</span></div>
           <div class="sc-line"><span class="sc-lk">Payback</span><span class="sc-lv tnum">${fmtYr(snap.payback_years)}</span></div>
         </div>
       </div>
       <div class="scen">
         <div class="sc-name">Upside</div>
-        <div class="sc-tag">Full platform contracted at 92%+ utilization. <span style="font-size:8pt;color:var(--gray-2)">(Estimated — upside model pending)</span></div>
-        <div class="sc-irr-k">IRR (est.)</div>
-        <div class="sc-irr tnum">${snap.irr ? fmtPctRaw(snap.irr > 1 ? snap.irr / 100 + 0.065 : snap.irr + 0.065) : 'N/A'}</div>
+        <div class="sc-tag">Not modeled — pending stress engine.</div>
+        <div class="sc-irr-k">IRR</div>
+        <div class="sc-irr tnum muted-note" style="font-size:14pt;">Not modeled</div>
         <div class="sc-rows">
-          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum">92%</span></div>
-          <div class="sc-line"><span class="sc-lk">NPV (est.)</span><span class="sc-lv tnum">${snap.npv ? fmtUsd(snap.npv * 1.8) : 'N/A'}</span></div>
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum muted-note">not specified</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum muted-note">not modeled</span></div>
         </div>
       </div>
     </div>
     <p class="scen-note">
-      <b>Base case is model-derived.</b> Downside and upside are estimated ±6pt IRR stress bands applied to the base projection.
-      A full three-scenario model (separate utilization + power price runs) is pending engine update.
-      The base case clears the 10% WACC hurdle by ${snap.irr ? fmtPctRaw(snap.irr > 1 ? snap.irr / 100 - 0.10 : snap.irr - 0.10) : '—'}.
+      <b>Base case is model-derived.</b> Downside and upside scenarios are not yet modeled —
+      a full three-scenario stress engine (separate utilization + power price runs) is pending.
+      Only the base case figures are presented here; no estimated IRR or NPV is shown for Downside or Upside.
     </p>
   </div>
   <div class="runfoot">
-    <span class="rf-pg">05</span>
+    <span class="rf-pg">04</span>
     <span class="rf-conf">Strictly Private &amp; Confidential</span>
     <span>${esc(projDate)}</span>
   </div>
 </section>
 
-<!-- PAGE 6 — RECOMMENDATION -->
+<!-- PAGE 5 — RECOMMENDATION -->
 <section class="page">
   <div class="runhead">
     <span class="rh-name">${esc(row.title)}</span>
     <span class="rh-class">Strictly Private &amp; Confidential</span>
   </div>
   <div class="frame">
-    <p class="eyebrow"><span class="num">06</span>Recommendation</p>
+    <p class="eyebrow"><span class="num">05</span>Recommendation</p>
     <h2 class="headline smaller">Commit Phase 1. Gate Phase 2 on commissioning and contracted demand.</h2>
     <hr class="accentline" />
     <div class="rec-two">
@@ -757,20 +709,20 @@ p { margin: 0; }
     <p class="rec-quote">${esc(committeeQuote)}</p>
   </div>
   <div class="runfoot">
-    <span class="rf-pg">06</span>
+    <span class="rf-pg">05</span>
     <span class="rf-conf">Strictly Private &amp; Confidential</span>
     <span>${esc(projDate)}</span>
   </div>
 </section>
 
-<!-- PAGE 7 — APPENDIX -->
+<!-- PAGE 6 — APPENDIX -->
 <section class="page">
   <div class="runhead">
     <span class="rh-name">${esc(row.title)}</span>
     <span class="rh-class">Strictly Private &amp; Confidential</span>
   </div>
   <div class="frame">
-    <p class="eyebrow"><span class="num">07</span>Appendix</p>
+    <p class="eyebrow"><span class="num">06</span>Appendix</p>
     <h2 class="headline smaller">Sources, assumptions &amp; supporting data.</h2>
     <div class="apx-grid">
       <div class="apx-block">
@@ -786,16 +738,14 @@ p { margin: 0; }
         </ul>
       </div>
       <div class="apx-block">
-        <div class="ab-k">Supporting Data — CAPEX Breakdown</div>
+        <div class="ab-k">Supporting Data — CAPEX</div>
         <table class="apx-table">
-          <thead><tr><th>Component</th><th class="r">Amount</th><th class="r">Share</th></tr></thead>
+          <thead><tr><th>Component</th><th class="r">Amount</th></tr></thead>
           <tbody>
-            <tr><td>Facilities</td><td class="r tnum">${fmtUsd(snap.total_capex ? snap.total_capex * 0.656 : null)}</td><td class="r tnum">65.6%</td></tr>
-            <tr><td>Power</td><td class="r tnum">${fmtUsd(snap.total_capex ? snap.total_capex * 0.250 : null)}</td><td class="r tnum">25.0%</td></tr>
-            <tr><td>Contingency</td><td class="r tnum">${fmtUsd(snap.total_capex ? snap.total_capex * 0.094 : null)}</td><td class="r tnum">9.4%</td></tr>
-            <tr style="border-top:1px solid var(--ink);font-weight:700"><td>Total</td><td class="r tnum">${fmtUsd(snap.total_capex)}</td><td class="r tnum">100%</td></tr>
+            <tr style="font-weight:700"><td>Total CAPEX</td><td class="r tnum">${fmtUsd(snap.total_capex)}</td></tr>
           </tbody>
         </table>
+        <div class="muted-note" style="margin-top:4mm;">Component breakdown not modeled.</div>
       </div>
       <div class="apx-block">
         <div class="ab-k">Supporting Data — Contract &amp; Structure</div>
@@ -813,7 +763,7 @@ p { margin: 0; }
     </div>
   </div>
   <div class="runfoot">
-    <span class="rf-pg">07</span>
+    <span class="rf-pg">06</span>
     <span class="rf-conf">Strictly Private &amp; Confidential</span>
     <span>${esc(projDate)}</span>
   </div>

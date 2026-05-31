@@ -8,6 +8,7 @@ export default function SimulatorCTABar({
   onGenerateMemo,
   savingState = 'idle',
   hasProjection = false,
+  planCaution = false,
 }) {
   const saving = savingState === 'saving';
   const saved = savingState === 'saved';
@@ -15,7 +16,11 @@ export default function SimulatorCTABar({
   return (
     <div style={S.bar}>
       <div style={S.left}>
-        {hasProjection ? (
+        {hasProjection && planCaution ? (
+          <span style={S.statusCaution}>
+            <span style={S.dotCaution} /> Plan needs review
+          </span>
+        ) : hasProjection ? (
           <span style={S.statusReady}>
             <span style={S.dot} /> Plan ready
           </span>
@@ -75,12 +80,32 @@ const S = {
     alignItems: 'center',
     gap: 6,
   },
+  statusCaution: {
+    color: 'var(--cp-text-strong)',
+    fontWeight: 700,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    background: 'var(--cp-accent-soft)',
+    border: '1px solid var(--cp-accent)',
+    borderRadius: 'var(--cp-radius-md)',
+    padding: '3px 10px',
+    fontSize: 'var(--cp-font-sm)',
+  },
   dot: {
     display: 'inline-block',
     width: 8,
     height: 8,
     borderRadius: 'var(--cp-radius-pill)',
     background: 'var(--cp-accent-maroon)',
+    boxShadow: '0 0 0 3px var(--cp-accent-soft)',
+  },
+  dotCaution: {
+    display: 'inline-block',
+    width: 8,
+    height: 8,
+    borderRadius: 'var(--cp-radius-pill)',
+    background: 'var(--cp-accent)',
     boxShadow: '0 0 0 3px var(--cp-accent-soft)',
   },
   statusDim: { fontStyle: 'italic' },

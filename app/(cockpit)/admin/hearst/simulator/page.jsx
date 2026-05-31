@@ -215,8 +215,9 @@ export default function SimulatorPage() {
     else dispatch({ type: ACTIONS.SET_MW, value: val });
   }, [state.mode]);
 
+  // Returns the saved scenario id (string) on success, null on failure.
   async function handleSave() {
-    if (!projectId || !scenario) return;
+    if (!projectId || !scenario) return null;
     setSavingState('saving');
     try {
       const writable = {};
@@ -242,14 +243,36 @@ export default function SimulatorPage() {
         throw new Error(body.error || 'Save failed');
       }
       const data = await r.json();
-      setSavedScenarioId(data.scenario?.id || null);
+      const newId = data.scenario?.id || null;
+      setSavedScenarioId(newId);
       setSavingState('saved');
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => setSavingState('idle'), 2500);
+      return newId;
     } catch (e) {
       setSavingState('idle');
       alert(`Save failed: ${e.message}`);
+      return null;
     }
+  }
+
+  // Auto-saves if needed, then starts the memo job with a guaranteed scenarioId.
+  async function handleGenerateMemo() {
+    let scenarioId = savedScenarioId;
+    if (!scenarioId) {
+      scenarioId = await handleSave();
+      if (!scenarioId) {
+        // Save failed — do not orphan a memo
+        return;
+      }
+    }
+    startMemoJob({
+      payload: simResult,
+      title: 'Strategic Memo — Simulator scenario',
+      scenarioLabel: 'Simulator scenario',
+      scenarioId,
+      projectId,
+    });
   }
 
   function handleExportMd() {
@@ -367,6 +390,7 @@ export default function SimulatorPage() {
           <h2 style={S.sectionTitle}>Financial Projection</h2>
           <span style={S.sectionSubtitle}>Key numbers & 10-year projection</span>
         </header>
+        <ProjectionCaution projection={projection} solver={simResult?.solver} />
         <OutputKpiStrip projection={projection} />
         <div style={S.subsection}>
           <ProjectionChart years={projection?.years || []} />
@@ -416,18 +440,99 @@ export default function SimulatorPage() {
         savingState={savingState}
         onSave={handleSave}
         onExportMd={handleExportMd}
-        onGenerateMemo={() => startMemoJob({
-          payload: simResult,
-          title: 'Strategic Memo — Simulator scenario',
-          scenarioLabel: 'Simulator scenario',
-          scenarioId: savedScenarioId,
-          projectId,
-        })}
+        onGenerateMemo={handleGenerateMemo}
+        planCaution={!!(
+          projection?.warnings?.length ||
+          (simResult?.solver && simResult.solver.converged === false) ||
+          (projection?.capex_reconciliation && projection.capex_reconciliation.within_tolerance === false)
+        )}
       />
       {/* Modal/badge/toast mountés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
     </div>
   );
 }
+
+// ────────────────────────────────────────────────────────────
+// ProjectionCaution — surfaces warnings / solver non-convergence
+// Sources: projection.warnings[] (engine-deduped) + solver.converged
+// ────────────────────────────────────────────────────────────
+function ProjectionCaution({ projection, solver }) {
+  if (!projection) return null;
+
+  const warnings = Array.isArray(projection.warnings) ? projection.warnings : [];
+  const solverFailed = solver && solver.converged === false;
+
+  if (warnings.length === 0 && !solverFailed) return null;
+
+  return (
+    <div style={SC.box} role="alert" aria-label="Projection cautions">
+      <div style={SC.header}>
+        <span style={SC.icon}>⚠</span>
+        <span style={SC.label}>Caution</span>
+      </div>
+      {warnings.length > 0 && (
+        <ul style={SC.list}>
+          {warnings.map((w, i) => (
+            <li key={i} style={SC.item}>{w}</li>
+          ))}
+        </ul>
+      )}
+      {solverFailed && (
+        <div style={SC.solverRow}>
+          <strong>Target IRR not reached</strong> — figures below are the closest attempt, not a solved plan.
+          {solver.diagnostic ? <span style={SC.diagnostic}> {solver.diagnostic}</span> : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const SC = {
+  box: {
+    padding: 'var(--cp-space-3, 12px) var(--cp-space-4, 16px)',
+    background: 'var(--cp-accent-soft)',
+    border: '1px solid var(--cp-accent)',
+    borderRadius: 'var(--cp-radius-md, 10px)',
+    fontSize: 'var(--cp-font-sm)',
+    color: 'var(--cp-text-strong)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-2, 8px)',
+  },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-1, 4px)',
+  },
+  icon: {
+    fontSize: 14,
+    lineHeight: 1,
+  },
+  label: {
+    fontWeight: 800,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    fontSize: 'var(--cp-font-sm)',
+  },
+  list: {
+    margin: 0,
+    paddingLeft: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-1, 4px)',
+  },
+  item: {
+    lineHeight: '18px',
+  },
+  solverRow: {
+    lineHeight: '18px',
+    paddingLeft: 4,
+  },
+  diagnostic: {
+    fontStyle: 'italic',
+    opacity: 0.85,
+  },
+};
 
 // ────────────────────────────────────────────────────────────
 // Memo MD generator
