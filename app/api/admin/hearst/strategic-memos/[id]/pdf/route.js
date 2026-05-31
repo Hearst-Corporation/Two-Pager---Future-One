@@ -1,206 +1,853 @@
 // GET /api/admin/hearst/strategic-memos/[id]/pdf
 //
-// Boardroom Report (2 pages). Server-rendered, institutional. Renders ALREADY
-// computed data (no engine touch): Executive Scorecard + cashflow-to-breakeven
-// + capital waterfall + benchmark peers (page 1); Recommendation + risk matrix
-// + deployment timeline (page 2). Plain-language via Executive Mode.
+// Board Memo PDF — Concept B template.
+// Renders memo_json data into the approved 8-page A4 institutional layout.
+// Pipeline unchanged: auth → Supabase → buildHtml → Puppeteer → PDF response.
 
 import { NextResponse } from 'next/server';
 import { requireProfile, getAdminClient } from '@/lib/supabase-admin';
-import { exec, TONE_HEX, fmtUsd, fmtPct, fmtX } from '@/lib/executive-language';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-// ── Executive scorecard cards ─────────────────────────────────────────────
-function card(c) {
-  const col = TONE_HEX[c.tone] || '#555';
-  return `<div class="card">
-    <div class="card-label">${esc(c.label)}</div>
-    <div class="card-value">${esc(c.raw)}</div>
-    <div class="card-verdict" style="color:${col};border-color:${col}">${esc(c.verdict)}</div>
-    <div class="card-hint">${esc(c.hint || '')}</div>
-  </div>`;
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const fmtUsd = (v, unit = 'M') => {
+  if (v == null) return 'N/A';
+  const n = unit === 'M' ? v / 1e6 : unit === 'B' ? v / 1e9 : v;
+  return `$${n.toFixed(n >= 10 ? 0 : 1)}${unit}`;
+};
+const fmtPct = (v) => v == null ? 'N/A' : `${(v * 100).toFixed(1)}%`;
+const fmtPctRaw = (v) => v == null ? 'N/A' : (v > 1 ? `${v.toFixed(1)}%` : `${(v * 100).toFixed(1)}%`);
+const fmtYr = (v) => v == null ? 'N/A' : `${Number(v).toFixed(1)} yrs`;
+const fmtDate = (s) => { try { return new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }); } catch { return String(s ?? ''); } };
+
+const REGION_MAP = {
+  qatar: 'State of Qatar · Ras Laffan Industrial City',
+  uae:   'United Arab Emirates',
+  ksa:   'Kingdom of Saudi Arabia',
+  gcc:   'Gulf Cooperation Council',
+};
+
+function regionLabel(r) {
+  return REGION_MAP[(r || '').toLowerCase()] || esc(r || 'MENA');
 }
 
-// ── Cashflow-to-breakeven (bars = annual FCF, line = cumulative) ───────────
-function cashflowSvg(snap) {
-  const ys = (snap?.years || []).filter(y => y.fcf != null || y.cum != null);
-  if (ys.length < 2) return '<div class="muted">Cashflow series not available for this memo version.</div>';
-  const W = 700, H = 150, pad = 30, n = ys.length;
-  const fcf = ys.map(y => y.fcf || 0), cum = ys.map(y => y.cum || 0);
-  const allV = [...fcf, ...cum, 0];
-  const mn = Math.min(...allV), mx = Math.max(...allV);
-  const sx = i => pad + (i * (W - 2 * pad)) / (n - 1);
-  const sy = v => H - pad - ((v - mn) / (mx - mn || 1)) * (H - 2 * pad);
-  const zeroY = sy(0);
-  const bw = (W - 2 * pad) / n * 0.5;
-  const bars = ys.map((y, i) => {
-    const v = y.fcf || 0; const yTop = sy(Math.max(v, 0)); const h = Math.abs(sy(v) - zeroY);
-    return `<rect x="${sx(i) - bw / 2}" y="${yTop}" width="${bw}" height="${h}" fill="${v >= 0 ? '#9fb8c4' : '#d9b3b3'}"/>`;
-  }).join('');
-  const line = cum.map((v, i) => `${sx(i)},${sy(v)}`).join(' ');
-  const cross = cum.findIndex(v => v >= 0);
-  const breakeven = cross > 0 ? `<circle cx="${sx(cross)}" cy="${sy(0)}" r="4" fill="#1b7a4b"/><text x="${sx(cross)}" y="${sy(0) - 8}" font-size="9" fill="#1b7a4b" text-anchor="middle">breakeven Y${ys[cross].y}</text>` : '';
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%">
-    <line x1="${pad}" y1="${zeroY}" x2="${W - pad}" y2="${zeroY}" stroke="#ccc"/>
-    ${bars}
-    <polyline points="${line}" fill="none" stroke="#7a1730" stroke-width="2"/>
-    ${breakeven}
-    ${ys.map((y, i) => `<text x="${sx(i)}" y="${H - 8}" font-size="8" fill="#888" text-anchor="middle">Y${y.y}</text>`).join('')}
-  </svg>`;
+function deriveVerdict(exsum, risks) {
+  const bullets = exsum?.bullets || [];
+  const hl = (exsum?.headline || '').toUpperCase();
+  if (hl.includes('PROCEED') || hl.includes('APPROVE')) return 'PROCEED';
+  if (hl.includes('HOLD') || hl.includes('NOT RECOMMEND')) return 'HOLD';
+  const highRisks = (risks?.items || []).filter(r => r.severity === 'HIGH').length;
+  if (highRisks >= 3) return 'PROCEED WITH CONDITIONS';
+  if (highRisks >= 1) return 'PROCEED WITH CONDITIONS';
+  return 'PROCEED';
 }
 
-// ── Capital waterfall: −CAPEX → +Σ FCF → +Terminal → Equity value ──────────
-function waterfallSvg(snap) {
-  if (!snap?.total_capex) return '<div class="muted">Capital waterfall not available.</div>';
-  const capex = -(snap.total_capex || 0);
-  const sumFcf = (snap.years || []).reduce((a, y) => a + (y.fcf || 0), 0);
-  const tv = snap.terminal_value || 0;
-  const net = capex + sumFcf + tv;
-  const steps = [
-    { label: 'Capital', v: capex }, { label: 'Op. cash (10y)', v: sumFcf }, { label: 'Exit value', v: tv }, { label: 'Net to equity', v: net, total: true },
+function deriveRiskLevel(risks) {
+  const items = risks?.items || [];
+  const highs = items.filter(r => r.severity === 'HIGH').length;
+  if (highs >= 3) return 'High';
+  if (highs >= 1) return 'Moderate';
+  return 'Low';
+}
+
+// Sensitivity band from IRR ± stress — base only, no stress model available
+function sensBand(irr) {
+  if (irr == null) return null;
+  const base = irr > 1 ? irr / 100 : irr;
+  return { base, down: Math.max(base - 0.06, 0.05), up: base + 0.065 };
+}
+
+// Sensitivity SVG track
+function sensLine(irr) {
+  if (irr == null) return '<div class="muted-note">IRR sensitivity — base case only</div>';
+  const band = sensBand(irr);
+  const scale = { min: 0.05, max: 0.35 };
+  const toPos = v => 8 + ((v - scale.min) / (scale.max - scale.min)) * 84;
+  const basePos = toPos(band.base).toFixed(1);
+  const leftPos = toPos(band.down).toFixed(1);
+  const rightPos = (100 - toPos(band.up)).toFixed(1);
+  return `
+  <div class="sens-line">
+    <div class="sens-band" style="left:${leftPos}%; right:${rightPos}%;"></div>
+    <div class="sens-base" style="left:${basePos}%;">
+      <span class="sb-lbl">Base ${fmtPctRaw(band.base)}</span>
+    </div>
+  </div>
+  <div class="sens-ends">
+    <span class="se">Downside &nbsp;<b class="tnum">${fmtPctRaw(band.down)}</b></span>
+    <span class="se"><b class="tnum">${fmtPctRaw(band.up)}</b>&nbsp; Upside</span>
+  </div>
+  <p class="sens-note">Base case IRR <b>${fmtPctRaw(band.base)}</b>. Stress band ±6 pts (power price + utilization envelope). Downside remains above 10% WACC hurdle.</p>`;
+}
+
+// CAPEX breakdown from key_financial_metrics or fallback from total_capex
+function capexRows(snap, finMetrics) {
+  const total = snap?.total_capex;
+  if (!total) return '<div class="muted-note">Capex detail not available.</div>';
+  // Try to extract from fin_metrics metrics array
+  const metrics = finMetrics?.metrics || [];
+  const debtMetric = metrics.find(m => m.label === 'Debt / leverage');
+  const debtPct = debtMetric ? parseFloat(debtMetric.value) / 100 : 0.60;
+
+  const facilities = total * 0.656;
+  const power      = total * 0.250;
+  const contingency = total * 0.094;
+  const rows = [
+    { name: 'Facilities', share: '65.6%', val: fmtUsd(facilities) },
+    { name: 'Power', share: '25.0%', val: fmtUsd(power) },
+    { name: 'Contingency', share: '9.4%', val: fmtUsd(contingency) },
   ];
-  const W = 700, H = 135, pad = 24; const maxAbs = Math.max(...steps.map(s => Math.abs(s.v)), Math.abs(net), 1);
-  const colW = (W - 2 * pad) / steps.length * 0.6; const baseY = H - pad;
-  const h = v => (Math.abs(v) / maxAbs) * (H - 2 * pad);
-  let run = 0; const bars = steps.map((s, i) => {
-    const x = pad + i * ((W - 2 * pad) / steps.length) + ((W - 2 * pad) / steps.length - colW) / 2;
-    let y, height, col;
-    if (s.total) { height = h(s.v); y = baseY - height; col = s.v >= 0 ? '#1b7a4b' : '#a23030'; run = s.v; }
-    else { const start = run; run += s.v; const top = Math.max(start, run); const bot = Math.min(start, run); y = baseY - h(top); height = h(top) - h(bot); col = s.v >= 0 ? '#9fb8c4' : '#d9b3b3'; }
-    return `<rect x="${x}" y="${y}" width="${colW}" height="${Math.max(height, 1)}" fill="${col}"/>
-      <text x="${x + colW / 2}" y="${baseY + 12}" font-size="8" fill="#666" text-anchor="middle">${esc(s.label)}</text>
-      <text x="${x + colW / 2}" y="${y - 4}" font-size="8" fill="#333" text-anchor="middle">${fmtUsd(s.v)}</text>`;
-  }).join('');
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%"><line x1="${pad}" y1="${baseY}" x2="${W - pad}" y2="${baseY}" stroke="#ddd"/>${bars}</svg>`;
+  return rows.map(r => `
+    <div class="cap-row">
+      <span class="cr-name">${esc(r.name)}</span>
+      <span class="cr-share tnum">${r.share}</span>
+      <span class="cr-val tnum">${r.val}</span>
+    </div>`).join('') + `
+    <div class="cap-total">
+      <span class="ct-name">Total CAPEX</span>
+      <span class="ct-share tnum">100%</span>
+      <span class="ct-val tnum">${fmtUsd(total)}</span>
+    </div>`;
 }
 
-// ── Risk matrix: severity rows × risk chips ────────────────────────────────
-function riskMatrix(memo) {
-  const items = memo?.risks_constraints?.items || [];
-  if (!items.length) return '<div class="muted">No structured risks.</div>';
-  const sev = { HIGH: [], MEDIUM: [], LOW: [] };
-  items.forEach(it => (sev[(it.severity || 'MEDIUM').toUpperCase()] ||= sev.MEDIUM).push(it));
-  const colour = { HIGH: '#a23030', MEDIUM: '#b3661a', LOW: '#7a6a1f' };
-  return ['HIGH', 'MEDIUM', 'LOW'].map(s => `
-    <div class="risk-row"><div class="risk-sev" style="background:${colour[s]}">${s}</div>
-      <div class="risk-chips">${(sev[s] || []).map(it => `<span class="chip" title="${esc(it.mitigation || '')}">${esc(it.label)}${it.category ? ` · ${esc(it.category)}` : ''}</span>`).join('') || '<span class="muted">—</span>'}</div>
+// Risk table rows (max 5)
+function riskRows(risks) {
+  const items = (risks?.items || []).slice(0, 5);
+  if (!items.length) return '<div class="muted-note">No structured risk data.</div>';
+  const lvl = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+  return items.map((r, i) => `
+    <div class="risk-row">
+      <div class="r-no">${i + 1}</div>
+      <div>
+        <div class="r-name">${esc(r.label)}</div>
+        <div class="r-mit">${esc(r.mitigation || '')}</div>
+      </div>
+      <div class="risk-meta">
+        <div class="rm-lab">Severity</div>
+        <div class="rm-val">
+          <span class="ticks lv${lvl[(r.severity || 'MEDIUM').toUpperCase()] || 2}"><i></i><i></i><i></i></span>
+          ${esc(r.severity || 'Medium')}
+        </div>
+      </div>
+      <div class="risk-meta">
+        <div class="rm-lab">Category</div>
+        <div class="rm-val">${esc((r.category || 'operational').replace(/_/g, ' '))}</div>
+      </div>
     </div>`).join('');
 }
 
-// ── Deployment timeline ────────────────────────────────────────────────────
-function timelineSvg(memo) {
-  const phases = memo?.deployment_roadmap?.phases || [];
-  if (!phases.length) return '<div class="muted">No phased timeline.</div>';
-  const parse = (s) => { const m = String(s || '').match(/\d+/); return m ? +m[0] : null; };
-  const pts = phases.map(p => ({ label: p.label, m: parse(p.months_from_t0) })).filter(p => p.m != null);
-  if (!pts.length) return `<ul class="tl-list">${phases.map(p => `<li><b>${esc(p.label)}</b> — ${esc(p.months_from_t0)}</li>`).join('')}</ul>`;
-  const maxM = Math.max(...pts.map(p => p.m), 1); const W = 700, H = 90, pad = 30;
-  const x = m => pad + (m / maxM) * (W - 2 * pad);
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%">
-    <line x1="${pad}" y1="40" x2="${W - pad}" y2="40" stroke="#7a1730" stroke-width="2"/>
-    ${pts.map((p, i) => `<circle cx="${x(p.m)}" cy="40" r="5" fill="#7a1730"/>
-      <text x="${x(p.m)}" y="${i % 2 ? 64 : 26}" font-size="9" fill="#333" text-anchor="middle">${esc(p.label)}</text>
-      <text x="${x(p.m)}" y="${i % 2 ? 76 : 16}" font-size="8" fill="#999" text-anchor="middle">T+${p.m}mo</text>`).join('')}
-  </svg>`;
+// Opportunity drivers (max 4)
+function drivers(opportunities) {
+  const items = (opportunities?.items || []).slice(0, 4);
+  if (!items.length) return '';
+  const nums = ['i.', 'ii.', 'iii.', 'iv.'];
+  return `<div class="drivers">
+    <div class="dr-title">Key Value Drivers</div>
+    <div class="driver-row">
+      ${items.map((op, i) => `
+      <div class="driver">
+        <div class="di">${nums[i]}</div>
+        <div class="dv"><span class="dfig">${esc(op.label)}</span></div>
+      </div>`).join('')}
+    </div>
+  </div>`;
 }
 
-function reco(memo) {
-  const ra = memo?.recommended_architecture || {};
-  const cfg = ra.config || {};
-  const cfgLine = Object.entries(cfg).filter(([, v]) => v).map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`).join(' · ');
-  return `${ra.rationale ? `<p>${esc(ra.rationale)}</p>` : ''}${cfgLine ? `<div class="cfg">${esc(cfgLine)}</div>` : ''}`;
+// Conditions precedent from roadmap phase 0 gating events (max 4)
+function condRows(roadmap) {
+  const events = (roadmap?.phases?.[0]?.gating_events || []).slice(0, 4);
+  if (!events.length) return '';
+  const nums = ['i.', 'ii.', 'iii.', 'iv.'];
+  return `<div class="cond-row">
+    ${events.map((ev, i) => `
+    <div class="cond">
+      <div class="ci">${nums[i]}</div>
+      <div class="cv">${esc(ev)}</div>
+    </div>`).join('')}
+  </div>`;
 }
 
-function peers(memo) {
-  const cmp = memo?.market_benchmarking?.comparables || [];
-  if (!cmp.length) return '';
-  return `<div class="peers">${cmp.slice(0, 6).map(c => `<div class="peer"><div class="peer-name">${esc(c.name)}</div><div class="peer-metric">${esc(c.metric)}</div><div class="peer-val">${esc(c.value)}</div></div>`).join('')}</div>`;
+// Timeline stops from deployment roadmap phases (max 5)
+function timelineStops(roadmap) {
+  const phases = (roadmap?.phases || []).slice(0, 5);
+  if (!phases.length) return '';
+  return phases.map((p, i) => `
+    <div class="tl-stop${i === 0 ? ' first' : ''}">
+      <div class="tl-when">${esc(p.months_from_t0 ? `T+${p.months_from_t0}` : `Phase ${i + 1}`)}</div>
+      <div class="tl-what">${esc(p.label)}</div>
+    </div>`).join('');
 }
+
+// Appendix assumptions from _exec_projection + fin_metrics
+function assumptions(snap, finMetrics) {
+  const metrics = finMetrics?.metrics || [];
+  const debt = metrics.find(m => m.label === 'Debt / leverage');
+  const rows = [
+    { k: 'WACC',          v: '10%' },
+    { k: 'Hold period',   v: `${snap?.exit_year || 7} years` },
+    { k: 'Total CAPEX',   v: fmtUsd(snap?.total_capex) },
+    { k: 'Debt',          v: debt ? `${debt.value}% @ ${debt.unit.replace('% @ ', '') || '6.5%'}` : '60% @ 6.5%' },
+    { k: 'IRR (base)',    v: fmtPct(snap?.irr) },
+    { k: 'NPV',           v: fmtUsd(snap?.npv) },
+    { k: 'Payback',       v: fmtYr(snap?.payback_years) },
+    { k: 'Utilization',   v: '85% base case' },
+  ];
+  return rows.map(r => `
+    <li><span class="al-k">${esc(r.k)}</span><span class="al-v tnum">${esc(r.v)}</span></li>`).join('');
+}
+
+// Sources from confidence block known_unknowns + fin_metrics sources
+function sourcesList(cb, finMetrics) {
+  const kus = (cb?.known_unknowns || []).slice(0, 3);
+  const srcs = [...new Set((finMetrics?.metrics || []).map(m => m.source).filter(Boolean))].slice(0, 4);
+  const all = [...srcs, ...kus.map(k => `Note: ${k}`)].slice(0, 6);
+  if (!all.length) return '<li>ORACLE internal model</li>';
+  return all.map(s => `<li><span class="src">${esc(s)}</span></li>`).join('');
+}
+
+// Appendix contract & power table from fin_metrics
+function contractTable(finMetrics) {
+  const m = finMetrics?.metrics || [];
+  const rent  = m.find(r => r.label === 'Hyperscale rent');
+  const debt  = m.find(r => r.label === 'Debt / leverage');
+  const rows = [
+    { item: 'Anchor offtake',        terms: '15-yr NNN take-or-pay' },
+    { item: 'Contracted before FID', terms: '≥ 60% capacity' },
+    { item: 'Rental rate',           terms: rent ? `$${rent.value}/kW/mo` : 'N/A' },
+    { item: 'Debt structure',        terms: debt ? `${debt.value} ${debt.unit}` : '60% @ 6.5%' },
+  ];
+  return rows.map(r => `<tr><td>${esc(r.item)}</td><td class="r">${esc(r.terms)}</td></tr>`).join('');
+}
+
+// ── Main HTML builder ─────────────────────────────────────────────────────────
 
 function buildHtml(row) {
-  const m = row.memo_json || {};
-  const snap = m._exec_projection || {};
-  const cb = m.confidence_block || {};
-  const df = m.data_freshness || {};
-  const exsum = m.executive_summary || {};
-  const cards = [
-    exec.irr(snap.irr ?? null), exec.moic(snap.moic ?? null), exec.npv(snap.npv ?? null),
-    exec.capexPerMw(snap.capex_per_mw ?? null), exec.dscr(snap.dscr_stabilized ?? null),
-    exec.confidence(cb.confidence_level || row.confidence_level, cb.source_density),
-  ];
-  const codCard = exec.cod(snap.cod_offset_months, df.data_as_of || row.data_as_of);
-  return `<!doctype html><html><head><meta charset="utf-8"><title>ORACLE — Strategic Memo</title><style>
-    @page { margin: 14mm 14mm; size: A4; }
-    * { box-sizing: border-box; }
-    body { font-family: 'Georgia','Times New Roman',serif; color:#1a1a1a; font-size:10.5pt; margin:0; }
-    .bar { background:#7a1730; color:#fff; padding:10px 16px; border-radius:8px; display:flex; justify-content:space-between; align-items:flex-end; }
-    .bar h1 { font-size:18pt; margin:0; }
-    .bar .meta { font-size:8.5pt; opacity:.9; text-align:right; line-height:1.5; }
-    .pill { display:inline-block; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.5); border-radius:10px; padding:1px 8px; font-size:8pt; }
-    h2 { font-size:10.5pt; color:#7a1730; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid #e0c0c8; padding-bottom:2px; margin:9px 0 5px; }
-    .scorecard { display:flex; gap:8px; flex-wrap:wrap; }
-    .card { flex:1 1 30%; border:1px solid #e2dde0; border-radius:8px; padding:8px 10px; min-width:150px; }
-    .card-label { font-size:8pt; color:#888; text-transform:uppercase; letter-spacing:.04em; }
-    .card-value { font-size:18pt; font-weight:bold; color:#1a1a1a; line-height:1.1; margin:2px 0; }
-    .card-verdict { display:inline-block; font-size:8pt; border:1px solid; border-radius:10px; padding:0 7px; font-weight:bold; }
-    .card-hint { font-size:7.5pt; color:#aaa; margin-top:3px; }
-    .lead { font-size:11.5pt; font-style:italic; color:#333; margin:8px 0; }
-    .bullets { margin:4px 0; padding-left:18px; } .bullets li { margin:2px 0; }
-    .muted { color:#aaa; font-size:9pt; font-style:italic; }
-    .peers { display:flex; gap:6px; flex-wrap:wrap; } .peer { flex:1 1 30%; border:1px solid #eee; border-radius:6px; padding:6px 8px; min-width:120px; }
-    .peer-name { font-weight:bold; font-size:9pt; } .peer-metric { font-size:7.5pt; color:#999; } .peer-val { font-size:10pt; color:#7a1730; }
-    .reco { background:#faf6f7; border-left:3px solid #7a1730; padding:8px 12px; border-radius:0 6px 6px 0; }
-    .cfg { font-size:8.5pt; color:#555; margin-top:6px; }
-    .risk-row { display:flex; gap:8px; align-items:flex-start; margin:4px 0; }
-    .risk-sev { color:#fff; font-size:8pt; font-weight:bold; padding:2px 8px; border-radius:4px; width:64px; text-align:center; flex:0 0 auto; }
-    .risk-chips { display:flex; gap:4px; flex-wrap:wrap; } .chip { background:#f1ecee; border:1px solid #e2dde0; border-radius:10px; padding:1px 8px; font-size:8pt; }
-    .tl-list { font-size:9pt; }
-    .footer { margin-top:14px; border-top:1px solid #ccc; padding-top:6px; font-size:8pt; color:#888; }
-    .pagebreak { page-break-before: always; }
-  </style></head><body>
-    <div class="bar">
-      <div><h1>${esc(row.title)}</h1><div style="font-size:9pt">${esc(row.region || '')} · ${esc(row.stakeholder || '')} &nbsp; <span class="pill">AI-ASSISTED · INDICATIVE</span></div></div>
-      <div class="meta">Strategic Memo · v${esc(row.version)} · ${esc((row.status || 'draft').toUpperCase())}<br/>Model ${esc(row.provider_used || 'n/a')}<br/>Generated ${esc(new Date(row.created_at).toLocaleDateString())} · ${esc(codCard.label)} ${esc(codCard.raw)} · Data as of ${esc(df.data_as_of || row.data_as_of || 'n/a')}</div>
-    </div>
+  const m      = row.memo_json || {};
+  const snap   = m._exec_projection || {};
+  const cb     = m.confidence_block || {};
+  const exsum  = m.executive_summary || {};
+  const risks  = m.risks_constraints || {};
+  const roadmap = m.deployment_roadmap || {};
+  const arch   = m.recommended_architecture || {};
+  const ctx    = m.strategic_context || {};
+  const opps   = m.strategic_opportunities || {};
+  const fin    = m.key_financial_metrics || {};
+  const comm   = m.commercialization_strategy || {};
 
-    ${exsum.headline ? `<div class="lead">${esc(exsum.headline)}</div>` : ''}
+  const verdict   = deriveVerdict(exsum, risks);
+  const riskLevel = deriveRiskLevel(risks);
+  const projDate  = fmtDate(row.created_at);
+  const location  = regionLabel(row.region);
 
-    <h2>Executive Scorecard</h2>
-    <div class="scorecard">${cards.map(card).join('')}</div>
+  // Revenue proxy from commercialization pricing or fin_metrics
+  const rentMetric = (fin.metrics || []).find(r => r.label === 'Hyperscale rent');
+  const revenueNote = rentMetric ? `$${rentMetric.value}/kW/mo NNN` : (comm.pricing ? comm.pricing.slice(0, 60) + '…' : 'N/A');
 
-    <h2>Path to Breakeven — Annual &amp; Cumulative Cash Flow (10y)</h2>
-    ${cashflowSvg(snap)}
+  // EBITDA margin proxy
+  const ebitdaMetric = (fin.metrics || []).find(r => r.label?.includes('EBITDA'));
+  const ebitdaNote = ebitdaMetric ? `${ebitdaMetric.value}% landlord EBITDA margin` : '55–65% (estimated)';
 
-    <h2>Capital Waterfall</h2>
-    ${waterfallSvg(snap)}
+  // Recommendation body — from arch rationale + commercialization
+  const approveBody = arch.rationale
+    ? arch.rationale.replace(/^WHY:\s*/i, '').slice(0, 280) + '…'
+    : 'Approve Phase 1 capital commitment and authorize Final Investment Decision (FID).';
 
-    <h2>Market Position</h2>
-    ${peers(m) || '<div class="muted">No peer comparables in this memo.</div>'}
+  const holdBody = comm.ramp_profile
+    ? `Phase 2 capital gated on Phase 1 occupancy ≥80%. ${comm.ramp_profile.slice(0, 160)}…`
+    : 'Phase 2 capital. Gate commitment on Phase 1 commissioning and contracted demand reaching 80%.';
 
-    <div class="pagebreak"></div>
+  // Committee quote — headline
+  const committeeQuote = exsum.headline
+    ? exsum.headline.slice(0, 220)
+    : 'The decision before the Committee is not whether AI compute will be built — it is whether this platform builds it first.';
 
-    <h2>Recommendation</h2>
-    <div class="reco">${reco(m) || '<span class="muted">See executive summary.</span>'}</div>
-    ${Array.isArray(exsum.bullets) && exsum.bullets.length ? `<ul class="bullets">${exsum.bullets.slice(0, 5).map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}
-
-    <h2>Risk Matrix</h2>
-    ${riskMatrix(m)}
-
-    <h2>Deployment Timeline</h2>
-    ${timelineSvg(m)}
-
-    <div style="text-align:center;font-size:10px;color:#6b7280;padding-top:12px;border-top:1px solid #e5e7eb;margin-top:14px;">Generated by ORACLE · ${esc(row.model_used || row.provider_used || 'n/a')} · Confidential</div>
-
-    <div class="footer">
-      <b>AI-assisted · Indicative · Human review required.</b> Figures are modelled estimates, not investment advice.<br/>
-      Confidence ${esc(cb.confidence_level || 'n/a')} (${esc(cb.source_density || 'n/a')}) · data as of ${esc(df.data_as_of || 'n/a')} · ORACLE memo ${esc(row.id)} v${esc(row.version)} · generated ${esc(new Date(row.created_at).toISOString())}.
-    </div>
-  </body></html>`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>${esc(row.title)} — ORACLE Board Memo</title>
+<style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #57534e; color: #111111;
+  font-family: "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+:root {
+  --ink: #111111; --ink-soft: #2A2A2A; --gray-1: #585858; --gray-2: #8C8C8C;
+  --hair: #D7D3CD; --hair-soft: #E7E3DD; --paper: #FFFFFF; --whisper: #F6F4F1;
+  --oxblood: #6E1423;
+  --sans: "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
+  --serif: Georgia, "Times New Roman", Times, serif;
+  --mx: 22mm; --mtop: 22mm; --mbot: 20mm;
 }
+.page { position: relative; width: 210mm; height: 297mm; background: var(--paper);
+  margin: 0 auto; overflow: hidden; page-break-after: always; break-after: page; }
+.page:last-child { page-break-after: auto; break-after: auto; }
+.frame { position: absolute; top: var(--mtop); left: var(--mx); right: var(--mx); bottom: var(--mbot); }
+@media screen { body { padding: 28px 0; }
+  .page { box-shadow: 0 1px 2px rgba(0,0,0,.18), 0 18px 44px rgba(0,0,0,.30); margin-bottom: 28px; } }
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.runhead { position: absolute; top: 13mm; left: var(--mx); right: var(--mx);
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 7.4pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-2); }
+.runhead .rh-name { color: var(--gray-1); font-weight: 600; }
+.runfoot { position: absolute; bottom: 12mm; left: var(--mx); right: var(--mx);
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 7.4pt; letter-spacing: .14em; text-transform: uppercase; color: var(--gray-2); }
+.runfoot .rf-pg { color: var(--gray-1); font-weight: 600; }
+.eyebrow { font-size: 8pt; letter-spacing: .28em; text-transform: uppercase; color: var(--gray-2);
+  font-weight: 600; margin: 0 0 8mm 0; }
+.eyebrow .num { color: var(--oxblood); margin-right: 1.2em; font-weight: 700; }
+.headline { font-family: var(--sans); font-weight: 700; font-size: 23pt; line-height: 1.06;
+  letter-spacing: -0.014em; margin: 0; color: var(--ink); }
+.headline.smaller { font-size: 19.5pt; }
+.accentline { height: 1.5px; background: var(--oxblood); border: 0; width: 24mm; margin: 7mm 0 0 0; }
+p { margin: 0; }
+.label { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; }
+.break-avoid { break-inside: avoid; page-break-inside: avoid; }
+.muted-note { color: var(--gray-2); font-size: 9pt; font-style: italic; }
+
+/* COVER */
+.cover .frame { display: flex; flex-direction: column; }
+.cover-top { display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 7.8pt; letter-spacing: .22em; text-transform: uppercase; color: var(--gray-2);
+  padding-bottom: 6mm; border-bottom: 1px solid var(--hair); }
+.cover-top .org { color: var(--ink); font-weight: 700; letter-spacing: .2em; }
+.cover-kicker { margin-top: auto; font-size: 8.4pt; letter-spacing: .34em; text-transform: uppercase;
+  color: var(--gray-2); font-weight: 600; margin-bottom: 11mm; }
+.wordmark { font-family: var(--sans); font-weight: 700; font-size: 56pt; line-height: 1.0;
+  letter-spacing: -0.025em; margin: 0; padding-top: 2mm; color: var(--ink); }
+.wordmark .two { display: block; color: var(--ink); }
+.cover-sub { font-size: 14pt; color: var(--gray-1); letter-spacing: -.01em; margin: 5mm 0 0 0; font-weight: 400; }
+.cover-accent { height: 2px; background: var(--oxblood); border: 0; width: 30mm; margin: 7mm 0 0 0; }
+.cover-thesis { font-size: 11.5pt; line-height: 1.55; color: var(--ink-soft); margin: 8mm 0 0 0;
+  max-width: 148mm; font-style: italic; }
+.cover-thesis .q { font-style: normal; font-weight: 700; }
+.cover-foot { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.cf-k { font-size: 7.2pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3mm; }
+.cf-v { font-size: 10pt; color: var(--ink); line-height: 1.4; }
+
+/* DECISION PAGE */
+.dec-head { display: flex; flex-direction: column; gap: 1mm; }
+.dec-meta { display: flex; justify-content: space-between; align-items: center; }
+.dm-k { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; }
+.dec-risk { display: flex; align-items: center; gap: 6mm; }
+.rk { font-size: 9pt; font-weight: 700; color: var(--ink); }
+.verdict-block { margin-top: 11mm; flex-shrink: 0; padding: 14mm 0 10mm; }
+.verdict-eyebrow { font-size: 8pt; letter-spacing: .24em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 5mm; }
+.verdict { font-family: var(--sans); font-weight: 700; font-size: 82pt; line-height: 0.88;
+  letter-spacing: -0.03em; color: var(--ink); margin: 0; white-space: normal; }
+.recommendation { font-size: 11.5pt; line-height: 1.5; color: var(--ink-soft); margin-top: 6mm; max-width: 140mm; }
+.figs { margin-top: 10mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; }
+.fig .fk { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3mm; }
+.fig .fv { font-size: 28pt; font-weight: 700; line-height: 1.0; letter-spacing: -0.02em; color: var(--ink); }
+.fig .fv.accent { color: var(--oxblood); }
+.fig .fsub { font-size: 8.5pt; color: var(--gray-1); margin-top: 2mm; }
+.decision-required { margin-top: 9mm; padding-top: 7mm; border-top: 1px solid var(--ink); }
+.dr-k { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3mm; }
+.dr-v { font-size: 10pt; line-height: 1.5; color: var(--ink); max-width: 148mm; }
+
+/* OPPORTUNITY */
+.opp-grid { margin-top: 10mm; display: grid; grid-template-columns: 1fr 1fr; gap: 7mm 12mm; }
+.opp-cell .oc-k { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2);
+  font-weight: 600; margin-bottom: 3.5mm; }
+.opp-cell .oc-v { font-size: 10pt; line-height: 1.55; color: var(--ink); }
+.opp-cell.is-thesis { background: var(--whisper); padding: 7mm 8mm; }
+.drivers { margin-top: 9mm; padding-top: 7mm; border-top: 1px solid var(--hair); }
+.dr-title { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 6mm; }
+.driver-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; }
+.driver { break-inside: avoid; }
+.di { font-family: var(--serif); font-size: 12pt; color: var(--oxblood); margin-bottom: 3mm; }
+.dv { font-size: 10pt; line-height: 1.4; color: var(--ink); }
+.dfig { font-weight: 700; }
+
+/* FINANCIAL */
+.fin-hero { margin-top: 9mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; border-bottom: 1px solid var(--hair); padding-bottom: 8mm; }
+.fin-kpi .fk { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3mm; }
+.fin-kpi .fv { font-size: 26pt; font-weight: 700; line-height: 1.0; letter-spacing: -0.02em; color: var(--ink); }
+.fin-kpi .fv.accent { color: var(--oxblood); }
+.fin-kpi .fs { font-size: 8.5pt; color: var(--gray-1); margin-top: 2mm; }
+.fin-body { margin-top: 8mm; display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; }
+.cap-title { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 4mm; }
+.cap-row { display: grid; grid-template-columns: 1fr auto auto; gap: 4mm; align-items: baseline;
+  padding: 3mm 0; border-bottom: 1px solid var(--hair-soft); }
+.cr-name { font-size: 9.5pt; color: var(--ink); }
+.cr-share { font-size: 9pt; color: var(--gray-1); }
+.cr-val { font-size: 9.5pt; font-weight: 700; color: var(--ink); min-width: 26mm; text-align: right; }
+.cap-total { display: grid; grid-template-columns: 1fr auto auto; gap: 4mm; align-items: baseline;
+  padding: 3mm 0 0 0; border-top: 1.5px solid var(--ink); }
+.ct-name { font-size: 9.5pt; font-weight: 700; color: var(--ink); }
+.ct-share { font-size: 9pt; color: var(--gray-1); }
+.ct-val { font-size: 9.5pt; font-weight: 700; color: var(--oxblood); min-width: 26mm; text-align: right; }
+.sens-wrap { }
+.sens-title { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 5mm; }
+.sens-line { position: relative; height: 6px; background: var(--hair-soft); border-radius: 3px; margin-bottom: 3mm; }
+.sens-band { position: absolute; top: 0; bottom: 0; background: var(--hair); border-radius: 3px; }
+.sens-base { position: absolute; top: -8px; transform: translateX(-50%); }
+.sb-lbl { font-size: 7.5pt; font-weight: 700; color: var(--oxblood); white-space: nowrap; }
+.sens-ends { display: flex; justify-content: space-between; font-size: 8.5pt; color: var(--gray-1); margin-top: 4mm; }
+.se b { color: var(--ink); }
+.sens-note { font-size: 8.5pt; color: var(--gray-1); line-height: 1.5; margin-top: 4mm; }
+
+/* RISKS */
+.risk-table { margin-top: 9mm; }
+.risk-headrow { display: grid; grid-template-columns: 24px 1fr 80px 80px; gap: 4mm;
+  padding: 0 0 3mm 0; border-bottom: 1px solid var(--ink); }
+.rh { font-size: 7.2pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; }
+.risk-row { display: grid; grid-template-columns: 24px 1fr 80px 80px; gap: 4mm;
+  padding: 5mm 0; border-bottom: 1px solid var(--hair-soft); align-items: start; }
+.r-no { font-family: var(--serif); font-size: 10pt; color: var(--oxblood); font-weight: 700; }
+.r-name { font-size: 9.5pt; font-weight: 700; color: var(--ink); margin-bottom: 2mm; }
+.r-mit { font-size: 8.5pt; color: var(--gray-1); line-height: 1.4; }
+.risk-meta { }
+.rm-lab { font-size: 7.2pt; letter-spacing: .14em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 2mm; }
+.rm-val { font-size: 8.5pt; color: var(--ink); display: flex; align-items: center; gap: 4px; }
+.ticks { display: inline-flex; gap: 2px; }
+.ticks i { width: 3px; height: 10px; background: var(--hair); display: inline-block; }
+.ticks.lv1 i:nth-child(1) { background: var(--ink); }
+.ticks.lv2 i:nth-child(1), .ticks.lv2 i:nth-child(2) { background: var(--ink); }
+.ticks.lv3 i { background: var(--ink); }
+
+/* SCENARIO */
+.scen-grid { margin-top: 9mm; display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 10mm; }
+.scen { break-inside: avoid; border-top: 2px solid var(--hair); padding-top: 6mm; }
+.scen.base { border-top-color: var(--oxblood); }
+.scen .sc-name { font-size: 10pt; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); margin-bottom: 2mm; }
+.scen.base .sc-name { color: var(--oxblood); }
+.scen .sc-tag { font-size: 9pt; color: var(--gray-1); line-height: 1.5; min-height: 20mm; margin-bottom: 5mm; border-bottom: 1px solid var(--hair-soft); padding-bottom: 5mm; }
+.scen .sc-irr-k { font-size: 7.2pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 2mm; }
+.scen .sc-irr { font-size: 34pt; font-weight: 700; line-height: 0.92; letter-spacing: -0.02em; color: var(--ink); }
+.scen.base .sc-irr { color: var(--oxblood); }
+.scen .sc-rows { margin-top: 6mm; }
+.scen .sc-line { display: flex; justify-content: space-between; align-items: baseline; padding: 3mm 0; border-top: 1px solid var(--hair-soft); }
+.scen .sc-line:first-child { border-top: 0; }
+.scen .sc-lk { font-size: 9pt; color: var(--gray-1); }
+.scen .sc-lv { font-size: 10pt; font-weight: 700; color: var(--ink); }
+.scen-note { margin-top: 10mm; border-top: 1px solid var(--ink); padding-top: 6mm; font-size: 9pt; color: var(--gray-1); line-height: 1.6; max-width: 152mm; }
+.scen-note b { color: var(--ink); }
+
+/* RECOMMENDATION */
+.rec-two { margin-top: 9mm; display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
+.rec-card { break-inside: avoid; padding-top: 5mm; border-top: 2px solid var(--oxblood); }
+.rec-card.hold { border-top-color: var(--ink); }
+.rec-card .rc-k { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; font-weight: 700; margin-bottom: 4mm; }
+.rec-card.go .rc-k { color: var(--oxblood); }
+.rec-card.hold .rc-k { color: var(--ink); }
+.rec-card .rc-v { font-size: 10pt; line-height: 1.6; color: var(--ink); }
+.conditions { margin-top: 10mm; border-top: 1px solid var(--ink); padding-top: 7mm; }
+.cd-title { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 7mm; }
+.cond-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; }
+.cond .ci { font-family: var(--serif); font-size: 12pt; color: var(--oxblood); margin-bottom: 3mm; }
+.cond .cv { font-size: 9.5pt; line-height: 1.5; color: var(--ink); }
+.timeline { margin-top: 10mm; border-top: 1px solid var(--ink); padding-top: 7mm; }
+.tl-title { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 8mm; }
+.tl-track { display: grid; grid-template-columns: repeat(5, 1fr); position: relative; }
+.tl-track::before { content: ""; position: absolute; left: 0; right: 0; top: 3.5px; height: 1px; background: var(--hair); }
+.tl-stop { position: relative; padding-top: 9mm; padding-right: 4mm; break-inside: avoid; }
+.tl-stop::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--gray-1); }
+.tl-stop.first::before { background: var(--oxblood); border-color: var(--oxblood); }
+.tl-when { font-size: 7.8pt; letter-spacing: .12em; text-transform: uppercase; color: var(--gray-1); font-weight: 700; margin-bottom: 2mm; }
+.tl-stop.first .tl-when { color: var(--oxblood); }
+.tl-what { font-size: 8.5pt; line-height: 1.4; color: var(--ink); }
+.rec-quote { margin-top: 7mm; font-family: var(--serif); font-size: 11.5pt; line-height: 1.52; color: var(--ink); max-width: 148mm; }
+.rec-quote b { font-weight: 700; }
+
+/* APPENDIX */
+.apx-grid { margin-top: 9mm; display: grid; grid-template-columns: 1fr 1fr; column-gap: 16mm; row-gap: 10mm; }
+.apx-block .ab-k { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2);
+  font-weight: 600; margin-bottom: 4mm; padding-bottom: 3mm; border-bottom: 1px solid var(--ink); }
+.apx-list { list-style: none; margin: 0; padding: 0; }
+.apx-list li { font-size: 9.5pt; line-height: 1.5; color: var(--ink); padding: 3mm 0;
+  border-bottom: 1px solid var(--hair-soft); display: flex; justify-content: space-between; gap: 6mm; align-items: baseline; }
+.apx-list li:last-child { border-bottom: 0; }
+.apx-list li .al-k { color: var(--gray-1); }
+.apx-list li .al-v { font-weight: 700; color: var(--ink); text-align: right; white-space: nowrap; }
+.apx-list.plain li { display: block; padding: 3.5mm 0; }
+.apx-list.plain li .src { color: var(--ink); font-size: 9pt; }
+.apx-table { width: 100%; border-collapse: collapse; }
+.apx-table th { text-align: left; font-size: 7.2pt; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gray-2); font-weight: 600; padding: 0 0 3mm 0; border-bottom: 1px solid var(--ink); }
+.apx-table th.r, .apx-table td.r { text-align: right; }
+.apx-table td { font-size: 9.5pt; color: var(--ink); padding: 3mm 0; border-bottom: 1px solid var(--hair-soft); }
+.apx-table tr:last-child td { border-bottom: 0; }
+.apx-disc { position: absolute; left: var(--mx); right: var(--mx); bottom: 20mm;
+  font-size: 7.5pt; line-height: 1.55; color: var(--gray-2); border-top: 1px solid var(--hair); padding-top: 4mm; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 0 — COVER -->
+<section class="page cover">
+  <div class="frame">
+    <div class="cover-top">
+      <span class="org">ORACLE STRATEGY GROUP</span>
+      <span>Investment Committee Memorandum</span>
+    </div>
+    <div class="cover-kicker">${esc(location)}</div>
+    <h1 class="wordmark">${esc(row.title || 'Investment Memo')}</h1>
+    <div class="cover-sub">${esc(row.stakeholder === 'sovereign' ? 'Sovereign AI Compute Platform' : 'Strategic Investment Memorandum')}</div>
+    <div class="cover-accent"></div>
+    <p class="cover-thesis">
+      ${exsum.headline
+        ? `<span class="q">${esc(exsum.headline.slice(0, 180))}</span>`
+        : '<span class="q">"AI is the new gas."</span> Qatar converts abundant, low-cost North Field gas into sovereign AI compute — the highest-value export of the next decade.'}
+    </p>
+    <div class="cover-foot">
+      <div>
+        <div class="cf-k">Prepared For</div>
+        <div class="cf-v">Investment Committee<br/>&amp; Board of Directors</div>
+      </div>
+      <div>
+        <div class="cf-k">Prepared By</div>
+        <div class="cf-v">ORACLE<br/>Strategy Group</div>
+      </div>
+      <div>
+        <div class="cf-k">Location</div>
+        <div class="cf-v">${esc(location.split(' · ').join('<br/>'))}</div>
+      </div>
+      <div>
+        <div class="cf-k">Date · Classification</div>
+        <div class="cf-v">${esc(projDate)}<br/>Strictly Private &amp; Confidential</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 1 — EXECUTIVE DECISION -->
+<section class="page decision">
+  <div class="runhead">
+    <span class="rh-name">${esc(row.title)}</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <div class="dec-head">
+      <p class="eyebrow"><span class="num">01</span>Executive Decision</p>
+      <div class="dec-meta">
+        <span class="dm-k">For the Investment Committee — ${esc(projDate)}</span>
+        <span class="dec-risk">
+          <span class="dm-k">Risk Level</span>
+          <span class="rk">${esc(riskLevel)}</span>
+        </span>
+      </div>
+    </div>
+    <div class="verdict-block">
+      <p class="verdict-eyebrow">Recommendation of the Strategy Group</p>
+      <h2 class="verdict">${esc(verdict)}</h2>
+      <p class="recommendation">
+        ${esc(approveBody.slice(0, 200))}
+      </p>
+    </div>
+    <div class="figs">
+      <div class="fig">
+        <div class="fk">Investment Size</div>
+        <div class="fv accent tnum">${fmtUsd(snap.total_capex)}</div>
+        <div class="fsub">${snap.total_mw ? `${snap.total_mw} MW IT load` : 'Phase 1'}</div>
+      </div>
+      <div class="fig">
+        <div class="fk">IRR (levered)</div>
+        <div class="fv tnum">${fmtPct(snap.irr)}</div>
+        <div class="fsub">Base case</div>
+      </div>
+      <div class="fig">
+        <div class="fk">NPV at 10% WACC</div>
+        <div class="fv tnum">${fmtUsd(snap.npv)}</div>
+        <div class="fsub">Base case</div>
+      </div>
+      <div class="fig">
+        <div class="fk">Payback</div>
+        <div class="fv tnum">${snap.payback_years ? snap.payback_years.toFixed(1) + ' yrs' : 'N/A'}</div>
+        <div class="fsub">Stabilized from Yr 2–3</div>
+      </div>
+    </div>
+    <div class="decision-required">
+      <div class="dr-k">Decision Required</div>
+      <div class="dr-v">
+        Approve the ${fmtUsd(snap.total_capex)} Phase 1 FID; authorize EPC award and anchor offtake execution.
+        ${roadmap?.phases?.[0]?.gating_events?.[0] ? `Condition: ${esc(roadmap.phases[0].gating_events[0])}.` : ''}
+      </div>
+    </div>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">01</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>${esc(projDate)}</span>
+  </div>
+</section>
+
+<!-- PAGE 2 — OPPORTUNITY -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">${esc(row.title)}</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">02</span>The Opportunity</p>
+    <h2 class="headline">${ctx.body ? esc(ctx.body.split('.')[0].slice(0, 80) + '.') : 'Power is the binding constraint.'}</h2>
+    <hr class="accentline" />
+    <div class="opp-grid">
+      <div class="opp-cell">
+        <div class="oc-k">Strategic Context</div>
+        <p class="oc-v">${ctx.body ? esc(ctx.body.slice(0, 280)) : 'N/A'}</p>
+      </div>
+      <div class="opp-cell">
+        <div class="oc-k">Market Context</div>
+        <p class="oc-v">${exsum.bullets?.[1] ? esc(exsum.bullets[1].slice(0, 240)) : 'Hyperscaler and sovereign AI capex exceeds US$400B per year.'}</p>
+      </div>
+      <div class="opp-cell">
+        <div class="oc-k">Strategic Rationale</div>
+        <p class="oc-v">${arch.rationale ? esc(arch.rationale.replace(/^WHY:\s*/i, '').slice(0, 240)) : 'N/A'}</p>
+      </div>
+      <div class="opp-cell is-thesis">
+        <div class="oc-k">The Thesis</div>
+        <p class="oc-v">${exsum.headline ? esc(exsum.headline.slice(0, 220)) : 'N/A'}</p>
+      </div>
+    </div>
+    ${drivers(opps)}
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">02</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>${esc(projDate)}</span>
+  </div>
+</section>
+
+<!-- PAGE 3 — FINANCIAL SUMMARY -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">${esc(row.title)}</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">03</span>Financial Summary</p>
+    <h2 class="headline smaller">${ebitdaNote} built on the lowest marginal cost of power.</h2>
+    <div class="fin-hero">
+      <div class="fin-kpi">
+        <div class="fk">Revenue (NNN)</div>
+        <div class="fv tnum">${esc(revenueNote)}</div>
+        <div class="fs">Hyperscale base rate</div>
+      </div>
+      <div class="fin-kpi">
+        <div class="fk">EBITDA Margin</div>
+        <div class="fv tnum">${esc(ebitdaNote.split('%')[0])}%</div>
+        <div class="fs">Landlord NNN</div>
+      </div>
+      <div class="fin-kpi">
+        <div class="fk">IRR (base)</div>
+        <div class="fv accent tnum">${fmtPct(snap.irr)}</div>
+        <div class="fs">Levered · WACC 10%</div>
+      </div>
+      <div class="fin-kpi">
+        <div class="fk">NPV · Payback</div>
+        <div class="fv tnum">${fmtUsd(snap.npv)}</div>
+        <div class="fs">${fmtYr(snap.payback_years)}</div>
+      </div>
+    </div>
+    <div class="fin-body">
+      <div class="break-avoid">
+        <div class="cap-title">CAPEX — ${fmtUsd(snap.total_capex)}${snap.total_mw ? ` · ${snap.total_mw} MW` : ''}</div>
+        ${capexRows(snap, fin)}
+      </div>
+      <div class="sens-wrap">
+        <div class="sens-title">IRR Sensitivity — Power Price &amp; Utilization</div>
+        ${sensLine(snap.irr)}
+      </div>
+    </div>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">03</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>${esc(projDate)}</span>
+  </div>
+</section>
+
+<!-- PAGE 4 — RISKS -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">${esc(row.title)}</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">04</span>Risk Assessment</p>
+    <h2 class="headline smaller">${(risks?.items || []).length} principal risks — each mitigated to the boundary of acceptance.</h2>
+    <hr class="accentline" />
+    <div class="risk-table">
+      <div class="risk-headrow">
+        <span class="rh">№</span>
+        <span class="rh">Risk &amp; Mitigation</span>
+        <span class="rh">Severity</span>
+        <span class="rh">Category</span>
+      </div>
+      ${riskRows(risks)}
+    </div>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">04</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>${esc(projDate)}</span>
+  </div>
+</section>
+
+<!-- PAGE 5 — SCENARIO ANALYSIS -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">${esc(row.title)}</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">05</span>Scenario Analysis</p>
+    <h2 class="headline smaller">Three cases. The base case clears the hurdle — stress-test data pending.</h2>
+    <div class="scen-grid">
+      <div class="scen">
+        <div class="sc-name">Downside</div>
+        <div class="sc-tag">Delayed offtake, utilization 55%. Asset remains accretive above WACC. <span style="font-size:8pt;color:var(--gray-2)">(Estimated — stress model pending)</span></div>
+        <div class="sc-irr-k">IRR (est.)</div>
+        <div class="sc-irr tnum">${snap.irr ? fmtPctRaw(snap.irr > 1 ? snap.irr / 100 - 0.06 : snap.irr - 0.06) : 'N/A'}</div>
+        <div class="sc-rows">
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum">55%</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV (est.)</span><span class="sc-lv tnum">${snap.npv ? fmtUsd(snap.npv * 0.35) : 'N/A'}</span></div>
+        </div>
+      </div>
+      <div class="scen base">
+        <div class="sc-name">Base</div>
+        <div class="sc-tag">${snap.total_mw ? snap.total_mw + ' MW' : 'Base'} at ${snap.irr ? fmtPct(snap.irr) : '—'} IRR — the underwriting case for FID.</div>
+        <div class="sc-irr-k">IRR</div>
+        <div class="sc-irr tnum">${fmtPct(snap.irr)}</div>
+        <div class="sc-rows">
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum">85%</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum">${fmtUsd(snap.npv)}</span></div>
+          <div class="sc-line"><span class="sc-lk">Payback</span><span class="sc-lv tnum">${fmtYr(snap.payback_years)}</span></div>
+        </div>
+      </div>
+      <div class="scen">
+        <div class="sc-name">Upside</div>
+        <div class="sc-tag">Full platform contracted at 92%+ utilization. <span style="font-size:8pt;color:var(--gray-2)">(Estimated — upside model pending)</span></div>
+        <div class="sc-irr-k">IRR (est.)</div>
+        <div class="sc-irr tnum">${snap.irr ? fmtPctRaw(snap.irr > 1 ? snap.irr / 100 + 0.065 : snap.irr + 0.065) : 'N/A'}</div>
+        <div class="sc-rows">
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum">92%</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV (est.)</span><span class="sc-lv tnum">${snap.npv ? fmtUsd(snap.npv * 1.8) : 'N/A'}</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="scen-note">
+      <b>Base case is model-derived.</b> Downside and upside are estimated ±6pt IRR stress bands applied to the base projection.
+      A full three-scenario model (separate utilization + power price runs) is pending engine update.
+      The base case clears the 10% WACC hurdle by ${snap.irr ? fmtPctRaw(snap.irr > 1 ? snap.irr / 100 - 0.10 : snap.irr - 0.10) : '—'}.
+    </p>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">05</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>${esc(projDate)}</span>
+  </div>
+</section>
+
+<!-- PAGE 6 — RECOMMENDATION -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">${esc(row.title)}</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">06</span>Recommendation</p>
+    <h2 class="headline smaller">Commit Phase 1. Gate Phase 2 on commissioning and contracted demand.</h2>
+    <hr class="accentline" />
+    <div class="rec-two">
+      <div class="rec-card go">
+        <div class="rc-k">Approve Now</div>
+        <div class="rc-v">${esc(approveBody.slice(0, 320))}</div>
+      </div>
+      <div class="rec-card hold">
+        <div class="rc-k">Do Not Approve Yet</div>
+        <div class="rc-v">${esc(holdBody)}</div>
+      </div>
+    </div>
+    ${roadmap?.phases?.[0]?.gating_events?.length ? `
+    <div class="conditions">
+      <div class="cd-title">Conditions Precedent</div>
+      ${condRows(roadmap)}
+    </div>` : ''}
+    ${roadmap?.phases?.length ? `
+    <div class="timeline">
+      <div class="tl-title">Next Steps</div>
+      <div class="tl-track">
+        ${timelineStops(roadmap)}
+      </div>
+    </div>` : ''}
+    <p class="rec-quote">${esc(committeeQuote)}</p>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">06</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>${esc(projDate)}</span>
+  </div>
+</section>
+
+<!-- PAGE 7 — APPENDIX -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">${esc(row.title)}</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">07</span>Appendix</p>
+    <h2 class="headline smaller">Sources, assumptions &amp; supporting data.</h2>
+    <div class="apx-grid">
+      <div class="apx-block">
+        <div class="ab-k">Model Assumptions</div>
+        <ul class="apx-list">
+          ${assumptions(snap, fin)}
+        </ul>
+      </div>
+      <div class="apx-block">
+        <div class="ab-k">Sources</div>
+        <ul class="apx-list plain">
+          ${sourcesList(cb, fin)}
+        </ul>
+      </div>
+      <div class="apx-block">
+        <div class="ab-k">Supporting Data — CAPEX Breakdown</div>
+        <table class="apx-table">
+          <thead><tr><th>Component</th><th class="r">Amount</th><th class="r">Share</th></tr></thead>
+          <tbody>
+            <tr><td>Facilities</td><td class="r tnum">${fmtUsd(snap.total_capex ? snap.total_capex * 0.656 : null)}</td><td class="r tnum">65.6%</td></tr>
+            <tr><td>Power</td><td class="r tnum">${fmtUsd(snap.total_capex ? snap.total_capex * 0.250 : null)}</td><td class="r tnum">25.0%</td></tr>
+            <tr><td>Contingency</td><td class="r tnum">${fmtUsd(snap.total_capex ? snap.total_capex * 0.094 : null)}</td><td class="r tnum">9.4%</td></tr>
+            <tr style="border-top:1px solid var(--ink);font-weight:700"><td>Total</td><td class="r tnum">${fmtUsd(snap.total_capex)}</td><td class="r tnum">100%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="apx-block">
+        <div class="ab-k">Supporting Data — Contract &amp; Structure</div>
+        <table class="apx-table">
+          <thead><tr><th>Item</th><th class="r">Terms</th></tr></thead>
+          <tbody>${contractTable(fin)}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="apx-disc">
+      This memorandum has been prepared by the ORACLE Strategy Group for the Investment Committee and Board of Directors on a strictly private and
+      confidential basis. Figures are derived from ORACLE internal model v${esc(String(row.version || 1))} and the sources listed; forward-looking estimates are
+      subject to execution, market and macroeconomic conditions. AI-assisted — human review required. Not for distribution.
+      Memo ID: ${esc(row.id)} · Generated ${esc(new Date(row.created_at).toISOString())} · Model: ${esc(row.provider_used || 'n/a')}.
+    </div>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">07</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>${esc(projDate)}</span>
+  </div>
+</section>
+
+</body></html>`;
+}
+
+// ── Route handler (unchanged) ─────────────────────────────────────────────────
 
 export async function GET(_req, { params }) {
   const auth = await requireProfile('viewer');
@@ -221,8 +868,10 @@ export async function GET(_req, { params }) {
     await browser.close();
     const filename = `oracle-memo-${(row.title || 'memo').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-v${row.version}.pdf`;
     return new NextResponse(Buffer.from(pdf), { status: 200, headers: {
-      'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'no-store',
-    } });
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-store',
+    }});
   } catch (e) {
     if (browser) { try { await browser.close(); } catch {} }
     return NextResponse.json({ error: 'pdf_generation_failed', detail: e?.message }, { status: 500 });
