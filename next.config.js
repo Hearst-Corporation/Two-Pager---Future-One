@@ -22,6 +22,13 @@ const nextConfig = {
     // @sparticuz/chromium ships a native binary — must not be bundled by Next.
     // Next 14 uses serverComponentsExternalPackages (renamed serverExternalPackages in Next 15).
     serverComponentsExternalPackages: ['@sparticuz/chromium', 'puppeteer-core', 'puppeteer'],
+    // Force Next output tracing to include the chromium binary so Vercel deploys it.
+    outputFileTracingIncludes: {
+      '/api/admin/hearst/strategic-memos/[id]/pdf': [
+        './node_modules/@sparticuz/chromium/**/*',
+        './node_modules/puppeteer-core/**/*',
+      ],
+    },
   },
 
   async redirects() {
