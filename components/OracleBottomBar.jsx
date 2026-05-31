@@ -21,6 +21,12 @@ const SECTIONS = [
     matchAny: ['/admin/hearst/simulator'],
   },
   {
+    id: 'workspace',
+    href: '/admin/hearst/workspace',
+    label: 'Workspace',
+    matchAny: ['/admin/hearst/workspace'],
+  },
+  {
     id: 'dossier',
     href: '/admin/hearst/dossier',
     label: 'Dossier',

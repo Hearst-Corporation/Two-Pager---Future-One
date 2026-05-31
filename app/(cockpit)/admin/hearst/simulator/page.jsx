@@ -109,6 +109,9 @@ export default function SimulatorPage() {
   const [savingState, setSavingState] = useState('idle');
   // memo job piloté par le store global — plus de state local
   const [projectId, setProjectId] = useState(null);
+  // Last saved scenario — carries the Scenario → Memo → Dossier linkage so a
+  // generated memo is persisted with its scenario_id. Set on Save and on reopen.
+  const [savedScenarioId, setSavedScenarioId] = useState(null);
   const debounceRef = useRef(null);
   const saveTimerRef = useRef(null);
   useEffect(() => () => clearTimeout(saveTimerRef.current), []);
@@ -121,6 +124,38 @@ export default function SimulatorPage() {
           const { project } = await r.json();
           setProjectId(project?.id);
         }
+      } catch {}
+    })();
+  }, []);
+
+  // Reopen: Workspace links to /admin/hearst/simulator?scenario=<id>. Read the id
+  // (client-only, no Suspense needed), fetch the persisted row, and hydrate the
+  // reducer from input_mode / input_value / hardware_mix. Archetype has no column
+  // → fall back to the default. The saved scenario id is kept so a memo generated
+  // from the reopened scenario links straight back to it.
+  useEffect(() => {
+    const sid = new URLSearchParams(window.location.search).get('scenario');
+    if (!sid) return;
+    (async () => {
+      try {
+        const r = await fetch(`/api/admin/hearst/scenarios/${sid}`);
+        if (!r.ok) return;
+        const row = (await r.json())?.scenario;
+        if (!row) return;
+        const patch = {};
+        if (row.input_mode) patch.mode = row.input_mode;
+        if (row.geography) patch.geography = row.geography;
+        const iv = row.input_value || {};
+        if (row.input_mode === 'capital_first' && iv.total_capex_usd != null) patch.capital_usd = iv.total_capex_usd;
+        else if (row.input_mode === 'target_irr_first') {
+          if (iv.target_irr_pct != null) patch.target_irr_pct = iv.target_irr_pct;
+          if (iv.lever) patch.target_irr_lever = iv.lever;
+          if (iv.total_mw != null) patch.total_mw = iv.total_mw;
+        } else if (iv.total_mw != null) patch.total_mw = iv.total_mw;
+        if (row.hardware_mix) patch.hardware_mix = { ...INITIAL_STATE.hardware_mix, ...row.hardware_mix };
+        if (row.primary_archetype_id) patch.primary_archetype_id = row.primary_archetype_id;
+        dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: patch });
+        setSavedScenarioId(sid);
       } catch {}
     })();
   }, []);
@@ -220,7 +255,8 @@ export default function SimulatorPage() {
         const body = await r.json().catch(() => ({}));
         throw new Error(body.error || 'Save failed');
       }
-      await r.json();
+      const data = await r.json();
+      setSavedScenarioId(data.scenario?.id || null);
       setSavingState('saved');
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => setSavingState('idle'), 2500);
@@ -427,6 +463,8 @@ export default function SimulatorPage() {
               payload: simResult,
               title: 'Strategic Memo — Simulator scenario',
               scenarioLabel: 'Simulator scenario',
+              scenarioId: savedScenarioId,
+              projectId,
             })}
             style={{
               padding: '10px 22px',
