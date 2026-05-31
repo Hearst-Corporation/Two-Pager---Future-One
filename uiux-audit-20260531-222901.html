@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr" data-product="default">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UIUX Audit — ORACLE / Futur One — 2026-05-31</title>
+<style>
+  :root{
+    --bg:#1A1D24; --bg2:#22262E; --bg3:#2A2F38; --surface:#2A2F38;
+    --maroon:#8A1538; --maroon2:#9F1239; --accent:#BE123C; --accent-soft:#E11D48;
+    --text:#F2F3F5; --text2:#C9CDD2; --muted:#8A9099; --border:#3D4450;
+    --p0:#DC2626; --p1:#D97706; --p2:#2563EB; --ok:#059669;
+    --r:12px; --r-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:32px;max-width:1180px;margin:0 auto}
+  header{border-left:4px solid var(--maroon);padding:8px 0 8px 20px;margin-bottom:28px}
+  header h1{font-size:26px;font-weight:800;letter-spacing:-.4px}
+  header .sub{color:var(--muted);margin-top:6px;font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:32px}
+  .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+  .kpi .n{font-size:30px;font-weight:800;letter-spacing:-1px}
+  .kpi .l{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin-top:4px}
+  .kpi.p0 .n{color:var(--p0)} .kpi.p1 .n{color:var(--p1)} .kpi.p2 .n{color:var(--p2)}
+  .bar{height:14px;background:var(--bg3);border-radius:999px;overflow:hidden;display:flex;margin:6px 0 30px}
+  .bar i{display:block;height:100%}
+  .seg-p0{background:var(--p0)} .seg-p1{background:var(--p1)} .seg-p2{background:var(--p2)}
+  h2{font-size:17px;font-weight:700;margin:34px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .controls button{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:6px 14px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:600}
+  .controls button.on{background:var(--maroon);border-color:var(--accent);color:#fff}
+  table{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:var(--r);overflow:hidden;font-size:13px}
+  th{background:var(--bg3);text-align:left;padding:11px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  td{padding:10px 14px;border-top:1px solid var(--border);vertical-align:top}
+  td.cat{font-weight:700}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.3px}
+  .pill.p0{background:rgba(220,38,38,.18);color:#fca5a5} .pill.p1{background:rgba(217,119,6,.18);color:#fcd34d} .pill.p2{background:rgba(37,99,235,.18);color:#93c5fd}
+  code{background:var(--bg);padding:1px 6px;border-radius:4px;font:12px ui-monospace,monospace;color:#fca5a5}
+  .file{font:12px ui-monospace,monospace;color:var(--text2)}
+  .struct{background:var(--bg2);border:1px solid var(--border);border-left:4px solid var(--p0);border-radius:var(--r);padding:16px 20px;margin-bottom:14px}
+  .struct h3{font-size:14px;margin-bottom:6px;color:#fca5a5}
+  .struct p{color:var(--text2);font-size:13px}
+  footer{margin-top:40px;color:var(--muted);font-size:12px;border-top:1px solid var(--border);padding-top:18px}
+  .grep{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;font:11px ui-monospace,monospace;color:var(--text2);margin:8px 0;overflow-x:auto;white-space:nowrap}
+</style>
+</head>
+<body>
+<header>
+  <h1>UIUX AUDIT — Rapport de violence</h1>
+  <div class="sub">ORACLE / Futur One Two-Pager · branche <code>chore/strip-to-engine</code> · 2026-05-31 22:29 · scope <code>app/</code> + <code>components/</code> (~30 fichiers UI)</div>
+</header>
+
+<div class="grid">
+  <div class="kpi"><div class="n">~983</div><div class="l">Hardcodes trouvés</div></div>
+  <div class="kpi"><div class="n">~30</div><div class="l">Fichiers touchés</div></div>
+  <div class="kpi p0"><div class="n">~40</div><div class="l">P0 critique</div></div>
+  <div class="kpi p1"><div class="n">~880</div><div class="l">P1 important</div></div>
+  <div class="kpi p2"><div class="n">~60</div><div class="l">P2 mineur</div></div>
+</div>
+
+<div class="bar">
+  <i class="seg-p0" style="width:4%"></i>
+  <i class="seg-p1" style="width:90%"></i>
+  <i class="seg-p2" style="width:6%"></i>
+</div>
+
+<h2>Score par catégorie</h2>
+<div class="controls" id="catfilter">
+  <button class="on" data-f="all">Tout</button>
+  <button data-f="color">Couleurs</button>
+  <button data-f="space">Spacing</button>
+  <button data-f="typo">Typo</button>
+  <button data-f="string">Strings</button>
+  <button data-f="effect">Ombres/z/transitions</button>
+  <button data-f="magic">Nombres magiques</button>
+</div>
+<table>
+  <thead><tr><th>Catégorie</th><th>Occ.</th><th>Fichiers</th><th>Criticité</th><th>Concentration</th></tr></thead>
+  <tbody>
+    <tr data-c="color"><td class="cat">🎨 Couleurs</td><td>~150</td><td>12</td><td><span class="pill p0">P0</span> <span class="pill p1">P1</span></td><td>pdf/route.js (34), cockpit.css (31), inline styles (DemoModeBadge, StrategicMemoModal, layout)</td></tr>
+    <tr data-c="space"><td class="cat">📏 Spacing/sizing</td><td>~230</td><td>27</td><td><span class="pill p1">P1</span></td><td>StrategicMemoModal, simulator/page, simulator/* — <code>borderRadius:999</code>→<code>--cp-radius-pill</code>, gap/padding bruts</td></tr>
+    <tr data-c="typo"><td class="cat">🔤 Typo</td><td>~282</td><td>27</td><td><span class="pill p1">P1</span></td><td>fontSize souvent tokenisé MAIS weight/letter-spacing/line-height bruts à côté</td></tr>
+    <tr data-c="string"><td class="cat">💬 Strings UI</td><td>~190</td><td>25</td><td><span class="pill p1">P1</span></td><td>incohérence FR/EN (SimpleWizard FR vs reste EN), empty-states &amp; "Loading…" dupliqués (dossier ×54)</td></tr>
+    <tr data-c="effect"><td class="cat">🌑 Ombres/z/transitions/opacity</td><td>~117</td><td>15</td><td><span class="pill p0">P0</span> <span class="pill p1">P1</span></td><td>z-index ingouvernés, transitions 0.12/0.15/150ms sans échelle, opacity SVG</td></tr>
+    <tr data-c="magic"><td class="cat">🔢 Nombres magiques</td><td>14</td><td>7</td><td><span class="pill p0">P0</span> <span class="pill p1">P1</span></td><td>2 timeouts simulator (300/2500), SLA_WARNING_MS dupliqué ×2</td></tr>
+  </tbody>
+</table>
+
+<h2>⚠️ Signaux P0 structurels (au-delà des hardcodes unitaires)</h2>
+
+<div class="struct">
+  <h3>1 · z-index ingouvernés</h3>
+  <p><code>9999</code> sur <span class="file">DemoModeBadge.jsx:22</span> écrase la modale (<code>1010</code>). Collision : <code>1002</code> partagé entre <span class="file">MemoJobBadge.jsx:50</span> et le fab panel (cockpit.css/chat-fab.css). 3 conventions concurrentes (1000+, 1-30, 0) + 2 échelles de tokens (<code>Z</code> JS 1/50/100/200/300, <code>--cp-z-*</code> 10/20/30) <b>jamais consommées</b>.</p>
+</div>
+<div class="struct">
+  <h3>2 · Code mort dans lib/design-system/tokens.js</h3>
+  <p>Les constantes <code>Z</code>, <code>TRANSITION</code>, <code>SHADOW</code>, <code>MOTION</code> ont <b>0 consommateur</b> — fausse impression de gouvernance. Soit les brancher, soit les supprimer.</p>
+</div>
+<div class="struct">
+  <h3>3 · --cp-blur-md défini à deux valeurs</h3>
+  <p><code>blur(12px)</code> dans cp-tokens.css:57 vs <code>blur(24px)</code> dans cockpit.css:153, + 3e variante <code>--oc-glass-backdrop</code> / <code>GLASS.backdrop</code>. À réconcilier sur une échelle unique <code>--cp-blur-sm/md/lg</code>.</p>
+</div>
+<div class="struct">
+  <h3>4 · SLA_WARNING_MS = 120_000 dupliqué</h3>
+  <p>Défini deux fois (<span class="file">StrategicMemoModal.jsx:32</span> &amp; <span class="file">MemoJobBadge.jsx:15</span>). À extraire dans <code>lib/memo-sla.js</code>.</p>
+</div>
+<div class="struct" style="border-left-color:var(--p1)">
+  <h3>5 · Incohérence de langue FR/EN</h3>
+  <p><span class="file">SimpleWizard.jsx</span> (~18 strings FR : « Votre budget », « Calcul en cours… ») + <span class="file">ChatToggleFAB.jsx:57</span> (FR) au milieu d'une UI 100% anglaise. Deux composants exposent les mêmes KPI en deux langues.</p>
+</div>
+
+<h2>Top fichiers (densité de hardcodes)</h2>
+<table>
+  <thead><tr><th>Fichier</th><th>Dominante</th><th>Occ. approx.</th></tr></thead>
+  <tbody>
+    <tr><td class="file">components/hearst/StrategicMemoModal.jsx</td><td>spacing + typo + color inline</td><td>~60</td></tr>
+    <tr><td class="file">app/(cockpit)/admin/hearst/simulator/page.jsx</td><td>spacing + typo + 2 timeouts</td><td>~55</td></tr>
+    <tr><td class="file">app/(cockpit)/admin/hearst/dossier/page.jsx</td><td>strings (~54) — styling ~90% tokenisé ✓</td><td>~60</td></tr>
+    <tr><td class="file">app/api/.../strategic-memos/[id]/pdf/route.js</td><td>couleurs+typo PDF print (isolé)</td><td>~59</td></tr>
+    <tr><td class="file">components/hearst/simulator/HardwareMixer.jsx</td><td>spacing + typo</td><td>~55</td></tr>
+    <tr><td class="file">app/(cockpit)/admin/hearst/cockpit.css</td><td>box-shadow / rgba glass</td><td>~40</td></tr>
+    <tr><td class="file">components/hearst/simulator/InputModeSwitcher.jsx</td><td>spacing + typo</td><td>~31</td></tr>
+    <tr><td class="file">components/hearst/simulator/B2BMatrix.jsx</td><td>spacing + typo + strings</td><td>~31</td></tr>
+  </tbody>
+</table>
+
+<h2>Fichiers PROPRES (référence) ✓</h2>
+<p style="color:var(--text2)">Quasi-conformes — déjà tokenisés via <code>--cp-*</code> ou constantes <code>T</code>/<code>W</code>/<code>LS</code> : <span class="file">dossier/page.jsx</span> (styling ~90%), <span class="file">HearstNavHeader.jsx</span>, <span class="file">KpiCard.jsx</span>, <span class="file">AlertBanner.jsx</span>, <span class="file">SpatialPlaceholder.jsx</span>, <span class="file">LeftContextPanel/RightContextPanel/ChatPanel.jsx</span>.</p>
+
+<h2>Patterns grep (re-run ciblé)</h2>
+<div class="grep">rg -n --glob 'app/**' --glob 'components/**' '#[0-9a-fA-F]{3,8}|rgba?\(' -g '!*.tri-trash*'</div>
+<div class="grep">rg -n --glob 'components/**' 'borderRadius:\s*999|borderRadius:\s*[0-9]'</div>
+<div class="grep">rg -n --glob 'components/**' 'fontWeight:\s*[0-9]|letterSpacing:\s*[-0-9]|lineHeight:\s*[0-9]'</div>
+<div class="grep">rg -n --glob 'app/**' --glob 'components/**' 'zIndex:\s*[0-9]|z-index:\s*[0-9]'</div>
+<div class="grep">rg -n --glob 'components/**' 'transition:\s*[^v]|setTimeout\([^,]+,\s*[0-9]{3,}'</div>
+
+<footer>
+  Rapport auto-contenu · aucune modification de fichier (scan seul) · Re-run : <code>/uiux-adrien</code> ou <code>/uiux fix</code> pour appliquer les corrections.
+</footer>
+
+<script>
+  document.querySelectorAll('#catfilter button').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('#catfilter button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      const f=b.dataset.f;
+      document.querySelectorAll('tbody tr[data-c]').forEach(tr=>{
+        tr.style.display=(f==='all'||tr.dataset.c===f)?'':'none';
+      });
+    };
+  });
+</script>
+</body>
+</html>

@@ -28,87 +28,118 @@ const OBJECTIVE_LABEL = {
 };
 
 export default function CopilotPanel({ suggestion, onApply, onDismiss }) {
-  const [expanded, setExpanded] = useState(false);
+  const [isReviewing, setIsReviewing] = useState(false);
 
   if (!suggestion) return null;
 
   const conf = CONFIDENCE_LABEL[suggestion.confidence] || CONFIDENCE_LABEL.MEDIUM;
   const objLabel = OBJECTIVE_LABEL[suggestion.objective] || suggestion.objective;
 
+  if (isReviewing) {
+    return (
+      <div style={S.wrap} role="region" aria-label="Review Copilot changes">
+        <div style={S.topRow}>
+          <div style={S.badge}>Review Changes</div>
+        </div>
+        <div style={S.label}>Confirm to apply these changes</div>
+        
+        <div style={S.expandBox}>
+          <div style={S.fieldsBlock}>
+            <ul style={S.fieldList}>
+              {suggestion.fields_to_apply.map(f => (
+                <li key={f.field} style={S.fieldItem}>
+                  <span style={S.fieldName}>{f.label || f.field}</span>
+                  <span style={S.fieldArrow}>
+                    <span style={S.currentVal}>{formatVal(f.current)}</span>
+                    <span style={S.arrow}> → </span>
+                    <span style={S.recVal}>{formatVal(f.value)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div style={S.actions}>
+          <button
+            type="button"
+            onClick={() => {
+              setIsReviewing(false);
+              onApply(suggestion.fields_to_apply);
+            }}
+            style={S.btnApply}
+          >
+            Confirm Apply
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsReviewing(false)}
+            style={S.btnDismiss}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={S.wrap} role="region" aria-label="Copilot suggestion">
       {/* ── Top row ───────────────────────────────────────────────────── */}
       <div style={S.topRow}>
-        <div style={S.badge}>✦ Copilot</div>
+        <div style={S.badge}>Copilot Recommendation</div>
         <div style={S.objChip}>{objLabel}</div>
         <div style={{ ...S.confChip, color: conf.color }}>{conf.text}</div>
-        <button
-          type="button"
-          onClick={onDismiss}
-          style={S.dismissBtn}
-          aria-label="Dismiss suggestion"
-        >
-          ✕
-        </button>
       </div>
 
       {/* ── Summary ───────────────────────────────────────────────────── */}
       <div style={S.label}>{suggestion.label}</div>
       <p style={S.rationale}>{suggestion.rationale}</p>
 
-      {/* ── Why? expanded ─────────────────────────────────────────────── */}
-      {expanded && (
-        <div style={S.expandBox}>
-          {suggestion.tradeoffs && suggestion.tradeoffs.length > 0 && (
-            <div style={S.tradeoffsBlock}>
-              <div style={S.expandLabel}>Expected tradeoffs</div>
-              <ul style={S.tradeoffList}>
-                {suggestion.tradeoffs.map((t, i) => (
-                  <li key={i} style={S.tradeoffItem}>
-                    <span style={t.type === 'advantage' ? S.plus : S.minus}>
-                      {t.type === 'advantage' ? '+' : '−'}
-                    </span>
-                    {t.label}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {suggestion.fields_to_apply && suggestion.fields_to_apply.length > 0 && (
-            <div style={S.fieldsBlock}>
-              <div style={S.expandLabel}>Changes proposed</div>
-              <ul style={S.fieldList}>
-                {suggestion.fields_to_apply.map(f => (
-                  <li key={f.field} style={S.fieldItem}>
-                    <span style={S.fieldName}>{f.label || f.field}</span>
-                    <span style={S.fieldArrow}>
-                      <span style={S.currentVal}>{formatVal(f.current)}</span>
-                      <span style={S.arrow}> → </span>
-                      <span style={S.recVal}>{formatVal(f.value)}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
+      {/* ── Details always visible ─────────────────────────────────────────────── */}
+      <div style={S.expandBox}>
+        {suggestion.tradeoffs && suggestion.tradeoffs.length > 0 && (
+          <div style={S.tradeoffsBlock}>
+            <div style={S.expandLabel}>Expected tradeoffs</div>
+            <ul style={S.tradeoffList}>
+              {suggestion.tradeoffs.map((t, i) => (
+                <li key={i} style={S.tradeoffItem}>
+                  <span style={t.type === 'advantage' ? S.plus : S.minus}>
+                    {t.type === 'advantage' ? '+' : '−'}
+                  </span>
+                  {t.label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {suggestion.fields_to_apply && suggestion.fields_to_apply.length > 0 && (
+          <div style={S.fieldsBlock}>
+            <div style={S.expandLabel}>Changes proposed</div>
+            <ul style={S.fieldList}>
+              {suggestion.fields_to_apply.map(f => (
+                <li key={f.field} style={S.fieldItem}>
+                  <span style={S.fieldName}>{f.label || f.field}</span>
+                  <span style={S.fieldArrow}>
+                    <span style={S.currentVal}>{formatVal(f.current)}</span>
+                    <span style={S.arrow}> → </span>
+                    <span style={S.recVal}>{formatVal(f.value)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
 
       {/* ── Actions ───────────────────────────────────────────────────── */}
       <div style={S.actions}>
         <button
           type="button"
-          onClick={() => onApply(suggestion.fields_to_apply)}
+          onClick={() => setIsReviewing(true)}
           style={S.btnApply}
         >
-          Apply
-        </button>
-        <button
-          type="button"
-          onClick={() => setExpanded(v => !v)}
-          style={S.btnWhy}
-        >
-          {expanded ? 'Hide details' : 'Why?'}
+          Apply Changes
         </button>
         <button
           type="button"
@@ -136,61 +167,50 @@ const S = {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
     borderLeft: '3px solid var(--cp-accent-maroon, var(--cp-accent))',
-    borderRadius: 10,
-    padding: '16px 20px',
+    borderRadius: 'var(--cp-radius-md, 8px)',
+    padding: 'var(--cp-space-4, 16px) var(--cp-space-5, 20px)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: 'var(--cp-space-3, 12px)',
   },
   topRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: 8,
+    gap: 'var(--cp-space-2, 8px)',
     flexWrap: 'wrap',
   },
   badge: {
-    fontSize: 11,
-    fontWeight: 800,
-    letterSpacing: 0.8,
+    fontSize: 'var(--cp-font-sm, 12px)',
+    fontWeight: 700,
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
-    color: 'var(--cp-accent-maroon, var(--cp-accent))',
+    color: 'var(--cp-text-primary)',
   },
   objChip: {
-    fontSize: 11,
+    fontSize: 'var(--cp-font-xs, 11px)',
     fontWeight: 600,
-    padding: '3px 10px',
+    padding: 'var(--cp-space-1, 4px) var(--cp-space-3, 12px)',
     background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 999,
+    borderRadius: 'var(--cp-radius-md, 8px)',
     color: 'var(--cp-text-muted)',
     letterSpacing: 0.3,
   },
   confChip: {
-    fontSize: 11,
+    fontSize: 'var(--cp-font-xs, 11px)',
     fontWeight: 600,
     letterSpacing: 0.3,
   },
-  dismissBtn: {
-    marginLeft: 'auto',
-    background: 'transparent',
-    border: 'none',
-    color: 'var(--cp-text-muted)',
-    cursor: 'pointer',
-    fontSize: 14,
-    lineHeight: 1,
-    padding: 0,
-    flexShrink: 0,
-  },
   label: {
-    fontSize: 14,
+    fontSize: 'var(--cp-font-md, 14px)',
     fontWeight: 700,
     color: 'var(--cp-text-primary)',
-    lineHeight: '20px',
+    lineHeight: 'var(--cp-leading-normal, 1.6)',
   },
   rationale: {
-    fontSize: 13,
+    fontSize: 'var(--cp-font-base, 13px)',
     color: 'var(--cp-text-body)',
-    lineHeight: '20px',
+    lineHeight: 'var(--cp-leading-normal, 1.6)',
     margin: 0,
   },
 
@@ -198,19 +218,19 @@ const S = {
   expandBox: {
     background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 8,
-    padding: '14px 16px',
+    borderRadius: 'var(--cp-radius-md, 8px)',
+    padding: 'var(--cp-space-3, 12px) var(--cp-space-4, 16px)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 14,
+    gap: 'var(--cp-space-3, 12px)',
   },
   expandLabel: {
-    fontSize: 10,
-    fontWeight: 700,
+    fontSize: 'var(--cp-font-xs, 11px)',
+    fontWeight: 600,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     color: 'var(--cp-text-muted)',
-    marginBottom: 6,
+    marginBottom: 'var(--cp-space-2, 8px)',
   },
   tradeoffsBlock: {},
   tradeoffList: {
@@ -219,18 +239,18 @@ const S = {
     padding: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: 5,
+    gap: 'var(--cp-space-2, 8px)',
   },
   tradeoffItem: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: 8,
-    fontSize: 12,
+    gap: 'var(--cp-space-2, 8px)',
+    fontSize: 'var(--cp-font-sm, 12px)',
     color: 'var(--cp-text-body)',
-    lineHeight: '18px',
+    lineHeight: 'var(--cp-leading-normal, 1.6)',
   },
-  plus:  { color: 'var(--cp-text-primary)', fontWeight: 800, flexShrink: 0, width: 12 },
-  minus: { color: 'var(--cp-text-muted)',   fontWeight: 800, flexShrink: 0, width: 12 },
+  plus:  { color: 'var(--cp-text-primary)', fontWeight: 700, flexShrink: 0, width: 12 },
+  minus: { color: 'var(--cp-text-muted)',   fontWeight: 700, flexShrink: 0, width: 12 },
 
   fieldsBlock: {},
   fieldList: {
@@ -239,59 +259,48 @@ const S = {
     padding: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
+    gap: 'var(--cp-space-1, 4px)',
   },
   fieldItem: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    fontSize: 12,
-    gap: 8,
+    fontSize: 'var(--cp-font-sm, 12px)',
+    gap: 'var(--cp-space-2, 8px)',
   },
   fieldName:   { color: 'var(--cp-text-muted)' },
-  fieldArrow:  { display: 'flex', alignItems: 'baseline', gap: 2 },
-  currentVal:  { color: 'var(--cp-text-muted)', textDecoration: 'line-through', fontSize: 11 },
-  arrow:       { color: 'var(--cp-text-muted)', fontSize: 11 },
-  recVal:      { color: 'var(--cp-accent-maroon, var(--cp-accent))', fontWeight: 700 },
+  fieldArrow:  { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-1, 4px)' },
+  currentVal:  { color: 'var(--cp-text-muted)', textDecoration: 'line-through', fontSize: 'var(--cp-font-xs, 11px)' },
+  arrow:       { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs, 11px)' },
+  recVal:      { color: 'var(--cp-accent-maroon, var(--cp-accent))', fontWeight: 600 },
 
   // Action buttons
   actions: {
     display: 'flex',
-    gap: 8,
+    gap: 'var(--cp-space-2, 8px)',
     flexWrap: 'wrap',
-    paddingTop: 2,
+    paddingTop: 'var(--cp-space-1, 4px)',
   },
   btnApply: {
     height: 32,
-    padding: '0 18px',
+    padding: '0 var(--cp-space-4, 16px)',
     background: 'var(--cp-accent-maroon, var(--cp-accent))',
     color: 'var(--cp-text-strong)',
     border: 'none',
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: 800,
+    borderRadius: 'var(--cp-radius-md, 8px)',
+    fontSize: 'var(--cp-font-sm, 12px)',
+    fontWeight: 600,
     cursor: 'pointer',
     letterSpacing: 0.3,
   },
-  btnWhy: {
-    height: 32,
-    padding: '0 16px',
-    background: 'transparent',
-    color: 'var(--cp-text-muted)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
   btnDismiss: {
     height: 32,
-    padding: '0 16px',
+    padding: '0 var(--cp-space-4, 16px)',
     background: 'transparent',
     color: 'var(--cp-text-muted)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 999,
-    fontSize: 12,
+    borderRadius: 'var(--cp-radius-md, 8px)',
+    fontSize: 'var(--cp-font-sm, 12px)',
     fontWeight: 600,
     cursor: 'pointer',
     marginLeft: 'auto',

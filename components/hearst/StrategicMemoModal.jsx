@@ -100,11 +100,11 @@ function toMarkdown(memo, meta) {
     ['Key Financial Metrics', 'key_financial_metrics', m => (m.metrics || []).map(x => `- **${x.label}**: ${x.value ?? '—'}${x.unit ? ' ' + x.unit : ''}${x.confidence ? ` (${x.confidence})` : ''}${x.source ? ` · ${x.source}` : ''}`).join('\n') + `\n\n${m.narrative || ''}`],
     ['Infrastructure Analysis', 'infrastructure_analysis', m => `${m.body || ''}\n\n${(m.tradeoffs || []).map(x => `- ${x}`).join('\n')}`],
     ['Market Benchmarking', 'market_benchmarking', m => (m.comparables || []).map(c => `- **${c.name}** — ${c.metric} : ${c.value} _(${c.source})_`).join('\n')],
-    ['Risks & Constraints', 'risks_constraints', m => (m.items || []).map(r => `- **[${r.severity}]** ${r.label} _(${r.category})_ — ${r.mitigation}`).join('\n')],
+    ['Key Concerns', 'risks_constraints', m => (m.items || []).map(r => `- **[${r.severity}]** ${r.label} _(${r.category})_ — ${r.mitigation}`).join('\n')],
     ['Strategic Opportunities', 'strategic_opportunities', m => (m.items || []).map(o => `- **${o.label}** _(${o.confidence})_ — ${o.execution_path}`).join('\n')],
     ['Recommended Architecture', 'recommended_architecture', m => `${Object.entries(m.config || {}).map(([k, v]) => `- ${k} : ${v}`).join('\n')}\n\n${m.rationale || ''}`],
-    ['Commercialization Strategy', 'commercialization_strategy', m => `- Pricing : ${m.pricing ?? '—'}\n- Contract : ${m.contract_structure ?? '—'}\n- Anchor : ${m.anchor_tenant ?? '—'}\n- Ramp : ${m.ramp_profile ?? '—'}`],
-    ['Deployment Roadmap', 'deployment_roadmap', m => `${(m.phases || []).map(p => `- **${p.label}** (+${p.months_from_t0}) : ${(p.gating_events || []).join(', ')}`).join('\n')}\n\n${(m.reality_check_flags || []).map(f => `> ⚠ ${f}`).join('\n')}`],
+    ['Revenue Model', 'commercialization_strategy', m => `- Pricing : ${m.pricing ?? '—'}\n- Contract : ${m.contract_structure ?? '—'}\n- Anchor : ${m.anchor_tenant ?? '—'}\n- Ramp : ${m.ramp_profile ?? '—'}`],
+    ['What Happens Next', 'deployment_roadmap', m => `${(m.phases || []).map(p => `- **${p.label}** (+${p.months_from_t0}) : ${(p.gating_events || []).join(', ')}`).join('\n')}\n\n${(m.reality_check_flags || []).map(f => `> ⚠ ${f}`).join('\n')}`],
     ['Long-Term Strategic Value', 'long_term_strategic_value', m => `${m.ten_year_arc || ''}\n\n${(m.speculative_branches || []).map(s => `- _(LOW VIS)_ ${s}`).join('\n')}`],
   ];
   for (const [title, key, fn] of blocks) {

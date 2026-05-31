@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Sankey, Tooltip, ResponsiveContainer } from 'recharts';
+import { Sankey, Tooltip } from 'recharts';
+import { useContainerSize } from './useContainerSize';
 
 /**
  * Build Sankey data depuis projection + waterfall.
@@ -91,20 +92,23 @@ function SankeyTooltip({ active, payload }) {
 }
 
 export default function FinancialSankey({ scenario, projection, height = 380 }) {
+  const [ref, size] = useContainerSize();
   const data = useMemo(() => buildSankeyData(scenario || {}, projection || {}), [scenario, projection]);
 
   if (!data.links?.length) {
     return (
       <div style={{ ...S.empty, height }}>
-        Fill in your numbers above to see how money flows.
+        Run a simulation to view capital allocation.
       </div>
     );
   }
 
   return (
-    <div style={{ width: '100%', height }}>
-      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+    <div ref={ref} style={{ width: '100%', height }}>
+      {size.width > 0 && size.height > 0 && (
         <Sankey
+          width={size.width}
+          height={size.height}
           data={data}
           nodePadding={20}
           nodeWidth={12}
@@ -115,7 +119,7 @@ export default function FinancialSankey({ scenario, projection, height = 380 }) 
         >
           <Tooltip content={<SankeyTooltip />} />
         </Sankey>
-      </ResponsiveContainer>
+      )}
     </div>
   );
 }

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en" data-concept="B">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORACLE · Sources Intelligence — Concept B · Command Center</title>
+<style>
+  :root{
+    --bg:#15060b; --surface-0:#1c0a10; --surface-1:#220d14; --surface-2:#2a121a;
+    --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16);
+    --text:#f3eef0; --body:#cdbfc4; --muted:#9a8b91; --faint:rgba(243,238,240,.30);
+    --accent:#be123c; --accent-soft:rgba(190,18,60,.14);
+    --fill:rgba(243,238,240,.85); --fill-track:rgba(255,255,255,.07);
+    --font:ui-sans-serif,-apple-system,"Inter",sans-serif; --mono:ui-monospace,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--body);font-family:var(--font);
+       background-image:radial-gradient(100% 70% at 90% -10%,rgba(190,18,60,.10),transparent 60%)}
+  .shell{display:flex;flex-direction:column;min-height:100vh}
+
+  /* Top overview bar */
+  .topbar{display:flex;align-items:center;gap:24px;padding:14px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .brand{font-size:13px;font-weight:800;color:var(--text);letter-spacing:.04em}
+  .brand small{display:block;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.14em}
+  .ometric{display:flex;flex-direction:column}
+  .ometric .v{font-size:20px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+  .ometric .l{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .ometric.crit .v{color:var(--accent)}
+
+  /* 3 panes */
+  .grid{display:grid;grid-template-columns:230px 1fr 300px;flex:1;min-height:0}
+  .pane{padding:16px 18px;overflow:auto}
+  .pane.left{border-right:1px solid var(--border);background:var(--surface-0)}
+  .pane.right{border-left:1px solid var(--border);background:var(--surface-0)}
+  h3{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin:0 0 12px}
+
+  /* Left — category navigator */
+  .navc{display:flex;flex-direction:column;gap:4px}
+  .navc a{display:block;padding:9px 10px;border-radius:8px;text-decoration:none;color:var(--body);border:1px solid transparent}
+  .navc a.on{background:var(--surface-2);border-color:var(--border);color:var(--text)}
+  .navc a:hover{background:var(--surface-1)}
+  .navc .r{display:flex;justify-content:space-between;font-size:12px;font-weight:600}
+  .navc .n{color:var(--muted);font-family:var(--mono);font-size:10px}
+  .spark{height:4px;border-radius:99px;background:var(--fill-track);overflow:hidden;margin-top:7px}
+  .spark>i{display:block;height:100%;background:var(--fill)}
+  .navc a.on .spark>i{background:var(--accent)}
+
+  /* Center — tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:14px}
+  .tabs button{font:inherit;font-size:12px;font-weight:700;color:var(--muted);background:transparent;border:1px solid var(--border);
+    border-radius:99px;padding:6px 14px;cursor:pointer}
+  .tabs button.on{background:var(--surface-2);color:var(--text);border-color:var(--border-strong)}
+  .feed{list-style:none;margin:0;padding:0}
+  .ev{display:grid;grid-template-columns:70px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+  .ev .when{font-size:11px;color:var(--faint);font-family:var(--mono)}
+  .ev .kind{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .ev .what{font-size:13px;color:var(--body);line-height:1.45;margin-top:2px}
+  .ev .what b{color:var(--text);font-weight:700}
+  .ev.influence{border-left:2px solid var(--accent);padding-left:12px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{text-align:left;font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:8px 8px;border-bottom:1px solid var(--border);cursor:pointer}
+  td{padding:9px 8px;border-bottom:1px solid var(--border);color:var(--body)}
+  td.name{color:var(--text);font-weight:600}
+  .rel{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px}
+  .rel .bar{width:40px;height:5px;border-radius:99px;background:var(--fill-track);overflow:hidden}
+  .rel .bar>i{display:block;height:100%;background:var(--fill)}
+  .st{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+  .st.active{color:var(--text)} .st.review{color:var(--accent)} .st.dep{color:var(--faint)}
+
+  /* Right — decision impact (always visible) */
+  .selsrc{padding:12px 14px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-1);margin-bottom:16px}
+  .selsrc .nm{font-size:14px;font-weight:800;color:var(--text)}
+  .selsrc .mt{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+  .selsrc .conf{margin-top:10px;font-size:11px;color:var(--body)}
+  .selsrc .conf .bar{height:6px;border-radius:99px;background:var(--fill-track);overflow:hidden;margin-top:5px}
+  .selsrc .conf .bar>i{display:block;height:100%;background:var(--accent)}
+  .impactlist{list-style:none;margin:0;padding:0}
+  .impactlist li{padding:9px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .impactlist .k{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .impactlist a{color:var(--accent);text-decoration:none;display:block;margin-top:3px;color:var(--text)}
+  .impactlist a:hover{color:var(--accent)}
+
+  .foot{padding:10px 22px;border-top:1px solid var(--border);font-size:11px;color:var(--faint);font-style:italic}
+
+  @media print{
+    @page{margin:12mm}
+    body{background:#fff!important;background-image:none!important;color:#222;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .grid{display:block} .pane{overflow:visible;border:none!important;background:#fff!important}
+    .pane.left{display:none}                      /* nav rail not meaningful in a static export */
+    .pane.right{border-top:1px solid #ddd;page-break-before:always}
+    .topbar{border-color:#ddd} .brand,.ometric .v,td.name,.selsrc .nm{color:#111}
+    .meter>i,.rel .bar>i,.spark>i{background:#444}
+    .ev,tr{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- Top overview -->
+  <div class="topbar">
+    <div class="brand">Sources Intelligence<small>ORACLE Research Command</small></div>
+    <div class="ometric"><span class="v">214</span><span class="l">Monitored</span></div>
+    <div class="ometric"><span class="v">63%</span><span class="l">Fresh</span></div>
+    <div class="ometric"><span class="v">22</span><span class="l">Review</span></div>
+    <div class="ometric crit"><span class="v">3</span><span class="l">Critical</span></div>
+    <div class="ometric"><span class="v">B+</span><span class="l">Confidence</span></div>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT — category navigator -->
+    <aside class="pane left">
+      <h3>Categories</h3>
+      <nav class="navc">
+        <a class="on"><div class="r"><span>GPU Market</span><span class="n">38</span></div><div class="spark"><i style="width:78%"></i></div></a>
+        <a><div class="r"><span>Energy</span><span class="n">26</span></div><div class="spark"><i style="width:55%"></i></div></a>
+        <a><div class="r"><span>Construction</span><span class="n">19</span></div><div class="spark"><i style="width:41%"></i></div></a>
+        <a><div class="r"><span>Finance</span><span class="n">31</span></div><div class="spark"><i style="width:84%"></i></div></a>
+        <a><div class="r"><span>Demand</span><span class="n">44</span></div><div class="spark"><i style="width:69%"></i></div></a>
+        <a><div class="r"><span>Regulation</span><span class="n">28</span></div><div class="spark"><i style="width:33%"></i></div></a>
+        <a><div class="r"><span>Internal Research</span><span class="n">28</span></div><div class="spark"><i style="width:90%"></i></div></a>
+      </nav>
+    </aside>
+
+    <!-- CENTER — feed / registry -->
+    <main class="pane center">
+      <div class="tabs"><button class="on">Live Feed</button><button>Registry</button><button>Signals only</button></div>
+      <ul class="feed">
+        <li class="ev influence"><span class="when">2h</span><div><span class="kind">Signal</span><div class="what"><b>GB200 NVL72 street price ↓ 9% QoQ</b> across 3 neoclouds → GPU-cloud CAPEX assumption updated.</div></div></li>
+        <li class="ev"><span class="when">6h</span><div><span class="kind">Updated</span><div class="what"><b>KAHRAMAA industrial tariff</b> Q2 schedule ingested (+3.1% creep).</div></div></li>
+        <li class="ev influence"><span class="when">1d</span><div><span class="kind">Confidence ↑</span><div class="what"><b>QIA–Brookfield $20B vehicle</b> MED → HIGH after second filing.</div></div></li>
+        <li class="ev"><span class="when">2d</span><div><span class="kind">Discovered</span><div class="what"><b>T&amp;T MENA cost index</b> Q1 — supersedes 2024.</div></div></li>
+        <li class="ev"><span class="when">3d</span><div><span class="kind">Invalidated</span><div class="what">Consumer GPU price feed deprecated (off-topic).</div></div></li>
+        <li class="ev"><span class="when">4d</span><div><span class="kind">Refreshed</span><div class="what"><b>DLR / Equinix leverage + margin</b> re-pulled from latest 10-K.</div></div></li>
+      </ul>
+    </main>
+
+    <!-- RIGHT — decision impact -->
+    <aside class="pane right">
+      <h3>Decision impact</h3>
+      <div class="selsrc">
+        <div class="nm">GB200 NVL72 street price</div>
+        <div class="mt">GPU Market · neocloud avg · updated 2h ago</div>
+        <div class="conf">Reliability 0.84<div class="bar"><i style="width:84%"></i></div></div>
+      </div>
+      <ul class="impactlist">
+        <li><span class="k">Scenarios using it</span><a>GPU Cloud 200MW</a><a>AI Factory 100MW (liquid)</a></li>
+        <li><span class="k">Reports referencing it</span><a>Qatar 100MW AI Factory — v2 (draft)</a></li>
+        <li><span class="k">Drives</span><a>CAPEX/MW · GPU-hour pricing assumption</a></li>
+        <li><span class="k">If invalidated</span><a>2 scenarios &amp; 1 report flagged for re-underwrite</a></li>
+      </ul>
+    </aside>
+  </div>
+
+  <div class="foot">Agent-monitored · select any source → see exactly which scenarios &amp; reports it moves. Concept B — Executive Research Command Center.</div>
+</div>
+</body>
+</html>

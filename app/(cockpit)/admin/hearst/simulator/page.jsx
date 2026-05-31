@@ -11,25 +11,15 @@ import {
 import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
 
 import { SIMULATOR_PARAM_EVENT } from '@/components/hearst/ChatContainer';
-import SimpleWizard from '@/components/hearst/simulator/SimpleWizard';
 import { startMemoJob } from '@/lib/hearst-memo-job-store';
-import CopilotPanel from '@/components/hearst/simulator/CopilotPanel';
-import ApplyModal from '@/components/hearst/simulator/ApplyModal';
-import { buildCopilotSuggestion } from '@/lib/copilot-rules';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import HardwareMixer from '@/components/hearst/simulator/HardwareMixer';
-import ArchetypeRadar from '@/components/hearst/simulator/ArchetypeRadar';
-import B2BMatrix from '@/components/hearst/simulator/B2BMatrix';
 import OutputKpiStrip from '@/components/hearst/simulator/OutputKpiStrip';
 import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
 import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
 
-const EcosystemNetwork = dynamic(() => import('@/components/hearst/simulator/EcosystemNetwork'), {
-  ssr: false,
-  loading: () => <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading industry players…</div>,
-});
 const FinancialSankey = dynamic(() => import('@/components/hearst/simulator/FinancialSankey'), {
   ssr: false,
   loading: () => <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading money flow…</div>,
@@ -38,13 +28,6 @@ const GanttTimeline = dynamic(() => import('@/components/hearst/simulator/GanttT
   ssr: false,
   loading: () => <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading timeline…</div>,
 });
-
-const VIZ_TABS = [
-  { id: 'radar',   label: 'Strengths' },
-  { id: 'network', label: 'Industry players' },
-  { id: 'matrix',  label: 'Who buys what' },
-  { id: 'sankey',  label: 'Money flow' },
-];
 
 const ARCH_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
 
@@ -61,20 +44,7 @@ export default function SimulatorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Wave 1 (C17): default to 'pro' (English) instead of 'simple'. The
-  // SimpleWizard novice flow is still French-only; until it is translated it
-  // must not be the first screen an English/Arabic-speaking stakeholder sees.
-  // A returning user who explicitly chose 'simple' is still respected below.
-  const [uiMode, setUiMode] = useState('pro');
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const stored = window.localStorage.getItem('hearst.simulator.uiMode');
-    if (stored === 'pro' || stored === 'simple') setUiMode(stored);
-  }, []);
-  const switchMode = useCallback((m) => {
-    setUiMode(m);
-    if (typeof window !== 'undefined') window.localStorage.setItem('hearst.simulator.uiMode', m);
-  }, []);
+  // Mode 'pro' is now the only mode in Wave 1 (C17).
 
   // AgentRail bridge: agent set_simulator_param → reducer dispatch
   useEffect(() => {
@@ -119,11 +89,6 @@ export default function SimulatorPage() {
   const saveTimerRef = useRef(null);
   useEffect(() => () => clearTimeout(saveTimerRef.current), []);
 
-  // Copilot V1 state
-  const [copilotSuggestion, setCopilotSuggestion] = useState(null);
-  const [copilotDismissed, setCopilotDismissed] = useState(false);
-  const [applyModalFields, setApplyModalFields] = useState(null);
-
   useEffect(() => {
     (async () => {
       try {
@@ -167,17 +132,6 @@ export default function SimulatorPage() {
       } catch {}
     })();
   }, []);
-
-  // Recompute Copilot suggestion whenever the simulation result changes.
-  // Reset dismissed state so a new (different) suggestion can surface.
-  useEffect(() => {
-    const next = buildCopilotSuggestion(state, simResult);
-    setCopilotSuggestion(prev => {
-      if (prev?.rule_id === next?.rule_id) return prev;
-      setCopilotDismissed(false);
-      return next;
-    });
-  }, [simResult, state]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -248,40 +202,6 @@ export default function SimulatorPage() {
     else dispatch({ type: ACTIONS.SET_MW, value: val });
   }, [state.mode]);
 
-  // Copilot: open the ApplyModal (no dispatch yet)
-  function handleCopilotApply(fields) {
-    setApplyModalFields(fields);
-  }
-
-  // ApplyModal confirmed: dispatch each field into the reducer
-  function handleApplyConfirm(fields) {
-    setApplyModalFields(null);
-    setCopilotDismissed(true);
-    for (const f of fields) {
-      switch (f.field) {
-        case 'total_mw':
-          dispatch({ type: ACTIONS.SET_MW, value: f.value });
-          break;
-        case 'primary_archetype_id':
-          dispatch({ type: ACTIONS.SET_PRIMARY_ARCHETYPE, value: f.value });
-          break;
-        case 'hardware_mix.utilization_pct':
-        case 'hardware_mix.ai_pct':
-        case 'hardware_mix.liquid_pct':
-        case 'hardware_mix.classic_pct':
-        case 'hardware_mix.gpu_sku_id':
-        case 'hardware_mix.debt_pct':
-        case 'hardware_mix.gpu_hour_price': {
-          const key = f.field.split('.')[1];
-          dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: { [key]: f.value } });
-          break;
-        }
-        default:
-          break;
-      }
-    }
-  }
-
   async function handleSave() {
     if (!projectId || !scenario) return;
     setSavingState('saving');
@@ -336,65 +256,15 @@ export default function SimulatorPage() {
       <header style={S.header}>
         <div style={S.headerText}>
           <h1 style={S.title}>Investment Simulator</h1>
-          <div style={S.subtitle}>
-            {uiMode === 'simple'
-              ? '4 questions simples pour bâtir votre plan d\'investissement.'
-              : 'Pick your starting point. See the financials, timeline, and team you\'ll need.'}
-          </div>
-        </div>
-        <div style={S.modeSwitch} role="tablist" aria-label="Simulator mode">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={uiMode === 'simple'}
-            onClick={() => switchMode('simple')}
-            style={{ ...S.modeBtn, ...(uiMode === 'simple' ? S.modeBtnActive : {}) }}
-          >
-            Simple
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={uiMode === 'pro'}
-            onClick={() => switchMode('pro')}
-            style={{ ...S.modeBtn, ...(uiMode === 'pro' ? S.modeBtnActive : {}) }}
-          >
-            Pro
-          </button>
         </div>
         {loading && <div style={S.loadingBadge}>Calculating…</div>}
       </header>
 
-      {uiMode === 'simple' && (
-        <SimpleWizard
-          state={state}
-          dispatch={dispatch}
-          simResult={simResult}
-          onSwitchToPro={() => switchMode('pro')}
-        />
-      )}
-
-      {uiMode === 'pro' && (<>
-      {/* ── Copilot Panel ── */}
-      {!copilotDismissed && copilotSuggestion && (
-        <CopilotPanel
-          suggestion={copilotSuggestion}
-          onApply={handleCopilotApply}
-          onDismiss={() => setCopilotDismissed(true)}
-        />
-      )}
-
-      {/* ── Apply Modal ── */}
-      {applyModalFields && (
-        <ApplyModal
-          fields={applyModalFields}
-          onConfirm={handleApplyConfirm}
-          onCancel={() => setApplyModalFields(null)}
-        />
-      )}
-
-      {/* ① INPUT — mode + hero field side-by-side */}
-      <section style={S.inputGrid}>
+      {/* 1. STARTING POINT */}
+      <section style={S.section}>
+        <header style={S.sectionHead}>
+          <h2 style={S.sectionTitle}>Starting Point</h2>
+        </header>
         <InputModeSwitcher
           mode={state.mode}
           onChange={onModeChange}
@@ -402,43 +272,12 @@ export default function SimulatorPage() {
           onPreset={onPreset}
           onBootstrap={onBootstrap}
         />
-        <InputFieldHero
-          mode={state.mode}
-          value={inputValue}
-          onChange={onInputChange}
-          derived={simResult?.derived}
-          solver={simResult?.solver}
-        />
       </section>
 
-      {state.mode === 'target_irr_first' && (
-        <div style={S.leverPanel}>
-          <span style={S.leverLabel}>What to change</span>
-          <div style={S.leverPills}>
-            {[
-              { id: 'pricing',      label: 'Pricing' },
-              { id: 'capex_per_mw', label: 'Build cost' },
-              { id: 'leverage',     label: 'Debt level' },
-              { id: 'mw',           label: 'Size (MW)' },
-            ].map(l => (
-              <button
-                key={l.id}
-                type="button"
-                onClick={() => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: l.id })}
-                style={{ ...S.leverBtn, ...(state.target_irr_lever === l.id ? S.leverBtnActive : {}) }}>
-                {l.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {simError && <div style={S.error}>Error: {simError}</div>}
-
-      {/* ② DEAL MODELS */}
+      {/* 2. OPERATING MODEL */}
       <section style={S.section}>
         <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Deal models</h2>
+          <h2 style={S.sectionTitle}>Operating Model</h2>
           <span style={S.counterChip}>{radarArchetypes.length} compared</span>
         </header>
         <ArchetypePicker
@@ -450,10 +289,45 @@ export default function SimulatorPage() {
         />
       </section>
 
-      {/* ③ EQUIPMENT MIX */}
+      {/* 3. PROJECT SIZE / TARGETS */}
       <section style={S.section}>
         <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Equipment mix</h2>
+          <h2 style={S.sectionTitle}>Project Size / Targets</h2>
+        </header>
+        <InputFieldHero
+          mode={state.mode}
+          value={inputValue}
+          onChange={onInputChange}
+          derived={simResult?.derived}
+          solver={simResult?.solver}
+        />
+        {state.mode === 'target_irr_first' && (
+          <div style={S.leverPanel}>
+            <span style={S.leverLabel}>What to change</span>
+            <div style={S.leverPills}>
+              {[
+                { id: 'pricing',      label: 'Pricing' },
+                { id: 'capex_per_mw', label: 'Build cost' },
+                { id: 'leverage',     label: 'Debt level' },
+                { id: 'mw',           label: 'Size (MW)' },
+              ].map(l => (
+                <button
+                  key={l.id}
+                  type="button"
+                  onClick={() => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: l.id })}
+                  style={{ ...S.leverBtn, ...(state.target_irr_lever === l.id ? S.leverBtnActive : {}) }}>
+                  {l.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* 4. HARDWARE ALLOCATION */}
+      <section style={S.section}>
+        <header style={S.sectionHead}>
+          <h2 style={S.sectionTitle}>Hardware Allocation</h2>
         </header>
         <HardwareMixer
           totalMw={scenario?.total_mw || state.total_mw}
@@ -462,63 +336,41 @@ export default function SimulatorPage() {
         />
       </section>
 
-      {/* ④ VISUALISATIONS */}
-      <section style={S.vizCard}>
+      {simError && <div style={S.error}>Error: {simError}</div>}
+
+      {/* 5. TIMELINE */}
+      <section style={S.section}>
         <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Visualisations</h2>
-          <div style={S.vizTabs} role="tablist">
-            {VIZ_TABS.map(t => (
-              <button
-                key={t.id}
-                type="button"
-                role="tab"
-                aria-selected={state.active_viz === t.id}
-                onClick={() => dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value: t.id })}
-                style={{ ...S.vizTab, ...(state.active_viz === t.id ? S.vizTabActive : {}) }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <h2 style={S.sectionTitle}>Timeline</h2>
         </header>
-        <div style={S.vizContainer}>
-          {state.active_viz === 'radar' && (
-            <ArchetypeRadar archetypes={radarArchetypes} height={400} />
-          )}
-          {state.active_viz === 'network' && (
-            <EcosystemNetwork activeArchetypeId={state.primary_archetype_id} />
-          )}
-          {state.active_viz === 'matrix' && (
-            <B2BMatrix
-              selected={{ businessModelId: state.business_model_id, clientTypeId: state.client_type_id }}
-              onCellClick={onCellClick}
-            />
-          )}
-          {state.active_viz === 'sankey' && (
-            <FinancialSankey scenario={scenario} projection={projection} height={400} />
-          )}
+        <div style={S.subsection}>
+          <GanttTimeline scenario={scenario || { site_readiness: 'greenfield' }} exit_year={scenario?.exit_year || 10} />
         </div>
       </section>
 
-      {/* ⑤ RESULTS */}
+      {/* 6. FINANCIAL PROJECTION */}
       <section style={S.section}>
         <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Results</h2>
-          <span style={S.sectionSubtitle}>Key numbers · timeline · 10-year projection</span>
+          <h2 style={S.sectionTitle}>Financial Projection</h2>
+          <span style={S.sectionSubtitle}>Key numbers & 10-year projection</span>
         </header>
-
         <OutputKpiStrip projection={projection} />
-
         <div style={S.subsection}>
-          <h3 style={S.subTitle}>Build timeline</h3>
-          <GanttTimeline scenario={scenario || { site_readiness: 'greenfield' }} exit_year={scenario?.exit_year || 10} />
-        </div>
-
-        <div style={S.subsection}>
-          <h3 style={S.subTitle}>10-year financial projection</h3>
           <ProjectionChart years={projection?.years || []} />
         </div>
       </section>
 
+      {/* 7. CAPITAL ALLOCATION */}
+      <section style={S.vizCard}>
+        <header style={S.sectionHead}>
+          <h2 style={S.sectionTitle}>Capital Allocation</h2>
+        </header>
+        <div style={S.vizContainer}>
+          <FinancialSankey scenario={scenario} projection={projection} height={400} />
+        </div>
+      </section>
+
+      {/* 8. ACTIONS */}
       <SimulatorCTABar
         hasProjection={!!projection}
         savingState={savingState}
@@ -527,7 +379,7 @@ export default function SimulatorPage() {
       />
 
       {projection && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: -16 }}>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
           <button
             type="button"
             onClick={() => startMemoJob({
@@ -542,7 +394,7 @@ export default function SimulatorPage() {
               background: 'var(--cp-accent-maroon, var(--cp-accent))',
               color: 'var(--cp-text-strong)',
               border: 'none',
-              borderRadius: 999,
+              borderRadius: 'var(--cp-radius-sm, 4px)',
               fontSize: 12,
               fontWeight: 800,
               letterSpacing: 0.3,
@@ -555,7 +407,6 @@ export default function SimulatorPage() {
         </div>
       )}
       {/* Modal/badge/toast mountés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
-      </>)}
     </div>
   );
 }
@@ -619,44 +470,44 @@ const S = {
   wrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 32,
+    gap: 'var(--cp-space-8, 32px)',
     maxWidth: 1280,
     margin: '0 auto',
-    padding: '32px 32px 96px',
+    padding: 'var(--cp-space-8, 32px) var(--cp-space-8, 32px) var(--cp-space-12, 96px)',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    gap: 16,
+    gap: 'var(--cp-space-4, 16px)',
     flexWrap: 'wrap',
-    paddingBottom: 16,
+    paddingBottom: 'var(--cp-space-4, 16px)',
     borderBottom: '1px solid var(--cp-border)',
   },
-  headerText: { display: 'flex', flexDirection: 'column', gap: 4 },
+  headerText: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1, 4px)' },
   title: {
-    fontSize: 28,
-    lineHeight: '36px',
-    fontWeight: 800,
+    fontSize: 'var(--cp-font-2xl, 24px)',
+    lineHeight: '1.2',
+    fontWeight: 600,
     letterSpacing: -0.4,
     color: 'var(--cp-text-primary)',
     margin: 0,
   },
   subtitle: {
-    fontSize: 13,
-    lineHeight: '20px',
+    fontSize: 'var(--cp-font-base, 13px)',
+    lineHeight: 'var(--cp-leading-normal, 1.6)',
     color: 'var(--cp-text-muted)',
   },
   modeSwitch: {
-    display: 'inline-flex', gap: 4, padding: 4,
+    display: 'inline-flex', gap: 'var(--cp-space-1, 4px)', padding: 'var(--cp-space-1, 4px)',
     background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)',
-    borderRadius: 999, flexShrink: 0,
+    borderRadius: 'var(--cp-radius-md, 8px)', flexShrink: 0,
   },
   modeBtn: {
-    height: 32, padding: '0 18px',
+    height: 32, padding: '0 var(--cp-space-4, 16px)',
     background: 'transparent', color: 'var(--cp-text-muted)',
-    border: 'none', borderRadius: 999, cursor: 'pointer',
-    fontSize: 'var(--cp-font-sm)', fontWeight: 700, letterSpacing: 0.3,
+    border: 'none', borderRadius: 'var(--cp-radius-pill, 9999px)', cursor: 'pointer',
+    fontSize: 'var(--cp-font-sm)', fontWeight: 600, letterSpacing: 0.3,
     transition: 'all 0.15s ease',
   },
   modeBtnActive: {
@@ -665,11 +516,11 @@ const S = {
   },
   loadingBadge: {
     fontSize: 'var(--cp-font-sm)',
-    padding: '8px 16px',
+    padding: 'var(--cp-space-2, 8px) var(--cp-space-4, 16px)',
     background: 'var(--cp-accent-soft)',
     color: 'var(--cp-text-strong)',
-    borderRadius: 999,
-    fontWeight: 700,
+    borderRadius: 'var(--cp-radius-md, 8px)',
+    fontWeight: 600,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     flexShrink: 0,
@@ -677,27 +528,27 @@ const S = {
 
   inputGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: 16,
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: 'var(--cp-space-4, 16px)',
     alignItems: 'stretch',
-    minHeight: 340,
   },
 
   section: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 16,
+    gap: 'var(--cp-space-4, 16px)',
   },
   sectionHead: {
     display: 'flex',
     alignItems: 'center',
-    gap: 12,
+    gap: 'var(--cp-space-3, 12px)',
     minHeight: 32,
+    flexWrap: 'wrap',
   },
   sectionTitle: {
-    fontSize: 16,
-    lineHeight: '24px',
-    fontWeight: 700,
+    fontSize: 'var(--cp-font-lg, 16px)',
+    lineHeight: 'var(--cp-leading-normal, 1.6)',
+    fontWeight: 600,
     color: 'var(--cp-text-primary)',
     margin: 0,
   },
@@ -707,19 +558,19 @@ const S = {
   },
   counterChip: {
     fontSize: 'var(--cp-font-sm)',
-    fontWeight: 700,
-    padding: '4px 12px',
+    fontWeight: 600,
+    padding: 'var(--cp-space-1, 4px) var(--cp-space-3, 12px)',
     background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
     color: 'var(--cp-text-muted)',
-    borderRadius: 999,
+    borderRadius: 'var(--cp-radius-md, 8px)',
     letterSpacing: 0.5,
   },
-  subsection: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8, minHeight: 0, position: 'relative' },
+  subsection: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2, 8px)', marginTop: 'var(--cp-space-2, 8px)', minHeight: 0, position: 'relative' },
   subTitle: {
     fontSize: 'var(--cp-font-base)',
-    lineHeight: '20px',
-    fontWeight: 700,
+    lineHeight: 'var(--cp-leading-normal, 1.6)',
+    fontWeight: 600,
     color: 'var(--cp-text-primary)',
     margin: 0,
     letterSpacing: 0.2,
@@ -728,31 +579,32 @@ const S = {
   vizCard: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 10,
-    padding: 24,
+    borderRadius: 'var(--cp-radius-md, 10px)',
+    padding: 'var(--cp-space-6, 24px)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 16,
+    gap: 'var(--cp-space-4, 16px)',
   },
   vizTabs: {
     display: 'flex',
-    gap: 4,
+    gap: 'var(--cp-space-1, 4px)',
     marginLeft: 'auto',
-    padding: 4,
+    padding: 'var(--cp-space-1, 4px)',
     background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 999,
+    borderRadius: 'var(--cp-radius-md, 8px)',
+    flexWrap: 'wrap',
   },
   vizTab: {
     fontSize: 'var(--cp-font-sm)',
     height: 32,
-    padding: '0 16px',
+    padding: '0 var(--cp-space-4, 16px)',
     background: 'transparent',
     color: 'var(--cp-text-muted)',
     border: 'none',
-    borderRadius: 999,
+    borderRadius: 'var(--cp-radius-md, 8px)',
     cursor: 'pointer',
-    fontWeight: 700,
+    fontWeight: 600,
     letterSpacing: 0.3,
     transition: 'all 0.15s ease',
   },
@@ -768,11 +620,11 @@ const S = {
   },
 
   error: {
-    padding: '12px 16px',
+    padding: 'var(--cp-space-3, 12px) var(--cp-space-4, 16px)',
     background: 'var(--cp-accent-soft)',
     color: 'var(--cp-text-strong)',
     border: '1px solid var(--cp-accent)',
-    borderRadius: 10,
+    borderRadius: 'var(--cp-radius-md, 10px)',
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 600,
   },
@@ -780,28 +632,29 @@ const S = {
   leverPanel: {
     display: 'flex',
     alignItems: 'center',
-    gap: 16,
-    padding: '16px 24px',
+    gap: 'var(--cp-space-4, 16px)',
+    padding: 'var(--cp-space-4, 16px) var(--cp-space-6, 24px)',
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 10,
+    borderRadius: 'var(--cp-radius-md, 10px)',
+    flexWrap: 'wrap',
   },
   leverLabel: {
     fontSize: 'var(--cp-font-sm)',
-    fontWeight: 700,
+    fontWeight: 600,
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
     letterSpacing: 1.5,
   },
-  leverPills: { display: 'flex', gap: 8, flexWrap: 'wrap' },
+  leverPills: { display: 'flex', gap: 'var(--cp-space-2, 8px)', flexWrap: 'wrap' },
   leverBtn: {
     fontSize: 'var(--cp-font-sm)',
     height: 32,
-    padding: '0 16px',
+    padding: '0 var(--cp-space-4, 16px)',
     background: 'transparent',
     color: 'var(--cp-text-muted)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 999,
+    borderRadius: 'var(--cp-radius-md, 8px)',
     cursor: 'pointer',
     fontWeight: 600,
   },

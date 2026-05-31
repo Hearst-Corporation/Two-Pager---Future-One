@@ -2,14 +2,17 @@
 
 import {
   ComposedChart, Bar, Line, Area, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  CartesianGrid, Tooltip, Legend,
 } from 'recharts';
+import { useContainerSize } from './useContainerSize';
 
 export default function ProjectionChart({ years = [], height = 280 }) {
+  const [ref, size] = useContainerSize();
+
   if (!years.length) {
     return (
       <div style={{ ...S.empty, height }}>
-        Fill in your numbers above to see the projection.
+        Run a simulation to view projections.
       </div>
     );
   }
@@ -23,9 +26,9 @@ export default function ProjectionChart({ years = [], height = 280 }) {
   }));
 
   return (
-    <div style={{ width: '100%', height }}>
-      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-        <ComposedChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+    <div ref={ref} style={{ width: '100%', height }}>
+      {size.width > 0 && size.height > 0 && (
+        <ComposedChart width={size.width} height={size.height} data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-border)" />
           <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'var(--cp-text-muted)' }} />
           <YAxis tick={{ fontSize: 11, fill: 'var(--cp-text-muted)' }} tickFormatter={(v) => `$${v.toFixed(0)}M`} />
@@ -36,7 +39,7 @@ export default function ProjectionChart({ years = [], height = 280 }) {
           <Bar dataKey="revenue" name="Revenue" fill="var(--cp-accent-maroon)" opacity={0.85} />
           <Line dataKey="ebitda" name="Yearly Profit" stroke="var(--cp-accent-maroon)" strokeWidth={2} dot={{ r: 3 }} />
         </ComposedChart>
-      </ResponsiveContainer>
+      )}
     </div>
   );
 }

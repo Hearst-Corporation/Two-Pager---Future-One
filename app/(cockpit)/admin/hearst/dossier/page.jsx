@@ -417,7 +417,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         )}
 
         {m.commercialization_strategy && (
-          <AnalyticsBlock title="Commercialization">
+          <AnalyticsBlock title="Revenue Model">
             <table style={S.configTable}>
               <tbody>
                 {[

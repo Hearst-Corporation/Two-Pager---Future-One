@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en" data-concept="C">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORACLE · Sources Intelligence — Concept C · Autonomous Research Network</title>
+<style>
+  :root{
+    --bg:#15060b; --surface-0:#1c0a10; --surface-1:#220d14; --surface-2:#2a121a;
+    --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16);
+    --text:#f3eef0; --body:#cdbfc4; --muted:#9a8b91; --faint:rgba(243,238,240,.30);
+    --accent:#be123c; --accent-soft:rgba(190,18,60,.14);
+    --fill:rgba(243,238,240,.85); --fill-track:rgba(255,255,255,.07);
+    --font:ui-sans-serif,-apple-system,"Inter",sans-serif; --mono:ui-monospace,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg);color:var(--body);font-family:var(--font);
+       background-image:radial-gradient(120% 90% at 50% -10%,rgba(190,18,60,.12),transparent 60%)}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 24px 80px}
+  .eyebrow{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.14em}
+  h1{font-size:22px;font-weight:800;color:var(--text);margin:6px 0 2px}
+  .sub{font-size:13px;color:var(--muted)}
+
+  /* Agent status hero */
+  .hero{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin:18px 0 8px;
+        padding:16px 20px;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:14px;background:var(--surface-1)}
+  .agents{display:flex;align-items:center;gap:10px}
+  .pulse{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 var(--accent-soft);animation:p 2s infinite}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(190,18,60,.45)}70%{box-shadow:0 0 0 10px rgba(190,18,60,0)}100%{box-shadow:0 0 0 0 rgba(190,18,60,0)}}
+  .agents .t{font-size:13px;color:var(--text);font-weight:700}
+  .agents .s{font-size:11px;color:var(--muted);font-family:var(--mono)}
+  .om{display:flex;flex-direction:column;margin-left:6px}
+  .om .v{font-size:19px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+  .om .l{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .om.crit .v{color:var(--accent)}
+
+  .cols{display:grid;grid-template-columns:1fr 300px;gap:16px;margin-top:16px}
+  @media(max-width:880px){.cols{grid-template-columns:1fr}}
+  .card{border:1px solid var(--border);border-radius:14px;background:var(--surface-0);padding:16px 18px}
+  h3{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin:0 0 12px}
+
+  /* Influence graph (static SVG — Puppeteer/PDF safe, no JS) */
+  .graph{width:100%;height:auto;display:block}
+  .gnode{fill:var(--surface-2);stroke:var(--border-strong);stroke-width:1}
+  .gnode.core{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+  .glabel{fill:var(--body);font:600 11px var(--font)} .glabel.t{fill:var(--text)}
+  .gnum{fill:var(--muted);font:10px var(--mono)}
+  .edge{stroke:rgba(243,238,240,.18);stroke-width:1;fill:none}
+  .edge.live{stroke:var(--accent);stroke-width:1.8}              /* influencing decisions today */
+  .gkey{font:10px var(--font);fill:var(--faint)}
+
+  /* Live agent activity */
+  .feed{list-style:none;margin:0;padding:0}
+  .ev{padding:9px 0;border-bottom:1px solid var(--border)}
+  .ev .k{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .ev .w{font-size:12px;color:var(--body);line-height:1.4;margin-top:2px}
+  .ev .w b{color:var(--text)} .ev.live{border-left:2px solid var(--accent);padding-left:10px}
+
+  /* Decision impact strip */
+  .impact{margin-top:16px}
+  .irow{display:grid;grid-template-columns:230px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .irow .src{color:var(--text);font-weight:700}
+  .irow .src small{display:block;color:var(--faint);font-weight:400;font-family:var(--mono);margin-top:2px}
+  .irow .lk a{color:var(--accent);text-decoration:none} .irow .lk{color:var(--body)}
+
+  .pdfnote{margin-top:18px;font-size:11px;color:var(--faint);font-style:italic;border-top:1px dashed var(--border);padding-top:10px}
+
+  @media print{
+    @page{margin:12mm}
+    body{background:#fff!important;background-image:none!important;color:#222;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .cols{display:block} .card,.hero{background:#fff!important;border-color:#ddd!important}
+    .pulse{animation:none;background:#9b1230} .agents .t,.om .v,h1,.irow .src{color:#111}
+    .gnode{fill:#f4f4f4;stroke:#bbb} .gnode.core{fill:#f3dde2;stroke:#9b1230}
+    .glabel,.glabel.t{fill:#222} .edge{stroke:#ccc} .edge.live{stroke:#9b1230}
+    .card,.ev,.irow{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">ORACLE · Sources Intelligence</div>
+  <h1>Autonomous Research Network</h1>
+  <div class="sub">The living evidence layer — agents discover, score and monitor; the graph shows what flows into decisions <b>now</b>.</div>
+
+  <!-- Agent status hero -->
+  <div class="hero">
+    <div class="agents"><span class="pulse"></span><div><div class="t">4 research agents active</div><div class="s">now: reading energy filings · scoring 11 GPU sources · monitoring 3 signals</div></div></div>
+    <div class="om"><span class="v">214</span><span class="l">Monitored</span></div>
+    <div class="om"><span class="v">63%</span><span class="l">Fresh</span></div>
+    <div class="om"><span class="v">22</span><span class="l">Review</span></div>
+    <div class="om crit"><span class="v">3</span><span class="l">Critical</span></div>
+    <div class="om"><span class="v">B+</span><span class="l">Confidence</span></div>
+  </div>
+
+  <div class="cols">
+    <!-- Influence graph -->
+    <div class="card">
+      <h3>Influence graph · sources → ORACLE → decisions</h3>
+      <svg class="graph" viewBox="0 0 760 400" role="img" aria-label="Influence graph">
+        <!-- edges category -> core -->
+        <path class="edge live" d="M150,60 C300,60 320,200 392,200"/>
+        <path class="edge" d="M150,110 C300,110 330,200 392,200"/>
+        <path class="edge" d="M150,160 C300,160 350,200 392,200"/>
+        <path class="edge live" d="M150,210 C300,210 360,200 392,200"/>
+        <path class="edge" d="M150,260 C300,260 350,200 392,200"/>
+        <path class="edge" d="M150,310 C300,310 330,200 392,200"/>
+        <!-- edges core -> decisions -->
+        <path class="edge live" d="M468,200 C560,200 560,90 610,90"/>
+        <path class="edge live" d="M468,200 C560,200 560,170 610,170"/>
+        <path class="edge" d="M468,200 C560,200 560,250 610,250"/>
+        <path class="edge" d="M468,200 C560,200 560,330 610,330"/>
+        <!-- category nodes (size = source count, opacity ~ freshness) -->
+        <g><circle class="gnode" cx="110" cy="60" r="20" opacity=".95"/><text class="glabel t" x="138" y="58">GPU Market</text><text class="gnum" x="138" y="72">38 · 78%</text></g>
+        <g><circle class="gnode" cx="110" cy="110" r="17" opacity=".7"/><text class="glabel" x="138" y="108">Energy</text><text class="gnum" x="138" y="122">26 · 55%</text></g>
+        <g><circle class="gnode" cx="110" cy="160" r="15" opacity=".55"/><text class="glabel" x="138" y="158">Construction</text><text class="gnum" x="138" y="172">19 · 41%</text></g>
+        <g><circle class="gnode" cx="110" cy="210" r="18" opacity=".95"/><text class="glabel t" x="138" y="208">Finance</text><text class="gnum" x="138" y="222">31 · 84%</text></g>
+        <g><circle class="gnode" cx="110" cy="260" r="21" opacity=".85"/><text class="glabel" x="138" y="258">Demand</text><text class="gnum" x="138" y="272">44 · 69%</text></g>
+        <g><circle class="gnode" cx="110" cy="310" r="17" opacity=".45"/><text class="glabel" x="138" y="308">Regulation</text><text class="gnum" x="138" y="322">28 · 33%</text></g>
+        <!-- ORACLE core -->
+        <g><circle class="gnode core" cx="430" cy="200" r="38"/><text class="glabel t" x="430" y="197" text-anchor="middle" style="font-weight:800">ORACLE</text><text class="gnum" x="430" y="213" text-anchor="middle">engine</text></g>
+        <!-- decision nodes -->
+        <g><circle class="gnode" cx="630" cy="90" r="16"/><text class="glabel t" x="652" y="88">Qatar 50MW Opus</text><text class="gnum" x="652" y="102">approved</text></g>
+        <g><circle class="gnode" cx="630" cy="170" r="16"/><text class="glabel t" x="652" y="168">100MW AI Factory</text><text class="gnum" x="652" y="182">draft · v2</text></g>
+        <g><circle class="gnode" cx="630" cy="250" r="14"/><text class="glabel" x="652" y="248">GPU Cloud 200MW</text><text class="gnum" x="652" y="262">scenario</text></g>
+        <g><circle class="gnode" cx="630" cy="330" r="13"/><text class="glabel" x="652" y="328">Powered Shell 50MW</text><text class="gnum" x="652" y="342">scenario</text></g>
+      </svg>
+      <div style="display:flex;gap:18px;margin-top:6px">
+        <span class="gkey">— neutral edge = monitored</span>
+        <span class="gkey" style="color:var(--accent)">— accent edge = influencing a live decision</span>
+        <span class="gkey">node size = #sources · opacity = freshness</span>
+      </div>
+    </div>
+
+    <!-- Live agent activity -->
+    <div class="card">
+      <h3>Agent activity</h3>
+      <ul class="feed">
+        <li class="ev live"><span class="k">Signal · 2h</span><div class="w"><b>GB200 price ↓9% QoQ</b> — pushed to GPU-cloud scenarios.</div></li>
+        <li class="ev"><span class="k">Reading · now</span><div class="w">Agent-2 parsing <b>KAHRAMAA Q2 tariff</b>.</div></li>
+        <li class="ev live"><span class="k">Score ↑ · 1d</span><div class="w"><b>QIA–Brookfield $20B</b> MED→HIGH.</div></li>
+        <li class="ev"><span class="k">Discovered · 2d</span><div class="w"><b>T&amp;T MENA cost index</b> Q1.</div></li>
+        <li class="ev"><span class="k">Rejected · 3d</span><div class="w">Consumer GPU feed — off-topic.</div></li>
+        <li class="ev"><span class="k">Monitoring</span><div class="w">3 sources on a 6h refresh cycle.</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Decision impact -->
+  <div class="card impact">
+    <h3>What is influencing decisions today</h3>
+    <div class="irow"><div class="src">GB200 NVL72 street price<small>GPU · conf 0.84 · 2h</small></div><div class="lk">Moves <a href="#">GPU Cloud 200MW</a>, <a href="#">100MW AI Factory v2</a> — CAPEX/MW &amp; GPU-hour pricing.</div></div>
+    <div class="irow"><div class="src">QIA–Brookfield $20B vehicle<small>Finance · conf 0.90 · 1d</small></div><div class="lk">Anchors financeability of <a href="#">Powered Shell 50MW</a> · cited in <a href="#">Qatar 50MW Opus (approved)</a>.</div></div>
+    <div class="irow"><div class="src">KAHRAMAA grid timeline<small>Energy · conf 0.64 · review</small></div><div class="lk">Source of the "energisation slips to 2029" risk in <a href="#">Qatar 50MW Opus</a>.</div></div>
+  </div>
+
+  <div class="pdfnote">PDF: the graph is static inline <b>SVG</b> (Puppeteer-renderable, no JS/canvas); the print stylesheet flips to ink-on-paper and the "influencing today" section doubles as a ranked table fallback so the export reads even without the diagram. Concept C — Autonomous Research Network.</div>
+</div>
+</body>
+</html>

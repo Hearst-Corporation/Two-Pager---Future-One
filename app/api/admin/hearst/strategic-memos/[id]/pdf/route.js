@@ -340,8 +340,8 @@ p { margin: 0; }
 .rk { font-size: 9pt; font-weight: 700; color: var(--ink); }
 .verdict-block { margin-top: 11mm; flex-shrink: 0; padding: 14mm 0 10mm; }
 .verdict-eyebrow { font-size: 8pt; letter-spacing: .24em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 5mm; }
-.verdict { font-family: var(--sans); font-weight: 700; font-size: 82pt; line-height: 0.88;
-  letter-spacing: -0.03em; color: var(--ink); margin: 0; white-space: normal; }
+.verdict { font-family: var(--sans); font-weight: 700; font-size: 44pt; line-height: 1.0;
+  letter-spacing: -0.02em; color: var(--ink); margin: 0; white-space: normal; }
 .recommendation { font-size: 11.5pt; line-height: 1.5; color: var(--ink-soft); margin-top: 6mm; max-width: 140mm; }
 .figs { margin-top: 10mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; }
 .fig .fk { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3mm; }
@@ -518,7 +518,7 @@ p { margin: 0; }
   </div>
 </section>
 
-<!-- PAGE 1 — EXECUTIVE DECISION -->
+<!-- PAGE 1 — EXECUTIVE SUMMARY -->
 <section class="page decision">
   <div class="runhead">
     <span class="rh-name">${esc(row.title)}</span>
@@ -526,7 +526,7 @@ p { margin: 0; }
   </div>
   <div class="frame">
     <div class="dec-head">
-      <p class="eyebrow"><span class="num">01</span>Executive Decision</p>
+      <p class="eyebrow"><span class="num">01</span>Executive Summary</p>
       <div class="dec-meta">
         <span class="dm-k">For the Investment Committee — ${esc(projDate)}</span>
         <span class="dec-risk">
@@ -542,6 +542,18 @@ p { margin: 0; }
         ${esc(approveBody.slice(0, 200))}
       </p>
     </div>
+    
+    <div class="opp-grid" style="margin-top: 5mm; margin-bottom: 5mm;">
+      <div class="opp-cell">
+        <div class="oc-k">Why This Matters</div>
+        <p class="oc-v">${ctx.body ? esc(ctx.body.slice(0, 280)) : 'N/A'}</p>
+      </div>
+      <div class="opp-cell is-thesis">
+        <div class="oc-k">The Thesis</div>
+        <p class="oc-v">${exsum.headline ? esc(exsum.headline.slice(0, 220)) : 'N/A'}</p>
+      </div>
+    </div>
+
     <div class="figs">
       <div class="fig">
         <div class="fk">Investment Size</div>
@@ -579,44 +591,7 @@ p { margin: 0; }
   </div>
 </section>
 
-<!-- PAGE 2 — OPPORTUNITY -->
-<section class="page">
-  <div class="runhead">
-    <span class="rh-name">${esc(row.title)}</span>
-    <span class="rh-class">Strictly Private &amp; Confidential</span>
-  </div>
-  <div class="frame">
-    <p class="eyebrow"><span class="num">02</span>The Opportunity</p>
-    <h2 class="headline">${ctx.body ? esc(ctx.body.split('.')[0].slice(0, 80) + '.') : 'Power is the binding constraint.'}</h2>
-    <hr class="accentline" />
-    <div class="opp-grid">
-      <div class="opp-cell">
-        <div class="oc-k">Strategic Context</div>
-        <p class="oc-v">${ctx.body ? esc(ctx.body.slice(0, 280)) : 'N/A'}</p>
-      </div>
-      <div class="opp-cell">
-        <div class="oc-k">Market Context</div>
-        <p class="oc-v">${exsum.bullets?.[1] ? esc(exsum.bullets[1].slice(0, 240)) : 'Hyperscaler and sovereign AI capex exceeds US$400B per year.'}</p>
-      </div>
-      <div class="opp-cell">
-        <div class="oc-k">Strategic Rationale</div>
-        <p class="oc-v">${arch.rationale ? esc(arch.rationale.replace(/^WHY:\s*/i, '').slice(0, 240)) : 'N/A'}</p>
-      </div>
-      <div class="opp-cell is-thesis">
-        <div class="oc-k">The Thesis</div>
-        <p class="oc-v">${exsum.headline ? esc(exsum.headline.slice(0, 220)) : 'N/A'}</p>
-      </div>
-    </div>
-    ${drivers(opps)}
-  </div>
-  <div class="runfoot">
-    <span class="rf-pg">02</span>
-    <span class="rf-conf">Strictly Private &amp; Confidential</span>
-    <span>${esc(projDate)}</span>
-  </div>
-</section>
-
-<!-- PAGE 3 — FINANCIAL SUMMARY -->
+<!-- PAGE 2 — FINANCIAL SUMMARY -->
 <section class="page">
   <div class="runhead">
     <span class="rh-name">${esc(row.title)}</span>

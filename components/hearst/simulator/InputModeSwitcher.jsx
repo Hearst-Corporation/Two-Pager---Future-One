@@ -139,7 +139,7 @@ const S = {
     background: 'transparent',
     color: 'var(--cp-text-muted)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 999,
+    borderRadius: 'var(--cp-radius-md, 8px)',
     cursor: 'pointer',
     transition: 'all 0.12s ease',
   },

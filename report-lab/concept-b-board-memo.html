@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FUTUR ONE — Investment Committee Memorandum · ORACLE</title>
+<style>
+/* ============================================================
+   ORACLE · CONCEPT B — "BOARD MEMO"
+   Swiss restraint · editorial calm · maximum white space.
+   One grotesque sans for structure; Georgia serif reserved
+   ONLY for the verdict and pull quotes. One oxblood accent,
+   rationed: a single rule, the verdict, key figures. When in
+   doubt, remove.
+   ============================================================ */
+
+/* ---- Print foundation ---- */
+@page { size: A4; margin: 0; }
+
+:root {
+  --ink:        #111111;
+  --ink-soft:   #2A2A2A;
+  --gray-1:     #585858;   /* secondary text — lifted for body legibility */
+  --gray-2:     #8C8C8C;   /* labels / eyebrows */
+  --hair:       #D7D3CD;   /* hairline on warm paper */
+  --hair-soft:  #E7E3DD;
+  --paper:      #FFFFFF;
+  --whisper:    #F6F4F1;   /* the single whisper panel tone */
+  --oxblood:    #6E1423;   /* the single accent */
+
+  --sans: "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
+  --serif: Georgia, "Times New Roman", Times, serif;
+
+  /* page geometry — generous, ~24mm */
+  --mx: 24mm;
+  --mtop: 22mm;
+  --mbot: 20mm;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #57534e;     /* screen surround only — never prints */
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- The A4 page object ---- */
+.page {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  background: var(--paper);
+  margin: 0 auto;
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+}
+.page:last-child { page-break-after: auto; break-after: auto; }
+
+/* interior content frame */
+.frame {
+  position: absolute;
+  top: var(--mtop);
+  left: var(--mx);
+  right: var(--mx);
+  bottom: var(--mbot);
+}
+
+/* screen-only spacing + soft shadow so pages read as sheets */
+@media screen {
+  body { padding: 28px 0; }
+  .page { box-shadow: 0 1px 2px rgba(0,0,0,.18), 0 18px 44px rgba(0,0,0,.30); margin-bottom: 28px; }
+}
+
+/* tabular numerals everywhere figures live */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ---- Running header / footer (interior pages only) ---- */
+.runhead {
+  position: absolute;
+  top: 13mm;
+  left: var(--mx);
+  right: var(--mx);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 7.4pt;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+}
+.runhead .rh-name { color: var(--gray-1); font-weight: 600; }
+.runhead .rh-class { letter-spacing: .16em; }
+
+.runfoot {
+  position: absolute;
+  bottom: 12mm;
+  left: var(--mx);
+  right: var(--mx);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 7.4pt;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+}
+.runfoot .rf-conf { letter-spacing: .16em; }
+.runfoot .rf-pg { color: var(--gray-1); font-weight: 600; }
+
+/* ---- Shared editorial atoms ---- */
+.eyebrow {
+  font-size: 8pt;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+  margin: 0 0 8mm 0;
+}
+.eyebrow .num { color: var(--oxblood); margin-right: 1.2em; font-weight: 700; }
+
+.headline {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 25pt;
+  line-height: 1.06;
+  letter-spacing: -0.014em;
+  margin: 0;
+  color: var(--ink);
+}
+.headline.smaller { font-size: 21.5pt; }
+
+/* one thin accent line per page, max */
+.accentline {
+  height: 1.5px;
+  background: var(--oxblood);
+  border: 0;
+  width: 24mm;
+  margin: 7mm 0 0 0;
+}
+
+p { margin: 0; }
+.label {
+  font-size: 7.6pt;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+}
+
+.break-avoid { break-inside: avoid; page-break-inside: avoid; }
+
+/* ============================================================
+   PAGE 0 — COVER  (Swiss: warm paper, ink type, maximum air,
+   exactly one oxblood hairline. No gradients, no grid, no box.)
+   ============================================================ */
+.cover .frame { display: flex; flex-direction: column; }
+
+.cover-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 7.8pt;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  padding-bottom: 6mm;
+  border-bottom: 1px solid var(--hair);
+}
+.cover-top .org { color: var(--ink); font-weight: 700; letter-spacing: .2em; }
+
+.cover-kicker {
+  margin-top: auto;
+  font-size: 8.4pt;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+  margin-bottom: 11mm;
+}
+.wordmark {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 62pt;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  margin: 0;
+  padding-top: 2mm;
+  color: var(--ink);
+}
+.wordmark .two { display: block; color: var(--ink); }
+.cover-sub {
+  font-size: 13pt;
+  letter-spacing: .02em;
+  color: var(--gray-1);
+  font-weight: 400;
+  margin: 11mm 0 0 0;
+}
+.cover-accent {
+  width: 24mm; height: 1.5px;
+  background: var(--oxblood);
+  margin: 11mm 0 0 0;
+}
+.cover-thesis {
+  font-family: var(--serif);
+  font-size: 14pt;
+  line-height: 1.55;
+  color: var(--ink);
+  max-width: 122mm;
+  margin: 11mm 0 0 0;
+}
+.cover-thesis .q { font-style: italic; }
+
+.cover-foot {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8mm;
+  padding-top: 8mm;
+  border-top: 1px solid var(--hair);
+}
+.cover-foot .cf-k {
+  font-size: 7.2pt;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+  margin-bottom: 2.6mm;
+}
+.cover-foot .cf-v {
+  font-size: 9pt;
+  line-height: 1.42;
+  color: var(--ink);
+}
+
+/* ============================================================
+   PAGE 1 — EXECUTIVE DECISION (the verdict)
+   Mostly white space · ONE enormous serif word · a tight
+   cluster of four labelled figures · everything else recedes.
+   ============================================================ */
+.decision .frame { display: flex; flex-direction: column; }
+
+.dec-head { }
+.dec-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 5mm;
+  padding-bottom: 5mm;
+  border-bottom: 1px solid var(--hair);
+}
+.dec-meta .dm-k {
+  font-size: 8pt;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+}
+.dec-risk { display: flex; align-items: baseline; gap: 3.5mm; }
+.dec-risk .rk {
+  font-size: 10pt;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* the verdict — singular, dominant, quiet around it */
+.verdict-block {
+  /* fixed spacing: no auto margin to avoid unpredictable gaps on print */
+  padding: 14mm 0 10mm;
+  flex-shrink: 0;
+}
+.verdict-eyebrow {
+  font-size: 8.4pt;
+  letter-spacing: .36em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+  margin: 0 0 8mm 0;
+}
+.verdict {
+  font-family: var(--serif);
+  font-weight: 700;
+  /* 88pt: fits A4 frame (162mm wide) without clipping — was 104pt */
+  font-size: 88pt;
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+  color: var(--oxblood);
+  margin: 0;
+}
+.recommendation {
+  /* sans for the supporting sentence — data-adjacent, not editorial */
+  font-family: var(--sans);
+  font-size: 14pt;
+  line-height: 1.48;
+  color: var(--ink-soft);
+  max-width: 150mm;
+  margin: 9mm 0 0 0;
+}
+
+/* four labelled figures cluster — right-aligned tabular values */
+.figs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--ink);
+  margin-top: 0;
+}
+.fig {
+  padding: 7mm 7mm 0 0;
+  break-inside: avoid;
+}
+.fig + .fig {
+  padding-left: 7mm;
+  border-left: 1px solid var(--hair);
+}
+.fig .fk {
+  font-size: 7.4pt;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+  margin-bottom: 4mm;
+}
+.fig .fv {
+  font-size: 22pt;
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.fig .fv.accent { color: var(--oxblood); }
+.fig .fsub {
+  font-size: 8.6pt;
+  color: var(--gray-1);
+  margin-top: 3mm;
+  line-height: 1.4;
+}
+
+.decision-required {
+  margin-top: 9mm;
+  border-top: 1px solid var(--hair);
+  padding-top: 6mm;
+  display: grid;
+  grid-template-columns: 40mm 1fr;
+  column-gap: 8mm;
+  align-items: baseline;
+  break-inside: avoid;
+}
+.decision-required .dr-k {
+  font-size: 7.6pt;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+}
+.decision-required .dr-v {
+  font-size: 11pt;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+/* ============================================================
+   PAGE 2 — OPPORTUNITY
+   ============================================================ */
+.opp-grid {
+  margin-top: 11mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16mm;
+  row-gap: 11mm;
+}
+.opp-cell { break-inside: avoid; }
+.opp-cell .oc-k {
+  font-size: 8pt;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+  margin-bottom: 4.5mm;
+  padding-bottom: 3mm;
+  border-bottom: 1px solid var(--hair);
+}
+.opp-cell .oc-v {
+  font-size: 10.5pt;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.opp-cell .oc-v b { font-weight: 700; }
+.opp-cell.is-thesis .oc-v {
+  font-family: var(--serif);
+  font-size: 11.5pt;
+  line-height: 1.55;
+}
+
+.drivers {
+  margin-top: 12mm;
+  border-top: 1px solid var(--ink);
+  padding-top: 8mm;
+}
+.drivers .dr-title {
+  font-size: 8pt;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+  font-weight: 600;
+  margin-bottom: 8mm;
+}
+.driver-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10mm;
+}
+.driver { break-inside: avoid; }
+.driver .di {
+  font-family: var(--serif);
+  font-size: 13pt;
+  color: var(--oxblood);
+  margin-bottom: 4mm;
+}
+.driver .dv {
+  font-size: 10pt;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.driver .dfig { font-weight: 700; }
+
+/* ============================================================
+   PAGE 3 — FINANCIAL SUMMARY
+   ============================================================ */
+.fin-hero {
+  margin-top: 10mm;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--hair);
+}
+.fin-kpi { padding: 7mm 7mm 7mm 0; break-inside: avoid; }
+.fin-kpi + .fin-kpi { padding-left: 7mm; border-left: 1px solid var(--hair); }
+.fin-kpi .fk { font-size: 7.4pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 4mm; }
+.fin-kpi .fv { font-size: 22pt; font-weight: 700; line-height: 1; letter-spacing: -0.015em; }
+.fin-kpi .fv.accent { color: var(--oxblood); }
+.fin-kpi .fs { font-size: 8.4pt; color: var(--gray-1); margin-top: 3mm; line-height: 1.4; }
+
+.fin-body {
+  margin-top: 12mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 18mm;
+}
+
+.cap-title, .sens-title {
+  font-size: 8pt; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--gray-2); font-weight: 600; margin-bottom: 7mm;
+}
+
+/* capex breakdown — quiet right-aligned ledger, not a progress widget */
+.cap-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  column-gap: 8mm;
+  align-items: baseline;
+  padding: 4.2mm 0;
+  border-bottom: 1px solid var(--hair-soft);
+  break-inside: avoid;
+}
+.cap-row .cr-name { font-size: 10pt; color: var(--ink); }
+.cap-row .cr-share { font-size: 9pt; color: var(--gray-1); text-align: right; min-width: 16mm; }
+.cap-row .cr-val { font-size: 10pt; font-weight: 700; color: var(--ink); text-align: right; min-width: 16mm; }
+.cap-total {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  column-gap: 8mm;
+  align-items: baseline;
+  border-top: 1px solid var(--ink);
+  margin-top: 1mm; padding-top: 4mm;
+}
+.cap-total .ct-name { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); font-weight: 700; }
+.cap-total .ct-share { font-size: 9pt; color: var(--gray-1); text-align: right; min-width: 16mm; }
+.cap-total .ct-val { font-size: 13pt; font-weight: 700; color: var(--ink); text-align: right; min-width: 16mm; }
+
+/* sensitivity — a single quiet measured line, not a gauge */
+.sens-wrap { break-inside: avoid; }
+.sens-line {
+  position: relative;
+  height: 1.5px;
+  background: var(--hair);
+  margin: 16mm 0 0 0;
+}
+.sens-band {
+  position: absolute;
+  top: 0; height: 1.5px;
+  background: var(--oxblood);
+}
+.sens-base {
+  position: absolute;
+  top: -4mm; height: 8mm; width: 1.5px;
+  background: var(--ink);
+}
+.sens-base .sb-lbl {
+  position: absolute;
+  bottom: 100%; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; margin-bottom: 2.4mm;
+  font-size: 7.8pt; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink); font-weight: 700;
+}
+.sens-ends {
+  display: flex; justify-content: space-between; margin-top: 4.5mm;
+}
+.sens-ends .se { font-size: 8.4pt; color: var(--gray-1); letter-spacing: .04em; }
+.sens-ends .se b { color: var(--ink); font-weight: 700; }
+.sens-note { font-size: 9pt; color: var(--gray-1); line-height: 1.55; margin-top: 8mm; }
+.sens-note b { color: var(--ink); font-weight: 700; }
+
+/* roadmap mini timeline */
+.roadmap {
+  margin-top: 12mm;
+  border-top: 1px solid var(--ink);
+  padding-top: 8mm;
+}
+.roadmap .rm-title { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 9mm; }
+.roadmap-track {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  position: relative;
+}
+.roadmap-track::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 3.5px;
+  height: 1px; background: var(--hair);
+}
+.rm-stop { position: relative; padding-top: 10mm; padding-right: 8mm; break-inside: avoid; }
+.rm-stop::before {
+  content: ""; position: absolute; left: 0; top: 0;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--paper); border: 1.5px solid var(--gray-1);
+}
+.rm-stop.first::before { background: var(--oxblood); border-color: var(--oxblood); }
+.rm-stop .rm-yr { font-size: 8pt; letter-spacing: .14em; color: var(--gray-1); font-weight: 700; margin-bottom: 2.6mm; }
+.rm-stop.first .rm-yr { color: var(--oxblood); }
+.rm-stop .rm-cap { font-size: 15pt; font-weight: 700; color: var(--ink); line-height: 1; letter-spacing: -0.01em; }
+.rm-stop .rm-d { font-size: 8.8pt; color: var(--gray-1); margin-top: 3mm; line-height: 1.4; }
+
+/* ============================================================
+   PAGE 4 — RISKS
+   ============================================================ */
+.risk-table { margin-top: 9mm; }
+.risk-headrow {
+  display: grid;
+  grid-template-columns: 7mm 1fr 30mm 30mm;
+  column-gap: 8mm;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 3.5mm;
+}
+.risk-headrow .rh {
+  font-size: 7.4pt; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--gray-2); font-weight: 600;
+}
+
+.risk-row {
+  display: grid;
+  grid-template-columns: 7mm 1fr 30mm 30mm;
+  column-gap: 8mm;
+  align-items: start;
+  padding: 5.6mm 0;
+  border-bottom: 1px solid var(--hair-soft);
+  break-inside: avoid;
+}
+.risk-row .r-no {
+  font-family: var(--serif);
+  font-size: 14pt;
+  color: var(--oxblood);
+  line-height: 1;
+  padding-top: 0.5mm;
+}
+.risk-row .r-name {
+  font-size: 12pt; font-weight: 700; color: var(--ink); margin-bottom: 3mm;
+  letter-spacing: -0.006em;
+}
+.risk-row .r-mit {
+  font-size: 9.6pt; line-height: 1.5; color: var(--gray-1);
+}
+.risk-meta .rm-lab {
+  font-size: 6.8pt; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gray-2); font-weight: 600; margin-bottom: 3mm;
+}
+.risk-meta .rm-val {
+  font-size: 9.6pt; font-weight: 700; color: var(--ink);
+  display: flex; align-items: center; gap: 3mm;
+}
+/* tiny level glyph — three quiet ticks, ink-filled, no candy */
+.ticks { display: inline-flex; gap: 1.6px; }
+.ticks i {
+  width: 3px; height: 10px; background: var(--hair); display: inline-block;
+}
+.ticks.lv1 i:nth-child(1) { background: var(--ink); }
+.ticks.lv2 i:nth-child(1), .ticks.lv2 i:nth-child(2) { background: var(--ink); }
+.ticks.lv3 i { background: var(--ink); }
+
+.risk-foot {
+  margin-top: 9mm;
+  background: var(--whisper);
+  padding: 7mm 9mm;
+  break-inside: avoid;
+}
+.risk-foot .rf-k { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3.5mm; }
+.risk-foot .rf-v { font-size: 11pt; line-height: 1.55; color: var(--ink); }
+.risk-foot .rf-v b { font-weight: 700; }
+
+/* ============================================================
+   PAGE 5 — SCENARIO ANALYSIS  (clean tabular comparison)
+   ============================================================ */
+.scen-grid {
+  margin-top: 11mm;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 12mm;
+}
+.scen {
+  break-inside: avoid;
+  border-top: 2px solid var(--hair);
+  padding-top: 6mm;
+}
+.scen.base { border-top-color: var(--oxblood); }
+.scen .sc-name {
+  font-size: 10pt; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink); margin-bottom: 2mm;
+}
+.scen.base .sc-name { color: var(--oxblood); }
+.scen .sc-tag {
+  font-size: 9pt; color: var(--gray-1); line-height: 1.5; min-height: 22mm;
+  margin-bottom: 6mm; border-bottom: 1px solid var(--hair-soft); padding-bottom: 6mm;
+}
+.scen .sc-irr-k {
+  font-size: 7.2pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2);
+  font-weight: 600; margin-bottom: 3mm;
+}
+.scen .sc-irr {
+  font-size: 36pt; font-weight: 700; line-height: 0.92; letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.scen.base .sc-irr { color: var(--oxblood); }
+
+.scen .sc-rows { margin-top: 8mm; }
+.scen .sc-line {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 3.8mm 0; border-top: 1px solid var(--hair-soft);
+}
+.scen .sc-line:first-child { border-top: 0; }
+.scen .sc-lk { font-size: 9pt; color: var(--gray-1); }
+.scen .sc-lv { font-size: 10pt; font-weight: 700; color: var(--ink); }
+
+.scen-note {
+  margin-top: 13mm; border-top: 1px solid var(--ink); padding-top: 7mm;
+  font-size: 9.4pt; color: var(--gray-1); line-height: 1.6; max-width: 158mm;
+}
+.scen-note b { color: var(--ink); font-weight: 700; }
+
+/* ============================================================
+   PAGE 6 — RECOMMENDATION
+   ============================================================ */
+.rec-two {
+  margin-top: 11mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16mm;
+}
+.rec-card { break-inside: avoid; padding-top: 5mm; border-top: 2px solid var(--oxblood); }
+.rec-card.hold { border-top-color: var(--ink); }
+.rec-card .rc-k {
+  font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; font-weight: 700;
+  margin-bottom: 4.5mm;
+}
+.rec-card.go .rc-k { color: var(--oxblood); }
+.rec-card.hold .rc-k { color: var(--ink); }
+.rec-card .rc-v { font-size: 10.5pt; line-height: 1.6; color: var(--ink); }
+.rec-card .rc-v b { font-weight: 700; }
+
+.conditions {
+  margin-top: 12mm; border-top: 1px solid var(--ink); padding-top: 8mm;
+}
+.conditions .cd-title { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 8mm; }
+.cond-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10mm; }
+.cond { break-inside: avoid; }
+.cond .ci { font-family: var(--serif); font-size: 13pt; color: var(--oxblood); margin-bottom: 3.5mm; }
+.cond .cv { font-size: 10pt; line-height: 1.5; color: var(--ink); }
+.cond .cv b { font-weight: 700; }
+
+.timeline {
+  margin-top: 12mm; border-top: 1px solid var(--ink); padding-top: 8mm;
+}
+.timeline .tl-title { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 9mm; }
+.tl-track {
+  display: grid; grid-template-columns: repeat(5, 1fr); position: relative;
+}
+.tl-track::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 3.5px; height: 1px; background: var(--hair);
+}
+.tl-stop { position: relative; padding-top: 10mm; padding-right: 5mm; break-inside: avoid; }
+.tl-stop::before {
+  content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--paper); border: 1.5px solid var(--gray-1);
+}
+.tl-stop.first::before { background: var(--oxblood); border-color: var(--oxblood); }
+.tl-stop .tl-when { font-size: 7.8pt; letter-spacing: .12em; text-transform: uppercase; color: var(--gray-1); font-weight: 700; margin-bottom: 2.6mm; }
+.tl-stop.first .tl-when { color: var(--oxblood); }
+.tl-stop .tl-what { font-size: 9.4pt; line-height: 1.42; color: var(--ink); }
+
+.rec-quote {
+  margin-top: 8mm;
+  font-family: var(--serif);
+  font-size: 12.5pt;
+  line-height: 1.52;
+  color: var(--ink);
+  max-width: 156mm;
+}
+.rec-quote b { font-weight: 700; }
+
+/* ============================================================
+   PAGE 7 — APPENDIX
+   ============================================================ */
+.apx-grid {
+  margin-top: 11mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 18mm;
+  row-gap: 12mm;
+}
+.apx-block { break-inside: avoid; }
+.apx-block .ab-k {
+  font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2);
+  font-weight: 600; margin-bottom: 5mm; padding-bottom: 3.5mm; border-bottom: 1px solid var(--ink);
+}
+.apx-list { list-style: none; margin: 0; padding: 0; }
+.apx-list li {
+  font-size: 9.8pt; line-height: 1.5; color: var(--ink);
+  padding: 3.4mm 0; border-bottom: 1px solid var(--hair-soft);
+  display: flex; justify-content: space-between; gap: 8mm; align-items: baseline;
+}
+.apx-list li:last-child { border-bottom: 0; }
+.apx-list li .al-k { color: var(--gray-1); }
+.apx-list li .al-v { font-weight: 700; color: var(--ink); text-align: right; white-space: nowrap; }
+.apx-list.plain li { display: block; padding: 4.5mm 0; }
+.apx-list.plain li .src { color: var(--ink); }
+
+/* supporting tables */
+.apx-table { width: 100%; border-collapse: collapse; }
+.apx-table th {
+  text-align: left; font-size: 7.2pt; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gray-2); font-weight: 600; padding: 0 0 3.4mm 0; border-bottom: 1px solid var(--ink);
+}
+.apx-table th.r, .apx-table td.r { text-align: right; }
+.apx-table td {
+  font-size: 9.8pt; color: var(--ink); padding: 3.4mm 0; border-bottom: 1px solid var(--hair-soft);
+}
+.apx-table td.r { font-weight: 700; }
+.apx-table tr:last-child td { border-bottom: 0; }
+.apx-table tr.tot td { border-top: 1px solid var(--ink); font-weight: 700; }
+.apx-table tr.tot td:first-child { letter-spacing: .04em; }
+
+.apx-disc {
+  position: absolute; left: var(--mx); right: var(--mx); bottom: 20mm;
+  font-size: 7.8pt; line-height: 1.55; color: var(--gray-2);
+  border-top: 1px solid var(--hair); padding-top: 5mm;
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PAGE 0 — COVER
+     ============================================================ -->
+<section class="page cover">
+  <div class="frame">
+    <div class="cover-top">
+      <span class="org">ORACLE STRATEGY GROUP</span>
+      <span>Investment Committee Memorandum</span>
+    </div>
+
+    <div class="cover-kicker">Sovereign Infrastructure · State of Qatar</div>
+    <h1 class="wordmark">FUTUR<span class="two">ONE</span></h1>
+    <div class="cover-sub">Sovereign AI Compute Platform</div>
+    <div class="cover-accent"></div>
+    <p class="cover-thesis">
+      <span class="q">“AI is the new gas.”</span> Qatar converts abundant, low-cost
+      North Field gas into sovereign AI compute — the highest-value export of the
+      next decade.
+    </p>
+
+    <div class="cover-foot">
+      <div>
+        <div class="cf-k">Prepared For</div>
+        <div class="cf-v">Investment Committee<br/>&amp; Board of Directors</div>
+      </div>
+      <div>
+        <div class="cf-k">Prepared By</div>
+        <div class="cf-v">ORACLE<br/>Strategy Group</div>
+      </div>
+      <div>
+        <div class="cf-k">Location</div>
+        <div class="cf-v">Ras Laffan<br/>Industrial City</div>
+      </div>
+      <div>
+        <div class="cf-k">Date · Classification</div>
+        <div class="cf-v">31 May 2026<br/>Strictly Private &amp; Confidential</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 1 — EXECUTIVE DECISION
+     ============================================================ -->
+<section class="page decision">
+  <div class="runhead">
+    <span class="rh-name">FUTUR ONE · Sovereign AI Compute Platform</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+
+  <div class="frame">
+    <div class="dec-head">
+      <p class="eyebrow"><span class="num">01</span>Executive Decision</p>
+      <div class="dec-meta">
+        <span class="dm-k">For the Investment Committee — 31 May 2026</span>
+        <span class="dec-risk">
+          <span class="dm-k">Risk Level</span>
+          <span class="rk">Moderate</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="verdict-block">
+      <p class="verdict-eyebrow">Recommendation of the Strategy Group</p>
+      <h2 class="verdict">PROCEED</h2>
+      <p class="recommendation">
+        Approve the Phase&nbsp;1 capital commitment and authorize the
+        Final&nbsp;Investment&nbsp;Decision&nbsp;(FID).
+      </p>
+    </div>
+
+    <div class="figs">
+      <div class="fig">
+        <div class="fk">Investment Size</div>
+        <div class="fv accent tnum">$3.2B</div>
+        <div class="fsub">Phase 1 — 300 MW IT load</div>
+      </div>
+      <div class="fig">
+        <div class="fk">Expected Return</div>
+        <div class="fv tnum">21.8%</div>
+        <div class="fsub">IRR unlevered · 29.4% levered</div>
+      </div>
+      <div class="fig">
+        <div class="fk">NPV at 10% WACC</div>
+        <div class="fv tnum">$1.9B</div>
+        <div class="fsub">Base case · 15-year hold</div>
+      </div>
+      <div class="fig">
+        <div class="fk">Payback</div>
+        <div class="fv tnum">5.7 yrs</div>
+        <div class="fsub">Stabilized from year 3</div>
+      </div>
+    </div>
+
+    <div class="decision-required">
+      <div class="dr-k">Decision Required</div>
+      <div class="dr-v">
+        Approve the US$3.2B Phase&nbsp;1 FID; authorize EPC award and anchor offtake
+        execution by Q3&nbsp;2026.
+      </div>
+    </div>
+  </div>
+
+  <div class="runfoot">
+    <span class="rf-pg">01</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>31 May 2026</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 2 — OPPORTUNITY
+     ============================================================ -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">FUTUR ONE · Sovereign AI Compute Platform</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+
+  <div class="frame">
+    <p class="eyebrow"><span class="num">02</span>The Opportunity</p>
+    <h2 class="headline">Power is the binding constraint.<br/>Qatar holds the structural advantage.</h2>
+    <hr class="accentline" />
+
+    <div class="opp-grid">
+      <div class="opp-cell">
+        <div class="oc-k">Why Now</div>
+        <p class="oc-v">
+          Global AI compute demand is outstripping supply, and power has become the
+          binding constraint. Qatar holds among the world’s lowest marginal cost of
+          dispatchable power — the scarce input the entire sector is competing for.
+        </p>
+      </div>
+      <div class="opp-cell">
+        <div class="oc-k">Market Context</div>
+        <p class="oc-v">
+          Hyperscaler and sovereign AI capex exceeds <b>US$400B per year</b>. GPU supply
+          is normalizing while power-ready land remains scarce; sub-US$0.03/kWh power is
+          a structural moat that cannot be quickly replicated elsewhere.
+        </p>
+      </div>
+      <div class="opp-cell">
+        <div class="oc-k">Strategic Rationale</div>
+        <p class="oc-v">
+          Monetize stranded gas into 24/7 compute and diversify the sovereign economy
+          beyond LNG. Futur&nbsp;One anchors Qatar as the MENA AI hub and converts an
+          energy advantage into a durable digital-export franchise.
+        </p>
+      </div>
+      <div class="opp-cell is-thesis">
+        <div class="oc-k">The Thesis</div>
+        <p class="oc-v">
+          “AI is the new gas.” The highest-value export of the next decade is not the
+          molecule — it is the intelligence it powers. Futur&nbsp;One captures the spread
+          at the source.
+        </p>
+      </div>
+    </div>
+
+    <div class="drivers">
+      <div class="dr-title">Key Value Drivers</div>
+      <div class="driver-row">
+        <div class="driver">
+          <div class="di">i.</div>
+          <div class="dv"><span class="dfig tnum">US$0.028/kWh</span> all-in power cost — among the lowest on earth.</div>
+        </div>
+        <div class="driver">
+          <div class="di">ii.</div>
+          <div class="dv">North Field expansion <span class="dfig">CCGT</span> supplying dedicated 24/7 generation.</div>
+        </div>
+        <div class="driver">
+          <div class="di">iii.</div>
+          <div class="dv">Anchor hyperscaler <span class="dfig">10-year</span> take-or-pay underpinning revenue.</div>
+        </div>
+        <div class="driver">
+          <div class="di">iv.</div>
+          <div class="dv">Sovereign co-investment and <span class="dfig">ECA</span> financing lowering cost of capital.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="runfoot">
+    <span class="rf-pg">02</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>31 May 2026</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 3 — FINANCIAL SUMMARY
+     ============================================================ -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">FUTUR ONE · Sovereign AI Compute Platform</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+
+  <div class="frame">
+    <p class="eyebrow"><span class="num">03</span>Financial Summary</p>
+    <h2 class="headline smaller">A 65% EBITDA margin built on the<br/>lowest marginal cost of power.</h2>
+
+    <div class="fin-hero">
+      <div class="fin-kpi">
+        <div class="fk">Revenue · Year 3</div>
+        <div class="fv tnum">$1.08B</div>
+        <div class="fs">Stabilized, per year</div>
+      </div>
+      <div class="fin-kpi">
+        <div class="fk">EBITDA</div>
+        <div class="fv tnum">$0.70B</div>
+        <div class="fs">65% margin, per year</div>
+      </div>
+      <div class="fin-kpi">
+        <div class="fk">IRR</div>
+        <div class="fv accent tnum">21.8%</div>
+        <div class="fs">Unlevered · 29.4% levered</div>
+      </div>
+      <div class="fin-kpi">
+        <div class="fk">NPV · 10% WACC</div>
+        <div class="fv tnum">$1.9B</div>
+        <div class="fs">Payback 5.7 years</div>
+      </div>
+    </div>
+
+    <div class="fin-body">
+      <!-- capex breakdown — quiet ledger -->
+      <div class="break-avoid">
+        <div class="cap-title">Capex — US$3.2B · Phase 1 (300 MW)</div>
+
+        <div class="cap-row">
+          <span class="cr-name">Facilities</span>
+          <span class="cr-share tnum">65.6%</span>
+          <span class="cr-val tnum">$2.1B</span>
+        </div>
+        <div class="cap-row">
+          <span class="cr-name">Power</span>
+          <span class="cr-share tnum">25.0%</span>
+          <span class="cr-val tnum">$0.8B</span>
+        </div>
+        <div class="cap-row">
+          <span class="cr-name">Contingency</span>
+          <span class="cr-share tnum">9.4%</span>
+          <span class="cr-val tnum">$0.3B</span>
+        </div>
+        <div class="cap-total">
+          <span class="ct-name">Total Phase 1 Capex</span>
+          <span class="ct-share tnum">100%</span>
+          <span class="ct-val tnum">$3.2B</span>
+        </div>
+      </div>
+
+      <!-- sensitivity — one measured line -->
+      <div class="sens-wrap">
+        <div class="sens-title">IRR Sensitivity — Power Price &amp; Utilization</div>
+        <div class="sens-line">
+          <!--
+            Scale: 10% → 30% (20pt range), band occupies 8%–92% of track.
+            Band range: 11.6%–28.4% mapped onto 8%–92% track:
+              track_width = 92 - 8 = 84pp
+              band_left  = 8 + (11.6-10)/20 * 84 = 8 + 6.72  = 14.7%
+              band_right = 8 + (30-28.4)/20 * 84 = 8 + 6.72  = 14.7% from right → right:14.7%
+            Base marker (21.8%): position = 8 + (21.8-10)/20 * 84 = 8 + 49.56 = 57.6%
+          -->
+          <div class="sens-band" style="left:14.7%; right:14.7%;"></div>
+          <div class="sens-base" style="left:57.6%;">
+            <span class="sb-lbl">Base 21.8%</span>
+          </div>
+        </div>
+        <div class="sens-ends">
+          <span class="se">Downside&nbsp; <b class="tnum">11.6%</b></span>
+          <span class="se"><b class="tnum">28.4%</b> &nbsp;Upside</span>
+        </div>
+        <p class="sens-note">
+          IRR ranges <b>11.6%–28.4%</b> across the power-price and utilization envelope.
+          The downside remains accretive above the 10% WACC hurdle; the base case clears
+          it by more than 11 points.
+        </p>
+      </div>
+    </div>
+
+    <!-- roadmap -->
+    <div class="roadmap">
+      <div class="rm-title">Build-Out Roadmap</div>
+      <div class="roadmap-track">
+        <div class="rm-stop first">
+          <div class="rm-yr">2029</div>
+          <div class="rm-cap tnum">300 MW</div>
+          <div class="rm-d">Phase 1 ready-to-build · anchor capacity online</div>
+        </div>
+        <div class="rm-stop">
+          <div class="rm-yr">2029 → 2031</div>
+          <div class="rm-cap">Scaling</div>
+          <div class="rm-d">Phased commissioning toward full platform</div>
+        </div>
+        <div class="rm-stop">
+          <div class="rm-yr">2031</div>
+          <div class="rm-cap tnum">1.2 GW</div>
+          <div class="rm-d">Full platform · MENA AI compute hub</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="runfoot">
+    <span class="rf-pg">03</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>31 May 2026</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 4 — RISKS
+     ============================================================ -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">FUTUR ONE · Sovereign AI Compute Platform</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+
+  <div class="frame">
+    <p class="eyebrow"><span class="num">04</span>Risk Assessment</p>
+    <h2 class="headline smaller">Five principal risks — each mitigated<br/>to the boundary of acceptance.</h2>
+    <hr class="accentline" />
+
+    <div class="risk-table">
+      <div class="risk-headrow">
+        <span class="rh">№</span>
+        <span class="rh">Risk &amp; Mitigation</span>
+        <span class="rh">Probability</span>
+        <span class="rh">Impact</span>
+      </div>
+
+      <!-- 1 Construction -->
+      <div class="risk-row">
+        <div class="r-no">1</div>
+        <div>
+          <div class="r-name">Construction</div>
+          <div class="r-mit">Fixed-price turnkey EPC with a tier-1 contractor and a 10% contingency reserve.</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Probability</div>
+          <div class="rm-val"><span class="ticks lv2"><i></i><i></i><i></i></span>Medium</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Impact</div>
+          <div class="rm-val"><span class="ticks lv3"><i></i><i></i><i></i></span>High</div>
+        </div>
+      </div>
+
+      <!-- 2 Power -->
+      <div class="risk-row">
+        <div class="r-no">2</div>
+        <div>
+          <div class="r-name">Power</div>
+          <div class="r-mit">Dedicated CCGT plus a 20-year PPA with QatarEnergy and N+1 redundancy.</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Probability</div>
+          <div class="rm-val"><span class="ticks lv1"><i></i><i></i><i></i></span>Low</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Impact</div>
+          <div class="rm-val"><span class="ticks lv3"><i></i><i></i><i></i></span>High</div>
+        </div>
+      </div>
+
+      <!-- 3 Financing -->
+      <div class="risk-row">
+        <div class="r-no">3</div>
+        <div>
+          <div class="r-name">Financing</div>
+          <div class="r-mit">60% ECA / sovereign debt secured on a multi-tranche basis.</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Probability</div>
+          <div class="rm-val"><span class="ticks lv2"><i></i><i></i><i></i></span>Low–Med</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Impact</div>
+          <div class="rm-val"><span class="ticks lv2"><i></i><i></i><i></i></span>Medium</div>
+        </div>
+      </div>
+
+      <!-- 4 Execution -->
+      <div class="risk-row">
+        <div class="r-no">4</div>
+        <div>
+          <div class="r-name">Execution</div>
+          <div class="r-mit">Tier-1 operator JV with phased commissioning to de-risk ramp.</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Probability</div>
+          <div class="rm-val"><span class="ticks lv2"><i></i><i></i><i></i></span>Medium</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Impact</div>
+          <div class="rm-val"><span class="ticks lv2"><i></i><i></i><i></i></span>Medium</div>
+        </div>
+      </div>
+
+      <!-- 5 Market -->
+      <div class="risk-row">
+        <div class="r-no">5</div>
+        <div>
+          <div class="r-name">Market</div>
+          <div class="r-mit">80% of capacity under 10-year take-or-pay contracted before FID.</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Probability</div>
+          <div class="rm-val"><span class="ticks lv2"><i></i><i></i><i></i></span>Medium</div>
+        </div>
+        <div class="risk-meta">
+          <div class="rm-lab">Impact</div>
+          <div class="rm-val"><span class="ticks lv3"><i></i><i></i><i></i></span>High</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="risk-foot">
+      <div class="rf-k">Residual Position</div>
+      <div class="rf-v">
+        The dominant exposures — power and market — are contractually pre-empted:
+        a <b>20-year PPA</b> neutralizes input cost, and <b>80% take-or-pay before FID</b>
+        underwrites demand. Net residual risk is assessed <b>Moderate</b>.
+      </div>
+    </div>
+  </div>
+
+  <div class="runfoot">
+    <span class="rf-pg">04</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>31 May 2026</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 5 — SCENARIO ANALYSIS
+     ============================================================ -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">FUTUR ONE · Sovereign AI Compute Platform</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+
+  <div class="frame">
+    <p class="eyebrow"><span class="num">05</span>Scenario Analysis</p>
+    <h2 class="headline smaller">Three cases. The downside still clears<br/>the hurdle.</h2>
+
+    <div class="scen-grid">
+      <!-- DOWNSIDE -->
+      <div class="scen">
+        <div class="sc-name">Downside</div>
+        <div class="sc-tag">Delayed offtake compresses utilization to 55%; ramp slips but the asset stays accretive.</div>
+        <div class="sc-irr-k">IRR</div>
+        <div class="sc-irr tnum">11.6%</div>
+        <div class="sc-rows">
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum">55%</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum">$0.6B</span></div>
+          <div class="sc-line"><span class="sc-lk">EBITDA / yr</span><span class="sc-lv tnum">$0.34B</span></div>
+        </div>
+      </div>
+
+      <!-- BASE -->
+      <div class="scen base">
+        <div class="sc-name">Base</div>
+        <div class="sc-tag">300 MW at 85% utilization on US$0.028/kWh power — the underwriting case for FID.</div>
+        <div class="sc-irr-k">IRR</div>
+        <div class="sc-irr tnum">21.8%</div>
+        <div class="sc-rows">
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum">85%</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum">$1.9B</span></div>
+          <div class="sc-line"><span class="sc-lk">EBITDA / yr</span><span class="sc-lv tnum">$0.70B</span></div>
+        </div>
+      </div>
+
+      <!-- UPSIDE -->
+      <div class="scen">
+        <div class="sc-name">Upside</div>
+        <div class="sc-tag">1.2 GW fully contracted at 92% utilization as the platform scales to full build-out.</div>
+        <div class="sc-irr-k">IRR</div>
+        <div class="sc-irr tnum">28.4%</div>
+        <div class="sc-rows">
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum">92%</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum">$3.1B</span></div>
+          <div class="sc-line"><span class="sc-lk">EBITDA / yr</span><span class="sc-lv tnum">$2.6B</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="scen-note">
+      Across the full envelope — from a delayed-offtake downside to a fully-contracted
+      1.2&nbsp;GW upside — returns span <b>11.6% to 28.4%</b>, with every case remaining
+      above the 10% WACC hurdle. The asymmetry favours the upside: contracting beyond
+      80% take-or-pay moves the platform decisively toward the higher band.
+    </p>
+  </div>
+
+  <div class="runfoot">
+    <span class="rf-pg">05</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>31 May 2026</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 6 — RECOMMENDATION
+     ============================================================ -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">FUTUR ONE · Sovereign AI Compute Platform</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+
+  <div class="frame">
+    <p class="eyebrow"><span class="num">06</span>Recommendation</p>
+    <h2 class="headline smaller">Commit Phase 1. Gate Phase 2 on<br/>commissioning and contracted demand.</h2>
+    <hr class="accentline" />
+
+    <div class="rec-two">
+      <div class="rec-card go">
+        <div class="rc-k">Approve Now</div>
+        <div class="rc-v">
+          The <b>US$3.2B Phase&nbsp;1 FID</b>; the EPC award; the anchor offtake; and the
+          sovereign&nbsp;/&nbsp;ECA debt package. This authorizes the team to execute the
+          critical path through financial close.
+        </div>
+      </div>
+      <div class="rec-card hold">
+        <div class="rc-k">Do Not Approve Yet</div>
+        <div class="rc-v">
+          <b>Phase&nbsp;2 (1.2&nbsp;GW) capital.</b> Gate this commitment on Phase&nbsp;1
+          commissioning and offtake reaching or exceeding 80% — preserving optionality
+          without committing scale capital prematurely.
+        </div>
+      </div>
+    </div>
+
+    <div class="conditions">
+      <div class="cd-title">Conditions Precedent</div>
+      <div class="cond-row">
+        <div class="cond"><div class="ci">i.</div><div class="cv">At least <b>80% take-or-pay</b> contracted before any drawdown.</div></div>
+        <div class="cond"><div class="ci">ii.</div><div class="cv"><b>Fixed-price EPC</b> signed with the tier-1 turnkey contractor.</div></div>
+        <div class="cond"><div class="ci">iii.</div><div class="cv"><b>PPA executed</b> with QatarEnergy on the 20-year term.</div></div>
+        <div class="cond"><div class="ci">iv.</div><div class="cv"><b>ECA debt close</b> on the 60% sovereign multi-tranche package.</div></div>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-title">Next Steps</div>
+      <div class="tl-track">
+        <div class="tl-stop first"><div class="tl-when">Jun 2026</div><div class="tl-what">FID sign-off</div></div>
+        <div class="tl-stop"><div class="tl-when">Q3 2026</div><div class="tl-what">EPC award</div></div>
+        <div class="tl-stop"><div class="tl-when">Q4 2026</div><div class="tl-what">Financial close</div></div>
+        <div class="tl-stop"><div class="tl-when">Q1 2027</div><div class="tl-what">Groundbreaking</div></div>
+        <div class="tl-stop"><div class="tl-when">2029</div><div class="tl-what">Ready-to-build Phase 1</div></div>
+      </div>
+    </div>
+
+    <p class="rec-quote">
+      The decision before the Committee is not whether AI compute will be built — it is
+      whether Qatar builds it first, at the lowest cost of power on earth. The Strategy
+      Group recommends <b>PROCEED</b>.
+    </p>
+  </div>
+
+  <div class="runfoot">
+    <span class="rf-pg">06</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>31 May 2026</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 7 — APPENDIX
+     ============================================================ -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">FUTUR ONE · Sovereign AI Compute Platform</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+
+  <div class="frame">
+    <p class="eyebrow"><span class="num">07</span>Appendix</p>
+    <h2 class="headline smaller">Sources, assumptions &amp; supporting data.</h2>
+
+    <div class="apx-grid">
+      <!-- Model assumptions -->
+      <div class="apx-block">
+        <div class="ab-k">Model Assumptions</div>
+        <ul class="apx-list">
+          <li><span class="al-k">WACC</span><span class="al-v tnum">10%</span></li>
+          <li><span class="al-k">Hold period</span><span class="al-v tnum">15 years</span></li>
+          <li><span class="al-k">All-in power</span><span class="al-v tnum">US$0.028/kWh</span></li>
+          <li><span class="al-k">Utilization</span><span class="al-v tnum">85%</span></li>
+          <li><span class="al-k">EBITDA margin</span><span class="al-v tnum">65%</span></li>
+          <li><span class="al-k">Terminal growth</span><span class="al-v tnum">2.5%</span></li>
+        </ul>
+      </div>
+
+      <!-- Sources -->
+      <div class="apx-block">
+        <div class="ab-k">Sources</div>
+        <ul class="apx-list plain">
+          <li><span class="src">QatarEnergy power data</span></li>
+          <li><span class="src">Hyperscaler capex guidance</span></li>
+          <li><span class="src">ORACLE internal model v4.2</span></li>
+          <li><span class="src">IEA &amp; industry reports</span></li>
+        </ul>
+      </div>
+
+      <!-- Supporting data: capex -->
+      <div class="apx-block">
+        <div class="ab-k">Supporting Data — Capex Breakdown</div>
+        <table class="apx-table">
+          <thead>
+            <tr><th>Component</th><th class="r">US$B</th><th class="r">Share</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Facilities</td><td class="r tnum">2.1</td><td class="r tnum">65.6%</td></tr>
+            <tr><td>Power</td><td class="r tnum">0.8</td><td class="r tnum">25.0%</td></tr>
+            <tr><td>Contingency</td><td class="r tnum">0.3</td><td class="r tnum">9.4%</td></tr>
+            <tr class="tot"><td>Total Phase 1</td><td class="r tnum">3.2</td><td class="r tnum">100%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Supporting data: contract / power -->
+      <div class="apx-block">
+        <div class="ab-k">Supporting Data — Contract &amp; Power</div>
+        <table class="apx-table">
+          <thead>
+            <tr><th>Item</th><th class="r">Terms</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Anchor offtake</td><td class="r">10-yr take-or-pay</td></tr>
+            <tr><td>Contracted before FID</td><td class="r tnum">≥ 80%</td></tr>
+            <tr><td>Power supply (PPA)</td><td class="r tnum">20-yr · QatarEnergy</td></tr>
+            <tr><td>Debt package (ECA)</td><td class="r tnum">60% · multi-tranche</td></tr>
+            <tr><td>Power-cost curve floor</td><td class="r tnum">US$0.028/kWh</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="apx-disc">
+      This memorandum has been prepared by the ORACLE Strategy Group for the Investment
+      Committee and Board of Directors of Futur&nbsp;One on a strictly private and
+      confidential basis. Figures are derived from ORACLE internal model v4.2 and the
+      sources listed above; forward-looking estimates are subject to execution, market
+      and macroeconomic conditions. Not for distribution. © 2026 ORACLE Strategy Group.
+    </div>
+  </div>
+
+  <div class="runfoot">
+    <span class="rf-pg">07</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>31 May 2026</span>
+  </div>
+</section>
+
+</body>
+</html>

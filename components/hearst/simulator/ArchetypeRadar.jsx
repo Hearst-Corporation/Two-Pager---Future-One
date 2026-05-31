@@ -1,14 +1,15 @@
 'use client';
 
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip, Legend } from 'recharts';
+import { useContainerSize } from './useContainerSize';
 
 const AXES = [
-  { key: 'brand',       label: 'Brand visibility' },
-  { key: 'bankability', label: 'Easy to finance' },
-  { key: 'speed',       label: 'Time to launch' },
-  { key: 'control',     label: 'Control' },
+  { key: 'brand',       label: 'Brand Visibility' },
+  { key: 'bankability', label: 'Bankability' },
+  { key: 'speed',       label: 'Time-to-Market' },
+  { key: 'control',     label: 'Operational Control' },
   { key: 'margin',      label: 'Margin' },
-  { key: 'exit',        label: 'Easy to sell later' },
+  { key: 'exit',        label: 'Exit Liquidity' },
 ];
 
 // Monochromatic palette — bordeaux + white tints only.
@@ -26,6 +27,8 @@ const ARCHETYPE_PALETTE = {
 };
 
 export default function ArchetypeRadar({ archetypes = [], highlighted = null, height = 320 }) {
+  const [ref, size] = useContainerSize();
+
   if (!archetypes.length) {
     return (
       <div style={{ ...S.empty, height }}>
@@ -46,9 +49,9 @@ export default function ArchetypeRadar({ archetypes = [], highlighted = null, he
   const highlightSet = highlighted ? new Set(highlighted) : null;
 
   return (
-    <div style={{ width: '100%', height }}>
-      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-        <RadarChart data={data} outerRadius="78%">
+    <div ref={ref} style={{ width: '100%', height }}>
+      {size.width > 0 && size.height > 0 && (
+        <RadarChart width={size.width} height={size.height} data={data} outerRadius="78%">
           <PolarGrid stroke="var(--cp-border)" />
           <PolarAngleAxis dataKey="axis" tick={{ fill: 'var(--cp-text-muted)', fontSize: 11 }} />
           <PolarRadiusAxis domain={[0, 5]} tickCount={6} angle={90} tick={false} stroke="var(--cp-border-soft)" />
@@ -70,7 +73,7 @@ export default function ArchetypeRadar({ archetypes = [], highlighted = null, he
           <Tooltip contentStyle={S.tooltip} />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
         </RadarChart>
-      </ResponsiveContainer>
+      )}
     </div>
   );
 }
