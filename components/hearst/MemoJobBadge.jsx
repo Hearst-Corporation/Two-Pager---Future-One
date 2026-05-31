@@ -56,7 +56,7 @@ const S = {
     color: 'var(--cp-text-primary)',
     border: '1px solid var(--cp-accent-maroon, var(--cp-accent))',
     borderRadius: 12,
-    boxShadow: '0 8px 24px -6px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04) inset',
+    boxShadow: 'var(--cp-shadow-md)',
     cursor: 'pointer',
     fontFamily: 'var(--cp-font-sans, sans-serif)',
     minWidth: 200,

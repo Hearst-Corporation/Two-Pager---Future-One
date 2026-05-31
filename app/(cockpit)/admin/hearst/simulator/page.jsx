@@ -562,7 +562,7 @@ const S = {
     height: 32, padding: '0 18px',
     background: 'transparent', color: 'var(--cp-text-muted)',
     border: 'none', borderRadius: 999, cursor: 'pointer',
-    fontSize: 12, fontWeight: 700, letterSpacing: 0.3,
+    fontSize: 'var(--cp-font-sm)', fontWeight: 700, letterSpacing: 0.3,
     transition: 'all 0.15s ease',
   },
   modeBtnActive: {
@@ -570,7 +570,7 @@ const S = {
     color: 'var(--cp-text-strong)',
   },
   loadingBadge: {
-    fontSize: 11,
+    fontSize: 'var(--cp-font-sm)',
     padding: '8px 16px',
     background: 'var(--cp-accent-soft)',
     color: 'var(--cp-text-strong)',
@@ -608,11 +608,11 @@ const S = {
     margin: 0,
   },
   sectionSubtitle: {
-    fontSize: 12,
+    fontSize: 'var(--cp-font-sm)',
     color: 'var(--cp-text-muted)',
   },
   counterChip: {
-    fontSize: 11,
+    fontSize: 'var(--cp-font-sm)',
     fontWeight: 700,
     padding: '4px 12px',
     background: 'var(--cp-surface-0)',
@@ -621,9 +621,9 @@ const S = {
     borderRadius: 999,
     letterSpacing: 0.5,
   },
-  subsection: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 },
+  subsection: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8, minHeight: 0, position: 'relative' },
   subTitle: {
-    fontSize: 13,
+    fontSize: 'var(--cp-font-base)',
     lineHeight: '20px',
     fontWeight: 700,
     color: 'var(--cp-text-primary)',
@@ -650,7 +650,7 @@ const S = {
     borderRadius: 999,
   },
   vizTab: {
-    fontSize: 11,
+    fontSize: 'var(--cp-font-sm)',
     height: 32,
     padding: '0 16px',
     background: 'transparent',
@@ -670,6 +670,7 @@ const S = {
     minHeight: 400,
     display: 'flex',
     flexDirection: 'column',
+    position: 'relative',
   },
 
   error: {
@@ -678,7 +679,7 @@ const S = {
     color: 'var(--cp-text-strong)',
     border: '1px solid var(--cp-accent)',
     borderRadius: 10,
-    fontSize: 12,
+    fontSize: 'var(--cp-font-sm)',
     fontWeight: 600,
   },
 
@@ -692,7 +693,7 @@ const S = {
     borderRadius: 10,
   },
   leverLabel: {
-    fontSize: 11,
+    fontSize: 'var(--cp-font-sm)',
     fontWeight: 700,
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
@@ -700,7 +701,7 @@ const S = {
   },
   leverPills: { display: 'flex', gap: 8, flexWrap: 'wrap' },
   leverBtn: {
-    fontSize: 11,
+    fontSize: 'var(--cp-font-sm)',
     height: 32,
     padding: '0 16px',
     background: 'transparent',

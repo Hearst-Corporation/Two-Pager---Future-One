@@ -76,7 +76,7 @@ const S = {
     padding: '10px 12px 10px 14px',
     border: '1px solid var(--cp-border)',
     borderRadius: 12,
-    boxShadow: '0 8px 24px -6px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset',
+    boxShadow: 'var(--cp-shadow-md)',
     fontFamily: 'var(--cp-font-sans, sans-serif)',
     minWidth: 280,
     maxWidth: 360,

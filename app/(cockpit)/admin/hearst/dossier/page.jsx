@@ -535,9 +535,11 @@ function ScenarioView({ scenarioId }) {
   useEffect(() => {
     async function load() {
       try {
+        const pRes = await fetch('/api/admin/hearst/project');
+        const { project: proj } = await pRes.json();
         const [mRes, sRes] = await Promise.allSettled([
           fetch(`/api/admin/hearst/strategic-memos?scenario_id=${scenarioId}`).then(r => r.json()),
-          fetch(`/api/admin/hearst/scenarios`).then(r => r.json()),
+          fetch(`/api/admin/hearst/scenarios?project_id=${proj?.id}`).then(r => r.json()),
         ]);
         if (mRes.status === 'fulfilled') setMemos(mRes.value.memos || []);
         if (sRes.status === 'fulfilled') {
@@ -646,9 +648,11 @@ function AllMemosView() {
   useEffect(() => {
     async function load() {
       try {
+        const pRes = await fetch('/api/admin/hearst/project');
+        const { project: proj } = await pRes.json();
         const [mRes, sRes] = await Promise.allSettled([
           fetch('/api/admin/hearst/strategic-memos').then(r => r.json()),
-          fetch('/api/admin/hearst/scenarios').then(r => r.json()),
+          fetch(`/api/admin/hearst/scenarios?project_id=${proj?.id}`).then(r => r.json()),
         ]);
         if (mRes.status === 'fulfilled') setMemos(mRes.value.memos || []);
         if (sRes.status === 'fulfilled') {
@@ -886,7 +890,7 @@ const S = {
   appendixLabel: { ...EYEBROW },
   appendixChevron: { fontSize: 'var(--cp-font-lg)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
   appendixBody: { padding: '0 var(--cp-space-4) var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
-  pre: { margin: 0, padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)', lineHeight: 1.5, overflowX: 'auto', maxHeight: 380, fontFamily: 'ui-monospace, monospace' },
+  pre: { margin: 0, padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)', lineHeight: 1.5, overflowX: 'auto', fontFamily: 'ui-monospace, monospace' },
   tensionList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
   tensionItem: { borderLeft: '3px solid var(--cp-border-strong)', paddingLeft: 'var(--cp-space-3)' },
   tensionId: { ...EYEBROW, color: 'var(--cp-text-primary)', fontFamily: 'ui-monospace, monospace' },

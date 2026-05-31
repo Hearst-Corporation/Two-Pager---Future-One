@@ -47,7 +47,7 @@ export default function ArchetypeRadar({ archetypes = [], highlighted = null, he
 
   return (
     <div style={{ width: '100%', height }}>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         <RadarChart data={data} outerRadius="78%">
           <PolarGrid stroke="var(--cp-border)" />
           <PolarAngleAxis dataKey="axis" tick={{ fill: 'var(--cp-text-muted)', fontSize: 11 }} />

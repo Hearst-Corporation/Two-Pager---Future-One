@@ -15,28 +15,16 @@ import { usePathname } from 'next/navigation';
 
 const SECTIONS = [
   {
-    id: 'executive',
-    href: '/admin/hearst/executive',
-    label: 'Executive',
-    matchAny: ['/admin/hearst/executive'],
-  },
-  {
     id: 'sim',
     href: '/admin/hearst/simulator',
     label: 'Simulator',
-    matchAny: ['/admin/hearst/simulator', '/admin/hearst/engine', '/admin/hearst/scenarios', '/admin/hearst/financial', '/admin/hearst/assumptions'],
-  },
-  {
-    id: 'hub',
-    href: '/admin/hearst/hub',
-    label: 'Hub',
-    matchAny: ['/admin/hearst/hub', '/admin/hearst/pipeline', '/admin/hearst/deals', '/admin/hearst/contracts', '/admin/hearst/data-room'],
+    matchAny: ['/admin/hearst/simulator'],
   },
   {
     id: 'dossier',
     href: '/admin/hearst/dossier',
     label: 'Dossier',
-    matchAny: ['/admin/hearst/dossier', '/admin/hearst/library', '/admin/hearst/sources', '/admin/hearst/reports', '/admin/hearst/timeline', '/admin/hearst/risks', '/admin/hearst/audit', '/admin/hearst/documents'],
+    matchAny: ['/admin/hearst/dossier'],
   },
 ];
 

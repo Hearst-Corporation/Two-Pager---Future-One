@@ -1,33 +1,7 @@
-import Header from '@/components/landing/Header';
-import Hero from '@/components/landing/Hero';
-import SectionOpportunity from '@/components/landing/SectionOpportunity';
-import SectionHub from '@/components/landing/SectionHub';
-import SectionPartners from '@/components/landing/SectionPartners';
-import SectionLife from '@/components/landing/SectionLife';
-import SectionMethod from '@/components/landing/SectionMethod';
-import SectionCampus from '@/components/landing/SectionCampus';
-import SectionFinalCTA from '@/components/landing/SectionFinalCTA';
-import Footer from '@/components/landing/Footer';
-import CustomCursor from '@/components/ui/CustomCursor';
-import ContactModal from '@/components/ui/ContactModal';
+import { redirect } from 'next/navigation';
 
+// Standalone ORACLE: the product is the engine → scenario → report → history.
+// Root redirects into the cockpit (middleware gates auth → /admin/login).
 export default function Home() {
-  return (
-    <>
-      <CustomCursor />
-      <Header />
-      <main>
-        <Hero />
-        <SectionOpportunity />
-        <SectionHub />
-        <SectionPartners />
-        <SectionLife />
-        <SectionMethod />
-        <SectionCampus />
-        <SectionFinalCTA />
-        <Footer />
-      </main>
-      <ContactModal />
-    </>
-  );
+  redirect('/admin/hearst/simulator');
 }

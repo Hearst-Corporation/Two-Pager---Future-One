@@ -68,7 +68,7 @@
     background: var(--cp-accent-maroon, var(--cp-accent, #8A1538));
     color: var(--cp-text-strong, #fff);
     border: 1px solid var(--cp-border-strong, rgba(255, 255, 255, 0.16));
-    box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.5),
+    box-shadow: var(--cp-shadow-lg),
                 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
     cursor: pointer;
     transition: transform 150ms ease, background 150ms ease;

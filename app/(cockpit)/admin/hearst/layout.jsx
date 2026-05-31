@@ -10,8 +10,6 @@ import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
 import MemoJobBadge from '@/components/hearst/MemoJobBadge';
 import MemoToast from '@/components/hearst/MemoToast';
 import DemoModeBadge from '@/components/hearst/DemoModeBadge';
-import { HubSessionBridge } from '@/components/HubSessionBridge';
-import { AdminReviewControls } from '@/components/admin/AdminReviewControls';
 import { ChatIdPersistor } from '@/components/admin/ChatIdPersistor';
 
 const ORACLE_PRODUCTS = [
@@ -27,18 +25,16 @@ const ORACLE_PRODUCTS = [
 // Source : ~/.claude/CLAUDE.md « Chat Kimi via Hypercli (kimi-k2.6, clé
 // HYPERCLI_API_KEY depuis ~/.claude/api-config/, jamais hardcodée) ».
 const ORACLE_CHAT_CONFIG = {
-  productContext: 'Hearst Oracle — investment simulator + CRM pipeline',
+  productContext: 'Hearst Oracle — infrastructure investment simulator',
 };
 
 export default function HearstLayout({ children }) {
   return (
     <SimulationProvider>
-      <HubSessionBridge />
       <ChatIdPersistor />
       <CockpitShell products={ORACLE_PRODUCTS} appId="oracle" chatConfig={ORACLE_CHAT_CONFIG}>
         <OracleBottomBar />
         {children}
-        <AdminReviewControls />
         <ChatToggleFAB />
         {/* Strategic Memo : modale + badge persistant + toast pilotés par
             le store global lib/hearst-memo-job-store.js. Le job survit à

@@ -206,7 +206,7 @@
   gap: 20px;
 }
 .ct-bottom-label {
-  font-size: 12px;
+  font-size: var(--cp-font-sm);
   font-weight: 500;
   color: var(--ct-text-body);
   white-space: nowrap;
@@ -214,7 +214,7 @@
 .ct-seg-track {
   display: flex;
   align-items: center;
-  padding: 4px;
+  padding: var(--cp-space-1);
   background: rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   border-radius: 9999px;
@@ -224,8 +224,8 @@
   border: none;
   background: transparent;
   color: var(--ct-text-primary);
-  padding: 8px 16px;
-  font-size: 12px;
+  padding: var(--cp-space-2) var(--cp-space-4);
+  font-size: var(--cp-font-sm);
   font-weight: 500;
   font-family: inherit;
   border-radius: 9999px;
@@ -234,7 +234,7 @@
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--cp-space-2);
   transition: background var(--ct-dur-base, 150ms) var(--ct-ease, ease),
     color var(--ct-dur-base, 150ms) var(--ct-ease, ease);
 }
