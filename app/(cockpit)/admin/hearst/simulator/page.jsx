@@ -19,6 +19,7 @@ import HardwareMixer from '@/components/hearst/simulator/HardwareMixer';
 import OutputKpiStrip from '@/components/hearst/simulator/OutputKpiStrip';
 import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
 import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
+import { T } from '@/lib/design-system/tokens';
 
 const FinancialSankey = dynamic(() => import('@/components/hearst/simulator/FinancialSankey'), {
   ssr: false,
@@ -508,7 +509,7 @@ const S = {
     background: 'transparent', color: 'var(--cp-text-muted)',
     border: 'none', borderRadius: 'var(--cp-radius-pill, 9999px)', cursor: 'pointer',
     fontSize: 'var(--cp-font-sm)', fontWeight: 600, letterSpacing: 0.3,
-    transition: 'all 0.15s ease',
+    transition: T.all,
   },
   modeBtnActive: {
     background: 'var(--cp-accent-maroon, var(--cp-accent))',
@@ -606,7 +607,7 @@ const S = {
     cursor: 'pointer',
     fontWeight: 600,
     letterSpacing: 0.3,
-    transition: 'all 0.15s ease',
+    transition: T.all,
   },
   vizTabActive: {
     background: 'var(--cp-accent-maroon)',

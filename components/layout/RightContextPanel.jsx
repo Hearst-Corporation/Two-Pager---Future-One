@@ -91,7 +91,7 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: `${SP[2]}px`,
-    transition: 'border-color 0.15s ease, background 0.15s ease',
+    transition: T.bgBorder,
   },
   metricLabel: {
     fontSize: T.mini,
@@ -135,7 +135,7 @@ const S = {
     fontWeight: W.semibold,
     fontFamily: 'inherit',
     cursor: 'pointer',
-    transition: 'background 0.12s ease, border-color 0.12s ease, color 0.12s ease',
+    transition: T.bgBorderColor,
   },
   actionBtnPrimary: {
     background: ACCENT.main,

@@ -145,7 +145,7 @@ const S = {
     padding: `${SP[1]}px ${SP[2]}px`,
     borderRadius: 4,
     textDecoration: 'none',
-    transition: 'color 0.12s ease',
+    transition: T.color,
   },
   headerLinkLabel: {
     whiteSpace: 'nowrap',
@@ -169,12 +169,12 @@ const S = {
     textDecoration: 'none',
     borderRadius: `${CARD.radiusSm}px ${CARD.radiusSm}px 0 0`,
     whiteSpace: 'nowrap',
-    transition: 'color 0.12s ease, background 0.12s ease',
+    transition: T.colorBg,
   },
   primaryTabActive: {
     color: TEXT.primary,
     fontWeight: W.bold,
-    background: 'rgba(255, 255, 255, 0.04)',
+    background: 'var(--cp-surface-1)',
   },
   tabIcon: {
     display: 'inline-flex',
@@ -219,7 +219,7 @@ const S = {
     textDecoration: 'none',
     whiteSpace: 'nowrap',
     borderBottom: '2px solid transparent',
-    transition: 'color 0.12s ease, border-color 0.12s ease',
+    transition: T.colorBorder,
   },
   secondaryTabActive: {
     color: TEXT.primary,

@@ -1,6 +1,7 @@
 'use client';
 
 import { GPU_CATALOG, calcRackPower, calcGpuCapex, calcGpuAnnualRevenue, REFERENCE_GPU_HOUR_PRICES } from '@/lib/hearst-gpu-catalog';
+import { T } from '@/lib/design-system/tokens';
 
 function redistribute(prev, changedKey, newValue) {
   const others = Object.keys(prev).filter(k => k !== changedKey);
@@ -221,7 +222,7 @@ const S = {
     borderRadius: 6,
     cursor: 'pointer',
     textAlign: 'left',
-    transition: 'all 0.12s ease',
+    transition: T.allFast,
     color: 'var(--cp-text-primary)',
   },
   gpuCardSel: {

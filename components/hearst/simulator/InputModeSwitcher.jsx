@@ -1,5 +1,7 @@
 'use client';
 
+import { T } from '@/lib/design-system/tokens';
+
 const MODES = [
   { id: 'capital_first',     label: 'Budget',        sub: '$',       hint: 'How much money do you have?' },
   { id: 'mw_first',          label: 'Size',          sub: 'MW',      hint: 'How big do you want it?' },
@@ -85,7 +87,7 @@ const S = {
     cursor: 'pointer',
     textAlign: 'left',
     color: 'var(--cp-text-primary)',
-    transition: 'all 0.15s ease',
+    transition: T.all,
     minHeight: 52,
   },
   modeBtnActive: {
@@ -141,7 +143,7 @@ const S = {
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-md, 8px)',
     cursor: 'pointer',
-    transition: 'all 0.12s ease',
+    transition: T.allFast,
   },
   bootstrap: {
     alignSelf: 'flex-start',

@@ -144,7 +144,7 @@ const S = {
     padding: '12px 14px',
     border: 0,
     background: 'var(--color-accent-strong)',
-    color: '#fff',
+    color: 'var(--color-text-inverse)',
     fontSize: 12,
     fontWeight: 800,
     letterSpacing: 2,
@@ -163,5 +163,5 @@ const S = {
     padding: 4,
   },
   err: { fontSize: 12, color: 'var(--color-accent-strong)', fontWeight: 600 },
-  msg: { fontSize: 12, color: 'var(--color-success, #059669)', fontWeight: 600 },
+  msg: { fontSize: 12, color: 'var(--color-success)', fontWeight: 600 },
 };

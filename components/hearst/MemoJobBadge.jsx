@@ -11,6 +11,8 @@ import {
   showMemoModal,
   formatElapsed,
 } from '@/lib/hearst-memo-job-store';
+import { Z } from '@/lib/z-index';
+import { T } from '@/lib/design-system/tokens';
 
 const SLA_WARNING_MS = 120_000;
 
@@ -47,7 +49,7 @@ const S = {
     // Au-dessus du FAB chat (qui est à bottom: var(--cp-bar-bottom, 64px) + 16px)
     // On le place encore plus haut pour ne pas chevaucher
     bottom: 'calc(var(--cp-bar-bottom, 64px) + 80px)',
-    zIndex: 1002,
+    zIndex: Z.fabOpen,
     display: 'inline-flex',
     alignItems: 'center',
     gap: 10,
@@ -60,7 +62,7 @@ const S = {
     cursor: 'pointer',
     fontFamily: 'var(--cp-font-sans, sans-serif)',
     minWidth: 200,
-    transition: 'transform 150ms ease, box-shadow 150ms ease',
+    transition: T.transformShadow,
   },
   spinner: {
     display: 'inline-block',

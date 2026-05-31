@@ -65,9 +65,9 @@
     height: 52px;
     border-radius: 50%;
     z-index: 1002;
-    background: var(--cp-accent-maroon, var(--cp-accent, #8A1538));
-    color: var(--cp-text-strong, #fff);
-    border: 1px solid var(--cp-border-strong, rgba(255, 255, 255, 0.16));
+    background: var(--cp-accent-maroon, var(--cp-accent));
+    color: var(--cp-text-strong);
+    border: 1px solid var(--cp-border-strong);
     box-shadow: var(--cp-shadow-lg),
                 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
     cursor: pointer;
@@ -80,7 +80,7 @@
     transform: translateY(0);
   }
   .cp-chat-drawer-fab[data-open="true"] {
-    background: var(--cp-surface-2, #2a0d13);
-    color: var(--cp-text-primary, #fff);
+    background: var(--cp-surface-2);
+    color: var(--cp-text-primary);
   }
 }

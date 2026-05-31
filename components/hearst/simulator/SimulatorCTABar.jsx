@@ -1,5 +1,7 @@
 'use client';
 
+import { Z } from '@/lib/z-index';
+
 export default function SimulatorCTABar({
   onSave,
   onExportMd,
@@ -52,7 +54,7 @@ const S = {
     alignItems: 'center',
     gap: 'var(--cp-space-4)',
     marginTop: 'var(--cp-space-2)',
-    zIndex: 40,
+    zIndex: Z.ctaBar,
     minHeight: 56,
   },
   left: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' },

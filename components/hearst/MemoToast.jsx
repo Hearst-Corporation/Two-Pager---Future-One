@@ -16,6 +16,7 @@ import {
   clearMemoJob,
   formatElapsed,
 } from '@/lib/hearst-memo-job-store';
+import { Z } from '@/lib/z-index';
 
 export default function MemoToast() {
   const job = useMemoJob();
@@ -69,7 +70,7 @@ const S = {
     position: 'fixed',
     right: 16,
     bottom: 'calc(var(--cp-bar-bottom, 64px) + 80px)',
-    zIndex: 1003,
+    zIndex: Z.toast,
     display: 'inline-flex',
     alignItems: 'center',
     gap: 10,

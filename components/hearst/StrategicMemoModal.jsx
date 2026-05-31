@@ -19,6 +19,8 @@ import {
   formatElapsed,
 } from '@/lib/hearst-memo-job-store';
 import { deriveVerdict, deriveCategory, deriveKpis } from '@/lib/dossier-derive';
+import { Z } from '@/lib/z-index';
+import { T } from '@/lib/design-system/tokens';
 
 /**
  * Live timeline shown during loading.
@@ -261,7 +263,7 @@ const S = {
   backdrop: {
     position: 'fixed',
     inset: 0,
-    zIndex: 1010,
+    zIndex: Z.modal,
     background: 'rgba(0, 0, 0, 0.72)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
@@ -301,7 +303,7 @@ const S = {
   timelineElapsed: { fontFamily: 'ui-monospace, monospace', fontSize: 12, fontWeight: 800, color: 'var(--cp-text-strong)', fontVariantNumeric: 'tabular-nums' },
   slaWrap: { display: 'flex', flexDirection: 'column', gap: 4 },
   slaBar: { position: 'relative', height: 6, background: 'var(--cp-surface-0)', borderRadius: 999, overflow: 'hidden' },
-  slaFill: { position: 'absolute', inset: 0, right: 'auto', height: '100%', borderRadius: 999, transition: 'width 1s linear, background 300ms ease' },
+  slaFill: { position: 'absolute', inset: 0, right: 'auto', height: '100%', borderRadius: 999, transition: T.slaBar },
   slaTarget: { position: 'absolute', top: -2, height: 10, width: 2, background: 'var(--cp-border-strong)' },
   slaLabel: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 },
   cascadeWrap: { display: 'flex', flexDirection: 'column', gap: 6 },

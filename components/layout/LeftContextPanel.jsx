@@ -97,7 +97,7 @@ const S = {
     fontFamily: 'inherit',
     cursor: 'pointer',
     textAlign: 'left',
-    transition: 'background 0.12s ease, color 0.12s ease',
+    transition: T.colorBg,
   },
   navItemActive: {
     background: NAV.activeBg,

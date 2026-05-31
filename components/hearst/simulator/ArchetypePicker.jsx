@@ -2,6 +2,7 @@
 
 import MiniRadar from './MiniRadar';
 import { ARCHETYPE_PALETTE } from './ArchetypeRadar';
+import { T } from '@/lib/design-system/tokens';
 
 const B2B_B2C_TAG = {
   powered_shell: 'Business',
@@ -91,7 +92,7 @@ const S = {
     flexDirection: 'column',
     gap: 8,
     minHeight: 280,
-    transition: 'border-color 0.15s ease',
+    transition: T.border,
   },
   cardHeader: {
     display: 'flex',
@@ -162,7 +163,7 @@ const S = {
     borderRadius: 6,
     cursor: 'pointer',
     fontWeight: 700,
-    transition: 'all 0.12s ease',
+    transition: T.allFast,
   },
   selectBtn: {
     flex: 1,
@@ -175,6 +176,6 @@ const S = {
     borderRadius: 6,
     cursor: 'pointer',
     fontWeight: 700,
-    transition: 'all 0.12s ease',
+    transition: T.allFast,
   },
 };
