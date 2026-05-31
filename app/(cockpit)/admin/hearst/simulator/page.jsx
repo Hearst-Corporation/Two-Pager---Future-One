@@ -13,6 +13,9 @@ import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-struc
 import { SIMULATOR_PARAM_EVENT } from '@/components/hearst/ChatContainer';
 import SimpleWizard from '@/components/hearst/simulator/SimpleWizard';
 import { startMemoJob } from '@/lib/hearst-memo-job-store';
+import CopilotPanel from '@/components/hearst/simulator/CopilotPanel';
+import ApplyModal from '@/components/hearst/simulator/ApplyModal';
+import { buildCopilotSuggestion } from '@/lib/copilot-rules';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
@@ -116,6 +119,11 @@ export default function SimulatorPage() {
   const saveTimerRef = useRef(null);
   useEffect(() => () => clearTimeout(saveTimerRef.current), []);
 
+  // Copilot V1 state
+  const [copilotSuggestion, setCopilotSuggestion] = useState(null);
+  const [copilotDismissed, setCopilotDismissed] = useState(false);
+  const [applyModalFields, setApplyModalFields] = useState(null);
+
   useEffect(() => {
     (async () => {
       try {
@@ -159,6 +167,17 @@ export default function SimulatorPage() {
       } catch {}
     })();
   }, []);
+
+  // Recompute Copilot suggestion whenever the simulation result changes.
+  // Reset dismissed state so a new (different) suggestion can surface.
+  useEffect(() => {
+    const next = buildCopilotSuggestion(state, simResult);
+    setCopilotSuggestion(prev => {
+      if (prev?.rule_id === next?.rule_id) return prev;
+      setCopilotDismissed(false);
+      return next;
+    });
+  }, [simResult, state]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -228,6 +247,40 @@ export default function SimulatorPage() {
     else if (state.mode === 'target_irr_first') dispatch({ type: ACTIONS.SET_IRR_TARGET, value: val });
     else dispatch({ type: ACTIONS.SET_MW, value: val });
   }, [state.mode]);
+
+  // Copilot: open the ApplyModal (no dispatch yet)
+  function handleCopilotApply(fields) {
+    setApplyModalFields(fields);
+  }
+
+  // ApplyModal confirmed: dispatch each field into the reducer
+  function handleApplyConfirm(fields) {
+    setApplyModalFields(null);
+    setCopilotDismissed(true);
+    for (const f of fields) {
+      switch (f.field) {
+        case 'total_mw':
+          dispatch({ type: ACTIONS.SET_MW, value: f.value });
+          break;
+        case 'primary_archetype_id':
+          dispatch({ type: ACTIONS.SET_PRIMARY_ARCHETYPE, value: f.value });
+          break;
+        case 'hardware_mix.utilization_pct':
+        case 'hardware_mix.ai_pct':
+        case 'hardware_mix.liquid_pct':
+        case 'hardware_mix.classic_pct':
+        case 'hardware_mix.gpu_sku_id':
+        case 'hardware_mix.debt_pct':
+        case 'hardware_mix.gpu_hour_price': {
+          const key = f.field.split('.')[1];
+          dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: { [key]: f.value } });
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
 
   async function handleSave() {
     if (!projectId || !scenario) return;
@@ -322,6 +375,24 @@ export default function SimulatorPage() {
       )}
 
       {uiMode === 'pro' && (<>
+      {/* ── Copilot Panel ── */}
+      {!copilotDismissed && copilotSuggestion && (
+        <CopilotPanel
+          suggestion={copilotSuggestion}
+          onApply={handleCopilotApply}
+          onDismiss={() => setCopilotDismissed(true)}
+        />
+      )}
+
+      {/* ── Apply Modal ── */}
+      {applyModalFields && (
+        <ApplyModal
+          fields={applyModalFields}
+          onConfirm={handleApplyConfirm}
+          onCancel={() => setApplyModalFields(null)}
+        />
+      )}
+
       {/* ① INPUT — mode + hero field side-by-side */}
       <section style={S.inputGrid}>
         <InputModeSwitcher
