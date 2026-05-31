@@ -18,7 +18,7 @@ import type { ProductContext } from "@hearst/review-mode";
 
 const PAGES_CONTEXT_TEXT = `# Carte des pages Oracle / Future One Qatar
 
-Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (18 pages internes). Stack Next.js 14 (App Router) + Supabase + Kimi K2.6 via Hypercli.
+Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (2 pages actives). Stack Next.js 14 (App Router) + Supabase + Kimi K2.6 via Hypercli.
 
 ## Routes publiques (présentation A3 + pitches)
 
@@ -37,24 +37,8 @@ Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (18 p
 
 ## Routes Cockpit admin HEARST (\`/admin/hearst/*\`)
 
-- \`/admin/hearst\` — Overview. Zone : KPI rangée haute (source_score, data room completeness, IRR/NPV/EBITDA/DSCR scenario actif), bandeau alertes critiques.
-- \`/admin/hearst/about\` — How it works. Zones : glossaire DC (retail colo / wholesale / powered shell / sovereign AI / PUE / IRR / NPV / MOIC / DSCR / terminal value), références publiques.
-- \`/admin/hearst/assumptions\` — Hypothèses financières. Zones : capacity phasing (total_mw, phase1/2/3 + COD years), power (pue, electricity_price_mwh, target_occupancy_pct), CAPEX components ($/MW), OPEX %, revenue $/kW/mo, capital structure (debt_pct, debt_interest_rate, debt_term_years, equity_hearst/brookfield/qatar_pct), exit (multiple, year). Chaque champ a un source_id obligatoire.
-- \`/admin/hearst/sources\` — Source Ledger. Zones : table sources (metric_id, source_type [official_source/uploaded_document/admin_input/calculated/contract], source_name, source_url, value, confidence_score 1–5, geography, date_published, page_number, quoted_excerpt, applicability_to_qatar, triangulation_status). Bibliothèque PUBLIC_SOURCES_LIBRARY (16 sources : JLL, CBRE, Turner & Townsend, Uptime, QIA/Brookfield $20B, KAHRAMAA, Equinix 10-K, DR 10-K, NTT, Lambda, NVIDIA GB200, SEC MCSA, SEC Turn Key lease, Mayer Brown, Ooredoo MENA).
-- \`/admin/hearst/financial\` — Projection 10 ans. Zones : ligne years[] (revenue, power_cost, opex, ebitda, ebitda_margin, free_cash_flow, cumulative_fcf, dscr), KPI tiles total_capex / terminal_value / irr / npv / moic / payback_years / dscr_stabilized, alertes si projection non calculable.
-- \`/admin/hearst/data-room\` — Data Room. Zone : table 25+ docs (corporate / land / power / permits / technical / commercial / financial / legal / ESG / tax / insurance) avec status missing→in_progress→uploaded→reviewed→approved.
-- \`/admin/hearst/contracts\` — Contract Library. Zone : table contracts (document_type lease/mcsa/term_sheet/ppa/government_source/market_report, source_org, jurisdiction, extracted_clauses, extracted_numbers, usable_in_model, confidence 1–5).
-- \`/admin/hearst/pipeline\` — Commercial Pipeline. Zone : table prospects (hyperscalers, operators, neoclouds, sovereigns) avec mw_requested, target_price_kw_month, probability_pct, expected_signing_date, contract_length_years, stage prospect→loi→term_sheet→contracted.
-- \`/admin/hearst/risks\` — Risk Dashboard. Zones : matrice risques par catégorie (site / power / technical / commercial / financial / geopolitical / regulatory), smart alerts (PUE not sourced, electricity not from PPA, etc.).
-- \`/admin/hearst/timeline\` — Gantt. Zone : phases development → financial close → construction → commissioning → operations → expansion, milestones dérivés de planned_cod + construction_months.
-- \`/admin/hearst/scenarios\` — Scenario Comparison. Zone : comparaison Base / Downside / Upside + scenarios custom (deltas inputs, IRR/NPV/MOIC/DSCR side-by-side).
-- \`/admin/hearst/deal-simulator\` — Deal Structure Simulator (read-only). Zones : 5 archétypes cards (Powered Shell + NNN [RECO, score 87], Branded JV 51/49 [score 63], Manage-Only [77], White-Label Compass [80], Sale-Leaseback [63]), scoring 6 dims, HEARST equity invested comparatif.
-- \`/admin/hearst/deals\` — Liste deals.
-- \`/admin/hearst/documents\` — Documents.
-- \`/admin/hearst/timeline\` — Timeline (déjà listé).
-- \`/admin/hearst/reports\` — Reports & Export. Zone : bouton export PDF investor-grade (project overview / financial summary / scenario comparison / sourcing compliance / disclaimers).
-- \`/admin/hearst/audit\` — Audit Trail. Zone : table audit_log (actor / field / previous_value / new_value / timestamp / rationale).
-- \`/admin/hearst/profile\` — Profil utilisateur + sign out.
+- \`/admin/hearst/simulator\` — Investment Simulator. Zone : mode switcher (Simple / Pro), input hero (MW / Capital / IRR), deal archetypes, equipment mix, visualisations (radar / network / matrix / sankey), résultats (KPIs, gantt, 10-year projection), CTA bar (save plan, export MD), génération de mémo stratégique.
+- \`/admin/hearst/dossier\` — Decision Canvas & Memo Approval. Zone : canvas de décision, approbation de mémos stratégiques, workflow institutionnel.
 
 ## Routes \`/admin/*\` (cockpit générique non-Hearst, hors scope review prioritaire)
 

@@ -35,7 +35,7 @@ function isSectionActive(section, pathname) {
 }
 
 export function OracleBottomBar() {
-  const pathname = usePathname() ?? '/admin/hearst/executive';
+  const pathname = usePathname() ?? '/admin/hearst/simulator';
 
   return (
     <nav className="ct-bottom-bar" aria-label="Hearst cockpit sections">

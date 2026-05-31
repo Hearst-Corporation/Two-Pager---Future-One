@@ -2,7 +2,6 @@
 
 export default function SimulatorCTABar({
   onSave,
-  onOpenFinancial,
   onExportMd,
   savingState = 'idle',
   hasProjection = false,
@@ -24,9 +23,6 @@ export default function SimulatorCTABar({
       <div style={S.actions}>
         <button type="button" onClick={onExportMd} disabled={!hasProjection} style={S.btnLink}>
           ↓ Summary (.md)
-        </button>
-        <button type="button" onClick={onOpenFinancial} disabled={!hasProjection || !saved} style={S.btnSecondary}>
-          Open financial model →
         </button>
         <button
           type="button"
@@ -93,17 +89,6 @@ const S = {
     fontWeight: 600,
     textDecoration: 'underline',
     textUnderlineOffset: 3,
-  },
-  btnSecondary: {
-    fontSize: 'var(--cp-font-sm)',
-    height: 36,
-    padding: '0 var(--cp-space-4)',
-    background: 'var(--cp-surface-0)',
-    color: 'var(--cp-text-primary)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
-    cursor: 'pointer',
-    fontWeight: 700,
   },
   btnPrimary: {
     fontSize: 'var(--cp-font-base)',

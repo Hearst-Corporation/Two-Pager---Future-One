@@ -2,7 +2,6 @@
 
 import { useReducer, useState, useEffect, useMemo, useCallback, useDeferredValue, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
 import {
@@ -11,7 +10,6 @@ import {
 } from '@/lib/hearst-simulator-state';
 import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
 
-import SectionTabs from '@/components/hearst/SectionTabs';
 import { SIMULATOR_PARAM_EVENT } from '@/components/hearst/ChatContainer';
 import SimpleWizard from '@/components/hearst/simulator/SimpleWizard';
 import { startMemoJob } from '@/lib/hearst-memo-job-store';
@@ -111,8 +109,9 @@ export default function SimulatorPage() {
   const [savingState, setSavingState] = useState('idle');
   // memo job piloté par le store global — plus de state local
   const [projectId, setProjectId] = useState(null);
-  const [savedScenarioId, setSavedScenarioId] = useState(null);
   const debounceRef = useRef(null);
+  const saveTimerRef = useRef(null);
+  useEffect(() => () => clearTimeout(saveTimerRef.current), []);
 
   useEffect(() => {
     (async () => {
@@ -221,21 +220,13 @@ export default function SimulatorPage() {
         const body = await r.json().catch(() => ({}));
         throw new Error(body.error || 'Save failed');
       }
-      const data = await r.json();
-      setSavedScenarioId(data.scenario?.id);
+      await r.json();
       setSavingState('saved');
-      setTimeout(() => setSavingState('idle'), 2500);
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => setSavingState('idle'), 2500);
     } catch (e) {
       setSavingState('idle');
       alert(`Save failed: ${e.message}`);
-    }
-  }
-
-  function handleOpenFinancial() {
-    if (savedScenarioId) {
-      router.push(`/admin/hearst/financial?scenario_id=${savedScenarioId}`);
-    } else {
-      router.push('/admin/hearst/financial');
     }
   }
 
@@ -253,7 +244,6 @@ export default function SimulatorPage() {
 
   return (
     <div style={S.wrap}>
-      <SectionTabs section="modeling" />
       <header style={S.header}>
         <div style={S.headerText}>
           <h1 style={S.title}>Investment Simulator</h1>
@@ -261,10 +251,6 @@ export default function SimulatorPage() {
             {uiMode === 'simple'
               ? '4 questions simples pour bâtir votre plan d\'investissement.'
               : 'Pick your starting point. See the financials, timeline, and team you\'ll need.'}
-            {' · '}
-            <Link href="/admin/hearst/engine" style={{ color: 'var(--cp-accent)', textDecoration: 'none' }}>
-              audit engine →
-            </Link>
           </div>
         </div>
         <div style={S.modeSwitch} role="tablist" aria-label="Simulator mode">
@@ -430,7 +416,6 @@ export default function SimulatorPage() {
         hasProjection={!!projection}
         savingState={savingState}
         onSave={handleSave}
-        onOpenFinancial={handleOpenFinancial}
         onExportMd={handleExportMd}
       />
 
