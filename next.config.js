@@ -18,9 +18,11 @@ const nextConfig = {
   reactStrictMode: true,
   devIndicators: false,
 
-  // @sparticuz/chromium ships a native binary that must not be bundled.
-  // Externalizing both it and puppeteer-core prevents Next from relocating the bin/.
-  serverExternalPackages: ['@sparticuz/chromium', 'puppeteer-core', 'puppeteer'],
+  experimental: {
+    // @sparticuz/chromium ships a native binary — must not be bundled by Next.
+    // Next 14 uses serverComponentsExternalPackages (renamed serverExternalPackages in Next 15).
+    serverComponentsExternalPackages: ['@sparticuz/chromium', 'puppeteer-core', 'puppeteer'],
+  },
 
   async redirects() {
     return [
