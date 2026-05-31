@@ -5,6 +5,7 @@ import { Z } from '@/lib/z-index';
 export default function SimulatorCTABar({
   onSave,
   onExportMd,
+  onGenerateMemo,
   savingState = 'idle',
   hasProjection = false,
 }) {
@@ -24,18 +25,27 @@ export default function SimulatorCTABar({
       </div>
       <div style={S.actions}>
         <button type="button" onClick={onExportMd} disabled={!hasProjection} style={S.btnLink}>
-          ↓ Summary (.md)
+          Export Summary
         </button>
         <button
           type="button"
           onClick={onSave}
           disabled={!hasProjection || saving}
           style={{
-            ...S.btnPrimary,
+            ...S.btnSecondary,
             ...(saving || !hasProjection ? { opacity: 0.55, cursor: 'not-allowed' } : {}),
-            ...(saved ? { background: 'var(--cp-accent-maroon)' } : {}),
           }}>
-          {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save this plan'}
+          {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save Scenario'}
+        </button>
+        <button
+          type="button"
+          onClick={onGenerateMemo}
+          disabled={!hasProjection}
+          style={{
+            ...S.btnPrimary,
+            ...(!hasProjection ? { opacity: 0.55, cursor: 'not-allowed' } : {}),
+          }}>
+          Generate Strategic Memo
         </button>
       </div>
     </div>
@@ -88,8 +98,20 @@ const S = {
     textDecoration: 'underline',
     textUnderlineOffset: 3,
   },
+  btnSecondary: {
+    fontSize: 'var(--cp-font-sm)',
+    height: 36,
+    padding: '0 var(--cp-space-4)',
+    background: 'transparent',
+    color: 'var(--cp-text-primary)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-sm)',
+    cursor: 'pointer',
+    fontWeight: 600,
+    letterSpacing: 0.2,
+  },
   btnPrimary: {
-    fontSize: 'var(--cp-font-base)',
+    fontSize: 'var(--cp-font-sm)',
     height: 36,
     padding: '0 var(--cp-space-5)',
     background: 'var(--cp-accent-maroon)',
@@ -97,7 +119,8 @@ const S = {
     border: 'none',
     borderRadius: 'var(--cp-radius-sm)',
     cursor: 'pointer',
-    fontWeight: 800,
-    letterSpacing: 0.2,
+    fontWeight: 700,
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
   },
 };

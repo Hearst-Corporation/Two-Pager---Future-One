@@ -6,7 +6,7 @@
    details, and contextual actions. Scrolls internally.
    ============================================================ */
 
-import { BG, CARD, TEXT, SP, T, W, LS, BORDER, ACCENT, STATUS } from '@/lib/design-system/tokens';
+import { BG, CARD, TEXT, SP, FONT_SIZES as T, W, LS, BORDER, ACCENT, STATUS } from '@/lib/design-system/tokens';
 
 export default function RightContextPanel({ header, children }) {
   return (

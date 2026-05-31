@@ -16,11 +16,16 @@ import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import HardwareMixer from '@/components/hearst/simulator/HardwareMixer';
+import ArchetypeRadar from '@/components/hearst/simulator/ArchetypeRadar';
+import B2BMatrix from '@/components/hearst/simulator/B2BMatrix';
 import OutputKpiStrip from '@/components/hearst/simulator/OutputKpiStrip';
 import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
 import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
-import { T } from '@/lib/design-system/tokens';
 
+const EcosystemNetwork = dynamic(() => import('@/components/hearst/simulator/EcosystemNetwork'), {
+  ssr: false,
+  loading: () => <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading industry players…</div>,
+});
 const FinancialSankey = dynamic(() => import('@/components/hearst/simulator/FinancialSankey'), {
   ssr: false,
   loading: () => <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading money flow…</div>,
@@ -29,6 +34,13 @@ const GanttTimeline = dynamic(() => import('@/components/hearst/simulator/GanttT
   ssr: false,
   loading: () => <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading timeline…</div>,
 });
+
+const VIZ_TABS = [
+  { id: 'radar',   label: 'Strengths' },
+  { id: 'network', label: 'Industry players' },
+  { id: 'matrix',  label: 'Who buys what' },
+  { id: 'sankey',  label: 'Money flow' },
+];
 
 const ARCH_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
 
@@ -361,13 +373,40 @@ export default function SimulatorPage() {
         </div>
       </section>
 
-      {/* 7. CAPITAL ALLOCATION */}
+      {/* 7. VISUALIZATIONS */}
       <section style={S.vizCard}>
         <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Capital Allocation</h2>
+          <h2 style={S.sectionTitle}>Visualizations</h2>
+          <div style={S.vizTabs} role="tablist">
+            {VIZ_TABS.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={state.active_viz === t.id}
+                onClick={() => dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value: t.id })}
+                style={{ ...S.vizTab, ...(state.active_viz === t.id ? S.vizTabActive : {}) }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
         </header>
         <div style={S.vizContainer}>
-          <FinancialSankey scenario={scenario} projection={projection} height={400} />
+          {state.active_viz === 'radar' && (
+            <ArchetypeRadar archetypes={radarArchetypes} height={400} />
+          )}
+          {state.active_viz === 'network' && (
+            <EcosystemNetwork activeArchetypeId={state.primary_archetype_id} />
+          )}
+          {state.active_viz === 'matrix' && (
+            <B2BMatrix
+              selected={{ businessModelId: state.business_model_id, clientTypeId: state.client_type_id }}
+              onCellClick={onCellClick}
+            />
+          )}
+          {state.active_viz === 'sankey' && (
+            <FinancialSankey scenario={scenario} projection={projection} height={400} />
+          )}
         </div>
       </section>
 
@@ -377,36 +416,14 @@ export default function SimulatorPage() {
         savingState={savingState}
         onSave={handleSave}
         onExportMd={handleExportMd}
+        onGenerateMemo={() => startMemoJob({
+          payload: simResult,
+          title: 'Strategic Memo — Simulator scenario',
+          scenarioLabel: 'Simulator scenario',
+          scenarioId: savedScenarioId,
+          projectId,
+        })}
       />
-
-      {projection && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <button
-            type="button"
-            onClick={() => startMemoJob({
-              payload: simResult,
-              title: 'Strategic Memo — Simulator scenario',
-              scenarioLabel: 'Simulator scenario',
-              scenarioId: savedScenarioId,
-              projectId,
-            })}
-            style={{
-              padding: '10px 22px',
-              background: 'var(--cp-accent-maroon, var(--cp-accent))',
-              color: 'var(--cp-text-strong)',
-              border: 'none',
-              borderRadius: 'var(--cp-radius-sm, 4px)',
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: 0.3,
-              cursor: 'pointer',
-              textTransform: 'uppercase',
-            }}
-          >
-            Generate Strategic Memo
-          </button>
-        </div>
-      )}
       {/* Modal/badge/toast mountés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
     </div>
   );
@@ -509,7 +526,7 @@ const S = {
     background: 'transparent', color: 'var(--cp-text-muted)',
     border: 'none', borderRadius: 'var(--cp-radius-pill, 9999px)', cursor: 'pointer',
     fontSize: 'var(--cp-font-sm)', fontWeight: 600, letterSpacing: 0.3,
-    transition: T.all,
+    transition: 'all 0.15s ease',
   },
   modeBtnActive: {
     background: 'var(--cp-accent-maroon, var(--cp-accent))',
@@ -607,7 +624,7 @@ const S = {
     cursor: 'pointer',
     fontWeight: 600,
     letterSpacing: 0.3,
-    transition: T.all,
+    transition: 'all 0.15s ease',
   },
   vizTabActive: {
     background: 'var(--cp-accent-maroon)',

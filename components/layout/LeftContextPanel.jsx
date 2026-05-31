@@ -6,7 +6,7 @@
    lists, and section-specific tools. Scrolls internally.
    ============================================================ */
 
-import { BG, CARD, TEXT, SP, T, W, LS, BORDER, NAV, ACCENT } from '@/lib/design-system/tokens';
+import { BG, CARD, TEXT, SP, FONT_SIZES as T, W, LS, BORDER, NAV, ACCENT } from '@/lib/design-system/tokens';
 
 export default function LeftContextPanel({ header, children }) {
   return (

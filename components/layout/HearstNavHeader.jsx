@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getIconByKey } from '@/components/admin/AdminIcons';
 import { PRIMARY_NAV, SECONDARY_LINKS, findPrimaryByPath, getPrimaryHref } from '@/lib/design-system/navigation';
-import { BG, CARD, TEXT, SP, T, W, LS, BORDER, ACCENT } from '@/lib/design-system/tokens';
+import { BG, CARD, TEXT, SP, FONT_SIZES as T, W, LS, BORDER, ACCENT } from '@/lib/design-system/tokens';
 
 export default function HearstNavHeader() {
   const pathname = usePathname();

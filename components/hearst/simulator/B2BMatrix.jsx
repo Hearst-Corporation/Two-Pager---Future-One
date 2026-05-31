@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { BUSINESS_MODELS, CLIENT_TYPES } from '@/lib/hearst-constants';
 import { BUSINESS_MODEL_GROUPS, CLIENT_GROUPS, getFit, fitColor } from '@/lib/hearst-fit-matrix';
 
@@ -55,8 +56,8 @@ export default function B2BMatrix({ selected, onCellClick }) {
         </thead>
         <tbody>
           {ROW_GROUPS.map(rowGroup => (
-            <>
-              <tr key={`hdr-${rowGroup.label}`}>
+            <React.Fragment key={rowGroup.label}>
+              <tr>
                 <th colSpan={allClientIds.length + 1} style={S.rowGroupHdr}>{rowGroup.label}</th>
               </tr>
               {rowGroup.ids.map(bm => (
@@ -84,7 +85,7 @@ export default function B2BMatrix({ selected, onCellClick }) {
                   })}
                 </tr>
               ))}
-            </>
+            </React.Fragment>
           ))}
         </tbody>
       </table>
