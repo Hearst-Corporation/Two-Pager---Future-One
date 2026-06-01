@@ -63,7 +63,7 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 - La page résultats conserve le chat du rail droit, masque seulement la bottom nav pour éviter le recouvrement, et utilise une timeline de déploiement en lignes de phases lisibles, sans jalons en points.
 - Le chat du rail droit utilise `/api/cockpit-chat` via Hypercli/Kimi et recharge l'historique via `/api/cockpit-chats/*`, pour éviter le fallback vers l'état d'accueil après un message.
 - La génération du mémo stratégique est asynchrone côté UI avec timeout client 300s ; si Kimi dépasse la fenêtre serveur, l'API retourne un mémo déterministe `deterministic-fallback` basé uniquement sur les chiffres moteur et le persiste en brouillon.
-- Le déploiement Railway utilise `/api/health` comme healthcheck HTTP ; cette route doit rester légère, sans auth ni appel externe.
+- La route `/api/health` sert au smoke-test Railway manuel ; elle doit rester légère, sans auth ni appel externe.
 
 ### Routes disponibles
 | URL | Page |
