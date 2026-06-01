@@ -4,25 +4,14 @@
 // Si Hypercli/Kimi échoue (timeout, 5xx, quota épuisé), l'appel échoue. Pas de
 // filet : ni cascade Hypercli (k2.5/glm-5/minimax), ni Claude, ni OpenAI.
 //
-// Le client `anthropic` reste exporté car app/api/cockpit-chat l'utilise pour
-// SON propre chat (rail droit). Il n'intervient PLUS dans la génération de mémo.
-//
-// Clés env : HYPERCLI_API_KEY (+ ANTHROPIC_API_KEY pour cockpit-chat).
+// Clés env : HYPERCLI_API_KEY.
 
 import OpenAI from "openai";
-import Anthropic from "@anthropic-ai/sdk";
 
 export const kimi = new OpenAI({
   apiKey: process.env.HYPERCLI_API_KEY || "build-placeholder",
   baseURL: process.env.HYPERCLI_BASE_URL || "https://api.hypercli.com/v1",
-  timeout: Number(process.env.LLM_MODEL_TIMEOUT_MS || 120_000),
-  maxRetries: 0,
-});
-
-// Conservé UNIQUEMENT pour app/api/cockpit-chat (chat rail droit) — hors mémo.
-export const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "build-placeholder",
-  timeout: Number(process.env.LLM_CLAUDE_TIMEOUT_MS || 300_000),
+  timeout: Number(process.env.LLM_MODEL_TIMEOUT_MS || 300_000),
   maxRetries: 0,
 });
 

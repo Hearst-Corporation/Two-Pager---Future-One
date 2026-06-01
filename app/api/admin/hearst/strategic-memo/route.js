@@ -19,7 +19,7 @@ import { requireProfile } from '@/lib/supabase-admin';
 import { kimiChatCompletion, KIMI_MODEL } from '@/lib/llm/kimi';
 import { buildOracleSystemPrompt } from '@/lib/oracle-system-prompt';
 import { buildIntelligenceBrief } from '@/lib/oracle-intelligence';
-import { getGpuPricingBrief, getEnergyBrief, getInfrastructureSignals, getLiveInfrastructureBrief } from '@/lib/oracle-live';
+import { getGpuPricingBrief, getEnergyBrief, getInfrastructureSignals } from '@/lib/oracle-live';
 import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from '@/lib/oracle-visualization';
 import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
 import { fmtUSD, fmtPctFromRatio, fmtX } from '@/lib/hearst-format';
@@ -34,6 +34,7 @@ export const maxDuration = 300;
 
 const RL_WINDOW = 60_000;
 const RL_MAX = 5;
+const MEMO_LLM_SOFT_TIMEOUT_MS = 45_000;
 const rlBuckets = new Map();
 
 function checkRl(actorId) {
@@ -232,6 +233,197 @@ function buildScenarioSummary(payload) {
   return parts.join('\n');
 }
 
+function compactIntelligenceBriefForModel(brief) {
+  if (!brief) return brief;
+  return {
+    region: brief.region,
+    archetype_id: brief.archetype_id,
+    intelligence_layer_version: brief.intelligence_layer_version,
+    datapoints: (brief.datapoints || []).slice(0, 8).map(d => ({
+      id: d.id,
+      entity_id: d.entity_id,
+      confidence: d.confidence,
+      trust: d.trust,
+      freshness_status: d.freshness_status,
+      metrics: d.metrics,
+      source_name: d.source_name,
+      caveat: d.caveat,
+    })),
+    comparables: (brief.comparables || []).slice(0, 5).map(c => ({
+      entity_id: c.entity_id,
+      profile: Object.fromEntries(
+        Object.entries(c.profile || {}).slice(0, 5).map(([key, value]) => [
+          key,
+          typeof value === 'string' && value.length > 240 ? `${value.slice(0, 237)}...` : value,
+        ]),
+      ),
+    })),
+    tensions: (brief.tensions || []).map(t => ({
+      id: t.id,
+      label: t.label,
+      pole_a: t.pole_a,
+      pole_b: t.pole_b,
+    })),
+    absorption: brief.absorption,
+    reality_violations: brief.reality_violations || [],
+  };
+}
+
+function compactLiveBriefForModel(brief) {
+  if (!brief) return brief;
+  return {
+    gpu_pricing: brief.gpu_pricing && {
+      summary: brief.gpu_pricing.summary,
+      freshness_tag: brief.gpu_pricing.freshness_tag,
+      median_observed: brief.gpu_pricing.median_observed,
+      prices: (brief.gpu_pricing.prices || []).slice(0, 4).map(p => ({
+        provider: p.provider,
+        sku: p.sku,
+        price_usd_hr: p.price_usd_hr,
+        freshness_tag: p.freshness_tag,
+      })),
+    },
+    energy: brief.energy && {
+      summary: brief.energy.summary,
+      tariff_used: brief.energy.tariff_used,
+      freshness_tag: brief.energy.freshness_tag,
+    },
+    signals: (brief.signals?.signals || brief.signals || []).slice(0, 5).map(s => ({
+      id: s.id,
+      title: s.title,
+      severity: s.severity,
+      implication: s.implication,
+    })),
+  };
+}
+
+function buildProjectionSnapshot(payload) {
+  const pj = payload?.projection; const sc = payload?.scenario;
+  if (!pj) return null;
+  return {
+    total_capex: pj.total_capex, terminal_value: pj.terminal_value, irr: pj.irr, npv: pj.npv,
+    moic: pj.moic, payback_years: pj.payback_years, dscr_stabilized: pj.dscr_stabilized,
+    stabilized_ebitda: pj.stabilized_ebitda ?? null,
+    stabilized_revenue: pj.stabilized_revenue ?? null,
+    total_mw: sc?.total_mw ?? null, pue: sc?.pue ?? null,
+    capex_per_mw: (pj.total_capex && sc?.total_mw) ? pj.total_capex / sc.total_mw : null,
+    cod_offset_months: pj.cod_offset_months ?? null,
+    capex_reconciliation: pj.capex_reconciliation ?? null,
+    years: (pj.years || []).map(y => ({ y: y.year, rev: y.revenue, ebitda: y.ebitda, fcf: y.free_cash_flow, cum: y.cumulative_fcf })),
+  };
+}
+
+function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience }) {
+  const projection = payload?.projection || {};
+  const scenario = payload?.scenario || {};
+  const fmtMaybe = (value, kind) => value == null ? 'Not modeled' : kind === 'pct' ? fmtPctFromRatio(value) : kind === 'usd' ? fmtUSD(value) : kind === 'x' ? fmtX(value) : String(value);
+  const primaryConcern = projection?.warnings?.[0]
+    || (projection.irr != null && projection.irr < 0.12 ? 'IRR is below the IC review threshold.' : 'No blocking engine warning surfaced.');
+  const realityFlags = intelligenceBrief.reality_violations || [];
+  const topDatapoints = (intelligenceBrief.datapoints || []).slice(0, 5);
+  const tensions = intelligenceBrief.tensions || [];
+
+  return {
+    executive_summary: {
+      headline: 'Engine-backed strategic memo generated without LLM narrative',
+      bullets: [
+        `IRR ${fmtMaybe(projection.irr, 'pct')} · MOIC ${fmtMaybe(projection.moic, 'x')} · Payback ${projection.payback_years ?? 'Not modeled'} years.`,
+        `Total CAPEX ${fmtMaybe(projection.total_capex, 'usd')} for ${scenario.total_mw ?? 'unknown'} MW.`,
+        primaryConcern,
+      ],
+      overall_confidence: computedConfidence.confidence_level,
+    },
+    confidence_block: {
+      ...computedConfidence,
+      estimation_quality: 'Generated from the simulator output and curated intelligence because the LLM provider exceeded the response window.',
+      known_unknowns: ['Narrative synthesis was not produced by Kimi.', 'Human review is required before IC circulation.'],
+      computed_by: 'server',
+    },
+    strategic_context: {
+      body: 'This memo preserves engine-owned numbers and marks the narrative as deterministic fallback. Use it as a decision canvas seed, not a final board memo.',
+      skip: false,
+    },
+    key_financial_metrics: {
+      metrics: [
+        { label: 'IRR', value: fmtMaybe(projection.irr, 'pct'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'MOIC', value: fmtMaybe(projection.moic, 'x'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'NPV', value: fmtMaybe(projection.npv, 'usd'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'CAPEX', value: fmtMaybe(projection.total_capex, 'usd'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'Payback', value: projection.payback_years ?? 'Not modeled', unit: projection.payback_years == null ? '' : 'years', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+      ],
+      narrative: 'Financial rows are pinned to the simulator engine; no LLM-authored figures are included.',
+    },
+    infrastructure_analysis: {
+      body: `Scenario scale: ${scenario.total_mw ?? 'unknown'} MW · PUE ${scenario.pue ?? 'unknown'} · AI allocation ${scenario.hardware_mix?.ai_pct ?? 0}%.`,
+      tradeoffs: tensions.slice(0, 3).map(t => `Choosing ${t.pole_a} over ${t.pole_b} requires IC review; accepting quantified tradeoff pending human synthesis.`),
+    },
+    market_benchmarking: {
+      comparables: (intelligenceBrief.comparables || []).slice(0, 5).map(c => ({
+        name: c.entity_id,
+        metric: 'Comparable profile',
+        value: 'Referenced',
+        source: 'ORACLE intelligence layer',
+      })),
+      structural_differences: (intelligenceBrief.comparables || []).slice(0, 3).map(c => `${c.entity_id}: profile is structurally comparable but not automatically interchangeable with this scenario.`),
+    },
+    risks_constraints: {
+      items: [
+        { category: 'other', label: primaryConcern, severity: primaryConcern.includes('No blocking') ? 'LOW' : 'MEDIUM', mitigation: 'Review engine assumptions and rerun sensitivity before approval.', dependency: 'IC assumption review' },
+        ...realityFlags.slice(0, 4).map(flag => ({ category: 'other', label: flag, severity: 'MEDIUM', mitigation: 'Validate with delivery, permitting and procurement workstream owners.', dependency: 'Execution diligence' })),
+      ].slice(0, 5),
+    },
+    strategic_opportunities: {
+      items: [
+        { label: 'Use engine-backed memo as decision seed', execution_path: 'Why: simulator returned usable KPIs. Alternative: wait for LLM narrative. Accepted risk: less prose nuance. Metric: IC can review IRR/MOIC/CAPEX without provider delay.', confidence: computedConfidence.confidence_level },
+      ],
+    },
+    recommended_architecture: {
+      config: {
+        mw: scenario.total_mw != null ? `${scenario.total_mw} MW` : 'Not modeled',
+        tier: scenario.tier || 'Not modeled',
+        cooling: scenario.hardware_mix?.liquid_pct ? `${scenario.hardware_mix.liquid_pct}% liquid allocation` : 'Standard / not modeled',
+        rack_mix: scenario.hardware_mix ? `${scenario.hardware_mix.classic_pct ?? 0}% classic / ${scenario.hardware_mix.liquid_pct ?? 0}% liquid / ${scenario.hardware_mix.ai_pct ?? 0}% AI` : 'Not modeled',
+        gpu_sku: scenario.hardware_mix?.gpu_sku_id || 'Not modeled',
+        networking: 'Not modeled',
+        phasing: scenario.phase1_complete_year ? `Phase 1 by year ${scenario.phase1_complete_year}` : 'Not modeled',
+      },
+      rationale: `We recommend IC review because the engine shows ${fmtMaybe(projection.irr, 'pct')} IRR supported by ENGINE metrics, while ${primaryConcern}`,
+    },
+    commercialization_strategy: {
+      pricing: scenario.price_hyperscale_kw_month != null ? `$${scenario.price_hyperscale_kw_month}/kW/mo hyperscale` : 'Not modeled',
+      contract_structure: 'Requires IC structuring review',
+      anchor_tenant: 'Not modeled',
+      ramp_profile: scenario.target_occupancy_pct != null ? `${scenario.target_occupancy_pct}% target occupancy` : 'Not modeled',
+    },
+    deployment_roadmap: {
+      phases: [
+        { label: 'IC review', months_from_t0: '0', gating_events: ['Validate engine assumptions', 'Review risks', 'Rerun memo when LLM provider is healthy'] },
+      ],
+      reality_check_flags: realityFlags,
+    },
+    long_term_strategic_value: {
+      ten_year_arc: 'Long-term value depends on occupancy, capital intensity, power availability and contract structure.',
+      speculative_branches: [],
+    },
+    decision_tensions: tensions.map(t => ({ id: t.id, verdict: `Requires human IC synthesis between ${t.pole_a} and ${t.pole_b}.` })),
+    intelligence_sources: topDatapoints.map(d => ({ datapoint_id: d.id, used_for: 'fallback memo grounding', trust: (d.confidence || 'medium').toUpperCase() })),
+    explainability: {
+      audience,
+      simplified_takeaways: ['The simulator produced usable numbers.', 'The AI memo writer timed out.', 'This fallback keeps the numbers and avoids inventing narrative.'],
+      jargon_translations: {
+        IRR: explainMetric('IRR', audience).short,
+        PUE: explainMetric('PUE', audience).short,
+        DSCR: explainMetric('DSCR', audience).short,
+        payback: explainMetric('payback', audience).short,
+      },
+      why_this_recommendation: `We recommend IC review because simulator metrics show ${fmtMaybe(projection.irr, 'pct')} IRR supported by [datapoint_id ${topDatapoints[0]?.id || 'ENGINE'}].`,
+    },
+    _exec_projection: buildProjectionSnapshot(payload),
+    data_freshness: dataFreshness,
+    _generation_mode: 'deterministic_fallback',
+  };
+}
+
 export async function POST(req) {
   const auth = await requireProfile('viewer');
   if (auth instanceof NextResponse) return auth;
@@ -329,6 +521,8 @@ export async function POST(req) {
   };
 
   const scenarioSummary = buildScenarioSummary(payload);
+  const modelIntelligenceBrief = compactIntelligenceBriefForModel(intelligenceBrief);
+  const modelLiveBrief = compactLiveBriefForModel(liveBrief);
   const userMessage = [
     user_question
       ? `User context : ${user_question}`
@@ -341,15 +535,15 @@ export async function POST(req) {
     'Use this brief as your primary source of comparables, decision tensions and reality constraints.',
     'Cite datapoints by their id in intelligence_sources, address every tension in decision_tensions, and surface every reality_violations entry in deployment_roadmap.reality_check_flags.',
     '',
-    JSON.stringify(intelligenceBrief, null, 2),
+    JSON.stringify(modelIntelligenceBrief),
     '',
     '── Authoritative confidence (computed server-side — DO NOT alter) ──',
     'These values are computed from datapoint trust + freshness scores. Copy confidence_block.confidence_level and confidence_block.source_density VERBATIM from here. You MAY write estimation_quality and known_unknowns as explanation, but you must NOT invent the confidence level or source density.',
-    JSON.stringify(computedConfidence, null, 2),
+    JSON.stringify(computedConfidence),
     '',
     '── Data freshness (computed server-side — DO NOT alter) ──',
     `Display "Data as of ${dataFreshness.data_as_of}" prominently in the memo. Overall data status: ${dataFreshness.overall_status}. Never present a STALE or EXPIRED datapoint as current — label any dated figure explicitly (e.g. "as of <date>, may have moved").`,
-    JSON.stringify(dataFreshness, null, 2),
+    JSON.stringify(dataFreshness),
     '',
     '── Infrastructure intelligence (curated benchmarks + live data where available) ──',
     'These are infrastructure intelligence signals. Cite freshness tags and signals in the relevant sections (live_intelligence block). Where live data is unavailable, surface it as a known unknown rather than fabricating a value. Do not describe figures as "real-time" unless the freshness_tag is FRESH.',
@@ -357,7 +551,7 @@ export async function POST(req) {
     `- explainability.simplified_takeaways MUST exclude every term flagged by lib/oracle-explainability.detectJargon() for the chosen audience. Re-write any takeaway that contains banned jargon.`,
     `- explainability.why_this_recommendation MUST start with "We recommend X because Y supported by [datapoint_id Z]." Not "This is an opportunity to..."`,
     '',
-    JSON.stringify(liveBrief, null, 2),
+    JSON.stringify(modelLiveBrief),
     '',
     MEMO_SCHEMA_INSTRUCTIONS,
   ].join('\n');
@@ -367,41 +561,62 @@ export async function POST(req) {
     // une indication de durée par étape (visible dans la réponse `timing`).
     const promptSize = systemPrompt.length + userMessage.length;
     console.log(`[strategic-memo] prompt size: ${promptSize} chars (system: ${systemPrompt.length}, user: ${userMessage.length})`);
-    const llmStart = Date.now();
-    const { response, model_used } = await kimiChatCompletion({
-      model: KIMI_MODEL,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user',   content: userMessage },
-      ],
-      temperature: 0.0,
-      max_tokens: 16000,
-      response_format: { type: 'json_object' },
-    });
-    const llmDurationMs = Date.now() - llmStart;
-    console.log(`[strategic-memo] LLM call completed in ${llmDurationMs}ms via ${model_used}`);
-
-    const rawContent = response.choices?.[0]?.message?.content || '';
-    // Strip markdown fences (Claude sometimes wraps JSON in ```json ... ``` despite instructions)
-    const content = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
     let memo;
-    try { memo = JSON.parse(content); }
-    catch (e) {
-      // Second attempt: extract first {...} block in case of surrounding text
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try { memo = JSON.parse(jsonMatch[0]); }
-        catch { /* fall through to error */ }
+    let model_used = KIMI_MODEL;
+    let llmDurationMs = 0;
+    const llmStart = Date.now();
+    const llmTimeout = new Promise(resolve => {
+      setTimeout(() => resolve({ __timeout: true }), MEMO_LLM_SOFT_TIMEOUT_MS);
+    });
+
+    try {
+      const llmResult = await Promise.race([
+        kimiChatCompletion({
+          model: KIMI_MODEL,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user',   content: userMessage },
+          ],
+          temperature: 0.0,
+          max_tokens: 9000,
+          response_format: { type: 'json_object' },
+        }),
+        llmTimeout,
+      ]);
+      llmDurationMs = Date.now() - llmStart;
+
+      if (llmResult?.__timeout) {
+        console.warn(`[strategic-memo] LLM soft timeout after ${llmDurationMs}ms; using deterministic fallback`);
+        memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
+        model_used = 'deterministic-fallback';
+      } else {
+        model_used = llmResult.model_used;
+        console.log(`[strategic-memo] LLM call completed in ${llmDurationMs}ms via ${model_used}`);
+
+        const rawContent = llmResult.response.choices?.[0]?.message?.content || '';
+        // Strip markdown fences (Claude sometimes wraps JSON in ```json ... ``` despite instructions)
+        const content = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+        try { memo = JSON.parse(content); }
+        catch (e) {
+          // Second attempt: extract first {...} block in case of surrounding text
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            try { memo = JSON.parse(jsonMatch[0]); }
+            catch { /* fall through to error */ }
+          }
+          if (!memo) {
+            console.warn('[strategic-memo] JSON parse failed; using deterministic fallback');
+            console.warn('[strategic-memo] raw tail:', rawContent.slice(-300));
+            memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
+            model_used = 'deterministic-fallback';
+          }
+        }
       }
-      if (!memo) {
-        console.warn('[strategic-memo] JSON parse failed, raw output kept');
-        console.warn('[strategic-memo] raw tail:', rawContent.slice(-300));
-        return NextResponse.json({
-          error: 'memo_parse_failed',
-          raw: rawContent.slice(0, 2000),
-          model_used,
-        }, { status: 502 });
-      }
+    } catch (e) {
+      llmDurationMs = Date.now() - llmStart;
+      console.warn('[strategic-memo] LLM failed; using deterministic fallback:', e?.message);
+      memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
+      model_used = 'deterministic-fallback';
     }
 
     // ── Wave 1 (C7) — overwrite model-graded confidence with server values.

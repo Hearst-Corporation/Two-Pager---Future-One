@@ -24,7 +24,7 @@ import {
   estimateTokens,
   estimateKimiCostUsd,
 } from "@hearst/review-mode";
-import { kimi, KIMI_MODEL, kimiChatStream, anthropic } from "@/lib/llm/kimi";
+import { KIMI_MODEL, kimiChatStream } from "@/lib/llm/kimi";
 import { buildOracleSystemPrompt, inferOracleContextFromPath } from "@/lib/oracle-system-prompt";
 import { getSessionProfile } from "@/lib/supabase-server";
 import { isSafeDemoMode, DEMO_DISABLED_RESPONSE } from "@/lib/demo-mode";
@@ -368,132 +368,14 @@ export async function POST(req: Request) {
     ...history,
   ];
 
-  // ── Stream LLM — direct Anthropic (Sonnet) or Kimi cascade ────────────
-  const CLAUDE_CHAT_MODEL = process.env.CLAUDE_CHAT_MODEL;
+  // ── Stream LLM — Kimi K2.6 via Hypercli only ─────────────────────────
+  // Do not route cockpit chat through Anthropic: billing/quota failures there
+  // should not break ORACLE's right rail when Hypercli is the configured provider.
   const inputTokens = estimateTokens(systemPrompt + history.map((h) => h.content).join("\n"));
   const startedAt = Date.now();
   const stripThink = makeThinkStripper();
   let full = "";
-  let modelUsed = CLAUDE_CHAT_MODEL || KIMI_MODEL;
-
-  // Extract system vs user/assistant turns for Anthropic Messages API
-  const anthropicSystem = systemPrompt;
-  const anthropicMessages = history.map((m) => ({
-    role: m.role as "user" | "assistant",
-    content: m.content,
-  })).filter((m) => m.role === "user" || m.role === "assistant");
-
-  // ── Path A: direct Anthropic streaming (preferred when CLAUDE_CHAT_MODEL set) ──
-  if (CLAUDE_CHAT_MODEL) {
-    let anthropicStream: ReturnType<typeof anthropic.messages.stream> | null = null;
-    let anthropicFailed = false;
-
-    try {
-      anthropicStream = anthropic.messages.stream({
-        model: CLAUDE_CHAT_MODEL,
-        system: anthropicSystem,
-        messages: anthropicMessages.length > 0
-          ? anthropicMessages
-          : [{ role: "user", content: message }],
-        max_tokens: 4096,
-      });
-    } catch (err) {
-      console.warn("[cockpit-chat] anthropic.messages.stream() init failed, falling back to Kimi:", err);
-      anthropicFailed = true;
-    }
-
-    if (anthropicStream && !anthropicFailed) {
-      const capturedStream = anthropicStream;
-      const stream = new ReadableStream({
-        async start(controller) {
-          const enc = new TextEncoder();
-          try {
-            for await (const event of capturedStream) {
-              if (req.signal.aborted) break;
-              if (
-                event.type === "content_block_delta" &&
-                event.delta.type === "text_delta"
-              ) {
-                const filtered = stripThink(event.delta.text);
-                if (filtered) {
-                  full += filtered;
-                  controller.enqueue(enc.encode(filtered));
-                }
-              }
-            }
-            const tail = stripThink("");
-            if (tail) {
-              full += tail;
-              controller.enqueue(enc.encode(tail));
-            }
-          } catch (err) {
-            const msg = err instanceof Error ? err.message : "LLM stream error";
-            controller.enqueue(enc.encode(`\0ERROR:${msg}`));
-            await insertLlmRun({
-              agentName,
-              model: modelUsed,
-              status: "failed",
-              latencyMs: Date.now() - startedAt,
-              userId,
-              systemPromptHash: promptHash,
-              inputTokens,
-              outputTokens: estimateTokens(full),
-              costUsd: null,
-              errorType: "stream",
-              errorMessage: msg,
-            });
-            controller.close();
-            return;
-          }
-
-          // ── Persist assistant message + llm_runs ──────────────────────
-          const latencyMs = Date.now() - startedAt;
-          if (userId && chatId && full) {
-            try {
-              await supa.from("cockpit_messages").insert({
-                chat_id: chatId,
-                role: "assistant",
-                content: full,
-                mode,
-              });
-            } catch (err) {
-              console.warn("[cockpit-chat] assistant persist failed", err);
-            }
-          }
-          const outputTokens = estimateTokens(full);
-          const costUsd = estimateKimiCostUsd({
-            prompt_tokens: inputTokens,
-            completion_tokens: outputTokens,
-          });
-          await insertLlmRun({
-            agentName,
-            model: modelUsed,
-            status: "success",
-            latencyMs,
-            userId,
-            systemPromptHash: promptHash,
-            inputTokens,
-            outputTokens,
-            costUsd,
-            errorType: null,
-            errorMessage: null,
-          });
-          controller.close();
-        },
-      });
-
-      const headers: Record<string, string> = {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-store",
-        "X-Accel-Buffering": "no",
-      };
-      if (chatId) headers["x-chat-id"] = chatId;
-      return new Response(stream, { headers });
-    }
-  }
-
-  // ── Path B: Kimi cascade (fallback or when CLAUDE_CHAT_MODEL not set) ──
-  modelUsed = KIMI_MODEL;
+  let modelUsed = KIMI_MODEL;
   let completion: any;
   try {
     const out = await kimiChatStream({ model: KIMI_MODEL, messages } as any);

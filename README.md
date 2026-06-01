@@ -61,7 +61,8 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 - Le rail droit est un `Investment Committee Advisor` : snapshot de décision toujours visible, provenance explicite (`MODELED`, `INTERPRETATION`, `HEURISTIC`, `UNKNOWN`) et prompts orientés IC avant la conversation.
 - L'étape `Operating Model` sélectionne désormais une seule thèse d'exploitation ; la comparaison stratégique est réservée aux visualisations, pas au picker de configuration.
 - La page résultats conserve le chat du rail droit, masque seulement la bottom nav pour éviter le recouvrement, et utilise une timeline de déploiement en lignes de phases lisibles, sans jalons en points.
-- La génération du mémo stratégique est asynchrone côté UI et possède un timeout client explicite de 150s, afin d'afficher une erreur claire si l'appel LLM ne revient pas.
+- Le chat du rail droit utilise `/api/cockpit-chat` via Hypercli/Kimi et recharge l'historique via `/api/cockpit-chats/*`, pour éviter le fallback vers l'état d'accueil après un message.
+- La génération du mémo stratégique est asynchrone côté UI avec timeout client 300s ; si Kimi dépasse la fenêtre serveur, l'API retourne un mémo déterministe `deterministic-fallback` basé uniquement sur les chiffres moteur et le persiste en brouillon.
 
 ### Routes disponibles
 | URL | Page |
