@@ -240,6 +240,55 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+/* ORACLE owns the first screen of the right rail. The native shell chat remains
+   mounted below for conversation/history, but its generic Kimi empty state is
+   hidden so the rail opens as an Investment Committee Advisor, not support chat. */
+.ct-rail-right-title {
+  font-size: 0;
+}
+.ct-rail-right-title::after {
+  content: "ORACLE · Investment Committee Advisor";
+  font-size: var(--cp-font-sm);
+  color: var(--ct-text-primary);
+}
+.ct-chat-root {
+  min-height: 0;
+}
+.ct-chat-root .ct-chat-actionbar {
+  display: none;
+}
+.ct-chat-root .ct-placeholder {
+  display: none;
+}
+.ct-chat-list > .ct-chat-msg.assistant:first-child {
+  display: none;
+}
+.ct-chat-input::placeholder {
+  color: transparent;
+}
+.ct-chat-input {
+  min-height: 54px;
+}
+.ct-chat-form {
+  position: relative;
+}
+.ct-chat-form::before {
+  content: "Ask ORACLE";
+  position: absolute;
+  left: 14px;
+  top: 8px;
+  z-index: 1;
+  pointer-events: none;
+  font-size: var(--cp-font-micro);
+  font-weight: 800;
+  letter-spacing: var(--cp-tracking-wider);
+  text-transform: uppercase;
+  color: var(--ct-text-muted);
+}
+.ct-chat-input {
+  padding-top: 24px !important;
+}
+
 /* Responsive : sous 720px de contenu, on masque le label et on resserre. */
 @media (max-width: 900px) {
   .ct-bottom-bar { padding: 10px 16px; transform: translateX(-50%); }

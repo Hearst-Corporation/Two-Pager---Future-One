@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'FUTUR ONE · Sovereign AI Innovation Hub · Qatar',
+  title: 'FUTUR ONE · National AI Innovation Hub · Qatar',
   description:
-    'FUTUR ONE is a sovereign AI innovation hub on the Qatari coast, operated by Hearst Qatar — where compute, architecture and talent operate as one.',
+    'FUTUR ONE is a national AI innovation hub on the Qatari coast, operated by Hearst Qatar — where compute, architecture and talent operate as one.',
   icons: { icon: '/hearst-h.svg' },
 };
 

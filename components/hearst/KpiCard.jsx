@@ -1,5 +1,5 @@
 'use client';
-import { MISSING_LABEL } from '@/lib/hearst-constants';
+import { fmtUSD, fmtPctFromRatio, fmtX, fmtMW, fmtYears, fmtNum, MISSING } from '@/lib/hearst-format';
 import SourceBadge from './SourceBadge';
 
 /**
@@ -51,18 +51,14 @@ export default function KpiCard({ label, value, format = 'number', source_type, 
 }
 
 function formatValue(value, format) {
-  if (value == null) return '—';
+  if (value == null) return MISSING;
   switch (format) {
-    case 'currency':
-      if (Math.abs(value) >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-      if (Math.abs(value) >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
-      if (Math.abs(value) >= 1e3) return `$${(value / 1e3).toFixed(0)}K`;
-      return `$${value.toFixed(0)}`;
-    case 'pct':  return `${(value * 100).toFixed(1)}%`;
-    case 'x':    return `${value.toFixed(2)}×`;
-    case 'years':return `${value.toFixed(0)}y`;
-    case 'mw':   return `${value.toFixed(1)} MW`;
-    default:     return value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    case 'currency': return fmtUSD(value);
+    case 'pct':      return fmtPctFromRatio(value);
+    case 'x':        return fmtX(value);
+    case 'years':    return fmtYears(value);
+    case 'mw':       return fmtMW(value);
+    default:         return fmtNum(value);
   }
 }
 

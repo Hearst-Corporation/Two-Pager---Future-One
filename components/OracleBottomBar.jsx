@@ -21,6 +21,12 @@ const SECTIONS = [
     matchAny: ['/admin/hearst/simulator'],
   },
   {
+    id: 'financial',
+    href: '/admin/hearst/financial',
+    label: 'Financial',
+    matchAny: ['/admin/hearst/financial'],
+  },
+  {
     id: 'workspace',
     href: '/admin/hearst/workspace',
     label: 'Workspace',
@@ -31,6 +37,12 @@ const SECTIONS = [
     href: '/admin/hearst/dossier',
     label: 'Dossier',
     matchAny: ['/admin/hearst/dossier'],
+  },
+  {
+    id: 'sources',
+    href: '/admin/hearst/sources',
+    label: 'Sources',
+    matchAny: ['/admin/hearst/sources'],
   },
 ];
 

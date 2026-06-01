@@ -39,7 +39,7 @@ const CATEGORY_DESC = {
   'AI Factory':             'Dense GPU training / inference cluster, liquid-cooled.',
   'GPU Cloud':              'Owned GPUs rented as compute — utilization and obsolescence exposure.',
   'Enterprise Colocation':  'Retail / wholesale colocation for enterprise tenants.',
-  'Sovereign Compute':      'State-anchored sovereign AI / compute capacity.',
+  'Government Compute':     'State-anchored national AI / compute capacity.',
   'Edge Campus':            'Distributed edge sites positioned close to demand.',
 };
 

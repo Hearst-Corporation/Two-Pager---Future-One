@@ -35,7 +35,7 @@ export default function B2BMatrix({ selected, onCellClick }) {
   const allClientIds = COL_GROUPS.flatMap(g => g.ids);
 
   return (
-    <div style={{ overflowX: 'auto' }}>
+    <div style={S.scroller}>
       <table style={S.table}>
         <thead>
           <tr>
@@ -94,12 +94,21 @@ export default function B2BMatrix({ selected, onCellClick }) {
 }
 
 const S = {
+  scroller: {
+    width: '100%',
+    maxWidth: '100%',
+    overflowX: 'auto',
+    overflowY: 'hidden',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md, 10px)',
+  },
   table: {
     width: '100%',
+    minWidth: 980,
     borderCollapse: 'collapse',
-    fontSize: 11,
+    fontSize: 10,
     background: 'var(--cp-surface-2)',
-    borderRadius: 8,
+    borderRadius: 'var(--cp-radius-md, 10px)',
     overflow: 'hidden',
   },
   thCorner: {
@@ -160,18 +169,19 @@ const S = {
     position: 'sticky',
     left: 0,
     zIndex: 1,
-    minWidth: 160,
+    minWidth: 132,
+    maxWidth: 150,
   },
   tdCell: {
-    padding: '8px 6px',
+    padding: '7px 5px',
     textAlign: 'center',
     cursor: 'pointer',
     borderBottom: '1px solid var(--cp-border)',
     borderLeft: '1px solid var(--cp-border)',
-    minWidth: 80,
+    minWidth: 68,
   },
   tdEmpty: {
-    padding: '8px 6px',
+    padding: '7px 5px',
     textAlign: 'center',
     color: 'var(--cp-text-faint)',
     borderBottom: '1px solid var(--cp-border)',
@@ -180,7 +190,7 @@ const S = {
   },
   tdPricing: {
     fontWeight: 700,
-    fontSize: 11,
+    fontSize: 10,
     color: 'var(--cp-text-primary)',
   },
   tdMargin: {

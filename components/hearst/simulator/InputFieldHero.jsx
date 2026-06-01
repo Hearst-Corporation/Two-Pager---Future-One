@@ -69,12 +69,13 @@ const S = {
   wrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 8,
-    background: 'var(--cp-surface-2)',
+    gap: 10,
+    background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 12,
+    padding: 18,
     justifyContent: 'space-between',
+    minHeight: 154,
   },
   label: {
     fontSize: 11,
@@ -92,7 +93,7 @@ const S = {
   },
   input: {
     flex: 1,
-    fontSize: 44,
+    fontSize: 46,
     lineHeight: '48px',
     fontWeight: 900,
     letterSpacing: -1,
@@ -105,8 +106,8 @@ const S = {
     fontVariantNumeric: 'tabular-nums',
   },
   suffix: {
-    fontSize: 24,
-    fontWeight: 700,
+    fontSize: 22,
+    fontWeight: 900,
     color: 'var(--cp-text-muted)',
   },
   desc: {

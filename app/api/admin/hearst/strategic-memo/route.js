@@ -22,6 +22,7 @@ import { buildIntelligenceBrief } from '@/lib/oracle-intelligence';
 import { getGpuPricingBrief, getEnergyBrief, getInfrastructureSignals, getLiveInfrastructureBrief } from '@/lib/oracle-live';
 import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from '@/lib/oracle-visualization';
 import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
+import { fmtUSD, fmtPctFromRatio, fmtX } from '@/lib/hearst-format';
 import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, computeConfidenceBlock } from '@/lib/memo-confidence';
 import { persistMemo } from '@/lib/strategic-memo-store';
 import { reconcileMetricsWithEngine } from '@/lib/engine-reconcile';
@@ -178,7 +179,7 @@ NUMERIC ANCHORING :
 
 STAKEHOLDER MATCH :
 - The memo language MUST match oracle_ctx.stakeholder.
-- Sovereign brief → strategic + long-horizon
+- Government brief → strategic + long-horizon
 - Investor brief → returns + risk + exit
 - Operator brief → contract structure + opex
 - If wrong audience tone, memo is invalid.
@@ -219,7 +220,7 @@ function buildScenarioSummary(payload) {
     parts.push(`Equity split : Hearst ${scenario.equity_hearst_pct ?? '?'}% / Brookfield ${scenario.equity_brookfield_pct ?? '?'}% / Qatar ${scenario.equity_qatar_pct ?? '?'}%`);
   }
   if (projection) {
-    const f = (v, k) => v == null ? 'N/A' : (k === 'pct' ? `${(v * 100).toFixed(1)}%` : k === 'usd' ? `$${(v / 1e6).toFixed(1)}M` : k === 'x' ? `${v.toFixed(2)}x` : v);
+    const f = (v, k) => v == null ? 'N/A' : (k === 'pct' ? fmtPctFromRatio(v) : k === 'usd' ? fmtUSD(v) : k === 'x' ? fmtX(v) : v);
     parts.push(`Projection : total CAPEX ${f(projection.total_capex, 'usd')} · stab. EBITDA ${f(projection.stabilized_ebitda, 'usd')} · IRR ${f(projection.irr, 'pct')} · MOIC ${f(projection.moic, 'x')} · payback ${projection.payback_years ?? '?'} yr · DSCR ${projection.dscr_stabilized ? f(projection.dscr_stabilized, 'x') : 'N/A'} · NPV ${f(projection.npv, 'usd')} · TV ${f(projection.terminal_value, 'usd')}`);
   }
   if (hardware_breakdown) {

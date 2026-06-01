@@ -6,6 +6,7 @@ import { CockpitShell } from '@hearst/cockpit-shell';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleBottomBar } from '@/components/OracleBottomBar';
 import ChatToggleFAB from '@/components/hearst/ChatToggleFAB';
+import OracleAdvisorRail from '@/components/hearst/OracleAdvisorRail';
 import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
 import MemoJobBadge from '@/components/hearst/MemoJobBadge';
 import MemoToast from '@/components/hearst/MemoToast';
@@ -34,6 +35,7 @@ export default function HearstLayout({ children }) {
       <CockpitShell products={ORACLE_PRODUCTS} appId="oracle" chatConfig={ORACLE_CHAT_CONFIG}>
         <OracleBottomBar />
         {children}
+        <OracleAdvisorRail />
         <ChatToggleFAB />
         {/* Strategic Memo : modale + badge persistant + toast pilotés par
             le store global lib/hearst-memo-job-store.js. Le job survit à

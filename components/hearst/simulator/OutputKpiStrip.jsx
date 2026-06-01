@@ -35,7 +35,7 @@ export default function OutputKpiStrip({ projection }) {
 const S = {
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(var(--cp-kpi-min-width, 160px), 1fr))',
     gap: 'var(--cp-space-3, 12px)',
   },
 };

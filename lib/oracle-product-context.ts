@@ -58,12 +58,12 @@ Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (2 pa
 - **Tokens couleur** définis dans \`app/globals.css\` (\`:root\`). Jamais de hex hardcodé dans les composants, toujours \`var(--color-*)\`.
 - **Source-strict financial engine** : si un input requis est null, \`lib/hearst-calculations.js\` retourne null (jamais d'invention). Ne jamais proposer de pré-remplir un champ sans \`source_id\`.
 - **Deal archetype recommandé = \`powered_shell\` (code B, score 87)** : tout le pitch Hearst repose dessus. Comp directe Meta×Blue Owl Hyperion ($27B, Oct 2025). Ne jamais suggérer d'élever un autre archetype sans raison forte.
-- **Capital stack documenté = HEARST + Brookfield + Qatar sovereign** (cf. \`equity_hearst_pct / equity_brookfield_pct / equity_qatar_pct\`). Ne pas inventer d'autre partenaire dans le modèle sans donnée source.
+- **Capital stack documenté = HEARST + Brookfield + Qatar government** (cf. \`equity_hearst_pct / equity_brookfield_pct / equity_qatar_pct\`). Ne pas inventer d'autre partenaire dans le modèle sans donnée source.
 - **Pas de hardcoded API keys**, jamais. Toutes les clés (\`HYPERCLI_API_KEY\`, \`SUPABASE_*\`, \`ANTHROPIC_API_KEY\`) via \`process.env.*\`.
 - **Auth obligatoire sur \`/admin/**\`** via middleware Supabase. Ne pas proposer de désactiver l'auth.
 - **RLS Supabase active sur toutes les tables**. Ne jamais proposer une route qui bypass RLS sauf via \`SUPABASE_SERVICE_ROLE_KEY\` côté serveur.
 - **Cockpit shell** = \`@hearst/cockpit-shell@0.2.0\` (tarball local). Toujours réutiliser ses primitives plutôt que recoder un layout chat.
-- **Slogans figés du pitch** : "Compute is the new oil and gas. Sovereign control is the new advantage. The window is now." (P2) · "AI IS THE NEW GAS." (P4). Ne pas reformuler dans les pages de prés.
+- **Slogans figés du pitch** : "Compute is the new oil and gas. Government control is the new advantage. The window is now." (P2) · "AI IS THE NEW GAS." (P4). Ne pas reformuler dans les pages de prés.
 - **Partenaires nommés figés** : design Foster + Partners, construction JB Pastor & Fils. Ne pas changer dans la prés sans demande explicite.
 
 ## Vocabulaire produit interne (pour ancrer les remarques)
@@ -132,25 +132,25 @@ export const DOMAIN_CONTEXT: string = `# Corpus expert Oracle / Future One Qatar
 - Cap rates : prime US/EU 5.0–6.5%, Tier-2 7.0–8.5%, **GCC 7.5–9.5%**.
 - $/MW transactions : Tier-1 $25–55M, émergent $15–25M, AI-ready >$50M.
 - Comps : AirTrunk→Blackstone $16B (Sept 2024) ~800 MW ~$20M/MW. CyrusOne→KKR+GIP $15B (2022). Switch→DigitalBridge $11B (2022). Aligned ~$40B (2025) Macquarie. Compass Brookfield/OTPP $5.5B (2023) 800 MW white-label. **Meta×Blue Owl Hyperion $27B (Oct 2025)** Blue Owl 80% + Meta lease 15 ans = comp directe archetype Hearst.
-- AI factories : xAI Colossus Memphis (200 MW→1 GW), Stargate OpenAI/Oracle/SoftBank $500B (Abilene TX 1.2 GW phase 1), Anthropic-Amazon Indiana 2.2 GW, Meta Hyperion Louisiana 2 GW. US constraints (NoVa/Phoenix/Dallas) queues 5–7 ans → **GCC arbitrage** (gaz $2–4/MMBtu, sovereign capex, permitting rapide). Précédents G42/Microsoft $1.5B (Apr 2024), PIF HUMAIN $40B (May 2025).
+- AI factories : xAI Colossus Memphis (200 MW→1 GW), Stargate OpenAI/Oracle/SoftBank $500B (Abilene TX 1.2 GW phase 1), Anthropic-Amazon Indiana 2.2 GW, Meta Hyperion Louisiana 2 GW. US constraints (NoVa/Phoenix/Dallas) queues 5–7 ans → **GCC arbitrage** (gaz $2–4/MMBtu, government capex, permitting rapide). Précédents G42/Microsoft $1.5B (Apr 2024), PIF HUMAIN $40B (May 2025).
 
 ## PILIER 2 — ÉCOSYSTÈME (compagnies, hyperscalers, capital)
 
 ### Hyperscalers anchor tenants
 - **AWS** : me-south-1 Bahrain (Jul 2019), me-central-1 UAE (Aug 2022, $5B/15y), me-central-2 KSA annoncée 2024 ($5.3B, livraison 2026–27). Edge Doha via Ooredoo. Requirements Tier III+ (IV préféré), 30–50 MW scalable 100–200 MW, PUE ≤1.3, commitment 15 ans + 2×5, pricing $130–180/kW/mo.
-- **Microsoft Azure** : UAE North Dubai + UAE Central Abu Dhabi, **Qatar Central Doha (Aug 2022)** Ooredoo/MOTC, gov Qatar tier-1 customer ~$1B/10y. Saudi Riyadh annoncée 2023→2026. Azure Arc + Sovereignty, ISO 27001/27017/27018. Requirements 25–40 MW initial → 80 MW.
-- **Google Cloud** : **Doha me-central1 lancée Jun 2023 — 1er hyperscaler à atterrir Qatar**, partenaire MOTC, $1B/5y. Sovereign Controls (Assured Workloads, External Key Manager). Requirements 30 MW initial, PUE ≤1.2.
-- **Oracle Cloud (OCI)** : Sovereign Cloud Qatar Doha déployée Oct 2022 via Ooredoo, **1ère sovereign region OCI mondiale** (Dedicated Region C@C). Min 6 racks $6M+/an. Autres : Jeddah, Riyadh, Dubai, Abu Dhabi. $1.5B région.
+- **Microsoft Azure** : UAE North Dubai + UAE Central Abu Dhabi, **Qatar Central Doha (Aug 2022)** Ooredoo/MOTC, gov Qatar tier-1 customer ~$1B/10y. Saudi Riyadh annoncée 2023→2026. Azure Arc + Governmentty, ISO 27001/27017/27018. Requirements 25–40 MW initial → 80 MW.
+- **Google Cloud** : **Doha me-central1 lancée Jun 2023 — 1er hyperscaler à atterrir Qatar**, partenaire MOTC, $1B/5y. Government Controls (Assured Workloads, External Key Manager). Requirements 30 MW initial, PUE ≤1.2.
+- **Oracle Cloud (OCI)** : Government Cloud Qatar Doha déployée Oct 2022 via Ooredoo, **1ère government region OCI mondiale** (Dedicated Region C@C). Min 6 racks $6M+/an. Autres : Jeddah, Riyadh, Dubai, Abu Dhabi. $1.5B région.
 - **IBM Cloud** : MZRs Doha (Mannai 2023) + Cairo. **Alibaba** : Dubai 2016, négociations Doha 2025. **Huawei** : Riyadh 2022 + Cairo 2023, $400M Saudi 2024, aligned gov MENA.
 
 ### AI labs & néo-tenants
 - Stargate Project $500B/4y. G42 (Microsoft $1.5B Apr 2024, Cerebras $900M). PIF HUMAIN $40B (May 2025). Anthropic via AWS/GCP. xAI Colossus 2 (1M GPU H200). Mistral/Cohere/Inflection tickets 5–15 MW. Qatar AI Strategy 2024 $2.5B/5y.
 
-### Sovereign & enterprise tenants Qatar
+### Government & enterprise tenants Qatar
 - MOTC Qatar Gov Cloud (~15 MW), QatarEnergy IT (8–12 MW), Qatar Airways (3–5), QNB (4–6 dual-site), Aljazeera (3–4), Ooredoo (8–10).
-- Mix tenants BTS 30 MW : 20–25 hyperscaler + 3–5 sovereign + 3–5 retail colo + 2–5 AI. Revenue mix : 65% hyperscaler ($110–130/kW) / 25% sovereign ($180–220/kW) / 10% retail ($250–350/kW).
+- Mix tenants BTS 30 MW : 20–25 hyperscaler + 3–5 government + 3–5 retail colo + 2–5 AI. Revenue mix : 65% hyperscaler ($110–130/kW) / 25% government ($180–220/kW) / 10% retail ($250–350/kW).
 
-### Sovereign Wealth Funds GCC
+### Government Wealth Funds GCC
 - **QIA** ~$475B (Qatar). Cible $500B 2030. Allocation infra ~15%. CEO Mohammed Al-Sowaidi. Deals : Mandiant (pré-Google), Sila Realty $200M (2024), Reliance Jio $1B (2020).
 - **PIF Saudi** ~$925B → $2T 2030. Vision 2030 Digital. HUMAIN $40B AI (Nvidia/AMD/Qualcomm), Center3 carve-out STC $1B+. Gov Yasir Al-Rumayyan.
 - **Mubadala (UAE)** ~$330B. G42 (Microsoft $1.5B Apr 2024), Khazna stake history, Yahsat. CEO Khaldoon Al Mubarak.
@@ -169,12 +169,12 @@ export const DOMAIN_CONTEXT: string = `# Corpus expert Oracle / Future One Qatar
 - Le repo traite Hearst exclusivement comme acteur infra/data center (sponsor opérationnel + brand).
 - Capital stack tripartite documenté : \`equity_hearst_pct / equity_brookfield_pct / equity_qatar_pct\` (\`lib/hearst-deal-structures.js\` l. 369–371). **HEARST + Brookfield + sponsor étatique qatari**.
 - Brookfield = partenaire financier de référence ("HEARST/Brookfield" pour completion guarantees). Compass Datacenters (Brookfield/OTPP, $5.5B acq 2023) = preferred white-label provider.
-- Futur One = "proposed sovereign vehicle to capture, deploy and govern that resource — founded and operated by Hearst Qatar" (P2InsideLeft l. 37–40). Sovereign JV combining state capital + founding operators + Tier-1 industrial partners.
-- Acteurs sovereign nommés : QIA + QCRI. Operators candidates : Equinix, NTT, Digital Realty, Vantage, EdgeConnex. O&M : Schneider, Vertiv, Equinix Services. Design Foster + Partners. Construction JB Pastor & Fils.
+- Futur One = "proposed government vehicle to capture, deploy and govern that resource — founded and operated by Hearst Qatar" (P2InsideLeft l. 37–40). Government JV combining state capital + founding operators + Tier-1 industrial partners.
+- Acteurs government nommés : QIA + QCRI. Operators candidates : Equinix, NTT, Digital Realty, Vantage, EdgeConnex. O&M : Schneider, Vertiv, Equinix Services. Design Foster + Partners. Construction JB Pastor & Fils.
 - The Method (P3InsideRight) : pipeline 4 phases — 01 INCUBATE (pre-seed→seed, 3–6 mo, 20–30 par cohorte) / 02 ACCELERATE (seed→Series A, 6–9 mo) / 03 SCALE (rolling, 20–30 companies) / 04 ANCHOR (Global Tech Bridge, long-term tenancy, hyperscalers + M&A).
-- Hub diagram 4 control points : COMPUTE / ENERGY / CAPITAL / TALENT. Slogan "Sovereign by design. Global by intent."
+- Hub diagram 4 control points : COMPUTE / ENERGY / CAPITAL / TALENT. Slogan "Government by design. Global by intent."
 - Funding mechanism : target 70% follow-on à 18 mois (vs MENA <10%). KPI campus : 150 startups, 4K residents, 100K sqm, 200 MW IT power.
-- Slogans pitch : "Compute is the new oil and gas. Sovereign control is the new advantage. The window is now." (P2). "AI IS THE NEW GAS. Qatar mastered the resource of the 20th century. The next one is intelligence." (P4 back).
+- Slogans pitch : "Compute is the new oil and gas. Government control is the new advantage. The window is now." (P2). "AI IS THE NEW GAS. Qatar mastered the resource of the 20th century. The next one is intelligence." (P4 back).
 
 ## PILIER 3 — BUSINESS MODELS & FINANCE
 

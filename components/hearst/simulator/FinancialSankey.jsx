@@ -91,6 +91,27 @@ function SankeyTooltip({ active, payload }) {
   );
 }
 
+// Custom node: recharts <Sankey> draws bare rects by default (names appear only
+// on hover — useless for a money-flow an investor must read at a glance). This
+// renders the node rect PLUS its name + $M value, placed left or right of the bar
+// depending on which half it sits in so labels stay inside the frame.
+function SankeyNode({ x, y, width, height, payload, chartWidth = 0 }) {
+  const rightHalf = x + width / 2 > chartWidth / 2;
+  const labelX = rightHalf ? x - 8 : x + width + 8;
+  const anchor = rightHalf ? 'end' : 'start';
+  const val = payload?.value != null ? `$${Math.round(payload.value)}M` : '';
+  return (
+    <g>
+      <rect x={x} y={y} width={width} height={height} rx={2}
+        fill={payload?.fill || 'var(--cp-accent-maroon)'} stroke="var(--cp-border)" />
+      <text x={labelX} y={y + height / 2 - 3} textAnchor={anchor}
+        fontSize={11} fontWeight={700} fill="var(--cp-text-primary)">{payload?.name}</text>
+      <text x={labelX} y={y + height / 2 + 11} textAnchor={anchor}
+        fontSize={10} fill="var(--cp-text-muted)">{val}</text>
+    </g>
+  );
+}
+
 export default function FinancialSankey({ scenario, projection, height = 380 }) {
   const [ref, size] = useContainerSize();
   const data = useMemo(() => buildSankeyData(scenario || {}, projection || {}), [scenario, projection]);
@@ -115,7 +136,7 @@ export default function FinancialSankey({ scenario, projection, height = 380 }) 
           linkCurvature={0.5}
           iterations={64}
           link={{ stroke: 'var(--cp-border)', strokeOpacity: 0.4 }}
-          node={{ stroke: 'var(--cp-border)' }}
+          node={<SankeyNode chartWidth={size.width} />}
         >
           <Tooltip content={<SankeyTooltip />} />
         </Sankey>

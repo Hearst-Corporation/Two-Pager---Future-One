@@ -4,7 +4,7 @@
 // quand la modale est fermée. Click → ré-ouvre la modale.
 //
 // Visible uniquement quand status === 'loading' && modal_visible === false.
-// Affiche elapsed time + stage estimé. Tokens --cp-* uniquement.
+// Affiche elapsed time + état de latence. Tokens --cp-* uniquement.
 
 import {
   useMemoJob,
@@ -34,7 +34,7 @@ export default function MemoJobBadge() {
       <span style={S.body}>
         <span style={S.title}>Memo in progress</span>
         <span style={{ ...S.sub, color: isSlowish ? 'var(--ct-status-warning)' : 'var(--cp-text-muted)' }}>
-          {formatElapsed(job.elapsed_ms)}{isSlowish ? ' · cascade fallback' : ''}
+          {formatElapsed(job.elapsed_ms)}{isSlowish ? ' · still waiting for Kimi' : ''}
         </span>
       </span>
       <span style={S.chevron}>›</span>

@@ -3,7 +3,7 @@
 // StrategicMemoModal — Sprint 1 + Decision Canvas sprint.
 //
 // Full-screen drawer/modal that calls /api/admin/hearst/strategic-memo. While
-// the cascade runs it shows a live timeline. On success it no longer renders an
+// Kimi runs it shows a live timeline. On success it no longer renders an
 // 11-section accordion reader — it shows a decision-first SUCCESS STATE (verdict
 // + 4 KPIs + category + actions) that routes straight to the Dossier Decision
 // Canvas, where the full report and approval workflow live.
@@ -25,10 +25,8 @@ import { T } from '@/lib/design-system/tokens';
 /**
  * Live timeline shown during loading.
  *
- * We can't know server-side cascade position from the client (no SSE yet), so we
- * show: real elapsed time, an SLA gauge vs the 60s target, and the full fallback
- * chain enumerated without faking an "active" stage. The true model is revealed
- * via meta.model_used when the memo arrives.
+ * We don't have SSE yet, so this shows real elapsed time and an SLA gauge.
+ * The true model is revealed via meta.model_used when the memo arrives.
  */
 const SLA_TARGET_MS = 60_000;
 const SLA_WARNING_MS = 120_000;
@@ -43,7 +41,7 @@ function MemoTimeline({ elapsedMs, cascade }) {
   const slaLabel =
     slaTone === 'normal' ? 'within target' :
     slaTone === 'warning' ? 'slower than usual' :
-    'cascade fallback in progress';
+    'still waiting for Kimi';
   // Single sober accent — the latency state is conveyed by the text label, not colour.
   const slaColor = 'var(--cp-accent)';
 
@@ -64,13 +62,11 @@ function MemoTimeline({ elapsedMs, cascade }) {
       </div>
 
       <div style={S.cascadeWrap}>
-        <div style={S.cascadeLabel}>Fallback chain :</div>
+        <div style={S.cascadeLabel}>Model :</div>
         <div style={S.cascadeList}>
           {cascade.map((model) => (
             <span key={model} style={S.cascadeChip}>{model}</span>
           ))}
-          <span style={{ ...S.cascadeChip, ...S.cascadeChipFallback }}>claude-sonnet-4-6</span>
-          <span style={{ ...S.cascadeChip, ...S.cascadeChipFallback }}>gpt-4o</span>
         </div>
       </div>
 
@@ -310,7 +306,6 @@ const S = {
   cascadeLabel: { fontSize: 10, fontWeight: 700, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 },
   cascadeList: { display: 'flex', gap: 6, flexWrap: 'wrap' },
   cascadeChip: { display: 'inline-flex', alignItems: 'center', padding: '3px 8px', background: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 999, fontSize: 10, fontFamily: 'ui-monospace, monospace', letterSpacing: 0.2 },
-  cascadeChipFallback: { background: 'var(--cp-accent-soft, var(--cp-surface-0))', color: 'var(--cp-accent)', borderColor: 'var(--cp-border-accent, var(--cp-border))' },
   timelineHint: { fontSize: 11, color: 'var(--cp-text-muted)', fontStyle: 'italic', lineHeight: 1.5, paddingTop: 8, borderTop: '1px dashed var(--cp-border)' },
 
   error: { padding: 16, background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', borderRadius: 10, fontSize: 12, fontWeight: 600 },

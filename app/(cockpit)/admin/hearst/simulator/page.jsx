@@ -1,40 +1,21 @@
 'use client';
 
-import { useReducer, useState, useEffect, useMemo, useCallback, useDeferredValue, useRef } from 'react';
+import { useReducer, useState, useEffect, useCallback, useDeferredValue, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
 
 import {
   INITIAL_STATE, ACTIONS, simulatorReducer,
   buildSimulatePayload, serializeStateToUrl, parseStateFromUrl, QATAR_PRESETS,
 } from '@/lib/hearst-simulator-state';
 import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
+import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
+import { useSimulation } from '@/lib/hearst-simulation-context';
 
 import { SIMULATOR_PARAM_EVENT } from '@/components/hearst/ChatContainer';
-import { startMemoJob } from '@/lib/hearst-memo-job-store';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import HardwareMixer from '@/components/hearst/simulator/HardwareMixer';
-import ArchetypeRadar from '@/components/hearst/simulator/ArchetypeRadar';
-import B2BMatrix from '@/components/hearst/simulator/B2BMatrix';
-import OutputKpiStrip from '@/components/hearst/simulator/OutputKpiStrip';
-import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
-import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
-import { Z } from '@/lib/z-index';
-
-const EcosystemNetwork = dynamic(() => import('@/components/hearst/simulator/EcosystemNetwork'), {
-  ssr: false,
-  loading: () => <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading industry players…</div>,
-});
-const FinancialSankey = dynamic(() => import('@/components/hearst/simulator/FinancialSankey'), {
-  ssr: false,
-  loading: () => <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading money flow…</div>,
-});
-const GanttTimeline = dynamic(() => import('@/components/hearst/simulator/GanttTimeline'), {
-  ssr: false,
-  loading: () => <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cp-text-muted)' }}>Loading timeline…</div>,
-});
 
 const VIZ_TABS = [
   { id: 'radar',   label: 'Strengths' },
@@ -43,24 +24,56 @@ const VIZ_TABS = [
   { id: 'sankey',  label: 'Money flow' },
 ];
 
-const ARCH_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
+// The 4 operating models the real market actually runs at scale. The other 4
+// (branded JV, in-house O&M, hidden operator, build & sell) are variants/exotic
+// and stay in the data layer (engine, radar) but are hidden from the picker.
+const PRIMARY_MODEL_IDS = ['powered_shell', 'neocloud_gpu', 'hyperscaler_self_build', 'sovereign_ai'];
+const PRIMARY_ARCHETYPES = DEAL_ARCHETYPES.filter(a => PRIMARY_MODEL_IDS.includes(a.id));
+
+// Highlights the active scenario card when the current config matches a preset.
+function matchScenarioPreset(state) {
+  const p = QATAR_PRESETS.find(q =>
+    q.mode === state.mode &&
+    q.primary_archetype_id === state.primary_archetype_id &&
+    (q.mode === 'capital_first' ? q.capital_usd === state.capital_usd : q.total_mw === state.total_mw),
+  );
+  return p?.id || null;
+}
+// Human one-liner under each scenario card — never expose raw archetype ids.
+function scenarioPresetSub(p) {
+  if (p.mode === 'capital_first') return `$${(p.capital_usd / 1e9).toFixed(1)}B budget`;
+  if (p.mode === 'target_irr_first') return `${p.target_irr_pct}% target return`;
+  return `${p.total_mw} MW`;
+}
 
 export default function SimulatorPage() {
   const router = useRouter();
+  const { setAdvisorContext } = useSimulation();
 
   const [state, dispatch] = useReducer(simulatorReducer, INITIAL_STATE);
   const deferredState = useDeferredValue(state);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const fromUrl = parseStateFromUrl(new URLSearchParams(window.location.search));
+    const sp = new URLSearchParams(window.location.search);
+    const fromUrl = parseStateFromUrl(sp);
     if (fromUrl) dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: fromUrl });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    document.body.classList.add('oracle-simulator-page');
+    return () => document.body.classList.remove('oracle-simulator-page');
+  }, []);
+
   // Mode 'pro' is now the only mode in Wave 1 (C17).
 
-  // AgentRail bridge: agent set_simulator_param → reducer dispatch
+  // Chat → simulator bridge (SIMULATOR_PARAM_EVENT). NOTE: this is a ready-to-wire
+  // CONTRACT, not a live feature in this repo — no chat currently emits the event
+  // (ChatContainer isn't mounted; the CockpitShell rail hits /api/cockpit-chat, a
+  // text proxy with no tools). The `default: return` guard makes unknown fields
+  // no-ops. Test in isolation via:
+  //   window.dispatchEvent(new CustomEvent('hearst.simulator.set_param', {detail:{field:'total_mw',value:120}}))
   useEffect(() => {
     if (typeof window === 'undefined') return;
     function handler(e) {
@@ -70,14 +83,33 @@ export default function SimulatorPage() {
         case 'total_mw':              return dispatch({ type: ACTIONS.SET_MW, value: Number(value) });
         case 'capital_usd':           return dispatch({ type: ACTIONS.SET_CAPITAL, value: Number(value) });
         case 'target_irr_pct':        return dispatch({ type: ACTIONS.SET_IRR_TARGET, value: Number(value) });
-        case 'primary_archetype_id':  return dispatch({ type: ACTIONS.SET_PRIMARY_ARCHETYPE, value: String(value) });
+        case 'target_irr_lever':      return dispatch({ type: ACTIONS.SET_IRR_LEVER, value: String(value) });
+        // Changing the model also applies its canonical buyer/product pair, exactly
+        // like clicking an operating-model card → never an off-grid combo.
+        case 'primary_archetype_id': {
+          const def = MODEL_DEFAULTS[String(value)];
+          return dispatch({ type: ACTIONS.APPLY_PRESET, value: { primary_archetype_id: String(value), ...(def || {}) } });
+        }
+        case 'compare_archetype_id':  return dispatch({ type: ACTIONS.TOGGLE_COMPARE_ARCHETYPE, value: String(value) });
         case 'business_model_id':     return dispatch({ type: ACTIONS.SET_BUSINESS_MODEL, value: String(value) });
         case 'client_type_id':        return dispatch({ type: ACTIONS.SET_CLIENT_TYPE, value: String(value) });
         case 'mode':                  return dispatch({ type: ACTIONS.SET_MODE, value: String(value) });
+        case 'geography':             return dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: String(value) } });
+        // Validate against VIZ_TABS so an out-of-catalogue value can't blank the panel.
+        case 'active_viz':            return VIZ_TABS.some(t => t.id === value) ? dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value }) : undefined;
+        // Whole-bundle apply (size + model + hardware in one shot) — the safe path
+        // for multi-field changes; resolves a QATAR_PRESETS id.
+        case 'apply_preset': {
+          const p = QATAR_PRESETS.find(q => q.id === value);
+          if (!p) return;
+          const { id: _id, label: _label, ...payload } = p;
+          return dispatch({ type: ACTIONS.APPLY_PRESET, value: payload });
+        }
         case 'hardware_mix.classic_pct':
         case 'hardware_mix.liquid_pct':
         case 'hardware_mix.ai_pct':
         case 'hardware_mix.gpu_sku_id':
+        case 'hardware_mix.num_racks':
         case 'hardware_mix.utilization_pct':
         case 'hardware_mix.gpu_hour_price': {
           const key = field.split('.')[1];
@@ -94,14 +126,29 @@ export default function SimulatorPage() {
   const [simError, setSimError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [savingState, setSavingState] = useState('idle');
-  // memo job piloté par le store global — plus de state local
   const [projectId, setProjectId] = useState(null);
   // Last saved scenario — carries the Scenario → Memo → Dossier linkage so a
   // generated memo is persisted with its scenario_id. Set on Save and on reopen.
   const [savedScenarioId, setSavedScenarioId] = useState(null);
+  // dirtySinceSave: true whenever the config changed since the last successful
+  // save. Gates re-save on Validate / Generate Memo so we never persist a
+  // duplicate row nor build a memo on a stale scenario.
+  const [dirtySinceSave, setDirtySinceSave] = useState(true);
+  const [saveError, setSaveError] = useState(null);
   const debounceRef = useRef(null);
   const saveTimerRef = useRef(null);
+  const savingRef = useRef(false); // synchronous double-click guard for Validate
+  const resultsNavigationRef = useRef(false); // prevents URL sync from racing results navigation
   useEffect(() => () => clearTimeout(saveTimerRef.current), []);
+
+  // Any config change marks the scenario dirty and invalidates the previous
+  // projection. Without this, a fast preset → validate click can save stale
+  // numbers from the prior configuration before the debounced /simulate returns.
+  useEffect(() => {
+    setDirtySinceSave(true);
+    setSimResult(null);
+    setSimError(null);
+  }, [state]);
 
   useEffect(() => {
     (async () => {
@@ -178,34 +225,46 @@ export default function SimulatorPage() {
   }, [deferredState]);
 
   useEffect(() => {
-    const qs = serializeStateToUrl(state);
-    router.replace(`/admin/hearst/simulator?${qs}`, { scroll: false });
-  }, [state, router]);
-
-  const radarArchetypes = useMemo(() => {
-    const ids = new Set([state.primary_archetype_id, ...(state.compare_archetype_ids || [])]);
-    return Array.from(ids).map(id => ARCH_BY_ID[id]).filter(Boolean);
-  }, [state.primary_archetype_id, state.compare_archetype_ids]);
+    if (resultsNavigationRef.current) return;
+    const params = new URLSearchParams(serializeStateToUrl(state));
+    if (savedScenarioId) params.set('scenario', savedScenarioId);
+    router.replace(`/admin/hearst/simulator?${params.toString()}`, { scroll: false });
+  }, [state, savedScenarioId, router]);
 
   const projection = simResult?.projection;
   const scenario = simResult?.scenario;
   const archetypeOutcome = simResult?.archetype_outcome;
 
+  useEffect(() => {
+    setAdvisorContext?.({
+      surface: 'simulator',
+      state,
+      scenario,
+      projection,
+      simResult,
+      loading,
+      error: simError,
+      savedScenarioId,
+    });
+    return () => setAdvisorContext?.(null);
+  }, [loading, projection, savedScenarioId, scenario, setAdvisorContext, simError, simResult, state]);
+
   const onModeChange = useCallback((v) => dispatch({ type: ACTIONS.SET_MODE, value: v }), []);
-  const onSelectPrimary = useCallback((id) => dispatch({ type: ACTIONS.SET_PRIMARY_ARCHETYPE, value: id }), []);
-  const onToggleCompare = useCallback((id) => dispatch({ type: ACTIONS.TOGGLE_COMPARE_ARCHETYPE, value: id }), []);
+  const onSelectPrimary = useCallback((id) => {
+    // Selecting an operating model also sets its canonical buyer/product pair
+    // (MODEL_DEFAULTS) in one dispatch, so the B2B matrix stays on-grid and the
+    // engine never gets an incoherent archetype × business_model combo.
+    const def = MODEL_DEFAULTS[id];
+    dispatch({ type: ACTIONS.APPLY_PRESET, value: { primary_archetype_id: id, ...(def || {}) } });
+  }, []);
   const onPreset = useCallback((p) => {
-    const { id, label, ...payload } = p;
+    const { id: _id, label: _label, ...payload } = p;
     dispatch({ type: ACTIONS.APPLY_PRESET, value: payload });
   }, []);
   const onBootstrap = useCallback(() => {
     dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: 'qatar' } });
   }, []);
   const onHwChange = useCallback((next) => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: next }), []);
-  const onCellClick = useCallback(({ businessModelId, clientTypeId }) => {
-    dispatch({ type: ACTIONS.SET_BUSINESS_MODEL, value: businessModelId });
-    dispatch({ type: ACTIONS.SET_CLIENT_TYPE, value: clientTypeId });
-  }, []);
 
   const inputValue = state.mode === 'capital_first' ? state.capital_usd
     : state.mode === 'target_irr_first' ? state.target_irr_pct
@@ -220,6 +279,7 @@ export default function SimulatorPage() {
   async function handleSave() {
     if (!projectId || !scenario) return null;
     setSavingState('saving');
+    setSaveError(null);
     try {
       const writable = {};
       for (const k of SCENARIO_WRITABLE_KEYS) {
@@ -246,125 +306,190 @@ export default function SimulatorPage() {
       const data = await r.json();
       const newId = data.scenario?.id || null;
       setSavedScenarioId(newId);
+      setDirtySinceSave(false);
+      setSaveError(null);
       setSavingState('saved');
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => setSavingState('idle'), 2500);
       return newId;
     } catch (e) {
       setSavingState('idle');
-      alert(`Save failed: ${e.message}`);
+      setSaveError(e.message || 'Save failed');
       return null;
     }
   }
 
-  // Auto-saves if needed, then starts the memo job with a guaranteed scenarioId.
-  async function handleGenerateMemo() {
-    let scenarioId = savedScenarioId;
-    if (!scenarioId) {
-      scenarioId = await handleSave();
-      if (!scenarioId) {
-        // Save failed — do not orphan a memo
-        return;
-      }
+  // Validate = persist THEN navigate to the dedicated results page. The graphs
+  // live in /admin/hearst/simulator/results; this page stays configuration-only.
+  // Synchronous savingRef guards
+  // against a double-click creating two rows before the first re-render.
+  async function handleValidateAndReveal() {
+    if (savingRef.current) return;
+    if (!projection || !projectId || loading || simError) return;
+    savingRef.current = true;
+    try {
+      let id = savedScenarioId;
+      if (!id || dirtySinceSave) id = await handleSave();
+      if (!id) return; // save failed → stay on config, inline error already shown
+      resultsNavigationRef.current = true;
+      const params = new URLSearchParams({
+        scenario: id,
+        arch: state.primary_archetype_id,
+        biz: state.business_model_id,
+        client: state.client_type_id,
+      });
+      router.push(`/admin/hearst/simulator/results?${params.toString()}`);
+    } finally {
+      savingRef.current = false;
     }
-    startMemoJob({
-      payload: simResult,
-      title: 'Strategic Memo — Simulator scenario',
-      scenarioLabel: 'Simulator scenario',
-      scenarioId,
-      projectId,
-    });
   }
 
-  function handleExportMd() {
-    if (!scenario || !projection) return;
-    const md = renderMemoMd(state, scenario, projection, archetypeOutcome);
-    const blob = new Blob([md], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `simulator-memo-${new Date().toISOString().slice(0, 10)}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const validateBlocked = !projection || !projectId || loading || !!simError || savingState === 'saving';
+  const activeScenarioPreset = matchScenarioPreset(state);
 
   return (
+    <>
+    <style>{`
+      @media (max-width: 1500px) {
+        [data-sim-command-deck] {
+          grid-template-columns: 1fr !important;
+        }
+        [data-sim-command-intro] {
+          border-bottom: 1px solid var(--cp-border) !important;
+          padding-bottom: var(--cp-space-5, 20px) !important;
+          min-height: 0 !important;
+          grid-template-columns: 1fr !important;
+          align-items: start !important;
+        }
+        [data-sim-command-copy] {
+          max-width: 720px !important;
+        }
+        [data-sim-command-grid],
+        [data-hardware-stack],
+        [data-archetype-grid] {
+          grid-template-columns: 1fr !important;
+        }
+      }
+      @media (max-width: 1120px) {
+        body.oracle-simulator-page .ct-rail-right {
+          width: 312px !important;
+          min-width: 312px !important;
+          flex: 0 0 312px !important;
+        }
+        [data-sim-preset-grid],
+        [data-hardware-summary],
+        [data-hardware-gpu-grid] {
+          grid-template-columns: 1fr !important;
+        }
+      }
+    `}</style>
     <div style={S.wrap}>
       <header style={S.header}>
         <div style={S.headerText}>
+          <span style={S.eyebrow}>Oracle capital cockpit</span>
           <h1 style={S.title}>Investment Simulator</h1>
+          <p style={S.subtitle}>Shape a Qatar AI/data-center thesis from capital, operating model and GPU density.</p>
         </div>
         {loading && <div style={S.loadingBadge}>Calculating…</div>}
       </header>
 
-      {/* 1. STARTING POINT */}
-      <section style={S.section}>
-        <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Starting Point</h2>
-        </header>
-        <InputModeSwitcher
-          mode={state.mode}
-          onChange={onModeChange}
-          presets={QATAR_PRESETS}
-          onPreset={onPreset}
-          onBootstrap={onBootstrap}
-        />
+      <section data-sim-command-deck style={S.commandDeck}>
+        <div data-sim-command-intro style={S.commandIntro}>
+          <div style={S.commandIntroTitleBlock}>
+            <span style={S.stepPill}>01 · Build brief</span>
+            <h2 style={S.commandTitle}>Set the investment constraint, then size the machine.</h2>
+          </div>
+          <p data-sim-command-copy style={S.commandCopy}>Pick how the IC wants to think first: budget, power capacity, or target return. The simulator keeps the downstream scenario coherent.</p>
+        </div>
+        <div data-sim-command-grid style={S.commandGrid}>
+        <section style={S.commandPanel}>
+          <header style={S.panelHead}>
+            <span style={S.panelKicker}>Starting Point</span>
+            <h3 style={S.panelTitle}>Choose the control variable</h3>
+          </header>
+          <InputModeSwitcher
+            mode={state.mode}
+            onChange={onModeChange}
+            onBootstrap={onBootstrap}
+          />
+        </section>
+
+        <section style={{ ...S.commandPanel, ...S.commandPanelPrimary }}>
+          <header style={S.panelHead}>
+            <span style={S.panelKicker}>Project Size / Targets</span>
+            <h3 style={S.panelTitle}>Calibrate the initial scenario</h3>
+          </header>
+          <div data-sim-preset-grid style={S.presetCards} role="group" aria-label="Ready scenarios">
+            {QATAR_PRESETS.map(p => {
+              const active = activeScenarioPreset === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onPreset(p)}
+                  style={{ ...S.presetCard, ...(active ? S.presetCardActive : {}) }}>
+                  <span style={S.presetCardName}>{p.label}</span>
+                  <span style={{ ...S.presetCardSub, ...(active ? S.presetCardSubActive : {}) }}>{scenarioPresetSub(p)}</span>
+                </button>
+              );
+            })}
+          </div>
+          <InputFieldHero
+            mode={state.mode}
+            value={inputValue}
+            onChange={onInputChange}
+            derived={simResult?.derived}
+            solver={simResult?.solver}
+          />
+          {state.mode === 'target_irr_first' && (
+            <div style={S.leverPanel}>
+              <span style={S.leverLabel}>What to change</span>
+              <div style={S.leverPills}>
+                {[
+                  { id: 'pricing',      label: 'Pricing' },
+                  { id: 'capex_per_mw', label: 'Build cost' },
+                  { id: 'leverage',     label: 'Debt level' },
+                  { id: 'mw',           label: 'Size (MW)' },
+                ].map(l => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={() => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: l.id })}
+                    style={{ ...S.leverBtn, ...(state.target_irr_lever === l.id ? S.leverBtnActive : {}) }}>
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+        </div>
       </section>
 
       {/* 2. OPERATING MODEL */}
-      <section style={S.section}>
-        <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Operating Model</h2>
-          <span style={S.counterChip}>{radarArchetypes.length} compared</span>
+      <section style={S.boardSection}>
+        <header style={S.boardHead}>
+          <div>
+            <span style={S.stepPill}>02 · Operating thesis</span>
+            <h2 style={S.sectionTitle}>Operating Model</h2>
+          </div>
+          <span style={S.counterChip}>Choose one operating thesis</span>
         </header>
         <ArchetypePicker
-          archetypes={DEAL_ARCHETYPES}
+          archetypes={PRIMARY_ARCHETYPES}
           primaryId={state.primary_archetype_id}
-          compareIds={state.compare_archetype_ids}
           onSelectPrimary={onSelectPrimary}
-          onToggleCompare={onToggleCompare}
         />
-      </section>
-
-      {/* 3. PROJECT SIZE / TARGETS */}
-      <section style={S.section}>
-        <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Project Size / Targets</h2>
-        </header>
-        <InputFieldHero
-          mode={state.mode}
-          value={inputValue}
-          onChange={onInputChange}
-          derived={simResult?.derived}
-          solver={simResult?.solver}
-        />
-        {state.mode === 'target_irr_first' && (
-          <div style={S.leverPanel}>
-            <span style={S.leverLabel}>What to change</span>
-            <div style={S.leverPills}>
-              {[
-                { id: 'pricing',      label: 'Pricing' },
-                { id: 'capex_per_mw', label: 'Build cost' },
-                { id: 'leverage',     label: 'Debt level' },
-                { id: 'mw',           label: 'Size (MW)' },
-              ].map(l => (
-                <button
-                  key={l.id}
-                  type="button"
-                  onClick={() => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: l.id })}
-                  style={{ ...S.leverBtn, ...(state.target_irr_lever === l.id ? S.leverBtnActive : {}) }}>
-                  {l.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </section>
 
       {/* 4. HARDWARE ALLOCATION */}
-      <section style={S.section}>
-        <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Hardware Allocation</h2>
+      <section style={S.boardSection}>
+        <header style={S.boardHead}>
+          <div>
+            <span style={S.stepPill}>03 · Technology stack</span>
+            <h2 style={S.sectionTitle}>Hardware Allocation</h2>
+          </div>
+          <span style={S.sectionSubtitle}>Power mix, rack density and GPU economics</span>
         </header>
         <HardwareMixer
           totalMw={scenario?.total_mw || state.total_mw}
@@ -375,231 +500,31 @@ export default function SimulatorPage() {
 
       {simError && <div style={S.error}>Error: {simError}</div>}
 
-      {/* 5. TIMELINE */}
-      <section style={S.section}>
-        <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Timeline</h2>
-        </header>
-        <div style={S.subsection}>
-          <GanttTimeline scenario={scenario || { site_readiness: 'greenfield' }} exit_year={scenario?.exit_year || 10} />
-        </div>
-      </section>
-
-      {/* 6. FINANCIAL PROJECTION */}
-      <section style={S.section}>
-        <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Financial Projection</h2>
-          <span style={S.sectionSubtitle}>Key numbers & 10-year projection</span>
-        </header>
-        <ProjectionCaution projection={projection} solver={simResult?.solver} />
-        <OutputKpiStrip projection={projection} />
-        <div style={S.subsection}>
-          <ProjectionChart years={projection?.years || []} />
-        </div>
-      </section>
-
-      {/* 7. VISUALIZATIONS */}
-      <section style={S.vizCard}>
-        <header style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Visualizations</h2>
-          <div style={S.vizTabs} role="tablist">
-            {VIZ_TABS.map(t => (
-              <button
-                key={t.id}
-                type="button"
-                role="tab"
-                aria-selected={state.active_viz === t.id}
-                onClick={() => dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value: t.id })}
-                style={{ ...S.vizTab, ...(state.active_viz === t.id ? S.vizTabActive : {}) }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </header>
-        <div style={S.vizContainer}>
-          {state.active_viz === 'radar' && (
-            <ArchetypeRadar archetypes={radarArchetypes} height={400} />
-          )}
-          {state.active_viz === 'network' && (
-            <EcosystemNetwork activeArchetypeId={state.primary_archetype_id} />
-          )}
-          {state.active_viz === 'matrix' && (
-            <B2BMatrix
-              selected={{ businessModelId: state.business_model_id, clientTypeId: state.client_type_id }}
-              onCellClick={onCellClick}
-            />
-          )}
-          {state.active_viz === 'sankey' && (
-            <FinancialSankey scenario={scenario} projection={projection} height={400} />
-          )}
-        </div>
-      </section>
-
-      {/* 8. ACTIONS */}
-      <SimulatorCTABar
-        hasProjection={!!projection}
-        savingState={savingState}
-        onSave={handleSave}
-        onExportMd={handleExportMd}
-        onGenerateMemo={handleGenerateMemo}
-        planCaution={!!(
-          projection?.warnings?.length ||
-          (simResult?.solver && simResult.solver.converged === false) ||
-          (projection?.capex_reconciliation && projection.capex_reconciliation.within_tolerance === false)
-        )}
-        cautionReason={
-          projection?.warnings?.[0] ||
-          (simResult?.solver?.converged === false ? simResult.solver.diagnostic || 'Target IRR not reached' : null) ||
-          (projection?.capex_reconciliation?.within_tolerance === false ? 'CAPEX reconciliation' : null) ||
-          null
-        }
-      />
-      {/* Inline save confirmation — auto-clears after 2.5 s via saveTimerRef */}
-      {savingState === 'saved' && (
-        <div
-          role="status"
-          aria-live="polite"
-          style={S.saveToast}
-        >
-          ✓ Scenario saved
-        </div>
+      {/* VALIDATE CONFIG → dedicated results page */}
+      <div style={S.validateBar}>
+        <span style={S.validateHint}>
+          {simError ? 'Fix the error above to continue.'
+            : loading ? 'Calculating…'
+            : !projectId ? 'Loading project…'
+            : savingState === 'saving' ? 'Saving your scenario…'
+            : projection ? 'Configuration ready.'
+            : 'Fill in your numbers to run the simulation.'}
+        </span>
+        <button
+          type="button"
+          disabled={validateBlocked}
+          onClick={handleValidateAndReveal}
+          style={{ ...S.validateBtn, ...(validateBlocked ? { opacity: 0.5, cursor: 'not-allowed' } : {}) }}>
+          {savingState === 'saving' ? 'Saving…' : 'Validate & see results →'}
+        </button>
+      </div>
+      {saveError && (
+        <div style={S.error} role="alert">Could not save: {saveError}</div>
       )}
       {/* Modal/badge/toast mountés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
     </div>
+    </>
   );
-}
-
-// ────────────────────────────────────────────────────────────
-// ProjectionCaution — surfaces warnings / solver non-convergence
-// Sources: projection.warnings[] (engine-deduped) + solver.converged
-// ────────────────────────────────────────────────────────────
-function ProjectionCaution({ projection, solver }) {
-  if (!projection) return null;
-
-  const warnings = Array.isArray(projection.warnings) ? projection.warnings : [];
-  const solverFailed = solver && solver.converged === false;
-
-  if (warnings.length === 0 && !solverFailed) return null;
-
-  return (
-    <div style={SC.box} role="alert" aria-label="Projection cautions">
-      <div style={SC.header}>
-        <span style={SC.icon}>⚠</span>
-        <span style={SC.label}>Caution</span>
-      </div>
-      {warnings.length > 0 && (
-        <ul style={SC.list}>
-          {warnings.map((w, i) => (
-            <li key={i} style={SC.item}>{w}</li>
-          ))}
-        </ul>
-      )}
-      {solverFailed && (
-        <div style={SC.solverRow}>
-          <strong>Target IRR not reached</strong> — figures below are the closest attempt, not a solved plan.
-          {solver.diagnostic ? <span style={SC.diagnostic}> {solver.diagnostic}</span> : null}
-        </div>
-      )}
-    </div>
-  );
-}
-
-const SC = {
-  box: {
-    padding: 'var(--cp-space-3, 12px) var(--cp-space-4, 16px)',
-    background: 'var(--cp-accent-soft)',
-    border: '1px solid var(--cp-accent)',
-    borderRadius: 'var(--cp-radius-md, 10px)',
-    fontSize: 'var(--cp-font-sm)',
-    color: 'var(--cp-text-strong)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-2, 8px)',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--cp-space-1, 4px)',
-  },
-  icon: {
-    fontSize: 14,
-    lineHeight: 1,
-  },
-  label: {
-    fontWeight: 800,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    fontSize: 'var(--cp-font-sm)',
-  },
-  list: {
-    margin: 0,
-    paddingLeft: 20,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-1, 4px)',
-  },
-  item: {
-    lineHeight: '18px',
-  },
-  solverRow: {
-    lineHeight: '18px',
-    paddingLeft: 4,
-  },
-  diagnostic: {
-    fontStyle: 'italic',
-    opacity: 0.85,
-  },
-};
-
-// ────────────────────────────────────────────────────────────
-// Memo MD generator
-// ────────────────────────────────────────────────────────────
-function renderMemoMd(state, scenario, projection, archetypeOutcome) {
-  const fmtUsd = (v) => v != null ? `$${(v / 1e6).toFixed(1)}M` : 'N/A';
-  const fmtPct = (v) => v != null ? `${(v * 100).toFixed(1)}%` : 'N/A';
-  const fmtX = (v) => v != null ? `${v.toFixed(2)}x` : 'N/A';
-
-  return `# Investment Plan — ${new Date().toISOString().slice(0, 10)}
-
-## Starting point
-- **Mode**: ${state.mode}
-- **Deal model**: ${archetypeOutcome?.label || state.primary_archetype_id} (${archetypeOutcome?.code || ''})
-- **Business model**: ${state.business_model_id}
-- **Customer type**: ${state.client_type_id}
-
-## Plan (key numbers)
-- Total size: ${scenario.total_mw} MW
-- Energy efficiency (PUE): ${scenario.pue}
-- Electricity price: $${scenario.electricity_price_mwh}/MWh
-- Rental price (big tech): $${scenario.price_hyperscale_kw_month}/kW/month
-- Debt: ${scenario.debt_pct.toFixed(0)}% at ${scenario.debt_interest_rate}%
-- Exit: ${scenario.exit_multiple}x yearly profit in year ${scenario.exit_year}
-
-## Equipment mix
-- Standard / High-density / AI clusters: ${state.hardware_mix.classic_pct}% / ${state.hardware_mix.liquid_pct}% / ${state.hardware_mix.ai_pct}%
-- AI chip model: ${state.hardware_mix.gpu_sku_id}
-- How busy: ${state.hardware_mix.utilization_pct}%
-- Rental price per hour: $${state.hardware_mix.gpu_hour_price}
-
-## Results (10-year projection)
-| Metric | Value |
-|---|---|
-| Total Build Cost | ${fmtUsd(projection.total_capex)} |
-| Yearly Revenue | ${fmtUsd(projection.stabilized_revenue)} |
-| Yearly Profit | ${fmtUsd(projection.stabilized_ebitda)} |
-| Annual Return | ${fmtPct(projection.irr)} |
-| Money Multiplier | ${fmtX(projection.moic)} |
-| Years to Break Even | ${projection.payback_years ?? 'N/A'} yr |
-| Debt Safety | ${fmtX(projection.dscr_stabilized)} |
-| Sale Value | ${fmtUsd(projection.terminal_value)} |
-| Net Value Today | ${fmtUsd(projection.npv)} |
-
-## Overall score
-${archetypeOutcome?.score ?? 'N/A'}/100
-
----
-Generated by HEARST Investment Simulator (/admin/hearst/simulator).
-`;
 }
 
 // ────────────────────────────────────────────────────────────
@@ -610,10 +535,10 @@ const S = {
   wrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-8, 32px)',
+    gap: 'var(--cp-space-5, 20px)',
     maxWidth: 1280,
     margin: '0 auto',
-    padding: 'var(--cp-space-8, 32px) var(--cp-space-8, 32px) var(--cp-space-12, 96px)',
+    padding: 'var(--cp-space-6, 24px) var(--cp-space-8, 32px) 180px',
   },
   header: {
     display: 'flex',
@@ -621,15 +546,25 @@ const S = {
     alignItems: 'flex-end',
     gap: 'var(--cp-space-4, 16px)',
     flexWrap: 'wrap',
-    paddingBottom: 'var(--cp-space-4, 16px)',
-    borderBottom: '1px solid var(--cp-border)',
+    padding: 'var(--cp-space-5, 20px)',
+    background: 'linear-gradient(135deg, color-mix(in srgb, var(--cp-accent-maroon) 22%, transparent), var(--cp-surface-2) 52%, var(--cp-surface-0))',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-lg, 14px)',
+    boxShadow: 'inset 0 1px 0 color-mix(in srgb, var(--cp-text-strong) 8%, transparent)',
+  },
+  eyebrow: {
+    color: 'var(--cp-accent-maroon)',
+    fontSize: 'var(--cp-font-micro, 10px)',
+    fontWeight: 900,
+    letterSpacing: 'var(--cp-tracking-eyebrow, 0.14em)',
+    textTransform: 'uppercase',
   },
   headerText: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1, 4px)' },
   title: {
-    fontSize: 'var(--cp-font-2xl, 24px)',
-    lineHeight: '1.2',
-    fontWeight: 600,
-    letterSpacing: -0.4,
+    fontSize: 'clamp(30px, 3vw, 44px)',
+    lineHeight: '0.98',
+    fontWeight: 900,
+    letterSpacing: -1.4,
     color: 'var(--cp-text-primary)',
     margin: 0,
   },
@@ -637,22 +572,7 @@ const S = {
     fontSize: 'var(--cp-font-base, 13px)',
     lineHeight: 'var(--cp-leading-normal, 1.6)',
     color: 'var(--cp-text-muted)',
-  },
-  modeSwitch: {
-    display: 'inline-flex', gap: 'var(--cp-space-1, 4px)', padding: 'var(--cp-space-1, 4px)',
-    background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md, 8px)', flexShrink: 0,
-  },
-  modeBtn: {
-    height: 32, padding: '0 var(--cp-space-4, 16px)',
-    background: 'transparent', color: 'var(--cp-text-muted)',
-    border: 'none', borderRadius: 'var(--cp-radius-pill, 9999px)', cursor: 'pointer',
-    fontSize: 'var(--cp-font-sm)', fontWeight: 600, letterSpacing: 0.3,
-    transition: 'all 0.15s ease',
-  },
-  modeBtnActive: {
-    background: 'var(--cp-accent-maroon, var(--cp-accent))',
-    color: 'var(--cp-text-strong)',
+    maxWidth: 560,
   },
   loadingBadge: {
     fontSize: 'var(--cp-font-sm)',
@@ -673,10 +593,164 @@ const S = {
     alignItems: 'stretch',
   },
 
+  commandDeck: {
+    display: 'grid',
+    gridTemplateColumns: '1fr',
+    gap: 'var(--cp-space-4, 16px)',
+    alignItems: 'start',
+    padding: 'var(--cp-space-4, 16px)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-lg, 14px)',
+    minWidth: 0,
+  },
+  commandIntro: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(260px, 0.55fr) minmax(280px, 0.45fr)',
+    alignItems: 'end',
+    columnGap: 'var(--cp-space-6, 24px)',
+    rowGap: 'var(--cp-space-3, 12px)',
+    paddingBottom: 'var(--cp-space-4, 16px)',
+    borderBottom: '1px solid var(--cp-border)',
+  },
+  commandIntroTitleBlock: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-3, 12px)',
+  },
+  stepPill: {
+    width: 'fit-content',
+    color: 'var(--cp-accent-maroon)',
+    fontSize: 'var(--cp-font-micro, 10px)',
+    fontWeight: 900,
+    letterSpacing: 'var(--cp-tracking-eyebrow, 0.14em)',
+    textTransform: 'uppercase',
+  },
+  commandTitle: {
+    margin: 0,
+    color: 'var(--cp-text-primary)',
+    fontSize: 'clamp(20px, 2vw, 26px)',
+    lineHeight: 1.08,
+    fontWeight: 900,
+    letterSpacing: -0.8,
+    maxWidth: 440,
+  },
+  commandCopy: {
+    margin: 0,
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-base, 13px)',
+    lineHeight: 'var(--cp-leading-normal, 1.6)',
+    maxWidth: 460,
+  },
+  commandGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 'var(--cp-space-4, 16px)',
+    alignItems: 'start',
+    justifyItems: 'stretch',
+  },
+  commandPanel: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-4, 16px)',
+    minWidth: 0,
+    alignSelf: 'start',
+    width: '100%',
+    padding: 'var(--cp-space-3, 12px)',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md, 10px)',
+  },
+  commandPanelPrimary: {
+    background: 'linear-gradient(180deg, var(--cp-surface-1), color-mix(in srgb, var(--cp-accent-maroon) 10%, var(--cp-surface-1)))',
+  },
+  panelHead: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1, 4px)' },
+  panelKicker: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-micro, 10px)',
+    fontWeight: 900,
+    letterSpacing: 'var(--cp-tracking-eyebrow, 0.14em)',
+    textTransform: 'uppercase',
+  },
+  panelTitle: {
+    margin: 0,
+    color: 'var(--cp-text-primary)',
+    fontSize: 'var(--cp-font-lg, 16px)',
+    fontWeight: 800,
+  },
+  presetCards: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: 'var(--cp-space-2, 8px)',
+  },
+  presetCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-1, 4px)',
+    minHeight: 64,
+    padding: 'var(--cp-space-3, 12px)',
+    background: 'var(--cp-surface-0)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md, 8px)',
+    cursor: 'pointer',
+    textAlign: 'left',
+    color: 'var(--cp-text-primary)',
+    transition: 'all 0.15s ease',
+  },
+  presetCardActive: {
+    background: 'var(--cp-accent-maroon)',
+    color: 'var(--cp-text-strong)',
+    borderColor: 'var(--cp-accent-maroon)',
+  },
+  presetCardName: {
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 700,
+    lineHeight: '16px',
+  },
+  presetCardSub: {
+    fontSize: 'var(--cp-font-xs, 11px)',
+    fontWeight: 600,
+    color: 'var(--cp-text-muted)',
+    letterSpacing: 0.2,
+  },
+  presetCardSubActive: { color: 'var(--cp-text-strong)', opacity: 0.85 },
+  validateBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 'var(--cp-space-4, 16px)',
+    padding: 'var(--cp-space-5, 20px) var(--cp-space-6, 24px)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md, 10px)',
+    flexWrap: 'wrap',
+  },
+  validateHint: {
+    fontSize: 'var(--cp-font-base, 13px)',
+    color: 'var(--cp-text-muted)',
+    fontWeight: 600,
+  },
+  validateBtn: {
+    height: 44,
+    padding: '0 var(--cp-space-6, 24px)',
+    fontSize: 'var(--cp-font-base, 13px)',
+    fontWeight: 800,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    background: 'var(--cp-accent-maroon)',
+    color: 'var(--cp-text-strong)',
+    border: 'none',
+    borderRadius: 'var(--cp-radius-md, 8px)',
+    cursor: 'pointer',
+  },
   section: {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-4, 16px)',
+    width: '100%',
+    minWidth: 0,
   },
   sectionHead: {
     display: 'flex',
@@ -685,10 +759,28 @@ const S = {
     minHeight: 32,
     flexWrap: 'wrap',
   },
+  boardSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-4, 16px)',
+    width: '100%',
+    minWidth: 0,
+    padding: 'var(--cp-space-6, 24px)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-lg, 14px)',
+  },
+  boardHead: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 'var(--cp-space-4, 16px)',
+    flexWrap: 'wrap',
+  },
   sectionTitle: {
-    fontSize: 'var(--cp-font-lg, 16px)',
-    lineHeight: 'var(--cp-leading-normal, 1.6)',
-    fontWeight: 600,
+    fontSize: 'var(--cp-font-xl, 20px)',
+    lineHeight: 'var(--cp-leading-tight, 1.3)',
+    fontWeight: 900,
     color: 'var(--cp-text-primary)',
     margin: 0,
   },
@@ -714,49 +806,6 @@ const S = {
     color: 'var(--cp-text-primary)',
     margin: 0,
     letterSpacing: 0.2,
-  },
-
-  vizCard: {
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md, 10px)',
-    padding: 'var(--cp-space-6, 24px)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-4, 16px)',
-  },
-  vizTabs: {
-    display: 'flex',
-    gap: 'var(--cp-space-1, 4px)',
-    marginLeft: 'auto',
-    padding: 'var(--cp-space-1, 4px)',
-    background: 'var(--cp-surface-0)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md, 8px)',
-    flexWrap: 'wrap',
-  },
-  vizTab: {
-    fontSize: 'var(--cp-font-sm)',
-    height: 32,
-    padding: '0 var(--cp-space-4, 16px)',
-    background: 'transparent',
-    color: 'var(--cp-text-muted)',
-    border: 'none',
-    borderRadius: 'var(--cp-radius-md, 8px)',
-    cursor: 'pointer',
-    fontWeight: 600,
-    letterSpacing: 0.3,
-    transition: 'all 0.15s ease',
-  },
-  vizTabActive: {
-    background: 'var(--cp-accent-maroon)',
-    color: 'var(--cp-text-strong)',
-  },
-  vizContainer: {
-    minHeight: 400,
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
   },
 
   error: {
@@ -793,7 +842,9 @@ const S = {
     padding: '0 var(--cp-space-4, 16px)',
     background: 'transparent',
     color: 'var(--cp-text-muted)',
-    border: '1px solid var(--cp-border)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--cp-border)',
     borderRadius: 'var(--cp-radius-md, 8px)',
     cursor: 'pointer',
     fontWeight: 600,
@@ -804,19 +855,4 @@ const S = {
     borderColor: 'var(--cp-accent-maroon)',
   },
 
-  saveToast: {
-    position: 'fixed',
-    bottom: 'var(--cp-space-8, 32px)',
-    right: 'var(--cp-space-8, 32px)',
-    padding: 'var(--cp-space-2, 8px) var(--cp-space-5, 20px)',
-    background: 'var(--cp-accent-maroon)',
-    color: 'var(--cp-text-strong)',
-    borderRadius: 'var(--cp-radius-md, 10px)',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 700,
-    letterSpacing: 0.5,
-    boxShadow: 'var(--cp-shadow-md)',
-    zIndex: Z.toast,
-    pointerEvents: 'none',
-  },
 };

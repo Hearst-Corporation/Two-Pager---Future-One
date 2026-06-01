@@ -1,7 +1,5 @@
 'use client';
 
-import { Z } from '@/lib/z-index';
-
 export default function SimulatorCTABar({
   onSave,
   onExportMd,
@@ -19,7 +17,7 @@ export default function SimulatorCTABar({
     : null;
 
   return (
-    <div style={S.bar}>
+    <div className="simulator-cta-bar" style={S.bar}>
       <div style={S.left}>
         {hasProjection && planCaution ? (
           <span style={S.statusCaution}>
@@ -64,18 +62,17 @@ export default function SimulatorCTABar({
 
 const S = {
   bar: {
-    position: 'sticky',
-    bottom: 0,
     background: 'var(--cp-surface-2)',
-    borderTop: '1px solid var(--cp-border)',
-    padding: 'var(--cp-space-3) var(--cp-space-5)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md, 10px)',
+    padding: 'var(--cp-space-4) var(--cp-space-5)',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 'var(--cp-space-4)',
-    marginTop: 'var(--cp-space-2)',
-    zIndex: Z.ctaBar,
+    marginTop: 'var(--cp-space-4)',
     minHeight: 56,
+    flexWrap: 'wrap',
   },
   left: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' },
   statusReady: {

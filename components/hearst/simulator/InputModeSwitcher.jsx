@@ -8,12 +8,10 @@ const MODES = [
   { id: 'target_irr_first',  label: 'Target return', sub: '%',       hint: 'What yearly return do you want?' },
 ];
 
-export default function InputModeSwitcher({ mode, onChange, onBootstrap, onPreset, presets = [] }) {
+export default function InputModeSwitcher({ mode, onChange, onBootstrap }) {
   return (
     <div style={S.wrap}>
-      <div style={S.label}>Starting point</div>
-
-      <div style={S.modes} role="radiogroup" aria-label="Input mode">
+      <div data-input-mode-grid style={S.modes} role="radiogroup" aria-label="Input mode">
         {MODES.map(m => {
           const active = mode === m.id;
           return (
@@ -34,17 +32,6 @@ export default function InputModeSwitcher({ mode, onChange, onBootstrap, onPrese
         })}
       </div>
 
-      <div style={S.presetsRow}>
-        <div style={S.presetsLabel}>Presets</div>
-        <div style={S.presets}>
-          {presets.map(p => (
-            <button key={p.id} type="button" onClick={() => onPreset?.(p)} style={S.chip}>
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <button type="button" onClick={onBootstrap} style={S.bootstrap}>
         Auto-fill with Qatar market data →
       </button>
@@ -57,47 +44,37 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 12,
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 10,
-    padding: 20,
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: 'var(--cp-text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
   },
   modes: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: 10,
   },
   modeBtn: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 2,
-    padding: '10px 14px',
+    gap: 3,
+    padding: '12px',
     background: 'var(--cp-surface-0)',
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: 'var(--cp-border)',
-    borderRadius: 6,
+    borderRadius: 10,
     cursor: 'pointer',
     textAlign: 'left',
     color: 'var(--cp-text-primary)',
     transition: T.all,
-    minHeight: 52,
+    minHeight: 72,
   },
   modeBtnActive: {
-    background: 'var(--cp-accent-maroon)',
+    background: 'linear-gradient(180deg, var(--cp-accent-maroon), color-mix(in srgb, var(--cp-accent-maroon) 70%, var(--cp-surface-0)))',
     color: 'var(--cp-text-strong)',
     borderColor: 'var(--cp-accent-maroon)',
+    boxShadow: '0 14px 36px -24px var(--cp-accent-maroon)',
   },
-  modeRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' },
+  modeRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 4 },
   modeLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 800,
     letterSpacing: 0.3,
   },
@@ -109,42 +86,11 @@ const S = {
   },
   modeSubActive: { color: 'var(--cp-text-strong)', opacity: 0.85 },
   modeHint: {
-    fontSize: 11,
+    fontSize: 10,
     opacity: 0.8,
-    lineHeight: '16px',
+    lineHeight: '14px',
   },
 
-  presetsRow: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
-    paddingTop: 4,
-    borderTop: '1px dashed var(--cp-border)',
-    marginTop: 4,
-  },
-  presetsLabel: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: 'var(--cp-text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-  },
-  presets: {
-    display: 'flex',
-    gap: 6,
-    flexWrap: 'wrap',
-  },
-  chip: {
-    fontSize: 11,
-    fontWeight: 600,
-    padding: '5px 12px',
-    background: 'transparent',
-    color: 'var(--cp-text-muted)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md, 8px)',
-    cursor: 'pointer',
-    transition: T.allFast,
-  },
   bootstrap: {
     alignSelf: 'flex-start',
     fontSize: 11,

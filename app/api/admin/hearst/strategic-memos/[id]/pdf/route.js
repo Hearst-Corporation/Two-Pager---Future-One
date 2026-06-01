@@ -443,12 +443,12 @@ p { margin: 0; }
     </div>
     <div class="cover-kicker">${esc(location)}</div>
     <h1 class="wordmark">${esc(row.title || 'Investment Memo')}</h1>
-    <div class="cover-sub">${esc(row.stakeholder === 'sovereign' ? 'Sovereign AI Compute Platform' : 'Strategic Investment Memorandum')}</div>
+    <div class="cover-sub">${esc(row.stakeholder === 'sovereign' ? 'National AI Compute Platform' : 'Strategic Investment Memorandum')}</div>
     <div class="cover-accent"></div>
     <p class="cover-thesis">
       ${exsum.headline
         ? `<span class="q">${esc(exsum.headline.slice(0, 180))}</span>`
-        : '<span class="q">"AI is the new gas."</span> Qatar converts abundant, low-cost North Field gas into sovereign AI compute — the highest-value export of the next decade.'}
+        : '<span class="q">"AI is the new gas."</span> Qatar converts abundant, low-cost North Field gas into national AI compute — the highest-value export of the next decade.'}
     </p>
     <div class="cover-foot">
       <div>

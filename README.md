@@ -54,6 +54,15 @@ npm run rundev
 
 Ouvrir [http://localhost:5005](http://localhost:5005).
 
+### Cockpit HEARST
+- Le simulateur `/admin/hearst/simulator` suit un parcours en deux temps : configuration avec rail assistant et bottom nav visibles, puis résultats complets après sauvegarde du scénario (`?step=results&scenario=<id>`).
+- Le premier bloc du simulateur utilise un brief horizontal compact au-dessus des contrôles, pour éviter une colonne gauche vide quand le module s'étire.
+- Le run scénario redirige vers `/admin/hearst/simulator/results?scenario=<id>` : page complète responsive avec nom du scénario, métriques de décision (`IRR`, `NPV`, `MOIC`) en priorité, grand panneau de projection financière, capital stack en donut, layers, timeline et visualisations harmonisés.
+- Le rail droit est un `Investment Committee Advisor` : snapshot de décision toujours visible, provenance explicite (`MODELED`, `INTERPRETATION`, `HEURISTIC`, `UNKNOWN`) et prompts orientés IC avant la conversation.
+- L'étape `Operating Model` sélectionne désormais une seule thèse d'exploitation ; la comparaison stratégique est réservée aux visualisations, pas au picker de configuration.
+- La page résultats conserve le chat du rail droit, masque seulement la bottom nav pour éviter le recouvrement, et utilise une timeline de déploiement en lignes de phases lisibles, sans jalons en points.
+- La génération du mémo stratégique est asynchrone côté UI et possède un timeout client explicite de 150s, afin d'afficher une erreur claire si l'appel LLM ne revient pas.
+
 ### Routes disponibles
 | URL | Page |
 |---|---|
