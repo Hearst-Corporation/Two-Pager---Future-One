@@ -493,3 +493,27 @@
     display: none !important;
   }
 }
+
+/* === Chat input always reachable ===
+   Bug: on short viewports / the embed (usable height < ~890px, i.e. most
+   laptops at 1366x768), the chat form fell BELOW the fold and the rail did
+   not scroll to it, so users could neither see nor type in the chat.
+   Root cause: .ct-chat-root collapses to 0 height when the Decision Snapshot
+   fills the rail body, and its overflow:visible form spilled out under the
+   viewport. Fix: dock the chat form to the bottom of the (relative) right
+   rail so it is always visible, and reserve space so scrolled content is not
+   hidden behind it. */
+.ct-rail-right { position: relative; }
+.ct-rail-right .ct-chat-form {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  margin: 0 !important;
+  padding: 10px 12px;
+  background: var(--cp-surface, #160a0d);
+  border-top: 1px solid var(--cp-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.35);
+  z-index: 6;
+}
+.ct-rail-right .ct-rail-right-body { padding-bottom: 124px; }
