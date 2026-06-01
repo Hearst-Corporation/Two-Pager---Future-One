@@ -23,6 +23,7 @@ import { getGpuPricingBrief, getEnergyBrief, getInfrastructureSignals } from '@/
 import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from '@/lib/oracle-visualization';
 import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
 import { fmtUSD, fmtPctFromRatio, fmtX } from '@/lib/hearst-format';
+import { generateProjection, foldGpuRevenue } from '@/lib/hearst-calculations';
 import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, computeConfidenceBlock } from '@/lib/memo-confidence';
 import { persistMemo } from '@/lib/strategic-memo-store';
 import { reconcileMetricsWithEngine } from '@/lib/engine-reconcile';
@@ -440,10 +441,35 @@ export async function POST(req) {
   try { body = await req.json(); }
   catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
 
-  const { payload, oracle = {}, user_question, project_id = null, scenario_id = null, title = null } = body || {};
+  let { payload, oracle = {}, user_question, project_id = null, scenario_id = null, title = null } = body || {};
   if (!payload || (!payload.scenario && !payload.projection)) {
     return NextResponse.json({ error: 'payload.scenario or payload.projection required' }, { status: 400 });
   }
+
+  // ── Part A: server-side projection recompute (kills "trust client projection") ──
+  // payload.scenario IS the post-archetype scenario (simulate returns archResult.scenario).
+  // We recompute from the engine and use that as the source of truth instead of
+  // whatever the client sent in payload.projection (which may be fabricated/empty).
+  let serverProjection = null;
+  if (payload?.scenario) {
+    try {
+      serverProjection = generateProjection(payload.scenario);
+      const hb = payload.hardware_breakdown;
+      if (serverProjection?.years?.length && hb && ((hb.revenue_ai_annual > 0) || (hb.capex_hardware > 0))) {
+        foldGpuRevenue(serverProjection, hb, payload.scenario, {
+          rfs_year: payload.scenario.phase1_complete_year || 3, ramp_years: 2,
+          exit_year: payload.scenario.exit_year || 10,
+          discount_rate_pct: payload.scenario.discount_rate_pct ?? 10,
+        });
+      }
+    } catch (e) {
+      console.warn('[strategic-memo] server-side projection recompute failed:', e?.message);
+      serverProjection = null;
+    }
+  }
+  const truthProjection = (serverProjection && serverProjection.years?.length) ? serverProjection : (payload?.projection || null);
+  // Replace payload.projection with the engine-authoritative value so all downstream reads use it.
+  payload = { ...payload, projection: truthProjection };
 
   const audience = SUPPORTED_AUDIENCES.includes(body?.audience) ? body.audience : 'investor';
 

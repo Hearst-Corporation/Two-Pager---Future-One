@@ -26,6 +26,8 @@ import {
 } from "@hearst/review-mode";
 import { KIMI_MODEL, kimiChatStream } from "@/lib/llm/kimi";
 import { buildOracleSystemPrompt, inferOracleContextFromPath } from "@/lib/oracle-system-prompt";
+import { buildDealGroundingBlock } from "@/lib/oracle-deal-grounding";
+import { resolveActiveDeal } from "@/lib/oracle-active-deal";
 import { getSessionProfile } from "@/lib/supabase-server";
 import { isSafeDemoMode, DEMO_DISABLED_RESPONSE } from "@/lib/demo-mode";
 import { getAdminChatMode, insertLlmRun } from "@/lib/review-mode/supabase-helpers";
@@ -74,6 +76,11 @@ const BodySchema = z.object({
     .optional(),
   productId: z.string().nullish(),
   system: z.string().optional(), // ignored when authenticated (we control the prompt)
+  deal: z.object({
+    scenario: z.record(z.string(), z.unknown()).optional(),
+    projection: z.record(z.string(), z.unknown()).optional(),
+    warnings: z.array(z.string().max(2000)).max(20).optional(),
+  }).passthrough().nullish(),
 });
 
 type Mode = "normal" | "review";
@@ -360,18 +367,34 @@ export async function POST(req: Request) {
   const oraclePrefix = buildOracleSystemPrompt(oracleCtx);
 
   const systemPrompt = oraclePrefix + "\n\n---\n\n" + baseSystemPrompt + tuningBlock;
+
+  // ── Grounding: voie a (front sends deal) OR voie b (server fetches active scenario) ──
+  // Voie a has priority. Voie b fires only when body.deal is absent and the user is
+  // authenticated (so we have a workspace). Any failure in voie b is non-breaking.
+  const dealBlock = buildDealGroundingBlock(body.deal); // voie a
+  let groundingBlock = dealBlock;
+  if (!groundingBlock && userId && !isSafeDemoMode()) {
+    try {
+      const activeDeal = await resolveActiveDeal();
+      if (activeDeal) groundingBlock = buildDealGroundingBlock(activeDeal);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.warn("[cockpit-chat] active-deal grounding failed", msg);
+    }
+  }
+  const finalSystemPrompt = groundingBlock ? systemPrompt + "\n\n" + groundingBlock : systemPrompt;
   const promptHash = mode === "review" ? FACILITATOR_PROMPT_HASH : CONVERSATIONAL_PROMPT_HASH;
   const agentName = mode === "review" ? "cockpit-chat-review" : "cockpit-chat-normal";
 
   const messages = [
-    { role: "system" as const, content: systemPrompt },
+    { role: "system" as const, content: finalSystemPrompt },
     ...history,
   ];
 
   // ── Stream LLM — Kimi K2.6 via Hypercli only ─────────────────────────
   // Do not route cockpit chat through Anthropic: billing/quota failures there
   // should not break ORACLE's right rail when Hypercli is the configured provider.
-  const inputTokens = estimateTokens(systemPrompt + history.map((h) => h.content).join("\n"));
+  const inputTokens = estimateTokens(finalSystemPrompt + history.map((h) => h.content).join("\n"));
   const startedAt = Date.now();
   const stripThink = makeThinkStripper();
   let full = "";

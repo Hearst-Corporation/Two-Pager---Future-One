@@ -57,8 +57,9 @@ export async function PATCH(req, { params }) {
   }
 
   // Load current row for the state-machine guard + audit "previous_value".
+  // Include memo_json so the approval guard can inspect engine-derived projection.
   const { data: current, error: loadErr } = await supa.from('strategic_memos')
-    .select('id,status,title,project_id').eq('id', params.id).maybeSingle();
+    .select('id,status,title,project_id,memo_json').eq('id', params.id).maybeSingle();
   if (loadErr) return NextResponse.json({ error: loadErr.message }, { status: 500 });
   if (!current) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
@@ -71,6 +72,22 @@ export async function PATCH(req, { params }) {
     return NextResponse.json({
       error: `illegal_transition — "${current.status}" → "${status}" not allowed (must pass through ${allowed.join(' or ') || 'none'})`,
     }, { status: 409 });
+  }
+
+  // Part B — approval guard: block → approved if memo lacks engine-derived projection.
+  // Only gates the → approved transition; reviewed/draft/archived remain free.
+  if (status === 'approved') {
+    const memoJson = current.memo_json || {};
+    const execProj = memoJson._exec_projection;
+    const hasYears = Array.isArray(execProj?.years) && execProj.years.length > 0;
+    const metrics = memoJson.key_financial_metrics?.metrics || [];
+    const hasEnginePinnedMetric = metrics.some(m => String(m?.source).toLowerCase() === 'engine');
+    if (!execProj || !hasYears || !hasEnginePinnedMetric) {
+      return NextResponse.json(
+        { error: 'cannot_approve_unpinned', detail: 'Memo lacks engine-derived projection (years) or engine-pinned metrics; regenerate before approval.' },
+        { status: 409 },
+      );
+    }
   }
 
   // Attribution: stamp who/when on review + approval; clear stamps on send-back.

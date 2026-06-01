@@ -195,8 +195,50 @@ function buildHtml(row) {
   const comm   = m.commercialization_strategy || {};
 
   // Verdict and risk level from single source of truth (dossier-derive)
-  const verdict   = deriveVerdict(m).label;
-  const riskLevel = deriveRiskLevel(m).label;
+  const v          = deriveVerdict(m);
+  const verdict    = v.label;
+  const verdictKey = v.key;
+  const riskLevel  = deriveRiskLevel(m).label;
+
+  // Verdict-gated copy map — ALL approval language is derived from here
+  const RECO = {
+    PROCEED: {
+      approve:     'Approve Phase 1 capital commitment and authorize the Final Investment Decision (FID).',
+      decision:    'Approve the {CAPEX} Phase 1 FID; authorize EPC award and anchor offtake execution.',
+      page5:       'Commit Phase 1. Gate Phase 2 on commissioning and contracted demand.',
+      cardLabel:   'Approve Now',
+      showApprove: true,
+    },
+    PROCEED_WITH_CONDITIONS: {
+      approve:     'Conditional approval — commit Phase 1 ONLY once the conditions precedent below are satisfied.',
+      decision:    'Approve the {CAPEX} Phase 1 FID SUBJECT TO the conditions precedent below.',
+      page5:       'Commit Phase 1 only once conditions precedent are met; gate Phase 2 on commissioning and 80% contracted demand.',
+      cardLabel:   'Approve — With Conditions',
+      showApprove: true,
+    },
+    REVIEW: {
+      approve:     'Return for analysis. Base-case returns are marginal or below the cost-of-capital hurdle — not yet an IC decision.',
+      decision:    'No FID recommended yet. Resolve the open items below and re-underwrite before any capital commitment.',
+      page5:       'Do not commit capital yet. Resolve the open items, then re-underwrite.',
+      cardLabel:   'Not Ready — Review',
+      showApprove: false,
+    },
+    REJECT: {
+      approve:     'Do not commit capital. On the base case the returns do not clear the cost of capital / destroy value.',
+      decision:    'No FID. The investment is not recommended on the current base case.',
+      page5:       'Do not proceed. Returns do not meet the threshold for capital commitment.',
+      cardLabel:   'Do Not Approve',
+      showApprove: false,
+    },
+    INSUFFICIENT_DATA: {
+      approve:     'Insufficient engine-derived data to make a recommendation; regenerate from a complete simulation.',
+      decision:    'No recommendation possible — the memo lacks engine-derived financials.',
+      page5:       'Insufficient data. Re-run the simulator and regenerate before review.',
+      cardLabel:   'Insufficient Data',
+      showApprove: false,
+    },
+  };
+  const reco = RECO[verdictKey] || RECO.INSUFFICIENT_DATA;
   const projDate  = fmtDate(row.created_at);
   const location  = regionLabel(row.region);
 
@@ -208,10 +250,10 @@ function buildHtml(row) {
   const ebitdaMetric = (fin.metrics || []).find(r => r.label?.includes('EBITDA'));
   const ebitdaNote = ebitdaMetric ? `${ebitdaMetric.value}% landlord EBITDA margin` : null;
 
-  // Recommendation body — from arch rationale + commercialization
-  const approveBody = arch.rationale
-    ? arch.rationale.replace(/^WHY:\s*/i, '').slice(0, 280) + '…'
-    : 'Approve Phase 1 capital commitment and authorize Final Investment Decision (FID).';
+  // Recommendation body — gated by verdictKey; LLM rationale only used for PROCEED family
+  const approveBody = (verdictKey === 'PROCEED' || verdictKey === 'PROCEED_WITH_CONDITIONS')
+    ? (arch.rationale ? arch.rationale.replace(/^WHY:\s*/i, '').slice(0, 280) + '…' : reco.approve)
+    : reco.approve;
 
   const holdBody = comm.ramp_profile
     ? `Phase 2 capital gated on Phase 1 occupancy ≥80%. ${comm.ramp_profile.slice(0, 160)}…`
@@ -532,8 +574,8 @@ p { margin: 0; }
     <div class="decision-required">
       <div class="dr-k">Decision Required</div>
       <div class="dr-v">
-        Approve the ${fmtUsd(snap.total_capex)} Phase 1 FID; authorize EPC award and anchor offtake execution.
-        ${roadmap?.phases?.[0]?.gating_events?.[0] ? `Condition: ${esc(roadmap.phases[0].gating_events[0])}.` : ''}
+        ${esc(reco.decision.replace('{CAPEX}', fmtUsd(snap.total_capex)))}
+        ${reco.showApprove && roadmap?.phases?.[0]?.gating_events?.[0] ? ` Condition: ${esc(roadmap.phases[0].gating_events[0])}.` : ''}
       </div>
     </div>
   </div>
@@ -682,11 +724,11 @@ p { margin: 0; }
   </div>
   <div class="frame">
     <p class="eyebrow"><span class="num">05</span>Recommendation</p>
-    <h2 class="headline smaller">Commit Phase 1. Gate Phase 2 on commissioning and contracted demand.</h2>
+    <h2 class="headline smaller">${esc(reco.page5)}</h2>
     <hr class="accentline" />
     <div class="rec-two">
-      <div class="rec-card go">
-        <div class="rc-k">Approve Now</div>
+      <div class="rec-card${reco.showApprove ? ' go' : ' hold'}">
+        <div class="rc-k">${esc(reco.cardLabel)}</div>
         <div class="rc-v">${esc(approveBody.slice(0, 320))}</div>
       </div>
       <div class="rec-card hold">
