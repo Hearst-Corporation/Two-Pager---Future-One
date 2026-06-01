@@ -21,6 +21,7 @@ import B2BMatrix from '@/components/hearst/simulator/B2BMatrix';
 import OutputKpiStrip from '@/components/hearst/simulator/OutputKpiStrip';
 import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
 import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
+import { Z } from '@/lib/z-index';
 
 const EcosystemNetwork = dynamic(() => import('@/components/hearst/simulator/EcosystemNetwork'), {
   ssr: false,
@@ -446,7 +447,23 @@ export default function SimulatorPage() {
           (simResult?.solver && simResult.solver.converged === false) ||
           (projection?.capex_reconciliation && projection.capex_reconciliation.within_tolerance === false)
         )}
+        cautionReason={
+          projection?.warnings?.[0] ||
+          (simResult?.solver?.converged === false ? simResult.solver.diagnostic || 'Target IRR not reached' : null) ||
+          (projection?.capex_reconciliation?.within_tolerance === false ? 'CAPEX reconciliation' : null) ||
+          null
+        }
       />
+      {/* Inline save confirmation — auto-clears after 2.5 s via saveTimerRef */}
+      {savingState === 'saved' && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={S.saveToast}
+        >
+          ✓ Scenario saved
+        </div>
+      )}
       {/* Modal/badge/toast mountés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
     </div>
   );
@@ -785,5 +802,21 @@ const S = {
     background: 'var(--cp-accent-maroon)',
     color: 'var(--cp-text-strong)',
     borderColor: 'var(--cp-accent-maroon)',
+  },
+
+  saveToast: {
+    position: 'fixed',
+    bottom: 'var(--cp-space-8, 32px)',
+    right: 'var(--cp-space-8, 32px)',
+    padding: 'var(--cp-space-2, 8px) var(--cp-space-5, 20px)',
+    background: 'var(--cp-accent-maroon)',
+    color: 'var(--cp-text-strong)',
+    borderRadius: 'var(--cp-radius-md, 10px)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 700,
+    letterSpacing: 0.5,
+    boxShadow: 'var(--cp-shadow-md)',
+    zIndex: Z.toast,
+    pointerEvents: 'none',
   },
 };

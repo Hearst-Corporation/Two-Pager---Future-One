@@ -24,6 +24,7 @@ import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from 
 import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
 import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, computeConfidenceBlock } from '@/lib/memo-confidence';
 import { persistMemo } from '@/lib/strategic-memo-store';
+import { reconcileMetricsWithEngine } from '@/lib/engine-reconcile';
 
 // Wave 1 (C18) — the LLM cascade (4 Hypercli models → Claude → OpenAI) can run
 // several minutes in the worst case. Without this the route inherits the Vercel
@@ -428,6 +429,8 @@ export async function POST(req) {
       return {
         total_capex: pj.total_capex, terminal_value: pj.terminal_value, irr: pj.irr, npv: pj.npv,
         moic: pj.moic, payback_years: pj.payback_years, dscr_stabilized: pj.dscr_stabilized,
+        stabilized_ebitda: pj.stabilized_ebitda ?? null,
+        stabilized_revenue: pj.stabilized_revenue ?? null,
         total_mw: sc?.total_mw ?? null, pue: sc?.pue ?? null,
         capex_per_mw: (pj.total_capex && sc?.total_mw) ? pj.total_capex / sc.total_mw : null,
         cod_offset_months: pj.cod_offset_months ?? null,
@@ -435,6 +438,17 @@ export async function POST(req) {
         years: (pj.years || []).map(y => ({ y: y.year, rev: y.revenue, ebitda: y.ebitda, fcf: y.free_cash_flow, cum: y.cumulative_fcf })),
       };
     })();
+
+    // ── Engine-truth pin (Task 1) — overwrite LLM-authored financial metric rows
+    // with the engine's authoritative numbers. Mirrors the confidence_block pattern
+    // above: server-computed values WIN over LLM-graded values. Any LLM row that
+    // has no engine equivalent (qualitative rows) is preserved unchanged.
+    if (memo.key_financial_metrics) {
+      memo.key_financial_metrics.metrics = reconcileMetricsWithEngine(
+        memo.key_financial_metrics.metrics,
+        memo._exec_projection,
+      );
+    }
 
     // ── Post-Kimi server-side quality checks (Sprint 3.1) ─────────────
     const bannedPhrases = [

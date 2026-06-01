@@ -50,7 +50,7 @@ export default function InputFieldHero({ mode, value, onChange, derived, solver 
             <span>Estimated capacity: <b>{derived.mw} MW</b> · ${(derived.capex_per_mw_used / 1e6).toFixed(1)}M/MW (Qatar market)</span>
           )}
           {mode === 'mw_first' && value > 0 && (
-            <span>Estimated cost: <b>~${((value * 10_900_000 * 1.1) / 1e6).toFixed(0)}M</b> to build</span>
+            <span>Industry benchmark: ~${((value * 10_900_000 * 1.1) / 1e6).toFixed(0)}M est. total · actual CAPEX after Run</span>
           )}
           {mode === 'target_irr_first' && solver && (
             <span>

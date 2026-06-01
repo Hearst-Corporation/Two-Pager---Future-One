@@ -143,10 +143,10 @@ function assumptions(snap, finMetrics) {
   const metrics = finMetrics?.metrics || [];
   const debt = metrics.find(m => m.label === 'Debt / leverage');
   const rows = [
-    { k: 'WACC',          v: '10%' },
-    { k: 'Hold period',   v: `${snap?.exit_year || 7} years` },
+    { k: 'WACC',          v: 'Not specified' },
+    { k: 'Hold period',   v: (typeof snap?.exit_year === 'number') ? `${snap.exit_year} years` : 'Not modeled' },
     { k: 'Total CAPEX',   v: fmtUsd(snap?.total_capex) },
-    { k: 'Debt',          v: debt ? `${debt.value}% @ ${debt.unit.replace('% @ ', '') || '6.5%'}` : 'not specified' },
+    { k: 'Debt',          v: debt ? `${debt.value}% @ ${debt.unit.replace('% @ ', '') || 'not specified'}` : 'not specified' },
     { k: 'IRR (base)',    v: fmtPct(snap?.irr) },
     { k: 'NPV',           v: fmtUsd(snap?.npv) },
     { k: 'Payback',       v: fmtYr(snap?.payback_years) },
@@ -519,7 +519,7 @@ p { margin: 0; }
         <div class="fsub">Base case</div>
       </div>
       <div class="fig">
-        <div class="fk">NPV at 10% WACC</div>
+        <div class="fk">NPV (discount rate not modeled)</div>
         <div class="fv tnum">${fmtUsd(snap.npv)}</div>
         <div class="fsub">Base case</div>
       </div>
@@ -567,7 +567,7 @@ p { margin: 0; }
       <div class="fin-kpi">
         <div class="fk">IRR (base)</div>
         <div class="fv accent tnum">${fmtPct(snap.irr)}</div>
-        <div class="fs">Levered · WACC 10%</div>
+        <div class="fs">Levered · base case</div>
       </div>
       <div class="fin-kpi">
         <div class="fk">NPV · Payback</div>

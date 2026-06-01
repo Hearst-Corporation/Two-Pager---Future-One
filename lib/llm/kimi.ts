@@ -67,11 +67,28 @@ const OPENAI_FALLBACK_MODEL = process.env.LLM_OPENAI_FALLBACK_MODEL || "gpt-4o";
 // Timeout fallback OpenAI
 const OPENAI_TIMEOUT_MS = Number(process.env.LLM_OPENAI_TIMEOUT_MS || 60_000);
 
+// Prod 3-min-abort fix: the route maxDuration is 300s. With 4 models × 45s each
+// (MODEL_TIMEOUT_MS default) the Hypercli budget alone could reach 180s, leaving
+// only 120s for Claude — but Claude can take up to CLAUDE_TIMEOUT_MS (90s default)
+// on a large memo, so the window was dangerously tight and the function aborted
+// before Claude finished. By capping to 2 Hypercli models (≤ 90s budget) we
+// guarantee Claude always has ≥ 180s — well within maxDuration.
+//
+// Budget arithmetic (defaults):
+//   Hypercli:  2 models × 45s = 90s
+//   Claude:    1 × 90s        = 90s
+//   OpenAI:    1 × 60s        = 60s  (only if Claude also fails)
+//   Total worst-case:           240s  < 300s ✓
+//
+// All env overrides (LLM_SKIP_HYPERCLI, LLM_MODEL_TIMEOUT_MS,
+// HYPERCLI_DEFAULT_MODEL) remain fully functional — they can expand or shrink
+// this chain at runtime.
 const KIMI_FALLBACK_CHAIN = [
   "kimi-k2.6",
   "kimi-k2.5",
-  "glm-5",
-  "minimax-m2.5",
+  // glm-5 and minimax-m2.5 removed from default chain — see comment above.
+  // Re-enable via HYPERCLI_DEFAULT_MODEL or by extending KIMI_FALLBACK_CHAIN
+  // if Hypercli latency improves significantly.
 ];
 
 function buildModelChain(primary?: string): string[] {

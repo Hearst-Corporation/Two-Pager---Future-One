@@ -9,16 +9,21 @@ export default function SimulatorCTABar({
   savingState = 'idle',
   hasProjection = false,
   planCaution = false,
+  cautionReason = null,
 }) {
   const saving = savingState === 'saving';
-  const saved = savingState === 'saved';
+
+  // Truncate reason to 52 chars so the badge stays on one line
+  const reasonSnippet = cautionReason
+    ? (cautionReason.length > 52 ? cautionReason.slice(0, 49) + '…' : cautionReason)
+    : null;
 
   return (
     <div style={S.bar}>
       <div style={S.left}>
         {hasProjection && planCaution ? (
           <span style={S.statusCaution}>
-            <span style={S.dotCaution} /> Plan needs review
+            <span style={S.dotCaution} /> Plan needs review{reasonSnippet ? ` · ${reasonSnippet}` : ''}
           </span>
         ) : hasProjection ? (
           <span style={S.statusReady}>
@@ -40,7 +45,7 @@ export default function SimulatorCTABar({
             ...S.btnSecondary,
             ...(saving || !hasProjection ? { opacity: 0.55, cursor: 'not-allowed' } : {}),
           }}>
-          {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save Scenario'}
+          {saving ? 'Saving…' : 'Save Scenario'}
         </button>
         <button
           type="button"

@@ -7,7 +7,7 @@ import SourceBadge from './SourceBadge';
  * value: number|null — null triggers "N/A — Source Required" display.
  * format: 'currency' | 'number' | 'pct' | 'x' | 'years' | 'mw'
  */
-export default function KpiCard({ label, value, format = 'number', source_type, unit, sublabel, highlight, size = 'md', valueColor }) {
+export default function KpiCard({ label, value, format = 'number', source_type, unit, sublabel, highlight, size = 'md', valueColor, emptyHint }) {
   const display = formatValue(value, format);
   const isSmall = size === 'sm';
 
@@ -24,10 +24,14 @@ export default function KpiCard({ label, value, format = 'number', source_type, 
     ? { ...S.sublabel, marginTop: 0 }
     : S.sublabel;
 
+  // emptyHint: native tooltip shown only when value is null/undefined (display is "—")
+  const titleAttr = value == null && emptyHint ? emptyHint : undefined;
+
   return (
     <div
       className={`cp-card cp-card-hover${highlight ? ' cp-card-accent' : ''}`}
       style={cardStyle}
+      title={titleAttr}
     >
       <div style={S.label}>{label}</div>
       <div style={valueStyle}>
@@ -55,7 +59,7 @@ function formatValue(value, format) {
       if (Math.abs(value) >= 1e3) return `$${(value / 1e3).toFixed(0)}K`;
       return `$${value.toFixed(0)}`;
     case 'pct':  return `${(value * 100).toFixed(1)}%`;
-    case 'x':    return `${value.toFixed(1)}×`;
+    case 'x':    return `${value.toFixed(2)}×`;
     case 'years':return `${value.toFixed(0)}y`;
     case 'mw':   return `${value.toFixed(1)} MW`;
     default:     return value.toLocaleString('en-US', { maximumFractionDigits: 2 });
