@@ -1,0 +1,35 @@
+# Local/build artefacts
+.git/
+.next/
+node_modules/
+coverage/
+playwright-report/
+test-results/
+export/
+futur-one-brochure.zip
+
+# Local QA captures and generated media
+*.mp4
+*.mov
+*.webm
+Google Chrome.mp4
+KONTENA-FOLDER-2026.pdf
+KONNECT HPC Info deck Q4 2025.pdf
+cockpit-*.png
+hearst-*.png
+advisor-*.png
+admin-dashboard-*.png
+prese-hub-*.png
+test-*.png
+qa-*.png
+memo-*.png
+simulator-*.png
+
+# Package tarballs are intentionally kept: package.json uses file: dependencies.
+
+# Heavy marketing/video source assets not required by the ORACLE cockpit runtime.
+public/clips/
+public/audio/
+public/rdc-research/
+public/*.mp4
+public/u2883995211_*
