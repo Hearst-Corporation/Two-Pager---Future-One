@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { OPERATORS, CLIENT_TYPES } from '@/lib/hearst-constants';
+import { OPERATORS } from '@/lib/hearst-constants';
 import { ECOSYSTEM_EDGES, EDGE_KIND_COLOR } from '@/lib/hearst-ecosystem-edges';
 
 // Layout radial déterministe groupé par type. Zéro animation, zéro lib.

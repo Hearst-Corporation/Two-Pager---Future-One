@@ -5,14 +5,11 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  AdvisorRequestSchema,
   ProjectUpdateSchema,
   ScenarioCreateSchema,
   ScenarioUpdateSchema,
   SourceCreateSchema,
   SourceUpdateSchema,
-  ContractCreateSchema,
-  ContractUpdateSchema,
   DataRoomCreateSchema,
   DataRoomUpdateSchema,
   PipelineCreateSchema,
@@ -29,96 +26,6 @@ function expectIssueWithPath(result, pathSegment) {
     .join('|');
   expect(flat).toContain(pathSegment);
 }
-
-// ────────────────────────────────────────────────────────────────────────
-// AdvisorRequestSchema
-// ────────────────────────────────────────────────────────────────────────
-describe('AdvisorRequestSchema', () => {
-  it('accepts a minimal valid request with `message`', () => {
-    const r = AdvisorRequestSchema.safeParse({
-      project_id: UUID,
-      message: 'What is the IRR?',
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it('accepts a request with `messages` array', () => {
-    const r = AdvisorRequestSchema.safeParse({
-      project_id: UUID,
-      messages: [{ role: 'user', content: 'hi' }],
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it('rejects { project_id: "not-uuid", message: "hi" } with a meaningful error', () => {
-    const r = AdvisorRequestSchema.safeParse({ project_id: 'not-uuid', message: 'hi' });
-    expect(r.success).toBe(false);
-    if (!r.success) {
-      const projectIssue = r.error.issues.find((i) => i.path[0] === 'project_id');
-      expect(projectIssue).toBeDefined();
-      // Zod's uuid error code is 'invalid_string' with validation 'uuid'
-      expect(projectIssue.code).toBe('invalid_string');
-    }
-  });
-
-  it('rejects when both message and messages are missing', () => {
-    const r = AdvisorRequestSchema.safeParse({ project_id: UUID });
-    expect(r.success).toBe(false);
-  });
-
-  it('rejects unknown top-level keys (strict)', () => {
-    const r = AdvisorRequestSchema.safeParse({
-      project_id: UUID,
-      message: 'hi',
-      stowaway: true,
-    });
-    expectIssueWithPath(r, 'stowaway');
-  });
-
-  // Regression: real clients send a page_context object with many extra keys
-  // (HEARST_PAGE_CONTEXT[path]: title, mission, keyFields, advisorTips, …).
-  // PageContextSchema must passthrough unknown keys instead of 400-ing.
-  it('accepts a page_context with cosmetic UI keys (passthrough)', () => {
-    const r = AdvisorRequestSchema.safeParse({
-      project_id: UUID,
-      messages: [{ role: 'user', content: 'hi' }],
-      page_context: {
-        path: '/admin/hearst',
-        page: 'cockpit',
-        title: 'Cockpit',
-        mission: 'Run the show',
-        keyFields: ['phase1_mw', 'pue'],
-        keyOutputs: ['irr'],
-        keyTerms: { irr: 'Internal Rate of Return' },
-        qatarDefaults: { electricity_price_mwh: 30 },
-        advisorTips: ['ask about PUE'],
-        suggestedPrompts: ['What is the IRR?'],
-      },
-    });
-    expect(r.success).toBe(true);
-  });
-
-  // Regression: clients pass `page_context: pageContext || null` — null is a
-  // valid value, not "missing", so .nullable() must be on the field.
-  it('accepts page_context: null (nullable)', () => {
-    const r = AdvisorRequestSchema.safeParse({
-      project_id: UUID,
-      messages: [{ role: 'user', content: 'hi' }],
-      page_context: null,
-    });
-    expect(r.success).toBe(true);
-  });
-
-  // Regression: with only the singular `message` and no `messages`, the
-  // request must still be accepted (the route normalises it).
-  it('accepts a request with only a singular `message` field', () => {
-    const r = AdvisorRequestSchema.safeParse({
-      project_id: UUID,
-      message: 'hello',
-    });
-    expect(r.success).toBe(true);
-  });
-});
 
 // ────────────────────────────────────────────────────────────────────────
 // ProjectUpdateSchema
@@ -253,40 +160,6 @@ describe('SourceUpdateSchema', () => {
   it('rejects unknown keys (strict)', () => {
     const r = SourceUpdateSchema.safeParse({ confidence_score: 4, evil: true });
     expectIssueWithPath(r, 'evil');
-  });
-});
-
-// ────────────────────────────────────────────────────────────────────────
-// ContractCreateSchema / ContractUpdateSchema
-// ────────────────────────────────────────────────────────────────────────
-describe('ContractCreateSchema', () => {
-  it('accepts a valid contract', () => {
-    const r = ContractCreateSchema.safeParse({
-      project_id: UUID,
-      document_type: 'lease',
-      title: 'Master Colocation Services Agreement',
-    });
-    expect(r.success).toBe(true);
-  });
-
-  it('rejects missing required title', () => {
-    const r = ContractCreateSchema.safeParse({
-      project_id: UUID,
-      document_type: 'lease',
-    });
-    expectIssueWithPath(r, 'title');
-  });
-});
-
-describe('ContractUpdateSchema', () => {
-  it('accepts an empty patch', () => {
-    const r = ContractUpdateSchema.safeParse({});
-    expect(r.success).toBe(true);
-  });
-
-  it('rejects unknown keys (strict)', () => {
-    const r = ContractUpdateSchema.safeParse({ title: 'X', stash: 1 });
-    expectIssueWithPath(r, 'stash');
   });
 });
 

@@ -11,7 +11,7 @@ import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-struc
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 
-import { SIMULATOR_PARAM_EVENT } from '@/components/hearst/ChatContainer';
+import { SIMULATOR_PARAM_EVENT } from '@/lib/hearst-simulator-bridge';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';

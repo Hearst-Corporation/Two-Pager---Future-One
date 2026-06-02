@@ -11,7 +11,8 @@
 // (collapsible, confidence tag, source citations, charts ré-utilisés).
 //
 // Auth : viewer (mémo = lecture seulement, pas d'écriture DB).
-// Modèle : Kimi cascade (kimi-k2.6 → k2.5 → glm-5 → minimax-m2.5).
+// Modèle : Hypercli/Kimi K2.6 UNIQUEMENT (aucun fallback provider). Si l'appel
+// échoue/timeout, on retombe sur un mémo déterministe local (sans LLM).
 // Rate-limit : 5 req/min/actor en prod, skip en dev.
 
 import { NextResponse } from 'next/server';
@@ -28,9 +29,9 @@ import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, c
 import { persistMemo } from '@/lib/strategic-memo-store';
 import { reconcileMetricsWithEngine } from '@/lib/engine-reconcile';
 
-// Wave 1 (C18) — the LLM cascade (4 Hypercli models → Claude → OpenAI) can run
-// several minutes in the worst case. Without this the route inherits the Vercel
-// default (~10-15s) and 504s mid-generation on any fallback. 300s = plan max.
+// Kimi K2.6 (no fallback) can run several minutes in the worst case. Without this
+// the route inherits the Vercel default (~10-15s) and 504s mid-generation. 300s =
+// plan max, matched by the client timeout (MEMO_CLIENT_TIMEOUT_MS).
 export const maxDuration = 300;
 
 const RL_WINDOW = 60_000;

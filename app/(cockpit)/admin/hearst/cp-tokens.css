@@ -5,8 +5,8 @@
    ===================================================================== */
 
 /* Le shell rend une .ct-hub-bar « Overview » destinée au hub multi-produits.
-   Oracle est un produit standalone avec 4 sections internes propres
-   (Brief / Sim / Hub / Library) — la bottom-bar Cockpit locale les remplace.
+   Oracle est un produit standalone — la bottom-bar locale (5 sections)
+   remplace la hub-bar du shell.
    La native est masquée pour éviter le doublon visuel signalé. */
 .ct-hub-bar {
   display: none !important;
@@ -163,6 +163,8 @@
   --cp-icon-btn-size:  32px;
   --cp-kpi-min-width:  160px;
   --cp-min-center:     520px;
+  /* Fixed bottom bar clearance for FAB + page padding */
+  --cp-bar-bottom:     88px;
 
   /* ── Couleurs opérateurs ── */
   --cp-op-default:    var(--ct-text-muted);
@@ -212,6 +214,10 @@
   background: rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   border-radius: 9999px;
+  max-width: min(100%, 72vw);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 .ct-seg-btn {
   appearance: none;

@@ -21,7 +21,6 @@ const COLORS = { base: 'var(--cp-text-primary)', downside: 'var(--cp-error)', up
 // Delegated to the shared formatter so the financial page matches the simulator
 // result page (tiered $B/$M/$K, lowercase 'x', single "—" missing token).
 const fmtM = fmtUSD;
-const fmtPct = fmtPctFromRatio;
 
 const METRIC_COLS = [
   { key: 'revenue', label: 'Revenue', fmt: fmtM },
@@ -107,10 +106,27 @@ export default function FinancialPage() {
   const hasProjection = proj.years?.length > 0;
 
   return (
+    <>
+    <style>{`
+      @media (max-width: 1100px) {
+        [data-financial-kpi-grid] {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+      }
+      @media (max-width: 600px) {
+        [data-financial-kpi-grid] {
+          grid-template-columns: 1fr !important;
+        }
+        [data-financial-top-bar] {
+          flex-direction: column !important;
+          align-items: stretch !important;
+        }
+      }
+    `}</style>
     <div style={S.wrap}>
       <SectionTabs section="modeling" />
       {/* Scenario toggles */}
-      <div style={S.topBar}>
+      <div data-financial-top-bar style={S.topBar}>
         <div style={S.pageTitle}>10-Year Financial Projection</div>
         <div style={{ display: 'flex', gap: 6 }}>
           {scenarios.map(s => {
@@ -155,7 +171,7 @@ export default function FinancialPage() {
       </div>
 
       {/* Summary KPIs */}
-      <div style={S.kpiGrid}>
+      <div data-financial-kpi-grid style={S.kpiGrid}>
         <KpiCard label="Total CAPEX" value={proj.total_capex} format="currency" />
         <KpiCard label="Project IRR" value={proj.irr} format="pct" sublabel={base?.source_score != null ? `Source score: ${base.source_score}/100` : undefined} highlight={proj.irr != null} />
         <KpiCard label="NPV (10yr)" value={proj.npv} format="currency" />
@@ -180,7 +196,7 @@ export default function FinancialPage() {
           <div style={S.noData}>
             <div style={S.noDataTitle}>Projection Cannot Run</div>
             <div style={S.noDataSub}>
-              Complete the <Link href="/admin/hearst/assumptions" style={S.noDataLink}>Assumptions tab →</Link> to generate the 10-year financial model.
+              Configure and save a scenario in the <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link> to generate the 10-year financial model.
             </div>
             {proj.missing_inputs?.length > 0 && (
               <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -251,7 +267,7 @@ export default function FinancialPage() {
           {!debtSchedule ? (
             <div style={S.noData}>
               <div style={S.noDataTitle}>No Debt Configured</div>
-              <div style={S.noDataSub}>Set Debt % and Interest Rate in <Link href="/admin/hearst/assumptions" style={S.noDataLink}>Assumptions →</Link></div>
+              <div style={S.noDataSub}>Set debt % and interest rate when saving a scenario in the <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link></div>
             </div>
           ) : (
             <>
@@ -322,7 +338,7 @@ export default function FinancialPage() {
           {!waterfall ? (
             <div style={S.noData}>
               <div style={S.noDataTitle}>No Equity Structure</div>
-              <div style={S.noDataSub}>Set HEARST / Brookfield / Qatar equity % in <Link href="/admin/hearst/assumptions" style={S.noDataLink}>Assumptions →</Link></div>
+              <div style={S.noDataSub}>Set HEARST / Brookfield / Qatar equity % when saving a scenario in the <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link></div>
             </div>
           ) : (
             <>
@@ -455,6 +471,7 @@ export default function FinancialPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
 
@@ -484,7 +501,12 @@ function formatSensVal(v, unit) {
 }
 
 const S = {
-  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
+  wrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 24,
+    paddingBottom: 160,
+  },
   loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
   error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
   topBar: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' },

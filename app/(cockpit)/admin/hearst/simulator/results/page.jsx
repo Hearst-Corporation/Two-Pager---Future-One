@@ -305,9 +305,6 @@ export default function SimulatorResultsPage() {
       body.oracle-results-wide .ct-page-area {
         width: 100% !important;
       }
-      body.oracle-results-wide .ct-bottom-bar {
-        display: none !important;
-      }
       @media (max-width: 1500px) {
         [data-results-hero],
         [data-analysis-layout] {
@@ -622,7 +619,7 @@ const S = {
   },
   hero: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 0.9fr) minmax(520px, 1.1fr)',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
     alignItems: 'stretch',
     gap: 'var(--cp-space-6, 24px)',
     padding: 'var(--cp-space-6, 24px)',
@@ -686,38 +683,6 @@ const S = {
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 700,
   },
-  heroKpis: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(150px, 1fr))',
-    gap: 'var(--cp-space-3, 12px)',
-    minWidth: 360,
-    flex: 0.9,
-  },
-  heroKpi: {
-    padding: 'var(--cp-space-5, 20px)',
-    background: 'transparent',
-    borderLeft: '1px solid var(--cp-border)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-1, 4px)',
-  },
-  heroKpiLabel: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-micro, 10px)',
-    textTransform: 'uppercase',
-    letterSpacing: 'var(--cp-tracking-eyebrow, 0.14em)',
-    fontWeight: 800,
-  },
-  heroKpiValue: {
-    color: 'var(--cp-text-strong)',
-    fontSize: 'var(--cp-font-2xl, 24px)',
-    lineHeight: 'var(--cp-leading-tight, 1.3)',
-    fontWeight: 800,
-  },
-  heroKpiSub: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
-  },
   decisionPanel: {
     minWidth: 0,
     display: 'flex',
@@ -756,7 +721,7 @@ const S = {
     lineHeight: 1,
     fontWeight: 900,
     letterSpacing: '-0.04em',
-    whiteSpace: 'nowrap',
+    fontVariantNumeric: 'tabular-nums',
   },
   decisionMetricNote: {
     color: 'var(--cp-text-muted)',
@@ -782,6 +747,7 @@ const S = {
     color: 'var(--cp-text-primary)',
     fontSize: 'var(--cp-font-lg, 16px)',
     fontWeight: 900,
+    fontVariantNumeric: 'tabular-nums',
   },
   riskNote: {
     color: 'var(--cp-text-muted)',
@@ -940,6 +906,7 @@ const S = {
     color: 'var(--cp-text-strong)',
     fontSize: 'var(--cp-font-base, 13px)',
     lineHeight: 'var(--cp-leading-tight, 1.3)',
+    fontVariantNumeric: 'tabular-nums',
   },
   boardMetric: {
     minWidth: 0,
@@ -956,6 +923,7 @@ const S = {
     fontSize: 'var(--cp-font-xl, 20px)',
     lineHeight: 'var(--cp-leading-tight, 1.3)',
     fontWeight: 900,
+    fontVariantNumeric: 'tabular-nums',
   },
   boardMetricNote: {
     color: 'var(--cp-text-muted)',

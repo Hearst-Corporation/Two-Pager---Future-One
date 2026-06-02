@@ -24,7 +24,6 @@ import {
   projectArchetype,
 } from '@/lib/hearst-deal-structures';
 import {
-  generateProjection,
   generateDebtSchedule,
   generateWaterfall,
   foldGpuRevenue,

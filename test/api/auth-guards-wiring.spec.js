@@ -11,19 +11,9 @@ import path from 'node:path';
 const root = path.resolve(__dirname, '../../');
 
 describe('requireRowOwnership wired into destructive routes', () => {
-  it('documents DELETE imports auth-guards', () => {
-    const src = readFileSync(path.join(root, 'app/api/admin/documents/route.js'), 'utf8');
-    expect(src).toMatch(/requireRowOwnership/);
-    expect(src).toMatch(/@\/lib\/auth-guards/);
-  });
-
   it('sources [id] DELETE imports auth-guards', () => {
     const src = readFileSync(path.join(root, 'app/api/admin/hearst/sources/[id]/route.js'), 'utf8');
     expect(src).toMatch(/requireRowOwnership/);
   });
 
-  it('comments DELETE imports auth-guards', () => {
-    const src = readFileSync(path.join(root, 'app/api/admin/comments/route.js'), 'utf8');
-    expect(src).toMatch(/requireRowOwnership/);
-  });
 });

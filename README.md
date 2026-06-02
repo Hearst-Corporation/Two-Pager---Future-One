@@ -60,7 +60,8 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 - Le run scénario redirige vers `/admin/hearst/simulator/results?scenario=<id>` : page complète responsive avec nom du scénario, métriques de décision (`IRR`, `NPV`, `MOIC`) en priorité, grand panneau de projection financière, capital stack en donut, layers, timeline et visualisations harmonisés.
 - Le rail droit est un `Investment Committee Advisor` : snapshot de décision toujours visible, provenance explicite (`MODELED`, `INTERPRETATION`, `HEURISTIC`, `UNKNOWN`) et prompts orientés IC avant la conversation.
 - L'étape `Operating Model` sélectionne désormais une seule thèse d'exploitation ; la comparaison stratégique est réservée aux visualisations, pas au picker de configuration.
-- La page résultats conserve le chat du rail droit, masque seulement la bottom nav pour éviter le recouvrement, et utilise une timeline de déploiement en lignes de phases lisibles, sans jalons en points.
+- La page résultats conserve le chat du rail droit et la bottom nav cockpit ; timeline de déploiement en lignes de phases lisibles, sans jalons en points.
+- `SectionTabs` (Financial / Sources) ne liste que des routes avec page réelle (Simulator, Financial, Workspace, Sources).
 - Le chat du rail droit utilise `/api/cockpit-chat` via Hypercli/Kimi et recharge l'historique via `/api/cockpit-chats/*`, pour éviter le fallback vers l'état d'accueil après un message.
 - La génération du mémo stratégique est asynchrone côté UI avec timeout client 300s ; si Kimi dépasse la fenêtre serveur, l'API retourne un mémo déterministe `deterministic-fallback` basé uniquement sur les chiffres moteur et le persiste en brouillon.
 - La route `/api/health` sert au smoke-test Railway manuel ; elle doit rester légère, sans auth ni appel externe.
@@ -72,8 +73,6 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 | `/brochure` | Brochure A3 plié (P1 → P4, 4 vues) |
 | `/datacenter` | One-pager isolé ; logos footer `public/partners/*.svg`, filigranes `*-icon.svg` (alignement vertical calibré dans le viewBox) |
 | `/print` | Vue print A3 |
-| `/pitch` | Deck plein écran (navigation clavier, dots, zones clic) |
-
 **Landing `/`** — `components/landing/SectionMethod.jsx` : le conteneur `sticky` utilise `overflow: clip` plutôt que `hidden`, sinon WebKit peut traiter ce nœud comme scrollport et casser le « pin » + le défilement lié au track horizontal.
 
 ## Palette
@@ -89,6 +88,4 @@ Tous les tokens sont dans `app/globals.css`. Catégories :
 ## Layout & Design Rules
 - **Hauteurs verrouillées** : Total 680px par page. Voir `CLAUDE.md`.
 - **Zéro hardcoding** : Utiliser exclusivement les variables CSS (`var(--color-*)`) ou `color-mix` pour les transparences. Ne jamais utiliser de codes hex ou RGBA en dur dans les composants.
-- **Pitch `/pitch`** : tokens dédiés et `color-mix` dans `components/pitch/tokens.js` (importés par `slides.jsx` et `Deck.jsx`) — mêmes `--color-*` que `globals.css`.
-
 ## Lancer le projet

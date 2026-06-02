@@ -59,7 +59,7 @@ Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (2 pa
 - **Source-strict financial engine** : si un input requis est null, \`lib/hearst-calculations.js\` retourne null (jamais d'invention). Ne jamais proposer de pré-remplir un champ sans \`source_id\`.
 - **Deal archetype recommandé = \`powered_shell\` (code B, score 87)** : tout le pitch Hearst repose dessus. Comp directe Meta×Blue Owl Hyperion ($27B, Oct 2025). Ne jamais suggérer d'élever un autre archetype sans raison forte.
 - **Capital stack documenté = HEARST + Brookfield + Qatar government** (cf. \`equity_hearst_pct / equity_brookfield_pct / equity_qatar_pct\`). Ne pas inventer d'autre partenaire dans le modèle sans donnée source.
-- **Pas de hardcoded API keys**, jamais. Toutes les clés (\`HYPERCLI_API_KEY\`, \`SUPABASE_*\`, \`ANTHROPIC_API_KEY\`) via \`process.env.*\`.
+- **Pas de hardcoded API keys**, jamais. Toutes les clés (\`HYPERCLI_API_KEY\`, \`SUPABASE_*\`) via \`process.env.*\`.
 - **Auth obligatoire sur \`/admin/**\`** via middleware Supabase. Ne pas proposer de désactiver l'auth.
 - **RLS Supabase active sur toutes les tables**. Ne jamais proposer une route qui bypass RLS sauf via \`SUPABASE_SERVICE_ROLE_KEY\` côté serveur.
 - **Cockpit shell** = \`@hearst/cockpit-shell@0.2.0\` (tarball local). Toujours réutiliser ses primitives plutôt que recoder un layout chat.

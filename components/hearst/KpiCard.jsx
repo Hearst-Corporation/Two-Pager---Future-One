@@ -85,6 +85,7 @@ const S = {
     lineHeight: 'var(--cp-leading-tight)',
     marginTop: 'var(--cp-space-1)',
     color: 'var(--cp-text-strong)',
+    fontVariantNumeric: 'tabular-nums',
   },
   valueSm: {
     fontSize: 'var(--cp-font-lg)',
@@ -92,6 +93,7 @@ const S = {
     letterSpacing: 'var(--cp-tracking-tight)',
     lineHeight: 'var(--cp-leading-tight)',
     color: 'var(--cp-text-strong)',
+    fontVariantNumeric: 'tabular-nums',
   },
   unit: {
     fontSize: 'var(--cp-font-base)',

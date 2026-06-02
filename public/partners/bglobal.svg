@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none">
-  <!-- Marque : carré plein avec "b." façon B-Global -->
-  <rect x="6" y="8" width="44" height="44" rx="2" fill="#FFFFFF"/>
-  <text x="28" y="41" font-family="'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="900" text-anchor="middle" fill="#000">b.</text>
-  <!-- Wordmark -->
-  <text x="62" y="30" font-family="'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" letter-spacing="0.8" fill="#FFFFFF">B-GLOBAL TECH</text>
-  <!-- Baseline -->
-  <text x="62" y="46" font-family="'Helvetica Neue', Arial, sans-serif" font-size="6" letter-spacing="2" fill="#FFFFFF" opacity="0.7">DATA CENTERS FOR TOMORROW</text>
-</svg>

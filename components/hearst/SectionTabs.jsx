@@ -4,33 +4,20 @@
 // À placer en haut de chaque page du hub correspondant.
 import { T } from '@/lib/design-system/tokens';
 //
-// Usage : <SectionTabs section="modeling" />
-//                       "modeling" | "hub" | "library"
+// Usage : <SectionTabs section="modeling" | "library" />
+// Only routes with a live page.jsx under app/(cockpit)/admin/hearst/.
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const SECTION_TABS = {
   modeling: [
-    { href: '/admin/hearst/simulator',   label: 'Simulator' },
-    { href: '/admin/hearst/engine',      label: 'Engine' },
-    { href: '/admin/hearst/scenarios',   label: 'Scenarios' },
-    { href: '/admin/hearst/financial',   label: 'Financial' },
-    { href: '/admin/hearst/assumptions', label: 'Assumptions' },
-  ],
-  hub: [
-    { href: '/admin/hearst/pipeline',  label: 'Pipeline' },
-    { href: '/admin/hearst/deals',     label: 'Deals' },
-    { href: '/admin/hearst/contracts', label: 'Contracts' },
-    { href: '/admin/hearst/data-room', label: 'Data Room' },
+    { href: '/admin/hearst/simulator', label: 'Simulator' },
+    { href: '/admin/hearst/financial', label: 'Financial' },
+    { href: '/admin/hearst/workspace', label: 'Workspace' },
   ],
   library: [
-    { href: '/admin/hearst/sources',   label: 'Sources' },
-    { href: '/admin/hearst/reports',   label: 'Reports' },
-    { href: '/admin/hearst/documents', label: 'Exports' },
-    { href: '/admin/hearst/timeline',  label: 'Timeline' },
-    { href: '/admin/hearst/risks',     label: 'Risks' },
-    { href: '/admin/hearst/audit',     label: 'Changelog' },
+    { href: '/admin/hearst/sources', label: 'Sources' },
   ],
 };
 

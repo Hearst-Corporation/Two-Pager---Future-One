@@ -1,10 +1,10 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import SourceBadge, { SOURCE_TYPES_CP } from '@/components/hearst/SourceBadge';
+import SourceBadge from '@/components/hearst/SourceBadge';
 import SectionTabs from '@/components/hearst/SectionTabs';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
 import {
-  SOURCE_TYPES, OPERATORS, OPERATORS_BY_ID,
+  SOURCE_TYPES, OPERATORS,
   PUBLIC_SOURCES_LIBRARY, DOC_TYPES,
 } from '@/lib/hearst-constants';
 

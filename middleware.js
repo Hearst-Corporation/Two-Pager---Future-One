@@ -8,7 +8,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const PUBLIC_ROUTES = new Set(['/admin/login', '/admin/auth/callback']);
-const PUBLIC_API_ROUTES = new Set(['/api/admin/login']);
+const PUBLIC_API_ROUTES = new Set([]);
 
 // ---------------------------------------------------------------------------
 // Fail-closed guard: dev-autologin must NEVER be reachable in a deployed env.

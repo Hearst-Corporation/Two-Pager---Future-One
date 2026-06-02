@@ -14,7 +14,7 @@ afterEach(() => {
 
 describe('hearst memo job store', () => {
   it('keeps the client timeout above the Kimi server timeout', () => {
-    expect(MEMO_CLIENT_TIMEOUT_MS).toBe(150_000);
+    expect(MEMO_CLIENT_TIMEOUT_MS).toBe(300_000);
     expect(MEMO_CLIENT_TIMEOUT_MS).toBeGreaterThan(120_000);
   });
 
@@ -32,6 +32,6 @@ describe('hearst memo job store', () => {
     await vi.advanceTimersByTimeAsync(MEMO_CLIENT_TIMEOUT_MS);
 
     expect(getSnapshot().status).toBe('error');
-    expect(getSnapshot().error).toMatch(/timed out after 150s/i);
+    expect(getSnapshot().error).toMatch(/timed out after 300s/i);
   });
 });
