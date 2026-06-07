@@ -327,11 +327,6 @@ export default function SimulatorResultsPage() {
         }
       }
       @media (max-width: 1120px) {
-        body.oracle-results-wide .ct-rail-right {
-          width: 312px !important;
-          min-width: 312px !important;
-          flex: 0 0 312px !important;
-        }
         [data-results-layout] {
           padding-left: var(--cp-space-5) !important;
           padding-right: var(--cp-space-5) !important;

@@ -27,6 +27,10 @@
 }
 
 :root {
+  /* Rail droit = drawer overlay (FAB), jamais colonne grid — centre full-width. */
+  --ct-rail-right: 0px;
+  --cp-rail-right: 0px;
+
   /* ── Aliases directs vers --ct-* ── */
   --cp-accent:          var(--ct-accent);
   --cp-accent-maroon:   var(--ct-accent-maroon);
@@ -330,13 +334,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100%;
-  }
-}
-
-@media (max-width: 900px) {
-  :root {
-    --ct-rail-right: 0px;
-    --cp-rail-right: 0px;
   }
 }
 

@@ -110,8 +110,18 @@ html :focus-visible {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* === Chat input always reachable === */
-.ct-rail-right { position: relative; }
+/* === Centre full-width (rail droit = drawer, voir chat-fab.css) === */
+.ct-center-panel {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+.ct-page-area {
+  width: 100% !important;
+  min-height: 0;
+}
+
+/* === Chat input always reachable (drawer ouvert) === */
 .ct-rail-right .ct-chat-form {
   position: absolute !important;
   left: 0 !important;

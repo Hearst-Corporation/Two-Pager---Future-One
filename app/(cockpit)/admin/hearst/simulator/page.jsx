@@ -391,11 +391,6 @@ export default function SimulatorPage() {
         }
       }
       @media (max-width: 1120px) {
-        body.oracle-simulator-page .ct-rail-right {
-          width: 312px !important;
-          min-width: 312px !important;
-          flex: 0 0 312px !important;
-        }
         [data-sim-preset-grid],
         [data-hardware-summary],
         [data-hardware-gpu-grid] {

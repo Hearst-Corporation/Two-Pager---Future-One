@@ -72,7 +72,8 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 - Le moteur financier **ne fabrique jamais** de données : `null` / `'N/A — Source Required'` si manquant.
 - IC Advisor rail : `lib/oracle-advisor-routes.js` — chat-only sur deals/sources/workspace/dossier liste ; full sur simulator/financial/dossier `?memo=`.
 - Chat voie A : `CockpitChatBridge` injecte `deal` + `oracle.pathname` dans POST `/api/cockpit-chat`. Prompts IC → `COCKPIT_CHAT_SEND_EVENT`.
-- Chat scope : `resolveChatScope()` → `oracle:chat-id:{scope}` ; `syncScopedChatToShell()` + `setActiveChat` (export shell 0.2.0 patché) recharge l’historique. Rail modeling = snapshot IC + chat empilés.
+- Chat scope : `resolveChatScope()` → `oracle:chat-id:{scope}` ; `syncScopedChatToShell()` + `setActiveChat` (export shell 0.2.0 patché) recharge l’historique.
+- Rail droit : drawer overlay (FAB) — `--ct-rail-right: 0`, centre full-width. IC snapshot seulement si `advisorContext.projection` présent.
 - `@hearst/cockpit-shell` : `hearst-cockpit-shell-0.2.0.tgz` exporte `setActiveChat` (patch dist) — repack après upgrade shell.
 - `useEffect(..., [])` init-only = pattern intentionnel sur simulator/page.jsx.
 - CSP : `unsafe-eval` retiré en prod (Next.js HMR en dev uniquement).

@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useSimulation } from '@/lib/hearst-simulation-context';
+import { buildAdvisorContextFromScenarioRow } from '@/lib/advisor-context-from-scenario';
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, Area, AreaChart, BarChart,
@@ -43,6 +45,7 @@ const METRIC_COLS = [
 
 
 export default function FinancialPage() {
+  const { setAdvisorContext } = useSimulation();
   const [project, setProject] = useState(null);
   const [scenarios, setScenarios] = useState([]);
   const [primaryId, setPrimaryId] = useState(null);
@@ -98,6 +101,19 @@ export default function FinancialPage() {
     if (!base) return null;
     return generateSensitivity(base, sensitivityX, sensitivityY, 5);
   }, [base, sensitivityX, sensitivityY]);
+
+  useEffect(() => {
+    const ctx = base
+      ? buildAdvisorContextFromScenarioRow({
+        row: base,
+        projection: base.projection,
+        surface: 'financial',
+        scenarioId: base.id,
+      })
+      : null;
+    setAdvisorContext?.(ctx);
+    return () => setAdvisorContext?.(null);
+  }, [base, setAdvisorContext]);
 
   if (loading) return <div style={S.loading}>{UI.FIN_LOADING}</div>;
   if (error) return <div style={S.error}>Error: {error}</div>;

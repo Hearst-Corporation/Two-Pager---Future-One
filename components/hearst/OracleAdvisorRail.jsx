@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 import { fmtPctFromRatio, fmtX, MISSING } from '@/lib/hearst-format';
+import { hasAdvisorProjection } from '@/lib/advisor-context-from-scenario';
 import { getAdvisorRailMode } from '@/lib/oracle-advisor-routes';
 import { COCKPIT_CHAT_SEND_EVENT } from '@/lib/cockpit-chat-payload';
 
@@ -168,18 +169,20 @@ function OracleAdvisorContent() {
 export default function OracleAdvisorRail() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { advisorContext } = useSimulation();
   const railMode = useMemo(
     () => getAdvisorRailMode(pathname, searchParams),
     [pathname, searchParams],
   );
-  const advisorEnabled = railMode === 'full';
+  const routeAllowsAdvisor = railMode === 'full';
+  const showAdvisor = routeAllowsAdvisor && hasAdvisorProjection(advisorContext);
 
   const [mount, setMount] = useState(null);
 
   useEffect(() => {
-    document.body.classList.toggle('oracle-advisor-chat-only', !advisorEnabled);
+    document.body.classList.toggle('oracle-advisor-chat-only', !showAdvisor);
     return () => document.body.classList.remove('oracle-advisor-chat-only');
-  }, [advisorEnabled]);
+  }, [showAdvisor]);
 
   useEffect(() => {
     const findMount = () => {
@@ -206,7 +209,7 @@ export default function OracleAdvisorRail() {
     };
   }, []);
 
-  if (!mount || !advisorEnabled) return null;
+  if (!mount || !showAdvisor) return null;
   return createPortal(<OracleAdvisorContent />, mount);
 }
 

@@ -1,9 +1,7 @@
 'use client';
 
-// ChatToggleFAB — bouton flottant ouvrant le rail droit (chat Kimi) en
-// overlay sur tablet/mobile (<900px). Sur desktop (>=900px), le FAB et le
-// backdrop sont masqués via CSS (.cp-chat-drawer-fab / .cp-chat-drawer-backdrop)
-// car le rail est déjà visible nativement dans le grid CockpitShell.
+// ChatToggleFAB — ouvre le rail droit (IC + Kimi) en drawer overlay.
+// Le centre reste full-width ; --ct-rail-right = 0 (cp-tokens.css).
 //
 // Mécanique : toggle la classe `cp-chat-drawer-open` sur <body>. cockpit.css
 // applique alors `transform: translateX(0)` au .ct-rail-right du shell + révèle
