@@ -27,6 +27,7 @@ import {
   deriveVerdict, deriveCategory, deriveKpis, topRisks, deriveDecision,
   deriveCapitalStack, fmtUsd,
 } from '@/lib/dossier-derive';
+import { SectionHead, Button } from '@/components/hearst/ui';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -62,15 +63,6 @@ function Collapsible({ label, children, defaultOpen = false }) {
       </button>
       {open && <div style={S.appendixBody}>{children}</div>}
     </section>
-  );
-}
-
-function SectionHeading({ children, hint }) {
-  return (
-    <div style={S.headingWrap}>
-      <h2 style={S.heading}>{children}</h2>
-      {hint && <span style={S.headingHint}>{hint}</span>}
-    </div>
   );
 }
 
@@ -237,19 +229,19 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
             </a>
             <div style={S.govRow}>
               {memo.status === 'draft' && (
-                <button type="button" disabled={govBusy} onClick={() => transition('reviewed')} style={S.govBtn}>Mark reviewed</button>
+                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('reviewed')}>Mark reviewed</Button>
               )}
               {memo.status === 'reviewed' && (
                 <>
-                  <button type="button" disabled={govBusy} onClick={() => transition('approved')} style={S.govBtn}>Approve</button>
-                  <button type="button" disabled={govBusy} onClick={() => transition('draft')} style={S.govBtn}>Send back</button>
+                  <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('approved')}>Approve</Button>
+                  <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('draft')}>Send back</Button>
                 </>
               )}
               {memo.status === 'approved' && (
-                <button type="button" disabled={govBusy} onClick={() => transition('archived')} style={S.govBtn}>Archive</button>
+                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('archived')}>Archive</Button>
               )}
               {memo.status === 'archived' && (
-                <button type="button" disabled={govBusy} onClick={() => transition('draft')} style={S.govBtn}>Reopen</button>
+                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('draft')}>Reopen</Button>
               )}
             </div>
             {(memo.approved_at || memo.reviewed_at) && (
@@ -296,7 +288,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
       {/* ── DECISION CARD + RISK CARDS ────────────────────────────── */}
       <section style={S.twoCol}>
         <div style={S.decisionCard}>
-          <SectionHeading>Recommendation</SectionHeading>
+          <SectionHead title="Recommendation" />
           {decision.why && <p style={S.body}>{decision.why}</p>}
           {decision.conditions.length > 0 && (
             <div style={S.condWrap}>
@@ -314,7 +306,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         </div>
 
         <div style={S.riskCol}>
-          <SectionHeading hint={`${risks.length} shown`}>Top risks</SectionHeading>
+          <SectionHead title="Top risks" hint={`${risks.length} shown`} />
           {risks.length === 0 && <Placeholder>No risks logged for this memo version</Placeholder>}
           <div style={S.riskGrid}>
             {risks.map((r, i) => {
@@ -337,7 +329,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
       {/* ── VISUAL STORY ──────────────────────────────────────────── */}
       <section>
-        <SectionHeading hint="from existing projection data">Visual story</SectionHeading>
+        <SectionHead title="Visual story" hint="from existing projection data" />
         <div style={S.vizGrid}>
           <div style={S.vizCard}>
             <div style={S.vizTitle}>Capital stack</div>
@@ -360,7 +352,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
       {/* ── ANALYTICS (continuous) ────────────────────────────────── */}
       <section style={S.analytics}>
-        <SectionHeading hint="full written memo · continuous">Analytics</SectionHeading>
+        <SectionHead title="Analytics" hint="full written memo · continuous" />
 
         {m.strategic_context && !m.strategic_context.skip && (
           <AnalyticsBlock title="Strategic context">
@@ -780,7 +772,6 @@ const S = {
 
   pdfBtn: { padding: 'var(--cp-space-2) var(--cp-space-4)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', textDecoration: 'none', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', whiteSpace: 'nowrap' },
   govRow: { display: 'flex', gap: 'var(--cp-space-1)', justifyContent: 'flex-end', flexWrap: 'wrap' },
-  govBtn: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-body)', border: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', cursor: 'pointer' },
   govNote: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)' },
   govErr: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-error)', maxWidth: 'calc(var(--cp-space-9) * 5 + var(--cp-space-5))', textAlign: 'right' },
 
@@ -816,9 +807,6 @@ const S = {
   riskMit: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', marginTop: 'calc(var(--cp-space-1) / 2)', lineHeight: 'var(--cp-leading-tight)' },
 
   // ── Section headings (canon H2 13/700) ──
-  headingWrap: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', paddingBottom: 'var(--cp-space-2)' },
-  heading: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
-  headingHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
 
   // ── Visual story ──
   vizGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 6 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
