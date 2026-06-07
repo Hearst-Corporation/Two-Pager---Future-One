@@ -1,8 +1,13 @@
-# CLAUDE.md — Prese Hub / Futur One Two-Pager
+# CLAUDE.md — Oracle (Hearst / Futur One Qatar)
 
 ## Projet
-Présentation A3 plié en 2 (4 pages portrait, 480×680px chacune) pour Futur One Qatar.
-Stack : Next.js · React · inline styles (pas de Tailwind, pas de CSS modules).
+Oracle = cockpit d'investissement infrastructure datacenter (Qatar / Hearst).
+Parcours : configurer un scénario → simuler → sauvegarder → résultats → mémo stratégique
+→ dossier décisionnel → export PDF.
+`/` redirige vers `/admin/hearst/simulator`. Le produit brochure A3 (FoldableA3, P1Cover…P4Back)
+n'existe plus.
+Stack : Next.js 14 · React 18 · inline styles + `var(--cp-*)` (pas de Tailwind, pas de CSS
+modules) · Supabase (schéma `crm`, service_role) · Kimi K2.6 via Hypercli · `@hearst/cockpit-shell`.
 
 ---
 
@@ -10,61 +15,60 @@ Stack : Next.js · React · inline styles (pas de Tailwind, pas de CSS modules).
 
 ### Dev server → port **5005**, toujours.
 - `npm run dev` lance **exclusivement** sur `http://localhost:5005`
-  (configuré dans `package.json` : `"dev": "next dev -p 5005"`).
-- Ne **JAMAIS** lancer sur 3000, 3001, ou un autre port.
-- Ne **JAMAIS** modifier le port dans `package.json` sans demande explicite.
-- Toute URL communiquée à l'utilisateur doit pointer sur `localhost:5005`.
-- Avant de démarrer le dev, vérifier qu'aucun process n'occupe déjà 5005 :
-  `lsof -nP -iTCP:5005 -sTCP:LISTEN`.
-- Ne pas relancer `npm run dev` si un serveur tourne déjà sur 5005 — Next.js
-  basculerait automatiquement sur 5006/5007 et casserait la règle.
+  (`package.json` : `"dev": "next dev -p 5005"`, `"start": "next start -p 5005"`).
+- Ne **JAMAIS** lancer sur 3000, 3001 ou autre. Ne **JAMAIS** changer le port sans demande.
+- Toute URL communiquée pointe sur `localhost:5005`.
+- Avant de démarrer : `lsof -nP -iTCP:5005 -sTCP:LISTEN`. Ne pas relancer si un serveur tourne
+  déjà (Next basculerait sur 5006/5007 et casserait la règle).
 
 ---
 
-## Architecture des pages
-| Fichier | Page | Rôle |
-|---|---|---|
-| `components/pages/P1Cover.jsx` | P1 — Couverture | Image `cover-facade.png` + titre FUTUR ONE. |
-| `components/pages/P2InsideLeft.jsx` | P2 — Intérieur gauche | Hero dark + Opportunity band + Footer |
-| `components/pages/P3InsideRight.jsx` | P3 — Intérieur droite | The Method + Hub diagram + Funding |
-| `components/pages/P4Back.jsx` | P4 — Dos | Image `back-cover.png` + "AI is the new gas." |
+## Architecture des pages (cockpit)
+Toutes sous `app/(cockpit)/admin/hearst/` (+ `layout.jsx` = shell 3 colonnes) :
+| Page | Rôle |
+|---|---|
+| `page.jsx` | Dashboard d'entrée |
+| `simulator/page.jsx` | Config scénario + projection live (POST /simulate, debounce 300ms) |
+| `simulator/results/page.jsx` | Résultats : IRR/NPV/MOIC, export MD, generate memo |
+| `financial/page.jsx` | Multi-scénarios, dette, waterfall, sensibilité |
+| `deals/page.jsx` | Référence modèles deal (statique) |
+| `workspace/page.jsx` | Index scénarios + mémos |
+| `dossier/page.jsx` | Decision Canvas, gouvernance, PDF par mémo |
+| `sources/page.jsx` | Bibliothèque benchmarks + CRUD `hearst_sources` |
 
-## Tokens couleur
-Tous les tokens sont définis dans `app/globals.css` sous `:root`.
-Ne jamais hardcoder de couleur hex dans les composants — utiliser exclusivement `var(--color-*)`.
+Auth + login : `app/admin/login/`, `app/admin/auth/callback/`. APIs : 10 routes sous
+`app/api/admin/hearst/` (toutes authentifiées via `requireProfile`/`authedWrite`) +
+`app/api/cockpit-chat/` (auth optionnelle) + `app/api/health/` (public).
 
----
+## Navigation
+- Rail primaire : `components/OracleRailNav.jsx` — 6 sections (Simulator · Financial · Deals ·
+  Workspace · Dossier · Sources).
+- Secondaire : `SectionTabs` (modeling / library).
 
-## ⚠️ LAYOUT LOCKS — NE PAS TOUCHER
+## Moteur financier
+- `lib/hearst-calculations.js` — IRR (Newton-Raphson), NPV, MOIC, payback, DSCR, projection 10 ans,
+  dette (annuité + IO selon `site_readiness`), waterfall 3 tiers (dette → pref 8% → equity).
+- `lib/hearst-bootstrap.js` — préremplissage depuis `PUBLIC_SOURCES_LIBRARY` (statique).
+- `lib/hearst-deal-structures.js` — 8 archétypes (`powered_shell` recommandé).
+- `lib/hearst-solver.js` — 3 modes (mw_first / capital_first / target_irr_first).
+- `lib/hearst-fit-matrix.js` — affichage uniquement (NON branché au calcul).
+- `lib/oracle-intelligence/` (datapoints statiques) · `lib/oracle-live/` (scrapers best-effort) ·
+  `lib/strategic-memo-store.js` (persistance Supabase).
+- Principe : pas de nombre inventé → champ manquant = `null` / `MISSING_LABEL`
+  (`'N/A — Source Required'`).
 
-Les hauteurs de sections sont verrouillées. Elles sont calibrées pixel par pixel pour
-que les 4 pages s'impriment correctement sur un A3 plié.
+## Design system — tokens
+- Canon : `--cp-*` défini dans `app/(cockpit)/admin/hearst/cp-tokens.css` (bridge `--cp-*` →
+  `--ct-*` upstream `@hearst/cockpit-shell/tokens.css`). Surfaces dans `cockpit.css`, FAB chat
+  dans `components/hearst/chat-fab.css`.
+- `app/globals.css` `--color-*` = **legacy login uniquement** — interdit dans le module Hearst.
+- **Jamais de hex hardcodé ni de `--color-*`** dans `components/hearst/**` et les pages cockpit :
+  utiliser un token `--cp-*`. (ESLint `no-restricted-syntax` ; ⚠️ l'override `files` ne couvre
+  aujourd'hui que `components/hearst/**` — les pages sous `app/(cockpit)/admin/hearst/**` ne sont
+  pas attrapées par le glob, rester discipliné à la main.)
 
-### P3InsideRight — heights LOCKED
-```
-header   : 122px
-phases   : 102px
-mid      : 282px
-picture  :  82px
-building :  92px
-TOTAL    : 680px
-```
-
-### P2InsideLeft — heights LOCKED
-```
-hero     : 270px  (anciennement 320px)
-darkBand : 230px
-building : 100px
-footer   :  80px
-TOTAL    : 680px
-```
-
-### Règles strictes
-- Ne jamais modifier `height:` dans les objets de style des sections `SECTION`.
-- Ne jamais modifier `REF_W = 480` ni `REF_H = 680` dans `FoldableA3.jsx`.
-- Ne jamais ajouter de `padding`, `margin` ou `gap` sur les conteneurs de section
-  sans compensation explicite (le total doit rester 680px).
-- Le `const SECTION = { flexShrink: 0, flexGrow: 0, minHeight: 0, overflow: 'hidden' }`
-  est invariant — ne pas le modifier.
-- Pour déplacer du contenu à l'intérieur d'une section, utiliser `padding`,
-  `position: absolute`, ou `top` relatif sur les enfants — jamais sur la section elle-même.
+## Tests
+- `npm test` → vitest (212 tests : calculs, solver, archétypes, bootstrap, validators, auth,
+  memo store, middleware…).
+- E2E Playwright : `tests/e2e/coherence-visual.spec.ts` (8 tests, nav + tokens desktop/mobile)
+  + `tests/e2e/login.spec.ts`. Config : `playwright.config.js`.
