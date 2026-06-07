@@ -10,7 +10,7 @@
 //
 // No hex tokens — everything via var(--cp-*) / var(--ct-*).
 
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   useMemoJob,
@@ -20,7 +20,6 @@ import {
 } from '@/lib/hearst-memo-job-store';
 import { deriveVerdict, deriveCategory, deriveKpis } from '@/lib/dossier-derive';
 import { Z } from '@/lib/z-index';
-import { T } from '@/lib/design-system/tokens';
 
 /**
  * Live timeline shown during loading.
@@ -199,11 +198,30 @@ export default function StrategicMemoModal(_legacyProps) {
     if (job.request) startMemoJob(job.request);
   }, [job.request]);
 
+  // B1 a11y — focus management: initial focus, Tab focus-trap, Escape, restore.
+  const modalRef = useRef(null);
   useEffect(() => {
     if (!open) return;
-    function onKey(e) { if (e.key === 'Escape') hideMemoModal(); }
+    const node = modalRef.current;
+    const prevFocus = document.activeElement;
+    node?.focus();
+    function onKey(e) {
+      if (e.key === 'Escape') { hideMemoModal(); return; }
+      if (e.key !== 'Tab' || !node) return;
+      const focusables = node.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      if (prevFocus instanceof HTMLElement) prevFocus.focus();
+    };
   }, [open]);
 
   const md = useMemo(() => toMarkdown(memo, meta), [memo, meta]);
@@ -224,8 +242,8 @@ export default function StrategicMemoModal(_legacyProps) {
   if (!open) return null;
 
   return (
-    <div style={S.backdrop} role="dialog" aria-label={title} onClick={hideMemoModal}>
-      <div style={S.modal} onClick={e => e.stopPropagation()}>
+    <div style={S.backdrop} role="dialog" aria-modal="true" aria-label={title} onClick={hideMemoModal}>
+      <div ref={modalRef} tabIndex={-1} style={S.modal} onClick={e => e.stopPropagation()}>
         <header style={S.head}>
           <div>
             <h2 style={S.title}>{title}</h2>
@@ -266,7 +284,7 @@ const S = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '32px 16px',
+    padding: 'var(--cp-space-8) var(--cp-space-4)',
   },
   modal: {
     width: '100%',
@@ -281,55 +299,55 @@ const S = {
     boxShadow: 'var(--cp-shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.06) inset',
   },
 
-  head: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderBottom: '1px solid var(--cp-border)' },
-  title: { fontSize: 16, fontWeight: 800, color: 'var(--cp-text-primary)', margin: 0, letterSpacing: 0.3 },
-  meta: { fontSize: 10, color: 'var(--cp-text-muted)', marginTop: 4, fontFamily: 'ui-monospace, monospace' },
+  head: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', padding: 'var(--cp-space-4) var(--cp-space-5)', borderBottom: '1px solid var(--cp-border)' },
+  title: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0, letterSpacing: 'var(--cp-tracking-wide)' },
+  meta: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)', fontFamily: 'ui-monospace, monospace' },
 
-  actions: { display: 'flex', gap: 6 },
-  actionBtn: { width: 32, height: 32, padding: 0, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 8, cursor: 'pointer', fontSize: 14 },
-  closeBtn: { width: 32, height: 32, padding: 0, background: 'transparent', color: 'var(--cp-text-muted)', border: 'none', cursor: 'pointer', fontSize: 18, lineHeight: 1 },
+  actions: { display: 'flex', gap: 'var(--cp-space-2)' },
+  actionBtn: { width: 'var(--cp-icon-btn-size)', height: 'var(--cp-icon-btn-size)', padding: 0, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-sm)', cursor: 'pointer', fontSize: 'var(--cp-font-md)' },
+  closeBtn: { width: 'var(--cp-icon-btn-size)', height: 'var(--cp-icon-btn-size)', padding: 0, background: 'transparent', color: 'var(--cp-text-muted)', border: 'none', cursor: 'pointer', fontSize: 'var(--cp-font-lg)', lineHeight: 1 },
 
-  body: { padding: 20, overflowY: 'auto', flex: 1 },
+  body: { padding: 'var(--cp-space-5)', overflowY: 'auto', flex: 1 },
 
   // Timeline (loading)
-  timelineWrap: { padding: '24px 20px', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 16 },
-  timelineHeader: { display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, fontWeight: 700, color: 'var(--cp-text-primary)' },
+  timelineWrap: { padding: 'var(--cp-space-6) var(--cp-space-5)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
+  timelineHeader: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-base)', fontWeight: 700, color: 'var(--cp-text-primary)' },
   timelineSpinner: { display: 'inline-block', width: 14, height: 14, borderRadius: '50%', border: '2px solid var(--cp-border)', borderTopColor: 'var(--cp-accent-maroon, var(--cp-accent))', animation: 'memo-spin 0.9s linear infinite' },
   timelineLabel: { flex: 1 },
-  timelineElapsed: { fontFamily: 'ui-monospace, monospace', fontSize: 12, fontWeight: 800, color: 'var(--cp-text-strong)', fontVariantNumeric: 'tabular-nums' },
-  slaWrap: { display: 'flex', flexDirection: 'column', gap: 4 },
-  slaBar: { position: 'relative', height: 6, background: 'var(--cp-surface-0)', borderRadius: 999, overflow: 'hidden' },
-  slaFill: { position: 'absolute', inset: 0, right: 'auto', height: '100%', borderRadius: 999, transition: T.slaBar },
+  timelineElapsed: { fontFamily: 'ui-monospace, monospace', fontSize: 'var(--cp-font-sm)', fontWeight: 800, color: 'var(--cp-text-strong)', fontVariantNumeric: 'tabular-nums' },
+  slaWrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
+  slaBar: { position: 'relative', height: 6, background: 'var(--cp-surface-0)', borderRadius: 'var(--cp-radius-pill)', overflow: 'hidden' },
+  slaFill: { position: 'absolute', inset: 0, right: 'auto', height: '100%', borderRadius: 'var(--cp-radius-pill)', transition: 'width 1s linear, background var(--cp-dur-base) var(--cp-ease)' },
   slaTarget: { position: 'absolute', top: -2, height: 10, width: 2, background: 'var(--cp-border-strong)' },
-  slaLabel: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 },
-  cascadeWrap: { display: 'flex', flexDirection: 'column', gap: 6 },
-  cascadeLabel: { fontSize: 10, fontWeight: 700, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 },
-  cascadeList: { display: 'flex', gap: 6, flexWrap: 'wrap' },
-  cascadeChip: { display: 'inline-flex', alignItems: 'center', padding: '3px 8px', background: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 999, fontSize: 10, fontFamily: 'ui-monospace, monospace', letterSpacing: 0.2 },
-  timelineHint: { fontSize: 11, color: 'var(--cp-text-muted)', fontStyle: 'italic', lineHeight: 1.5, paddingTop: 8, borderTop: '1px dashed var(--cp-border)' },
+  slaLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)' },
+  cascadeWrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
+  cascadeLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)' },
+  cascadeList: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap' },
+  cascadeChip: { display: 'inline-flex', alignItems: 'center', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-pill)', fontSize: 'var(--cp-font-micro)', fontFamily: 'ui-monospace, monospace', letterSpacing: 'var(--cp-tracking-wide)' },
+  timelineHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontStyle: 'italic', lineHeight: 1.5, paddingTop: 'var(--cp-space-2)', borderTop: '1px dashed var(--cp-border)' },
 
-  error: { padding: 16, background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', borderRadius: 10, fontSize: 12, fontWeight: 600 },
+  error: { padding: 'var(--cp-space-4)', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', fontSize: 'var(--cp-font-sm)', fontWeight: 600 },
 
   // Success state (sober — no status colours, no badges)
-  success: { display: 'flex', flexDirection: 'column', gap: 16 },
-  successBanner: { display: 'flex', alignItems: 'center', gap: 10 },
-  successText: { fontSize: 14, fontWeight: 800, color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 0.5, flex: 1 },
-  statusText: { fontSize: 11, color: 'var(--cp-text-muted)', textTransform: 'capitalize', fontWeight: 600 },
-  successTitle: { fontSize: 17, fontWeight: 700, color: 'var(--cp-text-primary)', lineHeight: 1.35, margin: 0 },
+  success: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
+  successBanner: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)' },
+  successText: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)', flex: 1 },
+  statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize', fontWeight: 600 },
+  successTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 1.35, margin: 0 },
 
-  successVerdictRow: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
-  verdictBadge: { fontSize: 'var(--cp-font-xl)', fontWeight: 800, letterSpacing: 0.5, color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 1.2, paddingLeft: 12, borderLeft: '3px solid var(--cp-accent)' },
-  categoryText: { fontSize: 13, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  driversText: { fontSize: 12, color: 'var(--cp-text-muted)' },
+  successVerdictRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
+  verdictBadge: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 1.2, paddingLeft: 'var(--cp-space-3)', borderLeft: '3px solid var(--cp-accent)' },
+  categoryText: { fontSize: 'var(--cp-font-base)', fontWeight: 800, color: 'var(--cp-text-primary)' },
+  driversText: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)' },
 
-  successKpis: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 },
-  successKpi: { padding: '12px 14px', borderRadius: 10, background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)' },
-  successKpiLabel: { fontSize: 10, fontWeight: 800, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 0.6 },
-  successKpiValue: { fontSize: 22, fontWeight: 800, color: 'var(--cp-text-primary)', lineHeight: 1.1, marginTop: 4, fontVariantNumeric: 'tabular-nums' },
-  successKpiSub: { fontSize: 10, color: 'var(--cp-text-muted)', marginTop: 2 },
+  successKpis: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--cp-space-3)' },
+  successKpi: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)' },
+  successKpiLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-eyebrow)' },
+  successKpiValue: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 1.1, marginTop: 'var(--cp-space-1)', fontVariantNumeric: 'tabular-nums' },
+  successKpiSub: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
-  successActions: { display: 'flex', gap: 10, flexWrap: 'wrap' },
-  ctaPrimary: { padding: '10px 18px', borderRadius: 10, background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer' },
-  ctaSecondary: { padding: '10px 16px', borderRadius: 10, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', fontSize: 13, fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' },
-  successNote: { fontSize: 12, color: 'var(--cp-text-muted)', lineHeight: 1.5, paddingTop: 12, borderTop: '1px dashed var(--cp-border)', fontStyle: 'italic' },
+  successActions: { display: 'flex', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
+  ctaPrimary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', fontSize: 'var(--cp-font-base)', fontWeight: 700, cursor: 'pointer' },
+  ctaSecondary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-base)', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' },
+  successNote: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', lineHeight: 1.5, paddingTop: 'var(--cp-space-3)', borderTop: '1px dashed var(--cp-border)', fontStyle: 'italic' },
 };

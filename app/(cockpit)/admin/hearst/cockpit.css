@@ -1,297 +1,37 @@
 /* ============================================================
-   HEARST COCKPIT — pixel-near port of the reference shell
-   Maroon glass theme, inline-style friendly.
+   HEARST COCKPIT — surfaces partagées (cp-card, rail chat).
+   Tokens canon = cp-tokens.css (:root). Chat drawer FAB = chat-fab.css.
    ============================================================ */
 
-/* Promote bg-deep to :root so it's available to layout wrappers that
-   render OUTSIDE .cockpit-root (e.g. app/admin/layout.jsx isHearst branch). */
 :root {
   --cp-bg-deep: #1A050B;
 }
 
-.cockpit-root {
-  font-family: "Inter var", "Inter", -apple-system, BlinkMacSystemFont,
-    "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
-  font-feature-settings: "cv11", "ss03", "cv02";
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  --cp-bg-deep: #1A050B;
-  /* used only by .cockpit-ambient-glow background radial */
-  --cp-accent-maroon: #8A1538;
-
-  /* === LAYOUT STRUCTURAL ================================ */
-  --cp-rail-left: 88px;
-  --cp-rail-right: 420px;
-  --cp-min-center: 520px;
-
-  /* === COMPOSANTS À DIMENSIONS FIXES =================== */
-  --cp-brand-size: 40px;
-  --cp-brand-inner: 16px;
-  --cp-icon-btn-size: 44px;
-  --cp-avatar-size: 40px;
-  --cp-badge-size: 16px;
-  --cp-kpi-min-width: 140px;
-
-  /* === SPACING (4px base) ============================ */
-  --cp-space-0: 0;
-  --cp-space-1: 4px;
-  --cp-space-2: 8px;
-  --cp-space-3: 12px;
-  --cp-space-4: 16px;
-  --cp-space-5: 20px;
-  --cp-space-6: 24px;
-  --cp-space-7: 32px;
-  --cp-space-8: 40px;
-  --cp-space-9: 48px;
-  --cp-space-12: 80px;
-
-  /* === RADIUS ======================================== */
-  --cp-radius-xs: 4px;
-  --cp-radius-sm: 6px;
-  --cp-radius-md: 8px;
-  --cp-radius-lg: 12px;
-  --cp-radius-pill: 9999px;
-
-  /* === TYPO ========================================== */
-  --cp-font-micro: 10px;
-  --cp-font-xs: 11px;
-  --cp-font-sm: 12px;
-  --cp-font-base: 13px;
-  --cp-font-md: 14px;
-  --cp-font-lg: 16px;
-  --cp-font-xl: 20px;
-  --cp-font-2xl: 24px;
-
-  --cp-leading-tight: 1.15;
-  --cp-leading-normal: 1.4;
-
-  --cp-tracking-tight: -0.02em;
-  --cp-tracking-wide: 0.04em;
-  --cp-tracking-wider: 0.08em;
-  --cp-tracking-eyebrow: 0.14em;
-
-  --cp-weight-regular: 400;
-  --cp-weight-medium: 500;
-  --cp-weight-semibold: 600;
-  --cp-weight-bold: 700;
-  --cp-weight-black: 800;
-
-  /* === SURFACE TONES (dark glass) ==================== */
-  --cp-surface-0: rgba(255, 255, 255, 0.02);
-  --cp-surface-1: rgba(255, 255, 255, 0.04);
-  --cp-surface-2: rgba(255, 255, 255, 0.06);
-  --cp-surface-3: rgba(255, 255, 255, 0.09);
-  --cp-tooltip-bg: #2a1118; /* solid maroon-tinted bg for Recharts floating tooltips */
-
-  /* === TEXT ON DARK ================================== */
-  --cp-text-strong: #ffffff;
-  --cp-text-primary: rgba(245, 245, 245, 0.92);
-  --cp-text-body: rgba(245, 245, 245, 0.72);
-  --cp-text-muted: rgba(245, 245, 245, 0.48);
-  --cp-text-faint: rgba(245, 245, 245, 0.40);
-
-  /* === SEMANTIC DARK =================================
-     Naming convention:
-     - --cp-{type}        : tinted variant for chips, badges, status pills (light tone on dark)
-     - --cp-{type}-bg     : 12-18% alpha tint for backgrounds (badge fills, alert bands)
-     - --cp-{type}-strong : deeper tone for SOLID CTAs that need WCAG AA contrast with white text
-                            (exception: --cp-info-strong is teal, reserved for the 'contract'
-                             source-type badge — for CTAs use --cp-info-strong-cta instead) */
-  --cp-success: rgba(255, 255, 255, 0.90);
-  --cp-success-bg: rgba(255, 255, 255, 0.06);
-  --cp-warning: rgba(255, 255, 255, 0.70);
-  --cp-warning-bg: rgba(255, 255, 255, 0.05);
-  --cp-error: rgba(255, 255, 255, 0.60);
-  --cp-error-bg: rgba(255, 255, 255, 0.04);
-  --cp-info: rgba(255, 255, 255, 0.80);
-  --cp-info-bg: rgba(255, 255, 255, 0.05);
-  --cp-violet: rgba(255, 255, 255, 0.75);
-  --cp-violet-bg: rgba(255, 255, 255, 0.06);
-  --cp-info-strong: rgba(255, 255, 255, 0.85);
-  --cp-info-strong-bg: rgba(255, 255, 255, 0.07);
-  --cp-error-strong: rgba(255, 255, 255, 0.15);
-  --cp-success-strong: rgba(255, 255, 255, 0.15);
-  --cp-warning-strong: rgba(255, 255, 255, 0.15);
-  --cp-info-strong-cta: rgba(255, 255, 255, 0.15);
-
-  /* === CHROMATIC STATUS (for dots, charts, comparison tables) =================
-     Use these tokens when you need CHROMATIC distinction (red/green/amber/blue),
-     not just lightness modulation. Picked to remain readable on both
-     --cp-surface-2 (dark glass) and --cp-text-primary (near-white CTA state).
-     Saturated mid-tones — Tailwind-equivalent: emerald-400, rose-400, amber-400, sky-400.
-     For dimmed/background variants, use color-mix() inline or follow with -bg suffix. */
-  --cp-status-positive: #34d399;
-  --cp-status-positive-bg: rgba(52, 211, 153, 0.15);
-  --cp-status-negative: #f87171;
-  --cp-status-negative-bg: rgba(248, 113, 113, 0.15);
-  --cp-status-neutral: #fbbf24;
-  --cp-status-neutral-bg: rgba(251, 191, 36, 0.15);
-  --cp-status-cool: #60a5fa;
-  --cp-status-cool-bg: rgba(96, 165, 250, 0.15);
-
-  --cp-accent: #be123c;
-  --cp-accent-strong: #e11d48;
-  --cp-accent-soft: rgba(225, 29, 72, 0.18);
-
-  /* === SHADOWS ======================================= */
-  --cp-shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.2);
-  --cp-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
-  --cp-shadow-md: 0 10px 24px -8px rgba(0, 0, 0, 0.45);
-  --cp-shadow-depth:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
-    0 20px 60px -24px rgba(0, 0, 0, 0.65),
-    0 6px 14px -10px rgba(0, 0, 0, 0.4);
-  --cp-shadow-card-hover:
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
-    0 28px 70px -22px rgba(0, 0, 0, 0.7),
-    0 8px 18px -12px rgba(225, 29, 72, 0.25);
-
-  /* === BLURS ========================================= */
-  --cp-blur-md: blur(24px) saturate(150%);
-
-  /* === BORDER TONES ================================== */
-  --cp-border-soft: rgba(255, 255, 255, 0.06);
-  --cp-border: rgba(255, 255, 255, 0.10);
-  --cp-border-strong: rgba(255, 255, 255, 0.16);
-  --cp-grid-line: rgba(255, 255, 255, 0.08); /* Recharts CartesianGrid — distinct from border tokens (between -soft and base) */
-  --cp-border-accent: rgba(225, 29, 72, 0.55);
-
-  /* === MOTION ======================================== */
-  --cp-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --cp-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --cp-dur-fast: 120ms;
-  --cp-dur-base: 180ms;
-
-  /* === Z-INDEX ======================================= */
-  --cp-z-content: 10;
-  --cp-z-rails: 20;
-  --cp-z-floating: 30;
+/* Scrollbars + focus (hearst layout only — fichier non importé ailleurs) */
+html ::-webkit-scrollbar {
+  width: var(--cp-space-2);
+  height: var(--cp-space-2);
 }
-
-.cockpit-ambient-deep {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: var(--cp-bg-deep);
-}
-.cockpit-ambient-glow {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.6;
-  background: radial-gradient(
-    ellipse 80% 60% at 50% 30%,
-    var(--cp-accent-maroon) 0%,
-    transparent 70%
-  );
-}
-
-/* Reusable glass surface */
-.cockpit-glass {
-  position: relative;
-  background: var(--cp-surface-2);
-  border: 1px solid var(--cp-border-strong);
-  backdrop-filter: blur(60px) saturate(110%) brightness(105%);
-  -webkit-backdrop-filter: blur(60px) saturate(110%) brightness(105%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
-    0 20px 60px -20px rgba(0, 0, 0, 0.6);
-}
-
-/* Buttons */
-.cockpit-btn-primary {
-  background: var(--cp-text-strong);
-  color: var(--cp-bg-deep);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    0 4px 12px rgba(0, 0, 0, 0.15);
-  font-weight: 500;
-  border: none;
-}
-
-.cockpit-btn-glass {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(20px) saturate(150%) brightness(110%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%) brightness(110%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.2);
-  color: rgba(255, 255, 255, 0.9);
-}
-.cockpit-btn-glass:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-/* Segmented track */
-.cockpit-seg-track {
-  background: rgba(0, 0, 0, 0.2);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-}
-
-/* Rails */
-.cockpit-rail-left {
-  border-right: 1px solid var(--cp-border-strong);
-}
-.cockpit-rail-right {
-  background: var(--cp-surface-2);
-  border-left: 1px solid var(--cp-border-strong);
-  backdrop-filter: var(--cp-blur-md);
-  -webkit-backdrop-filter: var(--cp-blur-md);
-  box-shadow:
-    inset 1px 0 0 rgba(255, 255, 255, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-/* Glass noise overlay */
-.cockpit-glass::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.22'/%3E%3C/svg%3E");
-  background-blend-mode: overlay;
-  /* bumped from 0.03 → 0.08: barely visible on the dark maroon surface at lower values */
-  opacity: 0.08;
-  pointer-events: none;
-  border-radius: inherit;
-  z-index: 0;
-}
-
-/* Scrollbars inside cockpit */
-.cockpit-root ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.cockpit-root ::-webkit-scrollbar-track {
+html ::-webkit-scrollbar-track {
   background: transparent;
 }
-.cockpit-root ::-webkit-scrollbar-thumb {
+html ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
+  border-radius: var(--cp-radius-xs);
 }
-.cockpit-root ::-webkit-scrollbar-thumb:hover {
+html ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.12);
 }
-
-/* === Focus visible global cockpit ==================== */
-.cockpit-root :focus-visible {
+html :focus-visible {
   outline: 2px solid var(--cp-accent-strong);
   outline-offset: 2px;
   border-radius: var(--cp-radius-sm);
 }
-
-/* === Reduced motion ================================== */
 @media (prefers-reduced-motion: reduce) {
-  .cockpit-root,
-  .cockpit-root *,
-  .cockpit-root *::before,
-  .cockpit-root *::after {
+  html,
+  html *,
+  html *::before,
+  html *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -320,8 +60,6 @@
   border-color: var(--cp-border-strong);
 }
 
-/* === Button hover affordance — applies to solid CTA buttons that
-   sit on saturated semantic backgrounds. Pairs with -strong/-cta tokens. */
 .cp-btn-hover {
   transition: filter var(--cp-dur-fast) var(--cp-ease),
               transform var(--cp-dur-fast) var(--cp-ease);
@@ -342,7 +80,6 @@
   border-color: var(--cp-border-accent);
 }
 
-/* === Glow accent (IRR / hero highlight) ============== */
 .cp-card-accent {
   background:
     linear-gradient(180deg,
@@ -363,13 +100,6 @@
     0 0 32px -8px color-mix(in srgb, var(--cp-accent-strong) 35%, transparent);
 }
 
-/* === Pulse animation (used by Dot component) ========= */
-@keyframes cp-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-/* === Memo job animations (timeline + badge + toast) === */
 @keyframes memo-spin {
   to { transform: rotate(360deg); }
 }
@@ -378,131 +108,11 @@
   50% { transform: scale(1.3); opacity: 0.7; }
 }
 @keyframes memo-toast-in {
-  from { transform: translateY(12px); opacity: 0; }
+  from { transform: translateY(var(--cp-space-3)); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* === Secondary stat divider (Stat in secondaryRow) ==== */
-.cp-stat {
-  border-right: 1px solid var(--cp-border-soft);
-}
-.cp-stat:last-child {
-  border-right: none;
-}
-
-/* === Chat drawer FAB — visible only on tablet/mobile === */
-/* Caché par défaut sur desktop, révélé par les media queries plus bas. */
-.cp-chat-drawer-fab,
-.cp-chat-drawer-backdrop {
-  display: none;
-}
-
-/* === Responsive — tablet & mobile ==================== */
-@media (max-width: 900px) {
-  /* Drop rails from the grid layout (shell + custom wrapper) */
-  .cockpit-root {
-    --ct-rail-right: 0px;
-    --cp-rail-right: 0px;
-    --cp-rail-left: 64px;
-  }
-  /* Notre wrapper custom HearstRightRail (défensif, pas rendu actuellement) */
-  .cockpit-rail-right {
-    display: none !important;
-  }
-
-  /* Shell rail-right (chat Kimi) → drawer slide-in depuis la droite */
-  .ct-rail-right {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: min(420px, 92vw);
-    z-index: 1001;
-    transform: translateX(100%);
-    transition: transform 240ms cubic-bezier(0.32, 0.72, 0, 1);
-    box-shadow: -8px 0 32px -8px rgba(0, 0, 0, 0.4);
-  }
-  body.cp-chat-drawer-open .ct-rail-right {
-    transform: translateX(0);
-  }
-  /* Force open state même si shell est en mode .collapsed (drawer = ouvert) */
-  body.cp-chat-drawer-open .ct-rail-right.collapsed {
-    width: min(420px, 92vw);
-  }
-  body.cp-chat-drawer-open .ct-rail-right.collapsed .ct-rail-right-body {
-    display: flex;
-  }
-
-  /* Backdrop : visible quand drawer ouvert */
-  .cp-chat-drawer-backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 200ms ease;
-  }
-  .cp-chat-drawer-backdrop[data-open="true"] {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* FAB : visible en bas-droite, au-dessus de la BottomBar */
-  .cp-chat-drawer-fab {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    right: 16px;
-    bottom: calc(var(--cp-bar-bottom, 64px) + 16px);
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    z-index: 1002;
-    background: var(--cp-accent-maroon, var(--cp-accent));
-    color: var(--cp-text-strong);
-    border: 1px solid var(--cp-border-strong);
-    box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-    cursor: pointer;
-    transition: transform 150ms ease, background 150ms ease;
-  }
-  .cp-chat-drawer-fab:hover {
-    transform: translateY(-2px);
-  }
-  .cp-chat-drawer-fab:active {
-    transform: translateY(0);
-  }
-  .cp-chat-drawer-fab[data-open="true"] {
-    background: var(--cp-surface-2);
-    color: var(--cp-text-primary);
-  }
-}
-
-@media (max-width: 600px) {
-  .cockpit-root {
-    --ct-rail-left: 0px;
-    --cp-rail-left: 0px;
-  }
-  .cockpit-rail-left,
-  .ct-rail-left {
-    display: none !important;
-  }
-}
-
-/* === Chat input always reachable ===
-   Bug: on short viewports / the embed (usable height < ~890px, i.e. most
-   laptops at 1366x768), the chat form fell BELOW the fold and the rail did
-   not scroll to it, so users could neither see nor type in the chat.
-   Root cause: .ct-chat-root collapses to 0 height when the Decision Snapshot
-   fills the rail body, and its overflow:visible form spilled out under the
-   viewport. Fix: dock the chat form to the bottom of the (relative) right
-   rail so it is always visible, and reserve space so scrolled content is not
-   hidden behind it. */
+/* === Chat input always reachable === */
 .ct-rail-right { position: relative; }
 .ct-rail-right .ct-chat-form {
   position: absolute !important;
@@ -510,10 +120,13 @@
   right: 0 !important;
   bottom: 0 !important;
   margin: 0 !important;
-  padding: 10px 12px;
-  background: var(--cp-surface, #160a0d);
-  border-top: 1px solid var(--cp-border, rgba(255, 255, 255, 0.08));
+  padding: var(--cp-space-2) var(--cp-space-3);
+  background: var(--cp-surface-1);
+  border-top: 1px solid var(--cp-border);
   box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.35);
   z-index: 6;
 }
-.ct-rail-right .ct-rail-right-body { padding-bottom: 124px; }
+.ct-rail-right .ct-rail-right-body { padding-bottom: var(--cp-chat-dock-clear); }
+
+.ct-rail-right-body[data-rail-tab="advisor"] .ct-chat-root { display: none !important; }
+.ct-rail-right-body[data-rail-tab="chat"] .ct-chat-root { display: flex !important; flex-direction: column; flex: 1 1 0%; min-height: 0; }

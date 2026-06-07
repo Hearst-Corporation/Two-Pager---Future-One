@@ -12,7 +12,6 @@ import {
   formatElapsed,
 } from '@/lib/hearst-memo-job-store';
 import { Z } from '@/lib/z-index';
-import { T } from '@/lib/design-system/tokens';
 
 const SLA_WARNING_MS = 120_000;
 
@@ -45,24 +44,23 @@ export default function MemoJobBadge() {
 const S = {
   badge: {
     position: 'fixed',
-    right: 16,
-    // Au-dessus du FAB chat (qui est à bottom: var(--cp-bar-bottom, 64px) + 16px)
-    // On le place encore plus haut pour ne pas chevaucher
-    bottom: 'calc(var(--cp-bar-bottom, 64px) + 80px)',
+    right: 'var(--cp-space-4)',
+    // Au-dessus du chrome bas (nav mobile + FAB) via --cp-toast-bottom
+    bottom: 'var(--cp-toast-bottom)',
     zIndex: Z.fabOpen,
     display: 'inline-flex',
     alignItems: 'center',
-    gap: 10,
-    padding: '10px 14px',
+    gap: 'var(--cp-space-3)',
+    padding: 'var(--cp-space-3) var(--cp-space-4)',
     background: 'var(--cp-surface-2)',
     color: 'var(--cp-text-primary)',
     border: '1px solid var(--cp-accent-maroon, var(--cp-accent))',
-    borderRadius: 12,
+    borderRadius: 'var(--cp-radius-md)',
     boxShadow: 'var(--cp-shadow-md)',
     cursor: 'pointer',
     fontFamily: 'var(--cp-font-sans, sans-serif)',
     minWidth: 200,
-    transition: T.transformShadow,
+    transition: 'transform var(--cp-dur-base) var(--cp-ease), box-shadow var(--cp-dur-base) var(--cp-ease)',
   },
   spinner: {
     display: 'inline-block',
@@ -78,24 +76,24 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    gap: 2,
+    gap: 'var(--cp-space-1)',
     flex: 1,
     textAlign: 'left',
   },
   title: {
-    fontSize: 12,
-    fontWeight: 800,
-    letterSpacing: 0.3,
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-wide)',
     color: 'var(--cp-text-strong)',
   },
   sub: {
-    fontSize: 10,
+    fontSize: 'var(--cp-font-micro)',
     fontFamily: 'ui-monospace, monospace',
     color: 'var(--cp-text-muted)',
     fontVariantNumeric: 'tabular-nums',
   },
   chevron: {
-    fontSize: 16,
+    fontSize: 'var(--cp-font-lg)',
     color: 'var(--cp-text-muted)',
     flexShrink: 0,
   },

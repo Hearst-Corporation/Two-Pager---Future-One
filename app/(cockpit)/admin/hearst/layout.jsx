@@ -1,10 +1,11 @@
 'use client';
 
 import '@hearst/cockpit-shell/tokens.css';
+import './cockpit.css';
 import './cp-tokens.css';
 import { CockpitShell } from '@hearst/cockpit-shell';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
-import { OracleBottomBar } from '@/components/OracleBottomBar';
+import { OracleRailNav } from '@/components/OracleRailNav';
 import ChatToggleFAB from '@/components/hearst/ChatToggleFAB';
 import OracleAdvisorRail from '@/components/hearst/OracleAdvisorRail';
 import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
@@ -33,7 +34,7 @@ export default function HearstLayout({ children }) {
     <SimulationProvider>
       <ChatIdPersistor />
       <CockpitShell products={ORACLE_PRODUCTS} appId="oracle" chatConfig={ORACLE_CHAT_CONFIG}>
-        <OracleBottomBar />
+        <OracleRailNav />
         {children}
         <OracleAdvisorRail />
         <ChatToggleFAB />

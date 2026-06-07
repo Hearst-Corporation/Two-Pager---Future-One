@@ -68,7 +68,7 @@ Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (2 pa
 
 ## Vocabulaire produit interne (pour ancrer les remarques)
 
-Archétypes deals : \`powered_shell\` / \`branded_jv\` / \`manage_only\` / \`white_label\` / \`sale_leaseback\`. Tables Supabase : \`cockpit_chats\`, \`cockpit_messages\`, \`hearst_deals\`, \`hearst_scenarios\`, \`hearst_sources\`, \`hearst_contracts\`, \`admin_chat_mode\`, \`review_documents\`, \`llm_runs\`. Composants clés : \`OracleBottomBar.jsx\` (rail nav gauche), \`FoldableA3.jsx\` (A3 portrait), \`AdminReviewControls.jsx\` (toggle review mode rail droit).`;
+Archétypes deals : \`powered_shell\` / \`branded_jv\` / \`manage_only\` / \`white_label\` / \`sale_leaseback\`. Tables Supabase : \`cockpit_chats\`, \`cockpit_messages\`, \`hearst_deals\`, \`hearst_scenarios\`, \`hearst_sources\`, \`hearst_contracts\`, \`admin_chat_mode\`, \`review_documents\`, \`llm_runs\`. Composants clés : \`OracleRailNav.jsx\` (nav sections, rail gauche + mobile), \`OracleAdvisorRail.jsx\` (IC advisor rail droit), \`StrategicMemoModal.jsx\` (génération mémo).`;
 
 export const PAGES_CONTEXT: ProductContext = { text: PAGES_CONTEXT_TEXT };
 

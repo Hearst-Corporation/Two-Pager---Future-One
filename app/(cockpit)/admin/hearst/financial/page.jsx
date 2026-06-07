@@ -113,6 +113,12 @@ export default function FinancialPage() {
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
       }
+      @media (max-width: 900px) {
+        [data-financial-tab-row] {
+          flex-wrap: nowrap !important;
+          overflow-x: auto;
+        }
+      }
       @media (max-width: 600px) {
         [data-financial-kpi-grid] {
           grid-template-columns: 1fr !important;
@@ -121,6 +127,18 @@ export default function FinancialPage() {
           flex-direction: column !important;
           align-items: stretch !important;
         }
+        [data-financial-tab-row] {
+          overflow-x: auto !important;
+          flex-wrap: nowrap !important;
+          -webkit-overflow-scrolling: touch !important;
+          scrollbar-width: none !important;
+          margin-left: 0 !important;
+        }
+        [data-financial-tab-row]::-webkit-scrollbar { display: none; }
+        [data-financial-table-scroll] {
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
       }
     `}</style>
     <div style={S.wrap}>
@@ -128,7 +146,7 @@ export default function FinancialPage() {
       {/* Scenario toggles */}
       <div data-financial-top-bar style={S.topBar}>
         <div style={S.pageTitle}>10-Year Financial Projection</div>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 'var(--cp-space-2)' }}>
           {scenarios.map(s => {
             const active = activeIds.includes(s.id);
             const color = s.name?.toLowerCase().includes('up') ? COLORS.upside
@@ -144,7 +162,7 @@ export default function FinancialPage() {
             );
           })}
         </div>
-        <div style={{ display: 'flex', gap: 4, marginLeft: 'auto', flexWrap: 'wrap' }}>
+        <div data-financial-tab-row style={{ display: 'flex', gap: 'var(--cp-space-1)', marginLeft: 'auto', flexWrap: 'wrap' }}>
           {[
             { id: 'table',       label: '⊞ Table' },
             { id: 'charts',      label: '⟁ Charts' },
@@ -156,7 +174,7 @@ export default function FinancialPage() {
               {t.label}
             </button>
           ))}
-          <div style={{ width: 1, background: 'var(--cp-border)', margin: '0 4px' }} />
+          <div style={{ width: 1, background: 'var(--cp-border)', margin: '0 var(--cp-space-1)' }} />
           <button disabled title="Excel export is not available yet" style={{ ...S.exportBtn, opacity: 0.5, cursor: 'not-allowed' }}>
             Excel (soon)
           </button>
@@ -188,7 +206,7 @@ export default function FinancialPage() {
           {(() => {
             const alerts = detectAlerts(base, project);
             return alerts.length > 0 ? (
-              <div style={{ marginBottom: 16 }}>
+              <div style={{ marginBottom: 'var(--cp-space-4)' }}>
                 <AlertBanner alerts={alerts.filter(a => a.severity === 'critical')} />
               </div>
             ) : null;
@@ -199,7 +217,7 @@ export default function FinancialPage() {
               Configure and save a scenario in the <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link> to generate the 10-year financial model.
             </div>
             {proj.missing_inputs?.length > 0 && (
-              <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div style={{ marginTop: 'var(--cp-space-3)', display: 'flex', flexWrap: 'wrap', gap: 'var(--cp-space-2)' }}>
                 {proj.missing_inputs.map((m, i) => <span key={i} style={S.missingTag}>{m}</span>)}
               </div>
             )}
@@ -207,7 +225,7 @@ export default function FinancialPage() {
         </>
       ) : tab === 'table' ? (
         /* Projection table */
-        <div style={{ overflowX: 'auto' }}>
+        <div data-financial-table-scroll style={{ overflowX: 'auto' }}>
           <table style={S.table}>
             <thead>
               <tr>
@@ -231,16 +249,16 @@ export default function FinancialPage() {
         </div>
       ) : (
         /* Charts */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-7)' }}>
           <div style={S.chartCard}>
             <div style={S.chartTitle}>Revenue & EBITDA ($M)</div>
             <ResponsiveContainer width="100%" height={260}>
               <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
-                <XAxis dataKey="year" style={{ fontSize: 11 }} tick={{ fill: 'var(--cp-text-body)' }} />
-                <YAxis style={{ fontSize: 11 }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
-                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 6, boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 11 }} />
-                <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 11 }} />
+                <XAxis dataKey="year" style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} />
+                <YAxis style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
+                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 'var(--cp-radius-sm)', boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)' }} />
+                <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                 <Bar dataKey="Revenue" fill="var(--cp-text-primary)" opacity={0.6} />
                 <Line type="monotone" dataKey="EBITDA" stroke="var(--cp-accent)" strokeWidth={2} dot={false} />
               </ComposedChart>
@@ -251,9 +269,9 @@ export default function FinancialPage() {
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
-                <XAxis dataKey="year" style={{ fontSize: 11 }} tick={{ fill: 'var(--cp-text-body)' }} />
-                <YAxis style={{ fontSize: 11 }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
-                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 6, boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 11 }} />
+                <XAxis dataKey="year" style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} />
+                <YAxis style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
+                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 'var(--cp-radius-sm)', boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)' }} />
                 <Area type="monotone" dataKey="Cum. FCF" stroke="var(--cp-accent)" fill="var(--cp-accent-soft)" fillOpacity={0.45} strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
@@ -284,17 +302,17 @@ export default function FinancialPage() {
                   <KpiCard key={kpi.label} size="sm" label={kpi.label} value={kpi.value} format="number" />
                 ))}
               </div>
-              <div style={{ marginBottom: 20 }}>
+              <div style={{ marginBottom: 'var(--cp-space-5)' }}>
                 <div style={S.chartCard}>
                   <div style={S.chartTitle}>Debt Balance Over Time ($M)</div>
                   <ResponsiveContainer width="100%" height={200}>
                     <ComposedChart data={debtSchedule.schedule.map(r => ({ year: 'Y' + r.year, Balance: +(r.closing_balance / 1e6).toFixed(1), 'Debt Service': +(r.total_service / 1e6).toFixed(2), IO: r.is_io }))}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
-                      <XAxis dataKey="year" tick={{ fill: 'var(--cp-text-body)', fontSize: 11 }} />
-                      <YAxis yAxisId="balance" tick={{ fill: 'var(--cp-text-body)', fontSize: 11 }} tickFormatter={v => '$' + v + 'M'} />
-                      <YAxis yAxisId="service" orientation="right" tick={{ fill: 'var(--cp-text-body)', fontSize: 11 }} tickFormatter={v => '$' + v + 'M'} />
-                      <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 6 }} />
-                      <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 11 }} />
+                      <XAxis dataKey="year" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
+                      <YAxis yAxisId="balance" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} tickFormatter={v => '$' + v + 'M'} />
+                      <YAxis yAxisId="service" orientation="right" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} tickFormatter={v => '$' + v + 'M'} />
+                      <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 'var(--cp-radius-sm)' }} />
+                      <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                       <Area yAxisId="balance" type="monotone" dataKey="Balance" stroke="var(--cp-error)" fill="var(--cp-error-bg)" strokeWidth={2} fillOpacity={0.3} />
                       <Bar yAxisId="service" dataKey="Debt Service" fill="var(--cp-accent)" opacity={0.7} />
                     </ComposedChart>
@@ -373,10 +391,10 @@ export default function FinancialPage() {
                     Qatar: waterfall.by_investor.qatar?.cash_flows?.[i + 1] ? +(waterfall.by_investor.qatar.cash_flows[i + 1] / 1e6).toFixed(2) : 0,
                   }))}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
-                    <XAxis dataKey="year" tick={{ fill: 'var(--cp-text-body)', fontSize: 11 }} />
-                    <YAxis tick={{ fill: 'var(--cp-text-body)', fontSize: 11 }} tickFormatter={v => '$' + v + 'M'} />
-                    <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', borderRadius: 6 }} />
-                    <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 11 }} />
+                    <XAxis dataKey="year" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
+                    <YAxis tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} tickFormatter={v => '$' + v + 'M'} />
+                    <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-sm)' }} />
+                    <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                     <Bar dataKey="HEARST" stackId="a" fill="var(--cp-op-qia)" />
                     <Bar dataKey="Brookfield" stackId="a" fill="var(--cp-op-brookfield)" />
                     <Bar dataKey="Qatar" stackId="a" fill="var(--cp-op-qai)" />
@@ -391,14 +409,14 @@ export default function FinancialPage() {
       {/* Sensitivity tab */}
       {hasProjection && tab === 'sensitivity' && (
         <div>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 'var(--cp-space-3)', alignItems: 'center', marginBottom: 'var(--cp-space-4)' }}>
             <div style={S.chartTitle}>Sensitivity Matrix — IRR</div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 'auto' }}>
-              <label style={{ fontSize: 11, color: 'var(--cp-text-muted)' }}>X-Axis</label>
+            <div style={{ display: 'flex', gap: 'var(--cp-space-2)', alignItems: 'center', marginLeft: 'auto' }}>
+              <label style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' }}>X-Axis</label>
               <select value={sensitivityX} onChange={e => setSensitivityX(e.target.value)} style={S.sensitivitySelect}>
                 {SENSITIVITY_PARAM_OPTIONS.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
               </select>
-              <label style={{ fontSize: 11, color: 'var(--cp-text-muted)' }}>Y-Axis</label>
+              <label style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' }}>Y-Axis</label>
               <select value={sensitivityY} onChange={e => setSensitivityY(e.target.value)} style={S.sensitivitySelect}>
                 {SENSITIVITY_PARAM_OPTIONS.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
               </select>
@@ -432,7 +450,7 @@ export default function FinancialPage() {
                             : 'color-mix(in srgb, var(--ct-status-success) 30%, black)',
                           color: 'var(--cp-text-primary)',
                           fontWeight: ri === 2 && ci === 2 ? 900 : 600,
-                          fontSize: 11,
+                          fontSize: 'var(--cp-font-xs)',
                           textAlign: 'center',
                           border: ri === 2 && ci === 2 ? '2px solid var(--cp-text-primary)' : 'none',
                         }}>
@@ -443,7 +461,7 @@ export default function FinancialPage() {
                   ))}
                 </tbody>
               </table>
-              <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-3)', flexWrap: 'wrap' }}>
                 {[
                   { bg: 'color-mix(in srgb, var(--ct-status-danger) 30%, black)', label: '< 0% IRR' },
                   { bg: 'color-mix(in srgb, var(--ct-status-danger) 60%, black)', label: '0–8%' },
@@ -451,12 +469,12 @@ export default function FinancialPage() {
                   { bg: 'color-mix(in srgb, var(--ct-status-success) 50%, black)', label: '12–15%' },
                   { bg: 'color-mix(in srgb, var(--ct-status-success) 30%, black)', label: '> 15%' },
                 ].map(l => (
-                  <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--cp-text-muted)' }}>
-                    <span style={{ width: 12, height: 12, borderRadius: 4, background: l.bg, display: 'inline-block' }} />
+                  <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)' }}>
+                    <span style={{ width: 'var(--cp-space-3)', height: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-xs)', background: l.bg, display: 'inline-block' }} />
                     {l.label}
                   </div>
                 ))}
-                <span style={{ fontSize: 10, color: 'var(--cp-text-muted)', marginLeft: 8 }}>Bold border = baseline scenario</span>
+                <span style={{ fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginLeft: 'var(--cp-space-2)' }}>Bold border = baseline scenario</span>
               </div>
             </div>
           )}
@@ -504,32 +522,34 @@ const S = {
   wrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 24,
-    paddingBottom: 160,
+    gap: 'var(--cp-space-6)',
+    maxWidth: 1280,
+    margin: '0 auto',
+    padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear, 0px)',
   },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
-  error: { padding: 24, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
-  topBar: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
-  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
-  scBtn: { fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 20, border: '2px solid', cursor: 'pointer', transition: 'all .15s' },
-  tabBtn: { fontSize: 11, fontWeight: 600, padding: '5px 12px', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 4, cursor: 'pointer' },
+  loading: { padding: 'var(--cp-space-12)', textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-md)' },
+  error: { padding: 'var(--cp-space-6)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-sm)' },
+  topBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
+  pageTitle: { fontSize: 'var(--cp-font-xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
+  scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 700, padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: '2px solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)' },
+  tabBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 600, padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
   tabBtnActive: { background: 'var(--cp-text-primary)', color: 'var(--cp-bg-deep)' },
-  kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 },
-  noData: { background: 'var(--cp-surface-2)', border: '1px dashed var(--cp-border-strong)', borderRadius: 10, padding: '28px 24px', textAlign: 'center', marginBottom: 24 },
-  noDataTitle: { fontSize: 15, fontWeight: 700, color: 'var(--cp-text-primary)', marginBottom: 8 },
-  noDataSub: { fontSize: 13, color: 'var(--cp-text-muted)' },
+  kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-6)' },
+  noData: { background: 'var(--cp-surface-2)', border: '1px dashed var(--cp-border-strong)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-7) var(--cp-space-6)', textAlign: 'center', marginBottom: 'var(--cp-space-6)' },
+  noDataTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 700, color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-2)' },
+  noDataSub: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-muted)' },
   noDataLink: { color: 'var(--cp-accent)', fontWeight: 700, textDecoration: 'underline' },
-  missingTag: { fontSize: 11, background: 'var(--cp-surface-2)', border: '1px solid var(--cp-error)', color: 'var(--cp-error)', padding: '2px 8px', borderRadius: 4 },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)' },
-  th: { padding: '8px 12px', textAlign: 'right', fontSize: 10, fontWeight: 700, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
-  td: { padding: '8px 12px', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 12 },
-  tdLabel: { padding: '8px 16px', fontWeight: 600, fontSize: 12, color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
-  chartCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 10, padding: '16px 20px' },
-  chartTitle: { fontSize: 12, fontWeight: 700, color: 'var(--cp-text-muted)', marginBottom: 12, letterSpacing: 0.5 },
-  warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 10, padding: '16px 16px', marginTop: 20 },
-  warnTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-error)', marginBottom: 8 },
-  warnRow: { fontSize: 12, color: 'var(--cp-error)', padding: '3px 0', borderBottom: '1px solid var(--cp-error-bg)' },
-  exportBtn: { fontSize: 11, fontWeight: 700, padding: '5px 12px', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
-  debtSummary: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12, marginBottom: 20 },
-  sensitivitySelect: { fontSize: 11, padding: '4px 8px', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 4, color: 'var(--cp-text-primary)', cursor: 'pointer' },
+  missingTag: { fontSize: 'var(--cp-font-xs)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-error)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) var(--cp-space-2)', borderRadius: 'var(--cp-radius-xs)' },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)' },
+  th: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
+  td: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-sm)' },
+  tdLabel: { padding: 'var(--cp-space-2) var(--cp-space-4)', fontWeight: 600, fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
+  chartCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4) var(--cp-space-5)' },
+  chartTitle: { fontSize: 'var(--cp-font-sm)', fontWeight: 700, color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)', letterSpacing: 'var(--cp-tracking-wider)' },
+  warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4)', marginTop: 'var(--cp-space-5)' },
+  warnTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
+  warnRow: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) 0', borderBottom: '1px solid var(--cp-error-bg)' },
+  exportBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 700, padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
+  debtSummary: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-5)' },
+  sensitivitySelect: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
 };

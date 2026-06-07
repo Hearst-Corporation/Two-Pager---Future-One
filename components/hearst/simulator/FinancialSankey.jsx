@@ -148,14 +148,14 @@ export default function FinancialSankey({ scenario, projection, height = 380 }) 
 const S = {
   empty: {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    color: 'var(--cp-text-muted)', fontSize: 13, fontStyle: 'italic',
+    color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-base)', fontStyle: 'italic',
   },
   tooltip: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 6,
-    padding: '6px 10px',
-    fontSize: 11,
+    borderRadius: 'var(--cp-radius-sm)',
+    padding: 'var(--cp-space-2) var(--cp-space-3)',
+    fontSize: 'var(--cp-font-xs)',
     color: 'var(--cp-text-primary)',
   },
 };

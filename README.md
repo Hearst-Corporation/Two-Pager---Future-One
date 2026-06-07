@@ -1,91 +1,71 @@
-# Futur One — Two-Pager
+# Hearst Oracle — Cockpit & Simulator
 
-Présentation commerciale A3 plié en 2, rendue dans le navigateur et exportable en PDF.
+Application Next.js : cockpit opérationnel HEARST (`/admin/hearst/*`) — simulateur financier, mémos stratégiques, sources, deals.
 
-> **Architecture** — Le projet contient deux systèmes complètement indépendants :
-> - **Brochure & Landing** (`/`, `/brochure`, `/print`) : présentation commerciale statique.
-> - **Cockpit HEARST** (`/admin/hearst/*`) : dashboard opérationnel et simulateur financier. Aucune dépendance vers la brochure ni la landing.
+> **Entry** — `/` redirige vers `/admin/hearst/simulator` (middleware auth → `/admin/login`).
 
 ## Stack
+
 - **Next.js 14** (App Router)
-- **React** — inline styles uniquement, pas de Tailwind ni CSS modules
-- **Design tokens** — définis dans `app/globals.css` sous `:root`
+- **React 18** — inline styles + tokens CSS `--cp-*`
+- **@hearst/cockpit-shell** — layout 3 colonnes (rail nav · contenu · advisor/chat)
+- **Supabase** — auth + tables `crm.*`
 
 ## Structure
 
 ```
 app/
-  globals.css       ← tokens couleur (--color-*)
-  layout.jsx
-  page.jsx          ← UI principale + sélecteur de vue
+  (cockpit)/admin/hearst/
+    layout.jsx          ← CockpitShell + OracleRailNav + memo modals
+    cp-tokens.css       ← canon design system (--cp-*)
+    cockpit.css         ← cp-card, rail chat dock
+    simulator/          ← config scénario
+    simulator/results/  ← résultats + visualisations
+    financial/ sources/ workspace/ dossier/ deals/
+  api/
+    cockpit-chat/       ← Kimi via Hypercli
+    admin/hearst/       ← simulate, scenarios, memos, sources, project
 
 components/
-  FoldableA3.jsx    ← moteur de rendu A3 plié (REF_W 480 × REF_H 680)
-  pages/
-    P1Cover.jsx     ← Couverture  : FUTUR ONE. / cover-facade.png
-    P2InsideLeft.jsx ← Intérieur gauche : Hero + Opportunity + Footer
-    P3InsideRight.jsx ← Intérieur droite : The Method + Hub + Funding
-    P4Back.jsx      ← Dos : AI is the new gas. / back-cover.png
-
-public/
-  cover-facade.png
-  back-cover.png
+  OracleRailNav.jsx     ← nav 6 sections (rail desktop + barre mobile)
+  hearst/               ← advisor, memo, KPI, simulator widgets
 ```
-
-## Vues disponibles
-| Vue | Description |
-|---|---|
-| Fermé | P1 seule (couverture) |
-| Ouvert | P2 + P3 côte à côte (intérieur) |
-| Dos | P4 seule |
-| À plat | Recto (P4\|P1) + Verso (P2\|P3) |
 
 ## Lancer le projet
 
 ```bash
 npm install
 npm run dev
-# ou alias équivalent :
-npm run rundev
 ```
 
-> ⚠️ **Règle absolue** — le dev server tourne **toujours** sur le port **5005**
-> (`dev` et `rundev` appellent la même commande dans `package.json`). Ne jamais lancer sur 3000 ni un autre port.
+> **Port fixe 5005** — `npm run dev` et `npm run start` utilisent `-p 5005`. Ne pas lancer sur 3000.
 
 Ouvrir [http://localhost:5005](http://localhost:5005).
 
 ### Cockpit HEARST
-- Le simulateur `/admin/hearst/simulator` suit un parcours en deux temps : configuration avec rail assistant et bottom nav visibles, puis résultats complets après sauvegarde du scénario (`?step=results&scenario=<id>`).
-- Le premier bloc du simulateur utilise un brief horizontal compact au-dessus des contrôles, pour éviter une colonne gauche vide quand le module s'étire.
-- Le run scénario redirige vers `/admin/hearst/simulator/results?scenario=<id>` : page complète responsive avec nom du scénario, métriques de décision (`IRR`, `NPV`, `MOIC`) en priorité, grand panneau de projection financière, capital stack en donut, layers, timeline et visualisations harmonisés.
-- Le rail droit est un `Investment Committee Advisor` : snapshot de décision toujours visible, provenance explicite (`MODELED`, `INTERPRETATION`, `HEURISTIC`, `UNKNOWN`) et prompts orientés IC avant la conversation.
-- L'étape `Operating Model` sélectionne désormais une seule thèse d'exploitation ; la comparaison stratégique est réservée aux visualisations, pas au picker de configuration.
-- La page résultats conserve le chat du rail droit et la bottom nav cockpit ; timeline de déploiement en lignes de phases lisibles, sans jalons en points.
-- `SectionTabs` (Financial / Sources) ne liste que des routes avec page réelle (Simulator, Financial, Workspace, Sources).
-- Le chat du rail droit utilise `/api/cockpit-chat` via Hypercli/Kimi et recharge l'historique via `/api/cockpit-chats/*`, pour éviter le fallback vers l'état d'accueil après un message.
-- La génération du mémo stratégique est asynchrone côté UI avec timeout client 300s ; si Kimi dépasse la fenêtre serveur, l'API retourne un mémo déterministe `deterministic-fallback` basé uniquement sur les chiffres moteur et le persiste en brouillon.
-- La route `/api/health` sert au smoke-test Railway manuel ; elle doit rester légère, sans auth ni appel externe.
 
-### Routes disponibles
+- **Design system** : `app/(cockpit)/admin/hearst/cp-tokens.css` (canon `--cp-*`). Pas d'OpenClaw (`dark-theme.css`, `lib/design-system/tokens` supprimés). Login `/admin/login` reste en `--color-*` legacy.
+- **Nav** : `OracleRailNav` porté dans `.ct-rail-left` (desktop) + `.oracle-mobile-nav` sur `body` (<600px).
+- **Chat drawer** : `ChatToggleFAB` + `chat-fab.css` (<900px).
+- **Vérif DS** : `npm run test:e2e -- tests/e2e/coherence-visual.spec.ts` (8 tests). Journal : `docs/coherence-fix-plan.md`.
+
+### Routes cockpit
+
 | URL | Page |
 |---|---|
-| `/` | Landing principale |
-| `/brochure` | Brochure A3 plié (P1 → P4, 4 vues) |
-| `/datacenter` | One-pager isolé ; logos footer `public/partners/*.svg`, filigranes `*-icon.svg` (alignement vertical calibré dans le viewBox) |
-| `/print` | Vue print A3 |
-**Landing `/`** — `components/landing/SectionMethod.jsx` : le conteneur `sticky` utilise `overflow: clip` plutôt que `hidden`, sinon WebKit peut traiter ce nœud comme scrollport et casser le « pin » + le défilement lié au track horizontal.
+| `/admin/hearst/simulator` | Configuration scénario |
+| `/admin/hearst/simulator/results?scenario=<id>` | Résultats complets |
+| `/admin/hearst/financial` | Modèle financier |
+| `/admin/hearst/sources` | Sources & contrats |
+| `/admin/hearst/workspace` | Hub scénarios / mémos |
+| `/admin/hearst/dossier` | Lecteur mémo stratégique |
+| `/admin/hearst/deals` | Structures deal |
+| `/api/health` | Smoke-test (Railway) |
 
-## Palette
+### Tests
 
-Tous les tokens sont dans `app/globals.css`. Catégories :
-- `--color-bg-*` — fonds de page
-- `--color-gray-*` — échelle de gris (100 → 900)
-- `--color-dark-*` — surfaces sombres (couvertures, bands)
-- `--color-accent-*` — rouge cramoisie (signature Futur One)
-- `--color-text-*` — hiérarchie typographique
-- `--color-border-*` — bordures et lignes
-
-## Layout & Design Rules
-- **Hauteurs verrouillées** : Total 680px par page. Voir `CLAUDE.md`.
-- **Zéro hardcoding** : Utiliser exclusivement les variables CSS (`var(--color-*)`) ou `color-mix` pour les transparences. Ne jamais utiliser de codes hex ou RGBA en dur dans les composants.
-## Lancer le projet
+```bash
+npx tsc --noEmit
+npm test
+npm run test:e2e -- tests/e2e/coherence-visual.spec.ts
+```

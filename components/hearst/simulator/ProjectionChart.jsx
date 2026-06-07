@@ -34,10 +34,10 @@ export default function ProjectionChart({ years = [], height = 280 }) {
       {size.width > 0 && size.height > 0 && (
         <ComposedChart width={size.width} height={size.height} data={data} margin={{ top: 12, right: 24, left: 8, bottom: 10 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-border)" />
-          <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'var(--cp-text-muted)' }} />
-          <YAxis tick={{ fontSize: 11, fill: 'var(--cp-text-muted)' }} tickFormatter={fmtAxisM} />
+          <XAxis dataKey="year" tick={{ fontSize: 'var(--cp-font-xs)', fill: 'var(--cp-text-muted)' }} />
+          <YAxis tick={{ fontSize: 'var(--cp-font-xs)', fill: 'var(--cp-text-muted)' }} tickFormatter={fmtAxisM} />
           <Tooltip contentStyle={S.tooltip} formatter={fmtTipM} />
-          <Legend wrapperStyle={{ fontSize: 11, color: 'var(--cp-text-muted)', paddingTop: 8 }} />
+          <Legend wrapperStyle={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', paddingTop: 'var(--cp-space-2)' }} />
           {/* break-even: where cumulative cash crosses 0 — the year an investor hunts for */}
           <ReferenceLine y={0} stroke="var(--cp-text-faint)" strokeDasharray="2 2" />
           <Area dataKey="cumFcf" name="Cumulative Cash" type="monotone"
@@ -55,13 +55,13 @@ export default function ProjectionChart({ years = [], height = 280 }) {
 const S = {
   empty: {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    color: 'var(--cp-text-muted)', fontSize: 13, fontStyle: 'italic',
+    color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-base)', fontStyle: 'italic',
   },
   tooltip: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 6,
-    fontSize: 11,
+    borderRadius: 'var(--cp-radius-sm)',
+    fontSize: 'var(--cp-font-xs)',
     color: 'var(--cp-text-primary)',
   },
 };

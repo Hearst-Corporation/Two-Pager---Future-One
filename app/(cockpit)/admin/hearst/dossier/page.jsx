@@ -378,7 +378,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
                     <td style={S.td}>{row.label}</td>
                     <td style={S.td}><strong>{row.value}</strong>{row.unit && <span style={S.unit}> {row.unit}</span>}</td>
                     <td style={S.td}><ConfidenceLabel level={row.confidence} /></td>
-                    <td style={{ ...S.td, color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)' }}>{row.source || '—'}</td>
+                    <td style={S.tdMuted}>{row.source || '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -752,13 +752,13 @@ const EYEBROW = {
 };
 
 const S = {
-  wrap: { maxWidth: 1280, margin: '0 auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-space-12)' },
+  wrap: { maxWidth: 'calc(var(--cp-space-8) * 40)', margin: 'var(--cp-space-0) auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear, var(--cp-space-0))' },
 
   // Typography / shared (canon)
-  h1: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0 },
-  h2: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0 },
+  h1: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
+  h2: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
   sub: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-1)' },
-  body: { margin: 'var(--cp-space-1) 0', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
+  body: { margin: 'var(--cp-space-1) var(--cp-space-0)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   eyebrow: { ...EYEBROW, display: 'block', marginBottom: 'var(--cp-space-1)' },
   confLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)', whiteSpace: 'nowrap' },
 
@@ -768,15 +768,15 @@ const S = {
   // ── Hero ── (single bordeaux accent = left keyline)
   hero: { padding: 'var(--cp-space-6)', borderRadius: 'var(--cp-radius-lg)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   heroTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
-  heroIdent: { flex: '1 1 320px', minWidth: 0 },
+  heroIdent: { flex: '1 1 calc(var(--cp-space-8) * 10)', minWidth: 0 },
   identLine: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'capitalize', marginBottom: 'var(--cp-space-2)' },
-  heroTitle: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0, lineHeight: 'var(--cp-leading-tight)' },
+  heroTitle: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)', lineHeight: 'var(--cp-leading-tight)' },
   heroActions: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)', alignItems: 'flex-end', flexShrink: 0 },
-  heroLead: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', margin: 0, maxWidth: 900 },
+  heroLead: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', margin: 'var(--cp-space-0)', maxWidth: 'calc(var(--cp-space-9) * 22 + var(--cp-space-5))' },
 
   verdictRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
   verdictBadge: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 'var(--cp-leading-tight)', paddingLeft: 'var(--cp-space-4)', borderLeft: '3px solid var(--cp-accent)' },
-  verdictMeta: { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 },
+  verdictMeta: { display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)', minWidth: 0 },
   verdictDrivers: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-body)' },
   verdictNote: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
 
@@ -784,28 +784,28 @@ const S = {
   govRow: { display: 'flex', gap: 'var(--cp-space-1)', justifyContent: 'flex-end', flexWrap: 'wrap' },
   govBtn: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-body)', border: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', cursor: 'pointer' },
   govNote: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)' },
-  govErr: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-error)', maxWidth: 220, textAlign: 'right' },
+  govErr: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-error)', maxWidth: 'calc(var(--cp-space-9) * 5 + var(--cp-space-5))', textAlign: 'right' },
 
   // ── KPI strip (auto-fit grid → responsive) ──
-  kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--cp-space-3)' },
+  kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 3 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
   kpiCard: { padding: 'var(--cp-space-4) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
   kpiLabel: { ...EYEBROW, marginBottom: 'var(--cp-space-2)' },
-  kpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' },
+  kpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', fontVariantNumeric: 'tabular-nums' },
   kpiSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
   // ── Category band ──
   categoryBand: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-4)', flexWrap: 'wrap', padding: 'var(--cp-space-3) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)' },
   categoryName: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
-  categoryDesc: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', flex: '1 1 240px' },
+  categoryDesc: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', flex: '1 1 calc(var(--cp-space-9) * 6)' },
 
   // ── Two-col (decision + risks) ──
-  twoCol: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--cp-space-4)', alignItems: 'start' },
+  twoCol: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-8) * 10), 1fr))', gap: 'var(--cp-space-4)', alignItems: 'start' },
   decisionCard: { padding: 'var(--cp-space-5)', borderRadius: 'var(--cp-radius-lg)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
-  condWrap: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', margin: 'var(--cp-space-3) 0' },
-  condList: { margin: 0, paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', lineHeight: 1.45 },
+  condWrap: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', margin: 'var(--cp-space-3) var(--cp-space-0)' },
+  condList: { margin: 'var(--cp-space-0)', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   nextAction: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-accent)' },
-  nextPrimary: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', marginTop: 2 },
-  nextDetail: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', marginTop: 2, lineHeight: 1.45 },
+  nextPrimary: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', marginTop: 'calc(var(--cp-space-1) / 2)' },
+  nextDetail: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', marginTop: 'calc(var(--cp-space-1) / 2)', lineHeight: 'var(--cp-leading-normal)' },
 
   riskCol: { minWidth: 0 },
   riskGrid: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
@@ -813,69 +813,70 @@ const S = {
   riskHead: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
   sevLabel: { ...EYEBROW, color: 'var(--cp-text-primary)' },
   riskCat: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' },
-  riskTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 1.35 },
-  riskWhy: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)', lineHeight: 1.4 },
-  riskMit: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', marginTop: 2, lineHeight: 1.4 },
+  riskTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)' },
+  riskWhy: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)', lineHeight: 'var(--cp-leading-tight)' },
+  riskMit: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', marginTop: 'calc(var(--cp-space-1) / 2)', lineHeight: 'var(--cp-leading-tight)' },
 
   // ── Section headings (canon H2 13/700) ──
   headingWrap: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', paddingBottom: 'var(--cp-space-2)' },
-  heading: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 0 },
+  heading: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
   headingHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
 
   // ── Visual story ──
-  vizGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--cp-space-3)' },
+  vizGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 6 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
   vizCard: { padding: 'var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
   vizTitle: { ...EYEBROW, marginBottom: 'var(--cp-space-3)' },
   placeholder: { padding: 'var(--cp-space-4) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', fontStyle: 'italic', textAlign: 'center' },
 
   // Capital stack
-  stackBar: { display: 'flex', height: 22, borderRadius: 'var(--cp-radius-sm)', overflow: 'hidden', border: '1px solid var(--cp-border)' },
+  stackBar: { display: 'flex', height: 'calc(var(--cp-space-5) + var(--cp-space-1) / 2)', borderRadius: 'var(--cp-radius-sm)', overflow: 'hidden', border: '1px solid var(--cp-border)' },
   stackSeg: { height: '100%' },
   stackLegend: { display: 'flex', gap: 'var(--cp-space-4)', marginTop: 'var(--cp-space-2)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)' },
-  dot: { display: 'inline-block', width: 10, height: 10, borderRadius: 'var(--cp-radius-xs)', marginRight: 'var(--cp-space-1)', verticalAlign: 'middle' },
+  dot: { display: 'inline-block', width: 'var(--cp-font-micro)', height: 'var(--cp-font-micro)', borderRadius: 'var(--cp-radius-xs)', marginRight: 'var(--cp-space-1)', verticalAlign: 'middle' },
   splitWrap: { marginTop: 'var(--cp-space-3)' },
   splitRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
-  splitName: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', width: 84, flexShrink: 0 },
-  splitTrack: { flex: 1, height: 8, borderRadius: 'var(--cp-radius-pill)', background: 'var(--cp-surface-0)', overflow: 'hidden' },
+  splitName: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', width: 'calc(var(--cp-space-9) * 2 + var(--cp-space-1))', flexShrink: 0 },
+  splitTrack: { flex: 1, height: 'var(--cp-space-2)', borderRadius: 'var(--cp-radius-pill)', background: 'var(--cp-surface-0)', overflow: 'hidden' },
   splitFill: { height: '100%', background: 'var(--cp-accent)', borderRadius: 'var(--cp-radius-pill)' },
-  splitPct: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', width: 36, textAlign: 'right', fontFamily: 'ui-monospace, monospace' },
+  splitPct: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', width: 'calc(var(--cp-space-9) - var(--cp-space-1))', textAlign: 'right', fontFamily: 'ui-monospace, monospace' },
 
   // Timeline
   timeline: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
   tlRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' },
   tlLabel: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', flex: '0 0 38%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  tlTrack: { position: 'relative', flex: 1, height: 10, borderRadius: 'var(--cp-radius-pill)', background: 'var(--cp-surface-0)' },
-  tlBar: { position: 'absolute', top: 0, height: '100%', background: 'var(--cp-accent)', borderRadius: 'var(--cp-radius-pill)' },
-  tlMonths: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', flex: '0 0 56px', textAlign: 'right' },
+  tlTrack: { position: 'relative', flex: 1, height: 'var(--cp-font-micro)', borderRadius: 'var(--cp-radius-pill)', background: 'var(--cp-surface-0)' },
+  tlBar: { position: 'absolute', top: 'var(--cp-space-0)', height: '100%', background: 'var(--cp-accent)', borderRadius: 'var(--cp-radius-pill)' },
+  tlMonths: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', flex: '0 0 calc(var(--cp-space-12) + var(--cp-space-2))', textAlign: 'right' },
 
   // Benchmark
-  benchList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
-  benchRow: { display: 'grid', gridTemplateColumns: '1fr auto', gap: '0 var(--cp-space-2)', alignItems: 'baseline', paddingBottom: 'var(--cp-space-1)', borderBottom: '1px solid var(--cp-border)' },
+  benchList: { margin: 'var(--cp-space-0)', padding: 'var(--cp-space-0)', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
+  benchRow: { display: 'grid', gridTemplateColumns: '1fr auto', gap: 'var(--cp-space-0) var(--cp-space-2)', alignItems: 'baseline', paddingBottom: 'var(--cp-space-1)', borderBottom: '1px solid var(--cp-border)' },
   benchName: { fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' },
   benchValue: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   benchMetric: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' },
   benchSrc: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-faint)', fontFamily: 'ui-monospace, monospace', gridColumn: '1 / -1' },
 
   // Cashflow
-  cashWrap: { display: 'flex', alignItems: 'flex-end', gap: 'var(--cp-space-1)', height: 120 },
+  cashWrap: { display: 'flex', alignItems: 'flex-end', gap: 'var(--cp-space-1)', height: 'calc(var(--cp-space-6) * 5)' },
   cashCol: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--cp-space-1)', height: '100%' },
-  cashBars: { display: 'flex', alignItems: 'flex-end', gap: 2, flex: 1, width: '100%', justifyContent: 'center' },
-  cashBar: { width: 7, borderRadius: 'var(--cp-radius-xs) var(--cp-radius-xs) 0 0', minHeight: 2 },
+  cashBars: { display: 'flex', alignItems: 'flex-end', gap: 'calc(var(--cp-space-1) / 2)', flex: 1, width: '100%', justifyContent: 'center' },
+  cashBar: { width: 'calc(var(--cp-space-2) - var(--cp-space-1) / 4)', borderRadius: 'var(--cp-radius-xs) var(--cp-radius-xs) 0 0', minHeight: 'calc(var(--cp-space-1) / 2)' },
   cashYr: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
 
   // ── Analytics ──
   analytics: { display: 'flex', flexDirection: 'column' },
-  analyticsBlock: { padding: 'var(--cp-space-4) 0', borderBottom: '1px solid var(--cp-border)' },
-  analyticsTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: '0 0 var(--cp-space-2)' },
-  bullets: { margin: 'var(--cp-space-1) 0', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.5 },
+  analyticsBlock: { padding: 'var(--cp-space-4) var(--cp-space-0)', borderBottom: '1px solid var(--cp-border)' },
+  analyticsTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0) var(--cp-space-0) var(--cp-space-2)' },
+  bullets: { margin: 'var(--cp-space-1) var(--cp-space-0)', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)' },
   th: { textAlign: 'left', padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-muted)', borderBottom: '1px solid var(--cp-border)', fontWeight: 'var(--cp-weight-semibold)', textTransform: 'uppercase', fontSize: 'var(--cp-font-xs)' },
   td: { padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-body)', verticalAlign: 'middle', borderBottom: '1px solid var(--cp-border)' },
+  tdMuted: { padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)', verticalAlign: 'middle', borderBottom: '1px solid var(--cp-border)' },
   unit: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)' },
   configTable: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-2)' },
-  configKey: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', ...EYEBROW, width: 160, verticalAlign: 'top' },
+  configKey: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', ...EYEBROW, width: 'calc(var(--cp-space-8) * 5)', verticalAlign: 'top' },
   configVal: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-sm)' },
-  sourceList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
+  sourceList: { margin: 'var(--cp-space-0)', padding: 'var(--cp-space-0)', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
   sourceItem: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-1)', flexWrap: 'wrap', fontSize: 'var(--cp-font-xs)' },
   sourceId: { fontFamily: 'ui-monospace, monospace', color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-xs)' },
   sourceMeta: { color: 'var(--cp-text-muted)' },
@@ -889,18 +890,18 @@ const S = {
   appendixBtn: { width: '100%', padding: 'var(--cp-space-3) var(--cp-space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' },
   appendixLabel: { ...EYEBROW },
   appendixChevron: { fontSize: 'var(--cp-font-lg)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
-  appendixBody: { padding: '0 var(--cp-space-4) var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
-  pre: { margin: 0, padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)', lineHeight: 1.5, overflowX: 'auto', fontFamily: 'ui-monospace, monospace' },
-  tensionList: { margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
+  appendixBody: { padding: 'var(--cp-space-0) var(--cp-space-4) var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
+  pre: { margin: 'var(--cp-space-0)', padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)', lineHeight: 'var(--cp-leading-normal)', overflowX: 'auto', fontFamily: 'ui-monospace, monospace' },
+  tensionList: { margin: 'var(--cp-space-0)', padding: 'var(--cp-space-0)', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
   tensionItem: { borderLeft: '3px solid var(--cp-border-strong)', paddingLeft: 'var(--cp-space-3)' },
   tensionId: { ...EYEBROW, color: 'var(--cp-text-primary)', fontFamily: 'ui-monospace, monospace' },
 
   // ── Shared (list/scenario views) ──
   sectionHeader: { marginBottom: 'var(--cp-space-5)' },
   statRow: { display: 'flex', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-6)', flexWrap: 'wrap' },
-  statBox: { padding: 'var(--cp-space-3) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', minWidth: 110 },
+  statBox: { padding: 'var(--cp-space-3) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', minWidth: 'calc(var(--cp-space-9) * 2 + var(--cp-space-6) + var(--cp-space-1) + var(--cp-space-1) / 2)' },
   statN: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
-  statL: { ...EYEBROW, marginTop: 2 },
+  statL: { ...EYEBROW, marginTop: 'calc(var(--cp-space-1) / 2)' },
   tr: { borderBottom: '1px solid var(--cp-border)', cursor: 'pointer' },
   link: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-medium)' },
   muted: { color: 'var(--cp-text-faint)' },

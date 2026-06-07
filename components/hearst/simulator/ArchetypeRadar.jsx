@@ -71,7 +71,7 @@ export default function ArchetypeRadar({ archetypes = [], highlighted = null, he
             );
           })}
           <Tooltip contentStyle={S.tooltip} />
-          <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+          <Legend wrapperStyle={{ fontSize: 'var(--cp-font-xs)', paddingTop: 'var(--cp-space-2)' }} />
         </RadarChart>
       )}
     </div>
@@ -84,14 +84,14 @@ const S = {
     alignItems: 'center',
     justifyContent: 'center',
     color: 'var(--cp-text-muted)',
-    fontSize: 13,
+    fontSize: 'var(--cp-font-base)',
     fontStyle: 'italic',
   },
   tooltip: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 6,
-    fontSize: 11,
+    borderRadius: 'var(--cp-radius-sm)',
+    fontSize: 'var(--cp-font-xs)',
     color: 'var(--cp-text-primary)',
   },
 };

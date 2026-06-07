@@ -351,7 +351,7 @@ export default function DealsPage() {
                 <Tooltip
                   formatter={(v) => ['$' + v + 'B', 'Size']}
                   cursor={{ fill: 'var(--cp-surface-2)' }}
-                  contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', borderRadius: 6, color: 'var(--cp-text-strong)' }}
+                  contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-sm)', color: 'var(--cp-text-strong)' }}
                   labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 11 }}
                 />
                 <Bar dataKey="val" radius={[0, 4, 4, 0]}>
@@ -461,50 +461,50 @@ function SectionHead({ num, title, hint }) {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const S = {
-  wrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-7)', paddingBottom: 180, maxWidth: 1160 },
+  wrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-7)', maxWidth: 1160, margin: '0 auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear)' },
 
   // hero
   hero: { borderLeft: '3px solid var(--cp-accent)', paddingLeft: 'var(--cp-space-5)', paddingTop: 'var(--cp-space-2)', paddingBottom: 'var(--cp-space-2)' },
   eyebrow: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)' },
-  h1: { fontSize: 'clamp(22px, 3.4vw, 30px)', lineHeight: 1.18, fontWeight: 800, letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-strong)', margin: '10px 0 10px' },
+  h1: { fontSize: 'var(--cp-font-xl)', lineHeight: 1.18, fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-strong)', margin: '10px 0 10px' },
   lede: { fontSize: 'clamp(13px, 1.4vw, 15px)', color: 'var(--cp-text-body)', maxWidth: 780, lineHeight: 1.55 },
 
   // kpi strip
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--cp-space-3)' },
-  kpiCard: { padding: 'var(--cp-space-4) var(--cp-space-5)', display: 'flex', flexDirection: 'column', gap: 4, minHeight: 92 },
+  kpiCard: { padding: 'var(--cp-space-4) var(--cp-space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', minHeight: 92 },
   kpiLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-text-muted)' },
-  kpiValue: { fontSize: 'clamp(19px, 2.6vw, 24px)', fontWeight: 800, letterSpacing: 'var(--cp-tracking-tight)', lineHeight: 1.15, fontVariantNumeric: 'tabular-nums', marginTop: 2 },
+  kpiValue: { fontSize: 'clamp(19px, 2.6vw, 24px)', fontWeight: 800, letterSpacing: 'var(--cp-tracking-tight)', lineHeight: 1.15, fontVariantNumeric: 'tabular-nums', marginTop: 'var(--cp-space-1)' },
   kpiSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', lineHeight: 1.35 },
 
   // anchor nav
-  nav: { display: 'flex', gap: 6, flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 5, padding: 'var(--cp-space-2) 0', background: 'linear-gradient(180deg, var(--cp-bg-deep) 60%, transparent)' },
-  navBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 600, padding: '6px 13px', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-pill)', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
+  nav: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 5, padding: 'var(--cp-space-2) 0', background: 'linear-gradient(180deg, var(--cp-bg-deep) 60%, transparent)' },
+  navBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 600, padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-pill)', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
   navBtnActive: { background: 'var(--cp-accent-maroon, var(--cp-accent))', color: 'var(--cp-text-strong)', borderColor: 'var(--cp-border-accent)' },
 
   // section
   section: { scrollMarginTop: 56, display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   secHead: { display: 'flex', gap: 'var(--cp-space-4)', alignItems: 'flex-start' },
-  secNum: { fontSize: 'var(--cp-font-sm)', fontWeight: 800, color: 'var(--cp-accent-strong)', border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)', padding: '4px 9px', flex: 'none', letterSpacing: '0.05em' },
-  secTitle: { fontSize: 'clamp(17px, 2.2vw, 20px)', fontWeight: 800, letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-strong)', lineHeight: 1.25 },
-  secHint: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', marginTop: 4, maxWidth: 820, lineHeight: 1.5 },
+  secNum: { fontSize: 'var(--cp-font-sm)', fontWeight: 800, color: 'var(--cp-accent-strong)', border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-1) var(--cp-space-2)', flex: 'none', letterSpacing: 'var(--cp-tracking-wide)' },
+  secTitle: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-strong)', lineHeight: 1.25 },
+  secHint: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)', maxWidth: 820, lineHeight: 1.5 },
 
   grid2: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--cp-space-4)' },
   grid3: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--cp-space-4)' },
 
   // model card
   modelCard: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column' },
-  modelTag: { display: 'inline-block', alignSelf: 'flex-start', fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--cp-accent-strong)', background: 'var(--cp-accent-soft)', border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)', padding: '3px 8px', marginBottom: 'var(--cp-space-3)' },
+  modelTag: { display: 'inline-block', alignSelf: 'flex-start', fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wide)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)', background: 'var(--cp-accent-soft)', border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-1) var(--cp-space-2)', marginBottom: 'var(--cp-space-3)' },
   modelTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 700, color: 'var(--cp-text-strong)', letterSpacing: 'var(--cp-tracking-tight)' },
-  modelSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)', marginTop: 2 },
+  modelSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)', marginTop: 'var(--cp-space-1)' },
   modelBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.55 },
   pc: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-4)' },
   pcCol: { border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-3)', background: 'var(--cp-surface-0)' },
-  pcHead: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 'var(--cp-space-2)' },
-  pcItem: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', lineHeight: 1.5, marginBottom: 5 },
+  pcHead: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wider)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-2)' },
+  pcItem: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', lineHeight: 1.5, marginBottom: 'var(--cp-space-1)' },
 
   // deal card
   dealCard: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column' },
-  dealTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-3)', marginBottom: 4 },
+  dealTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-1)' },
   dealWho: { fontSize: 'var(--cp-font-md)', fontWeight: 700, color: 'var(--cp-text-strong)', display: 'flex', alignItems: 'center', minWidth: 0, lineHeight: 1.3 },
   dealAmt: { fontSize: 'var(--cp-font-base)', fontWeight: 800, color: 'var(--cp-text-strong)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
   dealStruct: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-accent-strong)', fontWeight: 600, marginBottom: 'var(--cp-space-3)' },
@@ -512,21 +512,21 @@ const S = {
 
   // split panel
   splitPanel: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
-  splitRow: { display: 'flex', flexDirection: 'column', gap: 6 },
+  splitRow: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
   splitMeta: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--cp-space-3)' },
   splitDeal: { fontSize: 'var(--cp-font-sm)', fontWeight: 700, color: 'var(--cp-text-primary)' },
   splitTags: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
   splitTrack: { display: 'flex', height: 26, borderRadius: 'var(--cp-radius-sm)', overflow: 'hidden', border: '1px solid var(--cp-border)' },
   splitSeg: { display: 'flex', alignItems: 'center', paddingLeft: 8, minWidth: 0, transition: 'width var(--cp-dur-base) var(--cp-ease)' },
   splitSegLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-text-strong)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
-  legendRow: { display: 'flex', flexWrap: 'wrap', gap: 'var(--cp-space-4)', marginTop: 4, paddingTop: 'var(--cp-space-3)', borderTop: '1px solid var(--cp-border-soft)' },
-  legendItem: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' },
+  legendRow: { display: 'flex', flexWrap: 'wrap', gap: 'var(--cp-space-4)', marginTop: 'var(--cp-space-1)', paddingTop: 'var(--cp-space-3)', borderTop: '1px solid var(--cp-border-soft)' },
+  legendItem: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' },
 
   // table
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-md)', overflow: 'hidden' },
-  th: { padding: '10px 14px', textAlign: 'left', fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
-  td: { padding: '10px 14px', textAlign: 'left', borderBottom: '1px solid var(--cp-border-soft)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', verticalAlign: 'top' },
-  tdLabel: { padding: '10px 14px', fontWeight: 700, fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-strong)', borderBottom: '1px solid var(--cp-border-soft)', whiteSpace: 'nowrap' },
+  th: { padding: 'var(--cp-space-3) var(--cp-space-4)', textAlign: 'left', fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wide)', textTransform: 'uppercase', color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
+  td: { padding: 'var(--cp-space-3) var(--cp-space-4)', textAlign: 'left', borderBottom: '1px solid var(--cp-border-soft)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', verticalAlign: 'top' },
+  tdLabel: { padding: 'var(--cp-space-3) var(--cp-space-4)', fontWeight: 700, fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-strong)', borderBottom: '1px solid var(--cp-border-soft)', whiteSpace: 'nowrap' },
 
   // chart
   chartCard: { padding: 'var(--cp-space-5)' },
@@ -535,7 +535,7 @@ const S = {
   // roles
   roleCard: { padding: 'var(--cp-space-5)' },
   roleCardAccent: { borderColor: 'var(--cp-border-accent)' },
-  roleTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 700, color: 'var(--cp-text-strong)', marginBottom: 4 },
+  roleTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 700, color: 'var(--cp-text-strong)', marginBottom: 'var(--cp-space-1)' },
   roleWho: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
   roleDesc: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.55 },
 
@@ -554,7 +554,7 @@ const S = {
   // footer
   footer: { borderTop: '1px solid var(--cp-border)', paddingTop: 'var(--cp-space-5)', marginTop: 'var(--cp-space-4)' },
   footHead: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
-  srcList: { display: 'flex', flexDirection: 'column', gap: 6 },
+  srcList: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
   srcLink: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', transition: 'color var(--cp-dur-base) var(--cp-ease)', textDecoration: 'none' },
   disclaimer: { marginTop: 'var(--cp-space-5)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', maxWidth: 860, lineHeight: 1.5 },
 

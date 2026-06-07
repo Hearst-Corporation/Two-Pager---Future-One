@@ -56,7 +56,7 @@ export default function WorkspacePage() {
       <section style={S.section}>
         <div style={S.headingWrap}><h2 style={S.heading}>Saved scenarios</h2><span style={S.hint}>{scenarios?.length ?? '—'} saved</span></div>
         {scenarios === null && <div style={S.empty}>Loading scenarios…</div>}
-        {scenarios && scenarios.length === 0 && <div style={S.empty}>No saved scenarios yet. Build one in the Simulator and click “Save this plan”.</div>}
+        {scenarios && scenarios.length === 0 && <div style={S.empty}>No saved scenarios yet. Build one in the Simulator and click "Save this plan".</div>}
         {scenarios && scenarios.length > 0 && (
           <table style={S.table}>
             <thead><tr>{['Name', 'Type', 'Created', 'Status', ''].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
@@ -107,7 +107,7 @@ export default function WorkspacePage() {
 }
 
 const S = {
-  wrap: { maxWidth: 1280, margin: '0 auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-space-12)' },
+  wrap: { maxWidth: 1280, margin: '0 auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear)' },
   head: { marginBottom: 'var(--cp-space-5)' },
   h1: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0 },
   sub: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-1)' },
@@ -122,7 +122,7 @@ const S = {
   statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
   action: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', marginLeft: 'var(--cp-space-3)' },
   actionMuted: { color: 'var(--cp-text-muted)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', marginLeft: 'var(--cp-space-3)' },
-  del: { marginLeft: 'var(--cp-space-3)', background: 'transparent', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-sm)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', padding: '4px 10px', cursor: 'pointer' },
+  del: { marginLeft: 'var(--cp-space-3)', background: 'transparent', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-sm)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', padding: 'var(--cp-space-1) var(--cp-space-3)', cursor: 'pointer' },
   err: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-4)' },
   empty: { padding: 'var(--cp-space-8)', color: 'var(--cp-text-muted)', textAlign: 'center', fontSize: 'var(--cp-font-md)' },
 };

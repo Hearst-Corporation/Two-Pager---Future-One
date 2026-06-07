@@ -47,9 +47,9 @@ function fmtVal(src) {
 
 function ConfidenceDots({ score }) {
   return (
-    <span style={{ display: 'inline-flex', gap: 2 }}>
+    <span style={S.confDots}>
       {Array.from({ length: 5 }, (_, i) => (
-        <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: i < score ? 'var(--cp-accent)' : 'var(--cp-surface-3)', display: 'inline-block' }} />
+        <span key={i} style={{ ...S.confDot, background: i < score ? 'var(--cp-accent)' : 'var(--cp-surface-3)' }} />
       ))}
     </span>
   );
@@ -168,12 +168,21 @@ export default function SourcesPage() {
   if (error) return <div style={S.error}>Error: {error}</div>;
 
   return (
+    <>
+    <style>{`
+      @media (max-width: 600px) {
+        [data-sources-topbar] { flex-direction: column !important; align-items: stretch !important; }
+        [data-sources-filter-row] { flex-wrap: wrap !important; }
+        [data-sources-filter-row] select { flex: 1 1 auto; min-width: 0; }
+        [data-sources-add-grid] { grid-template-columns: 1fr !important; }
+      }
+    `}</style>
     <div style={S.wrap}>
       <SectionTabs section="library" />
       {/* Header */}
-      <div style={S.topBar}>
+      <div data-sources-topbar style={S.topBar}>
         <div style={S.pageTitle}>Market Intelligence — {PUBLIC_SOURCES_LIBRARY.length} benchmarks</div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={S.flexRow}>
           <button onClick={() => setShowMyS(v => !v)} style={S.secBtn}>
             My Sources ({adminSources.length})
           </button>
@@ -184,7 +193,7 @@ export default function SourcesPage() {
       </div>
 
       {/* Filters row */}
-      <div style={S.filterRow}>
+      <div data-sources-filter-row style={S.filterRow}>
         {/* Operator select */}
         <select value={selectedOp} onChange={e => setSelectedOp(e.target.value)} style={S.filterSelect}>
           <option value="all">All Operators ({PUBLIC_SOURCES_LIBRARY.length})</option>
@@ -207,6 +216,7 @@ export default function SourcesPage() {
       </div>
 
       {/* Library table */}
+      <div style={S.tableScroll}>
       <table style={S.table}>
         <thead>
           <tr>
@@ -222,7 +232,7 @@ export default function SourcesPage() {
         </thead>
         <tbody>
           {libFiltered.length === 0 ? (
-            <tr><td colSpan={8} style={{ ...S.td, textAlign: 'center', padding: 28 }}>No results matching filters.</td></tr>
+            <tr><td colSpan={8} style={{ ...S.td, textAlign: 'center', padding: 'var(--cp-space-7)' }}>No results matching filters.</td></tr>
           ) : libFiltered.map(src => (
             <tr key={src.id} style={S.tr}>
               <td style={S.td}><OperatorBadge operatorId={src.operator_id} size="sm" /></td>
@@ -245,16 +255,17 @@ export default function SourcesPage() {
           ))}
         </tbody>
       </table>
+      </div>
 
       {/* My Sources (collapsible) */}
       {showMyS && (
-        <div style={{ marginTop: 8 }}>
+        <div style={S.mySourcesWrap}>
           <div style={S.sectionLabel}>MY SOURCES — Admin &amp; Project-specific</div>
 
           {showAdd && (
             <div style={S.addForm}>
               <div style={S.addFormTitle}>ADD SOURCE</div>
-              <div style={S.addGrid}>
+              <div data-sources-add-grid style={S.addGrid}>
                 {SOURCE_FIELDS.map(f => (
                   <div key={f.key} style={{ gridColumn: f.type === 'textarea' ? '1 / -1' : 'auto' }}>
                     <label style={S.fieldLabel}>{f.label}{f.required && ' *'}</label>
@@ -263,14 +274,14 @@ export default function SourcesPage() {
                         {f.options.map(o => <option key={o} value={o}>{SOURCE_TYPES[o]?.label || o}</option>)}
                       </select>
                     ) : f.type === 'textarea' ? (
-                      <textarea value={form[f.key] || ''} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} style={{ ...S.input, minHeight: 56 }} />
+                      <textarea value={form[f.key] || ''} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} style={{ ...S.input, minHeight: 'calc(var(--cp-space-12) + var(--cp-space-2))' }} />
                     ) : (
                       <input type={f.type || 'text'} value={form[f.key] || ''} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} style={S.input} />
                     )}
                   </div>
                 ))}
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+              <div style={S.formActions}>
                 <button onClick={() => setShowAdd(false)} style={S.cancelBtn}>Cancel</button>
                 <button onClick={addSource} disabled={saving || !form.metric_id || !form.metric_name || !form.source_name}
                   style={{ ...S.addBtn, opacity: (saving || !form.metric_id) ? 0.5 : 1 }}>
@@ -303,7 +314,7 @@ export default function SourcesPage() {
                     <td style={S.td}>{s.source_url ? <a href={s.source_url} target="_blank" rel="noopener noreferrer" style={S.link}>↗</a> : '—'}</td>
                     <td style={S.td}>
                       {confirmDel === s.id ? (
-                        <span style={{ display: 'inline-flex', gap: 4 }}>
+                        <span style={S.delActions}>
                           <button onClick={() => deleteSource(s.id)} style={S.confirmYes}>Delete</button>
                           <button onClick={() => setConfirmDel(null)} style={S.cancelBtn}>Cancel</button>
                         </span>
@@ -325,25 +336,25 @@ export default function SourcesPage() {
           <div style={S.modal} onClick={e => e.stopPropagation()}>
             <div style={S.modalHeader}>
               <span style={S.modalTitle}>Add to Source Ledger</span>
-              <button onClick={() => setUimSrc(null)} style={{ background: 'transparent', border: 'none', color: 'var(--cp-text-muted)', fontSize: 16, cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setUimSrc(null)} style={S.modalClose}>✕</button>
             </div>
             <div style={S.modalBody}>
               <div style={S.modalRow}>
                 <OperatorBadge operatorId={uimSrc.operator_id} size="md" />
-                <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--cp-text-primary)', flex: 1 }}>{uimSrc.metric_name}</span>
-                <span style={{ fontWeight: 800, fontSize: 16, fontVariantNumeric: 'tabular-nums' }}>{fmtVal(uimSrc)}</span>
+                <span style={S.modalMetric}>{uimSrc.metric_name}</span>
+                <span style={S.modalValue}>{fmtVal(uimSrc)}</span>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--cp-text-muted)', marginBottom: 14 }}>
+              <div style={S.modalHint}>
                 This adds the source to your source ledger. It does not automatically update scenario assumptions.
               </div>
               <label style={S.fieldLabel}>Scenario context (for audit)</label>
-              <select value={uimScenario} onChange={e => setUimScenario(e.target.value)} style={{ ...S.input, width: '100%', marginBottom: 16 }}>
+              <select value={uimScenario} onChange={e => setUimScenario(e.target.value)} style={{ ...S.input, width: '100%', marginBottom: 'var(--cp-space-4)' }}>
                 {scenarios.map(sc => <option key={sc.id} value={sc.id}>{sc.name}</option>)}
               </select>
               {uimDone ? (
-                <div style={{ color: 'var(--cp-accent)', fontWeight: 700, textAlign: 'center', padding: 12 }}>Source added.</div>
+                <div style={S.uimDone}>Source added.</div>
               ) : (
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <div style={S.flexEnd}>
                   <button onClick={() => setUimSrc(null)} style={S.cancelBtn}>Cancel</button>
                   <button onClick={useInModel} disabled={uimSaving} style={{ ...S.addBtn, opacity: uimSaving ? 0.6 : 1 }}>
                     {uimSaving ? 'Adding…' : 'Add to Ledger'}
@@ -355,42 +366,56 @@ export default function SourcesPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
 
 const S = {
-  wrap: { display: 'flex', flexDirection: 'column', gap: 24 },
-  loading: { padding: 48, textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 14 },
-  error: { padding: 20, color: 'var(--cp-error)', fontSize: 13, background: 'var(--cp-error-bg)', borderRadius: 6 },
+  wrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)', maxWidth: 1280, margin: '0 auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear, 0px)' },
+  loading: { padding: 'var(--cp-space-12)', textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-md)' },
+  error: { padding: 'var(--cp-space-5)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-sm)' },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  pageTitle: { fontSize: 20, lineHeight: '28px', fontWeight: 800, color: 'var(--cp-text-primary)' },
-  secBtn: { fontSize: 12, padding: '6px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 6, cursor: 'pointer' },
-  addBtn: { fontSize: 12, fontWeight: 700, padding: '6px 16px', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 6, cursor: 'pointer' },
-  filterRow: { display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 },
-  filterSelect: { fontSize: 11, padding: '5px 8px', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 4, color: 'var(--cp-text-primary)', cursor: 'pointer' },
-  searchInput: { flex: 1, padding: '5px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', outline: 'none' },
-  resultCount: { fontSize: 10, color: 'var(--cp-text-muted)', whiteSpace: 'nowrap' },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 10, overflow: 'hidden', marginBottom: 24 },
-  th: { padding: '8px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
+  pageTitle: { fontSize: 'var(--cp-font-xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
+  secBtn: { fontSize: 'var(--cp-font-sm)', padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-sm)', cursor: 'pointer' },
+  addBtn: { fontSize: 'var(--cp-font-sm)', fontWeight: 700, padding: 'var(--cp-space-2) var(--cp-space-4)', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', borderRadius: 'var(--cp-radius-sm)', cursor: 'pointer' },
+  filterRow: { display: 'flex', gap: 'var(--cp-space-2)', alignItems: 'center', marginBottom: 'var(--cp-space-4)' },
+  filterSelect: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
+  searchInput: { flex: 1, padding: 'var(--cp-space-2) var(--cp-space-3)', fontSize: 'var(--cp-font-sm)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', outline: 'none' },
+  resultCount: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', whiteSpace: 'nowrap' },
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-md)', overflow: 'hidden', marginBottom: 'var(--cp-space-6)' },
+  th: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'left', fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)' },
   tr: { borderBottom: '1px solid var(--cp-border)' },
-  td: { padding: '8px 12px', color: 'var(--cp-text-muted)', verticalAlign: 'middle' },
-  tdBold: { padding: '8px 12px', fontWeight: 700, color: 'var(--cp-text-primary)', verticalAlign: 'middle' },
+  td: { padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-muted)', verticalAlign: 'middle' },
+  tdBold: { padding: 'var(--cp-space-2) var(--cp-space-3)', fontWeight: 700, color: 'var(--cp-text-primary)', verticalAlign: 'middle' },
   link: { color: 'var(--cp-accent)', textDecoration: 'none' },
-  useBtn: { fontSize: 10, fontWeight: 700, padding: '4px 10px', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
-  sectionLabel: { fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--cp-text-muted)', textTransform: 'uppercase', marginBottom: 12 },
-  addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 6, padding: '16px 16px', marginBottom: 16 },
-  addFormTitle: { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--cp-text-muted)', marginBottom: 12 },
-  addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 16px' },
-  fieldLabel: { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--cp-text-muted)', marginBottom: 3 },
-  input: { width: '100%', padding: '6px 10px', fontSize: 12, border: '1px solid var(--cp-border)', borderRadius: 4, background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', boxSizing: 'border-box', fontFamily: 'inherit' },
-  cancelBtn: { fontSize: 11, padding: '5px 12px', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 4, cursor: 'pointer' },
-  empty: { padding: '20px', color: 'var(--cp-text-muted)', fontSize: 12, background: 'var(--cp-surface-2)', borderRadius: 6, textAlign: 'center' },
-  delBtn: { fontSize: 12, color: 'var(--cp-error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 6px' },
-  confirmYes: { fontSize: 10, fontWeight: 700, color: 'var(--cp-text-strong)', background: 'var(--cp-error)', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 4 },
+  useBtn: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, padding: 'var(--cp-space-1) var(--cp-space-3)', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
+  sectionLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-3)' },
+  addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-4)', marginBottom: 'var(--cp-space-4)' },
+  addFormTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
+  addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--cp-space-3) var(--cp-space-4)' },
+  fieldLabel: { display: 'block', fontSize: 'var(--cp-font-xs)', fontWeight: 600, color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-1)' },
+  input: { width: '100%', padding: 'var(--cp-space-2) var(--cp-space-3)', fontSize: 'var(--cp-font-sm)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', boxSizing: 'border-box', fontFamily: 'inherit' },
+  cancelBtn: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
+  empty: { padding: 'var(--cp-space-5)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-sm)', textAlign: 'center' },
+  delBtn: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 'var(--cp-space-1) var(--cp-space-2)' },
+  confirmYes: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-text-strong)', background: 'var(--cp-error)', border: 'none', cursor: 'pointer', padding: 'var(--cp-space-1) var(--cp-space-2)', borderRadius: 'var(--cp-radius-xs)' },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  modal: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)', borderRadius: 10, width: 440, maxWidth: '90vw', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' },
-  modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 16px', borderBottom: '1px solid var(--cp-border)' },
-  modalTitle: { fontSize: 13, fontWeight: 800, color: 'var(--cp-text-primary)' },
-  modalBody: { padding: '16px 16px' },
-  modalRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, background: 'var(--cp-surface-2)', padding: '8px 12px', borderRadius: 6 },
+  modal: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-md)', width: 440, maxWidth: '90vw', boxShadow: 'var(--cp-shadow-lg)' },
+  modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--cp-space-4)', borderBottom: '1px solid var(--cp-border)' },
+  modalTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
+  modalBody: { padding: 'var(--cp-space-4)' },
+  modalRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-3)', background: 'var(--cp-surface-2)', padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)' },
+  confDots: { display: 'inline-flex', gap: 'calc(var(--cp-space-1) / 2)' },
+  confDot: { width: 'calc(var(--cp-space-1) + 1px)', height: 'calc(var(--cp-space-1) + 1px)', borderRadius: '50%', display: 'inline-block' },
+  flexRow: { display: 'flex', gap: 'var(--cp-space-2)' },
+  flexEnd: { display: 'flex', gap: 'var(--cp-space-2)', justifyContent: 'flex-end' },
+  formActions: { display: 'flex', gap: 'var(--cp-space-2)', justifyContent: 'flex-end', marginTop: 'var(--cp-space-3)' },
+  tableScroll: { overflowX: 'auto', WebkitOverflowScrolling: 'touch' },
+  mySourcesWrap: { marginTop: 'var(--cp-space-2)' },
+  delActions: { display: 'inline-flex', gap: 'var(--cp-space-1)' },
+  modalClose: { background: 'transparent', border: 'none', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-lg)', cursor: 'pointer' },
+  modalMetric: { fontWeight: 700, fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-primary)', flex: 1 },
+  modalValue: { fontWeight: 800, fontSize: 'var(--cp-font-lg)', fontVariantNumeric: 'tabular-nums' },
+  modalHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-font-md)' },
+  uimDone: { color: 'var(--cp-accent)', fontWeight: 700, textAlign: 'center', padding: 'var(--cp-space-3)' },
 };

@@ -91,10 +91,14 @@ function AdvisoryRow({ title, item }) {
   );
 }
 
-function sendPrompt(prompt) {
+function sendPrompt(prompt, onSent) {
+  const body = document.querySelector('.ct-rail-right-body');
   const input = document.querySelector('.ct-chat-input');
   const form = document.querySelector('.ct-chat-form');
   if (!input || !form) return;
+  // Switch to Chat tab so the user sees the response
+  if (body) body.setAttribute('data-rail-tab', 'chat');
+  onSent?.();
   const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
   setter?.call(input, prompt);
   input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -103,7 +107,7 @@ function sendPrompt(prompt) {
   }, 0);
 }
 
-function OracleAdvisorContent() {
+function OracleAdvisorContent({ onSwitchToChat }) {
   const { advisorContext } = useSimulation();
   const projection = advisorContext?.projection;
   const verdict = useMemo(() => verdictFor(projection), [projection]);
@@ -158,7 +162,7 @@ function OracleAdvisorContent() {
         <div style={S.sectionKicker}>Ask ORACLE</div>
         <div style={S.promptGrid}>
           {PROMPTS.map(prompt => (
-            <button key={prompt} type="button" onClick={() => sendPrompt(prompt)} style={S.promptBtn}>
+            <button key={prompt} type="button" onClick={() => sendPrompt(prompt, onSwitchToChat)} style={S.promptBtn}>
               {prompt}
             </button>
           ))}
@@ -168,8 +172,34 @@ function OracleAdvisorContent() {
   );
 }
 
+function TabBar({ activeTab, onTab }) {
+  return (
+    <div style={S.tabBar} role="tablist" aria-label="Rail panel">
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeTab === 'advisor'}
+        style={S.tab(activeTab === 'advisor')}
+        onClick={() => onTab('advisor')}
+      >
+        IC Advisor
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={activeTab === 'chat'}
+        style={S.tab(activeTab === 'chat')}
+        onClick={() => onTab('chat')}
+      >
+        Chat
+      </button>
+    </div>
+  );
+}
+
 export default function OracleAdvisorRail() {
   const [mount, setMount] = useState(null);
+  const [activeTab, setActiveTab] = useState('advisor');
 
   useEffect(() => {
     const findMount = () => {
@@ -184,6 +214,7 @@ export default function OracleAdvisorRail() {
         slot.setAttribute('data-oracle-advisor-slot', '');
         body.insertBefore(slot, body.firstChild);
       }
+      body.setAttribute('data-rail-tab', 'advisor');
       setMount(slot);
     };
     findMount();
@@ -191,15 +222,52 @@ export default function OracleAdvisorRail() {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
-      document.querySelector('[data-oracle-advisor-slot]')?.remove();
+      const slot = document.querySelector('[data-oracle-advisor-slot]');
+      slot?.remove();
+      document.querySelector('.ct-rail-right-body')?.removeAttribute('data-rail-tab');
     };
   }, []);
 
+  // Sync active tab to DOM so CSS can toggle .ct-chat-root visibility
+  useEffect(() => {
+    if (!mount) return;
+    mount.parentElement?.setAttribute('data-rail-tab', activeTab);
+  }, [mount, activeTab]);
+
   if (!mount) return null;
-  return createPortal(<OracleAdvisorContent />, mount);
+  return createPortal(
+    <>
+      <TabBar activeTab={activeTab} onTab={setActiveTab} />
+      {activeTab === 'advisor' && <OracleAdvisorContent onSwitchToChat={() => setActiveTab('chat')} />}
+    </>,
+    mount
+  );
 }
 
 const S = {
+  tabBar: {
+    display: 'flex',
+    flexShrink: 0,
+    borderBottom: '1px solid var(--cp-border)',
+    background: 'var(--cp-surface)',
+    position: 'sticky',
+    top: 0,
+    zIndex: 2,
+  },
+  tab: (active) => ({
+    flex: 1,
+    padding: 'var(--cp-space-2) var(--cp-space-3)',
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: active ? 700 : 500,
+    color: active ? 'var(--cp-text-strong)' : 'var(--cp-text-muted)',
+    background: active ? 'var(--cp-surface-1)' : 'transparent',
+    border: 'none',
+    borderBottom: active ? '2px solid var(--cp-accent-strong)' : '2px solid transparent',
+    cursor: 'pointer',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    transition: 'color 0.15s ease, background 0.15s ease',
+  }),
   wrap: {
     order: -1,
     flexShrink: 0,
@@ -223,7 +291,7 @@ const S = {
     color: 'var(--cp-text-strong)',
   },
   sub: {
-    marginTop: 2,
+    marginTop: 'var(--cp-space-1)',
     fontSize: 'var(--cp-font-xs)',
     color: 'var(--cp-text-muted)',
     letterSpacing: 'var(--cp-tracking-wide)',
@@ -234,7 +302,7 @@ const S = {
     color: 'var(--cp-accent-strong)',
     border: '1px solid var(--cp-border-accent)',
     borderRadius: 'var(--cp-radius-xs)',
-    padding: '2px 6px',
+    padding: 'var(--cp-space-1) var(--cp-space-2)',
   },
   snapshot: {
     display: 'flex',
@@ -254,7 +322,7 @@ const S = {
   verdictBlock: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 3,
+    gap: 'var(--cp-space-1)',
     paddingBottom: 'var(--cp-space-3)',
     borderBottom: '1px solid var(--cp-border-soft)',
   },
@@ -263,9 +331,9 @@ const S = {
     color: 'var(--cp-text-muted)',
   },
   verdict: {
-    fontSize: 30,
+    fontSize: 'var(--cp-font-2xl)',
     lineHeight: 1,
-    letterSpacing: '-0.03em',
+    letterSpacing: 'var(--cp-tracking-tight)',
     color: 'var(--cp-text-strong)',
   },
   triple: {
@@ -281,7 +349,7 @@ const S = {
   },
   smallValue: {
     display: 'block',
-    marginTop: 3,
+    marginTop: 'var(--cp-space-1)',
     fontSize: 'var(--cp-font-sm)',
     color: 'var(--cp-text-primary)',
   },
@@ -304,7 +372,7 @@ const S = {
     textTransform: 'uppercase',
   },
   metricValue: {
-    marginTop: 4,
+    marginTop: 'var(--cp-space-1)',
     fontSize: 'var(--cp-font-lg)',
     fontWeight: 800,
     color: 'var(--cp-text-strong)',
@@ -313,10 +381,10 @@ const S = {
   provenance: {
     display: 'inline-flex',
     width: 'max-content',
-    marginTop: 5,
-    fontSize: 9,
+    marginTop: 'var(--cp-space-2)',
+    fontSize: 'var(--cp-font-micro)',
     fontWeight: 800,
-    letterSpacing: '0.12em',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
   },
@@ -337,7 +405,7 @@ const S = {
     letterSpacing: 'var(--cp-tracking-wider)',
   },
   rowText: {
-    margin: '5px 0 0',
+    margin: 'var(--cp-space-2) 0 0',
     fontSize: 'var(--cp-font-sm)',
     lineHeight: 1.45,
     color: 'var(--cp-text-primary)',

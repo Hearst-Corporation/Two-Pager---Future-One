@@ -25,6 +25,10 @@ function polarToXY(angleDeg, r) {
   return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) };
 }
 
+function operatorColor(id) {
+  return `var(--cp-op-${id}, var(--cp-op-default))`;
+}
+
 function layoutNodes() {
   const positions = {};
   // HEARST au centre
@@ -37,7 +41,7 @@ function layoutNodes() {
     matches.forEach((op, i) => {
       const angle = group.angle_start + (span * (i + 0.5)) / matches.length;
       const { x, y } = polarToXY(angle, group.radius);
-      positions[op.id] = { x, y, color: op.color, type: op.type, label: op.name, big: false };
+      positions[op.id] = { x, y, color: operatorColor(op.id), type: op.type, label: op.name, big: false };
     });
   }
   return positions;
@@ -60,7 +64,7 @@ export default function EcosystemNetwork({ width = 720, height = 560, activeArch
   const visibleNodes = Object.entries(positions);
 
   return (
-    <div style={{ width: '100%', overflow: 'auto', background: 'var(--cp-surface-2)', borderRadius: 8, padding: 12 }}>
+    <div style={{ width: '100%', overflow: 'auto', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-3)' }}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
         {/* Group labels */}
         {TYPE_GROUPS.map(g => {
@@ -69,7 +73,7 @@ export default function EcosystemNetwork({ width = 720, height = 560, activeArch
           return (
             <text key={g.type} x={labelPos.x} y={labelPos.y} textAnchor="middle"
               fill="var(--cp-text-muted)" fontSize="10" fontWeight="700"
-              style={{ textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-eyebrow)' }}>
               {g.label}
             </text>
           );
@@ -135,12 +139,12 @@ export default function EcosystemNetwork({ width = 720, height = 560, activeArch
 const S = {
   legend: {
     display: 'flex',
-    gap: 16,
-    paddingTop: 8,
+    gap: 'var(--cp-space-4)',
+    paddingTop: 'var(--cp-space-2)',
     flexWrap: 'wrap',
-    fontSize: 10,
+    fontSize: 'var(--cp-font-micro)',
     color: 'var(--cp-text-muted)',
   },
-  legendItem: { display: 'flex', alignItems: 'center', gap: 6 },
-  legendDot: { width: 10, height: 10, borderRadius: 2 },
+  legendItem: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' },
+  legendDot: { width: 10, height: 10, borderRadius: 'var(--cp-radius-xs)' },
 };

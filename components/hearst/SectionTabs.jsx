@@ -2,7 +2,6 @@
 
 // SectionTabs — barre de tabs internes selon la section du cockpit Hearst.
 // À placer en haut de chaque page du hub correspondant.
-import { T } from '@/lib/design-system/tokens';
 //
 // Usage : <SectionTabs section="modeling" | "library" />
 // Only routes with a live page.jsx under app/(cockpit)/admin/hearst/.
@@ -66,12 +65,12 @@ const S = {
     padding: '0 var(--cp-space-4)',
     fontSize: 'var(--cp-font-base)',
     fontWeight: 700,
-    letterSpacing: 0.3,
+    letterSpacing: 'var(--cp-tracking-wide)',
     color: 'var(--cp-text-muted)',
     background: 'transparent',
     borderRadius: 'var(--cp-radius-pill)',
     textDecoration: 'none',
-    transition: T.colorBg,
+    transition: 'color var(--cp-dur-fast) var(--cp-ease), background var(--cp-dur-fast) var(--cp-ease)',
     flexShrink: 0,
   },
   pillActive: {

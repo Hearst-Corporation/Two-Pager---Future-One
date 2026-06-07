@@ -107,6 +107,7 @@
   --cp-shadow-xs:        0 1px 3px rgba(0,0,0,0.30);
   --cp-shadow-sm:        0 4px 12px rgba(0,0,0,0.35);
   --cp-shadow-md:        0 8px 24px rgba(0,0,0,0.40);
+  --cp-shadow-lg:        0 10px 32px rgba(0,0,0,0.42); /* B1: comblé — référencé par chat-fab.css + StrategicMemoModal, jamais défini. Interpolé dans l'échelle xs→sm→md→lg→card-hover. */
   --cp-shadow-card-hover:0 12px 40px rgba(0,0,0,0.45);
 
   /* ── Couleurs sémantiques ── */
@@ -163,8 +164,14 @@
   --cp-icon-btn-size:  32px;
   --cp-kpi-min-width:  160px;
   --cp-min-center:     520px;
-  /* Fixed bottom bar clearance for FAB + page padding */
-  --cp-bar-bottom:     88px;
+  /* Bottom chrome — nav mobile + FAB drawer (<900px) + page scroll padding */
+  --cp-fab-size:           52px;
+  --cp-fab-gap:            var(--cp-space-4);
+  --cp-nav-bottom:         0px;   /* mobile section nav height; 0 on desktop */
+  --cp-bar-bottom:         var(--cp-nav-bottom); /* FAB sits above this */
+  --cp-scroll-clear:       var(--cp-space-6);
+  --cp-chat-dock-clear:    calc(54px + var(--cp-space-6) + var(--cp-space-2));
+  --cp-toast-bottom:       calc(var(--cp-scroll-clear) + var(--cp-space-2));
 
   /* ── Couleurs opérateurs ── */
   --cp-op-default:    var(--ct-text-muted);
@@ -174,76 +181,128 @@
 }
 
 /* =====================================================================
-   Bottom bar — CANONIQUE, porté tel quel de la référence Cockpit
-   (~/.claude/assets/cockpit/cockpit-template.html §BOTTOM BAR).
-   Remplace l'ancienne pilule inline-styled de OracleBottomBar.
-   Positionnée fixe, centrée sur la zone CONTENU (offset des deux rails
-   via --ct-rail-left / --ct-rail-right) pour ne pas chevaucher le chat.
+   Rail gauche — navigation des sections Oracle.
+   Portalée dans `.ct-rail-left` (rendu par @hearst/cockpit-shell) par
+   components/OracleRailNav.jsx. Remplace l'ancienne bottom-bar : la nav
+   vit désormais dans le rail gauche (88px), centrée verticalement dans
+   l'espace libre entre le lanceur (haut) et l'avatar profil (bas).
+   Tokens --cp-* uniquement (résolus via cp-tokens.css :root).
    ===================================================================== */
-.ct-bottom-bar {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  /* recentre sur le contenu : décalage = (rail gauche − rail droit) / 2 */
-  transform: translateX(calc(-50% + (var(--ct-rail-left, 88px) - var(--ct-rail-right, 420px)) / 2));
-  z-index: 30;
-  width: max-content;
-  max-width: calc(100% - 48px);
-  padding: 12px 28px;
-  border-radius: var(--cp-radius-lg, 14px);
-  background: var(--ct-surface-2);
-  border: 1px solid var(--ct-border-strong);
-}
-.ct-bottom-bar-inner {
-  position: relative;
+[data-oracle-railnav-slot] {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
   z-index: 1;
+}
+.oracle-rail-nav {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--cp-space-1);
+  padding: 0 var(--cp-space-2);
 }
-.ct-bottom-label {
-  font-size: var(--cp-font-sm);
-  font-weight: 500;
-  color: var(--ct-text-body);
-  white-space: nowrap;
-}
-.ct-seg-track {
+.oracle-rail-nav-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: var(--cp-space-1);
-  background: rgba(0, 0, 0, 0.2);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  max-width: min(100%, 72vw);
-  overflow-x: auto;
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
-}
-.ct-seg-btn {
-  appearance: none;
-  border: none;
-  background: transparent;
-  color: var(--ct-text-primary);
-  padding: var(--cp-space-2) var(--cp-space-4);
-  font-size: var(--cp-font-sm);
-  font-weight: 500;
-  font-family: inherit;
-  border-radius: 9999px;
-  cursor: pointer;
+  justify-content: center;
+  gap: var(--cp-space-1);
+  padding: var(--cp-space-2) var(--cp-space-1);
+  border-radius: var(--cp-radius-md);
+  color: var(--cp-text-muted);
   text-decoration: none;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cp-space-2);
-  transition: background var(--ct-dur-base, 150ms) var(--ct-ease, ease),
-    color var(--ct-dur-base, 150ms) var(--ct-ease, ease);
+  cursor: pointer;
+  transition: background var(--cp-dur-base) var(--cp-ease),
+    color var(--cp-dur-base) var(--cp-ease);
 }
-.ct-seg-btn:hover { background: rgba(255, 255, 255, 0.05); }
-.ct-seg-btn.active {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.9);
+.oracle-rail-nav-item:hover {
+  background: var(--cp-surface-1);
+  color: var(--cp-text-primary);
+}
+.oracle-rail-nav-item.active {
+  background: var(--cp-accent-soft);
+  color: var(--cp-text-strong);
+}
+.oracle-rail-nav-item svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.oracle-rail-nav-label {
+  font-size: var(--cp-font-micro);
+  font-weight: var(--cp-weight-semibold);
+  letter-spacing: var(--cp-tracking-wide);
+  line-height: 1;
+  text-align: center;
+}
+
+/* Mobile fallback — rail gauche masqué <600px (cockpit.css) */
+.oracle-mobile-nav-root {
+  display: none;
+}
+@media (max-width: 600px) {
+  :root {
+    --ct-rail-left: 0px;
+    --cp-rail-left: 0px;
+    --cp-nav-bottom: 64px;
+    --cp-bar-bottom: var(--cp-nav-bottom);
+    --cp-scroll-clear: calc(var(--cp-nav-bottom) + var(--cp-fab-size) + var(--cp-fab-gap));
+    --cp-toast-bottom: calc(var(--cp-scroll-clear) + var(--cp-space-2));
+  }
+  .ct-rail-left {
+    display: none !important;
+  }
+  .oracle-mobile-nav-root {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--cp-z-floating);
+    padding: var(--cp-space-2) var(--cp-space-3) calc(var(--cp-space-2) + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, var(--cp-bg-deep) 92%, transparent);
+    border-top: 1px solid var(--cp-border);
+    backdrop-filter: var(--cp-blur-md);
+    -webkit-backdrop-filter: var(--cp-blur-md);
+  }
+  .oracle-mobile-nav {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: var(--cp-space-1);
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .oracle-mobile-nav .oracle-rail-nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: var(--cp-space-1);
+    border-radius: var(--cp-radius-sm);
+  }
+  .oracle-mobile-nav .oracle-rail-nav-label {
+    font-size: 9px;
+    letter-spacing: var(--cp-tracking-wide);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --ct-rail-right: 0px;
+    --cp-rail-right: 0px;
+  }
+}
+
+@media (max-width: 900px) and (min-width: 601px) {
+  :root {
+    --cp-scroll-clear: calc(var(--cp-fab-size) + var(--cp-fab-gap) + var(--cp-space-6));
+    --cp-toast-bottom: calc(var(--cp-scroll-clear) + var(--cp-space-2));
+  }
 }
 
 /* ORACLE owns the first screen of the right rail. The native shell chat remains
@@ -295,9 +354,12 @@
   padding-top: 24px !important;
 }
 
-/* Responsive : sous 720px de contenu, on masque le label et on resserre. */
 @media (max-width: 900px) {
-  .ct-bottom-bar { padding: 10px 16px; transform: translateX(-50%); }
-  .ct-bottom-label { display: none; }
-  .ct-seg-btn { padding: 8px 12px; }
+  /* Shell hardcodes min-width: 520px — override so center column collapses on sub-900px */
+  .ct-center-panel {
+    min-width: 0 !important;
+    width: 100% !important;
+    flex: 1 1 0% !important;
+    overflow-x: hidden !important;
+  }
 }

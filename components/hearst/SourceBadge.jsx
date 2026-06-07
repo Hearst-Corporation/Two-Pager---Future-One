@@ -46,18 +46,18 @@ export default function SourceBadge({ source_type, size = 'sm' }) {
 }
 
 function sizeStyle(size) {
-  if (size === 'xs') return { fontSize: 9, padding: '1px 5px' };
-  if (size === 'lg') return { fontSize: 12, padding: '4px 10px' };
-  return { fontSize: 10, padding: '2px 7px' };
+  if (size === 'xs') return { fontSize: 'var(--cp-font-micro)', padding: '1px var(--cp-space-2)' };
+  if (size === 'lg') return { fontSize: 'var(--cp-font-sm)', padding: 'var(--cp-space-1) var(--cp-space-3)' };
+  return { fontSize: 'var(--cp-font-micro)', padding: 'var(--cp-space-1) var(--cp-space-2)' };
 }
 
 const S = {
   badge: {
     display: 'inline-flex',
     alignItems: 'center',
-    borderRadius: 3,
+    borderRadius: 'var(--cp-radius-xs)',
     fontWeight: 700,
-    letterSpacing: 0.3,
+    letterSpacing: 'var(--cp-tracking-wide)',
     fontFamily: 'inherit',
     whiteSpace: 'nowrap',
   },

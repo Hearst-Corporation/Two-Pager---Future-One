@@ -69,7 +69,7 @@ const S = {
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
     minWidth: 'var(--cp-kpi-min-width)',
-    minHeight: 'var(--cp-space-12)',
+    minHeight: '80px',
   },
   label: {
     fontSize: 'var(--cp-font-micro)',

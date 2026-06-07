@@ -1,6 +1,5 @@
 'use client';
 
-import { T } from '@/lib/design-system/tokens';
 
 const MODES = [
   { id: 'capital_first',     label: 'Budget',        sub: '$',       hint: 'How much money do you have?' },
@@ -43,27 +42,27 @@ const S = {
   wrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 12,
+    gap: 'var(--cp-space-3)',
   },
   modes: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 10,
+    gap: 'var(--cp-space-3)',
   },
   modeBtn: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 3,
-    padding: '12px',
+    gap: 'var(--cp-space-1)',
+    padding: 'var(--cp-space-3)',
     background: 'var(--cp-surface-0)',
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: 'var(--cp-border)',
-    borderRadius: 10,
+    borderRadius: 'var(--cp-radius-md)',
     cursor: 'pointer',
     textAlign: 'left',
     color: 'var(--cp-text-primary)',
-    transition: T.all,
+    transition: 'all var(--cp-dur-base) var(--cp-ease)',
     minHeight: 72,
   },
   modeBtnActive: {
@@ -72,30 +71,30 @@ const S = {
     borderColor: 'var(--cp-accent-maroon)',
     boxShadow: '0 14px 36px -24px var(--cp-accent-maroon)',
   },
-  modeRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 4 },
+  modeRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--cp-space-1)' },
   modeLabel: {
-    fontSize: 12,
-    fontWeight: 800,
-    letterSpacing: 0.3,
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-wide)',
   },
   modeSub: {
-    fontSize: 11,
-    fontWeight: 700,
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-bold)',
     color: 'var(--cp-text-muted)',
     fontVariantNumeric: 'tabular-nums',
   },
   modeSubActive: { color: 'var(--cp-text-strong)', opacity: 0.85 },
   modeHint: {
-    fontSize: 10,
+    fontSize: 'var(--cp-font-micro)',
     opacity: 0.8,
     lineHeight: '14px',
   },
 
   bootstrap: {
     alignSelf: 'flex-start',
-    fontSize: 11,
-    fontWeight: 700,
-    padding: '0',
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-bold)',
+    padding: 'var(--cp-space-0)',
     background: 'transparent',
     color: 'var(--cp-accent-maroon)',
     border: 'none',
