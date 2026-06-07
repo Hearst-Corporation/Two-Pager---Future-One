@@ -12,6 +12,7 @@ import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
+import { Table, Row, Cell as Td, SectionHead } from '@/components/hearst/ui';
 
 // ─── Content data ────────────────────────────────────────────────────────────
 
@@ -260,7 +261,7 @@ export default function DealsPage() {
 
         {/* §1 MODELS */}
         <section id="sec-models" style={S.section}>
-          <SectionHead num="01" title="The 6 deal models used across the industry"
+          <SectionHead hero num="01" title="The 6 deal models used across the industry"
             hint="From the least capital-intensive for the operator (lease) to the most committing (equity JV). All coexist." />
           <div data-deals-grid-2 style={S.grid2}>
             {MODELS.map((m) => (
@@ -286,7 +287,7 @@ export default function DealsPage() {
 
         {/* §2 REAL DEALS */}
         <section id="sec-deals" style={S.section}>
-          <SectionHead num="02" title="Real deals — what the majors have signed"
+          <SectionHead hero num="02" title="Real deals — what the majors have signed"
             hint="The recurring structure: majority long-term capital + minority operator that keeps operational control." />
           <div data-deals-grid-2 style={S.grid2}>
             {DEALS.map((d) => (
@@ -304,7 +305,7 @@ export default function DealsPage() {
 
         {/* §3 SPLITS */}
         <section id="sec-splits" style={S.section}>
-          <SectionHead num="03" title="The equity splits — who owns what"
+          <SectionHead hero num="03" title="The equity splits — who owns what"
             hint="Outside the Gulf, the dominant rule: long-term capital owns, the operator keeps 20–25% + operations." />
           <div className="cp-card" style={S.splitPanel}>
             {SPLITS.map((row) => <SplitBar key={row.deal} row={row} />)}
@@ -317,25 +318,18 @@ export default function DealsPage() {
           </div>
 
           {/* table */}
-          <div style={{ overflowX: 'auto', marginTop: 'var(--cp-space-5)' }}>
-            <table style={S.table}>
-              <thead>
-                <tr>
-                  {['Deal', 'Model', 'Equity split', 'Size', 'Operates'].map((h) => <th key={h} style={S.th}>{h}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {SPLITS.map((r) => (
-                  <tr key={r.deal}>
-                    <td style={S.tdLabel}>{r.deal}</td>
-                    <td style={S.td}>{r.model}</td>
-                    <td style={{ ...S.td, color: 'var(--cp-text-primary)' }}>{r.segs.map((s) => `${s.k} ${s.pct}`).join(' · ')}</td>
-                    <td style={S.td}>{r.size}</td>
-                    <td style={S.td}>{r.op}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div style={{ marginTop: 'var(--cp-space-5)' }}>
+            <Table scroll head={['Deal', 'Model', 'Equity split', 'Size', 'Operates']}>
+              {SPLITS.map((r) => (
+                <Row key={r.deal}>
+                  <Td label>{r.deal}</Td>
+                  <Td>{r.model}</Td>
+                  <Td style={{ color: 'var(--cp-text-primary)' }}>{r.segs.map((s) => `${s.k} ${s.pct}`).join(' · ')}</Td>
+                  <Td>{r.size}</Td>
+                  <Td>{r.op}</Td>
+                </Row>
+              ))}
+            </Table>
           </div>
 
           {/* deal size chart */}
@@ -366,7 +360,7 @@ export default function DealsPage() {
 
         {/* §4 ROLES */}
         <section id="sec-roles" style={S.section}>
-          <SectionHead num="04" title="Who does what in a hyperscale deal"
+          <SectionHead hero num="04" title="Who does what in a hyperscale deal"
             hint="A deal can involve up to 5 distinct roles. One actor can hold several — but thinking in roles tells you what you bring and what you capture." />
           <div data-deals-grid-3 style={S.grid3}>
             {ROLES.map((r) => (
@@ -381,7 +375,7 @@ export default function DealsPage() {
 
         {/* §5 GULF */}
         <section id="sec-gulf" style={S.section}>
-          <SectionHead num="05" title="Gulf / Qatar specifics"
+          <SectionHead hero num="05" title="Gulf / Qatar specifics"
             hint="The regional pattern differs from the West: sovereignty first, the state/national champion owns, tech enters in minority." />
           <div data-deals-grid-2 style={S.grid2}>
             <div className="cp-card" style={{ ...S.callout, borderColor: SERIES.sovereign }}>
@@ -410,7 +404,7 @@ export default function DealsPage() {
 
         {/* §6 PLAYBOOK */}
         <section id="sec-playbook" style={S.section}>
-          <SectionHead num="06" title="Playbook for a hub — which model to aim for"
+          <SectionHead hero num="06" title="Playbook for a hub — which model to aim for"
             hint="Actionable synthesis depending on what you bring to the table." />
           <div className="cp-card cp-card-accent" style={S.playbook}>
             <ol style={S.ol}>
@@ -446,18 +440,6 @@ export default function DealsPage() {
   );
 }
 
-function SectionHead({ num, title, hint }) {
-  return (
-    <div style={S.secHead}>
-      <span style={S.secNum}>{num}</span>
-      <div>
-        <h2 style={S.secTitle}>{title}</h2>
-        {hint && <p style={S.secHint}>{hint}</p>}
-      </div>
-    </div>
-  );
-}
-
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const S = {
@@ -479,12 +461,8 @@ const S = {
   navBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 600, padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-pill)', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
   navBtnActive: { background: 'var(--cp-accent-maroon, var(--cp-accent))', color: 'var(--cp-text-strong)', borderColor: 'var(--cp-border-accent)' },
 
-  // section
+  // section (en-têtes via <SectionHead hero/>)
   section: { scrollMarginTop: 56, display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
-  secHead: { display: 'flex', gap: 'var(--cp-space-4)', alignItems: 'flex-start' },
-  secNum: { fontSize: 'var(--cp-font-sm)', fontWeight: 800, color: 'var(--cp-accent-strong)', border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-1) var(--cp-space-2)', flex: 'none', letterSpacing: 'var(--cp-tracking-wide)' },
-  secTitle: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-strong)', lineHeight: 1.25 },
-  secHint: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)', maxWidth: 820, lineHeight: 1.5 },
 
   grid2: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--cp-space-4)' },
   grid3: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--cp-space-4)' },
@@ -520,11 +498,6 @@ const S = {
   legendRow: { display: 'flex', flexWrap: 'wrap', gap: 'var(--cp-space-4)', marginTop: 'var(--cp-space-1)', paddingTop: 'var(--cp-space-3)', borderTop: '1px solid var(--cp-border-soft)' },
   legendItem: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' },
 
-  // table
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-md)', overflow: 'hidden' },
-  th: { padding: 'var(--cp-space-3) var(--cp-space-4)', textAlign: 'left', fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wide)', textTransform: 'uppercase', color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
-  td: { padding: 'var(--cp-space-3) var(--cp-space-4)', textAlign: 'left', borderBottom: '1px solid var(--cp-border-soft)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', verticalAlign: 'top' },
-  tdLabel: { padding: 'var(--cp-space-3) var(--cp-space-4)', fontWeight: 700, fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-strong)', borderBottom: '1px solid var(--cp-border-soft)', whiteSpace: 'nowrap' },
 
   // chart
   chartCard: { padding: 'var(--cp-space-5)' },
