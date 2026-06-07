@@ -78,4 +78,10 @@ describe('C10 — GPU refresh CAPEX disclosure', () => {
     expect(folded.gpu_refresh_modeled).toBe(false);
     expect(folded.warnings.some(w => /GPU refresh CAPEX not currently modeled/i.test(w))).toBe(true);
   });
+  it('discloses (warns) when GPU RFS is after the exit year instead of silently dropping it', () => {
+    const proj = generateProjection(greenfield);
+    const skipped = foldGpuRevenue(proj, { capex_hardware: 100_000_000, revenue_ai_annual: 50_000_000 }, greenfield, { rfs_year: 8, exit_year: 5 });
+    expect(skipped.gpu_skipped_before_rfs).toBe(true);
+    expect(skipped.warnings.some(w => /RFS year .* is after exit year/i.test(w))).toBe(true);
+  });
 });

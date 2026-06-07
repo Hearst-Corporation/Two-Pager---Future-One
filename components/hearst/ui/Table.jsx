@@ -16,7 +16,8 @@ const S = {
   },
   td: { padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-body)', borderBottom: '1px solid var(--cp-border)', verticalAlign: 'middle' },
   tdLabel: { padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-primary)', fontWeight: 'var(--cp-weight-bold)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
-  tr: { borderBottom: '1px solid var(--cp-border)' },
+  // Le filet de ligne est porté par les cellules (td/th) — Row reste neutre (évite le double trait).
+  tr: {},
 };
 
 /**

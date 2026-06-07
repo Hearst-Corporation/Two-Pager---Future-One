@@ -2,50 +2,69 @@
 import PropTypes from 'prop-types';
 import Eyebrow from './Eyebrow';
 
-// SectionHead — en-tête de section canonique. Unifie les ~4 variantes inline
-// (dossier `SectionHeading`, results `sectionHead`, deals `SectionHead`,
-// simulator `boardHead`). Tokens --cp-* uniquement.
+// SectionHead — en-tête de section canonique. Unifie les ~4 variantes inline.
+// Défaut = CANON cockpit : H2 13px/700 + filet bas + hint italique
+// (tel que dossier/workspace). `hero` = gros titre 20px/800 (+num/eyebrow optionnels)
+// pour les sections "tableau de bord" (deals/results/simulator). Tokens --cp-* only.
 
 const S = {
-  wrap: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
+  // Canon (défaut)
+  wrap: {
+    display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)',
+    marginBottom: 'var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', paddingBottom: 'var(--cp-space-2)',
+  },
+  title: { margin: 0, fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' },
+  hint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
+  // Hero
+  heroWrap: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
   numBadge: {
     fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-accent-strong)',
     border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)',
     padding: 'var(--cp-space-1) var(--cp-space-2)', letterSpacing: 'var(--cp-tracking-wide)', flex: 'none',
   },
-  body: { display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)', minWidth: 0 },
-  title: { margin: 0, fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)', lineHeight: 'var(--cp-leading-tight)' },
-  hint: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', fontStyle: 'italic' },
+  heroBody: { display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)', minWidth: 0 },
+  heroTitle: { margin: 0, fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)', lineHeight: 'var(--cp-leading-tight)' },
+  heroHint: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)' },
 };
 
 /**
  * @param {object} props
- * @param {React.ReactNode} props.title    Titre de section (rendu <h2>).
- * @param {string}  [props.num]            Index « 01 » rendu en badge accent.
- * @param {string}  [props.eyebrow]        Sur-libellé CAPS au lieu du badge num.
- * @param {React.ReactNode} [props.hint]   Aide/contexte à droite ou sous le titre.
- * @param {2|3} [props.level=2]            Niveau de titre (h2 par défaut).
+ * @param {React.ReactNode} props.title
+ * @param {React.ReactNode} [props.hint]
+ * @param {boolean} [props.hero=false]   Gros titre 20px/800 (sinon canon 13px/700 + filet).
+ * @param {string}  [props.num]          Badge index « 01 » (hero only).
+ * @param {string}  [props.eyebrow]      Sur-libellé CAPS (hero only).
+ * @param {2|3} [props.level=2]
  * @param {object} [props.style]
  */
-export default function SectionHead({ title, num, eyebrow, hint, level = 2, style, ...rest }) {
+export default function SectionHead({ title, hint, hero = false, num, eyebrow, level = 2, style, ...rest }) {
   const Heading = level === 3 ? 'h3' : 'h2';
+  if (hero) {
+    return (
+      <div style={{ ...S.heroWrap, ...style }} {...rest}>
+        {num && <span style={S.numBadge}>{num}</span>}
+        <div style={S.heroBody}>
+          {eyebrow && <Eyebrow block>{eyebrow}</Eyebrow>}
+          <Heading style={S.heroTitle}>{title}</Heading>
+          {hint && <span style={S.heroHint}>{hint}</span>}
+        </div>
+      </div>
+    );
+  }
   return (
     <div style={{ ...S.wrap, ...style }} {...rest}>
-      {num && <span style={S.numBadge}>{num}</span>}
-      <div style={S.body}>
-        {eyebrow && <Eyebrow block>{eyebrow}</Eyebrow>}
-        <Heading style={S.title}>{title}</Heading>
-        {hint && <span style={S.hint}>{hint}</span>}
-      </div>
+      <Heading style={S.title}>{title}</Heading>
+      {hint && <span style={S.hint}>{hint}</span>}
     </div>
   );
 }
 
 SectionHead.propTypes = {
   title: PropTypes.node.isRequired,
+  hint: PropTypes.node,
+  hero: PropTypes.bool,
   num: PropTypes.string,
   eyebrow: PropTypes.string,
-  hint: PropTypes.node,
   level: PropTypes.oneOf([2, 3]),
   style: PropTypes.object,
 };

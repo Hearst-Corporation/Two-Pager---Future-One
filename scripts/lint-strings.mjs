@@ -52,6 +52,9 @@ for (const file of walk(ROOT)) {
     if (t.startsWith('//') || t.startsWith('*')) return;
     for (const { re, label } of UI_STRING_RES) {
       if (re.test(line)) {
+        // `title=` sur un composant (<SectionHead title="…">) = prop de CONTENU (titre rendu),
+        // pas un attribut tooltip HTML → équivaut au children d'un <h2>, non visé par cette règle.
+        if (label === 'title en dur' && /<[A-Z][A-Za-z0-9]/.test(line)) continue;
         violations.push({ rel, num: i + 1, label, signature: sig(rel, line) });
       }
     }
