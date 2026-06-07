@@ -9,6 +9,7 @@ import {
 import { detectAlerts } from '@/lib/hearst-alerts';
 import AlertBanner from '@/components/hearst/AlertBanner';
 import KpiCard from '@/components/hearst/KpiCard';
+import { Button } from '@/components/hearst/ui';
 import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
@@ -175,16 +176,15 @@ export default function FinancialPage() {
             </button>
           ))}
           <div style={{ width: 1, background: 'var(--cp-border)', margin: '0 var(--cp-space-1)' }} />
-          <button disabled title="Excel export is not available yet" style={{ ...S.exportBtn, opacity: 0.5, cursor: 'not-allowed' }}>
-            Excel (soon)
-          </button>
-          <Link
+          <Button variant="muted" size="sm" disabled title="Excel export is not available yet">Excel (soon)</Button>
+          <Button
+            variant="muted"
+            size="sm"
             href={base ? `/admin/hearst/dossier?scenario=${base.id}` : '/admin/hearst/dossier'}
-            style={{ ...S.exportBtn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
             title="Open this scenario's strategic memo in the Dossier (PDF export available there)"
           >
             Memo →
-          </Link>
+          </Button>
         </div>
       </div>
 
@@ -541,7 +541,6 @@ const S = {
   warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4)', marginTop: 'var(--cp-space-5)' },
   warnTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
   warnRow: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) 0', borderBottom: '1px solid var(--cp-error-bg)' },
-  exportBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 700, padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
   debtSummary: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-5)' },
   sensitivitySelect: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
 };
