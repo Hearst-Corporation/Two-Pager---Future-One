@@ -10,13 +10,13 @@
 // <StrategicMemoModal /> rende chaque section avec ses propres affordances
 // (collapsible, confidence tag, source citations, charts ré-utilisés).
 //
-// Auth : viewer (mémo = lecture seulement, pas d'écriture DB).
+// Auth : editor requis (la route persiste une ligne versionnée du mémo en DB via persistMemo).
 // Modèle : Hypercli/Kimi K2.6 UNIQUEMENT (aucun fallback provider). Si l'appel
 // échoue/timeout, on retombe sur un mémo déterministe local (sans LLM).
 // Rate-limit : 5 req/min/actor en prod, skip en dev.
 
 import { NextResponse } from 'next/server';
-import { requireProfile } from '@/lib/supabase-admin';
+import { authedWrite } from '@/lib/supabase-admin';
 import { kimiChatCompletion, KIMI_MODEL } from '@/lib/llm/kimi';
 import { buildOracleSystemPrompt } from '@/lib/oracle-system-prompt';
 import { buildIntelligenceBrief } from '@/lib/oracle-intelligence';
@@ -427,7 +427,7 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
 }
 
 export async function POST(req) {
-  const auth = await requireProfile('viewer');
+  const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
 
   const rl = checkRl(auth.profile.id);
@@ -746,6 +746,7 @@ export async function POST(req) {
       persisted = { error: e?.message || 'persist_failed' };
     }
 
+    const persistFailed = !!(persisted && persisted.error);
     return NextResponse.json({
       memo,
       persisted,
@@ -783,7 +784,7 @@ export async function POST(req) {
       explainability_seed,
       audience,
       memo_quality,
-    });
+    }, persistFailed ? { status: 207 } : undefined);
   } catch (e) {
     console.error('[strategic-memo] error:', e?.message);
     return NextResponse.json({ error: e?.message || 'Memo generation failed' }, { status: 500 });

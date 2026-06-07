@@ -155,6 +155,7 @@ export default function SourcesPage() {
           unit: uimSrc.unit, currency: uimSrc.currency, geography: uimSrc.geography,
           confidence_score: uimSrc.confidence_score, date_published: uimSrc.date_published,
           applicability_to_qatar: uimSrc.applicability_to_qatar, notes: uimSrc.caveat,
+          used_in_model: true,
         }),
       });
       setUimDone(true);
@@ -305,7 +306,10 @@ export default function SourcesPage() {
               <tbody>
                 {adminSources.map(s => (
                   <tr key={s.id} style={S.tr}>
-                    <td style={S.tdBold}>{s.metric_id}</td>
+                    <td style={S.tdBold}>
+                      {s.metric_id}
+                      {s.used_in_model && <span style={S.inModelBadge}>● in model</span>}
+                    </td>
                     <td style={S.td}><SourceBadge source_type={s.source_type} /></td>
                     <td style={S.td}>{s.source_name || '—'}</td>
                     <td style={{ ...S.td, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{s.value != null ? s.value : (s.value_text || '—')}{s.unit ? ' ' + s.unit : ''}</td>
@@ -345,7 +349,7 @@ export default function SourcesPage() {
                 <span style={S.modalValue}>{fmtVal(uimSrc)}</span>
               </div>
               <div style={S.modalHint}>
-                This adds the source to your source ledger. It does not automatically update scenario assumptions.
+                This flags the source as used in the model — the simulator will use its value for this metric (overriding the benchmark median).
               </div>
               <label style={S.fieldLabel}>Scenario context (for audit)</label>
               <select value={uimScenario} onChange={e => setUimScenario(e.target.value)} style={{ ...S.input, width: '100%', marginBottom: 'var(--cp-space-4)' }}>
@@ -418,4 +422,5 @@ const S = {
   modalValue: { fontWeight: 800, fontSize: 'var(--cp-font-lg)', fontVariantNumeric: 'tabular-nums' },
   modalHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-font-md)' },
   uimDone: { color: 'var(--cp-accent)', fontWeight: 700, textAlign: 'center', padding: 'var(--cp-space-3)' },
+  inModelBadge: { display: 'inline-block', marginLeft: 'var(--cp-space-2)', fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-accent)', background: 'var(--cp-surface-3)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', padding: '0 var(--cp-space-2)', verticalAlign: 'middle', letterSpacing: 'var(--cp-tracking-eyebrow)' },
 };

@@ -52,4 +52,24 @@ describe('bootstrapScenarioFromSources', () => {
     // Au moins une métrique doit être sourcée
     expect(Object.keys(r.source_map).length).toBeGreaterThan(0);
   });
+
+  describe('extraSources override', () => {
+    it('extraSources override the static median for their metric', () => {
+      const baseline = bootstrapScenarioFromSources({ geography: 'qatar' });
+      const overridden = bootstrapScenarioFromSources({
+        geography: 'qatar',
+        extraSources: [{ id: 'db-test-1', metric_id: 'electricity_price_mwh', value: 999, geography: 'qatar', confidence_score: 5 }],
+      });
+      expect(overridden.scenario.electricity_price_mwh).toBe(999);
+      expect(overridden.source_map.electricity_price_mwh).toBe('db-test-1');
+      // Unrelated metric must be unchanged
+      expect(overridden.scenario.pue).toBe(baseline.scenario.pue);
+    });
+
+    it('extraSources default empty is equivalent to omitting it', () => {
+      const a = bootstrapScenarioFromSources({ geography: 'qatar' });
+      const b = bootstrapScenarioFromSources({ geography: 'qatar', extraSources: [] });
+      expect(b.scenario).toEqual(a.scenario);
+    });
+  });
 });

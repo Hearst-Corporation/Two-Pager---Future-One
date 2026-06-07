@@ -195,6 +195,7 @@ export default function SimulatorPage() {
   }, []);
 
   useEffect(() => {
+    let ignore = false;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
@@ -204,25 +205,32 @@ export default function SimulatorPage() {
         const r = await fetch('/api/admin/hearst/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ ...payload, project_id: projectId || undefined }),
         });
         if (!r.ok) {
           const body = await r.json().catch(() => ({}));
-          setSimError(body.error || `Simulate failed (${r.status})`);
-          setSimResult(null);
+          if (!ignore) {
+            setSimError(body.error || `Simulate failed (${r.status})`);
+            setSimResult(null);
+          }
         } else {
           const data = await r.json();
-          setSimResult(data);
-          setSimError(null);
+          if (!ignore) {
+            setSimResult(data);
+            setSimError(null);
+          }
         }
       } catch (e) {
-        setSimError(e.message);
+        if (!ignore) setSimError(e.message);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     }, 300);
-    return () => clearTimeout(debounceRef.current);
-  }, [deferredState]);
+    return () => {
+      ignore = true;
+      clearTimeout(debounceRef.current);
+    };
+  }, [deferredState, projectId]);
 
   useEffect(() => {
     if (resultsNavigationRef.current) return;

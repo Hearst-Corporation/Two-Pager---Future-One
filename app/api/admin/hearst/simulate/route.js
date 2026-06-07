@@ -16,7 +16,7 @@
 // confirmation utilisateur ("Save as Scenario" dans la page simulator).
 
 import { NextResponse } from 'next/server';
-import { requireProfile } from '@/lib/supabase-admin';
+import { requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { withValidation } from '@/lib/validators/withValidation';
 import { SimulateRequestSchema } from '@/lib/validators/hearst';
 import {
@@ -113,6 +113,7 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
     geography = 'qatar',
     hardware_mix,
     scenario_overrides,
+    project_id,
   } = parsed;
 
   const archetype = ARCHETYPE_BY_ID[archetype_id];
@@ -120,13 +121,30 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
     return NextResponse.json({ error: `Unknown archetype_id: ${archetype_id}` }, { status: 400 });
   }
 
-  // 1. Bootstrap des defaults Qatar depuis PUBLIC_SOURCES_LIBRARY
+  // 1a. Fetch DB sources flagged used_in_model=true (resilient — never breaks the route)
+  let extraSources = [];
+  if (project_id) {
+    try {
+      const supa = getAdminClient();
+      const { data } = await supa
+        .from('hearst_sources')
+        .select('id, metric_id, value, geography, confidence_score')
+        .eq('project_id', project_id)
+        .eq('used_in_model', true);
+      if (Array.isArray(data)) extraSources = data;
+    } catch (e) {
+      console.warn('[simulate] hearst_sources fetch failed:', e?.message);
+    }
+  }
+
+  // 1. Bootstrap des defaults Qatar depuis PUBLIC_SOURCES_LIBRARY (+ DB overrides)
   const requested_mw = input_value?.total_mw ?? 50;
   const boot = bootstrapScenarioFromSources({
     geography,
     business_model_id,
     mw_target: requested_mw,
     archetype_id,
+    extraSources,
   });
 
   // 2. Merge: defaults Qatar + overrides utilisateur
