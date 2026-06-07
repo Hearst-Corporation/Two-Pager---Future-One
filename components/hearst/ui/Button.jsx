@@ -17,6 +17,7 @@ const VARIANTS = {
   ghost:     { background: 'transparent', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)' },
   muted:     { background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)' },
   danger:    { background: 'transparent', color: 'var(--cp-error)', border: '1px solid var(--cp-border)' },
+  dangerSolid: { background: 'var(--cp-error)', color: 'var(--cp-text-strong)', border: '1px solid var(--cp-error)' },
 };
 
 const BASE = {
@@ -52,7 +53,7 @@ export default function Button({
 }
 
 Button.propTypes = {
-  variant: PropTypes.oneOf(['primary', 'secondary', 'ghost', 'muted', 'danger']),
+  variant: PropTypes.oneOf(['primary', 'secondary', 'ghost', 'muted', 'danger', 'dangerSolid']),
   size: PropTypes.oneOf(['sm', 'md', 'lg']),
   href: PropTypes.string,
   disabled: PropTypes.bool,
