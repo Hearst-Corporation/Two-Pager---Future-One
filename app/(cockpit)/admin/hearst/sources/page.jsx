@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import SourceBadge from '@/components/hearst/SourceBadge';
-import SectionTabs from '@/components/hearst/SectionTabs';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
 import { Table, Row, Cell, Field, Button, Badge } from '@/components/hearst/ui';
 import {
@@ -180,7 +179,6 @@ export default function SourcesPage() {
       }
     `}</style>
     <div className="oracle-page">
-      <SectionTabs section="library" />
       {/* Header */}
       <div data-sources-topbar style={S.topBar}>
         <div style={S.pageTitle}>Market Intelligence — {PUBLIC_SOURCES_LIBRARY.length} benchmarks</div>

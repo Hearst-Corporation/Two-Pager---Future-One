@@ -27,7 +27,7 @@ import {
   deriveVerdict, deriveCategory, deriveKpis, topRisks, deriveDecision,
   deriveCapitalStack, fmtUsd,
 } from '@/lib/dossier-derive';
-import { SectionHead, Button } from '@/components/hearst/ui';
+import { SectionHead, Button, Table, Row, Cell } from '@/components/hearst/ui';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -684,29 +684,29 @@ function AllMemosView() {
       {memos && memos.length === 0 && <div style={S.empty}>No reports yet. Generate a strategic memo from the Simulator.</div>}
 
       {memos && memos.length > 0 && (
-        <table style={S.table}>
-          <thead>
-            <tr>{['Title', 'Scenario', 'Date', 'v', 'Provider', 'Confidence', 'Status', ''].map(h => <th key={h} style={S.th}>{h}</th>)}</tr>
-          </thead>
-          <tbody>
-            {memos.map(mm => (
-              <tr key={mm.id} style={S.tr}>
-                <td style={S.td}><Link href={`/admin/hearst/dossier?memo=${mm.id}`} style={S.link}>{mm.title}</Link></td>
-                <td style={S.td}>
-                  {mm.scenario_id
-                    ? <Link href={`/admin/hearst/dossier?scenario=${mm.scenario_id}`} style={S.link}>{scenarioName(mm.scenario_id)}</Link>
-                    : <span style={S.muted}>—</span>}
-                </td>
-                <td style={S.td}>{fmtDateShort(mm.created_at)}</td>
-                <td style={S.td}>v{mm.version}</td>
-                <td style={S.td}>{mm.provider_used || '—'}</td>
-                <td style={S.td}><ConfidenceLabel level={mm.confidence_level} /></td>
-                <td style={S.td}><span style={S.statusText}>{mm.status}</span></td>
-                <td style={S.td}><a style={S.pdf} href={`/api/admin/hearst/strategic-memos/${mm.id}/pdf`} target="_blank" rel="noreferrer">PDF ↓</a></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Table
+          scroll
+          head={['Title', 'Scenario', 'Date', 'v', 'Provider', 'Confidence', 'Status', '']}
+        >
+          {memos.map(mm => (
+            <Row key={mm.id}>
+              <Cell label><Link href={`/admin/hearst/dossier?memo=${mm.id}`} style={S.link}>{mm.title}</Link></Cell>
+              <Cell>
+                {mm.scenario_id
+                  ? <Link href={`/admin/hearst/dossier?scenario=${mm.scenario_id}`} style={S.link}>{scenarioName(mm.scenario_id)}</Link>
+                  : <span style={S.muted}>—</span>}
+              </Cell>
+              <Cell>{fmtDateShort(mm.created_at)}</Cell>
+              <Cell>v{mm.version}</Cell>
+              <Cell>{mm.provider_used || '—'}</Cell>
+              <Cell><ConfidenceLabel level={mm.confidence_level} /></Cell>
+              <Cell><span style={S.statusText}>{mm.status}</span></Cell>
+              <Cell style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                <a style={S.pdf} href={`/api/admin/hearst/strategic-memos/${mm.id}/pdf`} target="_blank" rel="noreferrer">PDF ↓</a>
+              </Cell>
+            </Row>
+          ))}
+        </Table>
       )}
     </div>
   );

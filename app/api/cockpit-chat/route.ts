@@ -81,6 +81,12 @@ const BodySchema = z.object({
     projection: z.record(z.string(), z.unknown()).optional(),
     warnings: z.array(z.string().max(2000)).max(20).optional(),
   }).passthrough().nullish(),
+  oracle: z.object({
+    pathname: z.string().max(256).optional(),
+    stakeholder: z.string().optional(),
+    region: z.string().optional(),
+    overlays: z.array(z.string()).optional(),
+  }).optional(),
 });
 
 type Mode = "normal" | "review";
@@ -350,16 +356,13 @@ export async function POST(req: Request) {
   // Prefixe le system prompt pour aligner le raisonnement sur les 11 sections,
   // 6 perspectives, stakeholder mode, region + overlays. Heuristique par
   // pathname : /admin/hearst* → sovereign / qatar / Vision 2030 + Qatar AI.
-  const oracleCtxBase = body.productId ? {} : inferOracleContextFromPath("/admin/hearst");
+  const ctxPath = body.oracle?.pathname ?? "/admin/hearst";
+  const oracleCtxBase = body.productId ? {} : inferOracleContextFromPath(ctxPath);
   const oracleCtx = {
     ...oracleCtxBase,
-    // accepter override depuis le body (futur : front pourra envoyer stakeholder/region)
-    stakeholder: (raw as { oracle?: { stakeholder?: string } })?.oracle?.stakeholder
-      ?? oracleCtxBase.stakeholder,
-    region: (raw as { oracle?: { region?: string } })?.oracle?.region
-      ?? oracleCtxBase.region,
-    overlays: (raw as { oracle?: { overlays?: string[] } })?.oracle?.overlays
-      ?? oracleCtxBase.overlays,
+    stakeholder: body.oracle?.stakeholder ?? oracleCtxBase.stakeholder,
+    region: body.oracle?.region ?? oracleCtxBase.region,
+    overlays: body.oracle?.overlays ?? oracleCtxBase.overlays,
     brevity: mode === "review" ? "deep" as const : "standard" as const,
     surface: "cockpit-chat" as const,
     product_context: body.productId ? `product=${body.productId}` : "oracle cockpit",

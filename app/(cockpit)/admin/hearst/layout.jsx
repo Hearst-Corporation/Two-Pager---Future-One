@@ -5,6 +5,7 @@ import './cockpit.css';
 import './cp-tokens.css';
 import './oracle-layout.css';
 import { CockpitShell } from '@hearst/cockpit-shell';
+import { Suspense } from 'react';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleRailNav } from '@/components/OracleRailNav';
 import ChatToggleFAB from '@/components/hearst/ChatToggleFAB';
@@ -12,7 +13,7 @@ import OracleAdvisorRail from '@/components/hearst/OracleAdvisorRail';
 import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
 import MemoJobBadge from '@/components/hearst/MemoJobBadge';
 import MemoToast from '@/components/hearst/MemoToast';
-import { ChatIdPersistor } from '@/components/admin/ChatIdPersistor';
+import { CockpitChatBridge } from '@/components/admin/CockpitChatBridge';
 
 const ORACLE_PRODUCTS = [
   // eslint-disable-next-line no-restricted-syntax -- CockpitProduct.color contract requires a hex literal (shell consumes it via color-mix).
@@ -33,11 +34,15 @@ const ORACLE_CHAT_CONFIG = {
 export default function HearstLayout({ children }) {
   return (
     <SimulationProvider>
-      <ChatIdPersistor />
+      <Suspense fallback={null}>
+        <CockpitChatBridge />
+      </Suspense>
       <CockpitShell products={ORACLE_PRODUCTS} appId="oracle" chatConfig={ORACLE_CHAT_CONFIG}>
         <OracleRailNav />
         {children}
-        <OracleAdvisorRail />
+        <Suspense fallback={null}>
+          <OracleAdvisorRail />
+        </Suspense>
         <ChatToggleFAB />
         {/* Strategic Memo : modale + badge persistant + toast pilotés par
             le store global lib/hearst-memo-job-store.js. Le job survit à

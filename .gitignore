@@ -26,6 +26,7 @@ futur-one-brochure.zip
 public/u2883995211_*
 
 # QA & audit artefacts (kept local, not versioned)
+audit-screenshots/
 .playwright-mcp/
 docs/audit/*.html
 cockpit-*.png

@@ -23,7 +23,7 @@ app/
     simulator/results/  ← résultats + visualisations
     financial/ sources/ workspace/ dossier/ deals/
   api/
-    cockpit-chat/       ← Kimi via Hypercli
+    cockpit-chat/       ← Kimi via Hypercli (deal + pathname + historique scopé via CockpitChatBridge)
     admin/hearst/       ← simulate, scenarios, memos, sources, project
 
 components/
@@ -39,6 +39,7 @@ npm run dev
 ```
 
 > **Port fixe 5005** — `npm run dev` et `npm run start` utilisent `-p 5005`. Ne pas lancer sur 3000.
+> **Après `check:ci` ou build avec le dev actif** — `npm run dev:clean` (kill 5005 + purge `.next` + relance).
 
 Ouvrir [http://localhost:5005](http://localhost:5005).
 
@@ -57,8 +58,8 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 | `/admin/hearst/simulator/results?scenario=<id>` | Résultats complets |
 | `/admin/hearst/financial` | Modèle financier |
 | `/admin/hearst/sources` | Sources & contrats |
-| `/admin/hearst/workspace` | Hub scénarios / mémos |
-| `/admin/hearst/dossier` | Lecteur mémo stratégique |
+| `/admin/hearst/workspace` | Scénarios sauvegardés |
+| `/admin/hearst/dossier` | Mémos stratégiques / Decision Canvas |
 | `/admin/hearst/deals` | Structures deal |
 | `/api/health` | Smoke-test (Railway) |
 
@@ -68,4 +69,5 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 npx tsc --noEmit
 npm test
 npm run test:e2e -- tests/e2e/coherence-visual.spec.ts
+npm run test:e2e   # login.spec skip si ADMIN_DEV_AUTOLOGIN_EMAIL dans .env.local
 ```

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 5005",
+    "dev:clean": "sh -c 'pids=$(lsof -nP -iTCP:5005 -sTCP:LISTEN -t 2>/dev/null); [ -n \"$pids\" ] && kill -9 $pids; rm -rf .next && npm run dev'",
     "rundev": "npm run dev",
     "build": "next build",
     "start": "next start -p 5005",

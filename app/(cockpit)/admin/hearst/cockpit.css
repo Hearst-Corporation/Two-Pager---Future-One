@@ -126,5 +126,19 @@ html :focus-visible {
 }
 .ct-rail-right .ct-rail-right-body { padding-bottom: var(--cp-chat-dock-clear); }
 
-.ct-rail-right-body[data-rail-tab="advisor"] .ct-chat-root { display: none !important; }
-.ct-rail-right-body[data-rail-tab="chat"] .ct-chat-root { display: flex !important; flex-direction: column; flex: 1 1 0%; min-height: 0; }
+/* Modeling pages: IC snapshot stacked above chat (no tab toggle) */
+.ct-rail-right-body .ct-chat-root {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+}
+.ct-rail-right-body [data-oracle-advisor-slot] {
+  flex-shrink: 0;
+  max-height: 42vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Reference pages (deals, sources, workspace, dossier list) — chat only, no IC snapshot */
+body.oracle-advisor-chat-only [data-oracle-advisor-slot] { display: none !important; }

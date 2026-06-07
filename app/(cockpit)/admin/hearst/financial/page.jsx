@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import SectionTabs from '@/components/hearst/SectionTabs';
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, Area, AreaChart, BarChart,
@@ -143,7 +142,6 @@ export default function FinancialPage() {
       }
     `}</style>
     <div className="oracle-page">
-      <SectionTabs section="modeling" />
       {/* Scenario toggles */}
       <div data-financial-top-bar style={S.topBar}>
         <div style={S.pageTitle}>10-Year Financial Projection</div>

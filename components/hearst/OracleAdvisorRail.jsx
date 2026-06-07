@@ -2,8 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 import { fmtPctFromRatio, fmtX, MISSING } from '@/lib/hearst-format';
+import { getAdvisorRailMode } from '@/lib/oracle-advisor-routes';
+import { COCKPIT_CHAT_SEND_EVENT } from '@/lib/cockpit-chat-payload';
 
 const PROMPTS = [
   'Why REVIEW?',
@@ -91,23 +94,13 @@ function AdvisoryRow({ title, item }) {
   );
 }
 
-function sendPrompt(prompt, onSent) {
-  const body = document.querySelector('.ct-rail-right-body');
-  const input = document.querySelector('.ct-chat-input');
-  const form = document.querySelector('.ct-chat-form');
-  if (!input || !form) return;
-  // Switch to Chat tab so the user sees the response
-  if (body) body.setAttribute('data-rail-tab', 'chat');
-  onSent?.();
-  const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
-  setter?.call(input, prompt);
-  input.dispatchEvent(new Event('input', { bubbles: true }));
-  window.setTimeout(() => {
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-  }, 0);
+function sendPrompt(prompt) {
+  window.dispatchEvent(
+    new CustomEvent(COCKPIT_CHAT_SEND_EVENT, { detail: { message: prompt } }),
+  );
 }
 
-function OracleAdvisorContent({ onSwitchToChat }) {
+function OracleAdvisorContent() {
   const { advisorContext } = useSimulation();
   const projection = advisorContext?.projection;
   const verdict = useMemo(() => verdictFor(projection), [projection]);
@@ -162,7 +155,7 @@ function OracleAdvisorContent({ onSwitchToChat }) {
         <div style={S.sectionKicker}>Ask ORACLE</div>
         <div style={S.promptGrid}>
           {PROMPTS.map(prompt => (
-            <button key={prompt} type="button" onClick={() => sendPrompt(prompt, onSwitchToChat)} style={S.promptBtn}>
+            <button key={prompt} type="button" onClick={() => sendPrompt(prompt)} style={S.promptBtn}>
               {prompt}
             </button>
           ))}
@@ -172,34 +165,21 @@ function OracleAdvisorContent({ onSwitchToChat }) {
   );
 }
 
-function TabBar({ activeTab, onTab }) {
-  return (
-    <div style={S.tabBar} role="tablist" aria-label="Rail panel">
-      <button
-        type="button"
-        role="tab"
-        aria-selected={activeTab === 'advisor'}
-        style={S.tab(activeTab === 'advisor')}
-        onClick={() => onTab('advisor')}
-      >
-        IC Advisor
-      </button>
-      <button
-        type="button"
-        role="tab"
-        aria-selected={activeTab === 'chat'}
-        style={S.tab(activeTab === 'chat')}
-        onClick={() => onTab('chat')}
-      >
-        Chat
-      </button>
-    </div>
-  );
-}
-
 export default function OracleAdvisorRail() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const railMode = useMemo(
+    () => getAdvisorRailMode(pathname, searchParams),
+    [pathname, searchParams],
+  );
+  const advisorEnabled = railMode === 'full';
+
   const [mount, setMount] = useState(null);
-  const [activeTab, setActiveTab] = useState('advisor');
+
+  useEffect(() => {
+    document.body.classList.toggle('oracle-advisor-chat-only', !advisorEnabled);
+    return () => document.body.classList.remove('oracle-advisor-chat-only');
+  }, [advisorEnabled]);
 
   useEffect(() => {
     const findMount = () => {
@@ -214,7 +194,6 @@ export default function OracleAdvisorRail() {
         slot.setAttribute('data-oracle-advisor-slot', '');
         body.insertBefore(slot, body.firstChild);
       }
-      body.setAttribute('data-rail-tab', 'advisor');
       setMount(slot);
     };
     findMount();
@@ -224,50 +203,14 @@ export default function OracleAdvisorRail() {
       observer.disconnect();
       const slot = document.querySelector('[data-oracle-advisor-slot]');
       slot?.remove();
-      document.querySelector('.ct-rail-right-body')?.removeAttribute('data-rail-tab');
     };
   }, []);
 
-  // Sync active tab to DOM so CSS can toggle .ct-chat-root visibility
-  useEffect(() => {
-    if (!mount) return;
-    mount.parentElement?.setAttribute('data-rail-tab', activeTab);
-  }, [mount, activeTab]);
-
-  if (!mount) return null;
-  return createPortal(
-    <>
-      <TabBar activeTab={activeTab} onTab={setActiveTab} />
-      {activeTab === 'advisor' && <OracleAdvisorContent onSwitchToChat={() => setActiveTab('chat')} />}
-    </>,
-    mount
-  );
+  if (!mount || !advisorEnabled) return null;
+  return createPortal(<OracleAdvisorContent />, mount);
 }
 
 const S = {
-  tabBar: {
-    display: 'flex',
-    flexShrink: 0,
-    borderBottom: '1px solid var(--cp-border)',
-    background: 'var(--cp-surface)',
-    position: 'sticky',
-    top: 0,
-    zIndex: 2,
-  },
-  tab: (active) => ({
-    flex: 1,
-    padding: 'var(--cp-space-2) var(--cp-space-3)',
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: active ? 700 : 500,
-    color: active ? 'var(--cp-text-strong)' : 'var(--cp-text-muted)',
-    background: active ? 'var(--cp-surface-1)' : 'transparent',
-    border: 'none',
-    borderBottom: active ? '2px solid var(--cp-accent-strong)' : '2px solid transparent',
-    cursor: 'pointer',
-    textTransform: 'uppercase',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    transition: 'color 0.15s ease, background 0.15s ease',
-  }),
   wrap: {
     order: -1,
     flexShrink: 0,

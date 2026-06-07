@@ -8,7 +8,7 @@
 <!-- enable:section=tldr -->
 ## 1. TL;DR
 - Scaffolder : `node scripts/new-feature.mjs <resource> --ts=YYYYMMDDHHMMSS`
-- Tests : `npm test` (vitest, 214 tests)
+- Tests : `npm test` (vitest, 224 tests)
 - Gate : `npm run check` — la mauvaise façon ÉCHOUE ici.
 - Auth : toutes les routes API passent par `requireProfile` / `authedWrite`.
 - Tokens : `var(--cp-*)` uniquement — jamais de hex hardcodé dans `app/(cockpit)/` ni `components/hearst/`.
@@ -64,11 +64,16 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 <!-- enable:section=gotchas -->
 ## 6. Gotchas du repo
 - Port **5005** toujours (`npm run dev` → localhost:5005). Ne jamais changer.
+- Ne pas lancer `check:ci` / `next build` pendant `npm run dev` (corrompt `.next` → 404 chunks). Après build : `npm run dev:clean`.
 - `requireProfile` est dans `lib/auth-server.js`, **pas** un middleware Next.js.
 - `service_role` = bypass RLS complet → uniquement dans `app/api/`, jamais côté client.
 - Kimi K2.6 via Hypercli (`HYPERCLI_API_KEY`) — endpoint `/api/cockpit-chat/`.
 - Mémo fallback = `_generation_mode: 'deterministic_fallback'` dans le JSON.
 - Le moteur financier **ne fabrique jamais** de données : `null` / `'N/A — Source Required'` si manquant.
+- IC Advisor rail : `lib/oracle-advisor-routes.js` — chat-only sur deals/sources/workspace/dossier liste ; full sur simulator/financial/dossier `?memo=`.
+- Chat voie A : `CockpitChatBridge` injecte `deal` + `oracle.pathname` dans POST `/api/cockpit-chat`. Prompts IC → `COCKPIT_CHAT_SEND_EVENT`.
+- Chat scope : `resolveChatScope()` → `oracle:chat-id:{scope}` ; `syncScopedChatToShell()` + `setActiveChat` (export shell 0.2.0 patché) recharge l’historique. Rail modeling = snapshot IC + chat empilés.
+- `@hearst/cockpit-shell` : `hearst-cockpit-shell-0.2.0.tgz` exporte `setActiveChat` (patch dist) — repack après upgrade shell.
 - `useEffect(..., [])` init-only = pattern intentionnel sur simulator/page.jsx.
 - CSP : `unsafe-eval` retiré en prod (Next.js HMR en dev uniquement).
 

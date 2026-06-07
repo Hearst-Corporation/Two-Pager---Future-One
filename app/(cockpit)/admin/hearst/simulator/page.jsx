@@ -16,6 +16,8 @@ import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import HardwareMixer from '@/components/hearst/simulator/HardwareMixer';
+import { SectionHead, Button } from '@/components/hearst/ui';
+import { UI } from '@/lib/ui-strings';
 
 const VIZ_TABS = [
   { id: 'radar',   label: 'Strengths' },
@@ -381,11 +383,6 @@ export default function SimulatorPage() {
           border-bottom: 1px solid var(--cp-border) !important;
           padding-bottom: var(--cp-space-5) !important;
           min-height: 0 !important;
-          grid-template-columns: 1fr !important;
-          align-items: start !important;
-        }
-        [data-sim-command-copy] {
-          max-width: 720px !important;
         }
         [data-sim-command-grid],
         [data-hardware-stack],
@@ -408,28 +405,36 @@ export default function SimulatorPage() {
     `}</style>
     <div className="oracle-page">
       <header style={S.header}>
-        <div style={S.headerText}>
-          <span style={S.eyebrow}>Oracle capital cockpit</span>
-          <h1 style={S.title}>Investment Simulator</h1>
-          <p style={S.subtitle}>Shape a Qatar AI/data-center thesis from capital, operating model and GPU density.</p>
-        </div>
-        {loading && <div style={S.loadingBadge}>Calculating…</div>}
+        <SectionHead
+          hero
+          eyebrow={UI.SIM_PAGE_EYEBROW}
+          title={UI.SIM_PAGE_TITLE}
+          hint={UI.SIM_PAGE_SUBTITLE}
+          style={{ flex: '1 1 320px', minWidth: 0, marginBottom: 0 }}
+        />
+        {loading && <div style={S.loadingBadge}>{UI.STATE_CALCULATING}</div>}
       </header>
 
       <section data-sim-command-deck style={S.commandDeck}>
         <div data-sim-command-intro style={S.commandIntro}>
-          <div style={S.commandIntroTitleBlock}>
-            <span style={S.stepPill}>01 · Build brief</span>
-            <h2 style={S.commandTitle}>Set the investment constraint, then size the machine.</h2>
-          </div>
-          <p data-sim-command-copy style={S.commandCopy}>Pick how the IC wants to think first: budget, power capacity, or target return. The simulator keeps the downstream scenario coherent.</p>
+          <SectionHead
+            hero
+            num="01"
+            eyebrow={UI.SIM_BUILD_BRIEF_EYEBROW}
+            title={UI.SIM_BUILD_BRIEF_TITLE}
+            hint={UI.SIM_BUILD_BRIEF_HINT}
+            style={{ marginBottom: 0 }}
+          />
         </div>
         <div data-sim-command-grid style={S.commandGrid}>
         <section style={S.commandPanel}>
-          <header style={S.panelHead}>
-            <span style={S.panelKicker}>Starting Point</span>
-            <h3 style={S.panelTitle}>Choose the control variable</h3>
-          </header>
+          <SectionHead
+            hero
+            level={3}
+            eyebrow={UI.SIM_PANEL_START_EYEBROW}
+            title={UI.SIM_PANEL_START_TITLE}
+            style={{ marginBottom: 0 }}
+          />
           <InputModeSwitcher
             mode={state.mode}
             onChange={onModeChange}
@@ -438,10 +443,13 @@ export default function SimulatorPage() {
         </section>
 
         <section style={{ ...S.commandPanel, ...S.commandPanelPrimary }}>
-          <header style={S.panelHead}>
-            <span style={S.panelKicker}>Project Size / Targets</span>
-            <h3 style={S.panelTitle}>Calibrate the initial scenario</h3>
-          </header>
+          <SectionHead
+            hero
+            level={3}
+            eyebrow={UI.SIM_PANEL_SIZE_EYEBROW}
+            title={UI.SIM_PANEL_SIZE_TITLE}
+            style={{ marginBottom: 0 }}
+          />
           <div data-sim-preset-grid style={S.presetCards} role="group" aria-label="Ready scenarios">
             {QATAR_PRESETS.map(p => {
               const active = activeScenarioPreset === p.id;
@@ -491,13 +499,14 @@ export default function SimulatorPage() {
 
       {/* 2. OPERATING MODEL */}
       <section style={S.boardSection}>
-        <header style={S.boardHead}>
-          <div>
-            <span style={S.stepPill}>02 · Operating thesis</span>
-            <h2 style={S.sectionTitle}>Operating Model</h2>
-          </div>
-          <span style={S.counterChip}>Choose one operating thesis</span>
-        </header>
+        <SectionHead
+          hero
+          num="02"
+          eyebrow={UI.SIM_OS_EYEBROW}
+          title={UI.SIM_OS_TITLE}
+          hint={UI.SIM_OS_HINT}
+          style={{ marginBottom: 0 }}
+        />
         <ArchetypePicker
           archetypes={PRIMARY_ARCHETYPES}
           primaryId={state.primary_archetype_id}
@@ -507,13 +516,14 @@ export default function SimulatorPage() {
 
       {/* 4. HARDWARE ALLOCATION */}
       <section style={S.boardSection}>
-        <header style={S.boardHead}>
-          <div>
-            <span style={S.stepPill}>03 · Technology stack</span>
-            <h2 style={S.sectionTitle}>Hardware Allocation</h2>
-          </div>
-          <span style={S.sectionSubtitle}>Power mix, rack density and GPU economics</span>
-        </header>
+        <SectionHead
+          hero
+          num="03"
+          eyebrow={UI.SIM_HW_EYEBROW}
+          title={UI.SIM_HW_TITLE}
+          hint={UI.SIM_HW_HINT}
+          style={{ marginBottom: 0 }}
+        />
         <HardwareMixer
           totalMw={scenario?.total_mw || state.total_mw}
           value={state.hardware_mix}
@@ -522,9 +532,9 @@ export default function SimulatorPage() {
       </section>
 
       {projectLoadError && (
-        <div style={{ ...S.error, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} role="alert">
+        <div style={{ ...S.error, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
           <span>{projectLoadError}</span>
-          <button type="button" onClick={() => window.location.reload()} style={{ marginLeft: 12, background: 'none', border: '1px solid currentColor', borderRadius: 4, color: 'inherit', padding: '2px 10px', cursor: 'pointer', fontSize: 12 }}>Retry</button>
+          <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>{UI.ACTION_RETRY}</Button>
         </div>
       )}
       {simError && <div style={S.error}>Error: {simError}</div>}
@@ -532,21 +542,23 @@ export default function SimulatorPage() {
       {/* VALIDATE CONFIG → dedicated results page */}
       <div style={S.validateBar}>
         <span style={S.validateHint}>
-          {simError ? 'Fix the error above to continue.'
-            : loading ? 'Calculating…'
-            : projectLoadError ? 'Project unavailable — see error above.'
-            : !projectId ? 'Loading project…'
-            : savingState === 'saving' ? 'Saving your scenario…'
-            : projection ? 'Configuration ready.'
-            : 'Fill in your numbers to run the simulation.'}
+          {simError ? UI.SIM_FIX_ERROR
+            : loading ? UI.STATE_CALCULATING
+            : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
+            : !projectId ? UI.SIM_LOADING_PROJECT
+            : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
+            : projection ? UI.SIM_READY
+            : UI.SIM_FILL}
         </span>
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="lg"
           disabled={validateBlocked}
           onClick={handleValidateAndReveal}
-          style={{ ...S.validateBtn, ...(validateBlocked ? { opacity: 0.5, cursor: 'not-allowed' } : {}) }}>
-          {savingState === 'saving' ? 'Saving…' : 'Validate & see results →'}
-        </button>
+          style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
+        >
+          {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_VALIDATE}
+        </Button>
       </div>
       {saveError && (
         <div style={S.error} role="alert">Could not save: {saveError}</div>
@@ -569,28 +581,6 @@ const S = {
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-lg)',
     boxShadow: 'inset 0 1px 0 color-mix(in srgb, var(--cp-text-strong) 8%, transparent)',
-  },
-  eyebrow: {
-    color: 'var(--cp-accent-maroon)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    textTransform: 'uppercase',
-  },
-  headerText: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
-  title: {
-    fontSize: 'var(--cp-font-xl)',
-    lineHeight: '0.98',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-tight)',
-    color: 'var(--cp-text-primary)',
-    margin: 0,
-  },
-  subtitle: {
-    fontSize: 'var(--cp-font-base)',
-    lineHeight: 'var(--cp-leading-normal)',
-    color: 'var(--cp-text-muted)',
-    maxWidth: 560,
   },
   loadingBadge: {
     fontSize: 'var(--cp-font-sm)',
@@ -623,42 +613,8 @@ const S = {
     minWidth: 0,
   },
   commandIntro: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(260px, 0.55fr) minmax(280px, 0.45fr)',
-    alignItems: 'end',
-    columnGap: 'var(--cp-space-6)',
-    rowGap: 'var(--cp-space-3)',
     paddingBottom: 'var(--cp-space-4)',
     borderBottom: '1px solid var(--cp-border)',
-  },
-  commandIntroTitleBlock: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
-  },
-  stepPill: {
-    width: 'fit-content',
-    color: 'var(--cp-accent-maroon)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    textTransform: 'uppercase',
-  },
-  commandTitle: {
-    margin: 0,
-    color: 'var(--cp-text-primary)',
-    fontSize: 'clamp(20px, 2vw, 26px)',
-    lineHeight: 1.08,
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-tight)',
-    maxWidth: 440,
-  },
-  commandCopy: {
-    margin: 0,
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-base)',
-    lineHeight: 'var(--cp-leading-normal)',
-    maxWidth: 460,
   },
   commandGrid: {
     display: 'grid',
@@ -681,20 +637,6 @@ const S = {
   },
   commandPanelPrimary: {
     background: 'linear-gradient(180deg, var(--cp-surface-1), color-mix(in srgb, var(--cp-accent-maroon) 10%, var(--cp-surface-1)))',
-  },
-  panelHead: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
-  panelKicker: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    textTransform: 'uppercase',
-  },
-  panelTitle: {
-    margin: 0,
-    color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-lg)',
-    fontWeight: 800,
   },
   presetCards: {
     display: 'grid',
@@ -750,33 +692,6 @@ const S = {
     color: 'var(--cp-text-muted)',
     fontWeight: 600,
   },
-  validateBtn: {
-    height: 44,
-    padding: '0 var(--cp-space-6)',
-    fontSize: 'var(--cp-font-base)',
-    fontWeight: 800,
-    letterSpacing: 'var(--cp-tracking-wide)',
-    textTransform: 'uppercase',
-    background: 'var(--cp-accent-maroon)',
-    color: 'var(--cp-text-strong)',
-    border: 'none',
-    borderRadius: 'var(--cp-radius-md)',
-    cursor: 'pointer',
-  },
-  section: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
-    width: '100%',
-    minWidth: 0,
-  },
-  sectionHead: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--cp-space-3)',
-    minHeight: 'var(--cp-space-8)',
-    flexWrap: 'wrap',
-  },
   boardSection: {
     display: 'flex',
     flexDirection: 'column',
@@ -788,44 +703,6 @@ const S = {
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-lg)',
   },
-  boardHead: {
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: 'var(--cp-space-4)',
-    flexWrap: 'wrap',
-  },
-  sectionTitle: {
-    fontSize: 'var(--cp-font-xl)',
-    lineHeight: 'var(--cp-leading-tight)',
-    fontWeight: 'var(--cp-weight-black)',
-    color: 'var(--cp-text-primary)',
-    margin: 0,
-  },
-  sectionSubtitle: {
-    fontSize: 'var(--cp-font-sm)',
-    color: 'var(--cp-text-muted)',
-  },
-  counterChip: {
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 600,
-    padding: 'var(--cp-space-1) var(--cp-space-3)',
-    background: 'var(--cp-surface-0)',
-    border: '1px solid var(--cp-border)',
-    color: 'var(--cp-text-muted)',
-    borderRadius: 'var(--cp-radius-md)',
-    letterSpacing: 'var(--cp-tracking-wider)',
-  },
-  subsection: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)', marginTop: 'var(--cp-space-2)', minHeight: 0, position: 'relative' },
-  subTitle: {
-    fontSize: 'var(--cp-font-base)',
-    lineHeight: 'var(--cp-leading-normal)',
-    fontWeight: 600,
-    color: 'var(--cp-text-primary)',
-    margin: 0,
-    letterSpacing: 'var(--cp-tracking-wide)',
-  },
-
   error: {
     padding: 'var(--cp-space-3) var(--cp-space-4)',
     background: 'var(--cp-accent-soft)',

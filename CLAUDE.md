@@ -49,8 +49,7 @@ Auth + login : `app/admin/login/`, `app/admin/auth/callback/`. APIs : 10 routes 
 
 ## Navigation
 - Rail primaire : `components/OracleRailNav.jsx` — 6 sections (Simulator · Financial · Deals ·
-  Workspace · Dossier · Sources).
-- Secondaire : `SectionTabs` (modeling / library).
+  Workspace · Dossier · Sources). Workspace = scénarios ; Dossier = mémos / décision.
 
 ## Moteur financier
 - `lib/hearst-calculations.js` — IRR (Newton-Raphson), NPV, MOIC, payback, DSCR, projection 10 ans,

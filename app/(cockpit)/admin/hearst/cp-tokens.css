@@ -352,11 +352,20 @@
    hidden so the rail opens as an Investment Committee Advisor, not support chat. */
 .ct-rail-right-title {
   font-size: 0;
+  line-height: 0;
+  color: transparent;
+}
+.ct-rail-right-title > * {
+  display: none !important;
 }
 .ct-rail-right-title::after {
   content: "ORACLE · Investment Committee Advisor";
+  display: inline-block;
   font-size: var(--cp-font-sm);
-  color: var(--ct-text-primary);
+  line-height: var(--cp-leading-normal);
+  font-weight: 600;
+  letter-spacing: var(--cp-tracking-wide);
+  color: var(--cp-text-strong);
 }
 .ct-chat-root {
   min-height: 0;
