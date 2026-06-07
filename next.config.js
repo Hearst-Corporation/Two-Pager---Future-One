@@ -39,6 +39,15 @@ const nextConfig = {
 
   // Security headers — applied to all routes
   async headers() {
+    const isDev = process.env.NODE_ENV === 'development';
+    // unsafe-eval is required by Next.js HMR in dev only.
+    // unsafe-inline on script-src is removed in prod; style-src keeps it
+    // because the app uses inline styles extensively (no CSS modules/Tailwind).
+    const scriptSrc = isDev
+      ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
+      : "script-src 'self'";
+    const supabaseHost = 'https://pjwyntugyswabgpavtyt.supabase.co';
+    const supabaseWs  = 'wss://pjwyntugyswabgpavtyt.supabase.co';
     return [
       {
         source: '/(.*)',
@@ -61,11 +70,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              scriptSrc,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self'",
-              "connect-src 'self' https://zrvlmhuymhyrzonnihce.supabase.co wss://zrvlmhuymhyrzonnihce.supabase.co https://maps.googleapis.com",
+              `connect-src 'self' ${supabaseHost} ${supabaseWs} https://maps.googleapis.com https://api.hypercli.com`,
               "frame-ancestors 'self' http://localhost:4200 http://localhost:4201 https://oracle.hearst.app",
               "base-uri 'self'",
               "form-action 'self'",

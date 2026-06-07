@@ -3,9 +3,7 @@
    Tokens canon = cp-tokens.css (:root). Chat drawer FAB = chat-fab.css.
    ============================================================ */
 
-:root {
-  --cp-bg-deep: #1A050B;
-}
+/* --cp-bg-deep vit dans cp-tokens.css (alias var(--ct-bg-deep)) — source de vérité unique. */
 
 /* Scrollbars + focus (hearst layout only — fichier non importé ailleurs) */
 html ::-webkit-scrollbar {

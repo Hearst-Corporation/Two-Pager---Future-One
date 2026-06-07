@@ -130,6 +130,7 @@ export default function SimulatorPage() {
   // Last saved scenario — carries the Scenario → Memo → Dossier linkage so a
   // generated memo is persisted with its scenario_id. Set on Save and on reopen.
   const [savedScenarioId, setSavedScenarioId] = useState(null);
+  const [projectLoadError, setProjectLoadError] = useState(null);
   // dirtySinceSave: true whenever the config changed since the last successful
   // save. Gates re-save on Validate / Generate Memo so we never persist a
   // duplicate row nor build a memo on a stale scenario.
@@ -151,15 +152,27 @@ export default function SimulatorPage() {
   }, [state]);
 
   useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(() => {
+      if (!cancelled) setProjectLoadError('Project load timed out — please refresh.');
+    }, 8000);
     (async () => {
       try {
         const r = await fetch('/api/admin/hearst/project');
+        clearTimeout(t);
+        if (cancelled) return;
         if (r.ok) {
           const { project } = await r.json();
           setProjectId(project?.id);
+        } else {
+          setProjectLoadError(`Project unavailable (${r.status}) — please refresh.`);
         }
-      } catch {}
+      } catch (e) {
+        clearTimeout(t);
+        if (!cancelled) setProjectLoadError(`Project load failed: ${e.message}`);
+      }
     })();
+    return () => { cancelled = true; clearTimeout(t); };
   }, []);
 
   // Reopen: Workspace links to /admin/hearst/simulator?scenario=<id>. Read the id
@@ -190,7 +203,9 @@ export default function SimulatorPage() {
         if (row.primary_archetype_id) patch.primary_archetype_id = row.primary_archetype_id;
         dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: patch });
         setSavedScenarioId(sid);
-      } catch {}
+      } catch (e) {
+        console.warn('[simulator] failed to reopen scenario:', e.message);
+      }
     })();
   }, []);
 
@@ -391,7 +406,7 @@ export default function SimulatorPage() {
         }
       }
     `}</style>
-    <div style={S.wrap}>
+    <div className="oracle-page">
       <header style={S.header}>
         <div style={S.headerText}>
           <span style={S.eyebrow}>Oracle capital cockpit</span>
@@ -506,6 +521,12 @@ export default function SimulatorPage() {
         />
       </section>
 
+      {projectLoadError && (
+        <div style={{ ...S.error, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} role="alert">
+          <span>{projectLoadError}</span>
+          <button type="button" onClick={() => window.location.reload()} style={{ marginLeft: 12, background: 'none', border: '1px solid currentColor', borderRadius: 4, color: 'inherit', padding: '2px 10px', cursor: 'pointer', fontSize: 12 }}>Retry</button>
+        </div>
+      )}
       {simError && <div style={S.error}>Error: {simError}</div>}
 
       {/* VALIDATE CONFIG → dedicated results page */}
@@ -513,6 +534,7 @@ export default function SimulatorPage() {
         <span style={S.validateHint}>
           {simError ? 'Fix the error above to continue.'
             : loading ? 'Calculating…'
+            : projectLoadError ? 'Project unavailable — see error above.'
             : !projectId ? 'Loading project…'
             : savingState === 'saving' ? 'Saving your scenario…'
             : projection ? 'Configuration ready.'
@@ -536,14 +558,6 @@ export default function SimulatorPage() {
 }
 
 const S = {
-  wrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-5)',
-    maxWidth: 1280,
-    margin: '0 auto',
-    padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear)',
-  },
   header: {
     display: 'flex',
     justifyContent: 'space-between',

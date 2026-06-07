@@ -728,7 +728,7 @@ function DossierInner() {
   const scenarioId = sp.get('scenario');
 
   return (
-    <div style={S.wrap}>
+    <div className="oracle-page">
       {memoId && <MemoDetailView memoId={memoId} />}
       {!memoId && scenarioId && <ScenarioView scenarioId={scenarioId} />}
       {!memoId && !scenarioId && <AllMemosView />}
@@ -752,8 +752,6 @@ const EYEBROW = {
 };
 
 const S = {
-  wrap: { maxWidth: 'calc(var(--cp-space-8) * 40)', margin: 'var(--cp-space-0) auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear, var(--cp-space-0))' },
-
   // Typography / shared (canon)
   h1: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
   h2: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },

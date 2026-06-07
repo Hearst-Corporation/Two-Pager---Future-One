@@ -12,7 +12,16 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "lint:secrets": "node scripts/lint-secrets.mjs",
+    "lint:cockpit": "node scripts/lint-cockpit.mjs",
+    "lint:strings": "node scripts/lint-strings.mjs",
+    "lint:nav": "node scripts/lint-nav.mjs",
+    "lint:tokens": "node scripts/lint-tokens.mjs",
+    "new:feature": "node scripts/new-feature.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "check": "npm run lint:secrets && npm run lint:cockpit && npm run lint:strings && npm run lint:tokens && npm run lint:nav && npm test",
+    "check:ci": "npm run check && next build"
   },
   "dependencies": {
     "@hearst/cockpit-shell": "file:./hearst-cockpit-shell-0.2.0.tgz",
@@ -23,6 +32,7 @@
     "@supabase/supabase-js": "^2.105.3",
     "next": "^14.2.35",
     "openai": "^6.38.0",
+    "prop-types": "^15.8.1",
     "puppeteer-core": "^25.1.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",

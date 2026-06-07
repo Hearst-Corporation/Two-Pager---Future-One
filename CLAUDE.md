@@ -1,5 +1,12 @@
 # CLAUDE.md — Oracle (Hearst / Futur One Qatar)
 
+<!-- enable-adrien:start -->
+## Agent — lire avant de coder
+- Guide complet : **`AGENTS.md`** (source de vérité locale, ≤200 lignes).
+- Gate : `npm run check` (lint:secrets + lint:cockpit + lint:strings + tests).
+- Scaffolder : `node scripts/new-feature.mjs <resource> --ts=YYYYMMDDHHMMSS`
+<!-- enable-adrien:end -->
+
 ## Projet
 Oracle = cockpit d'investissement infrastructure datacenter (Qatar / Hearst).
 Parcours : configurer un scénario → simuler → sauvegarder → résultats → mémo stratégique
@@ -62,13 +69,16 @@ Auth + login : `app/admin/login/`, `app/admin/auth/callback/`. APIs : 10 routes 
   `--ct-*` upstream `@hearst/cockpit-shell/tokens.css`). Surfaces dans `cockpit.css`, FAB chat
   dans `components/hearst/chat-fab.css`.
 - `app/globals.css` `--color-*` = **legacy login uniquement** — interdit dans le module Hearst.
-- **Jamais de hex hardcodé ni de `--color-*`** dans `components/hearst/**` et les pages cockpit :
-  utiliser un token `--cp-*`. (ESLint `no-restricted-syntax` ; ⚠️ l'override `files` ne couvre
-  aujourd'hui que `components/hearst/**` — les pages sous `app/(cockpit)/admin/hearst/**` ne sont
-  pas attrapées par le glob, rester discipliné à la main.)
+- Source de vérité par couche (zéro chevauchement) : `--ct-*` = upstream
+  `@hearst/cockpit-shell/tokens.css` seul · `--cp-*` = `cp-tokens.css` seul · `--color-*` =
+  `globals.css` legacy seul. Les pages/composants **référencent** `--cp-*`, ne définissent jamais.
+- **Jamais de hex / `rgb()` / `hsl()` hardcodé, ni `var(--ct-*)`/`var(--color-*)` en direct** dans
+  `components/hearst/**` et les pages `app/(cockpit)/admin/hearst/**` : utiliser un `--cp-*`.
+  Gardé par `npm run lint:cockpit` (scope correct) ET ESLint `no-restricted-syntax`
+  (glob `app/(cockpit)/admin/hearst/**` corrigé — couvre désormais les pages).
 
 ## Tests
-- `npm test` → vitest (212 tests : calculs, solver, archétypes, bootstrap, validators, auth,
+- `npm test` → vitest (214 tests : calculs, solver, archétypes, bootstrap, validators, auth,
   memo store, middleware…).
 - E2E Playwright : `tests/e2e/coherence-visual.spec.ts` (8 tests, nav + tokens desktop/mobile)
   + `tests/e2e/login.spec.ts`. Config : `playwright.config.js`.

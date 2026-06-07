@@ -141,7 +141,7 @@ export default function FinancialPage() {
         }
       }
     `}</style>
-    <div style={S.wrap}>
+    <div className="oracle-page">
       <SectionTabs section="modeling" />
       {/* Scenario toggles */}
       <div data-financial-top-bar style={S.topBar}>
@@ -443,11 +443,11 @@ export default function FinancialPage() {
                         <td key={ci} style={{
                           ...S.td,
                           background: cell.irr == null ? 'var(--cp-surface-2)'
-                            : cell.irr < 0 ? 'color-mix(in srgb, var(--ct-status-danger) 30%, black)'
-                            : cell.irr < 0.08 ? 'color-mix(in srgb, var(--ct-status-danger) 60%, black)'
-                            : cell.irr < 0.12 ? 'color-mix(in srgb, var(--ct-status-warning) 50%, black)'
-                            : cell.irr < 0.15 ? 'color-mix(in srgb, var(--ct-status-success) 50%, black)'
-                            : 'color-mix(in srgb, var(--ct-status-success) 30%, black)',
+                            : cell.irr < 0 ? 'color-mix(in srgb, var(--cp-status-danger) 30%, black)'
+                            : cell.irr < 0.08 ? 'color-mix(in srgb, var(--cp-status-danger) 60%, black)'
+                            : cell.irr < 0.12 ? 'color-mix(in srgb, var(--cp-status-warning) 50%, black)'
+                            : cell.irr < 0.15 ? 'color-mix(in srgb, var(--cp-status-success) 50%, black)'
+                            : 'color-mix(in srgb, var(--cp-status-success) 30%, black)',
                           color: 'var(--cp-text-primary)',
                           fontWeight: ri === 2 && ci === 2 ? 900 : 600,
                           fontSize: 'var(--cp-font-xs)',
@@ -463,11 +463,11 @@ export default function FinancialPage() {
               </table>
               <div style={{ display: 'flex', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-3)', flexWrap: 'wrap' }}>
                 {[
-                  { bg: 'color-mix(in srgb, var(--ct-status-danger) 30%, black)', label: '< 0% IRR' },
-                  { bg: 'color-mix(in srgb, var(--ct-status-danger) 60%, black)', label: '0–8%' },
-                  { bg: 'color-mix(in srgb, var(--ct-status-warning) 50%, black)', label: '8–12%' },
-                  { bg: 'color-mix(in srgb, var(--ct-status-success) 50%, black)', label: '12–15%' },
-                  { bg: 'color-mix(in srgb, var(--ct-status-success) 30%, black)', label: '> 15%' },
+                  { bg: 'color-mix(in srgb, var(--cp-status-danger) 30%, black)', label: '< 0% IRR' },
+                  { bg: 'color-mix(in srgb, var(--cp-status-danger) 60%, black)', label: '0–8%' },
+                  { bg: 'color-mix(in srgb, var(--cp-status-warning) 50%, black)', label: '8–12%' },
+                  { bg: 'color-mix(in srgb, var(--cp-status-success) 50%, black)', label: '12–15%' },
+                  { bg: 'color-mix(in srgb, var(--cp-status-success) 30%, black)', label: '> 15%' },
                 ].map(l => (
                   <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)' }}>
                     <span style={{ width: 'var(--cp-space-3)', height: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-xs)', background: l.bg, display: 'inline-block' }} />
@@ -519,14 +519,6 @@ function formatSensVal(v, unit) {
 }
 
 const S = {
-  wrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-6)',
-    maxWidth: 1280,
-    margin: '0 auto',
-    padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear, 0px)',
-  },
   loading: { padding: 'var(--cp-space-12)', textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-md)' },
   error: { padding: 'var(--cp-space-6)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-sm)' },
   topBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },

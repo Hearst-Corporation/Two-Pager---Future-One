@@ -3,6 +3,7 @@
 import '@hearst/cockpit-shell/tokens.css';
 import './cockpit.css';
 import './cp-tokens.css';
+import './oracle-layout.css';
 import { CockpitShell } from '@hearst/cockpit-shell';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleRailNav } from '@/components/OracleRailNav';
@@ -15,7 +16,7 @@ import { ChatIdPersistor } from '@/components/admin/ChatIdPersistor';
 
 const ORACLE_PRODUCTS = [
   // eslint-disable-next-line no-restricted-syntax -- CockpitProduct.color contract requires a hex literal (shell consumes it via color-mix).
-  { id: 'oracle', name: 'Hearst Oracle', short: 'OR', color: '#be123c' },
+  { id: 'oracle', name: 'Hearst Oracle', short: 'OR', color: '#be123c' }, // cockpit-lint-allow -- shell prop = littéral hex obligatoire (= --ct-accent bordeaux)
 ];
 
 // Chat natif CockpitShell (rail droit) — Kimi K2.6 via Hypercli.

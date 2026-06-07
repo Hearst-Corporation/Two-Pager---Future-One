@@ -278,7 +278,7 @@ const S = {
     position: 'fixed',
     inset: 0,
     zIndex: Z.modal,
-    background: 'rgba(0, 0, 0, 0.72)',
+    background: 'var(--cp-overlay-strong)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
     display: 'flex',
@@ -296,7 +296,7 @@ const S = {
     border: '1px solid var(--cp-border-strong, var(--cp-border))',
     borderRadius: 'var(--cp-radius-lg)',
     overflow: 'hidden',
-    boxShadow: 'var(--cp-shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.06) inset',
+    boxShadow: 'var(--cp-shadow-lg), 0 0 0 1px var(--cp-hairline) inset',
   },
 
   head: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', padding: 'var(--cp-space-4) var(--cp-space-5)', borderBottom: '1px solid var(--cp-border)' },

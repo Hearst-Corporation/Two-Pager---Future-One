@@ -12,18 +12,18 @@
   display: none !important;
 }
 
-/* Status tokens — absents du package cockpit-shell.tokens.css aujourd'hui.
-   Définis ici en attendant un upstream propre. Couleurs ambient maintenues. */
+/* Status tokens projet (--cp-status-*) — absents du package upstream.
+   Définis ICI (source de vérité --cp-*), JAMAIS en redéfinissant un --ct-*. */
 :root {
-  --ct-status-success:        rgb(16, 185, 129);
-  --ct-status-success-soft:   rgba(16, 185, 129, 0.15);
-  --ct-status-success-border: rgba(16, 185, 129, 0.40);
-  --ct-status-warning:        rgb(217, 119, 6);
-  --ct-status-warning-soft:   rgba(245, 158, 11, 0.12);
-  --ct-status-warning-border: rgba(245, 158, 11, 0.35);
-  --ct-status-danger:         rgb(239, 68, 68);
-  --ct-status-danger-soft:    rgba(239, 68, 68, 0.12);
-  --ct-status-danger-border:  rgba(239, 68, 68, 0.40);
+  --cp-status-success:        rgb(16, 185, 129);
+  --cp-status-success-soft:   rgba(16, 185, 129, 0.15);
+  --cp-status-success-border: rgba(16, 185, 129, 0.40);
+  --cp-status-warning:        rgb(217, 119, 6);
+  --cp-status-warning-soft:   rgba(245, 158, 11, 0.12);
+  --cp-status-warning-border: rgba(245, 158, 11, 0.35);
+  --cp-status-danger:         rgb(239, 68, 68);
+  --cp-status-danger-soft:    rgba(239, 68, 68, 0.12);
+  --cp-status-danger-border:  rgba(239, 68, 68, 0.40);
 }
 
 :root {
@@ -110,6 +110,12 @@
   --cp-shadow-lg:        0 10px 32px rgba(0,0,0,0.42); /* B1: comblé — référencé par chat-fab.css + StrategicMemoModal, jamais défini. Interpolé dans l'échelle xs→sm→md→lg→card-hover. */
   --cp-shadow-card-hover:0 12px 40px rgba(0,0,0,0.45);
 
+  /* ── Overlays & hairlines (scrims de modale, lignes 1px subtiles) ── */
+  --cp-overlay:         rgba(0, 0, 0, 0.65);
+  --cp-overlay-strong:  rgba(0, 0, 0, 0.72);
+  --cp-hairline:        rgba(255, 255, 255, 0.06);
+  --cp-hairline-faint:  rgba(255, 255, 255, 0.04);
+
   /* ── Couleurs sémantiques ── */
   --cp-error:          #ef4444;
   --cp-error-bg:       rgba(239,68,68,0.08);
@@ -157,6 +163,13 @@
   --cp-z-floating: 30;
 
   /* ── Tailles de composants ── */
+  --cp-btn-height-sm:  32px;
+  --cp-btn-height-md:  36px;
+  --cp-btn-height-lg:  44px;
+  --cp-icon-sm:        16px;
+  --cp-icon-md:        20px;
+  --cp-icon-lg:        24px;
+  --cp-section-gap:    var(--cp-space-6);
   --cp-avatar-size:    32px;
   --cp-badge-size:     18px;
   --cp-brand-size:     36px;
@@ -173,7 +186,36 @@
   --cp-chat-dock-clear:    calc(54px + var(--cp-space-6) + var(--cp-space-2));
   --cp-toast-bottom:       calc(var(--cp-scroll-clear) + var(--cp-space-2));
 
-  /* ── Couleurs opérateurs ── */
+  /* ── Couleurs opérateurs (source de vérité unique — déplacées depuis globals.css) ──
+     Désaturées pour lisibilité sur cockpit sombre. Consommées par OperatorBadge,
+     EcosystemNetwork, deals, financial. */
+  --cp-op-equinix:         #C41B1B;
+  --cp-op-digital_realty:  #0057A8;
+  --cp-op-ntt:             #009FDB;
+  --cp-op-vantage:         #6B3FA0;
+  --cp-op-coreweave:       #E05A1A;
+  --cp-op-lambda:          #4F5BD5;
+  --cp-op-aws:             #FF9900;
+  --cp-op-microsoft:       #00A4EF;
+  --cp-op-google:          #4285F4;
+  --cp-op-meta:            #1877F2;
+  --cp-op-oracle:          #C74634;
+  --cp-op-nvidia:          #76B900;
+  --cp-op-cbre:            #005B41;
+  --cp-op-jll:             #C41230;
+  --cp-op-turner_townsend: #C89A00;
+  --cp-op-cushman:         #7B0000;
+  --cp-op-kahramaa:        #006341;
+  --cp-op-cra:             #003087;
+  --cp-op-moct:            #5C0000;
+  --cp-op-ooredoo:         #C8003C;
+  --cp-op-vodafone_qatar:  #BF0000;
+  --cp-op-mayer_brown:     #003B5C;
+  --cp-op-baker_mckenzie:  #1C3A6B;
+  --cp-op-uptime:          #555555;
+  --cp-op-sec:             #1A3560;
+  /* Conflits résolus : valeurs cp-tokens conservées (celles rendues aujourd'hui) ;
+     les versions divergentes de globals.css ont été supprimées. */
   --cp-op-default:    var(--ct-text-muted);
   --cp-op-brookfield: #0ea5e9;
   --cp-op-qai:        #6366f1;

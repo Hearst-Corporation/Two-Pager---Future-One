@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORACLE QA ASSAULT — Full Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; line-height: 1.5; }
+  h1 { font-size: 22px; font-weight: 800; letter-spacing: 0.08em; color: #fff; }
+  h2 { font-size: 15px; font-weight: 700; letter-spacing: 0.06em; color: #fff; margin-bottom: 12px; }
+  h3 { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: #aaa; margin-bottom: 8px; }
+  .header { padding: 32px 40px 24px; border-bottom: 1px solid #1a1a1a; }
+  .header-meta { display: flex; gap: 24px; margin-top: 8px; font-size: 11px; color: #555; letter-spacing: 0.06em; text-transform: uppercase; }
+  .section { padding: 28px 40px; border-bottom: 1px solid #111; }
+  .verdict-box { background: #1a0005; border: 2px solid #ff2d55; border-radius: 6px; padding: 20px 28px; margin-top: 16px; }
+  .verdict-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #ff2d55; margin-bottom: 6px; }
+  .verdict-text { font-size: 20px; font-weight: 800; color: #ff2d55; letter-spacing: 0.04em; }
+  .verdict-sub { font-size: 12px; color: #888; margin-top: 8px; }
+  .exec-summary { background: #0f0f0f; border-left: 3px solid #ff2d55; padding: 16px 20px; border-radius: 0 4px 4px 0; line-height: 1.7; color: #ccc; }
+  .stat-row { display: flex; gap: 32px; margin-top: 20px; }
+  .stat { background: #111; border-radius: 6px; padding: 14px 20px; flex: 1; }
+  .stat-num { font-size: 28px; font-weight: 800; }
+  .stat-num.p0 { color: #ff2d55; }
+  .stat-num.p1 { color: #ff9500; }
+  .stat-num.p2 { color: #0a84ff; }
+  .stat-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #555; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th { background: #111; padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #555; border-bottom: 1px solid #1a1a1a; position: sticky; top: 0; }
+  tbody tr { border-bottom: 1px solid #111; }
+  tbody tr:hover { background: #0f0f0f; }
+  td { padding: 9px 12px; vertical-align: top; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .badge-p0 { background: rgba(255,45,85,0.15); color: #ff2d55; border: 1px solid rgba(255,45,85,0.3); }
+  .badge-p1 { background: rgba(255,149,0,0.12); color: #ff9500; border: 1px solid rgba(255,149,0,0.25); }
+  .badge-p2 { background: rgba(10,132,255,0.12); color: #0a84ff; border: 1px solid rgba(10,132,255,0.25); }
+  .badge-agent { background: #1a1a1a; color: #888; border: 1px solid #222; }
+  .code { font-family: ui-monospace, monospace; font-size: 11px; color: #aaa; background: #111; padding: 1px 5px; border-radius: 3px; }
+  .location { font-family: ui-monospace, monospace; font-size: 10px; color: #555; }
+  .impact-high { color: #ff2d55; font-weight: 600; }
+  .impact-maj { color: #ff9500; font-weight: 600; }
+  .scrollable { overflow-x: auto; }
+  .section-title { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .count-badge { background: #1a1a1a; border: 1px solid #222; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: 700; color: #555; }
+  .top20-grid { display: grid; gap: 8px; }
+  .top20-item { background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 6px; padding: 14px 18px; display: grid; grid-template-columns: 40px 60px 1fr 80px 100px 120px; gap: 12px; align-items: start; }
+  .rank { font-size: 22px; font-weight: 800; color: #333; }
+  .fix-title { font-weight: 600; color: #e0e0e0; }
+  .fix-meta { font-size: 11px; color: #555; margin-top: 3px; }
+  .time-badge { font-size: 11px; font-weight: 700; color: #888; background: #111; padding: 3px 8px; border-radius: 4px; text-align: center; }
+  .trust-bar { height: 6px; border-radius: 3px; margin-top: 6px; }
+  .mismatch-table td:first-child { font-weight: 600; color: #ccc; }
+  .mismatch-table td:not(:first-child) { font-family: ui-monospace, monospace; font-size: 11px; }
+  .trust-section { background: #080808; }
+  .trust-item { border-left: 3px solid #ff2d55; padding: 12px 16px; margin-bottom: 10px; background: #0a0005; border-radius: 0 4px 4px 0; }
+  .trust-item h4 { font-size: 12px; font-weight: 700; color: #ff2d55; margin-bottom: 4px; }
+  .trust-item p { font-size: 12px; color: #999; line-height: 1.6; }
+  .top20-header { display: grid; grid-template-columns: 40px 60px 1fr 80px 100px 120px; gap: 12px; padding: 6px 18px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #444; }
+  .priority-crit { color: #ff2d55; font-weight: 800; font-size: 11px; }
+  .priority-high { color: #ff9500; font-weight: 800; font-size: 11px; }
+  .priority-med { color: #0a84ff; font-weight: 800; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex; align-items:center; gap:16px; margin-bottom:6px;">
+    <div style="width:8px;height:8px;border-radius:50%;background:#ff2d55;box-shadow:0 0 8px #ff2d55;"></div>
+    <h1>ORACLE QA ASSAULT — FULL REPORT</h1>
+  </div>
+  <div class="header-meta">
+    <span>10 Agents</span>
+    <span>Date: 2026-06-07</span>
+    <span>Project: oracle / Future One</span>
+    <span>Stack: Next.js · React · Supabase · Kimi K2.6</span>
+    <span>Classification: INTERNAL — WAR ROOM</span>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-num p0">48</div><div class="stat-label">P0 Blockers</div></div>
+    <div class="stat"><div class="stat-num p1">70</div><div class="stat-label">P1 Major Issues</div></div>
+    <div class="stat"><div class="stat-num p2">62</div><div class="stat-label">P2 Polish</div></div>
+    <div class="stat"><div class="stat-num" style="color:#888">180</div><div class="stat-label">Total Issues</div></div>
+    <div class="stat"><div class="stat-num" style="color:#ff2d55">7</div><div class="stat-label">Legal/Trust P0s</div></div>
+    <div class="stat"><div class="stat-num" style="color:#ff2d55">3</div><div class="stat-label">Financial Math Bugs</div></div>
+  </div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<div class="section">
+  <h2>EXECUTIVE SUMMARY</h2>
+  <div class="exec-summary">
+    ORACLE contains 48 P0 blockers that collectively make it unsuitable for any founder, investor, or board-facing use in its current state. The three most dangerous failure modes converge on a single trust catastrophe: the chat advisor is systematically ungrounded (quick-prompt answers invent numbers from corpus benchmarks while ignoring live engine output), the waterfall preferred-return accrual is mathematically wrong (over-accrues exponentially instead of compounding on the running balance), and there is zero investment-advice disclaimer anywhere in the output pipeline — an institutional deliverable containing IRR, MOIC, NPV, and explicit PROCEED/REJECT verdicts without a non-reliance notice is a regulatory liability in every target market. Compounding this: the title field is never sent to the memo API so every auto-generated memo is labeled with a truncated LLM headline; archetype selection is never persisted so reopening a scenario silently reverts the operating model; and a Supabase error during memo persistence returns HTTP 200 with no ID, routing the user to <span class="code">/dossier?memo=undefined</span>. The design system has dual token definitions in two CSS files that produce non-deterministic visual output for every semantic color, spacing step, and border radius in the cockpit. Until the P0 financial math bugs, the trust/disclaimer gap, and the three critical grounding failures are resolved, this product cannot be shown to a single investor.
+  </div>
+
+  <div class="verdict-box" style="margin-top:20px;">
+    <div class="verdict-label">Final Verdict</div>
+    <div class="verdict-text">NOT TRUSTWORTHY</div>
+    <div class="verdict-sub">48 P0 blockers including financial math errors, zero investment disclaimers, and a systematically ungrounded AI advisor. P0 fixes required before any external use.</div>
+  </div>
+</div>
+
+<!-- P0 BLOCKERS TABLE -->
+<div class="section">
+  <div class="section-title">
+    <h2>P0 BLOCKERS</h2>
+    <span class="count-badge">48 issues</span>
+  </div>
+  <div class="scrollable">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Agent</th>
+        <th>Issue</th>
+        <th>Evidence</th>
+        <th>Location</th>
+        <th>Impact</th>
+        <th>Recommended Fix</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-p0">P0-01</span></td>
+        <td><span class="badge badge-agent">A1</span></td>
+        <td><strong>Title never sent to memo API</strong> — every auto-persisted memo gets the LLM headline (truncated 120 chars) as its title</td>
+        <td><span class="code">hearst-memo-job-store.js:146-155</span> fetch body excludes title. <span class="code">strategic-memo/route.js:445</span> destructures title from body — always null. Fallback: <span class="code">strategic-memo-store.js:100</span> slices exec.headline.</td>
+        <td class="location">lib/hearst-memo-job-store.js:143-155</td>
+        <td class="impact-high">Workspace and Dossier lists are unnavigable — all memos show LLM headlines instead of scenario names.</td>
+        <td>Add <span class="code">title: req.title ?? null</span> to JSON.stringify body in startMemoJob. results/page.jsx:268 already passes the correct value.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-02</span></td>
+        <td><span class="badge badge-agent">A1</span></td>
+        <td><strong>primary_archetype_id never persisted</strong> — reopening a scenario silently reverts operating model to INITIAL_STATE default</td>
+        <td>handleSave (simulator/page.jsx:284-319) builds payload from SCENARIO_WRITABLE_KEYS which excludes primary_archetype_id. DB column exists but is never written.</td>
+        <td class="location">simulator/page.jsx:284-319<br>lib/hearst-deal-structures.js:532-567</td>
+        <td class="impact-high">User saves neocloud_gpu, reopens — archetype reverts to powered_shell. Wrong IRR/CAPEX. Memo generated on wrong model.</td>
+        <td>Add primary_archetype_id to SCENARIO_WRITABLE_KEYS or persist it explicitly alongside input_mode/input_value/hardware_mix in handleSave.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-03</span></td>
+        <td><span class="badge badge-agent">A1</span></td>
+        <td><strong>persistMemo failure swallowed — HTTP 200 returned, Dossier routes to /dossier?memo=undefined</strong></td>
+        <td>strategic-memo/route.js:734-747 catch block sets persisted={error:e?.message}, line 750 returns 200. No code checks persisted.error before navigating. dossier fetch: /strategic-memos/undefined → 404.</td>
+        <td class="location">app/api/admin/hearst/strategic-memo/route.js:734-747</td>
+        <td class="impact-high">Supabase transient error → silent failure → user clicks "Open Dossier" → 404. Memo content is gone with no recovery path.</td>
+        <td>After catch, check persisted?.error and return HTTP 500 (or 207) with explicit error. Return generated memo content in error response so client can display it.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-04</span></td>
+        <td><span class="badge badge-agent">A1</span></td>
+        <td><strong>Dossier fetches scenarios with null project_id — string "null" passes route guard, returns wrong data silently</strong></td>
+        <td>dossier/page.jsx:543 <span class="code">fetch('/api/admin/hearst/scenarios?project_id=${proj?.id}')</span> with no null-guard. scenarios/route.js:12-13 checks <span class="code">if (!project_id)</span> but string "null" passes. DB query returns empty set.</td>
+        <td class="location">dossier/page.jsx:543, 655</td>
+        <td class="impact-high">Project lookup failure → Dossier shows zero scenarios → all scenario breadcrumbs broken → AllMemosView shows "—" for every Scenario column.</td>
+        <td>Add null-guard: <span class="code">proj?.id ? fetch(...) : Promise.resolve({scenarios:[]})</span> — mirror workspace/page.jsx:26 pattern.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-05</span></td>
+        <td><span class="badge badge-agent">A1</span></td>
+        <td><strong>PDF route imports fmtPct from dossier-derive then shadows it with a local definition — inconsistent percentage formatting, latent 500 risk</strong></td>
+        <td>pdf/route.js:9 imports fmtPct as ddPct. Line 28 redefines local fmtPct with different signature. Line 57 uses ddPct. Two formatters with different semantics. If dossier-derive removes fmtPct, ddPct→undefined→TypeError→500.</td>
+        <td class="location">app/api/admin/hearst/strategic-memos/[id]/pdf/route.js:9, 28, 57</td>
+        <td class="impact-high">PDF export breaks with 500 on dossier-derive signature change. Inconsistent % formatting between the two code paths in the same file.</td>
+        <td>Remove fmtPct as ddPct import. Use only local fmtPct, or import from hearst-format.js and remove local definition entirely.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-06</span></td>
+        <td><span class="badge badge-agent">A1</span></td>
+        <td><strong>resultsNavigationRef never reset — URL sync permanently disabled after browser back</strong></td>
+        <td>simulator/page.jsx:228-232 URL sync reads resultsNavigationRef.current. Set to true at line 334, never reset. After browser-back, ref stays true → URL never updates → preset/archetype changes not reflected in URL.</td>
+        <td class="location">simulator/page.jsx:227-232, 333-341</td>
+        <td class="impact-high">After Validate + browser-back: archetype/MW changes don't update URL. Bookmarks capture stale state. Reopening by URL param hydrates wrong config.</td>
+        <td>Reset resultsNavigationRef.current=false in useEffect with router-change listener or on component mount.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-07</span></td>
+        <td><span class="badge badge-agent">A2</span></td>
+        <td><strong>FINANCIAL MATH BUG: Waterfall preferred-return accrual formula over-accrues exponentially</strong></td>
+        <td>hearst-calculations.js:753-755: <span class="code">hearst_pref_accrued = (hearst_pref_accrued + hearst_equity_in) * PREF_RATE</span>. Re-adds equity_in to accrued balance BEFORE multiplying each year. Year 2 already inflated. Correct: <span class="code">pref_accrued = pref_accrued * (1 + PREF_RATE)</span>.</td>
+        <td class="location">lib/hearst-calculations.js:753-755</td>
+        <td class="impact-high">Per-investor IRR and MOIC in Waterfall tab are computed from corrupt cashflow arrays. Wrong distribution to investors before carry split.</td>
+        <td>Change accrual lines to: <span class="code">hearst_pref_accrued = hearst_pref_accrued * (1 + PREF_RATE)</span>. Equity investment must never re-enter the accrual loop after year 0.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-08</span></td>
+        <td><span class="badge badge-agent">A2</span></td>
+        <td><strong>NPV displayed without disclosing hardcoded 10% discount rate — four different labels across surfaces, one says "not modeled" when 10% WAS applied</strong></td>
+        <td>hearst-calculations.js:364 defaults to 0.10 (TODO comment). financial/page.jsx:195 labels "NPV (10yr)". pdf/route.js:564 says "discount rate not modeled" — FALSE. dossier-derive: no rate note. Four contradictory labels for same figure.</td>
+        <td class="location">hearst-calculations.js:364<br>financial/page.jsx:195<br>pdf/route.js:146, 564</td>
+        <td class="impact-high">IC reader cannot verify NPV. PDF says "not modeled" while 10% WAS applied — a false statement in a board document.</td>
+        <td>Suffix ALL four surface labels: "NPV @ 10% discount rate". Remove "not modeled" from PDF. Unblock the TODO and persist discount_rate_pct on scenario.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-09</span></td>
+        <td><span class="badge badge-agent">A2</span></td>
+        <td><strong>PDF fmtUsd fixed "M" denominator — $2.4B NPV renders as "$2400.0M"</strong></td>
+        <td>pdf/route.js:23-27: default unit always "M", never auto-selects "B" or "K". hearst-format.js fmtUSD auto-tiers ≥1e9→B, ≥1e6→M. Dossier uses auto-tier. PDF does not. Same CAPEX shows "$1.20B" in simulator and "$1200M" in PDF.</td>
+        <td class="location">app/api/admin/hearst/strategic-memos/[id]/pdf/route.js:23-27</td>
+        <td class="impact-high">PDF shows non-standard formatting for large values. IC document showing "$1200M" instead of "$1.2B" is unprofessional and confusing.</td>
+        <td>Replace local fmtUsd with canonical fmtUSD from hearst-format.js, or copy the auto-tier logic (≥1e9→B, ≥1e6→M, ≥1e3→K).</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-10</span></td>
+        <td><span class="badge badge-agent">A2</span></td>
+        <td><strong>MOIC glyph inconsistent: "2.34x" vs "2.34×" vs raw inline across three surfaces</strong></td>
+        <td>hearst-format.js:39 uses lowercase "x". dossier-derive.js:43 uses Unicode "×". financial/page.jsx:369 uses raw inline <span class="code">(inv.irr * 100).toFixed(1) + '% IRR'</span> — not even fmtX.</td>
+        <td class="location">lib/hearst-format.js:39<br>lib/dossier-derive.js:43<br>financial/page.jsx:369-372</td>
+        <td class="impact-high">Same metric appears as three different representations on three screens. Signals QA gaps to any IC reviewer.</td>
+        <td>Unify all MOIC/DSCR/multiplier formatting to hearst-format.js fmtX as single source. Remove fmtX from dossier-derive or re-export as alias.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-11</span></td>
+        <td><span class="badge badge-agent">A3</span></td>
+        <td><strong>SECTION_IDS declared but never used — zero structural validation of LLM output before persisting</strong></td>
+        <td>route.js:58-71 defines 12 section names in SECTION_IDS, never referenced. No loop, no guard, no schema check uses it. A partial JSON (missing e.g. risks_constraints) is silently stored and served.</td>
+        <td class="location">app/api/admin/hearst/strategic-memo/route.js:58-71</td>
+        <td class="impact-high">Missing memo sections render placeholder "Not available" cards with no warning. Board reviewer sees structurally incomplete documents with no indication.</td>
+        <td>Either delete SECTION_IDS (if validation intentionally skipped) or add post-parse guard checking each ID is present before calling persistMemo.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-12</span></td>
+        <td><span class="badge badge-agent">A3</span></td>
+        <td><strong>HURDLE_IRR (0.10) defined but not enforced in verdict gate — IRR 10-11% receives PROCEED</strong></td>
+        <td>dossier-derive.js:75 defines HURDLE_IRR=0.10. Gate 3 (lines 127-139) only checks NPV&lt;0 and DSCR. Does NOT check irr&lt;HURDLE_IRR. Referenced only in NPV label string. Otherwise unused.</td>
+        <td class="location">lib/dossier-derive.js:75, 127-139</td>
+        <td class="impact-high">Board-level PROCEED shown for sub-hurdle-rate deals if NPV is marginally positive. Misrepresents investment quality to IC.</td>
+        <td>Add gate: <span class="code">if (irr != null && irr &lt; HURDLE_IRR) reviewDrivers.push(...)</span>. Or remove the misleading constant comment if intentionally excluded.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-13</span></td>
+        <td><span class="badge badge-agent">A3</span></td>
+        <td><strong>Deterministic fallback memo listed identically to LLM memos in Dossier — no visual distinction</strong></td>
+        <td>route.js:617-618 marks model_used="deterministic-fallback", fallback contains _generation_mode. Dossier shows provider_used but no banner, no warning, no differentiation in list view, Decision Canvas, or KPI strip.</td>
+        <td class="location">app/api/admin/hearst/strategic-memo/route.js:617-618<br>dossier/page.jsx:496</td>
+        <td class="impact-high">IC acts on an incomplete fallback memo that looks identical to a full LLM memo. Strategic qualitative sections are generic placeholders.</td>
+        <td>Detect <span class="code">memo.memo_json._generation_mode === 'deterministic_fallback'</span> and render top-of-canvas warning banner. "LLM timed out — financial KPIs authoritative; qualitative sections require manual review."</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-14</span></td>
+        <td><span class="badge badge-agent">A3</span></td>
+        <td><strong>Fallback memo market benchmarking uses dummy placeholders — "Comparable profile / Referenced" shown as real data</strong></td>
+        <td>route.js:362-370: comparables built as <span class="code">{metric: 'Comparable profile', value: 'Referenced', source: 'ORACLE intelligence layer'}</span>. Dossier BenchmarkPosition renders c.metric and c.value directly.</td>
+        <td class="location">app/api/admin/hearst/strategic-memo/route.js:362-370</td>
+        <td class="impact-high">Silent misinformation in board-facing deliverable. Benchmark Position viz looks complete but contains zero real data for Equinix, Khazna etc.</td>
+        <td>In deterministic fallback, skip market_benchmarking entirely (set a flag to render Placeholder) or pull actual metric data from intelligence brief datapoints.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-15</span></td>
+        <td><span class="badge badge-agent">A3</span></td>
+        <td><strong>assertNoPromises only checks depth-1 keys — nested Promise leakage in gpu_pricing.prices or signals.signals would serialize to {} silently</strong></td>
+        <td>memo-confidence.js:10-16: iterates Object.entries(obj), checks instanceof Promise at depth 1 only. gpu_pricing.prices[], signals.signals[] are nested. Comment at route.js:520 shows this was a real prior bug — fix only covers depth 1.</td>
+        <td class="location">lib/memo-confidence.js:10-16<br>app/api/admin/hearst/strategic-memo/route.js:519-520</td>
+        <td class="impact-high">Future regression: nested async leakage would serialize to {} in LLM prompt, allowing hallucinated live data without detection.</td>
+        <td>Make assertNoPromises recursive, or add explicit per-field checks for known nested arrays: gpu_pricing.prices, signals.signals.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-16</span></td>
+        <td><span class="badge badge-agent">A4</span></td>
+        <td><strong>MOIC completely absent from PDF — material metric discrepancy between PDF and dossier</strong></td>
+        <td>Dossier KPI strip renders MOIC via fmtX(proj.moic) (dossier-derive.js:230). PDF buildHtml never reads snap.moic. No MOIC KPI card anywhere in PDF. MOIC is a primary IC metric.</td>
+        <td class="location">app/api/admin/hearst/strategic-memos/[id]/pdf/route.js — buildHtml()</td>
+        <td class="impact-high">PDF is an incomplete board document. IC member comparing PDF to on-screen dossier sees different key metrics.</td>
+        <td>Add MOIC figure card alongside IRR/NPV/Payback on PDF pages 1 and 2, reading snap.moic with fmtX convention from dossier-derive.js.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-17</span></td>
+        <td><span class="badge badge-agent">A4</span></td>
+        <td><strong>PDF revenue metric pulled from brittle label-search on LLM-generated metrics array</strong></td>
+        <td><span class="code">fin.metrics.find(r => r.label === 'Hyperscale rent')</span> — exact string match on freeform LLM label. "Hyperscale Rent", "NNN Rent" → rentMetric is null → shows "N/A" or truncated prose while financials exist.</td>
+        <td class="location">pdf/route.js — buildHtml() rentMetric block</td>
+        <td class="impact-high">Revenue figure shown on PDF page 2 may silently show "N/A" while all other financial data exists. Inconsistent revenue display for committee.</td>
+        <td>Add canonical revenue_nnn or price_hyperscale_kw_month field to _exec_projection so PDF reads from structured data, not label-matched LLM row.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-18</span></td>
+        <td><span class="badge badge-agent">A4</span></td>
+        <td><strong>EBITDA margin in PDF from label search — not in dossier KPI strip at all, PDF surfaces unvalidated metric</strong></td>
+        <td><span class="code">fin.metrics.find(r => r.label?.includes('EBITDA'))</span>. Dossier KPI strip (deriveKpis) does not include EBITDA margin. PDF shows a metric the dossier never validated. Unit interpretation assumed without checks.</td>
+        <td class="location">pdf/route.js — buildHtml() ebitdaMetric block</td>
+        <td class="impact-high">PDF may show EBITDA margin inconsistent with or absent from dossier. Creates discrepancy in board-level documents.</td>
+        <td>Either add EBITDA margin to _exec_projection as structured field and derive in dossier-derive.js, or remove from PDF to keep views consistent.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-19</span></td>
+        <td><span class="badge badge-agent">A4</span></td>
+        <td><strong>IRR sensitivity chart visually implies a range but only shows base case — misleads IC into thinking Monte Carlo exists</strong></td>
+        <td>sensLine(irr) renders positioned .sens-base marker on colored track. Track visually implies range/spectrum but only base case is plotted. Note "Sensitivity analysis pending" is small italic. Section title says "IRR Sensitivity — Power Price & Utilization" — implies two-variable sweep.</td>
+        <td class="location">pdf/route.js — sensLine() helper, .sens-wrap block</td>
+        <td class="impact-high">IC could interpret as Monte Carlo or sensitivity sweep. Misleading visual in a board document — directly undermines credibility.</td>
+        <td>Replace bar-with-marker with plain typographic display: "Base case only — stress scenarios pending" until real stress engine populates min/max.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-20</span></td>
+        <td><span class="badge badge-agent">A4</span></td>
+        <td><strong>browser.close() not in finally block — leaked Chrome process on Vercel error path risks 504</strong></td>
+        <td>Catch block: try{await browser.close()}catch{} — inner catch swallows close error. If page.setContent throws before try/catch, close path may not execute. Vercel 60s maxDuration limit.</td>
+        <td class="location">pdf/route.js — GET handler, catch block</td>
+        <td class="impact-high">Leaked headless Chrome on Vercel may hit 60s maxDuration, returning 504 instead of explicit 500. Memory leak per invocation window.</td>
+        <td>Use finally: <span class="code">try{...}catch(e){err=e;}finally{if(browser)await browser.close().catch(()=>{});}if(err)return error;</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-21</span></td>
+        <td><span class="badge badge-agent">A5</span></td>
+        <td><strong>CRITICAL: sendPrompt() never injects current deal into chat — advisor answers ungrounded, invents IRR from corpus benchmarks</strong></td>
+        <td>OracleAdvisorRail.jsx:94-108: sendPrompt() fires DOM submit on .ct-chat-form. Body never includes body.deal={projection,scenario,warnings}. route.ts:374-384 only uses body.deal when front sends it. Quick-prompt answers draw on corpus ("IRR levered 18-24%") ignoring engine output.</td>
+        <td class="location">components/hearst/OracleAdvisorRail.jsx:94-108<br>app/api/cockpit-chat/route.ts:374-384</td>
+        <td class="impact-high">Advisor tells user "your IRR is ~20%" based on corpus while engine computed 9%. Core truthfulness failure. The primary IC Advisor panel is a hallucination machine.</td>
+        <td>OracleAdvisorRail.sendPrompt() must read advisorContext and attach deal:{scenario,projection,warnings} to fetch body. Requires exposing chatConfig.dealProvider callback on CockpitShell or shared ref that ChatIdPersistor intercepts.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-22</span></td>
+        <td><span class="badge badge-agent">A5</span></td>
+        <td><strong>CRITICAL: DOMAIN_CONTEXT contains specific IRR ranges (18-24%) that LLM presents as facts about current scenario when no grounding block is injected</strong></td>
+        <td>oracle-product-context.ts:275: "IRR levered 18-24%, equity multiple 2.2-2.8x." Injected verbatim into CONVERSATIONAL_PROMPT. Guardrail says "Si tu n'as pas la donnée, dis-le" but doesn't distinguish corpus ranges from engine-computed values.</td>
+        <td class="location">lib/oracle-product-context.ts:233, 275<br>lib/review-mode/prompts.ts:57-63</td>
+        <td class="impact-high">User asking "What is my IRR?" for a 9% scenario receives "18-24%" from corpus — directly contradicts engine result. Active misinformation.</td>
+        <td>Add instruction to CONVERSATIONAL_PROMPT: if CURRENT DEAL block present, ALL quantitative claims must reference ONLY those numbers. Prefix DOMAIN_CONTEXT benchmarks with [CORPUS RANGE] consistently.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-23</span></td>
+        <td><span class="badge badge-agent">A5</span></td>
+        <td><strong>CRITICAL: Advisor rail shows live unsaved numbers; chat route answers about last saved scenario — contradictory information on same page</strong></td>
+        <td>simulator/page.jsx:238-250: setAdvisorContext called on every state change including unsaved. oracle-active-deal.js:87-100: resolveActiveDeal() queries DB for last saved scenario. User modifies 50→100 MW, IRR 14→22%, asks "Why REVIEW?" — rail shows 22%, chat answers at 14%.</td>
+        <td class="location">lib/oracle-active-deal.js:87-100<br>app/api/cockpit-chat/route.ts:376-383<br>simulator/page.jsx:238-250</td>
+        <td class="impact-high">Two components on same page give contradictory IRR figures for the same deal. Fundamental data integrity failure.</td>
+        <td>Either always use voie a (front sends body.deal with live projection) and disable voie b for simulator surface, or block quick-prompts until scenario is saved with "UNSAVED" warning.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-24</span></td>
+        <td><span class="badge badge-agent">A6</span></td>
+        <td><strong>Token fork: --cp-space-*, --cp-radius-*, --cp-tracking-* have conflicting values between cockpit.css and cp-tokens.css</strong></td>
+        <td>cockpit.css:44 --cp-space-7:32px vs cp-tokens.css:94 --cp-space-7:28px. cockpit.css:52 --cp-radius-md:8px vs cp-tokens.css:102 --cp-radius-md:10px. cockpit.css:67 --cp-tracking-wide:0.04em vs cp-tokens.css:79 --cp-tracking-wide:0.06em. cp-tokens.css loads after and wins — but decoys in cockpit.css.</td>
+        <td class="location">cockpit.css:44-68 vs cp-tokens.css:87-104</td>
+        <td class="impact-high">Non-deterministic visual output — any component using these tokens gets different measurements depending on import order. Pixel-perfect consistency broken across entire cockpit.</td>
+        <td>Canonicalize all token values in cp-tokens.css. Remove duplicate definitions from cockpit.css, or make cockpit.css import-only with no :root overrides.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-25</span></td>
+        <td><span class="badge badge-agent">A6</span></td>
+        <td><strong>--cp-shadow-lg used in two components but defined nowhere — FAB and modal render with no shadow</strong></td>
+        <td>chat-fab.css:71: <span class="code">box-shadow: var(--cp-shadow-lg)</span> no fallback. StrategicMemoModal.jsx:281: <span class="code">var(--cp-shadow-lg)</span>. Neither cp-tokens.css nor cockpit.css defines --cp-shadow-lg. Grep returns only these two usage sites.</td>
+        <td class="location">components/hearst/chat-fab.css:71<br>components/hearst/StrategicMemoModal.jsx:281</td>
+        <td class="impact-high">FAB on mobile renders with no box-shadow. StrategicMemoModal elevation disappears. Both lose depth separation from background — modal looks flat.</td>
+        <td>Define --cp-shadow-lg in cp-tokens.css (e.g. 0 8px 24px -4px rgba(0,0,0,0.5)) or replace with --cp-shadow-md which already exists.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-26</span></td>
+        <td><span class="badge badge-agent">A6</span></td>
+        <td><strong>--cp-surface (bare) used in OracleAdvisorRail.jsx without fallback — tab bar renders transparent</strong></td>
+        <td>cockpit.css:511: <span class="code">var(--cp-surface, #160a0d)</span> — fallback exists. OracleAdvisorRail.jsx:252: <span class="code">background: var(--cp-surface)</span> — NO fallback. Token --cp-surface never defined in any :root block (only --cp-surface-0 through --cp-surface-3 exist).</td>
+        <td class="location">components/hearst/OracleAdvisorRail.jsx:252</td>
+        <td class="impact-high">Tab bar strip at top of right rail renders with transparent background. Tab bar becomes visually unanchored and unreadable.</td>
+        <td>Replace var(--cp-surface) with var(--cp-surface-1) or var(--cp-surface-2). Or define --cp-surface as alias in cp-tokens.css.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-27</span></td>
+        <td><span class="badge badge-agent">A6</span></td>
+        <td><strong>Sources page has no bottom padding — content hidden behind fixed BottomBar</strong></td>
+        <td>sources/page.jsx:374: wrap has no paddingBottom, no var(--cp-scroll-clear). workspace/page.jsx:110 and dossier/page.jsx:755 both use var(--cp-scroll-clear,0px). financial/page.jsx:526 uses paddingBottom:160.</td>
+        <td class="location">app/(cockpit)/admin/hearst/sources/page.jsx:374</td>
+        <td class="impact-high">Bottom rows of library table obscured by fixed bottom navigation bar. Users cannot see or interact with last ~88px of page content.</td>
+        <td>Add <span class="code">paddingBottom: 'var(--cp-scroll-clear, 112px)'</span> to wrap style object on line 374.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-28</span></td>
+        <td><span class="badge badge-agent">A6</span></td>
+        <td><strong>Simulator uses hardcoded 180px bottom padding instead of canonical --cp-scroll-clear (112px)</strong></td>
+        <td>simulator/page.jsx:541: <span class="code">padding: var(--cp-space-6, 24px) var(--cp-space-8, 32px) 180px</span>. Token --cp-scroll-clear = calc(var(--cp-bar-bottom, 88px) + 24px) = 112px. 180px is 68px taller with no justification.</td>
+        <td class="location">app/(cockpit)/admin/hearst/simulator/page.jsx:541</td>
+        <td class="impact-high">Excess dead space on short viewports. BottomBar height change breaks this silently.</td>
+        <td>Replace "180px" with "var(--cp-scroll-clear, 112px)".</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-29</span></td>
+        <td><span class="badge badge-agent">A7</span></td>
+        <td><strong>Deals nav item links to a dead-end static page — no back-path, no actionable CTAs</strong></td>
+        <td>OracleBottomBar.jsx:31-34 lists Deals → /admin/hearst/deals. Page is pure read, no engine, no API. ZERO inbound links from any other page. No back link, no breadcrumb. Positioned between Financial and Workspace disrupting the primary flow.</td>
+        <td class="location">components/OracleBottomBar.jsx:31-34<br>app/(cockpit)/admin/hearst/deals/page.jsx</td>
+        <td class="impact-high">Users clicking Deals land on a standalone static page with no onward CTAs and no way back except browser history. Dead-end mid-flow.</td>
+        <td>Either remove "Deals" from SECTIONS in OracleBottomBar, or move it to end of SECTIONS and add back link / contextual CTA in Deals page.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-30</span></td>
+        <td><span class="badge badge-agent">A7</span></td>
+        <td><strong>Bottom bar (6 items) and SectionTabs (3 items) express contradictory information architectures</strong></td>
+        <td>OracleBottomBar: Simulator, Financial, Deals, Workspace, Dossier, Sources. SectionTabs "modeling": Simulator, Financial, Workspace only. Dossier has no SectionTabs at all. Deals in bottom bar but not SectionTabs.</td>
+        <td class="location">components/hearst/SectionTabs.jsx:13-22<br>components/OracleBottomBar.jsx:16-53</td>
+        <td class="impact-high">Two navigation systems express different information architectures. Users confused about which items are peers. Dossier has no secondary tab nav at all.</td>
+        <td>Align SectionTabs groups with bottom bar model. Make SectionTabs exhaustive (all 6 sections) or remove SectionTabs entirely. Add Dossier to "modeling" group at minimum.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-31</span></td>
+        <td><span class="badge badge-agent">A7</span></td>
+        <td><strong>simulator/results page entirely missing from bottom bar and SectionTabs — no way to return after navigating away</strong></td>
+        <td>Bottom bar SECTIONS:22 only matches /admin/hearst/simulator (not /results). Results page exists at its own route. After navigating away, only path back is re-running full Validate flow. Results page has "← Edit inputs" but no forward path to Dossier except Generate Memo CTA.</td>
+        <td class="location">app/(cockpit)/admin/hearst/simulator/results/page.jsx<br>components/OracleBottomBar.jsx:22</td>
+        <td class="impact-high">Critical flow break. User sees results, clicks Workspace, cannot return to results page. Must re-run full Validate to get back.</td>
+        <td>Add /admin/hearst/simulator/results to matchAny for "sim" bottom-bar item. Add direct "Open Dossier" Link on results page for users who already have memos.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-32</span></td>
+        <td><span class="badge badge-agent">A7</span></td>
+        <td><strong>Auth callback redirects before session is established — missing code param causes redirect cycle with no error message</strong></td>
+        <td>auth/callback/route.js:25-43: NextResponse.redirect(target) called BEFORE exchangeCodeForSession. Cookies attached via res.cookies.set after. But if code param missing and no error param: unauthenticated redirect to cockpit → middleware bounces back to /admin/login → infinite loop. No error message shown.</td>
+        <td class="location">app/admin/auth/callback/route.js:25-43</td>
+        <td class="impact-high">User with consumed/missing magic link code sees redirect flash with no error message. Redirect loop until browser gives up.</td>
+        <td>Add guard: if !code && !error → redirect to /admin/login?auth_error=missing_code.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-33</span></td>
+        <td><span class="badge badge-agent">A8</span></td>
+        <td><strong>lib/copilot-rules.js is 327 lines of dead code — zero imports anywhere in production codebase</strong></td>
+        <td>grep for copilot-rules, buildCopilotSuggestion, fieldLabel, fmtFieldValue across all .js/.jsx/.ts/.tsx returns zero hits outside the file itself. Internal import of hearst-deal-structures creates tree-shaking obstacle.</td>
+        <td class="location">lib/copilot-rules.js (entire file, 327 lines)</td>
+        <td class="impact-high">327 lines of dead code shipped in every bundle. Copilot recommendation engine never runs — UI never calls it.</td>
+        <td>Remove the file entirely. Confirm no dynamic import exists (grep clean). Track planned feature in a feature-flag branch.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-34</span></td>
+        <td><span class="badge badge-agent">A8</span></td>
+        <td><strong>Duplicate verdict logic: decisionVerdict() in results page uses different thresholds than deriveVerdict() in dossier-derive — contradictory verdicts for same numbers</strong></td>
+        <td>results/page.jsx:152 local decisionVerdict: IRR≥0.18→"Investment-grade", IRR≥0.12→"Viable". dossier-derive.js:79-140 deriveVerdict: HURDLE_IRR=0.10, DSCR_COVENANT=1.25, MOIC&lt;1→REJECT. Different thresholds, different input shapes.</td>
+        <td class="location">simulator/results/page.jsx:152-160<br>lib/dossier-derive.js:79-140</td>
+        <td class="impact-high">"Viable" on results page → "REVIEW" or "REJECT" on dossier for same numbers. Board users see contradictory verdicts for same projection.</td>
+        <td>Delete decisionVerdict() from results/page.jsx. Import deriveVerdict from dossier-derive and pass {_exec_projection: projection} matching the memo shape.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-35</span></td>
+        <td><span class="badge badge-agent">A8</span></td>
+        <td><strong>Three parallel formatCurrency implementations with different behavior — same CAPEX prints differently on three surfaces</strong></td>
+        <td>dossier-derive.js:23 fmtUsd. hearst-format.js:9 fmtUSD. pdf/route.js:23-27 local fmtUsd (different rounding, fixed "M" unit). Different rounding, different tier selection, different sign handling. Same CAPEX appears differently in simulator, dossier, and PDF.</td>
+        <td class="location">lib/dossier-derive.js:23<br>lib/hearst-format.js:9<br>pdf/route.js:23-27</td>
+        <td class="impact-high">IC credibility issue. Same CAPEX value prints as "$1.20B" in simulator and "$1200M" in PDF. Source of user confusion in board documents.</td>
+        <td>Consolidate on hearst-format.js fmtUSD. Delete fmtUsd from dossier-derive (or re-export as alias). Replace local fmtUsd in pdf/route.js with canonical import.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-36</span></td>
+        <td><span class="badge badge-agent">A8</span></td>
+        <td><strong>Duplicate fmtPct/fmtPctRaw across dossier-derive, hearst-format, and PDF route — ddPct import immediately shadowed and becomes dead weight</strong></td>
+        <td>dossier-derive.js:34 fmtPct(v, isFraction=true). hearst-format.js:19 fmtPctFromRatio(v, dp=1). pdf/route.js:28 local fmtPct (no isFraction), :29 fmtPctRaw (v>1 heuristic — diverges from hearst-format). Line 9 imports ddPct then line 28 shadows it.</td>
+        <td class="location">pdf/route.js:9, 28-29<br>lib/dossier-derive.js:34<br>lib/hearst-format.js:19-28</td>
+        <td class="impact-high">IRR numbers formatted differently in PDF vs dossier for edge cases. ddPct is dead weight. fmtPctRaw v>1 heuristic misformats IRR near boundaries.</td>
+        <td>Delete local fmtPct and fmtPctRaw from pdf/route.js. Import fmtPctFromRatio and fmtPctRaw from hearst-format.js. Remove unused ddPct import.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-37</span></td>
+        <td><span class="badge badge-agent">A9</span></td>
+        <td><strong>Semantic colors monochrome in cockpit.css but chromatic in cp-tokens.css — non-deterministic alert/status colors</strong></td>
+        <td>cockpit.css:98 --cp-error: rgba(255,255,255,0.60) vs cp-tokens.css:113 --cp-error: #ef4444. --cp-status-positive: #34d399 (cockpit.css:121) vs var(--cp-violet)→#8b5cf6 (cp-tokens.css:137). cp-tokens.css loads last and wins — cockpit.css values are decoys.</td>
+        <td class="location">cockpit.css:98-113 vs cp-tokens.css:113-142</td>
+        <td class="impact-high">Alert banners, status dots, chart fills — all resolve to whichever file wins cascade. Error state could render as gray instead of red. Non-deterministic visual output for ALL semantic states.</td>
+        <td>Pick one authoritative source. Delete semantic block from cockpit.css (lines 91-113). Make cp-tokens.css the single owner.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-38</span></td>
+        <td><span class="badge badge-agent">A9</span></td>
+        <td><strong>--cp-radius-md/lg have different values in two CSS files — ambiguous border radius on all cards</strong></td>
+        <td>cockpit.css:52 --cp-radius-md:8px, --cp-radius-lg:12px. cp-tokens.css:102 --cp-radius-md:10px, --cp-radius-lg:14px. .cp-card (cockpit.css:304) uses var(--cp-radius-lg). If cp-tokens.css wins: 14px; if cockpit.css: 12px. All KpiCards, dossier cards, simulator panels affected.</td>
+        <td class="location">cockpit.css:52-53 vs cp-tokens.css:102-103</td>
+        <td class="impact-high">Every component using var(--cp-radius-md/lg) has ambiguous border radius depending on CSS load order.</td>
+        <td>Remove radius block from cockpit.css. Make cp-tokens.css sole owner. Update all JSX fallback values to match cp-tokens.css canonical scale.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-39</span></td>
+        <td><span class="badge badge-agent">A9</span></td>
+        <td><strong>--cp-space-7 through --cp-space-12 disagree between CSS files (4-32px drift per token)</strong></td>
+        <td>cockpit.css:44-47: --cp-space-7:32px, --cp-space-8:40px, --cp-space-9:48px, --cp-space-12:80px. cp-tokens.css:94-97: --cp-space-7:28px, --cp-space-8:32px, --cp-space-9:40px, --cp-space-12:48px.</td>
+        <td class="location">cockpit.css:44-47 vs cp-tokens.css:94-97</td>
+        <td class="impact-high">dossier/page.jsx:755 uses var(--cp-space-8) for horizontal padding, simulator/page.jsx:541 uses var(--cp-space-8,32px). Layout drift whenever token used without fallback.</td>
+        <td>Remove spacing scale from cockpit.css. cp-tokens.css as single source. Audit all JSX fallback values against canonical scale.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-40</span></td>
+        <td><span class="badge badge-agent">A9</span></td>
+        <td><strong>--cp-surface (no suffix) undefined — resolves to transparent in OracleAdvisorRail, bypasses token system in cockpit.css via hardcoded fallback</strong></td>
+        <td>OracleAdvisorRail.jsx:252 <span class="code">background: 'var(--cp-surface)'</span> — no fallback, no definition. cockpit.css:511 uses var(--cp-surface,#160a0d) — correct intent but bypasses token system. Only --cp-surface-0 through --cp-surface-3 are defined.</td>
+        <td class="location">components/hearst/OracleAdvisorRail.jsx:252<br>cockpit.css:511</td>
+        <td class="impact-high">TabBar background in OracleAdvisorRail resolves to transparent or inherited — wrong/invisible background in production.</td>
+        <td>Define --cp-surface as alias (e.g. var(--cp-surface-1)) in cp-tokens.css, or replace all references with explicit numbered token.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-41</span></td>
+        <td><span class="badge badge-agent">A9</span></td>
+        <td><strong>--cp-shadow-lg referenced in StrategicMemoModal and chat-fab but not defined in any token file — modal and FAB render flat</strong></td>
+        <td>StrategicMemoModal.jsx:281 uses --cp-shadow-lg. chat-fab.css:71 uses --cp-shadow-lg. cockpit.css defines --cp-shadow-xs/sm/md/depth/card-hover. cp-tokens.css defines --cp-shadow-xs/sm/md/card-hover. NEITHER defines --cp-shadow-lg.</td>
+        <td class="location">components/hearst/StrategicMemoModal.jsx:281<br>components/hearst/chat-fab.css:71</td>
+        <td class="impact-high">Modal appears flat (no depth layer). Chat FAB loses visual elevation. Critical for layering clarity in overlay/modal components.</td>
+        <td>Add --cp-shadow-lg to cp-tokens.css (e.g. 0 16px 48px rgba(0,0,0,0.50)) or replace references with --cp-shadow-depth which already exists.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-42</span></td>
+        <td><span class="badge badge-agent">A9</span></td>
+        <td><strong>Component sizing tokens disagree between files — 12px touch-target regression on icon buttons</strong></td>
+        <td>cockpit.css: --cp-avatar-size:40px, --cp-icon-btn-size:44px. cp-tokens.css: --cp-avatar-size:32px, --cp-icon-btn-size:32px. Every size token has different value. icon-btn-size 44px vs 32px is a 12px touch-target regression.</td>
+        <td class="location">cockpit.css:29-34 vs cp-tokens.css:159-163</td>
+        <td class="impact-high">Nav icons, avatar chips, brand logo render at unpredictable sizes. 12px icon button size difference is visible touch-target regression.</td>
+        <td>Remove component sizing from cockpit.css. Make cp-tokens.css authoritative. Choose correct values for cockpit shell spec.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-43</span></td>
+        <td><span class="badge badge-agent">A9</span></td>
+        <td><strong>Tracking tokens disagree: --cp-tracking-wide 0.04em vs 0.06em, --cp-tracking-wider 0.08em vs 0.10em</strong></td>
+        <td>cockpit.css:67-68 vs cp-tokens.css:79-80. Eyebrow labels, badge text, kicker text all use these tokens. 0.02em difference visible at small sizes in tight layouts.</td>
+        <td class="location">cockpit.css:67-68 vs cp-tokens.css:79-80</td>
+        <td class="impact-high">Typography density changes across components depending on CSS load order. Visible in board memo context.</td>
+        <td>Remove typography token definitions from cockpit.css. cp-tokens.css as authoritative.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-44</span></td>
+        <td><span class="badge badge-agent">A10</span></td>
+        <td><strong>LEGAL/REGULATORY: Zero investment-advice disclaimer anywhere in the output pipeline</strong></td>
+        <td>MEMO_SCHEMA_INSTRUCTIONS (route.js:149-192) define 40+ rules with zero disclaimer text. deriveVerdict() produces board-level labels (PROCEED, REJECT) structurally indistinguishable from licensed investment advice. IRR, MOIC, NPV, exit multiples all present.</td>
+        <td class="location">app/api/admin/hearst/strategic-memo/route.js:149-192<br>lib/dossier-derive.js:66-155<br>lib/oracle-system-prompt.js</td>
+        <td class="impact-high">Critical regulatory and legal exposure. IC recipient could reasonably rely on this as licensed advice. Disqualifies product from institutional due-diligence context without legal remediation.</td>
+        <td>Inject mandatory non-reliance disclaimer as top-level field in every memo JSON: (1) ORACLE is not a licensed financial adviser; (2) outputs are analytical frameworks; (3) projections are model outputs; (4) independent professional advice required. Must appear in API response, PDF export, and UI KPI strip adjacent to every verdict label.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-45</span></td>
+        <td><span class="badge badge-agent">A10</span></td>
+        <td><strong>Hardcoded occupancy ramp baked into every projection with no [ASSUMED] label — primary IRR driver is hidden</strong></td>
+        <td>hearst-calculations.js:235-239: <span class="code">const ramp = [0, 0.25, 0.45, 0.60, ...]</span>. Not in PUBLIC_SOURCES_LIBRARY, not exposed as configurable, not labeled [ASSUMED], not in warnings[]. Constitution says "Never fabricate precise cost without labeling [ASSUMED]". MENA greenfield occupancy ranges 0-80%+ — 25% default likely wrong for most scenarios.</td>
+        <td class="location">lib/hearst-calculations.js:235-239</td>
+        <td class="impact-high">Occupancy ramp is the primary driver of early EBITDA and DSCR. Hidden default producing IRR and MOIC figures the IC cannot verify or stress-test.</td>
+        <td>Surface ramp_profile as explicit scenario parameter (conservative/base/aggressive presets). Append mandatory warning when default used: "Occupancy ramp sourced from internal default schedule [ASSUMED] — not benchmarked to specific comparable."</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-46</span></td>
+        <td><span class="badge badge-agent">A10</span></td>
+        <td><strong>IRR solver non-convergence silently masked in verdict path — IC sees PROCEED alongside IRR "—" with no explanation</strong></td>
+        <td>calcIrr() (hearst-calculations.js:98-115) returns null after 200 iterations. deriveVerdict() (dossier-derive.js:95-115): hasCoreReturns = [irr,moic,npv].some(v=>v!=null) — if MOIC non-null but IRR null, verdict proceeds. No warning appended to projection.warnings[].</td>
+        <td class="location">lib/hearst-calculations.js:98-115<br>lib/dossier-derive.js:95-115</td>
+        <td class="impact-high">IC sees PROCEED verdict with IRR "—" and may not understand this means model failed to compute return rate. MOIC-only path can produce spuriously positive verdict on multi-sign-change cashflows.</td>
+        <td>When irr is null, append mandatory warning: "IRR did not converge — cashflow profile is irregular. Do not use MOIC or NPV in isolation as IRR substitute." Treat null IRR as INSUFFICIENT_DATA in deriveVerdict() gate.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-47</span></td>
+        <td><span class="badge badge-agent">A10</span></td>
+        <td><strong>GPU refresh CAPEX not modeled but upper-bound IRR surfaces at top level with only a buried warning</strong></td>
+        <td>hearst-calculations.js:444-446: GPU refresh warning pushed to projection.warnings[]. Same scalar IRR used in deriveVerdict() and KPI strip. oracle-explainability.js:117-130 explicitly warns "Hardware refresh capex mid-cycle can reset payback clock 2-3 years." Code violates its own explainability guidance.</td>
+        <td class="location">lib/hearst-calculations.js:424-573<br>lib/oracle-explainability.js payback.investor</td>
+        <td class="impact-high">GPU refresh at 24-36 months adds 20-40% to total CAPEX over 10yr, compressing IRR 4-8pp. Presenting upper-bound IRR as headline is materially misleading to IC.</td>
+        <td>When gpu_refresh_modeled===false, inject mandatory badge alongside IRR KPI: "IRR — UPPER BOUND (no GPU refresh)". Require memo section 3 to include GPU Refresh Capex: NOT MODELED line item.</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-p0">P0-48</span></td>
+        <td><span class="badge badge-agent">A10</span></td>
+        <td><strong>NPV discount rate hardcoded at 10% with no user disclosure — fundamental financial modeling disclosure failure</strong></td>
+        <td>hearst-calculations.js:364: <span class="code">const discount_rate = scenario.discount_rate_pct != null ? scenario.discount_rate_pct / 100 : 0.10</span>. TODO comment: "persist discount_rate_pct in a later wave". NPV displayed without this assumption. At 8% vs 10% vs 12%, a 100MW Qatar campus NPV shifts hundreds of millions of dollars.</td>
+        <td class="location">lib/hearst-calculations.js:364</td>
+        <td class="impact-high">IC sees "NPV: $340M" without knowing it was computed at assumed 10% hurdle. May reach opposite investment conclusion at their own hurdle rate. Fundamental modeling disclosure failure.</td>
+        <td>Require discount_rate_pct as explicit scenario param. Until persisted, append to projection.warnings[]: "NPV computed at default 10% discount rate [ASSUMED] — no hurdle rate provided." Surface assumption in section 3 of every memo.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+</body>
+</html>

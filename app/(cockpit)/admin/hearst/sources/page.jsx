@@ -178,7 +178,7 @@ export default function SourcesPage() {
         [data-sources-add-grid] { grid-template-columns: 1fr !important; }
       }
     `}</style>
-    <div style={S.wrap}>
+    <div className="oracle-page">
       <SectionTabs section="library" />
       {/* Header */}
       <div data-sources-topbar style={S.topBar}>
@@ -375,7 +375,6 @@ export default function SourcesPage() {
 }
 
 const S = {
-  wrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)', maxWidth: 1280, margin: '0 auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear, 0px)' },
   loading: { padding: 'var(--cp-space-12)', textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-md)' },
   error: { padding: 'var(--cp-space-5)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-sm)' },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
@@ -403,7 +402,7 @@ const S = {
   empty: { padding: 'var(--cp-space-5)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-sm)', textAlign: 'center' },
   delBtn: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 'var(--cp-space-1) var(--cp-space-2)' },
   confirmYes: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-text-strong)', background: 'var(--cp-error)', border: 'none', cursor: 'pointer', padding: 'var(--cp-space-1) var(--cp-space-2)', borderRadius: 'var(--cp-radius-xs)' },
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--cp-overlay)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' },
   modal: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-md)', width: 440, maxWidth: '90vw', boxShadow: 'var(--cp-shadow-lg)' },
   modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--cp-space-4)', borderBottom: '1px solid var(--cp-border)' },
   modalTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },

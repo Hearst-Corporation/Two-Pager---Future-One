@@ -226,7 +226,7 @@ export default function DealsPage() {
         }
       `}</style>
 
-      <div data-deals-root style={S.wrap}>
+      <div data-deals-root className="oracle-page" style={{ gap: 'var(--cp-space-7)' }}>
 
         {/* HERO */}
         <header style={S.hero}>
@@ -461,8 +461,6 @@ function SectionHead({ num, title, hint }) {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const S = {
-  wrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-7)', maxWidth: 1160, margin: '0 auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear)' },
-
   // hero
   hero: { borderLeft: '3px solid var(--cp-accent)', paddingLeft: 'var(--cp-space-5)', paddingTop: 'var(--cp-space-2)', paddingBottom: 'var(--cp-space-2)' },
   eyebrow: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)' },

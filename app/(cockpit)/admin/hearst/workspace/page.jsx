@@ -44,16 +44,16 @@ export default function WorkspacePage() {
   }
 
   return (
-    <div style={S.wrap}>
-      <header style={S.head}>
-        <h1 style={S.h1}>Workspace</h1>
-        <p style={S.sub}>Your saved work — scenarios and reports. Reopen a scenario in the Simulator or open its report.</p>
+    <div className="oracle-page">
+      <header className="oracle-page-header">
+        <h1>Workspace</h1>
+        <p className="oracle-subtitle">Your saved work — scenarios and reports. Reopen a scenario in the Simulator or open its report.</p>
       </header>
 
       {err && <div style={S.err}>Error: {err}</div>}
 
       {/* ── Saved Scenarios ── */}
-      <section style={S.section}>
+      <section className="oracle-section">
         <div style={S.headingWrap}><h2 style={S.heading}>Saved scenarios</h2><span style={S.hint}>{scenarios?.length ?? '—'} saved</span></div>
         {scenarios === null && <div style={S.empty}>Loading scenarios…</div>}
         {scenarios && scenarios.length === 0 && <div style={S.empty}>No saved scenarios yet. Build one in the Simulator and click "Save this plan".</div>}
@@ -79,7 +79,7 @@ export default function WorkspacePage() {
       </section>
 
       {/* ── Reports / Memos ── */}
-      <section style={S.section}>
+      <section className="oracle-section">
         <div style={S.headingWrap}><h2 style={S.heading}>Reports / memos</h2><span style={S.hint}>{memos?.length ?? '—'} reports</span></div>
         {memos === null && <div style={S.empty}>Loading reports…</div>}
         {memos && memos.length === 0 && <div style={S.empty}>No reports yet. Generate a strategic memo from the Simulator.</div>}
@@ -107,11 +107,6 @@ export default function WorkspacePage() {
 }
 
 const S = {
-  wrap: { maxWidth: 1280, margin: '0 auto', padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear)' },
-  head: { marginBottom: 'var(--cp-space-5)' },
-  h1: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0 },
-  sub: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-1)' },
-  section: { marginBottom: 'var(--cp-space-8)' },
   headingWrap: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', paddingBottom: 'var(--cp-space-2)' },
   heading: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 0 },
   hint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },

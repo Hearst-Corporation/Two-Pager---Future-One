@@ -67,3 +67,13 @@ runway-tasks.log
 simulator-*.png
 A[0-9]-*.png
 *-simulator*.png
+
+# audit / QA artefacts à la racine (générés, non versionnés)
+/coherence-final-*.png
+/batch*-*.png
+/declutter-*.png
+/rail-nav-*.png
+/oracle-cta-element.png
+/oracle-sim-raw.png
+/uiux-audit-*.html
+*.bak

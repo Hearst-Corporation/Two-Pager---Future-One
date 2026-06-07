@@ -421,7 +421,7 @@ const S = {
     gap: 'var(--cp-space-2)',
   },
   promptBtn: {
-    minHeight: 34,
+    minHeight: 'var(--cp-btn-height-md)',
     padding: 'var(--cp-space-2)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-sm)',

@@ -32,7 +32,7 @@ export default function MemoJobBadge() {
       <span style={S.spinner} />
       <span style={S.body}>
         <span style={S.title}>Memo in progress</span>
-        <span style={{ ...S.sub, color: isSlowish ? 'var(--ct-status-warning)' : 'var(--cp-text-muted)' }}>
+        <span style={{ ...S.sub, color: isSlowish ? 'var(--cp-status-warning)' : 'var(--cp-text-muted)' }}>
           {formatElapsed(job.elapsed_ms)}{isSlowish ? ' · still waiting for Kimi' : ''}
         </span>
       </span>

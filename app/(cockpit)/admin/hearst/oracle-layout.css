@@ -1,0 +1,81 @@
+/* oracle-layout.css — anatomie de page canonique pour Oracle cockpit.
+   Importé depuis layout.jsx après cp-tokens.css.
+   Chaque page du cockpit doit utiliser .oracle-page comme enveloppe.
+   Ne jamais mettre de hex ici — var(--cp-*) uniquement.
+*/
+
+/* ── Wrapper de page canonique ── */
+.oracle-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding:
+    var(--cp-space-6)
+    clamp(var(--cp-space-3), 4vw, var(--cp-space-8))
+    var(--cp-scroll-clear, var(--cp-space-6));
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-section-gap);
+}
+
+/* ── En-tête de page ── */
+.oracle-page-header {
+  margin-bottom: 0;
+}
+.oracle-page-header h1 {
+  font-size: var(--cp-font-2xl);
+  font-weight: var(--cp-weight-black);
+  letter-spacing: var(--cp-tracking-tight);
+  color: var(--cp-text-primary);
+  margin: 0 0 var(--cp-space-1);
+  line-height: var(--cp-leading-tight);
+}
+.oracle-subtitle {
+  font-size: var(--cp-font-sm);
+  color: var(--cp-text-muted);
+  margin: 0;
+  line-height: var(--cp-leading-normal);
+}
+
+/* ── Section card canonique ── */
+.oracle-section {
+  background: var(--cp-surface-1);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-lg);
+  padding: var(--cp-space-5) var(--cp-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-4);
+}
+.oracle-section-title {
+  font-size: var(--cp-font-xs);
+  font-weight: var(--cp-weight-semibold);
+  color: var(--cp-text-muted);
+  letter-spacing: var(--cp-tracking-eyebrow);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ── KPI strip canonique — même pattern partout ── */
+.oracle-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--cp-kpi-min-width), 1fr));
+  gap: var(--cp-space-3);
+}
+
+/* ── Layout 2 colonnes ── */
+.oracle-two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--cp-space-5);
+}
+
+/* ── Boutons canoniques ── */
+.oracle-btn-primary {
+  height: var(--cp-btn-height-md);
+  padding: 0 var(--cp-space-6);
+  border-radius: var(--cp-radius-md);
+  font-size: var(--cp-font-base);
+  font-weight: var(--cp-weight-semibold);
+  cursor: pointer;
+  border: none;
+}

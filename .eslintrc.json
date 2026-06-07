@@ -19,7 +19,7 @@
       }
     },
     {
-      "files": ["app/admin/hearst/**/*.{js,jsx,ts,tsx}", "components/hearst/**/*.{js,jsx,ts,tsx}"],
+      "files": ["app/(cockpit)/admin/hearst/**/*.{js,jsx,ts,tsx}", "components/hearst/**/*.{js,jsx,ts,tsx}"],
       "rules": {
         "no-restricted-syntax": ["error",
           {

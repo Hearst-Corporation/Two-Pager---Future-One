@@ -61,12 +61,12 @@ export default function ChatToggleFAB() {
       >
         {open ? (
           // X close icon
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 22 22" fill="none" aria-hidden="true">
             <path d="M5 5l12 12M17 5L5 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
         ) : (
           // Chat bubble icon
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 22 22" fill="none" aria-hidden="true">
             <path
               d="M3 5.5A2.5 2.5 0 015.5 3h11A2.5 2.5 0 0119 5.5v8A2.5 2.5 0 0116.5 16H9l-4.5 3.5V16H5.5A2.5 2.5 0 013 13.5v-8z"
               stroke="currentColor"
