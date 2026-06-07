@@ -71,6 +71,12 @@ export const UI = {
   DOSSIER_NO_VERSIONS: 'No versions.',
   DOSSIER_GO_SIMULATOR: 'the Simulator',
 
+  // Financial
+  FIN_PAGE_TITLE: '10-Year Financial Projection',
+  FIN_SAVED_PLAN_LABEL: 'Saved plan',
+  FIN_SAVED_PLAN_PLACEHOLDER: 'Select a saved scenario…',
+  FIN_LOADING: 'Loading financial model…',
+
   // Errors
   ERR_GENERIC: 'Something went wrong. Please try again.',
   ERR_PROJECT_LOAD: 'Project load failed',

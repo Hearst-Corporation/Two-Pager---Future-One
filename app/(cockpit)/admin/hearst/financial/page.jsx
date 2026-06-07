@@ -13,6 +13,13 @@ import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
 import { fmtUSD, fmtPctFromRatio, fmtPctRaw, fmtX } from '@/lib/hearst-format';
+import { UI } from '@/lib/ui-strings';
+import {
+  canonicalScenarioColorType,
+  dedupeSavedPlans,
+  groupCanonicalScenarios,
+  pickDefaultPrimaryScenarioId,
+} from '@/lib/financial-scenario-picker';
 
 // Scenario palette : accent for upside, neutral for base, error only for downside
 // (downside is a true risk warning, not just a third color).
@@ -38,7 +45,7 @@ const METRIC_COLS = [
 export default function FinancialPage() {
   const [project, setProject] = useState(null);
   const [scenarios, setScenarios] = useState([]);
-  const [activeIds, setActiveIds] = useState([]);
+  const [primaryId, setPrimaryId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tab, setTab] = useState('table');
@@ -54,8 +61,9 @@ export default function FinancialPage() {
         setProject(proj);
         const sRes = await fetch(`/api/admin/hearst/scenarios?project_id=${proj.id}`);
         const { scenarios: sc } = await sRes.json();
-        setScenarios(sc || []);
-        setActiveIds(sc?.map(s => s.id) || []);
+        const list = sc || [];
+        setScenarios(list);
+        setPrimaryId(pickDefaultPrimaryScenarioId(list));
       } catch (e) {
         setError(e.message);
       } finally {
@@ -66,9 +74,14 @@ export default function FinancialPage() {
   }, []);
 
   // Derived values — computed before early returns so hooks are always called in same order
-  const visible = scenarios.filter(s => activeIds.includes(s.id));
-  const base = visible.find(s => s.name?.toLowerCase().includes('base') || s.scenario_type === 'base') || visible[0];
+  const canonicalScenarios = useMemo(() => groupCanonicalScenarios(scenarios), [scenarios]);
+  const savedPlans = useMemo(() => dedupeSavedPlans(scenarios), [scenarios]);
+  const base = scenarios.find((s) => s.id === primaryId)
+    || canonicalScenarios.find((s) => s.scenario_type === 'base')
+    || scenarios[0]
+    || null;
   const proj = base?.projection || {};
+  const savedPlanValue = savedPlans.some((s) => s.id === primaryId) ? primaryId : '';
 
   const debtSchedule = useMemo(() => {
     if (!base) return null;
@@ -86,7 +99,7 @@ export default function FinancialPage() {
     return generateSensitivity(base, sensitivityX, sensitivityY, 5);
   }, [base, sensitivityX, sensitivityY]);
 
-  if (loading) return <div style={S.loading}>Loading financial model…</div>;
+  if (loading) return <div style={S.loading}>{UI.FIN_LOADING}</div>;
   if (error) return <div style={S.error}>Error: {error}</div>;
 
   // Export: the memo PDF lives in the Dossier (the working per-memo PDF route).
@@ -127,6 +140,10 @@ export default function FinancialPage() {
           flex-direction: column !important;
           align-items: stretch !important;
         }
+        [data-financial-scenario-row] {
+          flex-direction: column !important;
+          align-items: stretch !important;
+        }
         [data-financial-tab-row] {
           overflow-x: auto !important;
           flex-wrap: nowrap !important;
@@ -144,22 +161,46 @@ export default function FinancialPage() {
     <div className="oracle-page">
       {/* Scenario toggles */}
       <div data-financial-top-bar style={S.topBar}>
-        <div style={S.pageTitle}>10-Year Financial Projection</div>
-        <div style={{ display: 'flex', gap: 'var(--cp-space-2)' }}>
-          {scenarios.map(s => {
-            const active = activeIds.includes(s.id);
-            const color = s.name?.toLowerCase().includes('up') ? COLORS.upside
-              : s.name?.toLowerCase().includes('down') ? COLORS.downside : COLORS.base;
+        <div style={S.pageTitle}>{UI.FIN_PAGE_TITLE}</div>
+        <div data-financial-scenario-row style={S.scenarioRow}>
+          {canonicalScenarios.map((s) => {
+            const active = primaryId === s.id;
+            const tone = canonicalScenarioColorType(s.scenario_type) || 'base';
+            const color = COLORS[tone];
             return (
               <button
                 key={s.id}
-                onClick={() => setActiveIds(prev => active ? prev.filter(id => id !== s.id) : [...prev, s.id])}
-                style={{ ...S.scBtn, borderColor: color, background: active ? color : 'transparent', color: active ? 'var(--cp-bg-deep)' : color }}
+                type="button"
+                onClick={() => setPrimaryId(s.id)}
+                style={{
+                  ...S.scBtn,
+                  borderColor: color,
+                  background: active ? color : 'transparent',
+                  color: active ? 'var(--cp-bg-deep)' : color,
+                }}
               >
                 {s.name}
               </button>
             );
           })}
+          {savedPlans.length > 0 && (
+            <label style={S.savedPlanWrap}>
+              <span style={S.savedPlanLabel}>{UI.FIN_SAVED_PLAN_LABEL}</span>
+              <select
+                value={savedPlanValue}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  if (id) setPrimaryId(id);
+                }}
+                style={S.savedPlanSelect}
+              >
+                <option value="">{UI.FIN_SAVED_PLAN_PLACEHOLDER}</option>
+                {savedPlans.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
         <div data-financial-tab-row style={{ display: 'flex', gap: 'var(--cp-space-1)', marginLeft: 'auto', flexWrap: 'wrap' }}>
           {[
@@ -521,7 +562,11 @@ const S = {
   error: { padding: 'var(--cp-space-6)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-sm)' },
   topBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
   pageTitle: { fontSize: 'var(--cp-font-xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
-  scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 700, padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: '2px solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)' },
+  scenarioRow: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', alignItems: 'center', flex: '1 1 280px', minWidth: 0 },
+  scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 700, padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: '2px solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
+  savedPlanWrap: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', minWidth: 0, flex: '1 1 220px' },
+  savedPlanLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' },
+  savedPlanSelect: { flex: '1 1 180px', minWidth: 0, maxWidth: 360, fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-pill)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
   tabBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 600, padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
   tabBtnActive: { background: 'var(--cp-text-primary)', color: 'var(--cp-bg-deep)' },
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-6)' },
