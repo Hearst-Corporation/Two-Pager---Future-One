@@ -94,6 +94,10 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
 
   return (
     <div style={S.wrap}>
+      {/* Hardware grids stack earlier than the page (1100/1500 vs 900) because the
+          chat rail narrows the centre panel — these react to container width, not
+          the viewport. This component owns its own breakpoints; the page-level
+          stack rule does not target the hardware grids. */}
       <style>{`
         @media (max-width: 1100px) {
           [data-hardware-presets] { grid-template-columns: 1fr !important; }
@@ -118,10 +122,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
               hover
               accent={sel}
               surface={2}
-              style={{
-                ...S.presetCard,
-                borderLeft: sel ? '3px solid var(--cp-accent-maroon)' : undefined,
-              }}
+              style={S.presetCard}
             >
               <span style={S.presetName}>{p.name}</span>
               <span style={S.presetTagline}>{p.tagline}</span>

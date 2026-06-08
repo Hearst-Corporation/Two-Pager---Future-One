@@ -378,9 +378,8 @@ export default function SimulatorPage() {
     <>
     <style>{`
       @media (max-width: 900px) {
+        /* Hardware grids own their breakpoints (HardwareMixer, 1100/1500px). */
         [data-brief-bar-row],
-        [data-hardware-spine],
-        [data-hardware-presets],
         [data-archetype-grid] {
           grid-template-columns: 1fr !important;
         }

@@ -174,7 +174,6 @@ const S = {
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
     minHeight: 60,
-    padding: 'var(--cp-space-3)',
     cursor: 'pointer',
     textAlign: 'left',
   },

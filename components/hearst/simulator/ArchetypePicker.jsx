@@ -51,11 +51,7 @@ export default function ArchetypePicker({ archetypes = [], primaryId, onSelectPr
             hover
             accent={isPrimary}
             surface={2}
-            style={{
-              ...S.card,
-              borderColor: isPrimary ? 'var(--cp-accent-maroon)' : 'var(--cp-border)',
-              borderLeft: isPrimary ? '3px solid var(--cp-accent-maroon)' : undefined,
-            }}
+            style={S.card}
           >
             <div style={S.titleRow}>
               <span style={S.title}>{a.label}</span>
