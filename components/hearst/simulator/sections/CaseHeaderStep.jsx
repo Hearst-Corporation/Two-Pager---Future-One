@@ -15,13 +15,12 @@ function prettyGeo(g) {
 }
 
 /**
- * CaseHeaderStep — THE CASE. The single mental object the page is built around:
- * the live scenario read as an investment case, not a configuration. Pure
- * regrouping of existing values — archetype label, MW, geography, capex, IRR —
- * promoted above every editor so the case is visible before its parameters.
+ * CaseHeaderStep — THE CASE. The single mental object: the live scenario read as
+ * an investment decision, stated as one sentence — "Deploy $798M into a Government
+ * AI Cluster in Qatar" — with Expected Return and Capacity beneath it.
  *
- * No engine, solver, calculation or new data: every value is read straight off
- * the live projection/scenario/state that the page already holds.
+ * Pure regrouping of existing live values (archetype label, capex, IRR, MW,
+ * geography). No engine, solver, calculation or new data.
  *
  * @param {{ archetypeId: string, geography: string, scenario: object|null,
  *           projection: object|null, totalMw: number }} props
@@ -33,30 +32,30 @@ export default function CaseHeaderStep({ archetypeId, geography, scenario, proje
   const capital = projection?.total_capex;
   const irr = projection?.irr;
 
-  const identity = [
-    mw != null ? fmtMW(mw, 0) : null,
-    geo,
-  ].filter(Boolean).join(' · ');
+  // The case as a single board-readable sentence. Falls back to a "size it"
+  // prompt when capital is not computed yet — never prints a fake number.
+  const sentence = capital != null
+    ? UI.SIM_CASE_DEPLOY_INTO(fmtUSD(capital), model, geo)
+    : UI.SIM_CASE_DEPLOY_NEEDS_INPUT(model, geo);
 
   return (
     <Card as="section" data-sim-case variant="card" surface={1} padding="lg" style={S.case}>
       <span style={S.eyebrow}>{UI.SIM_CASE_EYEBROW}</span>
 
-      <div data-sim-case-grid style={S.grid}>
-        {/* Identity — what this investment IS */}
-        <div data-sim-case-identity style={S.identity}>
-          <span data-sim-case-model style={S.model}>{model}</span>
-          {identity && <span style={S.sub}>{identity}</span>}
-        </div>
+      <h1 data-sim-case-sentence style={S.sentence}>{sentence}</h1>
 
-        {/* The two headline numbers — capital in, return out */}
-        <div style={S.metric}>
-          <span style={S.metricLabel}>{UI.SIM_CASE_CAPITAL_LABEL}</span>
-          <strong style={S.metricValue}>{capital != null ? fmtUSD(capital) : MISSING}</strong>
-        </div>
+      <div data-sim-case-grid style={S.grid}>
         <div style={S.metric}>
           <span style={S.metricLabel}>{UI.SIM_CASE_RETURN_LABEL}</span>
           <strong style={S.metricValue}>{irr != null ? fmtPctFromRatio(irr) : MISSING}</strong>
+        </div>
+        <div style={S.metric}>
+          <span style={S.metricLabel}>{UI.SIM_CASE_CAPACITY_LABEL}</span>
+          <strong style={S.metricValue}>{mw != null ? fmtMW(mw, 0) : MISSING}</strong>
+        </div>
+        <div style={S.metric}>
+          <span style={S.metricLabel}>{UI.SIM_CASE_CAPITAL_LABEL}</span>
+          <strong style={S.metricValue}>{capital != null ? fmtUSD(capital) : MISSING}</strong>
         </div>
       </div>
     </Card>
@@ -85,30 +84,21 @@ const S = {
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
   },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr)',
-    alignItems: 'center',
-    gap: 'var(--cp-space-6)',
-  },
-  identity: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
-    minWidth: 0,
-  },
-  model: {
+  sentence: {
+    margin: 0,
     color: 'var(--cp-text-strong)',
-    fontSize: 'clamp(26px, 3vw, 40px)',
-    lineHeight: 1.05,
+    fontSize: 'clamp(19px, 1.9vw, 26px)',
+    lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
   },
-  sub: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-lg)',
-    fontWeight: 'var(--cp-weight-bold)',
-    fontVariantNumeric: 'tabular-nums',
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    alignItems: 'start',
+    gap: 'var(--cp-space-6)',
+    paddingTop: 'var(--cp-space-2)',
+    borderTop: '1px solid var(--cp-border)',
   },
   metric: {
     display: 'flex',
@@ -125,7 +115,7 @@ const S = {
   },
   metricValue: {
     color: 'var(--cp-text-strong)',
-    fontSize: 'clamp(24px, 2.6vw, 34px)',
+    fontSize: 'clamp(18px, 1.8vw, 24px)',
     lineHeight: 1,
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',

@@ -52,7 +52,22 @@ export const UI = {
   SIM_CASE_EYEBROW: 'Investment case',
   SIM_CASE_CAPITAL_LABEL: 'Capital Required',
   SIM_CASE_RETURN_LABEL: 'Expected Return',
+  SIM_CASE_CAPACITY_LABEL: 'Capacity',
   SIM_CASE_EDITORS: 'Adjust the case',
+  // "Deploy $X into a {model}[ in {Geo}]" — the case as one sentence. Parts kept
+  // separate so the missing-value fallbacks stay honest (never invents a number).
+  SIM_CASE_DEPLOY_PREFIX: 'Deploy',
+  SIM_CASE_DEPLOY_INTO: (capital: string, model: string, geo: string | null) =>
+    `Deploy ${capital} into a ${model}${geo ? ` in ${geo}` : ''}`,
+  SIM_CASE_DEPLOY_NEEDS_INPUT: (model: string, geo: string | null) =>
+    `Size a ${model}${geo ? ` in ${geo}` : ''}`,
+  // Why this case — the selected thesis summarised; the 4-card selector is hidden
+  // until the user asks to change it.
+  SIM_WHY_TITLE: 'Why this case',
+  SIM_THESIS_CHANGE: 'Change thesis',
+  SIM_THESIS_DONE: 'Done',
+  SIM_SIZE_CHANGE: 'Edit size',
+  SIM_SIZE_DONE: 'Done',
   // Section 01 — Investment Thesis (hero). The operating-model archetype, framed
   // as the primary entry decision: what kind of investment is this?
   SIM_THESIS_EYEBROW: 'Step 1 · Investment thesis',

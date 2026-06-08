@@ -16,7 +16,7 @@ import { UI } from '@/lib/ui-strings';
 import { S as CP } from '@/lib/cp-styles';
 
 import CaseHeaderStep from '@/components/hearst/simulator/sections/CaseHeaderStep';
-import InvestmentThesisStep from '@/components/hearst/simulator/sections/InvestmentThesisStep';
+import WhyThisCaseStep from '@/components/hearst/simulator/sections/WhyThisCaseStep';
 import InvestmentSizeStep from '@/components/hearst/simulator/sections/InvestmentSizeStep';
 import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
 import { Button, Card, Eyebrow } from '@/components/hearst/ui';
@@ -379,8 +379,8 @@ export default function SimulatorPage() {
     `}</style>
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
-        {/* THE CASE — the single mental object, centre of gravity. Pure regrouping
-            of existing live values; visible before any of its editors. */}
+        {/* THE CASE — the single mental object. Pure regrouping of existing live
+            values; the chosen investment, stated as one sentence. */}
         <CaseHeaderStep
           archetypeId={state.primary_archetype_id}
           geography={state.geography}
@@ -389,10 +389,13 @@ export default function SimulatorPage() {
           totalMw={state.total_mw}
         />
 
-        {/* CASE EDITORS — secondary. They modify the case above, they are not heroes. */}
+        {/* WHY THIS CASE — the selected thesis summarised. The 4-card selector is
+            hidden until the board clicks "Change thesis"; it is an editor, not the page. */}
+        <WhyThisCaseStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
+
+        {/* ADJUST THE CASE — secondary editors, collapsed by default. */}
         <div data-sim-editors style={S.editors}>
           <Eyebrow block>{UI.SIM_CASE_EDITORS}</Eyebrow>
-          <InvestmentThesisStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
           <InvestmentSizeStep mode={state.mode} inputValue={inputValue} onInputChange={onInputChange} />
           <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
         </div>
