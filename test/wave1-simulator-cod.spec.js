@@ -72,11 +72,16 @@ describe('C8 — CAPEX reconciliation warning on >15% divergence', () => {
 });
 
 describe('C10 — GPU refresh CAPEX disclosure', () => {
-  it('attaches a no-silent-optimism warning when GPU revenue is folded in', () => {
+  it('models GPU refresh CAPEX and discloses the redeployment schedule', () => {
     const proj = generateProjection(greenfield);
     const folded = foldGpuRevenue(proj, { capex_hardware: 100_000_000, revenue_ai_annual: 50_000_000 }, greenfield, {});
-    expect(folded.gpu_refresh_modeled).toBe(false);
-    expect(folded.warnings.some(w => /GPU refresh CAPEX not currently modeled/i.test(w))).toBe(true);
+    expect(folded.gpu_refresh_modeled).toBe(true);
+    expect(folded.gpu_refresh).toBeTruthy();
+    expect(folded.gpu_refresh.cycle_years).toBe(5);          // sourced default (sector median)
+    expect(folded.gpu_refresh.replacement_cost_pct).toBe(85); // sourced default
+    // RFS year 3 + 5-yr cycle = refresh at year 8 within the 10-yr horizon
+    expect(folded.gpu_refresh.refresh_years).toContain(8);
+    expect(folded.warnings.some(w => /GPU refresh CAPEX modeled/i.test(w))).toBe(true);
   });
   it('discloses (warns) when GPU RFS is after the exit year instead of silently dropping it', () => {
     const proj = generateProjection(greenfield);
