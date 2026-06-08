@@ -40,6 +40,7 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 - **Calculs** : `lib/hearst-calculations.js` (IRR Newton-Raphson, NPV, MOIC, waterfall)
 - **Solver** : `lib/hearst-solver.js` (3 modes : mw_first / capital_first / target_irr_first)
 - **Tokens DS** : `grep -r "var(--cp-" app/(cockpit)/admin/hearst/cp-tokens.css`
+- **Tokens morts** : `npm run prune:tokens` (rapport ; `--write` supprime). Protège les préfixes résolus en runtime (`--cp-op-*`) — ne jamais supprimer un token dont le préfixe est consommé via `var(--cp-PREFIX-${...})`.
 - **Styles inline** : `lib/cp-styles.js` — `T` (typo), `S` (états), `L` (layout), `RC` (Recharts). **Chercher ici avant d'écrire un `fontWeight`, `fontSize` ou état inline.**
 - **Nav routes** : `grep -n "href:" components/OracleRailNav.jsx`
 - **Strings UI** : `lib/ui-strings.ts` → `UI.*`
