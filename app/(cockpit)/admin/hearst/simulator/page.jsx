@@ -16,8 +16,8 @@ import { UI } from '@/lib/ui-strings';
 import { S as CP } from '@/lib/cp-styles';
 
 import SimulatorHeader from '@/components/hearst/simulator/sections/SimulatorHeader';
-import InvestmentBriefStep from '@/components/hearst/simulator/sections/InvestmentBriefStep';
-import OperatingModelStep from '@/components/hearst/simulator/sections/OperatingModelStep';
+import InvestmentThesisStep from '@/components/hearst/simulator/sections/InvestmentThesisStep';
+import InvestmentSizeStep from '@/components/hearst/simulator/sections/InvestmentSizeStep';
 import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
 import { Button, Card } from '@/components/hearst/ui';
 
@@ -398,7 +398,10 @@ export default function SimulatorPage() {
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
         <SimulatorHeader loading={loading} />
-        <InvestmentBriefStep
+        {/* SECTION 01 — Investment Thesis (hero): the dominant entry decision. */}
+        <InvestmentThesisStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
+        {/* SECTION 02 — Investment Size: grouped parameters, one active mode. */}
+        <InvestmentSizeStep
           mode={state.mode}
           inputValue={inputValue}
           activeScenarioPreset={activeScenarioPreset}
@@ -413,7 +416,7 @@ export default function SimulatorPage() {
           onInputChange={onInputChange}
           onSetIrrLever={onSetIrrLever}
         />
-        <OperatingModelStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
+        {/* SECTION 03 — Technology Stack: collapsed by default, opt-in detail. */}
         <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
 
         {projectLoadError && (

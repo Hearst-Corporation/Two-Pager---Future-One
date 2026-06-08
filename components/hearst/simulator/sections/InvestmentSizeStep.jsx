@@ -7,9 +7,8 @@ import { SectionHead, Card, Button, Eyebrow } from '@/components/hearst/ui';
 import { QATAR_PRESETS } from '@/lib/hearst-simulator-state';
 import { UI } from '@/lib/ui-strings';
 
-/** Human one-liner under each scenario card — always shows the native metric,
- * with $ budget appended when the preset is capital-driven (so the mix reads
- * intentional, never an incoherent outlier). Never exposes raw archetype ids. */
+/** Human one-liner under each preset shortcut — native metric, with $ budget when
+ * capital-driven. Never exposes raw archetype ids. */
 function scenarioPresetSub(p) {
   if (p.mode === 'target_irr_first') return `${p.target_irr_pct}% target return`;
   if (p.mode === 'capital_first') {
@@ -27,12 +26,14 @@ const LEVER_PILLS = [
 ];
 
 /**
- * InvestmentBriefStep — section 01, "The Brief Bar". One vertical card:
- * quick-start presets → a single control bar (segmented mode switch welded above
- * the driven field, with the two engine-computed quantities riveted to its right).
- * No side-by-side columns, no competing sub-titles.
+ * InvestmentSizeStep — SECTION 02, "Investment Size". One vertical reading flow:
+ * a compact segmented control (one active mode), the driven field welded to the
+ * engine-computed quantities as one grouped "Investment parameters" block, then
+ * the quick-start presets demoted to a quiet secondary shortcut strip. Reads as
+ * investment parameters, not configuration controls. Same handlers/data as the
+ * former InvestmentBriefStep — only framing and hierarchy changed.
  */
-export default function InvestmentBriefStep({
+export default function InvestmentSizeStep({
   mode,
   inputValue,
   activeScenarioPreset,
@@ -48,13 +49,13 @@ export default function InvestmentBriefStep({
   onSetIrrLever,
 }) {
   return (
-    <Card as="section" data-sim-command-deck variant="flat" style={S.deck} padding="lg">
+    <Card as="section" data-sim-size variant="flat" style={S.deck} padding="lg">
       <div style={S.head}>
         <SectionHead
-          num="01"
-          eyebrow={UI.SIM_BUILD_BRIEF_EYEBROW}
-          title={UI.SIM_BUILD_BRIEF_TITLE}
-          hint={UI.SIM_BUILD_BRIEF_HINT}
+          num="02"
+          eyebrow={UI.SIM_SIZE_EYEBROW}
+          title={UI.SIM_SIZE_TITLE}
+          hint={UI.SIM_SIZE_HINT}
           style={{ marginBottom: 0, flex: '1 1 320px', minWidth: 0 }}
         />
         <Button variant="link" size="sm" onClick={onBootstrap} style={S.autofill}>
@@ -62,35 +63,10 @@ export default function InvestmentBriefStep({
         </Button>
       </div>
 
-      {/* Quick-start presets — shortcuts that drive the bar below */}
-      <div style={S.presetBlock}>
-        <Eyebrow>{UI.SIM_QUICK_START} · {UI.SIM_QUICK_START_COUNT(QATAR_PRESETS.length)}</Eyebrow>
-        <div data-sim-preset-grid style={S.presetGrid} role="group" aria-label={UI.SIM_READY_SCENARIOS}>
-          {QATAR_PRESETS.map((p) => {
-            const active = activeScenarioPreset === p.id;
-            return (
-              <Card
-                key={p.id}
-                as="button"
-                onClick={() => onPreset(p)}
-                accent={active}
-                surface={0}
-                hover
-                padding="sm"
-                style={S.presetCard}
-              >
-                <span style={S.presetName}>{p.label}</span>
-                <span style={{ ...S.presetSub, ...(active ? S.presetSubActive : {}) }}>
-                  {scenarioPresetSub(p)}
-                </span>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* The bar — segmented mode switch welded above the driven field */}
-      <div style={S.bar}>
+      {/* Grouped investment parameters — segmented mode (one active) welded above
+          the driven field, with the two computed quantities riveted alongside. */}
+      <div style={S.params}>
+        <Eyebrow>{UI.SIM_SIZE_PARAMS}</Eyebrow>
         <InputModeSwitcher mode={mode} onChange={onModeChange} />
         <InputFieldHero
           mode={mode}
@@ -120,11 +96,39 @@ export default function InvestmentBriefStep({
           </div>
         )}
       </div>
+
+      {/* Quick-start presets — demoted to a quiet secondary shortcut strip so they
+          no longer compete with the parameters above. */}
+      <div style={S.presetBlock}>
+        <Eyebrow>{UI.SIM_QUICK_START} · {UI.SIM_QUICK_START_COUNT(QATAR_PRESETS.length)}</Eyebrow>
+        <div data-sim-preset-grid style={S.presetGrid} role="group" aria-label={UI.SIM_READY_SCENARIOS}>
+          {QATAR_PRESETS.map((p) => {
+            const active = activeScenarioPreset === p.id;
+            return (
+              <Card
+                key={p.id}
+                as="button"
+                onClick={() => onPreset(p)}
+                accent={active}
+                surface={0}
+                hover
+                padding="sm"
+                style={S.presetCard}
+              >
+                <span style={S.presetName}>{p.label}</span>
+                <span style={{ ...S.presetSub, ...(active ? S.presetSubActive : {}) }}>
+                  {scenarioPresetSub(p)}
+                </span>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
     </Card>
   );
 }
 
-InvestmentBriefStep.propTypes = {
+InvestmentSizeStep.propTypes = {
   mode: PropTypes.string.isRequired,
   inputValue: PropTypes.number,
   activeScenarioPreset: PropTypes.string,
@@ -160,40 +164,7 @@ const S = {
     flexShrink: 0,
     alignSelf: 'flex-start',
   },
-  presetBlock: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-2)',
-  },
-  presetGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-    gap: 'var(--cp-space-2)',
-  },
-  presetCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
-    minHeight: 60,
-    cursor: 'pointer',
-    textAlign: 'left',
-  },
-  presetName: {
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-bold)',
-    lineHeight: 'var(--cp-leading-tight)',
-  },
-  presetSub: {
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-semibold)',
-    color: 'var(--cp-text-muted)',
-    letterSpacing: 'var(--cp-tracking-wide)',
-  },
-  presetSubActive: {
-    color: 'var(--cp-text-strong)',
-    opacity: 0.85,
-  },
-  bar: {
+  params: {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-3)',
@@ -225,5 +196,41 @@ const S = {
     background: 'var(--cp-accent-maroon)',
     color: 'var(--cp-text-strong)',
     borderColor: 'var(--cp-border-accent)',
+  },
+  // Preset shortcut strip — quieter than the params above (smaller cards, muted).
+  presetBlock: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-2)',
+    paddingTop: 'var(--cp-space-4)',
+    borderTop: '1px solid var(--cp-border)',
+  },
+  presetGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gap: 'var(--cp-space-2)',
+  },
+  presetCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'calc(var(--cp-space-1) / 2)',
+    minHeight: 52,
+    cursor: 'pointer',
+    textAlign: 'left',
+  },
+  presetName: {
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-bold)',
+    lineHeight: 'var(--cp-leading-tight)',
+  },
+  presetSub: {
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-semibold)',
+    color: 'var(--cp-text-muted)',
+    letterSpacing: 'var(--cp-tracking-wide)',
+  },
+  presetSubActive: {
+    color: 'var(--cp-text-strong)',
+    opacity: 0.85,
   },
 };

@@ -16,7 +16,6 @@ export default function SimulatorHeader({ loading }) {
         hero
         eyebrow={UI.SIM_PAGE_EYEBROW}
         title={UI.SIM_PAGE_TITLE}
-        hint={UI.SIM_PAGE_SUBTITLE}
         style={{ flex: '1 1 320px', minWidth: 0, marginBottom: 0 }}
       />
       {loading && <div style={S.loadingBadge}>{UI.STATE_CALCULATING}</div>}
