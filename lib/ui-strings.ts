@@ -47,23 +47,18 @@ export const UI = {
   SIM_OS_EYEBROW: 'Operating thesis',
   SIM_OS_TITLE: 'Operating Model',
   SIM_OS_HINT: 'Choose one operating thesis',
-  // Case Header — the single mental object (centre of gravity). Pure regrouping of
-  // existing live values: archetype label · MW · geography · capex · IRR.
-  SIM_CASE_EYEBROW: 'Investment case',
-  SIM_CASE_CAPITAL_LABEL: 'Capital Required',
-  SIM_CASE_RETURN_LABEL: 'Expected Return',
-  SIM_CASE_CAPACITY_LABEL: 'Capacity',
-  SIM_CASE_EDITORS: 'Adjust the case',
-  // "Deploy $X into a {model}[ in {Geo}]" — the case as one sentence. Parts kept
-  // separate so the missing-value fallbacks stay honest (never invents a number).
-  SIM_CASE_DEPLOY_PREFIX: 'Deploy',
-  SIM_CASE_DEPLOY_INTO: (capital: string, model: string, geo: string | null) =>
-    `Deploy ${capital} into a ${model}${geo ? ` in ${geo}` : ''}`,
-  SIM_CASE_DEPLOY_NEEDS_INPUT: (model: string, geo: string | null) =>
-    `Size a ${model}${geo ? ` in ${geo}` : ''}`,
+  // Case setup — page 1 configures assumptions. Results live after Validate.
+  SIM_CASE_EYEBROW: 'Scenario setup',
+  SIM_CASE_TITLE: 'Configure scenario',
+  SIM_CASE_SUBTITLE: 'Choose model, size and technology mix.',
+  SIM_CASE_MODEL_LABEL: 'Model',
+  SIM_CASE_MARKET_LABEL: 'Market',
+  SIM_CASE_SIZE_LABEL: 'Size',
+  SIM_CASE_MODE_LABEL: 'Solve by',
+  SIM_CASE_EDITORS: 'Inputs',
   // Why this case — the selected thesis summarised; the 4-card selector is hidden
   // until the user asks to change it.
-  SIM_WHY_TITLE: 'Why this case',
+  SIM_WHY_TITLE: 'Model',
   SIM_THESIS_CHANGE: 'Change thesis',
   SIM_THESIS_DONE: 'Done',
   SIM_SIZE_CHANGE: 'Edit size',
@@ -75,11 +70,11 @@ export const UI = {
   SIM_THESIS_HINT: 'Choose the type of investment. This sets the operating model for everything below.',
   // Section 02 — Investment Size. Grouped investment parameters, not config controls.
   SIM_SIZE_EYEBROW: 'Step 2 · Investment size',
-  SIM_SIZE_TITLE: 'Investment Size',
+  SIM_SIZE_TITLE: 'Size',
   SIM_SIZE_HINT: 'Set one parameter — budget, capacity or target return. The other two are computed.',
   SIM_SIZE_PARAMS: 'Investment parameters',
   SIM_HW_EYEBROW: 'Step 3 · Technology stack',
-  SIM_HW_TITLE: 'Technology Stack',
+  SIM_HW_TITLE: 'Technology',
   SIM_HW_HINT: 'Power mix, rack density and GPU economics',
   SIM_HW_SHOW: 'Show details',
   SIM_HW_HIDE: 'Hide details',

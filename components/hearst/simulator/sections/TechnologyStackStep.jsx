@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { Cpu } from 'lucide-react';
 import { Card, SectionHead } from '@/components/hearst/ui';
 import HardwareMixer from '@/components/hearst/simulator/HardwareMixer';
 import { UI } from '@/lib/ui-strings';
@@ -14,7 +15,7 @@ import { S as CP } from '@/lib/cp-styles';
  * @param {{ totalMw: number, value: object, onChange: function }} props
  */
 export default function TechnologyStackStep({ totalMw, value, onChange }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   return (
     <Card as="section" data-sim-tech variant="flat" style={CP.sectionColumn} padding="lg">
       <button
@@ -24,7 +25,10 @@ export default function TechnologyStackStep({ totalMw, value, onChange }) {
         aria-controls="sim-tech-body"
         style={S.head}
       >
-        <SectionHead title={UI.SIM_HW_TITLE} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none', flex: '1 1 auto', minWidth: 0 }} />
+        <span style={S.titleGroup}>
+          <span style={S.icon} aria-hidden="true"><Cpu size={18} strokeWidth={1.8} /></span>
+          <SectionHead title={UI.SIM_HW_TITLE} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none', flex: '1 1 auto', minWidth: 0 }} />
+        </span>
         <span aria-hidden="true" style={{ ...S.chevron, transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
       </button>
 
@@ -56,6 +60,23 @@ const S = {
     cursor: 'pointer',
     textAlign: 'left',
     color: 'inherit',
+  },
+  titleGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-3)',
+    minWidth: 0,
+  },
+  icon: {
+    width: 36,
+    height: 36,
+    flex: '0 0 36px',
+    display: 'grid',
+    placeItems: 'center',
+    color: 'var(--cp-accent-maroon)',
+    background: 'var(--cp-accent-soft)',
+    border: '1px solid var(--cp-border-accent)',
+    borderRadius: 'var(--cp-radius-md)',
   },
   chevron: {
     flexShrink: 0,

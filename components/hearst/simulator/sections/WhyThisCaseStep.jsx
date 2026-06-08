@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { Landmark } from 'lucide-react';
 import { Card, SectionHead, Button } from '@/components/hearst/ui';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import { DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
@@ -23,7 +24,7 @@ const ARCH_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
  * @param {{ primaryId: string, onSelectPrimary: function }} props
  */
 export default function WhyThisCaseStep({ primaryId, onSelectPrimary }) {
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(true);
   const selected = ARCH_BY_ID[primaryId];
 
   // Picking a card both applies the choice and closes the selector — the page
@@ -36,7 +37,10 @@ export default function WhyThisCaseStep({ primaryId, onSelectPrimary }) {
   return (
     <Card as="section" data-sim-why variant="flat" style={S.deck} padding="lg">
       <div style={S.head}>
-        <SectionHead title={UI.SIM_WHY_TITLE} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }} />
+        <div style={S.titleGroup}>
+          <span style={S.icon} aria-hidden="true"><Landmark size={18} strokeWidth={1.8} /></span>
+          <SectionHead title={UI.SIM_WHY_TITLE} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }} />
+        </div>
         <Button
           variant={editing ? 'primary' : 'secondary'}
           size="sm"
@@ -84,6 +88,23 @@ const S = {
     justifyContent: 'space-between',
     gap: 'var(--cp-space-4)',
     flexWrap: 'wrap',
+  },
+  titleGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-3)',
+    minWidth: 0,
+  },
+  icon: {
+    width: 36,
+    height: 36,
+    flex: '0 0 36px',
+    display: 'grid',
+    placeItems: 'center',
+    color: 'var(--cp-accent-maroon)',
+    background: 'var(--cp-accent-soft)',
+    border: '1px solid var(--cp-border-accent)',
+    borderRadius: 'var(--cp-radius-md)',
   },
   summary: {
     display: 'flex',

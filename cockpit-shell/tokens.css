@@ -1,7 +1,7 @@
 /* ============================================================
-   COCKPIT — design system maison (source: ~/.claude/assets/cockpit).
-   Tokens + classes .ct-* copiés verbatim depuis cockpit-template.html.
-   Ne jamais réinventer ces valeurs.
+   COCKPIT — design system local éditable.
+   Cette copie vit dans ce repo : tokens --ct-* et classes .ct-* se
+   modifient directement ici, sans source centrale, resync ni repack.
    ============================================================ */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

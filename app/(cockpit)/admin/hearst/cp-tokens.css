@@ -1,7 +1,7 @@
 /* =====================================================================
    cp-tokens.css — Bridge --cp-* → --ct-* + valeurs manquantes.
    Importé uniquement dans app/(cockpit)/admin/hearst/layout.jsx.
-   Source des valeurs : ~/.claude/assets/cockpit/tokens.css + cockpit-shell/tokens.css
+   Source locale : cockpit-shell/tokens.css + compléments applicatifs ci-dessous.
    ===================================================================== */
 
 /* Le shell rend une .ct-hub-bar « Overview » destinée au hub multi-produits.
@@ -10,7 +10,7 @@
   display: none !important;
 }
 
-/* Status tokens projet (--cp-status-*) — absents du package upstream.
+/* Status tokens projet (--cp-status-*) — compléments applicatifs locaux.
    Définis ICI (source de vérité --cp-*), JAMAIS en redéfinissant un --ct-*. */
 :root {
   /* ── Status sémantiques (Core) ── */
@@ -25,10 +25,10 @@
   --cp-status-danger-border:  rgba(239, 68, 68, 0.40);
 
   /* Rail droit = drawer overlay (FAB), jamais colonne grid — centre full-width.
-     Override DÉLIBÉRÉ de --ct-rail-right (normalement upstream-only) : le shell
+     Override DÉLIBÉRÉ de --ct-rail-right dans la copie locale : le shell
      traite ce token comme la largeur de la colonne flex .ct-rail-right dans
      .ct-panels-row ET l'injecte dans --ct-rail-right-eff. Le mettre à 0 est le
-     SEUL levier upstream pour que le centre n'en réserve pas l'espace ; chat-fab.css
+     levier local pour que le centre n'en réserve pas l'espace ; chat-fab.css
      sort ensuite .ct-rail-right du flux (position:fixed) et réserve la place via
      --cp-chat-rail-width (padding-right de .ct-page-area). Ne pas le retirer. */
   --ct-rail-right: 0px;

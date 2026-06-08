@@ -47,7 +47,7 @@ Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (2 pa
 ## Non-négociables produit (INTERDICTION d'enfreindre dans toute proposition)
 
 - **Port dev = 5005 EXCLUSIVEMENT** (\`next dev -p 5005\`). Ne jamais proposer 3000/3001/autre, ne jamais modifier \`package.json\` dev script.
-- **Design system Cockpit** : tokens \`--ct-*\` uniquement, accents via \`<html data-product="...">\`, composants \`<hearst-asset id="...">\` quand catalog dispo. Aucun hex hardcodé hors \`tokens.core.json\`.
+- **Design system Cockpit local** : copie éditable dans \`cockpit-shell/\`. Tokens \`--ct-*\`, composants et CSS se modifient directement dans ce repo, sans source centrale ni repack. Garder la cohérence visuelle interne.
 - **Layout locks A3** (P1–P4 portrait 480×680) :
   - P3 InsideRight totaux verrouillés : header 122 + phases 102 + mid 282 + picture 82 + building 92 = 680.
   - P2 InsideLeft : hero 270 + darkBand 230 + building 100 + footer 80 = 680.
@@ -62,7 +62,7 @@ Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (2 pa
 - **Pas de hardcoded API keys**, jamais. Toutes les clés (\`MOONSHOT_API_KEY\`, \`SUPABASE_*\`) via \`process.env.*\`.
 - **Auth obligatoire sur \`/admin/**\`** via middleware Supabase. Ne pas proposer de désactiver l'auth.
 - **RLS Supabase active sur toutes les tables**. Ne jamais proposer une route qui bypass RLS sauf via \`SUPABASE_SERVICE_ROLE_KEY\` côté serveur.
-- **Cockpit shell** = \`@hearst/cockpit-shell@0.2.0\` (tarball local). Toujours réutiliser ses primitives plutôt que recoder un layout chat.
+- **Cockpit shell** = copie locale \`cockpit-shell/\`. Réutiliser ses primitives ou les modifier en place selon le besoin produit.
 - **Slogans figés du pitch** : "Compute is the new oil and gas. Government control is the new advantage. The window is now." (P2) · "AI IS THE NEW GAS." (P4). Ne pas reformuler dans les pages de prés.
 - **Partenaires nommés figés** : design Foster + Partners, construction JB Pastor & Fils. Ne pas changer dans la prés sans demande explicite.
 

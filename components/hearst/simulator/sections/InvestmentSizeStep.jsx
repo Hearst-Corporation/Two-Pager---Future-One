@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { Gauge } from 'lucide-react';
 import { SectionHead, Card, Button } from '@/components/hearst/ui';
 import { UI } from '@/lib/ui-strings';
 
@@ -19,12 +20,15 @@ const DRIVER = {
  * when it wants to resize. Outputs are the case; controls are editors.
  */
 export default function InvestmentSizeStep({ mode, inputValue, onInputChange }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const cfg = DRIVER[mode] || DRIVER.mw_first;
   return (
     <Card as="section" data-sim-size variant="flat" style={S.deck} padding="lg">
       <div style={S.head}>
-        <SectionHead title={UI.SIM_SIZE_TITLE} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }} />
+        <div style={S.titleGroup}>
+          <span style={S.icon} aria-hidden="true"><Gauge size={18} strokeWidth={1.8} /></span>
+          <SectionHead title={UI.SIM_SIZE_TITLE} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }} />
+        </div>
         <Button
           variant={open ? 'primary' : 'secondary'}
           size="sm"
@@ -73,20 +77,38 @@ const S = {
     gap: 'var(--cp-space-4)',
     flexWrap: 'wrap',
   },
+  titleGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-3)',
+    minWidth: 0,
+  },
+  icon: {
+    width: 36,
+    height: 36,
+    flex: '0 0 36px',
+    display: 'grid',
+    placeItems: 'center',
+    color: 'var(--cp-accent-maroon)',
+    background: 'var(--cp-accent-soft)',
+    border: '1px solid var(--cp-border-accent)',
+    borderRadius: 'var(--cp-radius-md)',
+  },
   driver: {
     display: 'flex',
     alignItems: 'baseline',
-    gap: 'var(--cp-space-2)',
-    paddingBottom: 'var(--cp-space-2)',
+    justifyContent: 'space-between',
+    gap: 'var(--cp-space-4)',
+    padding: 'var(--cp-space-5) 0 var(--cp-space-3)',
     borderBottom: '2px solid var(--cp-border-accent)',
-    width: 'fit-content',
-    minWidth: 120,
+    width: '100%',
+    minWidth: 0,
   },
   input: {
-    width: 'auto',
+    width: '100%',
     minWidth: 0,
-    flex: '0 1 auto',
-    fontSize: 'var(--cp-font-2xl)',
+    flex: '1 1 auto',
+    fontSize: 'clamp(32px, 4vw, 56px)',
     lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
@@ -101,5 +123,6 @@ const S = {
     fontSize: 'var(--cp-font-lg)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-muted)',
+    paddingBottom: 'var(--cp-space-2)',
   },
 };

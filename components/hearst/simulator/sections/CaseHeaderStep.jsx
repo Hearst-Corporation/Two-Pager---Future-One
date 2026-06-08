@@ -1,9 +1,10 @@
 'use client';
 
 import PropTypes from 'prop-types';
+import { MapPin, Ruler, SlidersHorizontal, Workflow } from 'lucide-react';
 import { Card } from '@/components/hearst/ui';
 import { DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
-import { fmtUSD, fmtMW, fmtPctFromRatio, MISSING } from '@/lib/hearst-format';
+import { fmtMW } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
 
 const ARCH_LABEL = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a.label]));
@@ -25,57 +26,91 @@ function prettyGeo(g) {
  * @param {{ archetypeId: string, geography: string, scenario: object|null,
  *           projection: object|null, totalMw: number }} props
  */
-export default function CaseHeaderStep({ archetypeId, geography, scenario, projection, totalMw }) {
-  const model = ARCH_LABEL[archetypeId] || archetypeId;
-  const mw = scenario?.total_mw ?? totalMw;
-  const geo = prettyGeo(geography);
-  const capital = projection?.total_capex;
-  const irr = projection?.irr;
+const MODE_LABEL = {
+  mw_first: UI.SIM_MODE_SIZE,
+  capital_first: UI.SIM_MODE_BUDGET,
+  target_irr_first: UI.SIM_MODE_RETURN,
+};
 
-  // The case as a single board-readable sentence. Falls back to a "size it"
-  // prompt when capital is not computed yet — never prints a fake number.
-  const sentence = capital != null
-    ? UI.SIM_CASE_DEPLOY_INTO(fmtUSD(capital), model, geo)
-    : UI.SIM_CASE_DEPLOY_NEEDS_INPUT(model, geo);
+export default function CaseHeaderStep({ archetypeId, geography, totalMw, mode }) {
+  const model = ARCH_LABEL[archetypeId] || archetypeId;
+  const geo = prettyGeo(geography);
 
   return (
     <Card as="section" data-sim-case variant="card" surface={1} padding="lg" style={S.case}>
-      <span style={S.eyebrow}>{UI.SIM_CASE_EYEBROW}</span>
-
-      <h1 data-sim-case-sentence style={S.sentence}>{sentence}</h1>
+      <div style={S.hero}>
+        <div style={S.iconShell} aria-hidden="true"><Workflow size={22} strokeWidth={1.8} /></div>
+        <div style={S.heroText}>
+          <span style={S.eyebrow}>{UI.SIM_CASE_EYEBROW}</span>
+          <h1 data-sim-case-sentence style={S.sentence}>{UI.SIM_CASE_TITLE}</h1>
+          <p style={S.subtitle}>{UI.SIM_CASE_SUBTITLE}</p>
+        </div>
+      </div>
 
       <div data-sim-case-grid style={S.grid}>
-        <div style={S.metric}>
-          <span style={S.metricLabel}>{UI.SIM_CASE_RETURN_LABEL}</span>
-          <strong style={S.metricValue}>{irr != null ? fmtPctFromRatio(irr) : MISSING}</strong>
-        </div>
-        <div style={S.metric}>
-          <span style={S.metricLabel}>{UI.SIM_CASE_CAPACITY_LABEL}</span>
-          <strong style={S.metricValue}>{mw != null ? fmtMW(mw, 0) : MISSING}</strong>
-        </div>
-        <div style={S.metric}>
-          <span style={S.metricLabel}>{UI.SIM_CASE_CAPITAL_LABEL}</span>
-          <strong style={S.metricValue}>{capital != null ? fmtUSD(capital) : MISSING}</strong>
-        </div>
+        <SetupPill icon={<SlidersHorizontal size={16} />} label={UI.SIM_CASE_MODEL_LABEL} value={model} />
+        <SetupPill icon={<MapPin size={16} />} label={UI.SIM_CASE_MARKET_LABEL} value={geo || geography} />
+        <SetupPill icon={<Ruler size={16} />} label={UI.SIM_CASE_SIZE_LABEL} value={totalMw != null ? fmtMW(totalMw, 0) : null} />
+        <SetupPill icon={<Workflow size={16} />} label={UI.SIM_CASE_MODE_LABEL} value={MODE_LABEL[mode] || mode} />
       </div>
     </Card>
   );
 }
 
+function SetupPill({ icon, label, value }) {
+  return (
+    <div style={S.metric}>
+      <span style={S.metricIcon} aria-hidden="true">{icon}</span>
+      <span style={S.metricText}>
+        <span style={S.metricLabel}>{label}</span>
+        <strong style={S.metricValue}>{value || '—'}</strong>
+      </span>
+    </div>
+  );
+}
+
+SetupPill.propTypes = {
+  icon: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string,
+};
+
 CaseHeaderStep.propTypes = {
   archetypeId: PropTypes.string,
   geography: PropTypes.string,
-  scenario: PropTypes.object,
-  projection: PropTypes.object,
   totalMw: PropTypes.number,
+  mode: PropTypes.string,
 };
 
 const S = {
   case: {
     display: 'flex',
     flexDirection: 'column',
+    gap: 'var(--cp-space-5)',
+    minWidth: 0,
+  },
+  hero: {
+    display: 'flex',
+    alignItems: 'flex-start',
     gap: 'var(--cp-space-4)',
     minWidth: 0,
+  },
+  iconShell: {
+    width: 48,
+    height: 48,
+    flex: '0 0 48px',
+    display: 'grid',
+    placeItems: 'center',
+    color: 'var(--cp-accent-maroon)',
+    background: 'var(--cp-accent-soft)',
+    border: '1px solid var(--cp-border-accent)',
+    borderRadius: 'var(--cp-radius-lg)',
+  },
+  heroText: {
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-1)',
   },
   eyebrow: {
     color: 'var(--cp-accent-maroon)',
@@ -87,24 +122,50 @@ const S = {
   sentence: {
     margin: 0,
     color: 'var(--cp-text-strong)',
-    fontSize: 'clamp(19px, 1.9vw, 26px)',
+    fontSize: 'clamp(24px, 2.4vw, 36px)',
     lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
   },
+  subtitle: {
+    margin: 0,
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-md)',
+    lineHeight: 'var(--cp-leading-normal)',
+  },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    alignItems: 'start',
-    gap: 'var(--cp-space-6)',
-    paddingTop: 'var(--cp-space-2)',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    alignItems: 'stretch',
+    gap: 'var(--cp-space-3)',
+    paddingTop: 'var(--cp-space-4)',
     borderTop: '1px solid var(--cp-border)',
   },
   metric: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
+    alignItems: 'center',
+    gap: 'var(--cp-space-3)',
+    padding: 'var(--cp-space-3)',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md)',
     minWidth: 0,
+  },
+  metricIcon: {
+    width: 34,
+    height: 34,
+    flex: '0 0 34px',
+    display: 'grid',
+    placeItems: 'center',
+    color: 'var(--cp-accent-maroon)',
+    background: 'var(--cp-surface-2)',
+    borderRadius: 'var(--cp-radius-md)',
+  },
+  metricText: {
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'calc(var(--cp-space-1) / 2)',
   },
   metricLabel: {
     color: 'var(--cp-text-muted)',
@@ -115,11 +176,12 @@ const S = {
   },
   metricValue: {
     color: 'var(--cp-text-strong)',
-    fontSize: 'clamp(18px, 1.8vw, 24px)',
-    lineHeight: 1,
+    fontSize: 'var(--cp-font-base)',
+    lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
-    fontVariantNumeric: 'tabular-nums',
     whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 };

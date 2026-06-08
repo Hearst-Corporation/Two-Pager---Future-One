@@ -356,6 +356,16 @@ export default function SimulatorPage() {
   return (
     <>
     <style>{`
+      body.oracle-simulator-page {
+        --cp-chat-rail-width: min(360px, 27vw);
+      }
+      body.oracle-simulator-page .ct-center-panel {
+        flex: 1 1 auto !important;
+        width: auto !important;
+      }
+      body.oracle-simulator-page .ct-page-area {
+        width: 100% !important;
+      }
       @media (max-width: 900px) {
         /* Hardware grids own their breakpoints (HardwareMixer, 1100/1500px). */
         /* Case Header: identity full-width, then the two metrics side by side. */
@@ -368,6 +378,9 @@ export default function SimulatorPage() {
         [data-archetype-grid] {
           grid-template-columns: 1fr !important;
         }
+        [data-sim-input-grid] {
+          grid-template-columns: 1fr !important;
+        }
       }
       @media (max-width: 600px) {
         [data-sim-case-grid],
@@ -375,29 +388,31 @@ export default function SimulatorPage() {
         [data-hardware-gpu-grid] {
           grid-template-columns: 1fr !important;
         }
+        [data-sim-input-grid] {
+          grid-template-columns: 1fr !important;
+        }
       }
     `}</style>
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
-        {/* THE CASE — the single mental object. Pure regrouping of existing live
-            values; the chosen investment, stated as one sentence. */}
+        {/* SETUP — inputs only. Decision metrics live on /simulator/results. */}
         <CaseHeaderStep
           archetypeId={state.primary_archetype_id}
           geography={state.geography}
-          scenario={scenario}
-          projection={projection}
           totalMw={state.total_mw}
+          mode={state.mode}
         />
 
-        {/* WHY THIS CASE — the selected thesis summarised. The 4-card selector is
-            hidden until the board clicks "Change thesis"; it is an editor, not the page. */}
-        <WhyThisCaseStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
-
-        {/* ADJUST THE CASE — secondary editors, collapsed by default. */}
+        {/* INPUTS — clean setup cards, collapsed where detail is optional. */}
         <div data-sim-editors style={S.editors}>
-          <Eyebrow block>{UI.SIM_CASE_EDITORS}</Eyebrow>
-          <InvestmentSizeStep mode={state.mode} inputValue={inputValue} onInputChange={onInputChange} />
-          <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+          <Eyebrow block style={S.inputsEyebrow}>{UI.SIM_CASE_EDITORS}</Eyebrow>
+          <div data-sim-input-grid style={S.inputGrid}>
+            <WhyThisCaseStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
+            <div style={S.rightStack}>
+              <InvestmentSizeStep mode={state.mode} inputValue={inputValue} onInputChange={onInputChange} />
+              <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+            </div>
+          </div>
         </div>
 
         {projectLoadError && (
@@ -442,7 +457,7 @@ export default function SimulatorPage() {
 const S = {
   wrap: {
     width: '100%',
-    maxWidth: 1280,
+    maxWidth: 1440,
     margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
@@ -455,6 +470,21 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-4)',
+    minWidth: 0,
+  },
+  inputsEyebrow: {
+    marginBottom: 'calc(var(--cp-space-2) * -1)',
+  },
+  inputGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(300px, 0.9fr) minmax(360px, 1.1fr)',
+    gap: 'var(--cp-space-5)',
+    alignItems: 'start',
+  },
+  rightStack: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-5)',
     minWidth: 0,
   },
   validateBar: {

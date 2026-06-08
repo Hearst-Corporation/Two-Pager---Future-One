@@ -4,8 +4,9 @@
 //   • aucun token (--x) défini dans 2+ de NOS fichiers (SoT ambiguë / conflit) ;
 //   • --cp-*    défini UNIQUEMENT dans cp-tokens.css ;
 //   • --color-* défini UNIQUEMENT dans globals.css.
-// --ct-* est upstream (@hearst/cockpit-shell) ; ses overrides responsive mono-fichier
-// (ex: --ct-rail-left: 0px en @media) sont tolérés. exit 1 sur violation.
+// --ct-* vit dans la copie locale éditable du DS (`cockpit-shell/`). Ce lint
+// garde seulement l'hygiène applicative --cp-* / --color-* ; il ne verrouille
+// pas l'édition du design system local.
 
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join, relative } from 'path';
