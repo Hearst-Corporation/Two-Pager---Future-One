@@ -1,0 +1,126 @@
+name: CI
+
+# PR gate for ORACLE. Protects against regressions on every PR and on push to main.
+# checks + build run everywhere (no secrets needed). The critical-path E2E runs
+# only when the required secrets are configured (skipped gracefully on forks).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  # ── 1. Checks: lint:secrets + lint:strings + lint:tokens + lint:nav + eslint + vitest ──
+  checks:
+    name: Checks (lint + unit tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: npm run check
+        run: npm run check
+
+  # ── 2. Build: Next.js production build (compile / route / import / SSR errors) ──
+  build:
+    name: Build (Next.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: npm run build
+        run: npm run build
+        env:
+          # next.config.js validateEnv() requires these vars to be PRESENT at build
+          # (presence-only — no real call). Placeholders satisfy it; no build-time
+          # data fetch (cockpit pages are client components, API routes are dynamic).
+          # Real values are only needed at runtime / for E2E.
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          MOONSHOT_API_KEY: placeholder-moonshot-key
+
+  # ── Guard: enable E2E only when the required secrets are present ──
+  e2e-guard:
+    name: E2E secrets guard
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.guard.outputs.enabled }}
+    steps:
+      - id: guard
+        env:
+          SVC: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          ANON: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          AUTOLOGIN: ${{ secrets.ADMIN_DEV_AUTOLOGIN_EMAIL }}
+        run: |
+          if [ -n "$SVC" ] && [ -n "$URL" ] && [ -n "$ANON" ] && [ -n "$AUTOLOGIN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "E2E enabled — required secrets present."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=E2E skipped::Required secrets are not configured (fork or unset) — critical-path E2E skipped, PR not failed."
+          fi
+
+  # ── 3. Critical-path E2E (only if secrets available) ──
+  e2e-critical-path:
+    name: E2E critical path
+    needs: [checks, build, e2e-guard]
+    if: needs.e2e-guard.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      ADMIN_DEV_AUTOLOGIN_EMAIL: ${{ secrets.ADMIN_DEV_AUTOLOGIN_EMAIL }}
+      # Optional — Kimi/Moonshot. If absent, memo generation uses the deterministic
+      # engine-backed fallback. The gate validates workflow integrity, not LLM text.
+      MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - name: Install pdftotext (poppler-utils) for PDF-truth assertion
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Install Playwright Chromium + system deps
+        run: npx playwright install --with-deps chromium
+      - name: Write .env.local (next dev + teardown read it)
+        run: |
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
+            echo "SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}"
+            echo "ADMIN_DEV_AUTOLOGIN_EMAIL=${ADMIN_DEV_AUTOLOGIN_EMAIL}"
+            [ -n "${MOONSHOT_API_KEY}" ] && echo "MOONSHOT_API_KEY=${MOONSHOT_API_KEY}"
+          } > .env.local
+      - name: Run critical-path E2E (Playwright starts dev on :5005, waits for simulator)
+        run: npx playwright test tests/e2e/critical-path.spec.ts
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

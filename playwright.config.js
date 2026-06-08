@@ -33,8 +33,10 @@ export default defineConfig({
   },
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:5005',
+    // Wait on the critical-path entry route so its first (cold) compile happens
+    // during server-start, not inside the first test — important on CI runners.
+    url: 'http://localhost:5005/admin/hearst/simulator',
     reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
+    timeout: 120_000,
   },
 });
