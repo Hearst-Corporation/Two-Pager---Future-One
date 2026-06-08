@@ -693,8 +693,8 @@ function AllMemosView() {
         >
           {memos.map(mm => (
             <Row key={mm.id}>
-              <Cell label><Link href={`/admin/hearst/dossier?memo=${mm.id}`} style={S.link}>{mm.title}</Link></Cell>
-              <Cell>
+              <Cell label style={S.titleCell} title={mm.title}><Link href={`/admin/hearst/dossier?memo=${mm.id}`} style={S.link}>{mm.title}</Link></Cell>
+              <Cell style={S.scenarioCell}>
                 {mm.scenario_id
                   ? <Link href={`/admin/hearst/dossier?scenario=${mm.scenario_id}`} style={S.link}>{scenarioName(mm.scenario_id)}</Link>
                   : <span style={S.muted}>—</span>}
@@ -877,6 +877,11 @@ const S = {
   // ── Shared (list/scenario views) ──
   sectionHeader: { marginBottom: 'var(--cp-space-5)' },
   link: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-medium)' },
+  // Cellule titre : libellé long et répété → on borne la largeur (ellipsis) pour ne pas
+  // affamer la colonne scénario (sinon noms de scénario à la ligne sur 5-6 lignes).
+  titleCell: { maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  // Le nom de scénario est l'identifiant clé de la ligne → une seule ligne, jamais coupé.
+  scenarioCell: { whiteSpace: 'nowrap' },
   muted: { color: 'var(--cp-text-faint)' },
   pdf: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)' },
   statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
