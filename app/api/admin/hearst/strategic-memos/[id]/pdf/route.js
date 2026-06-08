@@ -9,6 +9,7 @@ import { requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { deriveVerdict, deriveRiskLevel, fmtPct as ddPct } from '@/lib/dossier-derive';
 import { fmtUSD, fmtPctFromRatio, fmtPctRaw as fmtPctRawCore, fmtYears, MISSING } from '@/lib/hearst-format';
 import { deriveReturnsComposition } from '@/lib/returns-composition';
+import { boardFormatted, boardLabel } from '@/lib/hearst-board-metrics';
 import { resolveCitationsInText, resolveCitation } from '@/lib/citation-resolver';
 
 export const runtime = 'nodejs';
@@ -626,7 +627,7 @@ p { margin: 0; }
       <div class="fin-kpi">
         <div class="fk">IRR (Post-tax)</div>
         <div class="fv accent tnum">${fmtPct(snap.irr_post_tax ?? snap.irr)}</div>
-        <div class="fs">Levered equity${snap.irr_post_tax != null ? ` · Pre-tax ${fmtPct(snap.irr)}` : ''}</div>
+        <div class="fs">${esc(boardLabel('moic'))} ${naIf(boardFormatted(snap, 'moic'))} · Levered equity${snap.irr_post_tax != null ? ` · Pre-tax ${fmtPct(snap.irr)}` : ''}</div>
       </div>
       <div class="fin-kpi">
         <div class="fk">NPV (Post-tax) · Payback</div>

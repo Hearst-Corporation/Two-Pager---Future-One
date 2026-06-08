@@ -187,8 +187,8 @@ test('Flow D — PDF truth: IRR / NPV / MOIC / CAPEX match the engine snapshot',
   const text = pdfToText(pdf.buf);
   test.skip(text == null, 'pdftotext not installed — binary PDF validated, text-truth check skipped');
   const { matched, gaps } = assertMetricsConsistent(text!, snap);
-  expect(matched.length, 'IRR + NPV + CAPEX verified consistent in PDF').toBeGreaterThanOrEqual(3);
-  if (gaps.length) console.warn(`[Flow D] PDF metric gaps (no divergence, but absent): ${gaps.join('; ')}`);
+  expect(matched.length, 'IRR + NPV + MOIC + CAPEX all verified consistent in PDF').toBeGreaterThanOrEqual(4);
+  if (gaps.length) console.warn(`[Flow D] PDF metric gaps: ${gaps.join('; ')}`);
 });
 
 // ── FLOW E — Error Handling ──────────────────────────────────────────────────

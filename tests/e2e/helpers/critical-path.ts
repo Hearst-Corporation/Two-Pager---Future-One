@@ -152,13 +152,10 @@ export function pdfToText(buf: Buffer): string | null {
 }
 
 /**
- * Asserts the PDF text contains the engine snapshot's headline metrics, and never
- * a number that diverges from the snapshot ("no PDF-only numbers").
- *  - IRR / NPV / CAPEX are HARD-asserted (the PDF renders them as headline KPIs).
- *  - MOIC is SOFT: the current PDF does not render the MOIC *value* (only the word
- *    "MOIC" in prose). We verify it IF present and record a gap otherwise, rather
- *    than fail — this sprint surfaces the gap, it does not add the missing figure.
- * Returns { matched, gaps }.
+ * Asserts the PDF text contains the engine snapshot's headline board metrics, and
+ * never a number that diverges from the snapshot ("no PDF-only numbers").
+ * IRR / NPV / MOIC / CAPEX are ALL hard-asserted, each in the canonical board
+ * format (MOIC as lowercase "x"). Returns { matched, gaps }.
  */
 export function assertMetricsConsistent(pdfText: string, snap: any): { matched: string[]; gaps: string[] } {
   const matched: string[] = [];
@@ -166,18 +163,13 @@ export function assertMetricsConsistent(pdfText: string, snap: any): { matched: 
   const checks: Array<[string, string]> = [
     ['IRR(post-tax)', fmtPct(snap.irr_post_tax ?? snap.irr)],
     ['NPV(post-tax)', fmtUSD(snap.npv_post_tax ?? snap.npv)],
+    ['MOIC(post-tax)', fmtX(snap.moic_post_tax ?? snap.moic)],
     ['CAPEX', fmtUSD(snap.total_capex)],
   ];
   for (const [label, value] of checks) {
     if (value === '—') continue;
     expect(pdfText, `${label} ${value} present in PDF (no PDF-only numbers)`).toContain(value);
     matched.push(`${label}=${value}`);
-  }
-  const moicVal = snap.moic_post_tax ?? snap.moic;
-  if (moicVal != null && Number.isFinite(moicVal)) {
-    const moicNum = Number(moicVal).toFixed(2);
-    if (pdfText.includes(moicNum)) matched.push(`MOIC=${fmtX(moicVal)}`);
-    else gaps.push(`MOIC value (${fmtX(moicVal)}) not rendered in the board PDF`);
   }
   return { matched, gaps };
 }
