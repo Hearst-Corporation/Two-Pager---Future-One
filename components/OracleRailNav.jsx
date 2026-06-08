@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { UI } from '@/lib/ui-strings';
 
 const SECTIONS = [
   { id: 'sim', href: '/admin/hearst/simulator', label: 'Simulator', matchAny: ['/admin/hearst/simulator'] },
@@ -97,7 +98,7 @@ function Icon({ id }) {
 
 function NavContent({ pathname, className = 'oracle-rail-nav' }) {
   return (
-    <nav className={className} aria-label="Hearst cockpit sections">
+    <nav className={className} aria-label={UI.NAV_RAIL_ARIA}>
       {SECTIONS.map((section) => {
         const active = isSectionActive(section, pathname);
         return (

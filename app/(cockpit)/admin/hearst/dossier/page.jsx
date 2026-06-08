@@ -27,7 +27,12 @@ import {
   deriveVerdict, deriveCategory, deriveKpis, topRisks, deriveDecision,
   deriveCapitalStack, fmtUsd,
 } from '@/lib/dossier-derive';
-import { SectionHead, Button, Table, Row, Cell } from '@/components/hearst/ui';
+import { SectionHead, Button, Table, Row, Cell, KpiGrid, KpiCard } from '@/components/hearst/ui';
+import { S as CP } from '@/lib/cp-styles';
+import { UI } from '@/lib/ui-strings';
+
+const DOSSIER_ERR = { ...CP.error, padding: 'var(--cp-space-3)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-3)' };
+const DOSSIER_EMPTY = { ...CP.empty, padding: 'var(--cp-space-9)', fontSize: 'var(--cp-font-md)' };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -73,7 +78,7 @@ function Placeholder({ children }) {
 // ─── Visual Story blocks ─────────────────────────────────────────────────────
 
 function CapitalStack({ stack }) {
-  if (!stack) return <Placeholder>Capital structure not available for this memo version</Placeholder>;
+  if (!stack) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_STACK}</Placeholder>;
   return (
     <div>
       <div style={S.stackBar}>
@@ -110,7 +115,7 @@ function parseMonths(v) {
 }
 
 function DeploymentTimeline({ phases }) {
-  if (!phases?.length) return <Placeholder>Deployment timeline not available for this memo version</Placeholder>;
+  if (!phases?.length) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_TIMELINE}</Placeholder>;
   const ranges = phases.map(p => parseMonths(p.months_from_t0));
   const maxMonth = Math.max(...ranges.map(r => r?.end || 0), 1);
   return (
@@ -134,7 +139,7 @@ function DeploymentTimeline({ phases }) {
 }
 
 function BenchmarkPosition({ comparables }) {
-  if (!comparables?.length) return <Placeholder>No comparable peers cited in this memo version</Placeholder>;
+  if (!comparables?.length) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_COMPARABLES}</Placeholder>;
   return (
     <ul style={S.benchList}>
       {comparables.map((c, i) => (
@@ -258,7 +263,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
           <div style={S.verdictMeta}>
             <span style={S.eyebrow}>Investment verdict</span>
             {verdict.drivers?.length > 0 && <span style={S.verdictDrivers}>{verdict.drivers.join('  ·  ')}</span>}
-            <span style={S.verdictNote}>Synthesized from return, risk, freshness &amp; confidence signals</span>
+            <span style={S.verdictNote}>{UI.DOSSIER_VERDICT_NOTE}</span>
           </div>
         </div>
 
@@ -292,7 +297,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
           {decision.why && <p style={S.body}>{decision.why}</p>}
           {decision.conditions.length > 0 && (
             <div style={S.condWrap}>
-              <div style={S.eyebrow}>Conditions before approval</div>
+              <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_CONDITIONS}</div>
               <ul style={S.condList}>
                 {decision.conditions.map((c, i) => <li key={i}>{c}</li>)}
               </ul>
@@ -307,7 +312,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
         <div style={S.riskCol}>
           <SectionHead title="Top risks" hint={`${risks.length} shown`} />
-          {risks.length === 0 && <Placeholder>No risks logged for this memo version</Placeholder>}
+          {risks.length === 0 && <Placeholder>{UI.DOSSIER_PLACEHOLDER_RISKS}</Placeholder>}
           <div style={S.riskGrid}>
             {risks.map((r, i) => {
               const sv = (r.severity || 'MED').toUpperCase();
@@ -318,7 +323,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
                     {r.category && <span style={S.riskCat}>{r.category}</span>}
                   </div>
                   <div style={S.riskTitle}>{r.label}</div>
-                  {r.dependency && <div style={S.riskWhy}>Why it matters · {r.dependency}</div>}
+                  {r.dependency && <div style={S.riskWhy}>{UI.DOSSIER_RISK_WHY} {r.dependency}</div>}
                   {r.mitigation && <div style={S.riskMit}>Mitigation · {r.mitigation}</div>}
                 </div>
               );
@@ -403,7 +408,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
         {m.market_benchmarking?.structural_differences?.length > 0 && (
           <AnalyticsBlock title="Market benchmarking">
-            <div style={S.eyebrow}>Why peers aren&apos;t directly comparable</div>
+            <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_PEERS}</div>
             <ul style={S.bullets}>{m.market_benchmarking.structural_differences.map((d, i) => <li key={i}>{d}</li>)}</ul>
           </AnalyticsBlock>
         )}
@@ -543,8 +548,8 @@ function ScenarioView({ scenarioId }) {
     load();
   }, [scenarioId]);
 
-  if (err) return <div style={S.err}>Error: {err}</div>;
-  if (memos === null) return <div style={S.empty}>Loading scenario…</div>;
+  if (err) return <div style={DOSSIER_ERR}>Error: {err}</div>;
+  if (memos === null) return <div style={DOSSIER_EMPTY}>Loading scenario…</div>;
 
   return (
     <div>
@@ -559,7 +564,7 @@ function ScenarioView({ scenarioId }) {
         <p style={S.sub}>{memos.length} report version{memos.length !== 1 ? 's' : ''}</p>
       </header>
 
-      {memos.length === 0 && <div style={S.empty}>No reports for this scenario yet.</div>}
+      {memos.length === 0 && <div style={DOSSIER_EMPTY}>{UI.DOSSIER_NO_SCENARIO_REPORTS}</div>}
 
       <div style={S.memoCardList}>
         {memos.map(mm => (
@@ -600,8 +605,8 @@ function MemoDetailView({ memoId }) {
 
   useEffect(() => { load(memoId); }, [memoId, load]);
 
-  if (err) return <div style={S.err}>Error: {err}</div>;
-  if (!data) return <div style={S.empty}>Loading memo…</div>;
+  if (err) return <div style={DOSSIER_ERR}>Error: {err}</div>;
+  if (!data) return <div style={DOSSIER_EMPTY}>Loading memo…</div>;
 
   return (
     <div>
@@ -666,22 +671,20 @@ function AllMemosView() {
 
   return (
     <div>
-      <header style={S.sectionHeader}>
-        <div>
-          <h1 style={S.h1}>Project Dossier</h1>
-          <p style={S.sub}>Decision-first strategic reports · versioned · exportable. Open any report for its Decision Canvas.</p>
-        </div>
+      <header className="oracle-page-header">
+        <h1>Project Dossier</h1>
+        <p className="oracle-subtitle">Decision-first strategic reports · versioned · exportable. Open any report for its Decision Canvas.</p>
       </header>
 
-      <div style={S.statRow}>
-        <div style={S.statBox}><div style={S.statN}>{(memos || []).length}</div><div style={S.statL}>Reports</div></div>
-        <div style={S.statBox}><div style={S.statN}>{approvedCount}</div><div style={S.statL}>Approved</div></div>
-        <div style={S.statBox}><div style={S.statN}>{scenarios.length}</div><div style={S.statL}>Scenarios</div></div>
-      </div>
+      <KpiGrid cols={3} style={{ marginBottom: 'var(--cp-space-6)' }}>
+        <KpiCard label="Reports" value={(memos || []).length} format="display" size="sm" />
+        <KpiCard label="Approved" value={approvedCount} format="display" size="sm" />
+        <KpiCard label="Scenarios" value={scenarios.length} format="display" size="sm" />
+      </KpiGrid>
 
-      {err && <div style={S.err}>Error: {err}</div>}
-      {memos === null && <div style={S.empty}>Loading memos…</div>}
-      {memos && memos.length === 0 && <div style={S.empty}>No reports yet. Generate a strategic memo from the Simulator.</div>}
+      {err && <div style={DOSSIER_ERR}>Error: {err}</div>}
+      {memos === null && <div style={DOSSIER_EMPTY}>{UI.DOSSIER_LOADING_MEMOS}</div>}
+      {memos && memos.length === 0 && <div style={DOSSIER_EMPTY}>{UI.WS_NO_REPORTS}</div>}
 
       {memos && memos.length > 0 && (
         <Table
@@ -730,7 +733,7 @@ function DossierInner() {
 
 export default function DossierPage() {
   return (
-    <Suspense fallback={<div style={S.empty}>Loading…</div>}>
+    <Suspense fallback={<div style={DOSSIER_EMPTY}>Loading…</div>}>
       <DossierInner />
     </Suspense>
   );
@@ -746,7 +749,7 @@ const EYEBROW = {
 const S = {
   // Typography / shared (canon)
   h1: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
-  h2: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
+  h2: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
   sub: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-1)' },
   body: { margin: 'var(--cp-space-1) var(--cp-space-0)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   eyebrow: { ...EYEBROW, display: 'block', marginBottom: 'var(--cp-space-1)' },
@@ -884,10 +887,6 @@ const S = {
 
   // ── Shared (list/scenario views) ──
   sectionHeader: { marginBottom: 'var(--cp-space-5)' },
-  statRow: { display: 'flex', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-6)', flexWrap: 'wrap' },
-  statBox: { padding: 'var(--cp-space-3) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', minWidth: 'calc(var(--cp-space-9) * 2 + var(--cp-space-6) + var(--cp-space-1) + var(--cp-space-1) / 2)' },
-  statN: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
-  statL: { ...EYEBROW, marginTop: 'calc(var(--cp-space-1) / 2)' },
   tr: { borderBottom: '1px solid var(--cp-border)', cursor: 'pointer' },
   link: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-medium)' },
   muted: { color: 'var(--cp-text-faint)' },
@@ -904,6 +903,4 @@ const S = {
   memoCardTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-1)' },
   memoCardMeta: { display: 'flex', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
 
-  err: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-3)' },
-  empty: { padding: 'var(--cp-space-9)', color: 'var(--cp-text-muted)', textAlign: 'center', fontSize: 'var(--cp-font-md)' },
 };

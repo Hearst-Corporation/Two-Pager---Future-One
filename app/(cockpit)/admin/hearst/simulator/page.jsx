@@ -16,8 +16,9 @@ import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import HardwareMixer from '@/components/hearst/simulator/HardwareMixer';
-import { SectionHead, Button } from '@/components/hearst/ui';
+import { SectionHead, Button, Card, Eyebrow } from '@/components/hearst/ui';
 import { UI } from '@/lib/ui-strings';
+import { S as CP } from '@/lib/cp-styles';
 
 const VIZ_TABS = [
   { id: 'radar',   label: 'Strengths' },
@@ -375,7 +376,7 @@ export default function SimulatorPage() {
   return (
     <>
     <style>{`
-      @media (max-width: 1500px) {
+      @media (max-width: 900px) {
         [data-sim-command-deck] {
           grid-template-columns: 1fr !important;
         }
@@ -390,7 +391,7 @@ export default function SimulatorPage() {
           grid-template-columns: 1fr !important;
         }
       }
-      @media (max-width: 1120px) {
+      @media (max-width: 600px) {
         [data-sim-preset-grid],
         [data-hardware-summary],
         [data-hardware-gpu-grid] {
@@ -399,7 +400,8 @@ export default function SimulatorPage() {
       }
     `}</style>
     <div className="oracle-page">
-      <header style={S.header}>
+      <div data-sim-wrap style={S.wrap}>
+      <Card as="header" surface={1} padding="md" style={S.header}>
         <SectionHead
           hero
           eyebrow={UI.SIM_PAGE_EYEBROW}
@@ -408,12 +410,11 @@ export default function SimulatorPage() {
           style={{ flex: '1 1 320px', minWidth: 0, marginBottom: 0 }}
         />
         {loading && <div style={S.loadingBadge}>{UI.STATE_CALCULATING}</div>}
-      </header>
+      </Card>
 
-      <section data-sim-command-deck style={S.commandDeck}>
+      <Card as="section" data-sim-command-deck variant="flat" style={S.commandDeck} padding="md" surface={1}>
         <div data-sim-command-intro style={S.commandIntro}>
           <SectionHead
-            hero
             num="01"
             eyebrow={UI.SIM_BUILD_BRIEF_EYEBROW}
             title={UI.SIM_BUILD_BRIEF_TITLE}
@@ -422,9 +423,9 @@ export default function SimulatorPage() {
           />
         </div>
         <div data-sim-command-grid style={S.commandGrid}>
+        {/* Panneaux plats : délimitation par SectionHead, pas par une boîte. */}
         <section style={S.commandPanel}>
           <SectionHead
-            hero
             level={3}
             eyebrow={UI.SIM_PANEL_START_EYEBROW}
             title={UI.SIM_PANEL_START_TITLE}
@@ -437,26 +438,30 @@ export default function SimulatorPage() {
           />
         </section>
 
-        <section style={{ ...S.commandPanel, ...S.commandPanelPrimary }}>
+          <section style={S.commandPanel}>
           <SectionHead
-            hero
             level={3}
             eyebrow={UI.SIM_PANEL_SIZE_EYEBROW}
             title={UI.SIM_PANEL_SIZE_TITLE}
             style={{ marginBottom: 0 }}
           />
-          <div data-sim-preset-grid style={S.presetCards} role="group" aria-label="Ready scenarios">
+          <div data-sim-preset-grid style={S.presetCards} role="group" aria-label={UI.SIM_READY_SCENARIOS}>
             {QATAR_PRESETS.map(p => {
               const active = activeScenarioPreset === p.id;
               return (
-                <button
+                <Card
                   key={p.id}
-                  type="button"
+                  as="button"
                   onClick={() => onPreset(p)}
-                  style={{ ...S.presetCard, ...(active ? S.presetCardActive : {}) }}>
+                  accent={active}
+                  surface={0}
+                  hover
+                  padding="sm"
+                  style={S.presetCard}
+                >
                   <span style={S.presetCardName}>{p.label}</span>
                   <span style={{ ...S.presetCardSub, ...(active ? S.presetCardSubActive : {}) }}>{scenarioPresetSub(p)}</span>
-                </button>
+                </Card>
               );
             })}
           </div>
@@ -468,8 +473,8 @@ export default function SimulatorPage() {
             solver={simResult?.solver}
           />
           {state.mode === 'target_irr_first' && (
-            <div style={S.leverPanel}>
-              <span style={S.leverLabel}>What to change</span>
+            <Card variant="flat" style={S.leverPanel} padding="md" surface={2}>
+              <Eyebrow>{UI.SIM_WHAT_TO_CHANGE}</Eyebrow>
               <div style={S.leverPills}>
                 {[
                   { id: 'pricing',      label: 'Pricing' },
@@ -486,16 +491,15 @@ export default function SimulatorPage() {
                   </button>
                 ))}
               </div>
-            </div>
+            </Card>
           )}
         </section>
         </div>
-      </section>
+      </Card>
 
       {/* 2. OPERATING MODEL */}
-      <section style={S.boardSection}>
+      <Card as="section" variant="flat" style={S.boardSection} padding="lg" surface={1}>
         <SectionHead
-          hero
           num="02"
           eyebrow={UI.SIM_OS_EYEBROW}
           title={UI.SIM_OS_TITLE}
@@ -507,12 +511,11 @@ export default function SimulatorPage() {
           primaryId={state.primary_archetype_id}
           onSelectPrimary={onSelectPrimary}
         />
-      </section>
+      </Card>
 
       {/* 4. HARDWARE ALLOCATION */}
-      <section style={S.boardSection}>
+      <Card as="section" variant="flat" style={S.boardSection} padding="lg" surface={1}>
         <SectionHead
-          hero
           num="03"
           eyebrow={UI.SIM_HW_EYEBROW}
           title={UI.SIM_HW_TITLE}
@@ -524,18 +527,18 @@ export default function SimulatorPage() {
           value={state.hardware_mix}
           onChange={onHwChange}
         />
-      </section>
+      </Card>
 
       {projectLoadError && (
-        <div style={{ ...S.error, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
+        <div className="cp-surface-accent-soft" style={{ ...CP.accentAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
           <span>{projectLoadError}</span>
           <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>{UI.ACTION_RETRY}</Button>
         </div>
       )}
-      {simError && <div style={S.error}>Error: {simError}</div>}
+      {simError && <div className="cp-surface-accent-soft" style={CP.accentAlert}>Error: {simError}</div>}
 
       {/* VALIDATE CONFIG → dedicated results page */}
-      <div style={S.validateBar}>
+      <Card style={S.validateBar} padding="md" surface={1}>
         <span style={S.validateHint}>
           {simError ? UI.SIM_FIX_ERROR
             : loading ? UI.STATE_CALCULATING
@@ -554,28 +557,33 @@ export default function SimulatorPage() {
         >
           {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_VALIDATE}
         </Button>
-      </div>
+      </Card>
       {saveError && (
-        <div style={S.error} role="alert">Could not save: {saveError}</div>
+        <div className="cp-surface-accent-soft" style={CP.accentAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
       )}
       {/* Modal/badge/toast mountés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
+      </div>
     </div>
     </>
   );
 }
 
 const S = {
+  wrap: {
+    width: '100%',
+    maxWidth: 1280,
+    margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-section-gap)',
+    paddingBottom: 'var(--cp-scroll-clear)',
+  },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     gap: 'var(--cp-space-4)',
     flexWrap: 'wrap',
-    padding: 'var(--cp-space-5)',
-    background: 'linear-gradient(135deg, color-mix(in srgb, var(--cp-accent-maroon) 22%, transparent), var(--cp-surface-2) 52%, var(--cp-surface-0))',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    boxShadow: 'inset 0 1px 0 color-mix(in srgb, var(--cp-text-strong) 8%, transparent)',
   },
   loadingBadge: {
     fontSize: 'var(--cp-font-sm)',
@@ -583,17 +591,10 @@ const S = {
     background: 'var(--cp-accent-soft)',
     color: 'var(--cp-text-strong)',
     borderRadius: 'var(--cp-radius-md)',
-    fontWeight: 600,
+    fontWeight: 'var(--cp-weight-semibold)',
     letterSpacing: 'var(--cp-tracking-wider)',
     textTransform: 'uppercase',
     flexShrink: 0,
-  },
-
-  inputGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: 'var(--cp-space-4)',
-    alignItems: 'stretch',
   },
 
   commandDeck: {
@@ -601,10 +602,6 @@ const S = {
     gridTemplateColumns: '1fr',
     gap: 'var(--cp-space-4)',
     alignItems: 'start',
-    padding: 'var(--cp-space-4)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
     minWidth: 0,
   },
   commandIntro: {
@@ -625,13 +622,6 @@ const S = {
     minWidth: 0,
     alignSelf: 'start',
     width: '100%',
-    padding: 'var(--cp-space-3)',
-    background: 'var(--cp-surface-1)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-  },
-  commandPanelPrimary: {
-    background: 'linear-gradient(180deg, var(--cp-surface-1), color-mix(in srgb, var(--cp-accent-maroon) 10%, var(--cp-surface-1)))',
   },
   presetCards: {
     display: 'grid',
@@ -644,29 +634,17 @@ const S = {
     gap: 'var(--cp-space-1)',
     minHeight: 64,
     padding: 'var(--cp-space-3)',
-    background: 'var(--cp-surface-0)',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
     cursor: 'pointer',
     textAlign: 'left',
-    color: 'var(--cp-text-primary)',
-    transition: 'all var(--cp-dur-base) var(--cp-ease)',
-  },
-  presetCardActive: {
-    background: 'var(--cp-accent-maroon)',
-    color: 'var(--cp-text-strong)',
-    borderColor: 'var(--cp-accent-maroon)',
   },
   presetCardName: {
     fontSize: 'var(--cp-font-sm)',
-    fontWeight: 700,
+    fontWeight: 'var(--cp-weight-bold)',
     lineHeight: 'var(--cp-font-lg)',
   },
   presetCardSub: {
     fontSize: 'var(--cp-font-xs)',
-    fontWeight: 600,
+    fontWeight: 'var(--cp-weight-semibold)',
     color: 'var(--cp-text-muted)',
     letterSpacing: 'var(--cp-tracking-wide)',
   },
@@ -676,16 +654,12 @@ const S = {
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 'var(--cp-space-4)',
-    padding: 'var(--cp-space-5) var(--cp-space-6)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
     flexWrap: 'wrap',
   },
   validateHint: {
     fontSize: 'var(--cp-font-base)',
     color: 'var(--cp-text-muted)',
-    fontWeight: 600,
+    fontWeight: 'var(--cp-weight-semibold)',
   },
   boardSection: {
     display: 'flex',
@@ -693,56 +667,30 @@ const S = {
     gap: 'var(--cp-space-4)',
     width: '100%',
     minWidth: 0,
-    padding: 'var(--cp-space-6)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
   },
-  error: {
-    padding: 'var(--cp-space-3) var(--cp-space-4)',
-    background: 'var(--cp-accent-soft)',
-    color: 'var(--cp-text-strong)',
-    border: '1px solid var(--cp-accent)',
-    borderRadius: 'var(--cp-radius-md)',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 600,
-  },
-
   leverPanel: {
     display: 'flex',
     alignItems: 'center',
     gap: 'var(--cp-space-4)',
-    padding: 'var(--cp-space-4) var(--cp-space-6)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
     flexWrap: 'wrap',
-  },
-  leverLabel: {
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 600,
-    color: 'var(--cp-text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
   },
   leverPills: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap' },
   leverBtn: {
     fontSize: 'var(--cp-font-sm)',
     height: 'var(--cp-icon-btn-size)',
     padding: '0 var(--cp-space-4)',
-    background: 'transparent',
-    color: 'var(--cp-text-muted)',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
     cursor: 'pointer',
-    fontWeight: 600,
+    fontWeight: 'var(--cp-weight-semibold)',
+    background: 'var(--cp-surface-0)',
+    color: 'var(--cp-text-muted)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-pill)',
+    transition: 'background var(--cp-dur-base) var(--cp-ease), color var(--cp-dur-base) var(--cp-ease), border-color var(--cp-dur-base) var(--cp-ease)',
   },
   leverBtnActive: {
     background: 'var(--cp-accent-maroon)',
     color: 'var(--cp-text-strong)',
-    borderColor: 'var(--cp-accent-maroon)',
+    borderColor: 'var(--cp-border-accent)',
   },
 
 };

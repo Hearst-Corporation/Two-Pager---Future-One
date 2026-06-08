@@ -18,6 +18,7 @@ const VARIANTS = {
   muted:     { background: 'var(--cp-surface-3)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)' },
   danger:    { background: 'transparent', color: 'var(--cp-error)', border: '1px solid var(--cp-border)' },
   dangerSolid: { background: 'var(--cp-error)', color: 'var(--cp-text-strong)', border: '1px solid var(--cp-error)' },
+  link:      { height: 'auto', padding: 0, background: 'transparent', color: 'var(--cp-accent-maroon)', border: 'none', textDecoration: 'underline', textUnderlineOffset: '2px' },
 };
 
 const BASE = {
@@ -29,7 +30,7 @@ const BASE = {
 
 /**
  * @param {object} props
- * @param {'primary'|'secondary'|'ghost'|'muted'|'danger'} [props.variant='secondary']
+ * @param {'primary'|'secondary'|'ghost'|'muted'|'danger'|'dangerSolid'|'link'} [props.variant='secondary']
  * @param {'sm'|'md'|'lg'} [props.size='md']
  * @param {string} [props.href]      Si fourni → rend un <a> (lien/PDF/export).
  * @param {boolean} [props.disabled]
@@ -38,7 +39,7 @@ const BASE = {
  * @param {React.ReactNode} props.children
  */
 export default function Button({
-  variant = 'secondary', size = 'md', href, disabled = false, block = false, style, children, ...rest
+  variant = 'secondary', size = 'md', href, disabled = false, block = false, style, className = '', children, ...rest
 }) {
   const merged = {
     ...BASE, ...SIZES[size], ...VARIANTS[variant],
@@ -46,18 +47,20 @@ export default function Button({
     ...(disabled ? { opacity: 0.5, cursor: 'not-allowed', pointerEvents: 'none' } : {}),
     ...style,
   };
+  const cls = [variant === 'primary' ? 'cp-btn--primary' : '', className].filter(Boolean).join(' ');
   if (href && !disabled) {
-    return <a href={href} style={merged} {...rest}>{children}</a>;
+    return <a href={href} style={merged} className={cls || undefined} {...rest}>{children}</a>;
   }
-  return <button type="button" disabled={disabled} style={merged} {...rest}>{children}</button>;
+  return <button type="button" disabled={disabled} style={merged} className={cls || undefined} {...rest}>{children}</button>;
 }
 
 Button.propTypes = {
-  variant: PropTypes.oneOf(['primary', 'secondary', 'ghost', 'muted', 'danger', 'dangerSolid']),
+  variant: PropTypes.oneOf(['primary', 'secondary', 'ghost', 'muted', 'danger', 'dangerSolid', 'link']),
   size: PropTypes.oneOf(['sm', 'md', 'lg']),
   href: PropTypes.string,
   disabled: PropTypes.bool,
   block: PropTypes.bool,
   style: PropTypes.object,
+  className: PropTypes.string,
   children: PropTypes.node,
 };

@@ -40,6 +40,7 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 - **Calculs** : `lib/hearst-calculations.js` (IRR Newton-Raphson, NPV, MOIC, waterfall)
 - **Solver** : `lib/hearst-solver.js` (3 modes : mw_first / capital_first / target_irr_first)
 - **Tokens DS** : `grep -r "var(--cp-" app/(cockpit)/admin/hearst/cp-tokens.css`
+- **Styles inline** : `lib/cp-styles.js` — `T` (typo), `S` (états), `L` (layout), `RC` (Recharts). **Chercher ici avant d'écrire un `fontWeight`, `fontSize` ou état inline.**
 - **Nav routes** : `grep -n "href:" components/OracleRailNav.jsx`
 - **Strings UI** : `lib/ui-strings.ts` → `UI.*`
 
@@ -49,6 +50,7 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 | INTERDIT | ÉCHOUE VIA |
 |---|---|
 | Couleur hex / `rgb()` / `hsl()` hors `var(--cp-*)` dans cockpit | `npm run lint:cockpit` |
+| `fontWeight: 700\|800\|600` (chiffre brut) dans cockpit — utiliser `T.*` de `lib/cp-styles.js` | `npm run lint:cockpit` (à étendre) |
 | `var(--ct-*)` ou `var(--color-*)` en direct dans le cockpit | `npm run lint:cockpit` (passe par `--cp-*`) |
 | Token défini hors de sa source (`--cp-*`→cp-tokens.css · `--color-*`→globals.css) ou en double | `npm run lint:tokens` |
 | String UI en dur (nouvelle ligne) | `npm run lint:strings` |
@@ -73,7 +75,7 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 - IC Advisor rail : `lib/oracle-advisor-routes.js` — chat-only sur deals/sources/workspace/dossier liste ; full sur simulator/financial/dossier `?memo=`.
 - Chat voie A : `CockpitChatBridge` injecte `deal` + `oracle.pathname` dans POST `/api/cockpit-chat`. Prompts IC → `COCKPIT_CHAT_SEND_EVENT`.
 - Chat scope : `resolveChatScope()` → `oracle:chat-id:{scope}` ; `syncScopedChatToShell()` + `setActiveChat` (export shell 0.2.0 patché) recharge l’historique.
-- Rail droit : drawer overlay (FAB) — `--ct-rail-right: 0`, centre full-width. IC snapshot seulement si `advisorContext.projection` présent.
+- Rail droit : chat **toujours visible** desktop (fixe + `--cp-chat-rail-width` padding centre) ; drawer+FAB mobile. `--ct-rail-right: 0`. IC si `advisorContext.projection` présent.
 - `@hearst/cockpit-shell` : `hearst-cockpit-shell-0.2.0.tgz` exporte `setActiveChat` (patch dist) — repack après upgrade shell.
 - `useEffect(..., [])` init-only = pattern intentionnel sur simulator/page.jsx.
 - CSP : `unsafe-eval` retiré en prod (Next.js HMR en dev uniquement).

@@ -5,6 +5,7 @@
 
 export const UI = {
   // Navigation
+  NAV_RAIL_ARIA: 'Hearst cockpit sections',
   NAV_SIMULATOR: 'Simulator',
   NAV_FINANCIAL: 'Financial',
   NAV_DEALS: 'Deals',
@@ -21,6 +22,10 @@ export const UI = {
   ACTION_OPEN: 'Open',
   ACTION_EXPORT: 'Export',
   ACTION_GENERATE: 'Generate',
+
+  // Assistant chat (FAB mobile)
+  CHAT_OPEN: 'Open assistant',
+  CHAT_CLOSE: 'Close assistant',
 
   // États
   STATE_LOADING: 'Loading…',
@@ -45,6 +50,12 @@ export const UI = {
   SIM_HW_EYEBROW: 'Technology stack',
   SIM_HW_TITLE: 'Hardware Allocation',
   SIM_HW_HINT: 'Power mix, rack density and GPU economics',
+  SIM_READY_SCENARIOS: 'Ready scenarios',
+  SIM_WHAT_TO_CHANGE: 'What to change',
+  SIM_INPUT_MODE_ARIA: 'Input mode',
+  B2B_TH_CORNER: 'What we sell',
+  HW_TOPOLOGY_ARIA: 'Hardware allocation topology',
+  HW_GPU_UTIL_ARIA: 'AI chip utilization percentage',
   SIM_VALIDATE: 'Validate & see results →',
   SIM_SAVING: 'Saving…',
   SIM_SAVING_SCENARIO: 'Saving your scenario…',
@@ -53,6 +64,24 @@ export const UI = {
   SIM_FIX_ERROR: 'Fix the error above to continue.',
   SIM_PROJECT_UNAVAILABLE: 'Project unavailable — see error above.',
   SIM_LOADING_PROJECT: 'Resolving project…',
+  RESULTS_LOADING_SCENARIO: 'Running scenario…',
+  RESULTS_LOADING_ECOSYSTEM: 'Loading industry players…',
+  RESULTS_LOADING_SANKEY: 'Loading money flow…',
+  RESULTS_SCENARIO_SAVED: 'Scenario already saved',
+  RESULTS_RISK_NOTE: 'Debt coverage sits below returns in the hierarchy.',
+  RESULTS_CTA_FILL: 'Fill in your numbers to generate a plan',
+  RESULTS_CTA_PLAN_READY: 'Plan ready',
+  RESULTS_CTA_PLAN_REVIEW: 'Plan needs review',
+  RESULTS_CTA_EXPORT: 'Export Summary',
+  RESULTS_CTA_SAVE: 'Save Scenario',
+  RESULTS_CTA_MEMO: 'Generate Strategic Memo',
+
+  // Deals
+  DEALS_NAV_ARIA: 'Deal models sections',
+  DEALS_CALLOUT_SOVEREIGN: 'The sovereign rule',
+  DEALS_CALLOUT_LOCAL: 'Implication for a local deal (a hub like Futur One)',
+  DEALS_CLOSING_BOLD: 'The central reflex:',
+  DEALS_CLOSING_BODY: 'value is not captured at the equity line alone. The operator keeps 20% but pockets recurring development + operations fees, and whoever holds land + power controls the bottleneck. Knowing which role you play determines what you negotiate.',
 
   // Workspace (scenarios only — reports → Dossier)
   WS_PAGE_SUBTITLE: 'Saved scenarios for this project. Reopen in the Simulator; strategic reports live in',
@@ -61,28 +90,57 @@ export const UI = {
   WS_DELETE_CONFIRM: (name: string) => `Delete scenario "${name}"? This cannot be undone.`,
 
   // Sources
+  SOURCES_LOADING: 'Loading market intelligence…',
+  SOURCES_MY_SECTION: 'MY SOURCES — Admin & Project-specific',
   SOURCES_NO_DATA: 'No sources found.',
+  SOURCES_NO_ADMIN: 'No admin sources yet.',
+  SOURCES_NO_FILTER: 'No results matching filters.',
   SOURCES_ADD: 'Add source',
   SOURCES_DELETE_CONFIRM: 'Delete this source? This cannot be undone.',
 
   // Dossier
   DOSSIER_NO_REPORTS: 'No reports for this scenario yet. Generate a strategic memo from the',
+  DOSSIER_NO_SCENARIO_REPORTS: 'No reports for this scenario yet.',
+  DOSSIER_LOADING_MEMOS: 'Loading memos…',
   DOSSIER_NO_RISKS: 'No risks logged.',
   DOSSIER_NO_VERSIONS: 'No versions.',
   DOSSIER_GO_SIMULATOR: 'the Simulator',
+  DOSSIER_EYEBROW_CONDITIONS: 'Conditions before approval',
+  DOSSIER_EYEBROW_PEERS: "Why peers aren't directly comparable",
+  DOSSIER_VERDICT_NOTE: 'Synthesized from return, risk, freshness & confidence signals',
+  DOSSIER_PLACEHOLDER_STACK: 'Capital structure not available for this memo version',
+  DOSSIER_PLACEHOLDER_TIMELINE: 'Deployment timeline not available for this memo version',
+  DOSSIER_PLACEHOLDER_COMPARABLES: 'No comparable peers cited in this memo version',
+  DOSSIER_PLACEHOLDER_RISKS: 'No risks logged for this memo version',
+  DOSSIER_RISK_WHY: 'Why it matters ·',
 
   // Financial
   FIN_PAGE_TITLE: '10-Year Financial Projection',
   FIN_SAVED_PLAN_LABEL: 'Saved plan',
   FIN_SAVED_PLAN_PLACEHOLDER: 'Select a saved scenario…',
   FIN_LOADING: 'Loading financial model…',
+  FIN_EXCEL_SOON_TITLE: 'Excel export is not available yet',
+  FIN_MEMO_DOSSIER_TITLE: "Open this scenario's strategic memo in the Dossier (PDF export available there)",
 
   // Errors
   ERR_GENERIC: 'Something went wrong. Please try again.',
   ERR_PROJECT_LOAD: 'Project load failed',
   ERR_PROJECT_TIMEOUT: 'Project load timed out — please refresh.',
   ERR_SAVE: 'Could not save',
+  ERR_SAVE_DETAIL: (msg: string) => `Could not save: ${msg}`,
   ERR_DELETE: 'Delete failed',
+
+  // Memo / advisor chrome
+  MEMO_JOB_ARIA: 'Reopen the memo being generated',
+  MEMO_JOB_TITLE: 'Memo in progress',
+  MEMO_TOAST_DISMISS_ARIA: 'Dismiss notification',
+  MEMO_COPY_TITLE: 'Copy markdown',
+  MEMO_REGENERATE_TITLE: 'Regenerate',
+  MEMO_GENERATING_LABEL: 'Generating strategic memo…',
+  ADVISOR_RAIL_ARIA: 'ORACLE Investment Committee Advisor',
+
+  // Login (legacy layer — hors cockpit)
+  LOGIN_PASSWORD_PLACEHOLDER: 'Password',
 } as const;
 
 export type UIKey = keyof typeof UI;

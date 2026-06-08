@@ -8,6 +8,7 @@ import { fmtPctFromRatio, fmtX, MISSING } from '@/lib/hearst-format';
 import { hasAdvisorProjection } from '@/lib/advisor-context-from-scenario';
 import { getAdvisorRailMode } from '@/lib/oracle-advisor-routes';
 import { COCKPIT_CHAT_SEND_EVENT } from '@/lib/cockpit-chat-payload';
+import { UI } from '@/lib/ui-strings';
 
 const PROMPTS = [
   'Why REVIEW?',
@@ -111,7 +112,7 @@ function OracleAdvisorContent() {
   const payback = projection?.payback_years != null ? `${projection.payback_years} years` : MISSING;
 
   return (
-    <aside style={S.wrap} aria-label="ORACLE Investment Committee Advisor">
+    <aside style={S.wrap} aria-label={UI.ADVISOR_RAIL_ARIA}>
       <header style={S.header}>
         <div>
           <div style={S.brand}>ORACLE</div>
@@ -221,8 +222,7 @@ const S = {
     flexDirection: 'column',
     gap: 'var(--cp-space-4)',
     padding: 'var(--cp-space-4)',
-    borderBottom: '1px solid var(--cp-border)',
-    background: 'linear-gradient(180deg, color-mix(in srgb, var(--cp-accent-maroon) 10%, transparent), transparent 42%)',
+    background: 'var(--cp-surface-1)',
   },
   header: {
     display: 'flex',
@@ -232,7 +232,7 @@ const S = {
   },
   brand: {
     fontSize: 'var(--cp-font-lg)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-wider)',
     color: 'var(--cp-text-strong)',
   },
@@ -244,7 +244,7 @@ const S = {
   },
   mode: {
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-accent-strong)',
     border: '1px solid var(--cp-border-accent)',
     borderRadius: 'var(--cp-radius-xs)',
@@ -261,7 +261,7 @@ const S = {
   },
   sectionKicker: {
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     color: 'var(--cp-text-muted)',
   },
@@ -320,7 +320,7 @@ const S = {
   metricValue: {
     marginTop: 'var(--cp-space-1)',
     fontSize: 'var(--cp-font-lg)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-strong)',
     fontVariantNumeric: 'tabular-nums',
   },
@@ -329,7 +329,7 @@ const S = {
     width: 'max-content',
     marginTop: 'var(--cp-space-2)',
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
@@ -346,7 +346,7 @@ const S = {
   },
   rowTitle: {
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-muted)',
     letterSpacing: 'var(--cp-tracking-wider)',
   },
@@ -369,12 +369,12 @@ const S = {
   promptBtn: {
     minHeight: 'var(--cp-btn-height-md)',
     padding: 'var(--cp-space-2)',
-    border: '1px solid var(--cp-border)',
+    border: '1px solid var(--cp-border-strong)',
     borderRadius: 'var(--cp-radius-sm)',
-    background: 'var(--cp-surface-1)',
-    color: 'var(--cp-text-body)',
+    background: 'var(--cp-surface-2)',
+    color: 'var(--cp-text-strong)',
     fontSize: 'var(--cp-font-xs)',
-    fontWeight: 700,
+    fontWeight: 'var(--cp-weight-bold)',
     textAlign: 'left',
     cursor: 'pointer',
   },

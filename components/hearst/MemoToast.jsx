@@ -17,6 +17,7 @@ import {
   formatElapsed,
 } from '@/lib/hearst-memo-job-store';
 import { Z } from '@/lib/z-index';
+import { UI } from '@/lib/ui-strings';
 
 export default function MemoToast() {
   const job = useMemoJob();
@@ -56,7 +57,7 @@ export default function MemoToast() {
         type="button"
         onClick={isErr ? clearMemoJob : markSeenDone}
         style={S.dismiss}
-        aria-label="Dismiss notification"
+        aria-label={UI.MEMO_TOAST_DISMISS_ARIA}
         title="Dismiss"
       >
         ×

@@ -36,12 +36,32 @@ import {
   calcGpuAnnualRevenue,
   calcRackPower,
 } from '@/lib/hearst-gpu-catalog';
+import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 
 const ARCHETYPE_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
 
 // Fallback equity share when archetype.equity_share is not set (minority_equity archetypes
 // always define equity_share, but this guards against future archetypes that forget it).
 const DEFAULT_MINORITY_EQUITY_SHARE = 0.20;
+
+// In-memory rate limit pour /simulate : 10 req/min par actorId
+const _simRl = new Map();
+const SIM_RL_WINDOW = 60_000;
+const SIM_RL_MAX = 10;
+function checkSimRl(actorId) {
+  const now = Date.now();
+  const b = _simRl.get(actorId);
+  if (!b || now > b.resetAt) {
+    _simRl.set(actorId, { count: 1, resetAt: now + SIM_RL_WINDOW });
+    return { allowed: true };
+  }
+  if (b.count >= SIM_RL_MAX) {
+    const retryAfter = Math.ceil((b.resetAt - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+  b.count += 1;
+  return { allowed: true };
+}
 
 /**
  * Calcule le breakdown hardware (densités + GPU) pour un mix donné.
@@ -105,6 +125,14 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
   const auth = await requireProfile('viewer');
   if (auth instanceof NextResponse) return auth;
 
+  const rl = checkSimRl(auth.profile.id);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: 'Too many requests', retryAfter: rl.retryAfter }, {
+      status: 429,
+      headers: { 'Retry-After': String(rl.retryAfter) },
+    });
+  }
+
   const {
     input_mode,
     input_value,
@@ -133,7 +161,7 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
         .eq('used_in_model', true);
       if (Array.isArray(data)) extraSources = data;
     } catch (e) {
-      console.warn('[simulate] hearst_sources fetch failed:', e?.message);
+      console.warn(`[simulate][actor=${auth.profile.id}] hearst_sources fetch failed:`, e?.message);
     }
   }
 
@@ -187,7 +215,7 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
       rfs_year: archResult.scenario.phase1_complete_year || 3,
       ramp_years: 2,
       exit_year: archResult.scenario.exit_year || 10,
-      discount_rate_pct: archResult.scenario.discount_rate_pct ?? 10,
+      discount_rate_pct: archResult.scenario.discount_rate_pct ?? FINANCIAL_THRESHOLDS.discount_rate_pct,
     });
   }
 
@@ -204,7 +232,7 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
     }
   } catch (e) {
     // Les calculs auxiliaires ne doivent pas faire échouer la route
-    console.warn('[simulate] debt/waterfall failed:', e?.message);
+    console.warn(`[simulate][actor=${auth.profile.id}] debt/waterfall failed:`, e?.message);
   }
 
   return NextResponse.json({

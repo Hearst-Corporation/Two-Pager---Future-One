@@ -47,7 +47,7 @@ const S = {
     display: 'inline-block',
   },
   label: {
-    fontWeight: 700,
+    fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
     lineHeight: 1,
   },

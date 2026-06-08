@@ -6,8 +6,11 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { SectionHead, Table, Row, Cell, Button } from '@/components/hearst/ui';
+import { SectionHead, Table, Row, Cell, Button, Card } from '@/components/hearst/ui';
+import { S as CP } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
+
+const WS_ERR = { ...CP.error, padding: 'var(--cp-space-3)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-4)' };
 
 const fmtDate = (s) => { try { return new Date(s).toLocaleDateString(); } catch { return s; } };
 
@@ -66,12 +69,12 @@ export default function WorkspacePage() {
         </p>
       </header>
 
-      {err && <div style={S.err}>Error: {err}</div>}
+      {err && <div style={WS_ERR}>Error: {err}</div>}
 
-      <section className="oracle-section">
+      <Card as="section" variant="flat" surface={1} padding="lg" style={S.section}>
         <SectionHead title="Saved scenarios" hint={`${scenarios?.length ?? '—'} saved`} />
-        {scenarios === null && <div style={S.empty}>{UI.STATE_LOADING}</div>}
-        {scenarios && scenarios.length === 0 && <div style={S.empty}>{UI.WS_NO_SCENARIOS}</div>}
+        {scenarios === null && <div style={CP.empty}>{UI.STATE_LOADING}</div>}
+        {scenarios && scenarios.length === 0 && <div style={CP.empty}>{UI.WS_NO_SCENARIOS}</div>}
         {scenarios && scenarios.length > 0 && (
           <Table head={['Name', 'Type', 'Created', 'Status', '']}>
             {scenarios.map(s => (
@@ -90,15 +93,14 @@ export default function WorkspacePage() {
             ))}
           </Table>
         )}
-      </section>
+      </Card>
     </div>
   );
 }
 
 const S = {
+  section: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
   action: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', marginLeft: 'var(--cp-space-3)' },
   dossierLink: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)' },
-  err: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-4)' },
-  empty: { padding: 'var(--cp-space-8)', color: 'var(--cp-text-muted)', textAlign: 'center', fontSize: 'var(--cp-font-md)' },
 };

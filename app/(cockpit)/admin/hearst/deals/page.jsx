@@ -12,7 +12,9 @@ import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
-import { Table, Row, Cell as Td, SectionHead } from '@/components/hearst/ui';
+import { Table, Row, Cell as Td, SectionHead, KpiGrid, KpiCard } from '@/components/hearst/ui';
+import { RC } from '@/lib/cp-styles';
+import { UI } from '@/lib/ui-strings';
 
 // ─── Content data ────────────────────────────────────────────────────────────
 
@@ -227,7 +229,7 @@ export default function DealsPage() {
         }
       `}</style>
 
-      <div data-deals-root className="oracle-page" style={{ gap: 'var(--cp-space-7)' }}>
+      <div data-deals-root className="oracle-page">
 
         {/* HERO */}
         <header style={S.hero}>
@@ -240,18 +242,21 @@ export default function DealsPage() {
         </header>
 
         {/* KPI STRIP */}
-        <div data-deals-kpi-grid style={S.kpiGrid}>
+        <KpiGrid cols={5} data-deals-kpi-grid>
           {KPIS.map((k) => (
-            <div key={k.label} className={`cp-card${k.highlight ? ' cp-card-accent' : ''}`} style={S.kpiCard}>
-              <div style={S.kpiLabel}>{k.label}</div>
-              <div style={{ ...S.kpiValue, color: k.highlight ? 'var(--cp-text-strong)' : 'var(--cp-text-strong)' }}>{k.value}</div>
-              <div style={S.kpiSub}>{k.sub}</div>
-            </div>
+            <KpiCard
+              key={k.label}
+              label={k.label}
+              value={k.value}
+              format="display"
+              sublabel={k.sub}
+              highlight={k.highlight}
+            />
           ))}
-        </div>
+        </KpiGrid>
 
         {/* ANCHOR NAV */}
-        <nav data-deals-nav style={S.nav} aria-label="Deal models sections">
+        <nav data-deals-nav style={S.nav} aria-label={UI.DEALS_NAV_ARIA}>
           {SECTIONS.map((s) => (
             <button key={s.id} onClick={() => go(s.id)} style={{ ...S.navBtn, ...(active === s.id ? S.navBtnActive : {}) }}>
               {s.label}
@@ -261,7 +266,7 @@ export default function DealsPage() {
 
         {/* §1 MODELS */}
         <section id="sec-models" style={S.section}>
-          <SectionHead hero num="01" title="The 6 deal models used across the industry"
+          <SectionHead title="The 6 deal models used across the industry"
             hint="From the least capital-intensive for the operator (lease) to the most committing (equity JV). All coexist." />
           <div data-deals-grid-2 style={S.grid2}>
             {MODELS.map((m) => (
@@ -287,7 +292,7 @@ export default function DealsPage() {
 
         {/* §2 REAL DEALS */}
         <section id="sec-deals" style={S.section}>
-          <SectionHead hero num="02" title="Real deals — what the majors have signed"
+          <SectionHead title="Real deals — what the majors have signed"
             hint="The recurring structure: majority long-term capital + minority operator that keeps operational control." />
           <div data-deals-grid-2 style={S.grid2}>
             {DEALS.map((d) => (
@@ -305,7 +310,7 @@ export default function DealsPage() {
 
         {/* §3 SPLITS */}
         <section id="sec-splits" style={S.section}>
-          <SectionHead hero num="03" title="The equity splits — who owns what"
+          <SectionHead title="The equity splits — who owns what"
             hint="Outside the Gulf, the dominant rule: long-term capital owns, the operator keeps 20–25% + operations." />
           <div className="cp-card" style={S.splitPanel}>
             {SPLITS.map((row) => <SplitBar key={row.deal} row={row} />)}
@@ -340,13 +345,13 @@ export default function DealsPage() {
             <ResponsiveContainer width="100%" height={260}>
               <BarChart layout="vertical" data={SIZE_CHART} margin={{ top: 4, right: 24, left: 8, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" horizontal={false} />
-                <XAxis type="number" tick={{ fill: 'var(--cp-text-body)', fontSize: 11 }} tickFormatter={(v) => '$' + v + 'B'} />
-                <YAxis type="category" dataKey="name" width={170} tick={{ fill: 'var(--cp-text-body)', fontSize: 11 }} />
+                <XAxis type="number" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-chart-tick)' }} tickFormatter={(v) => '$' + v + 'B'} />
+                <YAxis type="category" dataKey="name" width={170} tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-chart-tick)' }} />
                 <Tooltip
                   formatter={(v) => ['$' + v + 'B', 'Size']}
                   cursor={{ fill: 'var(--cp-surface-2)' }}
-                  contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-sm)', color: 'var(--cp-text-strong)' }}
-                  labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 11 }}
+                  contentStyle={RC.tooltip}
+                  labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-chart-tick)' }}
                 />
                 <Bar dataKey="val" radius={[0, 4, 4, 0]}>
                   {SIZE_CHART.map((e, i) => <Cell key={i} fill={e.c} />)}
@@ -360,7 +365,7 @@ export default function DealsPage() {
 
         {/* §4 ROLES */}
         <section id="sec-roles" style={S.section}>
-          <SectionHead hero num="04" title="Who does what in a hyperscale deal"
+          <SectionHead title="Who does what in a hyperscale deal"
             hint="A deal can involve up to 5 distinct roles. One actor can hold several — but thinking in roles tells you what you bring and what you capture." />
           <div data-deals-grid-3 style={S.grid3}>
             {ROLES.map((r) => (
@@ -375,11 +380,11 @@ export default function DealsPage() {
 
         {/* §5 GULF */}
         <section id="sec-gulf" style={S.section}>
-          <SectionHead hero num="05" title="Gulf / Qatar specifics"
+          <SectionHead title="Gulf / Qatar specifics"
             hint="The regional pattern differs from the West: sovereignty first, the state/national champion owns, tech enters in minority." />
           <div data-deals-grid-2 style={S.grid2}>
             <div className="cp-card" style={{ ...S.callout, borderColor: SERIES.sovereign }}>
-              <div style={S.calloutTitle}><span style={{ ...S.dot, background: SERIES.sovereign }} />The sovereign rule</div>
+              <div style={S.calloutTitle}><span style={{ ...S.dot, background: SERIES.sovereign }} />{UI.DEALS_CALLOUT_SOVEREIGN}</div>
               <p style={S.calloutBody}>
                 UAE (G42), Saudi (HUMAIN), Qatar (Qai) are national champions coordinating capital, energy and compute.
                 On Stargate UAE, G42 keeps 60% so sovereign AI infra stays under national control. Data does not leave
@@ -393,7 +398,7 @@ export default function DealsPage() {
             </div>
           </div>
           <div className="cp-card cp-card-accent" style={{ ...S.callout, marginTop: 'var(--cp-space-4)' }}>
-            <div style={S.calloutTitle}>Implication for a local deal (a hub like Futur One)</div>
+            <div style={S.calloutTitle}>{UI.DEALS_CALLOUT_LOCAL}</div>
             <p style={S.calloutBody}>
               In Qatar, a Western partner (Equinix, Digital Realty, a hyperscaler) will not arrive as majority. The realistic
               setup: local entity / sovereign majority, the global player in minority + operator/tech role. The exact mirror
@@ -404,7 +409,7 @@ export default function DealsPage() {
 
         {/* §6 PLAYBOOK */}
         <section id="sec-playbook" style={S.section}>
-          <SectionHead hero num="06" title="Playbook for a hub — which model to aim for"
+          <SectionHead title="Playbook for a hub — which model to aim for"
             hint="Actionable synthesis depending on what you bring to the table." />
           <div className="cp-card cp-card-accent" style={S.playbook}>
             <ol style={S.ol}>
@@ -414,9 +419,7 @@ export default function DealsPage() {
             </ol>
           </div>
           <p style={S.closing}>
-            <b style={S.b}>The central reflex:</b> value is not captured at the equity line alone. The operator keeps 20% but
-            pockets recurring development + operations fees, and whoever holds land + power controls the bottleneck. Knowing
-            which role you play determines what you negotiate.
+            <b style={S.b}>{UI.DEALS_CLOSING_BOLD}</b> {UI.DEALS_CLOSING_BODY}
           </p>
         </section>
 
@@ -445,23 +448,17 @@ export default function DealsPage() {
 const S = {
   // hero
   hero: { borderLeft: '3px solid var(--cp-accent)', paddingLeft: 'var(--cp-space-5)', paddingTop: 'var(--cp-space-2)', paddingBottom: 'var(--cp-space-2)' },
-  eyebrow: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)' },
+  eyebrow: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)' },
   h1: { fontSize: 'var(--cp-font-xl)', lineHeight: 1.18, fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-strong)', margin: '10px 0 10px' },
   lede: { fontSize: 'clamp(13px, 1.4vw, 15px)', color: 'var(--cp-text-body)', maxWidth: 780, lineHeight: 1.55 },
 
   // kpi strip
-  kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--cp-space-3)' },
-  kpiCard: { padding: 'var(--cp-space-4) var(--cp-space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', minHeight: 92 },
-  kpiLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-text-muted)' },
-  kpiValue: { fontSize: 'clamp(19px, 2.6vw, 24px)', fontWeight: 800, letterSpacing: 'var(--cp-tracking-tight)', lineHeight: 1.15, fontVariantNumeric: 'tabular-nums', marginTop: 'var(--cp-space-1)' },
-  kpiSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', lineHeight: 1.35 },
-
   // anchor nav
-  nav: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 5, padding: 'var(--cp-space-2) 0', background: 'linear-gradient(180deg, var(--cp-bg-deep) 60%, transparent)' },
-  navBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 600, padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-pill)', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
+  nav: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 'var(--cp-z-sticky)', padding: 'var(--cp-space-2) 0', background: 'var(--cp-bg-deep)' },
+  navBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-pill)', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
   navBtnActive: { background: 'var(--cp-accent-maroon, var(--cp-accent))', color: 'var(--cp-text-strong)', borderColor: 'var(--cp-border-accent)' },
 
-  // section (en-têtes via <SectionHead hero/>)
+  // section (en-têtes via <SectionHead/> canon)
   section: { scrollMarginTop: 56, display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
 
   grid2: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--cp-space-4)' },
@@ -469,50 +466,50 @@ const S = {
 
   // model card
   modelCard: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column' },
-  modelTag: { display: 'inline-block', alignSelf: 'flex-start', fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wide)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)', background: 'var(--cp-accent-soft)', border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-1) var(--cp-space-2)', marginBottom: 'var(--cp-space-3)' },
-  modelTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 700, color: 'var(--cp-text-strong)', letterSpacing: 'var(--cp-tracking-tight)' },
+  modelTag: { display: 'inline-block', alignSelf: 'flex-start', fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wide)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)', background: 'var(--cp-accent-soft)', border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-1) var(--cp-space-2)', marginBottom: 'var(--cp-space-3)' },
+  modelTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', letterSpacing: 'var(--cp-tracking-tight)' },
   modelSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)', marginTop: 'var(--cp-space-1)' },
   modelBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.55 },
   pc: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-4)' },
   pcCol: { border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-3)', background: 'var(--cp-surface-0)' },
-  pcHead: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wider)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-2)' },
+  pcHead: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wider)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-2)' },
   pcItem: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', lineHeight: 1.5, marginBottom: 'var(--cp-space-1)' },
 
   // deal card
   dealCard: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column' },
   dealTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-1)' },
-  dealWho: { fontSize: 'var(--cp-font-md)', fontWeight: 700, color: 'var(--cp-text-strong)', display: 'flex', alignItems: 'center', minWidth: 0, lineHeight: 1.3 },
-  dealAmt: { fontSize: 'var(--cp-font-base)', fontWeight: 800, color: 'var(--cp-text-strong)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
-  dealStruct: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-accent-strong)', fontWeight: 600, marginBottom: 'var(--cp-space-3)' },
+  dealWho: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', display: 'flex', alignItems: 'center', minWidth: 0, lineHeight: 1.3 },
+  dealAmt: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-strong)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
+  dealStruct: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-accent-strong)', fontWeight: 'var(--cp-weight-semibold)', marginBottom: 'var(--cp-space-3)' },
   dealDesc: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.55 },
 
   // split panel
   splitPanel: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   splitRow: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
   splitMeta: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--cp-space-3)' },
-  splitDeal: { fontSize: 'var(--cp-font-sm)', fontWeight: 700, color: 'var(--cp-text-primary)' },
+  splitDeal: { fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' },
   splitTags: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
   splitTrack: { display: 'flex', height: 26, borderRadius: 'var(--cp-radius-sm)', overflow: 'hidden', border: '1px solid var(--cp-border)' },
   splitSeg: { display: 'flex', alignItems: 'center', paddingLeft: 8, minWidth: 0, transition: 'width var(--cp-dur-base) var(--cp-ease)' },
-  splitSegLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-text-strong)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
+  splitSegLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
   legendRow: { display: 'flex', flexWrap: 'wrap', gap: 'var(--cp-space-4)', marginTop: 'var(--cp-space-1)', paddingTop: 'var(--cp-space-3)', borderTop: '1px solid var(--cp-border-soft)' },
   legendItem: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' },
 
 
   // chart
   chartCard: { padding: 'var(--cp-space-5)' },
-  chartTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-4)' },
+  chartTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-4)' },
 
   // roles
   roleCard: { padding: 'var(--cp-space-5)' },
   roleCardAccent: { borderColor: 'var(--cp-border-accent)' },
-  roleTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 700, color: 'var(--cp-text-strong)', marginBottom: 'var(--cp-space-1)' },
+  roleTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', marginBottom: 'var(--cp-space-1)' },
   roleWho: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
   roleDesc: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.55 },
 
   // callouts
   callout: { padding: 'var(--cp-space-5)' },
-  calloutTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 700, color: 'var(--cp-text-strong)', marginBottom: 'var(--cp-space-3)', display: 'flex', alignItems: 'center' },
+  calloutTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', marginBottom: 'var(--cp-space-3)', display: 'flex', alignItems: 'center' },
   calloutBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.6 },
 
   // playbook
@@ -520,11 +517,11 @@ const S = {
   ol: { margin: 0, paddingLeft: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-3)' },
   li: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.6 },
   closing: { fontSize: 'var(--cp-font-md)', color: 'var(--cp-text-body)', lineHeight: 1.6, maxWidth: 880, marginTop: 'var(--cp-space-2)' },
-  b: { color: 'var(--cp-text-strong)', fontWeight: 700 },
+  b: { color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' },
 
   // footer
   footer: { borderTop: '1px solid var(--cp-border)', paddingTop: 'var(--cp-space-5)', marginTop: 'var(--cp-space-4)' },
-  footHead: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
+  footHead: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
   srcList: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
   srcLink: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', transition: 'color var(--cp-dur-base) var(--cp-ease)', textDecoration: 'none' },
   disclaimer: { marginTop: 'var(--cp-space-5)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', maxWidth: 860, lineHeight: 1.5 },

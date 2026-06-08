@@ -2,6 +2,9 @@
 
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip, Legend } from 'recharts';
 import { useContainerSize } from './useContainerSize';
+import { RC } from '@/lib/cp-styles';
+
+const CHART_TOOLTIP = { ...RC.tooltip, fontSize: 'var(--cp-font-xs)' };
 
 const AXES = [
   { key: 'brand',       label: 'Brand Visibility' },
@@ -53,7 +56,7 @@ export default function ArchetypeRadar({ archetypes = [], highlighted = null, he
       {size.width > 0 && size.height > 0 && (
         <RadarChart width={size.width} height={size.height} data={data} outerRadius="78%">
           <PolarGrid stroke="var(--cp-border)" />
-          <PolarAngleAxis dataKey="axis" tick={{ fill: 'var(--cp-text-muted)', fontSize: 11 }} />
+          <PolarAngleAxis dataKey="axis" tick={{ fill: 'var(--cp-text-muted)', fontSize: 'var(--cp-chart-tick)' }} />
           <PolarRadiusAxis domain={[0, 5]} tickCount={6} angle={90} tick={false} stroke="var(--cp-border-soft)" />
           {archetypes.map(a => {
             const isHi = !highlightSet || highlightSet.has(a.id);
@@ -70,8 +73,8 @@ export default function ArchetypeRadar({ archetypes = [], highlighted = null, he
               />
             );
           })}
-          <Tooltip contentStyle={S.tooltip} />
-          <Legend wrapperStyle={{ fontSize: 'var(--cp-font-xs)', paddingTop: 'var(--cp-space-2)' }} />
+          <Tooltip contentStyle={CHART_TOOLTIP} />
+          <Legend wrapperStyle={{ ...RC.legend, paddingTop: 'var(--cp-space-2)' }} />
         </RadarChart>
       )}
     </div>
@@ -87,13 +90,5 @@ const S = {
     fontSize: 'var(--cp-font-base)',
     fontStyle: 'italic',
   },
-  tooltip: {
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
-    fontSize: 'var(--cp-font-xs)',
-    color: 'var(--cp-text-primary)',
-  },
 };
 
-export { ARCHETYPE_PALETTE };

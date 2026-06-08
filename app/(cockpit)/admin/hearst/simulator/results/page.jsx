@@ -17,14 +17,19 @@ import B2BMatrix from '@/components/hearst/simulator/B2BMatrix';
 import GanttTimeline from '@/components/hearst/simulator/GanttTimeline';
 import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
 import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
+import { SectionHead, KpiGrid } from '@/components/hearst/ui';
+import { S as CP, T } from '@/lib/cp-styles';
+import { UI } from '@/lib/ui-strings';
+
+const RESULTS_ERROR = { ...CP.accentAlert, padding: 'var(--cp-space-4)', background: 'var(--cp-accent-soft)' };
 
 const EcosystemNetwork = dynamic(() => import('@/components/hearst/simulator/EcosystemNetwork'), {
   ssr: false,
-  loading: () => <div style={S.loadingPanel}>Loading industry players…</div>,
+  loading: () => <div style={CP.loadingPanel}>{UI.RESULTS_LOADING_ECOSYSTEM}</div>,
 });
 const FinancialSankey = dynamic(() => import('@/components/hearst/simulator/FinancialSankey'), {
   ssr: false,
-  loading: () => <div style={S.loadingPanel}>Loading money flow…</div>,
+  loading: () => <div style={CP.loadingPanel}>{UI.RESULTS_LOADING_SANKEY}</div>,
 });
 
 const ARCH_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
@@ -280,18 +285,22 @@ export default function SimulatorResultsPage() {
 
   if (loading) {
     return (
-      <main style={S.wrap}>
-        <div style={S.loadingCard}>Running scenario…</div>
-      </main>
+      <div className="oracle-page">
+        <div data-results-layout style={S.inner}>
+          <div style={CP.loadingCard}>{UI.RESULTS_LOADING_SCENARIO}</div>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <main style={S.wrap}>
-        <Link href="/admin/hearst/simulator" style={S.backLink}>← Back to simulator</Link>
-        <div style={S.error}>Error: {error}</div>
-      </main>
+      <div className="oracle-page">
+        <div data-results-layout style={S.inner}>
+          <Link href="/admin/hearst/simulator" style={S.backLink}>← Back to simulator</Link>
+          <div style={RESULTS_ERROR}>Error: {error}</div>
+        </div>
+      </div>
     );
   }
 
@@ -327,10 +336,6 @@ export default function SimulatorResultsPage() {
         }
       }
       @media (max-width: 1120px) {
-        [data-results-layout] {
-          padding-left: var(--cp-space-5) !important;
-          padding-right: var(--cp-space-5) !important;
-        }
         [data-economics-grid] {
           grid-template-columns: 1fr !important;
         }
@@ -367,7 +372,8 @@ export default function SimulatorResultsPage() {
         }
       }
     `}</style>
-    <main data-results-layout style={S.wrap}>
+    <div className="oracle-page">
+    <div data-results-layout style={S.inner}>
       <header data-results-hero style={S.hero}>
         <div style={S.heroCopy}>
           <Link href={`/admin/hearst/simulator?scenario=${scenarioId}`} style={S.backLink}>← Edit inputs</Link>
@@ -387,26 +393,20 @@ export default function SimulatorResultsPage() {
       </header>
 
       <section style={S.kpiBand}>
-        <div style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Economics behind the decision</h2>
-          <span style={S.sectionSubtitle}>Scale, yield and evidence quality behind the return.</span>
-        </div>
-        <div data-economics-grid style={S.secondaryKpis}>
+        <SectionHead title="Economics behind the decision" hint="Scale, yield and evidence quality behind the return." style={{ marginBottom: 0 }} />
+        <KpiGrid cols={3} data-economics-grid style={{ gap: 'var(--cp-space-4)' }}>
           <BoardMetric label="Total CAPEX" value={fmtUSD(projection?.total_capex)} note="Build requirement" />
           <BoardMetric label="Stabilized revenue" value={fmtUSD(projection?.stabilized_revenue)} note="Annual run-rate" />
           <BoardMetric label="Stabilized EBITDA" value={fmtUSD(projection?.stabilized_ebitda)} note="Operating yield" />
           <BoardMetric label="Terminal value" value={fmtUSD(projection?.terminal_value)} note="Exit valuation" />
           <BoardMetric label="Payback" value={projection?.payback_years != null ? `${projection.payback_years} yr` : MISSING} note="Capital recovery" />
           <BoardMetric label="Source score" value={simResult?.source_score != null ? `${simResult.source_score}/100` : MISSING} note="Evidence depth" />
-        </div>
+        </KpiGrid>
       </section>
 
       <section style={S.analysisBoard}>
         <div style={S.analysisHead}>
-          <div>
-            <h2 style={S.analysisTitle}>Financial Projection</h2>
-            <p style={S.analysisSub}>10-year cash generation, break-even path and exit value.</p>
-          </div>
+          <SectionHead title="Financial Projection" hint="10-year cash generation, break-even path and exit value." style={{ marginBottom: 0, flex: '1 1 auto' }} />
           <span style={S.cardEyebrow}>Main analysis</span>
         </div>
         <div data-analysis-layout style={S.analysisLayout}>
@@ -428,10 +428,7 @@ export default function SimulatorResultsPage() {
       </section>
 
       <section style={S.boardSection}>
-        <div style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Scenario Layers</h2>
-          <span style={S.sectionSubtitle}>Starting point, operating model and hardware allocation</span>
-        </div>
+        <SectionHead title="Scenario Layers" hint="Starting point, operating model and hardware allocation" style={{ marginBottom: 0 }} />
         <div data-layer-grid style={S.layerGrid}>
           <LayerCard index="01" title="Starting Point" rows={[
             ['Mode', state?.mode],
@@ -457,18 +454,12 @@ export default function SimulatorResultsPage() {
       </section>
 
       <section style={S.boardSection}>
-        <div style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Deployment Timeline</h2>
-          <span style={S.sectionSubtitle}>Milestones and launch path</span>
-        </div>
-        <GanttTimeline scenario={scenario || { site_readiness: 'greenfield' }} exit_year={scenario?.exit_year || 10} height={300} />
+        <SectionHead title="Deployment Timeline" hint="Milestones and launch path" style={{ marginBottom: 0 }} />
+        <GanttTimeline scenario={scenario || { site_readiness: 'greenfield' }} exit_year={scenario?.exit_year || 10} />
       </section>
 
       <section style={S.vizCard}>
-        <div style={S.sectionHead}>
-          <h2 style={S.sectionTitle}>Visualizations</h2>
-          <span style={S.sectionSubtitle}>Switch between strategic, industry and money-flow views</span>
-        </div>
+        <SectionHead title="Visualizations" hint="Switch between strategic, industry and money-flow views" style={{ marginBottom: 0 }} />
         <div data-viz-shell style={S.vizShell}>
           <aside data-viz-rail style={S.vizRail}>
             {Object.entries(VIZ_META).map(([id, meta]) => (
@@ -508,8 +499,9 @@ export default function SimulatorResultsPage() {
         planCaution={!!projection?.warnings?.length}
         cautionReason={projection?.warnings?.[0] || null}
       />
-      {savingState === 'saved' && <div style={S.statusToast}>Scenario already saved</div>}
-    </main>
+      {savingState === 'saved' && <div style={CP.toastAccent}>{UI.RESULTS_SCENARIO_SAVED}</div>}
+    </div>
+    </div>
     </>
   );
 }
@@ -578,7 +570,7 @@ function DecisionKpis({ projection }) {
       <div data-risk-strip style={S.riskStrip}>
         <span style={S.riskLabel}>Risk guardrail</span>
         <strong style={S.riskValue}>DSCR {fmtX(projection?.dscr_stabilized)}</strong>
-        <span style={S.riskNote}>Debt coverage sits below returns in the hierarchy.</span>
+        <span style={T.muted}>{UI.RESULTS_RISK_NOTE}</span>
       </div>
     </div>
   );
@@ -604,13 +596,13 @@ function LayerCard({ index, title, rows }) {
 }
 
 const S = {
-  wrap: {
+  inner: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-5)',
+    gap: 'var(--cp-section-gap)',
     maxWidth: 1240,
     margin: '0 auto',
-    padding: 'var(--cp-space-6) clamp(var(--cp-space-3), 4vw, var(--cp-space-8)) var(--cp-scroll-clear)',
+    width: '100%',
   },
   hero: {
     display: 'grid',
@@ -644,7 +636,7 @@ const S = {
   backLink: {
     color: 'var(--cp-accent-maroon)',
     fontSize: 'var(--cp-font-sm)',
-    fontWeight: 700,
+    fontWeight: 'var(--cp-weight-bold)',
     textDecoration: 'none',
   },
   title: {
@@ -676,7 +668,7 @@ const S = {
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-pill)',
     fontSize: 'var(--cp-font-sm)',
-    fontWeight: 700,
+    fontWeight: 'var(--cp-weight-bold)',
   },
   decisionPanel: {
     minWidth: 0,
@@ -744,10 +736,6 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
     fontVariantNumeric: 'tabular-nums',
   },
-  riskNote: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
-  },
   section: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   kpiBand: {
     display: 'flex',
@@ -758,20 +746,6 @@ const S = {
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-lg)',
   },
-  sectionHead: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 'var(--cp-space-4)',
-    flexWrap: 'wrap',
-  },
-  sectionTitle: {
-    margin: 0,
-    color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-xl)',
-    fontWeight: 'var(--cp-weight-black)',
-  },
-  sectionSubtitle: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)' },
   analysisBoard: {
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
@@ -786,17 +760,6 @@ const S = {
     gap: 'var(--cp-space-4)',
     marginBottom: 'var(--cp-space-4)',
   },
-  analysisTitle: {
-    margin: 0,
-    color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-xl)',
-    fontWeight: 800,
-  },
-  analysisSub: {
-    margin: 'var(--cp-space-1) 0 0',
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
-  },
   analysisLayout: {
     display: 'grid',
     gridTemplateColumns: 'minmax(0, 1fr) 300px',
@@ -809,7 +772,7 @@ const S = {
     padding: 'var(--cp-space-4) var(--cp-space-3) var(--cp-space-2)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-lg)',
-    background: 'linear-gradient(180deg, var(--cp-surface-1), var(--cp-surface-2))',
+    background: 'var(--cp-surface-1)',
   },
   capitalPanel: {
     display: 'flex',
@@ -823,7 +786,7 @@ const S = {
   cardEyebrow: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
   },
@@ -836,11 +799,6 @@ const S = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
     gap: 'var(--cp-space-3)',
-  },
-  secondaryKpis: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gap: 'var(--cp-space-4)',
   },
   boardSection: {
     display: 'flex',
@@ -875,7 +833,7 @@ const S = {
     margin: 0,
     color: 'var(--cp-text-primary)',
     fontSize: 'var(--cp-font-base)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
   },
@@ -894,7 +852,7 @@ const S = {
     fontSize: 'var(--cp-font-micro)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
-    fontWeight: 700,
+    fontWeight: 'var(--cp-weight-bold)',
   },
   metricValue: { color: 'var(--cp-text-strong)', fontSize: 'var(--cp-font-base)' },
   inlineMetricValue: {
@@ -953,7 +911,7 @@ const S = {
   donutLabel: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
   },
@@ -1031,7 +989,7 @@ const S = {
   vizRailLabel: {
     color: 'var(--cp-text-strong)',
     fontSize: 'var(--cp-font-sm)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
   },
@@ -1059,7 +1017,7 @@ const S = {
     margin: 0,
     color: 'var(--cp-text-primary)',
     fontSize: 'var(--cp-font-lg)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
   },
   vizDetail: {
     margin: 'var(--cp-space-1) 0 0',
@@ -1070,7 +1028,7 @@ const S = {
   vizMode: {
     color: 'var(--cp-accent-maroon)',
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
   },
@@ -1085,44 +1043,6 @@ const S = {
     border: '1px solid var(--cp-accent)',
     borderRadius: 'var(--cp-radius-pill)',
     fontSize: 'var(--cp-font-sm)',
-    fontWeight: 800,
-  },
-  loadingCard: {
-    minHeight: 320,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    color: 'var(--cp-text-muted)',
-    fontWeight: 700,
-  },
-  loadingPanel: {
-    height: 420,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'var(--cp-text-muted)',
-  },
-  error: {
-    padding: 'var(--cp-space-4)',
-    color: 'var(--cp-text-strong)',
-    background: 'var(--cp-accent-soft)',
-    border: '1px solid var(--cp-accent)',
-    borderRadius: 'var(--cp-radius-md)',
-  },
-  statusToast: {
-    position: 'fixed',
-    right: 'var(--cp-space-8)',
-    bottom: 'var(--cp-space-8)',
-    padding: 'var(--cp-space-2) var(--cp-space-5)',
-    background: 'var(--cp-accent-maroon)',
-    color: 'var(--cp-text-strong)',
-    borderRadius: 'var(--cp-radius-md)',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 700,
-    boxShadow: 'var(--cp-shadow-md)',
-    zIndex: 'var(--cp-z-floating)',
+    fontWeight: 'var(--cp-weight-black)',
   },
 };

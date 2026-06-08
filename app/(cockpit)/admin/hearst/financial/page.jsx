@@ -9,8 +9,14 @@ import {
 } from 'recharts';
 import { detectAlerts } from '@/lib/hearst-alerts';
 import AlertBanner from '@/components/hearst/AlertBanner';
-import KpiCard from '@/components/hearst/KpiCard';
-import { Button } from '@/components/hearst/ui';
+import { Button, KpiCard, KpiGrid } from '@/components/hearst/ui';
+import { S as CP, T, RC } from '@/lib/cp-styles';
+
+const FIN_TOOLTIP = {
+  contentStyle: { ...RC.tooltip, boxShadow: 'var(--cp-shadow-md)' },
+  itemStyle: RC.tooltipItem,
+  labelStyle: RC.tooltipLabel,
+};
 import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
@@ -115,8 +121,20 @@ export default function FinancialPage() {
     return () => setAdvisorContext?.(null);
   }, [base, setAdvisorContext]);
 
-  if (loading) return <div style={S.loading}>{UI.FIN_LOADING}</div>;
-  if (error) return <div style={S.error}>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className="oracle-page">
+        <div style={CP.loading}>{UI.FIN_LOADING}</div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="oracle-page">
+        <div style={CP.error}>Error: {error}</div>
+      </div>
+    );
+  }
 
   // Export: the memo PDF lives in the Dossier (the working per-memo PDF route).
   // Excel/server-side exports are not built yet, so we don't pretend — the
@@ -137,7 +155,7 @@ export default function FinancialPage() {
   return (
     <>
     <style>{`
-      @media (max-width: 1100px) {
+      @media (max-width: 900px) {
         [data-financial-kpi-grid] {
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
@@ -177,7 +195,7 @@ export default function FinancialPage() {
     <div className="oracle-page">
       {/* Scenario toggles */}
       <div data-financial-top-bar style={S.topBar}>
-        <div style={S.pageTitle}>{UI.FIN_PAGE_TITLE}</div>
+        <h1 style={S.pageTitle}>{UI.FIN_PAGE_TITLE}</h1>
         <div data-financial-scenario-row style={S.scenarioRow}>
           {canonicalScenarios.map((s) => {
             const active = primaryId === s.id;
@@ -231,12 +249,12 @@ export default function FinancialPage() {
             </button>
           ))}
           <div style={{ width: 1, background: 'var(--cp-border)', margin: '0 var(--cp-space-1)' }} />
-          <Button variant="muted" size="sm" disabled title="Excel export is not available yet">Excel (soon)</Button>
+          <Button variant="muted" size="sm" disabled title={UI.FIN_EXCEL_SOON_TITLE}>Excel (soon)</Button>
           <Button
             variant="muted"
             size="sm"
             href={base ? `/admin/hearst/dossier?scenario=${base.id}` : '/admin/hearst/dossier'}
-            title="Open this scenario's strategic memo in the Dossier (PDF export available there)"
+            title={UI.FIN_MEMO_DOSSIER_TITLE}
           >
             Memo →
           </Button>
@@ -244,7 +262,7 @@ export default function FinancialPage() {
       </div>
 
       {/* Summary KPIs */}
-      <div data-financial-kpi-grid style={S.kpiGrid}>
+      <KpiGrid cols={4} data-financial-kpi-grid style={{ marginBottom: 'var(--cp-space-6)' }}>
         <KpiCard label="Total CAPEX" value={proj.total_capex} format="currency" />
         <KpiCard label="Project IRR" value={proj.irr} format="pct" sublabel={base?.source_score != null ? `Source score: ${base.source_score}/100` : undefined} highlight={proj.irr != null} />
         <KpiCard label="NPV (10yr)" value={proj.npv} format="currency" />
@@ -253,7 +271,7 @@ export default function FinancialPage() {
         <KpiCard label="Payback" value={proj.payback_years} format="years" />
         <KpiCard label="Terminal Value" value={proj.terminal_value} format="currency" />
         <KpiCard label="Stab. Revenue" value={proj.stabilized_revenue} format="currency" sublabel="per year" />
-      </div>
+      </KpiGrid>
 
       {!hasProjection ? (
         <>
@@ -306,27 +324,27 @@ export default function FinancialPage() {
         /* Charts */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-7)' }}>
           <div style={S.chartCard}>
-            <div style={S.chartTitle}>Revenue & EBITDA ($M)</div>
+            <div style={T.chartTitle}>Revenue & EBITDA ($M)</div>
             <ResponsiveContainer width="100%" height={260}>
               <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
                 <XAxis dataKey="year" style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} />
                 <YAxis style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
-                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 'var(--cp-radius-sm)', boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)' }} />
-                <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
+                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} {...FIN_TOOLTIP} />
+                <Legend wrapperStyle={RC.legend} />
                 <Bar dataKey="Revenue" fill="var(--cp-text-primary)" opacity={0.6} />
                 <Line type="monotone" dataKey="EBITDA" stroke="var(--cp-accent)" strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
           <div style={S.chartCard}>
-            <div style={S.chartTitle}>Cumulative Free Cash Flow ($M)</div>
+            <div style={T.chartTitle}>Cumulative Free Cash Flow ($M)</div>
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
                 <XAxis dataKey="year" style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} />
                 <YAxis style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
-                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 'var(--cp-radius-sm)', boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)' }} />
+                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} {...FIN_TOOLTIP} />
                 <Area type="monotone" dataKey="Cum. FCF" stroke="var(--cp-accent)" fill="var(--cp-accent-soft)" fillOpacity={0.45} strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
@@ -359,14 +377,14 @@ export default function FinancialPage() {
               </div>
               <div style={{ marginBottom: 'var(--cp-space-5)' }}>
                 <div style={S.chartCard}>
-                  <div style={S.chartTitle}>Debt Balance Over Time ($M)</div>
+                  <div style={T.chartTitle}>Debt Balance Over Time ($M)</div>
                   <ResponsiveContainer width="100%" height={200}>
                     <ComposedChart data={debtSchedule.schedule.map(r => ({ year: 'Y' + r.year, Balance: +(r.closing_balance / 1e6).toFixed(1), 'Debt Service': +(r.total_service / 1e6).toFixed(2), IO: r.is_io }))}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                       <YAxis yAxisId="balance" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} tickFormatter={v => '$' + v + 'M'} />
                       <YAxis yAxisId="service" orientation="right" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} tickFormatter={v => '$' + v + 'M'} />
-                      <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 'var(--cp-radius-sm)' }} />
+                      <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} {...FIN_TOOLTIP} />
                       <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                       <Area yAxisId="balance" type="monotone" dataKey="Balance" stroke="var(--cp-error)" fill="var(--cp-error-bg)" strokeWidth={2} fillOpacity={0.3} />
                       <Bar yAxisId="service" dataKey="Debt Service" fill="var(--cp-accent)" opacity={0.7} />
@@ -437,7 +455,7 @@ export default function FinancialPage() {
                 />
               </div>
               <div style={S.chartCard}>
-                <div style={S.chartTitle}>Equity Distributions by Investor ($M)</div>
+                <div style={T.chartTitle}>Equity Distributions by Investor ($M)</div>
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={(proj.years || []).map((y, i) => ({
                     year: 'Y' + y.year,
@@ -448,7 +466,7 @@ export default function FinancialPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
                     <XAxis dataKey="year" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                     <YAxis tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} tickFormatter={v => '$' + v + 'M'} />
-                    <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-sm)' }} />
+                    <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} {...FIN_TOOLTIP} />
                     <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                     <Bar dataKey="HEARST" stackId="a" fill="var(--cp-op-qia)" />
                     <Bar dataKey="Brookfield" stackId="a" fill="var(--cp-op-brookfield)" />
@@ -465,7 +483,7 @@ export default function FinancialPage() {
       {hasProjection && tab === 'sensitivity' && (
         <div>
           <div style={{ display: 'flex', gap: 'var(--cp-space-3)', alignItems: 'center', marginBottom: 'var(--cp-space-4)' }}>
-            <div style={S.chartTitle}>Sensitivity Matrix — IRR</div>
+            <div style={T.chartTitle}>Sensitivity Matrix — IRR</div>
             <div style={{ display: 'flex', gap: 'var(--cp-space-2)', alignItems: 'center', marginLeft: 'auto' }}>
               <label style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' }}>X-Axis</label>
               <select value={sensitivityX} onChange={e => setSensitivityX(e.target.value)} style={S.sensitivitySelect}>
@@ -574,31 +592,27 @@ function formatSensVal(v, unit) {
 }
 
 const S = {
-  loading: { padding: 'var(--cp-space-12)', textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-md)' },
-  error: { padding: 'var(--cp-space-6)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-sm)' },
   topBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
-  pageTitle: { fontSize: 'var(--cp-font-xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
+  pageTitle: { margin: 0, fontSize: 'var(--cp-font-xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
   scenarioRow: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', alignItems: 'center', flex: '1 1 280px', minWidth: 0 },
-  scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 700, padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: '2px solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
+  scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: '2px solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
   savedPlanWrap: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', minWidth: 0, flex: '1 1 220px' },
-  savedPlanLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' },
+  savedPlanLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' },
   savedPlanSelect: { flex: '1 1 180px', minWidth: 0, maxWidth: 360, fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-pill)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
-  tabBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 600, padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
+  tabBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
   tabBtnActive: { background: 'var(--cp-text-primary)', color: 'var(--cp-bg-deep)' },
-  kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-6)' },
   noData: { background: 'var(--cp-surface-2)', border: '1px dashed var(--cp-border-strong)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-7) var(--cp-space-6)', textAlign: 'center', marginBottom: 'var(--cp-space-6)' },
-  noDataTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 700, color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-2)' },
+  noDataTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-2)' },
   noDataSub: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-muted)' },
-  noDataLink: { color: 'var(--cp-accent)', fontWeight: 700, textDecoration: 'underline' },
+  noDataLink: { color: 'var(--cp-accent)', fontWeight: 'var(--cp-weight-bold)', textDecoration: 'underline' },
   missingTag: { fontSize: 'var(--cp-font-xs)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-error)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) var(--cp-space-2)', borderRadius: 'var(--cp-radius-xs)' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)' },
-  th: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
+  th: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
   td: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-sm)' },
-  tdLabel: { padding: 'var(--cp-space-2) var(--cp-space-4)', fontWeight: 600, fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
+  tdLabel: { padding: 'var(--cp-space-2) var(--cp-space-4)', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
   chartCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4) var(--cp-space-5)' },
-  chartTitle: { fontSize: 'var(--cp-font-sm)', fontWeight: 700, color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)', letterSpacing: 'var(--cp-tracking-wider)' },
   warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4)', marginTop: 'var(--cp-space-5)' },
-  warnTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
+  warnTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
   warnRow: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) 0', borderBottom: '1px solid var(--cp-error-bg)' },
   debtSummary: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-5)' },
   sensitivitySelect: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', color: 'var(--cp-text-primary)', cursor: 'pointer' },

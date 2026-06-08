@@ -25,6 +25,7 @@ import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from 
 import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
 import { fmtUSD, fmtPctFromRatio, fmtX } from '@/lib/hearst-format';
 import { generateProjection, foldGpuRevenue } from '@/lib/hearst-calculations';
+import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, computeConfidenceBlock } from '@/lib/memo-confidence';
 import { persistMemo } from '@/lib/strategic-memo-store';
 import { reconcileMetricsWithEngine } from '@/lib/engine-reconcile';
@@ -320,7 +321,7 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
   const scenario = payload?.scenario || {};
   const fmtMaybe = (value, kind) => value == null ? 'Not modeled' : kind === 'pct' ? fmtPctFromRatio(value) : kind === 'usd' ? fmtUSD(value) : kind === 'x' ? fmtX(value) : String(value);
   const primaryConcern = projection?.warnings?.[0]
-    || (projection.irr != null && projection.irr < 0.12 ? 'IRR is below the IC review threshold.' : 'No blocking engine warning surfaced.');
+    || (projection.irr != null && projection.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 ? 'IRR is below the IC review threshold.' : 'No blocking engine warning surfaced.');
   const realityFlags = intelligenceBrief.reality_violations || [];
   const topDatapoints = (intelligenceBrief.datapoints || []).slice(0, 5);
   const tensions = intelligenceBrief.tensions || [];
@@ -460,11 +461,11 @@ export async function POST(req) {
         foldGpuRevenue(serverProjection, hb, payload.scenario, {
           rfs_year: payload.scenario.phase1_complete_year || 3, ramp_years: 2,
           exit_year: payload.scenario.exit_year || 10,
-          discount_rate_pct: payload.scenario.discount_rate_pct ?? 10,
+          discount_rate_pct: payload.scenario.discount_rate_pct ?? FINANCIAL_THRESHOLDS.discount_rate_pct,
         });
       }
     } catch (e) {
-      console.warn('[strategic-memo] server-side projection recompute failed:', e?.message);
+      console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] server-side projection recompute failed:`, e?.message);
       serverProjection = null;
     }
   }
@@ -587,7 +588,7 @@ export async function POST(req) {
     // Timing transparent — pour identifier les hotspots et donner au caller
     // une indication de durée par étape (visible dans la réponse `timing`).
     const promptSize = systemPrompt.length + userMessage.length;
-    console.log(`[strategic-memo] prompt size: ${promptSize} chars (system: ${systemPrompt.length}, user: ${userMessage.length})`);
+    console.log(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] prompt size: ${promptSize} chars (system: ${systemPrompt.length}, user: ${userMessage.length})`);
     let memo;
     let model_used = KIMI_MODEL;
     let llmDurationMs = 0;
@@ -613,12 +614,12 @@ export async function POST(req) {
       llmDurationMs = Date.now() - llmStart;
 
       if (llmResult?.__timeout) {
-        console.warn(`[strategic-memo] LLM soft timeout after ${llmDurationMs}ms; using deterministic fallback`);
+        console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM soft timeout after ${llmDurationMs}ms; using deterministic fallback`);
         memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
         model_used = 'deterministic-fallback';
       } else {
         model_used = llmResult.model_used;
-        console.log(`[strategic-memo] LLM call completed in ${llmDurationMs}ms via ${model_used}`);
+        console.log(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM call completed in ${llmDurationMs}ms via ${model_used}`);
 
         const rawContent = llmResult.response.choices?.[0]?.message?.content || '';
         // Strip markdown fences (Claude sometimes wraps JSON in ```json ... ``` despite instructions)
@@ -632,8 +633,8 @@ export async function POST(req) {
             catch { /* fall through to error */ }
           }
           if (!memo) {
-            console.warn('[strategic-memo] JSON parse failed; using deterministic fallback');
-            console.warn('[strategic-memo] raw tail:', rawContent.slice(-300));
+            console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] JSON parse failed; using deterministic fallback`);
+            console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] raw tail:`, rawContent.slice(-300));
             memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
             model_used = 'deterministic-fallback';
           }
@@ -641,7 +642,7 @@ export async function POST(req) {
       }
     } catch (e) {
       llmDurationMs = Date.now() - llmStart;
-      console.warn('[strategic-memo] LLM failed; using deterministic fallback:', e?.message);
+      console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM failed; using deterministic fallback:`, e?.message);
       memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
       model_used = 'deterministic-fallback';
     }
@@ -701,9 +702,12 @@ export async function POST(req) {
     const memoText = JSON.stringify(memo).toLowerCase();
     const bannedFound = bannedPhrases.filter(p => memoText.includes(p));
 
-    const hasDatapointCitations = (memo.intelligence_sources?.length || 0) >= 5;
-    const hasTradeoffs = (memo.infrastructure_analysis?.tradeoffs?.length || 0) >= 2;
-    const tensionsAddressed = (memo.decision_tensions?.length || 0) >= 2;
+    const QUALITY_MIN_CITATIONS = 5;
+    const QUALITY_MIN_TRADEOFFS = 2;
+    const QUALITY_MIN_TENSIONS = 2;
+    const hasDatapointCitations = (memo.intelligence_sources?.length || 0) >= QUALITY_MIN_CITATIONS;
+    const hasTradeoffs = (memo.infrastructure_analysis?.tradeoffs?.length || 0) >= QUALITY_MIN_TRADEOFFS;
+    const tensionsAddressed = (memo.decision_tensions?.length || 0) >= QUALITY_MIN_TENSIONS;
 
     const gradeScore = [
       bannedFound.length === 0,
@@ -714,7 +718,7 @@ export async function POST(req) {
     const overall_grade = gradeScore === 4 ? 'A' : gradeScore === 3 ? 'B' : gradeScore === 2 ? 'C' : 'D';
 
     if (bannedFound.length > 0) {
-      console.warn('[strategic-memo] quality: banned phrases detected:', bannedFound);
+      console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] quality: banned phrases detected:`, bannedFound);
     }
 
     const memo_quality = {
@@ -786,7 +790,7 @@ export async function POST(req) {
       memo_quality,
     }, persistFailed ? { status: 207 } : undefined);
   } catch (e) {
-    console.error('[strategic-memo] error:', e?.message);
+    console.error(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] error:`, e?.message);
     return NextResponse.json({ error: e?.message || 'Memo generation failed' }, { status: 500 });
   }
 }

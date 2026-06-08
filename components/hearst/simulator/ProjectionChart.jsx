@@ -5,6 +5,9 @@ import {
   CartesianGrid, Tooltip, Legend, ReferenceLine,
 } from 'recharts';
 import { useContainerSize } from './useContainerSize';
+import { RC } from '@/lib/cp-styles';
+
+const CHART_TOOLTIP = { ...RC.tooltip, fontSize: 'var(--cp-font-xs)' };
 
 // Axis/tooltip in $M, promoted to $B past a billion so a 10-yr plan never shows "$1200M".
 const fmtAxisM = (v) => Math.abs(v) >= 1000 ? `$${(v / 1000).toFixed(1)}B` : `$${v.toFixed(0)}M`;
@@ -36,8 +39,8 @@ export default function ProjectionChart({ years = [], height = 280 }) {
           <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-border)" />
           <XAxis dataKey="year" tick={{ fontSize: 'var(--cp-font-xs)', fill: 'var(--cp-text-muted)' }} />
           <YAxis tick={{ fontSize: 'var(--cp-font-xs)', fill: 'var(--cp-text-muted)' }} tickFormatter={fmtAxisM} />
-          <Tooltip contentStyle={S.tooltip} formatter={fmtTipM} />
-          <Legend wrapperStyle={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', paddingTop: 'var(--cp-space-2)' }} />
+          <Tooltip contentStyle={CHART_TOOLTIP} formatter={fmtTipM} />
+          <Legend wrapperStyle={{ ...RC.legend, paddingTop: 'var(--cp-space-2)' }} />
           {/* break-even: where cumulative cash crosses 0 — the year an investor hunts for */}
           <ReferenceLine y={0} stroke="var(--cp-text-faint)" strokeDasharray="2 2" />
           <Area dataKey="cumFcf" name="Cumulative Cash" type="monotone"
@@ -56,12 +59,5 @@ const S = {
   empty: {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-base)', fontStyle: 'italic',
-  },
-  tooltip: {
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
-    fontSize: 'var(--cp-font-xs)',
-    color: 'var(--cp-text-primary)',
   },
 };

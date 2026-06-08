@@ -10,7 +10,7 @@ import { SOURCE_TYPES, MISSING_LABEL } from '@/lib/hearst-constants';
  */
 // Monochrome source palette — differentiation by label only.
 // "official_source" gets the single accent (bordeaux) as the highest-trust source.
-export const SOURCE_TYPES_CP = {
+const SOURCE_TYPES_CP = {
   official_source:   { bg: 'var(--cp-accent-soft)', color: 'var(--cp-accent)'        },
   uploaded_document: { bg: 'var(--cp-surface-2)',   color: 'var(--cp-text-body)'     },
   admin_input:       { bg: 'var(--cp-surface-3)',   color: 'var(--cp-text-primary)'  },
@@ -56,7 +56,7 @@ const S = {
     display: 'inline-flex',
     alignItems: 'center',
     borderRadius: 'var(--cp-radius-xs)',
-    fontWeight: 700,
+    fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
     fontFamily: 'inherit',
     whiteSpace: 'nowrap',

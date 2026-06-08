@@ -1,7 +1,6 @@
 'use client';
 
-// ChatToggleFAB — ouvre le rail droit (IC + Kimi) en drawer overlay.
-// Le centre reste full-width ; --ct-rail-right = 0 (cp-tokens.css).
+// ChatToggleFAB — mobile uniquement (<900px). Desktop : chat docké permanent (chat-fab.css).
 //
 // Mécanique : toggle la classe `cp-chat-drawer-open` sur <body>. cockpit.css
 // applique alors `transform: translateX(0)` au .ct-rail-right du shell + révèle
@@ -9,7 +8,8 @@
 // de conversation au open/close).
 
 import { useEffect, useState, useCallback } from 'react';
-import './chat-fab.css';
+import { UI } from '@/lib/ui-strings';
+// chat-fab.css importé dans app/(cockpit)/admin/hearst/layout.jsx (serveur, avant mount shell)
 
 const BODY_CLASS = 'cp-chat-drawer-open';
 
@@ -52,7 +52,7 @@ export default function ChatToggleFAB() {
       <button
         type="button"
         className="cp-chat-drawer-fab"
-        aria-label={open ? 'Fermer le chat Kimi' : 'Ouvrir le chat Kimi'}
+        aria-label={open ? UI.CHAT_CLOSE : UI.CHAT_OPEN}
         aria-expanded={open}
         onClick={toggle}
         data-open={open ? 'true' : 'false'}

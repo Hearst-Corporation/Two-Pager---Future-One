@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { GPU_CATALOG, calcRackPower, calcGpuCapex, calcGpuAnnualRevenue, REFERENCE_GPU_HOUR_PRICES } from '@/lib/hearst-gpu-catalog';
+import { Card } from '@/components/hearst/ui';
+import { UI } from '@/lib/ui-strings';
 
 // 3 ready-to-use hardware profiles. Click one to load the full mix; open
 // Advanced to fine-tune every dial by hand.
@@ -97,9 +99,14 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
             grid-template-columns: 1fr !important;
           }
         }
+        @media (max-width: 1100px) {
+          [data-hardware-stack] {
+            grid-template-columns: 1fr !important;
+          }
+        }
       `}</style>
       <div data-hardware-stack style={S.stackGrid}>
-        <div style={S.visualPanel}>
+        <Card variant="flat" style={S.visualPanel} padding="md">
           <div style={S.visualHead}>
             <div>
               <span style={S.visualKicker}>GPU / rack topology</span>
@@ -115,17 +122,22 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
             aiMw={mw_ai}
           />
           <MixBar classicPct={v.classic_pct} liquidPct={v.liquid_pct} aiPct={v.ai_pct} />
-        </div>
+        </Card>
 
         <div style={S.controlPanel}>
           <div style={S.presetGrid}>
             {HARDWARE_PRESETS.map(p => {
               const sel = activePreset === p.id;
               return (
-                <button
+                <Card
+                  as="button"
                   key={p.id}
                   type="button"
                   onClick={() => applyPreset(p)}
+                  padding="md"
+                  hover
+                  accent={sel}
+                  surface={2}
                   style={{ ...S.presetCard, ...(sel ? S.presetCardSel : {}) }}>
                   <div style={S.presetMix}>
                     <span style={S.presetMixSeg}>{p.patch.classic_pct}</span>
@@ -136,7 +148,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                   </div>
                   <div style={S.presetName}>{p.name}</div>
                   <div style={S.presetTagline}>{p.tagline}</div>
-                </button>
+                </Card>
               );
             })}
           </div>
@@ -191,10 +203,15 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                 {GPU_CATALOG.map(g => {
                   const sel = v.gpu_sku_id === g.id;
                   return (
-                    <button
+                    <Card
+                      as="button"
                       key={g.id}
                       type="button"
                       onClick={() => onChange?.({ ...v, gpu_sku_id: g.id, gpu_hour_price: REFERENCE_GPU_HOUR_PRICES[g.id] || v.gpu_hour_price })}
+                      padding="sm"
+                      hover
+                      accent={sel}
+                      surface={2}
                       style={{ ...S.gpuCard, ...(sel ? S.gpuCardSel : {}) }}>
                       <div style={S.gpuSku}>{g.sku}</div>
                       <div style={S.gpuMeta}>
@@ -203,7 +220,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                       <div style={S.gpuPrice}>
                         ${g.rack_scale ? `${(g.msrp_usd / 1000000).toFixed(1)}M/rack` : `${(g.msrp_usd / 1000).toFixed(0)}k/GPU`}
                       </div>
-                    </button>
+                    </Card>
                   );
                 })}
               </div>
@@ -212,7 +229,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                 <label style={S.ctrlBlock}>
                   <span style={S.ctrlLabel}>Utilization</span>
                   <input type="range" min={40} max={95} step={1} value={v.utilization_pct}
-                    aria-label="AI chip utilization percentage"
+                    aria-label={UI.HW_GPU_UTIL_ARIA}
                     aria-valuetext={`${v.utilization_pct} percent utilization`}
                     onChange={e => onChange?.({ ...v, utilization_pct: Number(e.target.value) })} style={S.range} />
                   <span style={S.ctrlValue}>{v.utilization_pct}%</span>
@@ -236,7 +253,7 @@ function HardwareTopology({ classicPct, liquidPct, racks, totalMw, aiMw }) {
   const classicCount = Math.round(rackCount * classicPct / 100);
   const liquidCount = Math.round(rackCount * liquidPct / 100);
   return (
-    <svg viewBox="0 0 760 300" role="img" aria-label="Hardware allocation topology" style={S.topology}>
+    <svg viewBox="0 0 760 300" role="img" aria-label={UI.HW_TOPOLOGY_ARIA} style={S.topology}>
       <defs>
         <linearGradient id="rackGlow" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="var(--cp-accent-maroon)" stopOpacity="0.85" />
@@ -271,10 +288,10 @@ function HardwareTopology({ classicPct, liquidPct, racks, totalMw, aiMw }) {
       })}
       <g>
         <rect x="562" y="172" width="132" height="74" rx="16" fill="var(--cp-surface-2)" stroke="var(--cp-border)" />
-        <text x="580" y="198" fill="var(--cp-text-muted)" fontSize="12" fontWeight="800" letterSpacing="var(--cp-tracking-wider)">AI FABRIC</text>
+        <text x="580" y="198" fill="var(--cp-text-muted)" fontSize="12" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">AI FABRIC</text>
         <text x="580" y="224" fill="var(--cp-text-primary)" fontSize="26" fontWeight="var(--cp-weight-black)">{aiMw.toFixed(1)} MW</text>
       </g>
-      <text x="58" y="48" fill="var(--cp-text-muted)" fontSize="12" fontWeight="800" letterSpacing="var(--cp-tracking-wider)">POWER HALL</text>
+      <text x="58" y="48" fill="var(--cp-text-muted)" fontSize="12" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">POWER HALL</text>
       <text x="590" y="48" fill="var(--cp-text-primary)" fontSize="18" fontWeight="var(--cp-weight-black)">{totalMw} MW</text>
       <text x="590" y="70" fill="var(--cp-text-muted)" fontSize="12">{racks.toLocaleString('en-US')} GPU racks implied</text>
     </svg>
@@ -300,10 +317,10 @@ function MixBar({ classicPct, liquidPct, aiPct }) {
 
 function SumKpi({ label, value, accent }) {
   return (
-    <div style={S.sumCard}>
+    <Card variant="flat" style={S.sumCard} padding="sm" surface={2}>
       <div style={S.sumLabel}>{label}</div>
       <div style={{ ...S.sumValue, color: accent ? 'var(--cp-accent-maroon)' : 'var(--cp-text-primary)' }}>{value}</div>
-    </div>
+    </Card>
   );
 }
 
@@ -323,10 +340,6 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-4)',
-    padding: 'var(--cp-space-5)',
-    background: 'linear-gradient(145deg, var(--cp-surface-1), color-mix(in srgb, var(--cp-accent-maroon) 10%, var(--cp-surface-0)))',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
     minWidth: 0,
   },
   visualHead: {
@@ -345,7 +358,7 @@ const S = {
   visualTitle: {
     margin: 'var(--cp-space-1) 0 0',
     color: 'var(--cp-text-primary)',
-    fontSize: 22,
+    fontSize: 'var(--cp-font-2xl)',
     lineHeight: 1.1,
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
@@ -370,7 +383,7 @@ const S = {
     gap: 'var(--cp-space-2)',
   },
   mixBar: {
-    height: 14,
+    height: 'calc(var(--cp-space-3) + var(--cp-space-1) / 2)',
     display: 'flex',
     overflow: 'hidden',
     borderRadius: 'var(--cp-radius-pill)',
@@ -405,33 +418,22 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-4)',
-    background: 'var(--cp-surface-0)',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    cursor: 'pointer',
     textAlign: 'left',
-    color: 'var(--cp-text-primary)',
-    transition: 'all var(--cp-dur-fast) var(--cp-ease)',
   },
-  presetCardSel: {
-    borderColor: 'var(--cp-accent-maroon)',
-    outline: '1px solid var(--cp-accent-maroon)',
-    background: 'var(--cp-accent-soft)',
-  },
+  presetCardSel: {},
   presetMix: {
     display: 'flex',
     alignItems: 'baseline',
     gap: 'var(--cp-space-1)',
     fontVariantNumeric: 'tabular-nums',
+    whiteSpace: 'nowrap',
+    flexWrap: 'nowrap',
   },
-  presetMixSeg: { fontSize: 18, fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
+  presetMixSeg: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
   presetMixDiv: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)' },
   presetMixAi: { color: 'var(--cp-accent-maroon)' },
   presetName: { fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
-  presetTagline: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', lineHeight: '15px' },
+  presetTagline: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', lineHeight: 'var(--cp-leading-tight)' },
 
   advancedToggle: {
     alignSelf: 'stretch',
@@ -507,24 +509,11 @@ const S = {
     gap: 'var(--cp-space-2)',
   },
   gpuCard: {
-    padding: 'var(--cp-space-3)',
-    background: 'var(--cp-surface-0)',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
-    cursor: 'pointer',
     textAlign: 'left',
-    transition: 'all var(--cp-dur-fast) var(--cp-ease)',
-    color: 'var(--cp-text-primary)',
   },
-  gpuCardSel: {
-    background: 'var(--cp-accent-maroon)',
-    color: 'var(--cp-text-strong)',
-    borderColor: 'var(--cp-accent-maroon)',
-  },
+  gpuCardSel: {},
   gpuSku: { fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)' },
-  gpuMeta: { fontSize: 'var(--cp-font-xs)', opacity: 0.75, marginTop: 'var(--cp-space-1)', lineHeight: '16px' },
+  gpuMeta: { fontSize: 'var(--cp-font-xs)', opacity: 0.75, marginTop: 'var(--cp-space-1)', lineHeight: 'var(--cp-leading-tight)' },
   gpuPrice: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', marginTop: 'var(--cp-space-1)' },
 
   aiControls: {
@@ -548,9 +537,9 @@ const S = {
     fontVariantNumeric: 'tabular-nums',
   },
   numInput: {
-    width: 72,
+    width: 'calc(var(--cp-space-9) + var(--cp-space-8))',
     fontSize: 'var(--cp-font-sm)',
-    height: 28,
+    height: 'var(--cp-space-7)',
     padding: '0 var(--cp-space-2)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-sm)',
@@ -561,7 +550,9 @@ const S = {
 
   summary: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
+    // auto-fit réagit à la largeur du CONTENEUR (rail chat ouvert → centre étroit),
+    // pas du viewport. Évite le débordement de la carte "AI revenue / yr".
+    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
     gap: 'var(--cp-space-2)',
     paddingTop: 'var(--cp-space-0)',
   },
@@ -569,10 +560,6 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-3) var(--cp-space-3)',
-    background: 'var(--cp-surface-0)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
   },
   sumLabel: {
     fontSize: 'var(--cp-font-xs)',

@@ -1,5 +1,7 @@
 'use client';
 
+import { Card } from '@/components/hearst/ui';
+
 const MODE_CONFIG = {
   capital_first: {
     label: 'How much to invest',
@@ -31,7 +33,7 @@ export default function InputFieldHero({ mode, value, onChange, derived, solver 
   const cfg = MODE_CONFIG[mode] || MODE_CONFIG.mw_first;
 
   return (
-    <div style={S.wrap}>
+    <Card surface={0} padding="lg" style={S.wrap}>
       <div style={S.label}>{cfg.label}</div>
       <div style={S.row}>
         <input
@@ -45,7 +47,7 @@ export default function InputFieldHero({ mode, value, onChange, derived, solver 
       </div>
       <div style={S.desc}>{cfg.description}</div>
       {derived && (
-        <div style={S.derived}>
+        <div className="cp-surface-accent-soft" style={S.derived}>
           {mode === 'capital_first' && derived.mw != null && (
             <span>Estimated capacity: <b>{derived.mw} MW</b> · ${(derived.capex_per_mw_used / 1e6).toFixed(1)}M/MW (Qatar market)</span>
           )}
@@ -61,7 +63,7 @@ export default function InputFieldHero({ mode, value, onChange, derived, solver 
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -70,10 +72,6 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-3)',
-    background: 'var(--cp-surface-0)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    padding: 'var(--cp-space-5)',
     justifyContent: 'space-between',
     minHeight: 154,
   },
@@ -91,10 +89,11 @@ const S = {
     paddingBottom: 'var(--cp-space-2)',
     borderBottom: '2px solid var(--cp-border)',
   },
+  // Hero display field — display tokens dédiés, hors échelle texte courante.
   input: {
     flex: 1,
-    fontSize: 46,
-    lineHeight: '48px',
+    fontSize: 'var(--cp-display-input)',
+    lineHeight: 'var(--cp-space-12)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
     padding: 0,
@@ -106,21 +105,22 @@ const S = {
     fontVariantNumeric: 'tabular-nums',
   },
   suffix: {
-    fontSize: 22,
+    fontSize: 'var(--cp-display-unit)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-muted)',
   },
   desc: {
     fontSize: 'var(--cp-font-xs)',
-    lineHeight: '16px',
+    lineHeight: 'var(--cp-leading-tight)',
     color: 'var(--cp-text-muted)',
   },
+  // Bandeau d'info plat (pas une cp-card) — fond accent-soft + radius léger,
+  // sans bordure/ombre pour ne pas réintroduire une boîte imbriquée.
   derived: {
     fontSize: 'var(--cp-font-sm)',
     color: 'var(--cp-text-primary)',
     padding: 'var(--cp-space-2) var(--cp-space-3)',
-    background: 'var(--cp-accent-soft)',
-    borderRadius: 'var(--cp-radius-sm)',
+    borderRadius: 'var(--cp-radius-md)',
     marginTop: 'auto',
   },
 };

@@ -1,5 +1,7 @@
 'use client';
 
+import { Card, Button } from '@/components/hearst/ui';
+import { UI } from '@/lib/ui-strings';
 
 const MODES = [
   { id: 'capital_first',     label: 'Budget',        sub: '$',       hint: 'How much money do you have?' },
@@ -10,30 +12,35 @@ const MODES = [
 export default function InputModeSwitcher({ mode, onChange, onBootstrap }) {
   return (
     <div style={S.wrap}>
-      <div data-input-mode-grid style={S.modes} role="radiogroup" aria-label="Input mode">
+      <div data-input-mode-grid style={S.modes} role="radiogroup" aria-label={UI.SIM_INPUT_MODE_ARIA}>
         {MODES.map(m => {
           const active = mode === m.id;
           return (
-            <button
+            <Card
               key={m.id}
-              type="button"
+              as="button"
               role="radio"
               aria-checked={active}
               onClick={() => onChange?.(m.id)}
-              style={{ ...S.modeBtn, ...(active ? S.modeBtnActive : {}) }}>
+              accent={active}
+              surface={0}
+              hover
+              padding="sm"
+              style={S.modeBtn}
+            >
               <div style={S.modeRow}>
                 <span style={S.modeLabel}>{m.label}</span>
                 <span style={{ ...S.modeSub, ...(active ? S.modeSubActive : {}) }}>{m.sub}</span>
               </div>
               <div style={S.modeHint}>{m.hint}</div>
-            </button>
+            </Card>
           );
         })}
       </div>
 
-      <button type="button" onClick={onBootstrap} style={S.bootstrap}>
+      <Button variant="link" size="sm" onClick={onBootstrap} style={{ alignSelf: 'flex-start' }}>
         Auto-fill with Qatar market data →
-      </button>
+      </Button>
     </div>
   );
 }
@@ -53,23 +60,7 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-3)',
-    background: 'var(--cp-surface-0)',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    cursor: 'pointer',
-    textAlign: 'left',
-    color: 'var(--cp-text-primary)',
-    transition: 'all var(--cp-dur-base) var(--cp-ease)',
     minHeight: 72,
-  },
-  modeBtnActive: {
-    background: 'linear-gradient(180deg, var(--cp-accent-maroon), color-mix(in srgb, var(--cp-accent-maroon) 70%, var(--cp-surface-0)))',
-    color: 'var(--cp-text-strong)',
-    borderColor: 'var(--cp-accent-maroon)',
-    boxShadow: '0 14px 36px -24px var(--cp-accent-maroon)',
   },
   modeRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--cp-space-1)' },
   modeLabel: {
@@ -87,19 +78,6 @@ const S = {
   modeHint: {
     fontSize: 'var(--cp-font-micro)',
     opacity: 0.8,
-    lineHeight: '14px',
-  },
-
-  bootstrap: {
-    alignSelf: 'flex-start',
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-bold)',
-    padding: 'var(--cp-space-0)',
-    background: 'transparent',
-    color: 'var(--cp-accent-maroon)',
-    border: 'none',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-    textUnderlineOffset: 2,
+    lineHeight: 'var(--cp-leading-tight)',
   },
 };

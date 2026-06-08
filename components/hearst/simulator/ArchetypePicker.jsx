@@ -1,6 +1,6 @@
 'use client';
 
-import { ARCHETYPE_PALETTE } from './ArchetypeRadar';
+import { Card } from '@/components/hearst/ui';
 
 // Each operating model is anchored to how the real market actually runs it:
 // who the customer is (B2B / B2C / B2B+B2C), the reference operator, and how
@@ -25,41 +25,44 @@ export default function ArchetypePicker({
     <div data-archetype-grid style={S.grid}>
       {archetypes.map(a => {
         const isPrimary = primaryId === a.id;
-        const color = ARCHETYPE_PALETTE[a.id] || 'var(--cp-accent-maroon)';
         return (
-          <button
+          <Card
+            as="button"
             key={a.id}
             type="button"
             onClick={() => onSelectPrimary?.(a.id)}
+            padding="md"
+            hover
+            accent={isPrimary}
+            surface={2}
             style={{
               ...S.card,
-              borderColor: isPrimary ? color : 'var(--cp-border)',
-              background: isPrimary ? 'var(--cp-accent-soft)' : 'var(--cp-surface-2)',
+              borderColor: isPrimary ? 'var(--cp-accent-maroon)' : 'var(--cp-border)',
             }}
           >
-            <div style={S.cardCode}>{a.code}</div>
+            <div className="cp-surface-0" style={{...S.cardCode, padding: 'var(--cp-space-1) var(--cp-space-2)'}}>{a.code}</div>
             <div style={S.cardBody}>
               <div style={S.cardTitleRow}>
                 <div style={S.cardTitle}>{MODEL_META[a.id]?.title || a.label}</div>
-                {isPrimary && <span style={{ ...S.selectedTag, borderColor: color }}>Selected</span>}
+                {isPrimary && <span className="cp-surface-0" style={{ ...S.selectedTag, borderColor: 'var(--cp-accent-maroon)', padding: 'var(--cp-space-1) var(--cp-space-2)' }}>Selected</span>}
               </div>
               <div style={S.cardShort}>{a.short}</div>
               {MODEL_META[a.id] && (
                 <div style={S.cardMeta}>
                   <span style={S.metaVal}>{MODEL_META[a.id].anchor}</span>
-                  <span style={{ ...S.metaVal, color }}>{MODEL_META[a.id].prevalence}</span>
+                  <span style={S.metaVal}>{MODEL_META[a.id].prevalence}</span>
                 </div>
               )}
             </div>
             <div style={S.cardTags}>
-              {a.recommended && <span style={S.recoTag}>RECO</span>}
-              <span style={{ ...S.b2bTag, color }}>{MODEL_META[a.id]?.tag || ''}</span>
+              {a.recommended && <span className="cp-surface-accent-soft" style={{...S.recoTag, padding: 'var(--cp-space-1) var(--cp-space-2)'}}>RECO</span>}
+              <span className="cp-surface-0" style={{ ...S.b2bTag, color: 'var(--cp-text-primary)', padding: 'var(--cp-space-1) var(--cp-space-2)' }}>{MODEL_META[a.id]?.tag || ''}</span>
             </div>
             {/*
               Compare was removed from the picker: this step chooses one operating
               thesis. Strategic comparison belongs in the visualizations section.
             */}
-          </button>
+          </Card>
         );
       })}
     </div>
@@ -73,26 +76,15 @@ const S = {
     gap: 'var(--cp-space-3)',
   },
   card: {
-    appearance: 'none',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    padding: 'var(--cp-space-4)',
     display: 'grid',
     gridTemplateColumns: '44px minmax(0, 1fr)',
     gap: 'var(--cp-space-3)',
     textAlign: 'left',
-    cursor: 'pointer',
-    transition: 'all var(--cp-dur-fast) var(--cp-ease)',
   },
   cardCode: {
     fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-muted)',
-    background: 'var(--cp-surface-0)',
-    padding: 'var(--cp-space-1) var(--cp-space-2)',
-    borderRadius: 'var(--cp-radius-sm)',
     letterSpacing: 'var(--cp-tracking-wider)',
     alignSelf: 'start',
     textAlign: 'center',
@@ -103,19 +95,13 @@ const S = {
   recoTag: {
     fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-black)',
-    padding: 'var(--cp-space-1) var(--cp-space-2)',
-    background: 'var(--cp-accent-soft)',
     color: 'var(--cp-text-strong)',
-    borderRadius: 'var(--cp-radius-sm)',
     letterSpacing: 'var(--cp-tracking-wider)',
     textTransform: 'uppercase',
   },
   b2bTag: {
     fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-black)',
-    padding: 'var(--cp-space-1) var(--cp-space-2)',
-    background: 'var(--cp-surface-0)',
-    borderRadius: 'var(--cp-radius-sm)',
     letterSpacing: 'var(--cp-tracking-wider)',
     textTransform: 'uppercase',
   },
@@ -135,7 +121,7 @@ const S = {
     fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-bold)',
     color: 'var(--cp-text-primary)',
-    lineHeight: '15px',
+    lineHeight: 'var(--cp-leading-tight)',
   },
   cardShort: {
     fontSize: 'var(--cp-font-sm)',
@@ -145,11 +131,7 @@ const S = {
   selectedTag: {
     fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-black)',
-    padding: 'var(--cp-space-1) var(--cp-space-2)',
     color: 'var(--cp-text-strong)',
-    background: 'var(--cp-surface-0)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
     letterSpacing: 'var(--cp-tracking-wider)',
     textTransform: 'uppercase',
   },
