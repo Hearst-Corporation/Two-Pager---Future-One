@@ -22,7 +22,7 @@ const PRIMARY_ARCHETYPES = DEAL_ARCHETYPES.filter(a => PRIMARY_MODEL_IDS.include
 export default function InvestmentThesisStep({ primaryId, onSelectPrimary }) {
   return (
     <Card as="section" data-sim-thesis variant="flat" style={CP.sectionColumn} padding="lg">
-      <SectionHead hero title={UI.SIM_THESIS_TITLE} style={{ marginBottom: 0 }} />
+      <SectionHead title={UI.SIM_THESIS_TITLE} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }} />
       <ArchetypePicker
         archetypes={PRIMARY_ARCHETYPES}
         primaryId={primaryId}

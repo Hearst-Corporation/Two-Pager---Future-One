@@ -15,10 +15,11 @@ import { SIMULATOR_PARAM_EVENT } from '@/lib/hearst-simulator-bridge';
 import { UI } from '@/lib/ui-strings';
 import { S as CP } from '@/lib/cp-styles';
 
+import CaseHeaderStep from '@/components/hearst/simulator/sections/CaseHeaderStep';
 import InvestmentThesisStep from '@/components/hearst/simulator/sections/InvestmentThesisStep';
 import InvestmentSizeStep from '@/components/hearst/simulator/sections/InvestmentSizeStep';
 import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
-import { Button, Card } from '@/components/hearst/ui';
+import { Button, Card, Eyebrow } from '@/components/hearst/ui';
 
 // Valid viz tab ids — the chat bridge may set active_viz for the dedicated /results
 // page (single source of truth: VIZ_META). This config page stays results-free.
@@ -357,16 +358,19 @@ export default function SimulatorPage() {
     <style>{`
       @media (max-width: 900px) {
         /* Hardware grids own their breakpoints (HardwareMixer, 1100/1500px). */
-        [data-brief-bar-row],
+        /* Case Header: identity full-width, then the two metrics side by side. */
+        [data-sim-case-grid] {
+          grid-template-columns: 1fr 1fr !important;
+        }
+        [data-sim-case-identity] {
+          grid-column: 1 / -1 !important;
+        }
         [data-archetype-grid] {
           grid-template-columns: 1fr !important;
         }
-        [data-sim-preset-grid] {
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
       }
       @media (max-width: 600px) {
-        [data-sim-preset-grid],
+        [data-sim-case-grid],
         [data-hardware-summary],
         [data-hardware-gpu-grid] {
           grid-template-columns: 1fr !important;
@@ -375,19 +379,23 @@ export default function SimulatorPage() {
     `}</style>
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
-        {/* SECTION 01 — Investment Thesis (hero): the dominant entry decision. */}
-        <InvestmentThesisStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
-        {/* SECTION 02 — Investment Size: one driven value + two computed lines. */}
-        <InvestmentSizeStep
-          mode={state.mode}
-          inputValue={inputValue}
-          projection={projection}
+        {/* THE CASE — the single mental object, centre of gravity. Pure regrouping
+            of existing live values; visible before any of its editors. */}
+        <CaseHeaderStep
+          archetypeId={state.primary_archetype_id}
+          geography={state.geography}
           scenario={scenario}
-          derived={simResult?.derived}
-          onInputChange={onInputChange}
+          projection={projection}
+          totalMw={state.total_mw}
         />
-        {/* SECTION 03 — Technology Stack: collapsed by default, opt-in detail. */}
-        <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+
+        {/* CASE EDITORS — secondary. They modify the case above, they are not heroes. */}
+        <div data-sim-editors style={S.editors}>
+          <Eyebrow block>{UI.SIM_CASE_EDITORS}</Eyebrow>
+          <InvestmentThesisStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
+          <InvestmentSizeStep mode={state.mode} inputValue={inputValue} onInputChange={onInputChange} />
+          <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+        </div>
 
         {projectLoadError && (
           <div className="cp-surface-accent-soft" style={{ ...CP.accentAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
@@ -437,6 +445,14 @@ const S = {
     flexDirection: 'column',
     gap: 'var(--cp-section-gap)',
     paddingBottom: 'var(--cp-scroll-clear)',
+  },
+  // Editors group — secondary to the Case Header. Tighter gap than the page
+  // section-gap so the three editors read as one demoted block.
+  editors: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-4)',
+    minWidth: 0,
   },
   validateBar: {
     display: 'flex',

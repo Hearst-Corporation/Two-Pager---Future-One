@@ -3,11 +3,9 @@
 import PropTypes from 'prop-types';
 import { SectionHead, Card } from '@/components/hearst/ui';
 import { UI } from '@/lib/ui-strings';
-import { fmtUSD, fmtMW, fmtPctFromRatio, MISSING } from '@/lib/hearst-format';
 
-// Per-mode driven-field config — the one value the user controls. The other two
-// quantities are always engine-computed (read from the live simResult, never
-// invented). Size mode (mw_first) is the default and shows "50 MW" as the driver.
+// Per-mode driven-field config — the one value the user controls. Budget / return
+// are surfaced by the Case Header above, never duplicated here.
 const DRIVER = {
   mw_first:         { unit: UI.SIM_MODE_SIZE_UNIT,   parse: (s) => parseFloat(s) || 0, format: (v) => (v ? String(v) : '') },
   capital_first:    { unit: UI.SIM_MODE_BUDGET_UNIT,  parse: (s) => parseFloat(String(s).replace(/[\s,]/g, '')) || 0, format: (v) => (v ? v.toLocaleString('en-US') : '') },
@@ -15,21 +13,15 @@ const DRIVER = {
 };
 
 /**
- * InvestmentSizeStep — SECTION 02, stripped to the bone. The driven value is one
- * editable number; Budget and Target Return are read straight off the live
- * projection. No segmented control, no quick-start, no labels, no autofill — just:
- *   50 MW  /  Budget $372M  /  Target Return 24%
+ * InvestmentSizeStep — SECTION 02 EDITOR. One editable value that drives the case.
+ * Demoted to a secondary editor: it changes the Case Header above, it is not the
+ * hero. No computed read-out here — budget and return live in the Case Header.
  */
-export default function InvestmentSizeStep({ mode, inputValue, projection, scenario, derived, onInputChange }) {
+export default function InvestmentSizeStep({ mode, inputValue, onInputChange }) {
   const cfg = DRIVER[mode] || DRIVER.mw_first;
-  const mw = derived?.mw ?? scenario?.total_mw;
-  const budget = projection?.total_capex;
-  const irr = projection?.irr;
-
   return (
     <Card as="section" data-sim-size variant="flat" style={S.deck} padding="lg">
-      <SectionHead hero title={UI.SIM_SIZE_TITLE} style={{ marginBottom: 0 }} />
-
+      <SectionHead title={UI.SIM_SIZE_TITLE} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }} />
       <div data-sim-size-driver style={S.driver}>
         <input
           type="text"
@@ -39,24 +31,7 @@ export default function InvestmentSizeStep({ mode, inputValue, projection, scena
           aria-label={UI.SIM_SIZE_TITLE}
           style={S.input}
         />
-        <span style={S.unit}>{mode === 'mw_first' ? UI.SIM_MODE_SIZE_UNIT : cfg.unit}</span>
-      </div>
-
-      <div data-sim-size-readout style={S.readout}>
-        <div style={S.line}>
-          <span style={S.lineLabel}>{UI.SIM_RESULT_BUDGET}</span>
-          <strong style={S.lineValue}>{budget != null ? fmtUSD(budget) : MISSING}</strong>
-        </div>
-        <div style={S.line}>
-          <span style={S.lineLabel}>{UI.SIM_RESULT_RETURN_LONG}</span>
-          <strong style={S.lineValue}>{irr != null ? fmtPctFromRatio(irr) : MISSING}</strong>
-        </div>
-        {mode !== 'mw_first' && (
-          <div style={S.line}>
-            <span style={S.lineLabel}>{UI.SIM_RESULT_SIZE}</span>
-            <strong style={S.lineValue}>{mw != null ? fmtMW(mw, 0) : MISSING}</strong>
-          </div>
-        )}
+        <span style={S.unit}>{cfg.unit}</span>
       </div>
     </Card>
   );
@@ -65,9 +40,6 @@ export default function InvestmentSizeStep({ mode, inputValue, projection, scena
 InvestmentSizeStep.propTypes = {
   mode: PropTypes.string.isRequired,
   inputValue: PropTypes.number,
-  projection: PropTypes.object,
-  scenario: PropTypes.object,
-  derived: PropTypes.object,
   onInputChange: PropTypes.func.isRequired,
 };
 
@@ -75,19 +47,23 @@ const S = {
   deck: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
+    gap: 'var(--cp-space-3)',
     minWidth: 0,
   },
   driver: {
     display: 'flex',
     alignItems: 'baseline',
-    gap: 'var(--cp-space-3)',
+    gap: 'var(--cp-space-2)',
+    paddingBottom: 'var(--cp-space-2)',
+    borderBottom: '2px solid var(--cp-border-accent)',
+    width: 'fit-content',
+    minWidth: 120,
   },
   input: {
     width: 'auto',
     minWidth: 0,
     flex: '0 1 auto',
-    fontSize: 'var(--cp-display-input)',
+    fontSize: 'var(--cp-font-2xl)',
     lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
@@ -99,29 +75,8 @@ const S = {
     fontVariantNumeric: 'tabular-nums',
   },
   unit: {
-    fontSize: 'var(--cp-display-unit)',
+    fontSize: 'var(--cp-font-lg)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-muted)',
-  },
-  readout: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 'var(--cp-space-2) var(--cp-space-8)',
-  },
-  line: {
-    display: 'inline-flex',
-    alignItems: 'baseline',
-    gap: 'var(--cp-space-3)',
-  },
-  lineLabel: {
-    fontSize: 'var(--cp-font-base)',
-    fontWeight: 'var(--cp-weight-semibold)',
-    color: 'var(--cp-text-muted)',
-  },
-  lineValue: {
-    fontSize: 'var(--cp-font-xl)',
-    fontWeight: 'var(--cp-weight-black)',
-    color: 'var(--cp-text-strong)',
-    fontVariantNumeric: 'tabular-nums',
   },
 };

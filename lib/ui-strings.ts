@@ -47,6 +47,12 @@ export const UI = {
   SIM_OS_EYEBROW: 'Operating thesis',
   SIM_OS_TITLE: 'Operating Model',
   SIM_OS_HINT: 'Choose one operating thesis',
+  // Case Header — the single mental object (centre of gravity). Pure regrouping of
+  // existing live values: archetype label · MW · geography · capex · IRR.
+  SIM_CASE_EYEBROW: 'Investment case',
+  SIM_CASE_CAPITAL_LABEL: 'Capital Required',
+  SIM_CASE_RETURN_LABEL: 'Expected Return',
+  SIM_CASE_EDITORS: 'Adjust the case',
   // Section 01 — Investment Thesis (hero). The operating-model archetype, framed
   // as the primary entry decision: what kind of investment is this?
   SIM_THESIS_EYEBROW: 'Step 1 · Investment thesis',

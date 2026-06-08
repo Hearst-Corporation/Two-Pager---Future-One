@@ -24,7 +24,7 @@ export default function TechnologyStackStep({ totalMw, value, onChange }) {
         aria-controls="sim-tech-body"
         style={S.head}
       >
-        <SectionHead hero title={UI.SIM_HW_TITLE} style={{ marginBottom: 0, flex: '1 1 auto', minWidth: 0 }} />
+        <SectionHead title={UI.SIM_HW_TITLE} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none', flex: '1 1 auto', minWidth: 0 }} />
         <span aria-hidden="true" style={{ ...S.chevron, transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
       </button>
 
