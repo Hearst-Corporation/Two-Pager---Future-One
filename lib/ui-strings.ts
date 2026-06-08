@@ -75,6 +75,8 @@ export const UI = {
   RESULTS_CTA_EXPORT: 'Export Summary',
   RESULTS_CTA_SAVE: 'Save Scenario',
   RESULTS_CTA_MEMO: 'Generate Strategic Memo',
+  RESULTS_VERDICT_INSUFFICIENT: 'Insufficient data',
+  RESULTS_VERDICT_NO_DATA: 'NO DATA',
 
   // Deals
   DEALS_NAV_ARIA: 'Deal models sections',

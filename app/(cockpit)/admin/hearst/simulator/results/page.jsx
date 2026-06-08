@@ -5,7 +5,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
 import { DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
-import { BUSINESS_MODELS, CLIENT_TYPES } from '@/lib/hearst-constants';
+import { BUSINESS_MODELS, CLIENT_TYPES, FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import { buildSimulatePayload, INITIAL_STATE } from '@/lib/hearst-simulator-state';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { fmtMW, fmtPctFromRatio, fmtPctRaw, fmtUSD, fmtX, MISSING } from '@/lib/hearst-format';
@@ -17,7 +17,7 @@ import B2BMatrix from '@/components/hearst/simulator/B2BMatrix';
 import GanttTimeline from '@/components/hearst/simulator/GanttTimeline';
 import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
 import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
-import { SectionHead, KpiGrid } from '@/components/hearst/ui';
+import { Card, SectionHead, KpiGrid } from '@/components/hearst/ui';
 import { S as CP, T } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
 
@@ -159,8 +159,9 @@ function decisionVerdict(projection) {
   const irr = projection.irr;
   const npv = projection.npv;
   const dscr = projection.dscr_stabilized;
-  if (irr >= 0.18 && npv > 0 && dscr >= 1.5) return 'Investment-grade case';
-  if (irr >= 0.12 && npv > 0 && dscr >= 1.2) return 'Viable, needs structuring';
+  if (irr == null || npv == null) return UI.RESULTS_VERDICT_INSUFFICIENT;
+  if (irr >= FINANCIAL_THRESHOLDS.investment_grade_pct / 100 && npv > 0 && dscr != null && dscr >= FINANCIAL_THRESHOLDS.dscr_strong_threshold) return 'Investment-grade case';
+  if (irr >= FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 && npv > 0 && (dscr == null || dscr >= FINANCIAL_THRESHOLDS.dscr_breach_threshold)) return 'Viable, needs structuring';
   return 'Needs rework before IC';
 }
 
@@ -374,7 +375,7 @@ export default function SimulatorResultsPage() {
     `}</style>
     <div className="oracle-page">
     <div data-results-layout style={S.inner}>
-      <header data-results-hero style={S.hero}>
+      <Card as="header" data-results-hero variant="flat" padding="lg" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', alignItems: 'stretch', gap: 'var(--cp-space-6)' }}>
         <div style={S.heroCopy}>
           <Link href={`/admin/hearst/simulator?scenario=${scenarioId}`} style={S.backLink}>← Edit inputs</Link>
           <span style={S.verdict}>{decisionVerdict(projection)}</span>
@@ -385,14 +386,14 @@ export default function SimulatorResultsPage() {
             <span style={S.heroChip}>{scenario?.total_mw != null ? fmtMW(scenario.total_mw, 0) : MISSING}</span>
             <span style={S.heroChip}>{hardware.ai_pct ?? 0}% AI allocation</span>
             {projection?.warnings?.length > 0 && (
-              <span title={projection.warnings[0]} style={S.cautionChip}>Needs review</span>
+              <span title={projection.warnings.join('\n')} style={S.cautionChip}>{`Needs review${projection.warnings.length > 1 ? ` (${projection.warnings.length})` : ''}`}</span>
             )}
           </div>
         </div>
         <DecisionKpis projection={projection} />
-      </header>
+      </Card>
 
-      <section style={S.kpiBand}>
+      <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead title="Economics behind the decision" hint="Scale, yield and evidence quality behind the return." style={{ marginBottom: 0 }} />
         <KpiGrid cols={3} data-economics-grid style={{ gap: 'var(--cp-space-4)' }}>
           <BoardMetric label="Total CAPEX" value={fmtUSD(projection?.total_capex)} note="Build requirement" />
@@ -402,32 +403,35 @@ export default function SimulatorResultsPage() {
           <BoardMetric label="Payback" value={projection?.payback_years != null ? `${projection.payback_years} yr` : MISSING} note="Capital recovery" />
           <BoardMetric label="Source score" value={simResult?.source_score != null ? `${simResult.source_score}/100` : MISSING} note="Evidence depth" />
         </KpiGrid>
-      </section>
+      </Card>
 
-      <section style={S.analysisBoard}>
+      <Card as="section" variant="flat" padding="lg" style={{ minWidth: 0 }}>
         <div style={S.analysisHead}>
           <SectionHead title="Financial Projection" hint="10-year cash generation, break-even path and exit value." style={{ marginBottom: 0, flex: '1 1 auto' }} />
           <span style={S.cardEyebrow}>Main analysis</span>
         </div>
         <div data-analysis-layout style={S.analysisLayout}>
-          <div data-results-chart style={S.chartFrame}>
+          <Card data-results-chart variant="card" surface={1} style={{ minWidth: 0, minHeight: 430, paddingTop: 'var(--cp-space-4)', paddingBottom: 'var(--cp-space-2)', paddingLeft: 'var(--cp-space-3)', paddingRight: 'var(--cp-space-3)' }}>
             <ProjectionChart years={projection?.years || []} height={500} />
-          </div>
-          <aside data-capital-panel style={S.capitalPanel}>
+          </Card>
+          <Card as="aside" data-capital-panel variant="card" surface={1} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', padding: 'var(--cp-space-4)' }}>
             <CapitalDonut segments={capitalStackSegments(scenario, projection)} />
             <div style={S.structureRows}>
               <InlineMetric label="Build cost" value={fmtUSD(projection?.total_capex)} />
+              {projection?.equity_invested != null && <InlineMetric label="Equity (incl. IDC)" value={fmtUSD(projection.equity_invested)} />}
+              {projection?.idc != null && projection.idc > 0 && <InlineMetric label="Interest during construction" value={fmtUSD(projection.idc)} />}
               <InlineMetric label="Terminal value" value={fmtUSD(projection?.terminal_value)} />
+              {projection?.terminal_value_to_equity != null && <InlineMetric label="Terminal value (to equity)" value={fmtUSD(projection.terminal_value_to_equity)} />}
               <InlineMetric label="IRR" value={fmtPctFromRatio(projection?.irr)} />
               <InlineMetric label="DSCR risk guardrail" value={fmtX(projection?.dscr_stabilized)} />
               <InlineMetric label="Occupancy target" value={scenario?.target_occupancy_pct != null ? fmtPctRaw(scenario.target_occupancy_pct) : MISSING} />
               <InlineMetric label="Exit year" value={scenario?.exit_year ? `Year ${scenario.exit_year}` : MISSING} />
             </div>
-          </aside>
+          </Card>
         </div>
-      </section>
+      </Card>
 
-      <section style={S.boardSection}>
+      <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead title="Scenario Layers" hint="Starting point, operating model and hardware allocation" style={{ marginBottom: 0 }} />
         <div data-layer-grid style={S.layerGrid}>
           <LayerCard index="01" title="Starting Point" rows={[
@@ -451,14 +455,14 @@ export default function SimulatorResultsPage() {
             ['AI exposure', hardware.ai_pct != null ? `${hardware.ai_pct}%` : null],
           ]} />
         </div>
-      </section>
+      </Card>
 
-      <section style={S.boardSection}>
+      <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead title="Deployment Timeline" hint="Milestones and launch path" style={{ marginBottom: 0 }} />
         <GanttTimeline scenario={scenario || { site_readiness: 'greenfield' }} exit_year={scenario?.exit_year || 10} />
-      </section>
+      </Card>
 
-      <section style={S.vizCard}>
+      <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead title="Visualizations" hint="Switch between strategic, industry and money-flow views" style={{ marginBottom: 0 }} />
         <div data-viz-shell style={S.vizShell}>
           <aside data-viz-rail style={S.vizRail}>
@@ -470,7 +474,7 @@ export default function SimulatorResultsPage() {
               </button>
             ))}
           </aside>
-          <div data-viz-panel style={S.vizPanel}>
+          <Card data-viz-panel variant="card" surface={0} padding="lg" style={{ minWidth: 0 }}>
             <div style={S.vizPanelHead}>
               <div>
                 <h3 style={S.vizTitle}>{VIZ_META[activeViz].title}</h3>
@@ -486,9 +490,9 @@ export default function SimulatorResultsPage() {
               )}
               {activeViz === 'sankey' && <FinancialSankey scenario={scenario} projection={projection} height={420} />}
             </div>
-          </div>
+          </Card>
         </div>
-      </section>
+      </Card>
 
       <SimulatorCTABar
         hasProjection={!!projection}
@@ -517,11 +521,11 @@ function InlineMetric({ label, value }) {
 
 function BoardMetric({ label, value, note }) {
   return (
-    <div style={S.boardMetric}>
+    <Card variant="card" surface={1} padding="sm" style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' }}>
       <span style={S.metricLabel}>{label}</span>
       <strong style={S.boardMetricValue}>{value ?? MISSING}</strong>
       <span style={S.boardMetricNote}>{note}</span>
-    </div>
+    </Card>
   );
 }
 
@@ -578,7 +582,7 @@ function DecisionKpis({ projection }) {
 
 function LayerCard({ index, title, rows }) {
   return (
-    <div style={S.layerCard}>
+    <Card variant="card" surface={1} padding="sm" style={{ minWidth: 0 }}>
       <div style={S.layerHead}>
         <span style={S.layerIndex}>{index}</span>
         <h3 style={S.layerTitle}>{title}</h3>
@@ -591,7 +595,7 @@ function LayerCard({ index, title, rows }) {
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -603,16 +607,6 @@ const S = {
     maxWidth: 1240,
     margin: '0 auto',
     width: '100%',
-  },
-  hero: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
-    alignItems: 'stretch',
-    gap: 'var(--cp-space-6)',
-    padding: 'var(--cp-space-6)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
   },
   heroCopy: {
     display: 'flex',
@@ -736,23 +730,6 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
     fontVariantNumeric: 'tabular-nums',
   },
-  section: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
-  kpiBand: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
-    padding: 'var(--cp-space-6)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-  },
-  analysisBoard: {
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    padding: 'var(--cp-space-6)',
-    minWidth: 0,
-  },
   analysisHead: {
     display: 'flex',
     alignItems: 'flex-start',
@@ -766,23 +743,6 @@ const S = {
     gap: 'var(--cp-space-6)',
     alignItems: 'stretch',
   },
-  chartFrame: {
-    minWidth: 0,
-    minHeight: 430,
-    padding: 'var(--cp-space-4) var(--cp-space-3) var(--cp-space-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    background: 'var(--cp-surface-1)',
-  },
-  capitalPanel: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
-    padding: 'var(--cp-space-4)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    background: 'var(--cp-surface-1)',
-  },
   cardEyebrow: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
@@ -795,28 +755,7 @@ const S = {
     gridTemplateColumns: '1fr',
     gap: 'var(--cp-space-3)',
   },
-  structureGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: 'var(--cp-space-3)',
-  },
-  boardSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
-    padding: 'var(--cp-space-6)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-  },
   layerGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'var(--cp-space-4)' },
-  layerCard: {
-    background: 'var(--cp-surface-1)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    padding: 'var(--cp-space-4)',
-    minWidth: 0,
-  },
   layerHead: {
     display: 'flex',
     alignItems: 'baseline',
@@ -854,22 +793,11 @@ const S = {
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     fontWeight: 'var(--cp-weight-bold)',
   },
-  metricValue: { color: 'var(--cp-text-strong)', fontSize: 'var(--cp-font-base)' },
   inlineMetricValue: {
     color: 'var(--cp-text-strong)',
     fontSize: 'var(--cp-font-base)',
     lineHeight: 'var(--cp-leading-tight)',
     fontVariantNumeric: 'tabular-nums',
-  },
-  boardMetric: {
-    minWidth: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-4)',
-    background: 'var(--cp-surface-1)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
   },
   boardMetricValue: {
     color: 'var(--cp-text-strong)',
@@ -945,15 +873,6 @@ const S = {
     fontSize: 'var(--cp-font-sm)',
     whiteSpace: 'nowrap',
   },
-  vizCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    padding: 'var(--cp-space-6)',
-  },
   vizShell: {
     display: 'grid',
     gridTemplateColumns: '1fr',
@@ -997,13 +916,6 @@ const S = {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-sm)',
     lineHeight: 'var(--cp-leading-normal)',
-  },
-  vizPanel: {
-    minWidth: 0,
-    background: 'var(--cp-surface-0)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    padding: 'var(--cp-space-6)',
   },
   vizPanelHead: {
     display: 'flex',

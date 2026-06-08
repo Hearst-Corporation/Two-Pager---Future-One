@@ -313,7 +313,7 @@ const S = {
   // Timeline (loading)
   timelineWrap: { padding: 'var(--cp-space-6) var(--cp-space-5)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   timelineHeader: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' },
-  timelineSpinner: { display: 'inline-block', width: 14, height: 14, borderRadius: '50%', border: '2px solid var(--cp-border)', borderTopColor: 'var(--cp-accent-maroon, var(--cp-accent))', animation: 'memo-spin 0.9s linear infinite' },
+  timelineSpinner: { display: 'inline-block', width: 'var(--cp-spinner-size)', height: 'var(--cp-spinner-size)', borderRadius: '50%', border: '2px solid var(--cp-border)', borderTopColor: 'var(--cp-accent-maroon, var(--cp-accent))', animation: 'memo-spin 0.9s linear infinite' },
   timelineLabel: { flex: 1 },
   timelineElapsed: { fontFamily: 'ui-monospace, monospace', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-strong)', fontVariantNumeric: 'tabular-nums' },
   slaWrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },

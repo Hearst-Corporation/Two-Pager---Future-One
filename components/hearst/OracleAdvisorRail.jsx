@@ -5,13 +5,14 @@ import { createPortal } from 'react-dom';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 import { fmtPctFromRatio, fmtX, MISSING } from '@/lib/hearst-format';
+import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import { hasAdvisorProjection } from '@/lib/advisor-context-from-scenario';
 import { getAdvisorRailMode } from '@/lib/oracle-advisor-routes';
 import { COCKPIT_CHAT_SEND_EVENT } from '@/lib/cockpit-chat-payload';
 import { UI } from '@/lib/ui-strings';
 
+// First prompt is generated verdict-aware in the component (Why APPROVE? / REVIEW? / REWORK?).
 const PROMPTS = [
-  'Why REVIEW?',
   'Explain CAPEX',
   'Improve Returns',
   'Build Conservative Case',
@@ -24,10 +25,13 @@ function verdictFor(projection) {
   const irr = projection.irr;
   const npv = projection.npv;
   const dscr = projection.dscr_stabilized;
-  if (irr >= 0.18 && npv > 0 && dscr >= 1.5) {
+  if (irr == null || npv == null) {
+    return { label: UI.RESULTS_VERDICT_NO_DATA, risk: 'Unknown', confidence: 'Unknown' };
+  }
+  if (irr >= FINANCIAL_THRESHOLDS.investment_grade_pct / 100 && npv > 0 && dscr != null && dscr >= FINANCIAL_THRESHOLDS.dscr_strong_threshold) {
     return { label: 'APPROVE', risk: 'Moderate', confidence: 'Modeled' };
   }
-  if (irr >= 0.12 && npv > 0 && dscr >= 1.2) {
+  if (irr >= FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 && npv > 0 && (dscr == null || dscr >= FINANCIAL_THRESHOLDS.dscr_breach_threshold)) {
     return { label: 'REVIEW', risk: 'Medium', confidence: 'Modeled' };
   }
   return { label: 'REWORK', risk: 'High', confidence: 'Modeled' };
@@ -41,20 +45,17 @@ function advisoryFor(ctx) {
 
   if (!projection) {
     return {
-      concern: { label: 'Current projection not available.', provenance: 'UNKNOWN' },
-      driver: { label: 'Run the simulator to surface value drivers.', provenance: 'UNKNOWN' },
-      nextStep: { label: 'Complete configuration, then ask what blocks approval.', provenance: 'HEURISTIC' },
+      concern: 'Current projection not available.',
+      driver: 'Run the simulator to surface value drivers.',
+      nextStep: 'Complete configuration, then ask what blocks approval.',
     };
   }
 
   let concern = warnings[0] || 'No critical warning surfaced by the engine.';
-  let concernProv = warnings[0] ? 'MODELED' : 'INTERPRETATION';
-  if (!warnings[0] && projection.irr != null && projection.irr < 0.12) {
+  if (!warnings[0] && projection.irr != null && projection.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100) {
     concern = 'Returns are below the investment committee threshold.';
-    concernProv = 'INTERPRETATION';
   } else if (!warnings[0] && projection.payback_years != null && projection.payback_years > 9) {
     concern = 'Payback is long for an IC-ready base case.';
-    concernProv = 'INTERPRETATION';
   }
 
   const driver = hardware.ai_pct >= 25
@@ -65,33 +66,23 @@ function advisoryFor(ctx) {
     ? 'Stress utilization and CAPEX sensitivity before IC.'
     : 'Test powered-shell structure as the lower-risk benchmark.';
 
-  return {
-    concern: { label: concern, provenance: concernProv },
-    driver: { label: driver, provenance: 'INTERPRETATION' },
-    nextStep: { label: nextStep, provenance: 'HEURISTIC' },
-  };
+  return { concern, driver, nextStep };
 }
 
-function Provenance({ children }) {
-  return <span style={S.provenance}>{children}</span>;
-}
-
-function SnapshotMetric({ label, value, provenance = 'MODELED' }) {
+function SnapshotMetric({ label, value }) {
   return (
     <div style={S.metric}>
       <div style={S.metricLabel}>{label}</div>
       <div style={S.metricValue}>{value}</div>
-      <Provenance>{provenance}</Provenance>
     </div>
   );
 }
 
-function AdvisoryRow({ title, item }) {
+function AdvisoryRow({ title, text }) {
   return (
     <div style={S.advisoryRow}>
       <div style={S.rowTitle}>{title}</div>
-      <p style={S.rowText}>{item.label}</p>
-      <Provenance>{item.provenance}</Provenance>
+      <p style={S.rowText}>{text}</p>
     </div>
   );
 }
@@ -126,37 +117,34 @@ function OracleAdvisorContent() {
         <div style={S.verdictBlock}>
           <span style={S.verdictLabel}>Current Verdict</span>
           <strong style={S.verdict}>{verdict.label}</strong>
-          <Provenance>{projection ? 'INTERPRETATION' : 'UNKNOWN'}</Provenance>
         </div>
         <div style={S.triple}>
           <div>
             <span style={S.smallLabel}>Risk Level</span>
             <strong style={S.smallValue}>{verdict.risk}</strong>
-            <Provenance>{projection ? 'INTERPRETATION' : 'UNKNOWN'}</Provenance>
           </div>
           <div>
             <span style={S.smallLabel}>Confidence</span>
             <strong style={S.smallValue}>{verdict.confidence}</strong>
-            <Provenance>{projection ? 'MODELED' : 'UNKNOWN'}</Provenance>
           </div>
         </div>
         <div style={S.metrics}>
-          <SnapshotMetric label="IRR" value={irr} provenance={projection?.irr == null ? 'UNKNOWN' : 'MODELED'} />
-          <SnapshotMetric label="MOIC" value={moic} provenance={projection?.moic == null ? 'UNKNOWN' : 'MODELED'} />
-          <SnapshotMetric label="Payback" value={payback} provenance={projection?.payback_years == null ? 'UNKNOWN' : 'MODELED'} />
+          <SnapshotMetric label="IRR" value={irr} />
+          <SnapshotMetric label="MOIC" value={moic} />
+          <SnapshotMetric label="Payback" value={payback} />
         </div>
       </section>
 
       <section style={S.advisory}>
-        <AdvisoryRow title="Main Concern" item={advisory.concern} />
-        <AdvisoryRow title="Largest Value Driver" item={advisory.driver} />
-        <AdvisoryRow title="Recommended Next Step" item={advisory.nextStep} />
+        <AdvisoryRow title="Main Concern" text={advisory.concern} />
+        <AdvisoryRow title="Largest Value Driver" text={advisory.driver} />
+        <AdvisoryRow title="Recommended Next Step" text={advisory.nextStep} />
       </section>
 
       <section style={S.ask}>
         <div style={S.sectionKicker}>Ask ORACLE</div>
         <div style={S.promptGrid}>
-          {PROMPTS.map(prompt => (
+          {[`Why ${verdict.label}?`, ...PROMPTS].map(prompt => (
             <button key={prompt} type="button" onClick={() => sendPrompt(prompt)} style={S.promptBtn}>
               {prompt}
             </button>
@@ -323,16 +311,6 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-strong)',
     fontVariantNumeric: 'tabular-nums',
-  },
-  provenance: {
-    display: 'inline-flex',
-    width: 'max-content',
-    marginTop: 'var(--cp-space-2)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    color: 'var(--cp-text-muted)',
-    textTransform: 'uppercase',
   },
   advisory: {
     display: 'flex',

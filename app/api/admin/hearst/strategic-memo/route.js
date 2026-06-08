@@ -226,6 +226,9 @@ function buildScenarioSummary(payload) {
   if (projection) {
     const f = (v, k) => v == null ? 'N/A' : (k === 'pct' ? fmtPctFromRatio(v) : k === 'usd' ? fmtUSD(v) : k === 'x' ? fmtX(v) : v);
     parts.push(`Projection : total CAPEX ${f(projection.total_capex, 'usd')} · stab. EBITDA ${f(projection.stabilized_ebitda, 'usd')} · IRR ${f(projection.irr, 'pct')} · MOIC ${f(projection.moic, 'x')} · payback ${projection.payback_years ?? '?'} yr · DSCR ${projection.dscr_stabilized ? f(projection.dscr_stabilized, 'x') : 'N/A'} · NPV ${f(projection.npv, 'usd')} · TV ${f(projection.terminal_value, 'usd')}`);
+    if (projection?.warnings?.length) {
+      parts.push(`Engine warnings : ${projection.warnings.join(' | ')}`);
+    }
   }
   if (hardware_breakdown) {
     parts.push(`Hardware : ${hardware_breakdown.mw_classic?.toFixed(1)} MW classic / ${hardware_breakdown.mw_liquid?.toFixed(1)} MW liquid / ${hardware_breakdown.mw_ai?.toFixed(1)} MW AI · ${hardware_breakdown.total_gpus} GPUs (${hardware_breakdown.gpu?.sku || 'n/a'})`);
@@ -313,6 +316,15 @@ function buildProjectionSnapshot(payload) {
     cod_offset_months: pj.cod_offset_months ?? null,
     capex_reconciliation: pj.capex_reconciliation ?? null,
     years: (pj.years || []).map(y => ({ y: y.year, rev: y.revenue, ebitda: y.ebitda, fcf: y.free_cash_flow, cum: y.cumulative_fcf })),
+    // Extended fields (AC-C3)
+    equity_invested: pj.equity_invested ?? null,
+    idc: pj.idc ?? null,
+    construction_years: pj.construction_years ?? null,
+    terminal_value_to_equity: pj.terminal_value_to_equity ?? null,
+    remaining_debt_at_exit: pj.remaining_debt_at_exit ?? null,
+    revenue_start_year: pj.revenue_start_year ?? null,
+    warnings: pj.warnings ?? [],
+    gpu_refresh: pj.gpu_refresh ?? null,
   };
 }
 
@@ -667,21 +679,8 @@ export async function POST(req) {
     // ── Boardroom report — attach a compact projection snapshot (display only,
     // no recomputation) so the PDF/scorecard can render real cashflow/waterfall
     // charts from the already-computed projection. Rides inside memo_json.
-    memo._exec_projection = (() => {
-      const pj = payload?.projection; const sc = payload?.scenario;
-      if (!pj) return null;
-      return {
-        total_capex: pj.total_capex, terminal_value: pj.terminal_value, irr: pj.irr, npv: pj.npv,
-        moic: pj.moic, payback_years: pj.payback_years, dscr_stabilized: pj.dscr_stabilized,
-        stabilized_ebitda: pj.stabilized_ebitda ?? null,
-        stabilized_revenue: pj.stabilized_revenue ?? null,
-        total_mw: sc?.total_mw ?? null, pue: sc?.pue ?? null,
-        capex_per_mw: (pj.total_capex && sc?.total_mw) ? pj.total_capex / sc.total_mw : null,
-        cod_offset_months: pj.cod_offset_months ?? null,
-        capex_reconciliation: pj.capex_reconciliation ?? null,
-        years: (pj.years || []).map(y => ({ y: y.year, rev: y.revenue, ebitda: y.ebitda, fcf: y.free_cash_flow, cum: y.cumulative_fcf })),
-      };
-    })();
+    // DRY: single source of truth via buildProjectionSnapshot (AC-C3).
+    memo._exec_projection = buildProjectionSnapshot(payload);
 
     // ── Engine-truth pin (Task 1) — overwrite LLM-authored financial metric rows
     // with the engine's authoritative numbers. Mirrors the confidence_block pattern

@@ -401,7 +401,7 @@ export default function SimulatorPage() {
     `}</style>
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
-      <Card as="header" surface={1} padding="md" style={S.header}>
+      <Card as="header" variant="flat" padding="md" style={S.header}>
         <SectionHead
           hero
           eyebrow={UI.SIM_PAGE_EYEBROW}
@@ -412,7 +412,7 @@ export default function SimulatorPage() {
         {loading && <div style={S.loadingBadge}>{UI.STATE_CALCULATING}</div>}
       </Card>
 
-      <Card as="section" data-sim-command-deck variant="flat" style={S.commandDeck} padding="md" surface={1}>
+      <Card as="section" data-sim-command-deck variant="flat" style={S.commandDeck} padding="md">
         <div data-sim-command-intro style={S.commandIntro}>
           <SectionHead
             num="01"
@@ -473,7 +473,7 @@ export default function SimulatorPage() {
             solver={simResult?.solver}
           />
           {state.mode === 'target_irr_first' && (
-            <Card variant="flat" style={S.leverPanel} padding="md" surface={2}>
+            <Card variant="flat" style={S.leverPanel} padding="md">
               <Eyebrow>{UI.SIM_WHAT_TO_CHANGE}</Eyebrow>
               <div style={S.leverPills}>
                 {[
@@ -498,7 +498,7 @@ export default function SimulatorPage() {
       </Card>
 
       {/* 2. OPERATING MODEL */}
-      <Card as="section" variant="flat" style={S.boardSection} padding="lg" surface={1}>
+      <Card as="section" variant="flat" style={S.boardSection} padding="lg">
         <SectionHead
           num="02"
           eyebrow={UI.SIM_OS_EYEBROW}
@@ -514,7 +514,7 @@ export default function SimulatorPage() {
       </Card>
 
       {/* 4. HARDWARE ALLOCATION */}
-      <Card as="section" variant="flat" style={S.boardSection} padding="lg" surface={1}>
+      <Card as="section" variant="flat" style={S.boardSection} padding="lg">
         <SectionHead
           num="03"
           eyebrow={UI.SIM_HW_EYEBROW}

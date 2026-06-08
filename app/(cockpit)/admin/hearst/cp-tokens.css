@@ -189,6 +189,10 @@
   --cp-brand-inner:    24px;
   --cp-icon-btn-size:  32px;
   --cp-kpi-min-width:  160px;
+  --cp-spinner-size:   14px;
+  --cp-op-dot-sm:       6px;
+  --cp-op-dot-md:       7px;
+  --cp-op-dot-lg:       8px;
   /* Bottom chrome — nav mobile + FAB drawer (<900px) + page scroll padding */
   --cp-fab-size:           52px;
   --cp-fab-gap:            var(--cp-space-4);

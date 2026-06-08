@@ -27,7 +27,7 @@ import {
   deriveVerdict, deriveCategory, deriveKpis, topRisks, deriveDecision,
   deriveCapitalStack, fmtUsd,
 } from '@/lib/dossier-derive';
-import { SectionHead, Button, Table, Row, Cell, KpiGrid, KpiCard } from '@/components/hearst/ui';
+import { Card, SectionHead, Button, Table, Row, Cell, KpiGrid, KpiCard } from '@/components/hearst/ui';
 import { S as CP } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
 
@@ -61,13 +61,13 @@ function ConfidenceLabel({ level }) {
 function Collapsible({ label, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <section style={S.appendix}>
+    <Card as="section" variant="card" surface={1} style={{ padding: 0, overflow: 'hidden' }}>
       <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open} style={S.appendixBtn}>
         <span style={S.appendixLabel}>{label}</span>
         <span style={S.appendixChevron}>{open ? '−' : '+'}</span>
       </button>
       {open && <div style={S.appendixBody}>{children}</div>}
-    </section>
+    </Card>
   );
 }
 
@@ -221,7 +221,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
   return (
     <div style={S.canvas}>
       {/* ── HERO VERDICT ──────────────────────────────────────────── */}
-      <section style={S.hero}>
+      <Card as="section" variant="card" surface={1} padding="lg" style={{ borderLeft: '3px solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <div style={S.heroTop}>
           <div style={S.heroIdent}>
             <div style={S.identLine}>{ident.join('  ·  ')}</div>
@@ -268,31 +268,31 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         </div>
 
         {decision.recommendation && <p style={S.heroLead}>{decision.recommendation}</p>}
-      </section>
+      </Card>
 
       {/* ── KPI STRIP ─────────────────────────────────────────────── */}
       <section style={S.kpiStrip}>
         {kpis.map(k => (
-          <div key={k.key} style={S.kpiCard}>
+          <Card key={k.key} variant="card" surface={1} padding="md">
             <div style={S.kpiLabel}>{k.label}</div>
             <div style={S.kpiValue}>{k.value || '—'}</div>
             {k.sub && <div style={S.kpiSub}>{k.sub}</div>}
-          </div>
+          </Card>
         ))}
       </section>
 
       {/* ── OPPORTUNITY CATEGORY ──────────────────────────────────── */}
-      <section style={S.categoryBand}>
+      <Card as="section" variant="card" surface={0} style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-4)', flexWrap: 'wrap', paddingTop: 'var(--cp-space-3)', paddingBottom: 'var(--cp-space-3)', paddingLeft: 'var(--cp-space-5)', paddingRight: 'var(--cp-space-5)' }}>
         <span style={S.eyebrow}>Opportunity type</span>
         <span style={S.categoryName}>{category || 'Not classified'}</span>
         <span style={S.categoryDesc}>
           {category ? CATEGORY_DESC[category] : 'Archetype could not be inferred from this memo version.'}
         </span>
-      </section>
+      </Card>
 
       {/* ── DECISION CARD + RISK CARDS ────────────────────────────── */}
       <section style={S.twoCol}>
-        <div style={S.decisionCard}>
+        <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-5)' }}>
           <SectionHead title="Recommendation" />
           {decision.why && <p style={S.body}>{decision.why}</p>}
           {decision.conditions.length > 0 && (
@@ -308,7 +308,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
             <div style={S.nextPrimary}>{decision.nextAction.primary}</div>
             <div style={S.nextDetail}>{decision.nextAction.detail}</div>
           </div>
-        </div>
+        </Card>
 
         <div style={S.riskCol}>
           <SectionHead title="Top risks" hint={`${risks.length} shown`} />
@@ -317,7 +317,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
             {risks.map((r, i) => {
               const sv = (r.severity || 'MED').toUpperCase();
               return (
-                <div key={i} style={S.riskCard}>
+                <Card key={i} variant="card" surface={1} padding="sm" style={{ borderLeft: '3px solid var(--cp-border-strong)' }}>
                   <div style={S.riskHead}>
                     <span style={S.sevLabel}>{sv === 'MEDIUM' ? 'MED' : sv}</span>
                     {r.category && <span style={S.riskCat}>{r.category}</span>}
@@ -325,7 +325,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
                   <div style={S.riskTitle}>{r.label}</div>
                   {r.dependency && <div style={S.riskWhy}>{UI.DOSSIER_RISK_WHY} {r.dependency}</div>}
                   {r.mitigation && <div style={S.riskMit}>Mitigation · {r.mitigation}</div>}
-                </div>
+                </Card>
               );
             })}
           </div>
@@ -336,22 +336,22 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
       <section>
         <SectionHead title="Visual story" hint="from existing projection data" />
         <div style={S.vizGrid}>
-          <div style={S.vizCard}>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
             <div style={S.vizTitle}>Capital stack</div>
             <CapitalStack stack={capStack} />
-          </div>
-          <div style={S.vizCard}>
+          </Card>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
             <div style={S.vizTitle}>Deployment timeline</div>
             <DeploymentTimeline phases={phases} />
-          </div>
-          <div style={S.vizCard}>
+          </Card>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
             <div style={S.vizTitle}>Benchmark position</div>
             <BenchmarkPosition comparables={comparables} />
-          </div>
-          <div style={S.vizCard}>
+          </Card>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
             <div style={S.vizTitle}>Cashflow trajectory</div>
             <Cashflow years={m._exec_projection?.years} />
-          </div>
+          </Card>
         </div>
       </section>
 
@@ -459,7 +459,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
       {/* ── APPENDIX (collapsed) ──────────────────────────────────── */}
       {versions && versions.length > 1 && (
-        <div style={S.versionBar}>
+        <Card variant="card" surface={0} style={{ display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', flexWrap: 'wrap', paddingTop: 'var(--cp-space-2)', paddingBottom: 'var(--cp-space-2)', paddingLeft: 'var(--cp-space-4)', paddingRight: 'var(--cp-space-4)' }}>
           <span style={S.eyebrow}>Versions</span>
           {versions.map(v => (
             <button key={v.id} type="button" onClick={() => onVersionSelect(v.id)}
@@ -467,7 +467,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
               v{v.version}{v.status ? ` · ${v.status}` : ''}
             </button>
           ))}
-        </div>
+        </Card>
       )}
 
       <Collapsible label="Appendix · raw detail, metadata & audit">
@@ -568,7 +568,7 @@ function ScenarioView({ scenarioId }) {
 
       <div style={S.memoCardList}>
         {memos.map(mm => (
-          <button key={mm.id} type="button" onClick={() => router.push(`/admin/hearst/dossier?memo=${mm.id}`)} style={S.memoCard}>
+          <Card key={mm.id} as="button" variant="card" surface={1} padding="sm" onClick={() => router.push(`/admin/hearst/dossier?memo=${mm.id}`)} style={{ cursor: 'pointer', textAlign: 'left', width: '100%', font: 'inherit', color: 'inherit' }}>
             <div style={S.memoCardTop}>
               <span style={S.memoCardVersion}>v{mm.version}</span>
               <ConfidenceLabel level={mm.confidence_level} />
@@ -579,7 +579,7 @@ function ScenarioView({ scenarioId }) {
               {mm.provider_used && <span>{mm.provider_used}</span>}
               <span>{fmtDateShort(mm.created_at)}</span>
             </div>
-          </button>
+          </Card>
         ))}
       </div>
     </div>
@@ -748,7 +748,6 @@ const EYEBROW = {
 
 const S = {
   // Typography / shared (canon)
-  h1: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
   h2: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
   sub: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-1)' },
   body: { margin: 'var(--cp-space-1) var(--cp-space-0)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
@@ -758,8 +757,6 @@ const S = {
   // Canvas
   canvas: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)' },
 
-  // ── Hero ── (single bordeaux accent = left keyline)
-  hero: { padding: 'var(--cp-space-6)', borderRadius: 'var(--cp-radius-lg)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   heroTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
   heroIdent: { flex: '1 1 calc(var(--cp-space-8) * 10)', minWidth: 0 },
   identLine: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'capitalize', marginBottom: 'var(--cp-space-2)' },
@@ -780,19 +777,15 @@ const S = {
 
   // ── KPI strip (auto-fit grid → responsive) ──
   kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 3 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
-  kpiCard: { padding: 'var(--cp-space-4) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
   kpiLabel: { ...EYEBROW, marginBottom: 'var(--cp-space-2)' },
   kpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', fontVariantNumeric: 'tabular-nums' },
   kpiSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
-  // ── Category band ──
-  categoryBand: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-4)', flexWrap: 'wrap', padding: 'var(--cp-space-3) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)' },
   categoryName: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
   categoryDesc: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', flex: '1 1 calc(var(--cp-space-9) * 6)' },
 
   // ── Two-col (decision + risks) ──
   twoCol: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-8) * 10), 1fr))', gap: 'var(--cp-space-4)', alignItems: 'start' },
-  decisionCard: { padding: 'var(--cp-space-5)', borderRadius: 'var(--cp-radius-lg)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
   condWrap: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', margin: 'var(--cp-space-3) var(--cp-space-0)' },
   condList: { margin: 'var(--cp-space-0)', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   nextAction: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-accent)' },
@@ -801,7 +794,6 @@ const S = {
 
   riskCol: { minWidth: 0 },
   riskGrid: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
-  riskCard: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-border-strong)' },
   riskHead: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
   sevLabel: { ...EYEBROW, color: 'var(--cp-text-primary)' },
   riskCat: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' },
@@ -813,7 +805,6 @@ const S = {
 
   // ── Visual story ──
   vizGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 6 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
-  vizCard: { padding: 'var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
   vizTitle: { ...EYEBROW, marginBottom: 'var(--cp-space-3)' },
   placeholder: { padding: 'var(--cp-space-4) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', fontStyle: 'italic', textAlign: 'center' },
 
@@ -871,11 +862,9 @@ const S = {
   sourceMeta: { color: 'var(--cp-text-muted)' },
 
   // ── Version bar + appendix ──
-  versionBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', flexWrap: 'wrap', padding: 'var(--cp-space-2) var(--cp-space-4)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' },
   versionChip: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', cursor: 'pointer' },
   versionChipActive: { background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', borderColor: 'var(--cp-border-strong)' },
 
-  appendix: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', overflow: 'hidden' },
   appendixBtn: { width: '100%', padding: 'var(--cp-space-3) var(--cp-space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' },
   appendixLabel: { ...EYEBROW },
   appendixChevron: { fontSize: 'var(--cp-font-lg)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
@@ -887,7 +876,6 @@ const S = {
 
   // ── Shared (list/scenario views) ──
   sectionHeader: { marginBottom: 'var(--cp-space-5)' },
-  tr: { borderBottom: '1px solid var(--cp-border)', cursor: 'pointer' },
   link: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-medium)' },
   muted: { color: 'var(--cp-text-faint)' },
   pdf: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)' },
@@ -896,7 +884,6 @@ const S = {
   breadcrumbLink: { color: 'var(--cp-accent)', textDecoration: 'none' },
   breadcrumbSep: { color: 'var(--cp-text-faint)' },
   memoCardList: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
-  memoCard: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', cursor: 'pointer', textAlign: 'left', width: '100%', font: 'inherit', color: 'inherit' },
   memoCardTop: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
   memoCardVersion: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
   memoCardStatus: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },

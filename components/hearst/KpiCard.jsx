@@ -5,7 +5,7 @@ import SourceBadge from './SourceBadge';
 
 /**
  * Hero KPI card for the HEARST overview and financial pages.
- * value: number|null — null triggers "N/A — Source Required" display.
+ * value: number|null — null renders MISSING ('—') via hearst-format.
  * format: 'currency' | 'number' | 'pct' | 'x' | 'years' | 'mw' | 'display'
  */
 export default function KpiCard({ label, value, format = 'number', source_type, unit, sublabel, highlight, size = 'md', valueColor, emptyHint }) {

@@ -9,7 +9,7 @@ import {
 } from 'recharts';
 import { detectAlerts } from '@/lib/hearst-alerts';
 import AlertBanner from '@/components/hearst/AlertBanner';
-import { Button, KpiCard, KpiGrid } from '@/components/hearst/ui';
+import { Button, Card, KpiCard, KpiGrid } from '@/components/hearst/ui';
 import { S as CP, T, RC } from '@/lib/cp-styles';
 
 const FIN_TOOLTIP = {
@@ -22,6 +22,7 @@ import {
 } from '@/lib/hearst-calculations';
 import { fmtUSD, fmtPctFromRatio, fmtPctRaw, fmtX } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
+import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import {
   canonicalScenarioColorType,
   dedupeSavedPlans,
@@ -32,6 +33,12 @@ import {
 // Scenario palette : accent for upside, neutral for base, error only for downside
 // (downside is a true risk warning, not just a third color).
 const COLORS = { base: 'var(--cp-text-primary)', downside: 'var(--cp-error)', upside: 'var(--cp-accent)' };
+
+// Display-only palier thresholds — NOT lender covenants (use FINANCIAL_THRESHOLDS for those).
+// DSCR_STRONG: above this the coverage is "comfortable" (green), between covenant and here = neutral.
+const DSCR_STRONG = FINANCIAL_THRESHOLDS.dscr_strong_threshold;
+// IRR_WEAK: below this (but ≥ 0) the IRR is structurally weak — distinct red shade in heatmap.
+const IRR_WEAK = 0.08;
 
 // Delegated to the shared formatter so the financial page matches the simulator
 // result page (tiered $B/$M/$K, lowercase 'x', single "—" missing token).
@@ -323,7 +330,7 @@ export default function FinancialPage() {
       ) : (
         /* Charts */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-7)' }}>
-          <div style={S.chartCard}>
+          <Card variant="card" surface={2} padding="md">
             <div style={T.chartTitle}>Revenue & EBITDA ($M)</div>
             <ResponsiveContainer width="100%" height={260}>
               <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -336,8 +343,8 @@ export default function FinancialPage() {
                 <Line type="monotone" dataKey="EBITDA" stroke="var(--cp-accent)" strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
-          </div>
-          <div style={S.chartCard}>
+          </Card>
+          <Card variant="card" surface={2} padding="md">
             <div style={T.chartTitle}>Cumulative Free Cash Flow ($M)</div>
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -348,7 +355,7 @@ export default function FinancialPage() {
                 <Area type="monotone" dataKey="Cum. FCF" stroke="var(--cp-accent)" fill="var(--cp-accent-soft)" fillOpacity={0.45} strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
+          </Card>
         </div>
       )}
 
@@ -376,7 +383,7 @@ export default function FinancialPage() {
                 ))}
               </div>
               <div style={{ marginBottom: 'var(--cp-space-5)' }}>
-                <div style={S.chartCard}>
+                <Card variant="card" surface={2} padding="md">
                   <div style={T.chartTitle}>Debt Balance Over Time ($M)</div>
                   <ResponsiveContainer width="100%" height={200}>
                     <ComposedChart data={debtSchedule.schedule.map(r => ({ year: 'Y' + r.year, Balance: +(r.closing_balance / 1e6).toFixed(1), 'Debt Service': +(r.total_service / 1e6).toFixed(2), IO: r.is_io }))}>
@@ -390,7 +397,7 @@ export default function FinancialPage() {
                       <Bar yAxisId="service" dataKey="Debt Service" fill="var(--cp-accent)" opacity={0.7} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </Card>
               </div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={S.table}>
@@ -410,7 +417,7 @@ export default function FinancialPage() {
                         <td style={S.td}>{fmtM(r.principal)}</td>
                         <td style={S.td}>{fmtM(r.closing_balance)}</td>
                         <td style={S.td}>{fmtM(r.total_service)}</td>
-                        <td style={{ ...S.td, color: r.dscr == null ? 'var(--cp-text-muted)' : r.dscr < 1.25 ? 'var(--cp-error)' : r.dscr < 1.5 ? 'var(--cp-text-body)' : 'var(--cp-accent)' }}>
+                        <td style={{ ...S.td, color: r.dscr == null ? 'var(--cp-text-muted)' : r.dscr < FINANCIAL_THRESHOLDS.dscr_breach_threshold ? 'var(--cp-error)' : r.dscr < DSCR_STRONG ? 'var(--cp-text-body)' : 'var(--cp-accent)' }}>
                           {fmtX(r.dscr)}
                         </td>
                       </tr>
@@ -454,7 +461,7 @@ export default function FinancialPage() {
                   valueColor={waterfall.by_investor.lender.total_repaid ? 'var(--cp-text-muted)' : undefined}
                 />
               </div>
-              <div style={S.chartCard}>
+              <Card variant="card" surface={2} padding="md">
                 <div style={T.chartTitle}>Equity Distributions by Investor ($M)</div>
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={(proj.years || []).map((y, i) => ({
@@ -473,7 +480,7 @@ export default function FinancialPage() {
                     <Bar dataKey="Qatar" stackId="a" fill="var(--cp-op-qai)" />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+              </Card>
             </>
           )}
         </div>
@@ -517,9 +524,8 @@ export default function FinancialPage() {
                           ...S.td,
                           background: cell.irr == null ? 'var(--cp-surface-2)'
                             : cell.irr < 0 ? 'color-mix(in srgb, var(--cp-status-danger) 30%, black)'
-                            : cell.irr < 0.08 ? 'color-mix(in srgb, var(--cp-status-danger) 60%, black)'
-                            : cell.irr < 0.12 ? 'color-mix(in srgb, var(--cp-status-warning) 50%, black)'
-                            : cell.irr < 0.15 ? 'color-mix(in srgb, var(--cp-status-success) 50%, black)'
+                            : cell.irr < IRR_WEAK ? 'color-mix(in srgb, var(--cp-status-danger) 60%, black)'
+                            : cell.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 ? 'color-mix(in srgb, var(--cp-status-warning) 50%, black)'
                             : 'color-mix(in srgb, var(--cp-status-success) 30%, black)',
                           color: 'var(--cp-text-primary)',
                           fontWeight: ri === 2 && ci === 2 ? 900 : 600,
@@ -538,9 +544,8 @@ export default function FinancialPage() {
                 {[
                   { bg: 'color-mix(in srgb, var(--cp-status-danger) 30%, black)', label: '< 0% IRR' },
                   { bg: 'color-mix(in srgb, var(--cp-status-danger) 60%, black)', label: '0–8%' },
-                  { bg: 'color-mix(in srgb, var(--cp-status-warning) 50%, black)', label: '8–12%' },
-                  { bg: 'color-mix(in srgb, var(--cp-status-success) 50%, black)', label: '12–15%' },
-                  { bg: 'color-mix(in srgb, var(--cp-status-success) 30%, black)', label: '> 15%' },
+                  { bg: 'color-mix(in srgb, var(--cp-status-warning) 50%, black)', label: '8–15% (below IC hurdle)' },
+                  { bg: 'color-mix(in srgb, var(--cp-status-success) 30%, black)', label: '≥ 15% (IC hurdle)' },
                 ].map(l => (
                   <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)' }}>
                     <span style={{ width: 'var(--cp-space-3)', height: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-xs)', background: l.bg, display: 'inline-block' }} />
@@ -610,7 +615,6 @@ const S = {
   th: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
   td: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-sm)' },
   tdLabel: { padding: 'var(--cp-space-2) var(--cp-space-4)', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
-  chartCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4) var(--cp-space-5)' },
   warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4)', marginTop: 'var(--cp-space-5)' },
   warnTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
   warnRow: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) 0', borderBottom: '1px solid var(--cp-error-bg)' },
