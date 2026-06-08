@@ -48,7 +48,7 @@ export default function InvestmentBriefStep({
   onSetIrrLever,
 }) {
   return (
-    <Card as="section" data-sim-command-deck variant="flat" style={S.deck} padding="md">
+    <Card as="section" data-sim-command-deck variant="flat" style={S.deck} padding="lg">
       <div style={S.head}>
         <SectionHead
           num="01"

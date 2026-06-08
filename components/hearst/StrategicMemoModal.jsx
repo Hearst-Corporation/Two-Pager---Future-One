@@ -12,6 +12,7 @@
 
 import { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { RotateCw, Copy, Download, X } from 'lucide-react';
 import {
   useMemoJob,
   startMemoJob,
@@ -257,10 +258,10 @@ export default function StrategicMemoModal() {
             )}
           </div>
           <div style={S.actions}>
-            <button type="button" onClick={refetch} disabled={loading} style={S.actionBtn} title={UI.MEMO_REGENERATE_TITLE}>↻</button>
-            <button type="button" onClick={copyMd} disabled={!memo} style={S.actionBtn} title={UI.MEMO_COPY_TITLE}>⧉</button>
-            <button type="button" onClick={downloadMd} disabled={!memo} style={S.actionBtn} title="Download .md">↓</button>
-            <button type="button" onClick={hideMemoModal} style={S.closeBtn} aria-label="Close (job continues in background)">×</button>
+            <button type="button" onClick={refetch} disabled={loading} style={S.actionBtn} title={UI.MEMO_REGENERATE_TITLE} aria-label={UI.MEMO_REGENERATE_TITLE}><RotateCw size={15} aria-hidden="true" /></button>
+            <button type="button" onClick={copyMd} disabled={!memo} style={S.actionBtn} title={UI.MEMO_COPY_TITLE} aria-label={UI.MEMO_COPY_TITLE}><Copy size={15} aria-hidden="true" /></button>
+            <button type="button" onClick={downloadMd} disabled={!memo} style={S.actionBtn} title={UI.MEMO_DOWNLOAD_TITLE} aria-label={UI.MEMO_DOWNLOAD_TITLE}><Download size={15} aria-hidden="true" /></button>
+            <button type="button" onClick={hideMemoModal} style={S.closeBtn} title={UI.MEMO_CLOSE_TITLE} aria-label={UI.MEMO_CLOSE_TITLE}><X size={16} aria-hidden="true" /></button>
           </div>
         </header>
 

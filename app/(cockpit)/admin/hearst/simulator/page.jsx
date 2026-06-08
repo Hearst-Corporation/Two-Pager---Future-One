@@ -379,7 +379,8 @@ export default function SimulatorPage() {
     <style>{`
       @media (max-width: 900px) {
         [data-brief-bar-row],
-        [data-hardware-stack],
+        [data-hardware-spine],
+        [data-hardware-presets],
         [data-archetype-grid] {
           grid-template-columns: 1fr !important;
         }

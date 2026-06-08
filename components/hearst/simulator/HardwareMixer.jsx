@@ -242,6 +242,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                 <label style={S.ctrlBlock}>
                   <span style={S.ctrlLabel}>{UI.HW_ADV_PRICE}</span>
                   <input type="number" step={0.10} min={0} max={20} value={v.gpu_hour_price}
+                    aria-label={UI.HW_ADV_PRICE}
                     onChange={(e) => onChange?.({ ...v, gpu_hour_price: Number(e.target.value) })} style={S.numInput} />
                 </label>
               </div>

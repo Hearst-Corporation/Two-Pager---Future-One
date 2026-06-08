@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import SourceBadge from '@/components/hearst/SourceBadge';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
-import { X } from 'lucide-react';
+import { X, ExternalLink } from 'lucide-react';
 import { Table, Row, Cell, Field, Button, Badge, Eyebrow } from '@/components/hearst/ui';
 import {
   SOURCE_TYPES, OPERATORS,
@@ -298,14 +298,14 @@ export default function SourcesPage() {
                 <Row key={s.id}>
                   <Cell label>
                     {s.metric_id}
-                    {s.used_in_model && <Badge tone="accent" pill={false} style={{ marginLeft: 'var(--cp-space-2)' }}>● in model</Badge>}
+                    {s.used_in_model && <Badge tone="accent" pill={false} style={{ marginLeft: 'var(--cp-space-2)' }}>{UI.SOURCES_IN_MODEL}</Badge>}
                   </Cell>
                   <Cell><SourceBadge source_type={s.source_type} /></Cell>
                   <Cell>{s.source_name || '—'}</Cell>
                   <Cell style={{ fontWeight: 'var(--cp-weight-bold)', fontVariantNumeric: 'tabular-nums' }}>{s.value != null ? s.value : (s.value_text || '—')}{s.unit ? ' ' + s.unit : ''}</Cell>
                   <Cell>{s.confidence_score != null ? s.confidence_score + '/5' : '—'}</Cell>
                   <Cell>{s.date_published || '—'}</Cell>
-                  <Cell>{s.source_url ? <a href={s.source_url} target="_blank" rel="noopener noreferrer" style={S.link}>↗</a> : '—'}</Cell>
+                  <Cell>{s.source_url ? <a href={s.source_url} target="_blank" rel="noopener noreferrer" style={S.link} aria-label={UI.SOURCES_OPEN_URL}><ExternalLink size={14} aria-hidden="true" /></a> : '—'}</Cell>
                   <Cell>
                     {confirmDel === s.id ? (
                       <span style={S.delActions}>

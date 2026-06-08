@@ -259,6 +259,8 @@ export const UI = {
   WS_DELETE_CONFIRM: (name: string) => `Delete scenario "${name}"? This cannot be undone.`,
 
   // Sources
+  SOURCES_IN_MODEL: 'In model',
+  SOURCES_OPEN_URL: 'Open source URL',
   SOURCES_LOADING: 'Loading market intelligence…',
   SOURCES_MY_SECTION: 'MY SOURCES — Admin & Project-specific',
   SOURCES_NO_DATA: 'No sources found.',
@@ -305,6 +307,8 @@ export const UI = {
   MEMO_TOAST_DISMISS_ARIA: 'Dismiss notification',
   MEMO_COPY_TITLE: 'Copy markdown',
   MEMO_REGENERATE_TITLE: 'Regenerate',
+  MEMO_DOWNLOAD_TITLE: 'Download .md',
+  MEMO_CLOSE_TITLE: 'Close (job continues in background)',
   MEMO_GENERATING_LABEL: 'Generating strategic memo…',
   ADVISOR_RAIL_ARIA: 'ORACLE Investment Committee Advisor',
 
