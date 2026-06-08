@@ -329,7 +329,7 @@ export default function FinancialPage() {
             </tbody>
           </table>
         </div>
-      ) : (
+      ) : tab === 'charts' ? (
         /* Charts */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-7)' }}>
           <Card variant="card" surface={2} padding="md">
@@ -359,7 +359,7 @@ export default function FinancialPage() {
             </ResponsiveContainer>
           </Card>
         </div>
-      )}
+      ) : null}
 
       {/* Debt Schedule tab */}
       {hasProjection && tab === 'debt' && (
