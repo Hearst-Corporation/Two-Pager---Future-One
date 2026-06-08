@@ -326,7 +326,7 @@ const S = {
     flexDirection: 'column',
     gap: 'var(--cp-space-4)',
   },
-  rcTitle: {
+  cardEyebrow: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
