@@ -90,6 +90,7 @@ export const UI = {
   SIM_RESULT_BUDGET: 'Budget',
   SIM_RESULT_SIZE: 'Size',
   SIM_RESULT_RETURN: 'Return',
+  SIM_RESULT_RETURN_LONG: 'Target Return',
   SIM_RESULT_PENDING: 'Run to compute',
   SIM_SOLVER_NO_SOLUTION: 'No solution — try a smaller target or another lever.',
   SIM_SOLVER_SOLVED: (n: number) => `Solved in ${n} steps`,

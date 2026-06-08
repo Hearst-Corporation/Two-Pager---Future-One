@@ -15,7 +15,6 @@ import { SIMULATOR_PARAM_EVENT } from '@/lib/hearst-simulator-bridge';
 import { UI } from '@/lib/ui-strings';
 import { S as CP } from '@/lib/cp-styles';
 
-import SimulatorHeader from '@/components/hearst/simulator/sections/SimulatorHeader';
 import InvestmentThesisStep from '@/components/hearst/simulator/sections/InvestmentThesisStep';
 import InvestmentSizeStep from '@/components/hearst/simulator/sections/InvestmentSizeStep';
 import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
@@ -24,16 +23,6 @@ import { Button, Card } from '@/components/hearst/ui';
 // Valid viz tab ids — the chat bridge may set active_viz for the dedicated /results
 // page (single source of truth: VIZ_META). This config page stays results-free.
 const VIZ_TAB_IDS = new Set(['radar', 'network', 'matrix', 'sankey']);
-
-// Highlights the active scenario card when the current config matches a preset.
-function matchScenarioPreset(state) {
-  const p = QATAR_PRESETS.find(q =>
-    q.mode === state.mode &&
-    q.primary_archetype_id === state.primary_archetype_id &&
-    (q.mode === 'capital_first' ? q.capital_usd === state.capital_usd : q.total_mw === state.total_mw),
-  );
-  return p?.id || null;
-}
 
 export default function SimulatorPage() {
   const router = useRouter();
@@ -274,20 +263,12 @@ export default function SimulatorPage() {
     return () => setAdvisorContext?.(null);
   }, [loading, projection, savedScenarioId, scenario, setAdvisorContext, simError, simResult, state]);
 
-  const onModeChange = useCallback((v) => dispatch({ type: ACTIONS.SET_MODE, value: v }), []);
   const onSelectPrimary = useCallback((id) => {
     // Selecting an operating model also sets its canonical buyer/product pair
     // (MODEL_DEFAULTS) in one dispatch, so the B2B matrix stays on-grid and the
     // engine never gets an incoherent archetype × business_model combo.
     const def = MODEL_DEFAULTS[id];
     dispatch({ type: ACTIONS.APPLY_PRESET, value: { primary_archetype_id: id, ...(def || {}) } });
-  }, []);
-  const onPreset = useCallback((p) => {
-    const { id: _id, label: _label, ...payload } = p;
-    dispatch({ type: ACTIONS.APPLY_PRESET, value: payload });
-  }, []);
-  const onBootstrap = useCallback(() => {
-    dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: 'qatar' } });
   }, []);
   const onHwChange = useCallback((next) => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: next }), []);
 
@@ -299,8 +280,6 @@ export default function SimulatorPage() {
     else if (state.mode === 'target_irr_first') dispatch({ type: ACTIONS.SET_IRR_TARGET, value: val });
     else dispatch({ type: ACTIONS.SET_MW, value: val });
   }, [state.mode]);
-
-  const onSetIrrLever = useCallback((id) => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: id }), []);
 
   // Returns the saved scenario id (string) on success, null on failure.
   async function handleSave() {
@@ -372,7 +351,6 @@ export default function SimulatorPage() {
   }
 
   const validateBlocked = !projection || !projectId || loading || !!simError || savingState === 'saving';
-  const activeScenarioPreset = matchScenarioPreset(state);
 
   return (
     <>
@@ -397,24 +375,16 @@ export default function SimulatorPage() {
     `}</style>
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
-        <SimulatorHeader loading={loading} />
         {/* SECTION 01 — Investment Thesis (hero): the dominant entry decision. */}
         <InvestmentThesisStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
-        {/* SECTION 02 — Investment Size: grouped parameters, one active mode. */}
+        {/* SECTION 02 — Investment Size: one driven value + two computed lines. */}
         <InvestmentSizeStep
           mode={state.mode}
           inputValue={inputValue}
-          activeScenarioPreset={activeScenarioPreset}
           projection={projection}
           scenario={scenario}
           derived={simResult?.derived}
-          solver={simResult?.solver}
-          targetIrrLever={state.target_irr_lever}
-          onModeChange={onModeChange}
-          onBootstrap={onBootstrap}
-          onPreset={onPreset}
           onInputChange={onInputChange}
-          onSetIrrLever={onSetIrrLever}
         />
         {/* SECTION 03 — Technology Stack: collapsed by default, opt-in detail. */}
         <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />

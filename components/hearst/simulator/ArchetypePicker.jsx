@@ -2,7 +2,6 @@
 
 import PropTypes from 'prop-types';
 import { Card } from '@/components/hearst/ui';
-import { UI } from '@/lib/ui-strings';
 
 // One glyph per operating model. Simple line icons on currentColor so they inherit
 // the accent when the card is selected. Keyed by archetype id; falls back to a
@@ -91,19 +90,7 @@ export default function ArchetypePicker({ archetypes = [], primaryId, onSelectPr
             <div style={{ ...S.icon, color: isPrimary ? 'var(--cp-accent-maroon)' : 'var(--cp-text-muted)' }}>
               <ArchetypeIcon id={a.id} />
             </div>
-            <div style={S.titleRow}>
-              <span style={S.title}>{a.label}</span>
-              <span style={S.pills}>
-                {a.recommended && (
-                  <span className="cp-surface-accent-soft" style={S.recoTag}>{UI.SIM_OS_RECO}</span>
-                )}
-                {isPrimary && (
-                  <span className="cp-surface-0" style={{ ...S.selectedTag, borderColor: 'var(--cp-accent-maroon)' }}>
-                    {UI.SIM_OS_SELECTED}
-                  </span>
-                )}
-              </span>
-            </div>
+            <span style={S.title}>{a.label}</span>
             <div style={S.desc}>{a.short}</div>
           </Card>
         );
@@ -136,12 +123,6 @@ const S = {
     display: 'flex',
     transition: 'color var(--cp-dur-base) var(--cp-ease)',
   },
-  titleRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 'var(--cp-space-2)',
-  },
   title: {
     fontSize: 'var(--cp-font-lg)',
     lineHeight: 1.15,
@@ -149,30 +130,6 @@ const S = {
     color: 'var(--cp-text-strong)',
     letterSpacing: 'var(--cp-tracking-tight)',
     minWidth: 0,
-  },
-  pills: {
-    display: 'inline-flex',
-    gap: 'var(--cp-space-1)',
-    flexShrink: 0,
-  },
-  recoTag: {
-    padding: 'var(--cp-space-1) var(--cp-space-2)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    color: 'var(--cp-text-strong)',
-    letterSpacing: 'var(--cp-tracking-wider)',
-    textTransform: 'uppercase',
-    borderRadius: 'var(--cp-radius-sm)',
-  },
-  selectedTag: {
-    padding: 'var(--cp-space-1) var(--cp-space-2)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    color: 'var(--cp-text-strong)',
-    letterSpacing: 'var(--cp-tracking-wider)',
-    textTransform: 'uppercase',
-    border: '1px solid var(--cp-accent-maroon)',
-    borderRadius: 'var(--cp-radius-sm)',
   },
   desc: {
     fontSize: 'var(--cp-font-sm)',
