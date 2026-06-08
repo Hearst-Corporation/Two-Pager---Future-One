@@ -11,7 +11,7 @@
 - Tests : `npm test` (vitest, 224 tests)
 - Gate : `npm run check` — la mauvaise façon ÉCHOUE ici.
 - Auth : toutes les routes API passent par `requireProfile` / `authedWrite`.
-- Tokens : `var(--cp-*)` uniquement — jamais de hex hardcodé dans `app/(cockpit)/` ni `components/hearst/`.
+- Tokens : dans les pages/composants applicatifs (`app/(cockpit)/` · `components/hearst/`) → `var(--cp-*)` uniquement, pas de hex hardcodé. Le DS lui-même (`cockpit-shell/` · `tokens.css`) est librement éditable (`--ct-*` s'y définissent).
 
 <!-- enable:section=recette -->
 ## 2. Recette canonique (nouvelle page)
@@ -51,7 +51,7 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 |---|---|
 | Couleur hex / `rgb()` / `hsl()` hors `var(--cp-*)` dans cockpit | `npm run lint:cockpit` |
 | `fontWeight: 700\|800\|600` (chiffre brut) dans cockpit — utiliser `T.*` de `lib/cp-styles.js` | `npm run lint:cockpit` (à étendre) |
-| `var(--ct-*)` ou `var(--color-*)` en direct dans le cockpit | `npm run lint:cockpit` (passe par `--cp-*`) |
+| `var(--ct-*)` ou `var(--color-*)` en direct dans les **pages/composants applicatifs** | `npm run lint:cockpit` (passe par `--cp-*`) — ne vise PAS `cockpit-shell/` (DS éditable) |
 | Token défini hors de sa source (`--cp-*`→cp-tokens.css · `--color-*`→globals.css) ou en double | `npm run lint:tokens` |
 | String UI en dur (nouvelle ligne) | `npm run lint:strings` |
 | Secret hardcodé (`sk-ant-`, `ghp_`, etc.) | `npm run lint:secrets` |
@@ -74,9 +74,9 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 - Le moteur financier **ne fabrique jamais** de données : `null` / `'N/A — Source Required'` si manquant.
 - IC Advisor rail : `lib/oracle-advisor-routes.js` — chat-only sur deals/sources/workspace/dossier liste ; full sur simulator/financial/dossier `?memo=`.
 - Chat voie A : `CockpitChatBridge` injecte `deal` + `oracle.pathname` dans POST `/api/cockpit-chat`. Prompts IC → `COCKPIT_CHAT_SEND_EVENT`.
-- Chat scope : `resolveChatScope()` → `oracle:chat-id:{scope}` ; `syncScopedChatToShell()` + `setActiveChat` (export shell 0.2.0 patché) recharge l’historique.
+- Chat scope : `resolveChatScope()` → `oracle:chat-id:{scope}` ; `syncScopedChatToShell()` + `setActiveChat` (exporté par `cockpit-shell/src/index.ts`) recharge l’historique.
 - Rail droit : chat **toujours visible** desktop (fixe + `--cp-chat-rail-width` padding centre) ; drawer+FAB mobile. `--ct-rail-right: 0`. IC si `advisorContext.projection` présent.
-- `@hearst/cockpit-shell` : `hearst-cockpit-shell-0.2.0.tgz` exporte `setActiveChat` (patch dist) — repack après upgrade shell.
+- `@hearst/cockpit-shell` : **copie locale éditable** dans `./cockpit-shell/` (alias tsconfig/jsconfig → `cockpit-shell/src/index.ts`). `setActiveChat` exporté depuis `src/index.ts`. Pas de tarball, pas de repack.
 - `useEffect(..., [])` init-only = pattern intentionnel sur simulator/page.jsx.
 - CSP : `unsafe-eval` retiré en prod (Next.js HMR en dev uniquement).
 

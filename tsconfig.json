@@ -2,7 +2,11 @@
   "compilerOptions": {
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
-    "paths": { "@/*": ["./*"] },
+    "paths": {
+      "@/*": ["./*"],
+      "@hearst/cockpit-shell": ["./cockpit-shell/src/index.ts"],
+      "@hearst/cockpit-shell/*": ["./cockpit-shell/*"]
+    },
     "lib": [
       "dom",
       "dom.iterable",

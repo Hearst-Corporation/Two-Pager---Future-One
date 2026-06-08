@@ -23,6 +23,7 @@ const ALLOW_PATHS = [
   /node_modules/, /\.next/, /\.bak/, /coverage/, /playwright-report/,
   /test\//, /\.spec\./, /\.test\./, /scripts\//,
   /\.claude\//,  // worktrees agents + artefacts : jamais scannés (copies du repo).
+  /cockpit-shell\//,  // DS Cockpit (copie locale éditable) : ses strings lui appartiennent.
 ];
 
 const ALLOW_FILES = [
