@@ -13,6 +13,7 @@ import { CockpitChatBridge } from '@/components/admin/CockpitChatBridge';
 
 // ThemeAccent (cockpit-shell) fait setProperty('--ct-accent', color) sur <html>.
 // INTERDIT var(--cp-accent) ici : --cp-accent = var(--ct-accent) → boucle circulaire → couleurs mortes au mount shell.
+  // eslint-disable-next-line no-restricted-syntax -- ThemeAccent contract requires a hex literal for setProperty('--ct-accent') (var(--cp-accent) would loop).
 const ORACLE_ACCENT_HEX = '#8A1538'; // cockpit-lint-allow — hex obligatoire pour ThemeAccent (pas var(--cp-accent))
 
 const ORACLE_PRODUCTS = [

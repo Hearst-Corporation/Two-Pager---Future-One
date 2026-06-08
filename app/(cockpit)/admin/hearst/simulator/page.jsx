@@ -1,37 +1,29 @@
 'use client';
 
-import { useReducer, useState, useEffect, useCallback, useDeferredValue, useRef } from 'react';
+import { useReducer, useState, useEffect, useCallback, useDeferredValue, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
 import {
   INITIAL_STATE, ACTIONS, simulatorReducer,
   buildSimulatePayload, serializeStateToUrl, parseStateFromUrl, QATAR_PRESETS,
 } from '@/lib/hearst-simulator-state';
-import { DEAL_ARCHETYPES, SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
+import { SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 
 import { SIMULATOR_PARAM_EVENT } from '@/lib/hearst-simulator-bridge';
-import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
-import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
-import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
-import HardwareMixer from '@/components/hearst/simulator/HardwareMixer';
-import { SectionHead, Button, Card, Eyebrow } from '@/components/hearst/ui';
 import { UI } from '@/lib/ui-strings';
 import { S as CP } from '@/lib/cp-styles';
 
-const VIZ_TABS = [
-  { id: 'radar',   label: 'Strengths' },
-  { id: 'network', label: 'Industry players' },
-  { id: 'matrix',  label: 'Who buys what' },
-  { id: 'sankey',  label: 'Money flow' },
-];
+import SimulatorHeader from '@/components/hearst/simulator/sections/SimulatorHeader';
+import InvestmentBriefStep from '@/components/hearst/simulator/sections/InvestmentBriefStep';
+import OperatingModelStep from '@/components/hearst/simulator/sections/OperatingModelStep';
+import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
+import { Button, Card } from '@/components/hearst/ui';
 
-// The 4 operating models the real market actually runs at scale. The other 4
-// (branded JV, in-house O&M, hidden operator, build & sell) are variants/exotic
-// and stay in the data layer (engine, radar) but are hidden from the picker.
-const PRIMARY_MODEL_IDS = ['powered_shell', 'neocloud_gpu', 'hyperscaler_self_build', 'sovereign_ai'];
-const PRIMARY_ARCHETYPES = DEAL_ARCHETYPES.filter(a => PRIMARY_MODEL_IDS.includes(a.id));
+// Valid viz tab ids — the chat bridge may set active_viz for the dedicated /results
+// page (single source of truth: VIZ_META). This config page stays results-free.
+const VIZ_TAB_IDS = new Set(['radar', 'network', 'matrix', 'sankey']);
 
 // Highlights the active scenario card when the current config matches a preset.
 function matchScenarioPreset(state) {
@@ -41,12 +33,6 @@ function matchScenarioPreset(state) {
     (q.mode === 'capital_first' ? q.capital_usd === state.capital_usd : q.total_mw === state.total_mw),
   );
   return p?.id || null;
-}
-// Human one-liner under each scenario card — never expose raw archetype ids.
-function scenarioPresetSub(p) {
-  if (p.mode === 'capital_first') return `$${(p.capital_usd / 1e9).toFixed(1)}B budget`;
-  if (p.mode === 'target_irr_first') return `${p.target_irr_pct}% target return`;
-  return `${p.total_mw} MW`;
 }
 
 export default function SimulatorPage() {
@@ -98,8 +84,8 @@ export default function SimulatorPage() {
         case 'client_type_id':        return dispatch({ type: ACTIONS.SET_CLIENT_TYPE, value: String(value) });
         case 'mode':                  return dispatch({ type: ACTIONS.SET_MODE, value: String(value) });
         case 'geography':             return dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: String(value) } });
-        // Validate against VIZ_TABS so an out-of-catalogue value can't blank the panel.
-        case 'active_viz':            return VIZ_TABS.some(t => t.id === value) ? dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value }) : undefined;
+        // Validate against VIZ_TAB_IDS so an out-of-catalogue value can't blank the panel.
+        case 'active_viz':            return VIZ_TAB_IDS.has(value) ? dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value }) : undefined;
         // Whole-bundle apply (size + model + hardware in one shot) — the safe path
         // for multi-field changes; resolves a QATAR_PRESETS id.
         case 'apply_preset': {
@@ -148,10 +134,17 @@ export default function SimulatorPage() {
   // Any config change marks the scenario dirty and invalidates the previous
   // projection. Without this, a fast preset → validate click can save stale
   // numbers from the prior configuration before the debounced /simulate returns.
+  // Ref-guarded so that active_viz changes (which buildSimulatePayload omits)
+  // are no-ops — preserves the synchronous stale-numbers guard.
+  const prevSimKeyRef = useRef(null);
   useEffect(() => {
-    setDirtySinceSave(true);
-    setSimResult(null);
-    setSimError(null);
+    const next = JSON.stringify(buildSimulatePayload(state)); // state, NOT deferredState
+    if (next !== prevSimKeyRef.current) {
+      prevSimKeyRef.current = next;
+      setDirtySinceSave(true);
+      setSimResult(null);
+      setSimError(null);
+    }
   }, [state]);
 
   useEffect(() => {
@@ -212,6 +205,12 @@ export default function SimulatorPage() {
     })();
   }, []);
 
+  // simKey: JSON of the simulate payload derived from deferredState.
+  // buildSimulatePayload omits active_viz, so viz tab clicks leave simKey unchanged
+  // → no redundant POST /simulate. The mark-dirty effect above uses state directly
+  // (NOT simKey) to remain synchronous — two different keys by design (P0).
+  const simKey = useMemo(() => JSON.stringify(buildSimulatePayload(deferredState)), [deferredState]);
+
   useEffect(() => {
     let ignore = false;
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -248,7 +247,7 @@ export default function SimulatorPage() {
       ignore = true;
       clearTimeout(debounceRef.current);
     };
-  }, [deferredState, projectId]);
+  }, [simKey, projectId]);
 
   useEffect(() => {
     if (resultsNavigationRef.current) return;
@@ -300,6 +299,8 @@ export default function SimulatorPage() {
     else if (state.mode === 'target_irr_first') dispatch({ type: ACTIONS.SET_IRR_TARGET, value: val });
     else dispatch({ type: ACTIONS.SET_MW, value: val });
   }, [state.mode]);
+
+  const onSetIrrLever = useCallback((id) => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: id }), []);
 
   // Returns the saved scenario id (string) on success, null on failure.
   async function handleSave() {
@@ -377,18 +378,13 @@ export default function SimulatorPage() {
     <>
     <style>{`
       @media (max-width: 900px) {
-        [data-sim-command-deck] {
-          grid-template-columns: 1fr !important;
-        }
-        [data-sim-command-intro] {
-          border-bottom: 1px solid var(--cp-border) !important;
-          padding-bottom: var(--cp-space-5) !important;
-          min-height: 0 !important;
-        }
-        [data-sim-command-grid],
+        [data-brief-bar-row],
         [data-hardware-stack],
         [data-archetype-grid] {
           grid-template-columns: 1fr !important;
+        }
+        [data-sim-preset-grid] {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
       }
       @media (max-width: 600px) {
@@ -401,167 +397,58 @@ export default function SimulatorPage() {
     `}</style>
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
-      <Card as="header" variant="flat" padding="md" style={S.header}>
-        <SectionHead
-          hero
-          eyebrow={UI.SIM_PAGE_EYEBROW}
-          title={UI.SIM_PAGE_TITLE}
-          hint={UI.SIM_PAGE_SUBTITLE}
-          style={{ flex: '1 1 320px', minWidth: 0, marginBottom: 0 }}
+        <SimulatorHeader loading={loading} />
+        <InvestmentBriefStep
+          mode={state.mode}
+          inputValue={inputValue}
+          activeScenarioPreset={activeScenarioPreset}
+          projection={projection}
+          scenario={scenario}
+          derived={simResult?.derived}
+          solver={simResult?.solver}
+          targetIrrLever={state.target_irr_lever}
+          onModeChange={onModeChange}
+          onBootstrap={onBootstrap}
+          onPreset={onPreset}
+          onInputChange={onInputChange}
+          onSetIrrLever={onSetIrrLever}
         />
-        {loading && <div style={S.loadingBadge}>{UI.STATE_CALCULATING}</div>}
-      </Card>
+        <OperatingModelStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
+        <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
 
-      <Card as="section" data-sim-command-deck variant="flat" style={S.commandDeck} padding="md">
-        <div data-sim-command-intro style={S.commandIntro}>
-          <SectionHead
-            num="01"
-            eyebrow={UI.SIM_BUILD_BRIEF_EYEBROW}
-            title={UI.SIM_BUILD_BRIEF_TITLE}
-            hint={UI.SIM_BUILD_BRIEF_HINT}
-            style={{ marginBottom: 0 }}
-          />
-        </div>
-        <div data-sim-command-grid style={S.commandGrid}>
-        {/* Panneaux plats : délimitation par SectionHead, pas par une boîte. */}
-        <section style={S.commandPanel}>
-          <SectionHead
-            level={3}
-            eyebrow={UI.SIM_PANEL_START_EYEBROW}
-            title={UI.SIM_PANEL_START_TITLE}
-            style={{ marginBottom: 0 }}
-          />
-          <InputModeSwitcher
-            mode={state.mode}
-            onChange={onModeChange}
-            onBootstrap={onBootstrap}
-          />
-        </section>
-
-          <section style={S.commandPanel}>
-          <SectionHead
-            level={3}
-            eyebrow={UI.SIM_PANEL_SIZE_EYEBROW}
-            title={UI.SIM_PANEL_SIZE_TITLE}
-            style={{ marginBottom: 0 }}
-          />
-          <div data-sim-preset-grid style={S.presetCards} role="group" aria-label={UI.SIM_READY_SCENARIOS}>
-            {QATAR_PRESETS.map(p => {
-              const active = activeScenarioPreset === p.id;
-              return (
-                <Card
-                  key={p.id}
-                  as="button"
-                  onClick={() => onPreset(p)}
-                  accent={active}
-                  surface={0}
-                  hover
-                  padding="sm"
-                  style={S.presetCard}
-                >
-                  <span style={S.presetCardName}>{p.label}</span>
-                  <span style={{ ...S.presetCardSub, ...(active ? S.presetCardSubActive : {}) }}>{scenarioPresetSub(p)}</span>
-                </Card>
-              );
-            })}
+        {projectLoadError && (
+          <div className="cp-surface-accent-soft" style={{ ...CP.accentAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
+            <span>{projectLoadError}</span>
+            <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>{UI.ACTION_RETRY}</Button>
           </div>
-          <InputFieldHero
-            mode={state.mode}
-            value={inputValue}
-            onChange={onInputChange}
-            derived={simResult?.derived}
-            solver={simResult?.solver}
-          />
-          {state.mode === 'target_irr_first' && (
-            <Card variant="flat" style={S.leverPanel} padding="md">
-              <Eyebrow>{UI.SIM_WHAT_TO_CHANGE}</Eyebrow>
-              <div style={S.leverPills}>
-                {[
-                  { id: 'pricing',      label: 'Pricing' },
-                  { id: 'capex_per_mw', label: 'Build cost' },
-                  { id: 'leverage',     label: 'Debt level' },
-                  { id: 'mw',           label: 'Size (MW)' },
-                ].map(l => (
-                  <button
-                    key={l.id}
-                    type="button"
-                    onClick={() => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: l.id })}
-                    style={{ ...S.leverBtn, ...(state.target_irr_lever === l.id ? S.leverBtnActive : {}) }}>
-                    {l.label}
-                  </button>
-                ))}
-              </div>
-            </Card>
-          )}
-        </section>
-        </div>
-      </Card>
+        )}
+        {simError && <div className="cp-surface-accent-soft" style={CP.accentAlert}>Error: {simError}</div>}
 
-      {/* 2. OPERATING MODEL */}
-      <Card as="section" variant="flat" style={S.boardSection} padding="lg">
-        <SectionHead
-          num="02"
-          eyebrow={UI.SIM_OS_EYEBROW}
-          title={UI.SIM_OS_TITLE}
-          hint={UI.SIM_OS_HINT}
-          style={{ marginBottom: 0 }}
-        />
-        <ArchetypePicker
-          archetypes={PRIMARY_ARCHETYPES}
-          primaryId={state.primary_archetype_id}
-          onSelectPrimary={onSelectPrimary}
-        />
-      </Card>
-
-      {/* 4. HARDWARE ALLOCATION */}
-      <Card as="section" variant="flat" style={S.boardSection} padding="lg">
-        <SectionHead
-          num="03"
-          eyebrow={UI.SIM_HW_EYEBROW}
-          title={UI.SIM_HW_TITLE}
-          hint={UI.SIM_HW_HINT}
-          style={{ marginBottom: 0 }}
-        />
-        <HardwareMixer
-          totalMw={scenario?.total_mw || state.total_mw}
-          value={state.hardware_mix}
-          onChange={onHwChange}
-        />
-      </Card>
-
-      {projectLoadError && (
-        <div className="cp-surface-accent-soft" style={{ ...CP.accentAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
-          <span>{projectLoadError}</span>
-          <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>{UI.ACTION_RETRY}</Button>
-        </div>
-      )}
-      {simError && <div className="cp-surface-accent-soft" style={CP.accentAlert}>Error: {simError}</div>}
-
-      {/* VALIDATE CONFIG → dedicated results page */}
-      <Card style={S.validateBar} padding="md" surface={1}>
-        <span style={S.validateHint}>
-          {simError ? UI.SIM_FIX_ERROR
-            : loading ? UI.STATE_CALCULATING
-            : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
-            : !projectId ? UI.SIM_LOADING_PROJECT
-            : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
-            : projection ? UI.SIM_READY
-            : UI.SIM_FILL}
-        </span>
-        <Button
-          variant="primary"
-          size="lg"
-          disabled={validateBlocked}
-          onClick={handleValidateAndReveal}
-          style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
-        >
-          {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_VALIDATE}
-        </Button>
-      </Card>
-      {saveError && (
-        <div className="cp-surface-accent-soft" style={CP.accentAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
-      )}
-      {/* Modal/badge/toast mountés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
+        {/* VALIDATE CONFIG → dedicated results page */}
+        <Card style={S.validateBar} padding="md" surface={1}>
+          <span style={S.validateHint}>
+            {simError ? UI.SIM_FIX_ERROR
+              : loading ? UI.STATE_CALCULATING
+              : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
+              : !projectId ? UI.SIM_LOADING_PROJECT
+              : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
+              : projection ? UI.SIM_READY
+              : UI.SIM_FILL}
+          </span>
+          <Button
+            variant="primary"
+            size="lg"
+            disabled={validateBlocked}
+            onClick={handleValidateAndReveal}
+            style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
+          >
+            {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_VALIDATE}
+          </Button>
+        </Card>
+        {saveError && (
+          <div className="cp-surface-accent-soft" style={CP.accentAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
+        )}
+        {/* Modal/badge/toast montés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
       </div>
     </div>
     </>
@@ -578,77 +465,6 @@ const S = {
     gap: 'var(--cp-section-gap)',
     paddingBottom: 'var(--cp-scroll-clear)',
   },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    gap: 'var(--cp-space-4)',
-    flexWrap: 'wrap',
-  },
-  loadingBadge: {
-    fontSize: 'var(--cp-font-sm)',
-    padding: 'var(--cp-space-2) var(--cp-space-4)',
-    background: 'var(--cp-accent-soft)',
-    color: 'var(--cp-text-strong)',
-    borderRadius: 'var(--cp-radius-md)',
-    fontWeight: 'var(--cp-weight-semibold)',
-    letterSpacing: 'var(--cp-tracking-wider)',
-    textTransform: 'uppercase',
-    flexShrink: 0,
-  },
-
-  commandDeck: {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: 'var(--cp-space-4)',
-    alignItems: 'start',
-    minWidth: 0,
-  },
-  commandIntro: {
-    paddingBottom: 'var(--cp-space-4)',
-    borderBottom: '1px solid var(--cp-border)',
-  },
-  commandGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: 'var(--cp-space-4)',
-    alignItems: 'start',
-    justifyItems: 'stretch',
-  },
-  commandPanel: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
-    minWidth: 0,
-    alignSelf: 'start',
-    width: '100%',
-  },
-  presetCards: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-    gap: 'var(--cp-space-2)',
-  },
-  presetCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
-    minHeight: 64,
-    padding: 'var(--cp-space-3)',
-    cursor: 'pointer',
-    textAlign: 'left',
-  },
-  presetCardName: {
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-bold)',
-    lineHeight: 'var(--cp-font-lg)',
-  },
-  presetCardSub: {
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-semibold)',
-    color: 'var(--cp-text-muted)',
-    letterSpacing: 'var(--cp-tracking-wide)',
-  },
-  presetCardSubActive: { color: 'var(--cp-text-strong)', opacity: 0.85 },
   validateBar: {
     display: 'flex',
     alignItems: 'center',
@@ -661,36 +477,4 @@ const S = {
     color: 'var(--cp-text-muted)',
     fontWeight: 'var(--cp-weight-semibold)',
   },
-  boardSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
-    width: '100%',
-    minWidth: 0,
-  },
-  leverPanel: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--cp-space-4)',
-    flexWrap: 'wrap',
-  },
-  leverPills: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap' },
-  leverBtn: {
-    fontSize: 'var(--cp-font-sm)',
-    height: 'var(--cp-icon-btn-size)',
-    padding: '0 var(--cp-space-4)',
-    cursor: 'pointer',
-    fontWeight: 'var(--cp-weight-semibold)',
-    background: 'var(--cp-surface-0)',
-    color: 'var(--cp-text-muted)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-pill)',
-    transition: 'background var(--cp-dur-base) var(--cp-ease), color var(--cp-dur-base) var(--cp-ease), border-color var(--cp-dur-base) var(--cp-ease)',
-  },
-  leverBtnActive: {
-    background: 'var(--cp-accent-maroon)',
-    color: 'var(--cp-text-strong)',
-    borderColor: 'var(--cp-border-accent)',
-  },
-
 };
