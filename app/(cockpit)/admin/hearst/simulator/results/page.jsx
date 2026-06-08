@@ -13,9 +13,7 @@ import {
   ARCH_BY_ID,
   BUSINESS_BY_ID,
   CLIENT_BY_ID,
-  scenarioSubtitle,
   capitalStackSegments,
-  decisionVerdict,
   buildMemoMd,
 } from '@/lib/hearst-results-view';
 
@@ -23,7 +21,7 @@ import {
   InlineMetric,
   BoardMetric,
   CapitalDonut,
-  DecisionKpis,
+  DecisionHeader,
   ReturnsComposition,
   LayerCard,
 } from '@/components/hearst/simulator/results';
@@ -135,6 +133,14 @@ export default function SimulatorResultsPage() {
   const archetype = state ? ARCH_BY_ID[state.primary_archetype_id] : null;
   const hardware = state?.hardware_mix || {};
 
+  // Case header — "Deploy $X · Model · MW · Geography" from existing data only.
+  const caseHeader = [
+    projection?.total_capex != null ? UI.RESULTS_CASE_DEPLOY(fmtUSD(projection.total_capex)) : null,
+    archetype?.label || state?.primary_archetype_id,
+    scenario?.total_mw != null ? fmtMW(scenario.total_mw, 0) : null,
+    state?.geography,
+  ].filter(Boolean).join(' · ');
+
   useEffect(() => {
     setAdvisorContext?.({
       surface: 'results',
@@ -210,16 +216,8 @@ export default function SimulatorResultsPage() {
         width: 100% !important;
       }
       @media (max-width: 1500px) {
-        [data-results-hero],
         [data-analysis-layout] {
           grid-template-columns: 1fr !important;
-        }
-        [data-decision-panel] {
-          min-width: 0 !important;
-          padding-left: 0 !important;
-          border-left: 0 !important;
-          border-top: 1px solid var(--cp-border) !important;
-          padding-top: var(--cp-space-4) !important;
         }
         [data-capital-panel] {
           display: grid !important;
@@ -234,13 +232,13 @@ export default function SimulatorResultsPage() {
         [data-economics-grid] {
           grid-template-columns: 1fr !important;
         }
+        [data-decision-kpis] {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
         [data-layer-grid] {
           grid-template-columns: 1fr !important;
         }
         [data-capital-panel] {
-          grid-template-columns: 1fr !important;
-        }
-        [data-decision-metrics] {
           grid-template-columns: 1fr !important;
         }
         [data-risk-strip] {
@@ -249,11 +247,9 @@ export default function SimulatorResultsPage() {
       }
       @media (max-width: 760px) {
         [data-economics-grid],
+        [data-decision-kpis],
         [data-layer-grid],
         [data-capital-panel] {
-          grid-template-columns: 1fr !important;
-        }
-        [data-decision-metrics] {
           grid-template-columns: 1fr !important;
         }
         [data-risk-strip] {
@@ -263,22 +259,12 @@ export default function SimulatorResultsPage() {
     `}</style>
     <div className="oracle-page">
     <div data-results-layout style={S.inner}>
-      <Card as="header" data-results-hero variant="flat" padding="lg" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', alignItems: 'stretch', gap: 'var(--cp-space-6)' }}>
-        <div style={S.heroCopy}>
+      <Card as="header" data-results-hero variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
+        <div style={S.heroTopRow}>
           <Link href={`/admin/hearst/simulator?scenario=${scenarioId}`} style={S.backLink}>{UI.RESULTS_BACK_EDIT}</Link>
-          <span style={S.verdict}>{decisionVerdict(projection)}</span>
-          <h1 style={S.title}>{row?.name || UI.RESULTS_HERO_FALLBACK_NAME}</h1>
-          <p style={S.subtitle}>{state && scenarioSubtitle(state, scenario)}</p>
-          <div style={S.heroChips}>
-            <span style={S.heroChip}>{archetype?.label || state?.primary_archetype_id}</span>
-            <span style={S.heroChip}>{scenario?.total_mw != null ? fmtMW(scenario.total_mw, 0) : MISSING}</span>
-            <span style={S.heroChip}>{hardware.ai_pct ?? 0}% {UI.RESULTS_CHIP_AI_SUFFIX}</span>
-            {projection?.warnings?.length > 0 && (
-              <span title={projection.warnings.join('\n')} style={S.cautionChip}>{UI.RESULTS_CHIP_NEEDS_REVIEW(projection.warnings.length)}</span>
-            )}
-          </div>
+          <span style={S.heroName}>{row?.name || UI.RESULTS_HERO_FALLBACK_NAME}</span>
         </div>
-        <DecisionKpis projection={projection} />
+        <DecisionHeader projection={projection} caseHeader={caseHeader} />
       </Card>
 
       <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
@@ -291,7 +277,6 @@ export default function SimulatorResultsPage() {
           <BoardMetric label={UI.RESULTS_BM_PAYBACK} value={projection?.payback_years != null ? `${projection.payback_years} yr` : MISSING} note={UI.RESULTS_BM_PAYBACK_NOTE} />
           <BoardMetric label={UI.RESULTS_BM_SOURCE} value={simResult?.source_score != null ? `${simResult.source_score}/100` : MISSING} note={UI.RESULTS_BM_SOURCE_NOTE} />
         </KpiGrid>
-        <ReturnsComposition projection={projection} />
       </Card>
 
       <Card as="section" variant="flat" padding="lg" style={{ minWidth: 0 }}>
@@ -384,61 +369,25 @@ const S = {
     margin: '0 auto',
     width: '100%',
   },
-  heroCopy: {
+  heroTopRow: {
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'baseline',
     justifyContent: 'space-between',
     gap: 'var(--cp-space-4)',
-    minWidth: 0,
+    flexWrap: 'wrap',
   },
-  verdict: {
-    width: 'fit-content',
-    color: 'var(--cp-accent-maroon)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
+  heroName: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
-    padding: 'var(--cp-space-1) var(--cp-space-3)',
-    border: '1px solid var(--cp-accent-maroon)',
-    borderRadius: 'var(--cp-radius-pill)',
-    background: 'var(--cp-accent-soft)',
   },
   backLink: {
     color: 'var(--cp-accent-maroon)',
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 'var(--cp-weight-bold)',
     textDecoration: 'none',
-  },
-  title: {
-    margin: 'var(--cp-space-3) 0 var(--cp-space-2)',
-    color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-2xl)',
-    lineHeight: 'var(--cp-leading-tight)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-tight)',
-  },
-  subtitle: {
-    margin: 0,
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-base)',
-    lineHeight: 'var(--cp-leading-normal)',
-  },
-  heroChips: {
-    display: 'flex',
-    gap: 'var(--cp-space-2)',
-    flexWrap: 'wrap',
-  },
-  heroChip: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    minHeight: 'var(--cp-space-7)',
-    padding: '0 var(--cp-space-3)',
-    color: 'var(--cp-text-primary)',
-    background: 'var(--cp-surface-0)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-pill)',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-bold)',
   },
   analysisHead: {
     display: 'flex',
@@ -469,17 +418,5 @@ const S = {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
     gap: 'var(--cp-space-4)',
-  },
-  cautionChip: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    minHeight: 'var(--cp-space-7)',
-    padding: '0 var(--cp-space-3)',
-    color: 'var(--cp-text-strong)',
-    background: 'var(--cp-accent-soft)',
-    border: '1px solid var(--cp-accent)',
-    borderRadius: 'var(--cp-radius-pill)',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-black)',
   },
 };

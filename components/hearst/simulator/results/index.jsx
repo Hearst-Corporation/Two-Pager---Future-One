@@ -3,8 +3,20 @@
 import PropTypes from 'prop-types';
 import { fmtPctRaw, fmtUSD, fmtX, MISSING } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
-import { DECISION_METRICS } from '@/lib/hearst-results-view';
+import { DECISION_METRICS, verdictDecision } from '@/lib/hearst-results-view';
 import { deriveReturnsComposition } from '@/lib/returns-composition';
+
+// Tone → token color for the decision verdict / warnings. Presentation only.
+const TONE_COLOR = {
+  positive: 'var(--cp-success)',
+  caution: 'var(--cp-warning)',
+  negative: 'var(--cp-error)',
+};
+const TONE_SOFT = {
+  positive: 'var(--cp-success-bg)',
+  caution: 'var(--cp-warning-bg)',
+  negative: 'var(--cp-error-bg)',
+};
 
 // ── InlineMetric ─────────────────────────────────────────────────────────────
 /**
@@ -119,6 +131,98 @@ DecisionKpis.propTypes = {
   projection: PropTypes.object,
 };
 
+// ── DecisionKpiTile ──────────────────────────────────────────────────────────
+/**
+ * One promoted KPI in the decision row: dominant number, secondary label.
+ * Tabular numerics so the four tiles align on the decimal.
+ * @param {{ label: string, value: string, sub?: string|null, note?: string }} props
+ */
+export function DecisionKpiTile({ label, value, sub, note }) {
+  return (
+    <div style={S.kpiTile}>
+      <span style={S.kpiLabel}>{label}</span>
+      <strong style={S.kpiValue}>{value ?? MISSING}</strong>
+      {sub ? <span style={S.kpiSub}>{sub}</span> : null}
+      {note ? <span style={S.kpiNote}>{note}</span> : null}
+    </div>
+  );
+}
+DecisionKpiTile.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string,
+  sub: PropTypes.string,
+  note: PropTypes.string,
+};
+
+// ── DecisionHeader ───────────────────────────────────────────────────────────
+/**
+ * Decision-first header (UI V2 — Phase 1). The verdict (APPROVE / REVIEW / REJECT)
+ * is the largest object on screen; the case header sits above it; the IRR / MOIC /
+ * NPV / CAPITAL row dominates directly below; Returns Composition sits above the
+ * fold with an immediate warning when terminal dependence exceeds 75%.
+ *
+ * PRESENTATION ONLY — every value comes from existing engine fields via
+ * verdictDecision() / DECISION_METRICS / deriveReturnsComposition(). No new math.
+ *
+ * @param {{ projection: object|null, caseHeader: string }} props
+ */
+export function DecisionHeader({ projection, caseHeader }) {
+  const v = verdictDecision(projection);
+  const color = TONE_COLOR[v.tone] || 'var(--cp-text-primary)';
+  const soft = TONE_SOFT[v.tone] || 'var(--cp-surface-1)';
+
+  const capital = fmtUSD(projection?.total_capex);
+  const irr = DECISION_METRICS.find(m => m.id === 'irr');
+  const moic = DECISION_METRICS.find(m => m.id === 'moic');
+  const npv = DECISION_METRICS.find(m => m.id === 'npv');
+
+  const rc = deriveReturnsComposition(projection);
+  const tvPct = rc.available && rc.terminalPct != null ? Math.round(rc.terminalPct * 100) : null;
+  const tvAlarm = tvPct != null && tvPct > 75;
+
+  return (
+    <div data-decision-header style={S.dhWrap}>
+      {/* Case header — above the verdict */}
+      <div style={S.caseHeader}>{caseHeader}</div>
+
+      {/* Verdict — the largest object on screen */}
+      <div style={{ ...S.verdictBlock, borderColor: color, background: soft }}>
+        <span style={S.verdictEyebrow}>{UI.RESULTS_DECISION_EYEBROW}</span>
+        <strong data-verdict style={{ ...S.verdictWord, color }}>{v.decision}</strong>
+        <span style={S.verdictDetail}>{v.detail}</span>
+      </div>
+
+      {/* KPI row — numbers dominate, directly below verdict */}
+      <div data-decision-kpis style={S.kpiRow}>
+        <DecisionKpiTile label={UI.RESULTS_KPI_IRR} value={irr?.value(projection)} sub={irr?.subValue?.(projection)} note={irr?.note} />
+        <DecisionKpiTile label={UI.RESULTS_KPI_MOIC} value={moic?.value(projection)} sub={moic?.subValue?.(projection)} note={moic?.note} />
+        <DecisionKpiTile label={UI.RESULTS_KPI_NPV} value={npv?.value(projection)} sub={npv?.subValue?.(projection)} note={npv?.note} />
+        <DecisionKpiTile label={UI.RESULTS_KPI_CAPITAL} value={capital} note={UI.RESULTS_KPI_CAPITAL_NOTE} />
+      </div>
+
+      {/* Returns Composition — above the fold, directly under KPI row */}
+      <ReturnsComposition projection={projection} />
+      {tvAlarm ? (
+        <div data-tv-warning style={{ ...S.tvWarning, borderColor: 'var(--cp-warning)', background: 'var(--cp-warning-bg)' }}>
+          {UI.RESULTS_TV_WARNING(tvPct)}
+        </div>
+      ) : null}
+
+      {/* Risk guardrail — DSCR sits below returns in the hierarchy (preserved from
+          the previous decision panel; not promoted, but never dropped). */}
+      <div data-risk-strip style={S.riskStrip}>
+        <span style={S.riskLabel}>{UI.RESULTS_RISK_GUARDRAIL}</span>
+        <strong style={S.riskValue}>DSCR {fmtX(projection?.dscr_stabilized)}</strong>
+        <span style={S.riskNote}>{UI.RESULTS_RISK_NOTE}</span>
+      </div>
+    </div>
+  );
+}
+DecisionHeader.propTypes = {
+  projection: PropTypes.object,
+  caseHeader: PropTypes.string.isRequired,
+};
+
 // ── ReturnsComposition ───────────────────────────────────────────────────────
 /**
  * Board-facing disclosure: how much of equity value comes from operations vs the
@@ -186,6 +290,97 @@ LayerCard.propTypes = {
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 const S = {
+  // Decision-first header (UI V2 — Phase 1)
+  dhWrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-5)',
+    minWidth: 0,
+  },
+  caseHeader: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-tight)',
+    lineHeight: 'var(--cp-leading-tight)',
+  },
+  verdictBlock: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-6)',
+    border: '1px solid var(--cp-border)',
+    borderLeftWidth: 'var(--cp-space-1)',
+    borderRadius: 'var(--cp-radius-lg)',
+  },
+  verdictEyebrow: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    textTransform: 'uppercase',
+  },
+  verdictWord: {
+    fontSize: 'clamp(48px, 6vw, 80px)',
+    lineHeight: 0.95,
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-tight)',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  verdictDetail: {
+    color: 'var(--cp-text-primary)',
+    fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-bold)',
+  },
+  kpiRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gap: 'var(--cp-space-4)',
+  },
+  kpiTile: {
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-1)',
+    padding: 'var(--cp-space-4) var(--cp-space-5)',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md)',
+  },
+  kpiLabel: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    textTransform: 'uppercase',
+  },
+  kpiValue: {
+    color: 'var(--cp-text-strong)',
+    fontSize: 'clamp(30px, 3vw, 44px)',
+    lineHeight: 1,
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-tight)',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  kpiSub: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-xs)',
+    lineHeight: 'var(--cp-leading-tight)',
+  },
+  kpiNote: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-sm)',
+    lineHeight: 'var(--cp-leading-normal)',
+  },
+  tvWarning: {
+    padding: 'var(--cp-space-3) var(--cp-space-4)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md)',
+    color: 'var(--cp-text-strong)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-bold)',
+    lineHeight: 'var(--cp-leading-normal)',
+  },
   rcWrap: {
     display: 'flex',
     flexDirection: 'column',
