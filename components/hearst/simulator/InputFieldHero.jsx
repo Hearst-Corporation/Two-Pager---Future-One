@@ -130,8 +130,10 @@ const S = {
     minWidth: 0,
   },
   row: {
+    // driven field ~1.6× the computed-results panel; stacks to 1 col ≤900px
+    // via the page-level [data-brief-bar-row] rule.
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 0.62fr)',
+    gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
     gap: 'var(--cp-space-5)',
     alignItems: 'stretch',
   },

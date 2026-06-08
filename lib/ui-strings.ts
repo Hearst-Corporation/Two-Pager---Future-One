@@ -293,6 +293,102 @@ export const UI = {
   FIN_EXCEL_SOON_TITLE: 'Excel export is not available yet',
   FIN_MEMO_DOSSIER_TITLE: "Open this scenario's strategic memo in the Dossier (PDF export available there)",
 
+  // Financial — tabs
+  FIN_TAB_TABLE: 'Table',
+  FIN_TAB_CHARTS: 'Charts',
+  FIN_TAB_DEBT: 'Debt Schedule',
+  FIN_TAB_WATERFALL: 'Waterfall',
+  FIN_TAB_SENSITIVITY: 'Sensitivity',
+
+  // Financial — action buttons
+  FIN_BTN_EXCEL_SOON: 'Excel (soon)',
+  FIN_BTN_MEMO: 'Memo →',
+
+  // Financial — KPI card labels
+  FIN_KPI_TOTAL_CAPEX: 'Total CAPEX',
+  FIN_KPI_PROJECT_IRR: 'Project IRR',
+  FIN_KPI_NPV: 'NPV (10yr)',
+  FIN_KPI_MOIC: 'MOIC',
+  FIN_KPI_DSCR: 'DSCR (Stab.)',
+  FIN_KPI_PAYBACK: 'Payback',
+  FIN_KPI_TERMINAL: 'Terminal Value',
+  FIN_KPI_STAB_REVENUE: 'Stab. Revenue',
+  FIN_KPI_PER_YEAR: 'per year',
+  FIN_KPI_SOURCE_SCORE: (score: number) => `Source score: ${score}/100`,
+
+  // Financial — table headers
+  FIN_TH_METRIC: 'Metric',
+  FIN_TH_YEAR: (y: number) => `Year ${y}`,
+  FIN_TH_YEAR_LABEL: 'Year',
+  FIN_TH_OPENING_BALANCE: 'Opening Balance',
+  FIN_TH_INTEREST: 'Interest',
+  FIN_TH_PRINCIPAL: 'Principal',
+  FIN_TH_CLOSING_BALANCE: 'Closing Balance',
+  FIN_TH_TOTAL_SERVICE: 'Total Service',
+  FIN_TH_DSCR: 'DSCR',
+
+  // Financial — METRIC_COLS labels
+  FIN_ROW_REVENUE: 'Revenue',
+  FIN_ROW_POWER_COST: 'Power Cost',
+  FIN_ROW_OPEX: 'OpEx',
+  FIN_ROW_EBITDA: 'EBITDA',
+  FIN_ROW_EBITDA_MARGIN: 'EBITDA Margin',
+  FIN_ROW_DEBT_SERVICE: 'Debt Service',
+  FIN_ROW_FREE_CASH_FLOW: 'Free Cash Flow',
+  FIN_ROW_CUMULATIVE_FCF: 'Cumulative FCF',
+  FIN_ROW_OCCUPANCY: 'Occupancy',
+
+  // Financial — no-data states
+  FIN_NODATA_PROJECTION: 'Projection Cannot Run',
+  FIN_NODATA_PROJECTION_SUB: 'Configure and save a scenario in the',
+  FIN_NODATA_PROJECTION_SUB2: 'to generate the 10-year financial model.',
+  FIN_NODATA_DEBT: 'No Debt Configured',
+  FIN_NODATA_DEBT_SUB: 'Set debt % and interest rate when saving a scenario in the',
+  FIN_NODATA_EQUITY: 'No Equity Structure',
+  FIN_NODATA_EQUITY_SUB: 'Set HEARST / Brookfield / Qatar equity % when saving a scenario in the',
+  FIN_NODATA_SENSITIVITY: 'Could not compute sensitivity — check that both parameters are set in the base scenario.',
+
+  // Financial — debt schedule KPI labels
+  FIN_DEBT_PRINCIPAL: 'Principal',
+  FIN_DEBT_TOTAL_INTEREST: 'Total Interest',
+  FIN_DEBT_TERM: 'Term',
+  FIN_DEBT_IO_PERIOD: 'IO Period',
+  FIN_DEBT_MIN_DSCR: 'Min DSCR',
+  FIN_DEBT_AVG_DSCR: 'Avg DSCR',
+  FIN_DEBT_COVENANT_BREACHES: 'Covenant Breaches',
+  FIN_DEBT_TERM_SUFFIX: ' yr',
+  FIN_DEBT_NO_BREACH: 'None',
+
+  // Financial — chart titles
+  FIN_CHART_REVENUE_EBITDA: 'Revenue & EBITDA ($M)',
+  FIN_CHART_CUMULATIVE_FCF: 'Cumulative Free Cash Flow ($M)',
+  FIN_CHART_DEBT_BALANCE: 'Debt Balance Over Time ($M)',
+  FIN_CHART_EQUITY_DIST: 'Equity Distributions by Investor ($M)',
+
+  // Financial — sensitivity
+  FIN_SENSITIVITY_TITLE: 'Sensitivity Matrix — IRR',
+  FIN_SENSITIVITY_X_AXIS: 'X-Axis',
+  FIN_SENSITIVITY_Y_AXIS: 'Y-Axis',
+  FIN_LEGEND_NEGATIVE_IRR: '< 0% IRR',
+  FIN_LEGEND_WEAK_IRR: '0–8%',
+  FIN_LEGEND_BELOW_HURDLE: '8–15% (below IC hurdle)',
+  FIN_LEGEND_ABOVE_HURDLE: '≥ 15% (IC hurdle)',
+  FIN_LEGEND_BASELINE: 'Bold border = baseline scenario',
+
+  // Financial — sensitivity param option labels
+  FIN_PARAM_ELECTRICITY_PRICE: 'Electricity Price',
+  FIN_PARAM_OCCUPANCY_PCT: 'Occupancy %',
+  FIN_PARAM_RETAIL_PRICE: 'Retail Price',
+  FIN_PARAM_WHOLESALE_PRICE: 'Wholesale Price',
+  FIN_PARAM_HYPERSCALE_PRICE: 'Hyperscale Price',
+  FIN_PARAM_IT_CAPACITY: 'IT Capacity (MW)',
+  FIN_PARAM_DEBT_LEVERAGE: 'Debt Leverage',
+  FIN_PARAM_EXIT_MULTIPLE: 'Exit Multiple',
+  FIN_PARAM_PUE: 'PUE',
+
+  // Financial — warnings
+  FIN_WARNINGS_TITLE: 'INVESTMENT WARNINGS',
+
   // Errors
   ERR_GENERIC: 'Something went wrong. Please try again.',
   ERR_PROJECT_LOAD: 'Project load failed',
