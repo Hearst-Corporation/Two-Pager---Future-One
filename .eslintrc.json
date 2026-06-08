@@ -31,12 +31,12 @@
             "message": "Hearst module is isolated from the site DS. Use a --cp-* token from cockpit.css instead of --color-*."
           },
           {
-            "selector": "Literal[value=/#[0-9A-Fa-f]{6}\\b/]",
-            "message": "Hearst module forbids hardcoded hex colors. Use a --cp-* token from cockpit.css. (Pure #fff/#000 still allowed as 3-digit shorthand if truly needed.)"
+            "selector": "Literal[value=/#[0-9A-Fa-f]{3,8}\\b/]",
+            "message": "Hearst module forbids hardcoded hex colors (3–8 digit). Use a --cp-* token from cockpit.css."
           },
           {
-            "selector": "TemplateElement[value.raw=/#[0-9A-Fa-f]{6}\\b/]",
-            "message": "Hearst module forbids hardcoded hex colors. Use a --cp-* token from cockpit.css."
+            "selector": "TemplateElement[value.raw=/#[0-9A-Fa-f]{3,8}\\b/]",
+            "message": "Hearst module forbids hardcoded hex colors (3–8 digit). Use a --cp-* token from cockpit.css."
           }
         ]
       }

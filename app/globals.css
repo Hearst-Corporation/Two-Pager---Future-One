@@ -27,6 +27,9 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* NOTE: background/color ici = fallback pour login (/admin/login/) qui n'a pas accès
+   aux --cp-*. Sur les routes cockpit, tokens.css (html,body) et .ct-root écrasent
+   background via --ct-bg-deep. Ces règles ne "fuient" pas visuellement sur le cockpit. */
 html, body {
   font-family: var(--font-sans);
   background: #1A1D24; /* Fallback matching old --color-gray-900 */
@@ -41,6 +44,8 @@ html, body {
    pour que SectionMethod puisse pin pendant son scroll horizontal. */
 body { overflow-x: clip; }
 
+/* Fallback ::selection pour /admin/login/ (n'a pas --cp-*).
+   Sur le cockpit, cockpit.css surcharge via .ct-root ::selection (accent courant). */
 ::selection {
   background: #6B102B; /* --cp-accent-strong fallback: hors scope cp-tokens.css sur routes non-cockpit */
   color: #FFFFFF;

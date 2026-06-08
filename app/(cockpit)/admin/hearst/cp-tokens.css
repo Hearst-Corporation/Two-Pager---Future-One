@@ -24,7 +24,13 @@
   --cp-status-danger-soft:    rgba(239, 68, 68, 0.12);
   --cp-status-danger-border:  rgba(239, 68, 68, 0.40);
 
-  /* Rail droit fixe hors grid — largeur réservée via --cp-chat-rail-width (padding centre). */
+  /* Rail droit = drawer overlay (FAB), jamais colonne grid — centre full-width.
+     Override DÉLIBÉRÉ de --ct-rail-right (normalement upstream-only) : le shell
+     traite ce token comme la largeur de la colonne flex .ct-rail-right dans
+     .ct-panels-row ET l'injecte dans --ct-rail-right-eff. Le mettre à 0 est le
+     SEUL levier upstream pour que le centre n'en réserve pas l'espace ; chat-fab.css
+     sort ensuite .ct-rail-right du flux (position:fixed) et réserve la place via
+     --cp-chat-rail-width (padding-right de .ct-page-area). Ne pas le retirer. */
   --ct-rail-right: 0px;
   --cp-chat-rail-width: min(420px, 32vw);
 
@@ -121,16 +127,20 @@
   --cp-hairline:        rgba(255, 255, 255, 0.06);
   --cp-hairline-faint:  rgba(255, 255, 255, 0.04);
 
-  /* ── Couleurs sémantiques ── */
-  --cp-error:          #ef4444;
+  /* ── Couleurs sémantiques ──
+     --cp-error / --cp-success / --cp-warning : alias vers --cp-status-danger /
+     --cp-status-success / --cp-status-warning (même hex — source unique sur --cp-status-*).
+     Variantes -bg/-strong gardées séparément : valeurs distinctes de leurs homologues
+     status-*-soft/-border (opacités/teintes différentes), donc pas aliasées. */
+  --cp-error:          var(--cp-status-danger);
   --cp-error-bg:       rgba(239,68,68,0.08);
   --cp-error-strong:   #fca5a5;
 
-  --cp-success:        #10b981;
+  --cp-success:        var(--cp-status-success);
   --cp-success-bg:     rgba(16,185,129,0.08);
   --cp-success-strong: #6ee7b7;
 
-  --cp-warning:        #f59e0b;
+  --cp-warning:        var(--cp-status-warning);
   --cp-warning-bg:     rgba(245,158,11,0.08);
   --cp-warning-strong: #fcd34d;
 
@@ -161,16 +171,19 @@
   --cp-op-sovereign:       #8B1C1C;
   --cp-op-sovereign-bg:    rgba(139,28,28,0.08);
 
-  /* ── Z-index (échelle unique cockpit) ── */
-  --cp-z-content:   10;
-  --cp-z-floating:  30;
-  --cp-z-sticky:    40;
+  /* ── Z-index ──
+     Échelle basse (sous 1000) : pas de collision avec skip-link upstream (z:1000).
+     Échelle haute : démarre à 2000 pour passer franchement au-dessus du skip-link
+     upstream (tokens.css, z-index:1000) et de tout overlay tiers. */
+  --cp-z-content:  10;
+  --cp-z-floating: 30;
+  --cp-z-sticky:   40;
   --cp-z-docked:   100;
-  --cp-z-overlay: 1000;
-  --cp-z-drawer:  1001;
-  --cp-z-fab:     1002;
-  --cp-z-toast:   1003;
-  --cp-z-modal:   1010;
+  --cp-z-overlay:  2000;
+  --cp-z-drawer:   2001;
+  --cp-z-fab:      2002;
+  --cp-z-toast:    2003;
+  --cp-z-modal:    2010;
 
   /* ── Tailles de composants ── */
   --cp-btn-height-sm:  32px;
@@ -301,6 +314,9 @@
 }
 @media (max-width: 600px) {
   :root {
+    /* Override délibéré de --ct-rail-left (cf. --ct-rail-right plus haut) : le shell
+       lit ce token comme largeur de la colonne rail gauche. À 0 + .ct-rail-left
+       { display:none } ci-dessous, l'espace est entièrement libéré en mobile. */
     --ct-rail-left: 0px;
     --cp-rail-left: 0px;
     --cp-nav-bottom: 64px;

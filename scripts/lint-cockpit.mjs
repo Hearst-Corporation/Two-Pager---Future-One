@@ -33,13 +33,28 @@ const TOKEN_FILES = [
 const ALLOW_PATHS = [
   /node_modules/, /\.next/, /\.bak/, /coverage/, /playwright-report/,
   /test\//, /\.spec\./, /\.test\./, /scripts\//, /public\//, /docs\//,
+  /\.claude\//,  // worktrees agents + artefacts : jamais scannés (copies du repo).
 ];
 
 const SCAN_EXTS = new Set(['.jsx', '.tsx', '.js', '.ts', '.css', '.scss']);
 
-// Scope : seulement app/(cockpit)/ et components/hearst/
-const COCKPIT_SCOPE = [join(ROOT, 'app/(cockpit)'), join(ROOT, 'components/hearst')];
-const inScope = (file) => COCKPIT_SCOPE.some(s => file.startsWith(s));
+// Scope : app/(cockpit)/, components/hearst/, components/admin/
+// + fichiers de présentation DS dans lib/ (source de vérité des styles inline).
+const COCKPIT_SCOPE_PREFIXES = [
+  join(ROOT, 'app/(cockpit)'),
+  join(ROOT, 'components/hearst'),
+  join(ROOT, 'components/admin'),
+];
+const COCKPIT_SCOPE_FILES = new Set([
+  join(ROOT, 'lib/cp-styles.js'),
+  join(ROOT, 'lib/admin-tokens.js'),
+  join(ROOT, 'lib/hearst-results-view.js'),
+  join(ROOT, 'lib/z-index.js'),
+  join(ROOT, 'components/OracleRailNav.jsx'),
+]);
+const inScope = (file) =>
+  COCKPIT_SCOPE_PREFIXES.some(s => file.startsWith(s)) ||
+  COCKPIT_SCOPE_FILES.has(file);
 
 // Règles de détection — chacune renvoie le 1er motif trouvé (ou null).
 const RULES = [

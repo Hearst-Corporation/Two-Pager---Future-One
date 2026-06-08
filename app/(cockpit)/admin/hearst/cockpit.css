@@ -5,6 +5,13 @@
 
 /* --cp-bg-deep vit dans cp-tokens.css (alias var(--ct-bg-deep)) — source de vérité unique. */
 
+/* ::selection cockpit — override le fallback globals.css (qui ne connaît pas --cp-*).
+   Scopé au shell cockpit pour laisser le login intact. */
+.ct-root ::selection {
+  background: var(--cp-accent-strong);
+  color: var(--cp-text-strong);
+}
+
 /* Scrollbars + focus (hearst layout only — fichier non importé ailleurs) */
 html ::-webkit-scrollbar {
   width: var(--cp-space-2);
