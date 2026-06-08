@@ -11,7 +11,7 @@
 // (collapsible, confidence tag, source citations, charts ré-utilisés).
 //
 // Auth : editor requis (la route persiste une ligne versionnée du mémo en DB via persistMemo).
-// Modèle : Hypercli/Kimi K2.6 UNIQUEMENT (aucun fallback provider). Si l'appel
+// Modèle : Moonshot AI/Kimi K2.6 UNIQUEMENT (aucun fallback provider). Si l'appel
 // échoue/timeout, on retombe sur un mémo déterministe local (sans LLM).
 // Rate-limit : 5 req/min/actor en prod, skip en dev.
 
@@ -37,7 +37,7 @@ export const maxDuration = 300;
 
 const RL_WINDOW = 60_000;
 const RL_MAX = 5;
-const MEMO_LLM_SOFT_TIMEOUT_MS = 45_000;
+const MEMO_LLM_SOFT_TIMEOUT_MS = 90_000; // élevé à 90s : kimi-k2.6 est un modèle à raisonnement, le thinking peut prendre 30-60s
 const rlBuckets = new Map();
 
 function checkRl(actorId) {
@@ -634,7 +634,7 @@ export async function POST(req) {
         console.log(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM call completed in ${llmDurationMs}ms via ${model_used}`);
 
         const rawContent = llmResult.response.choices?.[0]?.message?.content || '';
-        // Strip markdown fences (Claude sometimes wraps JSON in ```json ... ``` despite instructions)
+        // Strip markdown fences (kimi-k2.6 sometimes wraps JSON in ```json ... ``` despite instructions)
         const content = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
         try { memo = JSON.parse(content); }
         catch (e) {

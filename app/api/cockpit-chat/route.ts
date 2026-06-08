@@ -62,6 +62,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 const BodySchema = z.object({
   chatId: z.string().nullish(),
@@ -394,9 +395,11 @@ export async function POST(req: Request) {
     ...history,
   ];
 
-  // ── Stream LLM — Kimi K2.6 via Hypercli only ─────────────────────────
+  // ── Stream LLM — Kimi K2.6 via Moonshot AI (direct, éditeur officiel) ──────
   // Do not route cockpit chat through Anthropic: billing/quota failures there
-  // should not break ORACLE's right rail when Hypercli is the configured provider.
+  // should not break ORACLE's right rail when Moonshot is the configured provider.
+  // max_tokens ≥ 4096 obligatoire : kimi-k2.6 est un modèle à raisonnement —
+  // sans max_tokens large, delta.content peut rester vide (tout part en reasoning).
   const inputTokens = estimateTokens(finalSystemPrompt + history.map((h) => h.content).join("\n"));
   const startedAt = Date.now();
   const stripThink = makeThinkStripper();
@@ -404,7 +407,7 @@ export async function POST(req: Request) {
   let modelUsed = KIMI_MODEL;
   let completion: any;
   try {
-    const out = await kimiChatStream({ model: KIMI_MODEL, messages } as any);
+    const out = await kimiChatStream({ model: KIMI_MODEL, messages, max_tokens: 8192 } as any);
     completion = out.stream;
     modelUsed = out.model_used;
   } catch (err) {

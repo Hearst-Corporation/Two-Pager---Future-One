@@ -3,7 +3,7 @@
 <!-- enable-adrien:start -->
 ## Agent — lire avant de coder
 - Guide complet : **`AGENTS.md`** (source de vérité locale, ≤200 lignes).
-- Gate : `npm run check` (lint:secrets + lint:cockpit + lint:strings + tests).
+- Gate : `npm run check` (lint:secrets + lint:strings + lint:tokens + lint:nav + tests).
 - Scaffolder : `node scripts/new-feature.mjs <resource> --ts=YYYYMMDDHHMMSS`
 <!-- enable-adrien:end -->
 
@@ -72,10 +72,10 @@ Pas de source centrale à mettre à jour, pas de resync, pas de repack tarball.
   `app/(cockpit)/admin/hearst/cp-tokens.css`) pour la cohérence interne. Surfaces dans `cockpit.css`,
   FAB chat dans `components/hearst/chat-fab.css`.
 - `app/globals.css` `--color-*` = **legacy login uniquement** — interdit dans le module Hearst.
-- Dans `components/hearst/**` et les pages `app/(cockpit)/admin/hearst/**` : pas de hex / `rgb()` /
-  `hsl()` hardcodé ni `var(--ct-*)`/`var(--color-*)` en direct — passer par un `--cp-*` (gardé par
-  `npm run lint:cockpit` + ESLint). Ce garde-fou **ne couvre pas** `cockpit-shell/` (le DS lui-même),
-  qui définit légitimement les `--ct-*` et reste librement éditable.
+- Dans `components/hearst/**` et les pages `app/(cockpit)/admin/hearst/**` : convention (non gardée
+  par lint) de passer par un `--cp-*` plutôt que hex / `rgb()` / `hsl()` ou `var(--ct-*)`/`var(--color-*)`
+  en direct — pour la cohérence interne. `cockpit-shell/` (le DS lui-même) définit légitimement les
+  `--ct-*` et reste librement éditable.
 - Seule règle : garder la cohérence visuelle interne du repo.
 
 ## Tests

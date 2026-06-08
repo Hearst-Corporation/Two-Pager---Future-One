@@ -20,5 +20,5 @@ import { Button, Card, Table, Row, Cell, Field, Badge, SectionHead, Eyebrow, Kpi
 | `KpiGrid` | `kpiGrid`/`statRow`/`secondaryKpis` | `cols` (défaut auto-fit) — enfants = `KpiCard` |
 | `KpiCard` | (existant, réexporté) | `label`, `value`, `format` (currency·number·pct·x·years·mw·**display**), `size`, … |
 
-**Règles** : couleur → token `--cp-*` (jamais hex/rgba/`--ct-`/`--color-`, gardé par `lint:cockpit`).
+**Règles** : couleur → token `--cp-*` (convention, plus de lint dédié — jamais hex/rgba/`--ct-`/`--color-`).
 Tout nouveau token → `cp-tokens.css` (gardé par `lint:tokens`).

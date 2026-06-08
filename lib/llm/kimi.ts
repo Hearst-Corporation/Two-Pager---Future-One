@@ -1,26 +1,32 @@
-// lib/llm/kimi.ts — client Hypercli, Kimi K2.6.
+// lib/llm/kimi.ts — client Moonshot AI (éditeur officiel Kimi), Kimi K2.6.
 //
-// Génération de mémo : Kimi K2.6 via Hypercli UNIQUEMENT — AUCUN fallback.
-// Si Hypercli/Kimi échoue (timeout, 5xx, quota épuisé), l'appel échoue. Pas de
-// filet : ni cascade Hypercli (k2.5/glm-5/minimax), ni Claude, ni OpenAI.
+// Génération de mémo : Kimi K2.6 via Moonshot AI UNIQUEMENT — AUCUN fallback.
+// Si Moonshot/Kimi échoue (timeout, 5xx, quota épuisé), l'appel échoue. Pas de
+// filet : ni Claude, ni OpenAI.
 //
-// Clés env : HYPERCLI_API_KEY.
+// Clés env : MOONSHOT_API_KEY, MOONSHOT_BASE_URL, KIMI_MODEL.
+//
+// CAVEAT reasoning_content : kimi-k2.6 est un modèle à raisonnement. Le thinking
+// arrive dans delta.reasoning_content (champ séparé), la réponse finale dans
+// delta.content. Le stream ne consomme QUE delta.content — reasoning_content est
+// ignoré naturellement (champ non lu). max_tokens doit être large (≥4096) sinon
+// delta.content peut rester vide.
 
 import OpenAI from "openai";
 
 export const kimi = new OpenAI({
-  apiKey: process.env.HYPERCLI_API_KEY || "build-placeholder",
-  baseURL: process.env.HYPERCLI_BASE_URL || "https://api.hypercli.com/v1",
+  apiKey: process.env.MOONSHOT_API_KEY || "build-placeholder",
+  baseURL: process.env.MOONSHOT_BASE_URL || "https://api.moonshot.ai/v1",
   timeout: Number(process.env.LLM_MODEL_TIMEOUT_MS || 300_000),
   maxRetries: 0,
 });
 
-export const KIMI_MODEL = process.env.HYPERCLI_DEFAULT_MODEL || "kimi-k2.6";
+export const KIMI_MODEL = process.env.KIMI_MODEL || "kimi-k2.6";
 
 /**
- * Génération mémo — Kimi K2.6 via Hypercli, SANS fallback.
+ * Génération mémo — Kimi K2.6 via Moonshot AI, SANS fallback.
  * Renvoie la réponse OpenAI standard + le modèle effectivement utilisé.
- * Throw direct si l'appel Hypercli échoue.
+ * Throw direct si l'appel Moonshot échoue.
  */
 export async function kimiChatCompletion(
   params: Omit<Parameters<typeof kimi.chat.completions.create>[0], "stream"> & { stream?: false },
@@ -33,7 +39,8 @@ export async function kimiChatCompletion(
 }
 
 /**
- * Streaming — Kimi K2.6 via Hypercli, SANS fallback.
+ * Streaming — Kimi K2.6 via Moonshot AI, SANS fallback.
+ * Consomme delta.content uniquement ; delta.reasoning_content ignoré.
  */
 export async function kimiChatStream(
   params: Omit<Parameters<typeof kimi.chat.completions.create>[0], "stream">,

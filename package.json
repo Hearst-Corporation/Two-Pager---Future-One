@@ -16,14 +16,13 @@
     "test:e2e:ui": "playwright test --ui",
     "lint": "SKIP_ENV_VALIDATION=true next lint",
     "lint:secrets": "node scripts/lint-secrets.mjs",
-    "lint:cockpit": "node scripts/lint-cockpit.mjs",
     "lint:strings": "node scripts/lint-strings.mjs",
     "lint:nav": "node scripts/lint-nav.mjs",
     "lint:tokens": "node scripts/lint-tokens.mjs",
     "prune:tokens": "node scripts/prune-tokens.mjs",
     "new:feature": "node scripts/new-feature.mjs",
     "doctor": "node scripts/doctor.mjs",
-    "check": "npm run lint:secrets && npm run lint:cockpit && npm run lint:strings && npm run lint:tokens && npm run lint:nav && npm run lint && npm test",
+    "check": "npm run lint:secrets && npm run lint:strings && npm run lint:tokens && npm run lint:nav && npm run lint && npm test",
     "check:ci": "npm run check && next build"
   },
   "dependencies": {

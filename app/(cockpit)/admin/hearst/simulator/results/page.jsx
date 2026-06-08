@@ -410,8 +410,8 @@ const S = {
   title: {
     margin: 'var(--cp-space-3) 0 var(--cp-space-2)',
     color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-xl)',
-    lineHeight: '1.15',
+    fontSize: 'var(--cp-font-2xl)',
+    lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
   },

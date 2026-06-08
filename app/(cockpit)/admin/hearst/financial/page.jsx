@@ -605,7 +605,7 @@ function formatSensVal(v, unit) {
 
 const S = {
   topBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
-  pageTitle: { margin: 0, fontSize: 'var(--cp-font-xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
+  pageTitle: { margin: 0, fontSize: 'var(--cp-font-2xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-primary)' },
   scenarioRow: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', alignItems: 'center', flex: '1 1 280px', minWidth: 0 },
   scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: '2px solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
   savedPlanWrap: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', minWidth: 0, flex: '1 1 220px' },

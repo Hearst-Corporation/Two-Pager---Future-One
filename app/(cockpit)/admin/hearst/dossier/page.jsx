@@ -760,7 +760,7 @@ const S = {
   heroTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
   heroIdent: { flex: '1 1 calc(var(--cp-space-8) * 10)', minWidth: 0 },
   identLine: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'capitalize', marginBottom: 'var(--cp-space-2)' },
-  heroTitle: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)', lineHeight: 'var(--cp-leading-tight)' },
+  heroTitle: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)', lineHeight: 'var(--cp-leading-tight)' },
   heroActions: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)', alignItems: 'flex-end', flexShrink: 0 },
   heroLead: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', margin: 'var(--cp-space-0)', maxWidth: 'calc(var(--cp-space-9) * 22 + var(--cp-space-5))' },
 

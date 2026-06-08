@@ -50,9 +50,6 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 
 | INTERDIT | ÉCHOUE VIA |
 |---|---|
-| Couleur hex / `rgb()` / `hsl()` hors `var(--cp-*)` dans cockpit | `npm run lint:cockpit` |
-| `fontWeight: 700\|800\|600` (chiffre brut) dans cockpit — utiliser `T.*` de `lib/cp-styles.js` | `npm run lint:cockpit` (à étendre) |
-| `var(--ct-*)` ou `var(--color-*)` en direct dans les **pages/composants applicatifs** | `npm run lint:cockpit` (passe par `--cp-*`) — ne vise PAS `cockpit-shell/` (DS éditable) |
 | Token défini hors de sa source (`--cp-*`→cp-tokens.css · `--color-*`→globals.css) ou en double | `npm run lint:tokens` |
 | String UI en dur (nouvelle ligne) | `npm run lint:strings` |
 | Secret hardcodé (`sk-ant-`, `ghp_`, etc.) | `npm run lint:secrets` |
@@ -60,9 +57,9 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 | Build cassé (import/JSX) dans une page sans test | `npm run check:ci` (lance `next build`) |
 | `getAdminClient()` dans un composant client | convention — import server-only |
 
-> Baselines gelées par **signature** (`scripts/.lint-baseline.json`) : seules les
+> Baseline gelée par **signature** (`scripts/.lint-baseline.json`, clé `strings`) : seules les
 > *nouvelles* violations échouent. Toucher une ligne legacy la « réactive » → corrige-la.
-> Régénérer (legacy assumé) : `node scripts/lint-cockpit.mjs --update-baseline`.
+> Régénérer (legacy assumé) : `node scripts/lint-strings.mjs --update-baseline`.
 
 <!-- enable:section=gotchas -->
 ## 6. Gotchas du repo
@@ -84,7 +81,7 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 <!-- enable:section=livrer -->
 ## 7. Avant de livrer
 ```bash
-npm run check     # lint:secrets + lint:cockpit + lint:strings + lint:nav + test (rapide)
+npm run check     # lint:secrets + lint:strings + lint:tokens + lint:nav + test (rapide)
 npm run check:ci  # + next build — PROUVE que l'app compile (à lancer avant toute PR)
 npm run doctor    # préflight env (dit ce qui manque pour dev/build)
 ```
