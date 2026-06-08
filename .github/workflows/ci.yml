@@ -30,7 +30,10 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-      - run: npm ci
+      # npm install (not npm ci): npm ci skips installing cross-platform optional
+      # native binaries (rolldown via vitest) from a lockfile generated on another
+      # OS — a known npm bug. The committed lockfile still pins all versions.
+      - run: npm install --no-audit --no-fund
       - name: npm run check
         run: npm run check
 
@@ -44,7 +47,10 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-      - run: npm ci
+      # npm install (not npm ci): npm ci skips installing cross-platform optional
+      # native binaries (rolldown via vitest) from a lockfile generated on another
+      # OS — a known npm bug. The committed lockfile still pins all versions.
+      - run: npm install --no-audit --no-fund
       - name: npm run build
         run: npm run build
         env:
@@ -99,7 +105,10 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-      - run: npm ci
+      # npm install (not npm ci): npm ci skips installing cross-platform optional
+      # native binaries (rolldown via vitest) from a lockfile generated on another
+      # OS — a known npm bug. The committed lockfile still pins all versions.
+      - run: npm install --no-audit --no-fund
       - name: Install pdftotext (poppler-utils) for PDF-truth assertion
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
       - name: Install Playwright Chromium + system deps
