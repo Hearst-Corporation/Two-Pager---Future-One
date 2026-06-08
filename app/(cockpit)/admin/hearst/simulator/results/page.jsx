@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import { buildSimulatePayload, INITIAL_STATE } from '@/lib/hearst-simulator-state';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
-import { fmtMW, fmtPctFromRatio, fmtPctRaw, fmtUSD, fmtX, MISSING } from '@/lib/hearst-format';
+import { fmtMW, fmtPctFromRatio, fmtPctRaw, fmtUSD, MISSING } from '@/lib/hearst-format';
 import { startMemoJob } from '@/lib/hearst-memo-job-store';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 
@@ -18,9 +18,9 @@ import {
 } from '@/lib/hearst-results-view';
 
 import {
-  InlineMetric,
   BoardMetric,
   CapitalDonut,
+  CapitalStructureGrid,
   DecisionHeader,
   ReturnsComposition,
   LayerCard,
@@ -134,21 +134,13 @@ export default function SimulatorResultsPage() {
   const archetype = useMemo(() => state ? ARCH_BY_ID[state.primary_archetype_id] : null, [state]);
   const hardware = useMemo(() => state?.hardware_mix || {}, [state]);
 
-  // Case header — "Deploy $X · Model · MW · Geography" from existing data only.
-  const caseHeader = useMemo(() => [
-    projection?.total_capex != null ? UI.RESULTS_CASE_DEPLOY(fmtUSD(projection.total_capex)) : null,
-    archetype?.label || state?.primary_archetype_id,
-    scenario?.total_mw != null ? fmtMW(scenario.total_mw, 0) : null,
-    state?.geography,
-  ].filter(Boolean).join(' · '), [projection, archetype, state, scenario]);
-
   // Investment Case sentence: "Deploy $X into a Y in Z targeting W% IRR"
   const investmentCaseSentence = useMemo(() => projection ? (
     <>
-      Deploy <strong style={{ color: 'var(--cp-text-strong)' }}>{fmtUSD(projection.total_capex)}</strong> into a{' '}
-      <strong style={{ color: 'var(--cp-text-strong)' }}>{archetype?.label || state?.primary_archetype_id}</strong> in{' '}
-      <strong style={{ color: 'var(--cp-text-strong)' }}>{state?.geography}</strong> targeting{' '}
-      <strong style={{ color: 'var(--cp-text-strong)' }}>{fmtPctFromRatio(projection.irr)} IRR</strong>.
+      Deploy <strong style={{ color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' }}>{fmtUSD(projection.total_capex)}</strong> into a{' '}
+      <strong style={{ color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' }}>{archetype?.label || state?.primary_archetype_id}</strong> in{' '}
+      <strong style={{ color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' }}>{state?.geography}</strong> targeting{' '}
+      <strong style={{ color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' }}>{fmtPctFromRatio(projection.irr)} IRR</strong>.
     </>
   ) : null, [projection, archetype, state]);
 
@@ -248,7 +240,7 @@ export default function SimulatorResultsPage() {
     <>
     <div className="oracle-page">
     <div data-results-layout style={S.inner}>
-      <Card as="header" data-results-hero variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
+      <Card as="header" data-results-hero variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column' }}>
         <div style={S.heroTopRow}>
           <Link href={`/admin/hearst/simulator?scenario=${scenarioId}`} style={{ textDecoration: 'none' }}>
             <Button variant="secondary" size="sm" style={{ fontWeight: 'var(--cp-weight-bold)' }}>
@@ -258,58 +250,48 @@ export default function SimulatorResultsPage() {
           <span style={S.heroName}>{row?.name || UI.RESULTS_HERO_FALLBACK_NAME}</span>
         </div>
 
-        <div style={S.narrativeBox}>
+        <div data-narrative-box style={S.narrativeBox}>
           <span style={S.cardEyebrow}>INVESTMENT CASE</span>
           <p style={S.narrativeSentence}>{investmentCaseSentence}</p>
         </div>
 
-        <DecisionHeader projection={projection} caseHeader={caseHeader} />
+        <DecisionHeader projection={projection} />
       </Card>
 
       <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead title={UI.RESULTS_ECON_TITLE} hint={UI.RESULTS_ECON_HINT} style={{ marginBottom: 0 }} />
         <KpiGrid data-economics-grid style={{ gap: 'var(--cp-space-4)' }}>
-          <BoardMetric label={UI.RESULTS_BM_CAPEX} value={fmtUSD(projection?.total_capex)} note={UI.RESULTS_BM_CAPEX_NOTE} />
-          <BoardMetric label={UI.RESULTS_BM_REVENUE} value={fmtUSD(projection?.stabilized_revenue)} note={UI.RESULTS_BM_REVENUE_NOTE} />
-          <BoardMetric label={UI.RESULTS_BM_EBITDA} value={fmtUSD(projection?.stabilized_ebitda)} note={UI.RESULTS_BM_EBITDA_NOTE} />
-          <BoardMetric label={UI.RESULTS_BM_TERMINAL} value={fmtUSD(projection?.terminal_value)} note={UI.RESULTS_BM_TERMINAL_NOTE} />
-          <BoardMetric label={UI.RESULTS_BM_PAYBACK} value={projection?.payback_years != null ? `${projection.payback_years} yr` : MISSING} note={UI.RESULTS_BM_PAYBACK_NOTE} />
-          <BoardMetric label={UI.RESULTS_BM_SOURCE} value={simResult?.source_score != null ? `${simResult.source_score}/100` : MISSING} note={UI.RESULTS_BM_SOURCE_NOTE} />
+          <BoardMetric label={UI.RESULTS_BM_CAPEX} value={fmtUSD(projection?.total_capex)} note={UI.RESULTS_BM_CAPEX_NOTE} hint="capex" />
+          <BoardMetric label={UI.RESULTS_BM_REVENUE} value={fmtUSD(projection?.stabilized_revenue)} note={UI.RESULTS_BM_REVENUE_NOTE} hint="revenue" />
+          <BoardMetric label={UI.RESULTS_BM_EBITDA} value={fmtUSD(projection?.stabilized_ebitda)} note={UI.RESULTS_BM_EBITDA_NOTE} hint="ebitda" />
+          <BoardMetric label={UI.RESULTS_BM_TERMINAL} value={fmtUSD(projection?.terminal_value)} note={UI.RESULTS_BM_TERMINAL_NOTE} hint="terminal_value" />
+          <BoardMetric label={UI.RESULTS_BM_PAYBACK} value={projection?.payback_years != null ? `${projection.payback_years} yr` : MISSING} note={UI.RESULTS_BM_PAYBACK_NOTE} hint="payback" />
+          <BoardMetric label={UI.RESULTS_BM_SOURCE} value={simResult?.source_score != null ? `${simResult.source_score}/100` : MISSING} note={UI.RESULTS_BM_SOURCE_NOTE} hint="source_score" />
         </KpiGrid>
       </Card>
 
       <Card as="section" variant="flat" padding="lg" style={{ minWidth: 0 }}>
         <div data-analysis-head>
-          <SectionHead title={UI.RESULTS_PROJ_TITLE} hint={UI.RESULTS_PROJ_HINT} style={{ marginBottom: 0, flex: '1 1 auto', minWidth: 0 }} />
+          <SectionHead title={UI.RESULTS_PROJ_TITLE} hint={UI.RESULTS_PROJ_HINT} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none', flex: '1 1 auto', minWidth: 0 }} />
           <span data-analysis-eyebrow style={S.cardEyebrow}>{UI.RESULTS_PROJ_EYEBROW}</span>
         </div>
-        <div data-analysis-layout style={S.analysisLayout}>
+        <div data-analysis-layout>
           <Card data-results-chart variant="card" surface={1} style={{ minWidth: 0 }}>
             <ProjectionChart years={projection?.years || []} height={400} />
           </Card>
           <Card as="aside" data-capital-panel variant="card" surface={1} padding="sm">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' }}>
+            <div data-capital-zone="donut">
               <span style={S.cardEyebrow}>{UI.RESULTS_KPI_CAPITAL}</span>
               <CapitalDonut segments={donutSegments} />
             </div>
 
-            <div>
+            <div data-capital-zone="returns">
               <ReturnsComposition projection={projection} />
             </div>
 
-            <div>
-              <span style={{ ...S.cardEyebrow, marginBottom: 'var(--cp-space-3)', display: 'block' }}>STRUCTURE</span>
-              <div style={S.structureRows}>
-                <InlineMetric label={UI.RESULTS_IM_BUILD_COST} value={fmtUSD(projection?.total_capex)} />
-                {projection?.equity_invested != null && <InlineMetric label={UI.RESULTS_IM_EQUITY_IDC} value={fmtUSD(projection.equity_invested)} />}
-                {projection?.idc != null && projection.idc > 0 && <InlineMetric label={UI.RESULTS_IM_IDC} value={fmtUSD(projection.idc)} />}
-                <InlineMetric label={UI.RESULTS_IM_TERMINAL} value={fmtUSD(projection?.terminal_value)} />
-                {projection?.terminal_value_to_equity != null && <InlineMetric label={UI.RESULTS_IM_TERMINAL_EQUITY} value={fmtUSD(projection.terminal_value_to_equity)} />}
-                <InlineMetric label={UI.RESULTS_IM_IRR} value={fmtPctFromRatio(projection?.irr)} />
-                <InlineMetric label={UI.RESULTS_IM_DSCR} value={fmtX(projection?.dscr_stabilized)} />
-                <InlineMetric label={UI.RESULTS_IM_OCCUPANCY} value={scenario?.target_occupancy_pct != null ? fmtPctRaw(scenario.target_occupancy_pct) : MISSING} />
-                <InlineMetric label={UI.RESULTS_IM_EXIT_LABEL} value={scenario?.exit_year ? UI.RESULTS_IM_EXIT_YEAR(scenario.exit_year) : MISSING} />
-              </div>
+            <div data-capital-zone="structure">
+              <span style={S.cardEyebrow}>{UI.RESULTS_CAPITAL_STRUCTURE}</span>
+              <CapitalStructureGrid projection={projection} scenario={scenario} />
             </div>
           </Card>
         </div>
@@ -317,7 +299,7 @@ export default function SimulatorResultsPage() {
 
       <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead title={UI.RESULTS_LAYERS_TITLE} hint={UI.RESULTS_LAYERS_HINT} style={{ marginBottom: 0 }} />
-        <div data-layer-grid style={S.layerGrid}>
+        <div data-layer-grid>
           <LayerCard index="01" title={UI.RESULTS_LAYER_START} rows={layer1Rows} />
           <LayerCard index="02" title={UI.RESULTS_LAYER_MODEL} rows={layer2Rows} />
           <LayerCard index="03" title={UI.RESULTS_LAYER_HW} rows={layer3Rows} />
@@ -377,13 +359,12 @@ const S = {
     textTransform: 'uppercase',
   },
   narrativeBox: {
-    padding: 'var(--cp-space-4)',
+    padding: 'var(--cp-space-5)',
     background: 'var(--cp-surface-2)',
     borderRadius: 'var(--cp-radius-md)',
     border: '1px solid var(--cp-border-base)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-2)',
   },
   narrativeSentence: {
     margin: 0,
@@ -397,25 +378,11 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     textDecoration: 'none',
   },
-  analysisLayout: {
-    display: 'grid',
-    gap: 'var(--cp-space-6)',
-    alignItems: 'start',
-  },
   cardEyebrow: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
-  },
-  structureRows: {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: 'var(--cp-space-3)',
-  },
-  layerGrid: {
-    display: 'grid',
-    gap: 'var(--cp-space-4)',
   },
 };

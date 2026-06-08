@@ -4,6 +4,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { GPU_CATALOG, calcRackPower, calcGpuCapex, calcGpuAnnualRevenue, REFERENCE_GPU_HOUR_PRICES } from '@/lib/hearst-gpu-catalog';
 import { Card } from '@/components/hearst/ui';
+import InfoHint from '@/components/hearst/InfoHint';
 import { UI } from '@/lib/ui-strings';
 
 // 3 ready-to-use hardware profiles. Click one to load the full mix; open
@@ -13,18 +14,21 @@ const HARDWARE_PRESETS = [
     id: 'colo',
     name: UI.HW_PRESET_COLO_NAME,
     tagline: UI.HW_PRESET_COLO_TAGLINE,
+    info: UI.HW_PRESET_COLO_INFO,
     patch: { classic_pct: 80, liquid_pct: 15, ai_pct: 5, gpu_sku_id: 'h200_sxm5', utilization_pct: 70, gpu_hour_price: 2.99 },
   },
   {
     id: 'mixed',
     name: UI.HW_PRESET_MIXED_NAME,
     tagline: UI.HW_PRESET_MIXED_TAGLINE,
+    info: UI.HW_PRESET_MIXED_INFO,
     patch: { classic_pct: 40, liquid_pct: 35, ai_pct: 25, gpu_sku_id: 'gb200_nvl72', utilization_pct: 75, gpu_hour_price: 5 },
   },
   {
     id: 'ai_factory',
     name: UI.HW_PRESET_AI_NAME,
     tagline: UI.HW_PRESET_AI_TAGLINE,
+    info: UI.HW_PRESET_AI_INFO,
     patch: { classic_pct: 10, liquid_pct: 20, ai_pct: 70, gpu_sku_id: 'gb200_nvl72', utilization_pct: 85, gpu_hour_price: 5 },
   },
 ];
@@ -100,41 +104,33 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
   const [showFineTune, setShowFineTune] = useState(false);
 
   return (
-    <div style={S.wrap}>
-      {/* Hardware grids stack earlier than the page (1100/1500 vs 900) because the
-          chat rail narrows the centre panel — these react to container width, not
-          the viewport. This component owns its own breakpoints; the page-level
-          stack rule does not target the hardware grids. */}
-      <style>{`
-        @media (max-width: 1100px) {
-          [data-hardware-presets] { grid-template-columns: 1fr !important; }
-          [data-hardware-spine] { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width: 1500px) {
-          [data-hardware-advanced-grid] { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
-
+    <div data-hardware-mixer style={S.wrap}>
       {/* PRESET RAIL — 3 horizontal choices, no redundant number triple */}
       <div data-hardware-presets style={S.presetRail}>
         {HARDWARE_PRESETS.map((p) => {
           const sel = activePreset === p.id;
           return (
-            <Card
-              as="button"
-              key={p.id}
-              type="button"
-              onClick={() => applyPreset(p)}
-              padding="md"
-              hover
-              accent={sel}
-              aria-pressed={sel}
-              surface={2}
-              style={S.presetCard}
-            >
-              <span style={S.presetName}>{p.name}</span>
-              <span style={S.presetTagline}>{p.tagline}</span>
-            </Card>
+            <div key={p.id} style={S.presetWrap}>
+              <Card
+                as="button"
+                type="button"
+                onClick={() => applyPreset(p)}
+                padding="md"
+                hover
+                accent={sel}
+                aria-pressed={sel}
+                surface={2}
+                style={S.presetCard}
+              >
+                <span style={S.presetName}>{p.name}</span>
+                <span style={S.presetTagline}>{p.tagline}</span>
+              </Card>
+              {p.info && (
+                <span style={S.presetHintSlot}>
+                  <InfoHint label={p.name} align="right" content={{ title: p.name, body: p.info }} />
+                </span>
+              )}
+            </div>
           );
         })}
       </div>
@@ -159,20 +155,21 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
         </Card>
       </div>
 
-      <div style={S.fineTuneToggle}>
+      <div data-hardware-finetune-toggle style={S.fineTuneToggle}>
         <button
           type="button"
-          onClick={() => setShowFineTune(!showFineTune)}
+          onClick={() => setShowFineTune((open) => !open)}
           style={S.fineTuneButton}
+          aria-expanded={showFineTune}
+          aria-controls="hardware-finetune-panel"
         >
           <span>{showFineTune ? UI.SIM_CONFIG_FINETUNE_HIDE : UI.SIM_CONFIG_FINETUNE_SHOW}</span>
-          <span style={{ transform: showFineTune ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+          <span aria-hidden style={{ transform: showFineTune ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
         </button>
       </div>
 
       {showFineTune && (
-        <>
-          {/* KPI ROW — full width, breathing */}
+        <div id="hardware-finetune-panel" data-hardware-advanced style={S.advanced}>
           <div data-hardware-summary style={S.summary}>
             <SumKpi label={UI.HW_KPI_CHIPS} value={total_gpus.toLocaleString('en-US')} />
             <SumKpi label={UI.HW_KPI_RACKS} value={racks_used.toLocaleString('en-US')} />
@@ -181,87 +178,87 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
           </div>
 
           <div data-hardware-advanced-grid style={S.grid}>
+          <div style={S.col}>
+            <div style={S.colTitle}>
+              {UI.HW_ADV_POWER_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_POWER_META}</span>
+            </div>
+            <div style={S.sliders}>
+              {['classic_pct', 'liquid_pct', 'ai_pct'].map((key) => (
+                <div key={key} style={S.sliderRow}>
+                  <div style={S.sliderHead}>
+                    <span style={S.sliderName}>{TIER_LABELS[key].name}</span>
+                    <span style={S.sliderMeta}>{TIER_LABELS[key].meta}</span>
+                  </div>
+                  <div style={S.sliderControl}>
+                    <input
+                      type="range" min={0} max={100} step={1}
+                      value={v[key]}
+                      aria-label={`${TIER_LABELS[key].name} %`}
+                      aria-valuetext={`${v[key]} %, ${(totalMw * v[key] / 100).toFixed(1)} MW`}
+                      onChange={(e) => setTier(key, Number(e.target.value))}
+                      style={S.range}
+                    />
+                    <span style={S.pct}>{v[key]}%</span>
+                    <span style={S.mw}>{(totalMw * v[key] / 100).toFixed(1)} MW</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {v.ai_pct > 0 && (
             <div style={S.col}>
               <div style={S.colTitle}>
-                {UI.HW_ADV_POWER_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_POWER_META}</span>
+                {UI.HW_ADV_AI_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_AI_META(mw_ai.toFixed(1))}</span>
               </div>
-              <div style={S.sliders}>
-                {['classic_pct', 'liquid_pct', 'ai_pct'].map((key) => (
-                  <div key={key} style={S.sliderRow}>
-                    <div style={S.sliderHead}>
-                      <span style={S.sliderName}>{TIER_LABELS[key].name}</span>
-                      <span style={S.sliderMeta}>{TIER_LABELS[key].meta}</span>
-                    </div>
-                    <div style={S.sliderControl}>
-                      <input
-                        type="range" min={0} max={100} step={1}
-                        value={v[key]}
-                        aria-label={`${TIER_LABELS[key].name} %`}
-                        aria-valuetext={`${v[key]} %, ${(totalMw * v[key] / 100).toFixed(1)} MW`}
-                        onChange={(e) => setTier(key, Number(e.target.value))}
-                        style={S.range}
-                      />
-                      <span style={S.pct}>{v[key]}%</span>
-                      <span style={S.mw}>{(totalMw * v[key] / 100).toFixed(1)} MW</span>
-                    </div>
-                  </div>
-                ))}
+              <div data-hardware-gpu-grid style={S.gpuCards}>
+                {GPU_CATALOG.map((g) => {
+                  const sel = v.gpu_sku_id === g.id;
+                  return (
+                    <Card
+                      as="button"
+                      key={g.id}
+                      type="button"
+                      onClick={() => onChange?.({ ...v, gpu_sku_id: g.id, gpu_hour_price: REFERENCE_GPU_HOUR_PRICES[g.id] || v.gpu_hour_price })}
+                      padding="sm"
+                      hover
+                      accent={sel}
+                      aria-pressed={sel}
+                      surface={2}
+                      style={S.gpuCard}
+                    >
+                      <div style={S.gpuSku}>{g.sku}</div>
+                      <div style={S.gpuMeta}>
+                        {g.vendor} · {g.rack_scale ? `${(g.tdp_w / 1000000).toFixed(1)} MW/rack` : `${g.tdp_w}W`} · {g.hbm_gb}GB
+                      </div>
+                      <div style={S.gpuPrice}>
+                        ${g.rack_scale ? `${(g.msrp_usd / 1000000).toFixed(1)}M/rack` : `${(g.msrp_usd / 1000).toFixed(0)}k/GPU`}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              <div data-hardware-ai-controls style={S.aiControls}>
+                <label style={S.ctrlBlock}>
+                  <span style={S.ctrlLabel}>{UI.HW_ADV_UTILIZATION}</span>
+                  <input type="range" min={40} max={95} step={1} value={v.utilization_pct}
+                    aria-label={UI.HW_GPU_UTIL_ARIA}
+                    aria-valuetext={`${v.utilization_pct} %`}
+                    onChange={(e) => onChange?.({ ...v, utilization_pct: Number(e.target.value) })} style={S.range} />
+                  <span style={S.ctrlValue}>{v.utilization_pct}%</span>
+                </label>
+                <label style={S.ctrlBlock}>
+                  <span style={S.ctrlLabel}>{UI.HW_ADV_PRICE}</span>
+                  <input type="number" step={0.10} min={0} max={20} value={v.gpu_hour_price}
+                    aria-label={UI.HW_ADV_PRICE}
+                    onChange={(e) => onChange?.({ ...v, gpu_hour_price: Number(e.target.value) })} style={S.numInput} />
+                </label>
               </div>
             </div>
-
-            {v.ai_pct > 0 && (
-              <div style={S.col}>
-                <div style={S.colTitle}>
-                  {UI.HW_ADV_AI_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_AI_META(mw_ai.toFixed(1))}</span>
-                </div>
-                <div data-hardware-gpu-grid style={S.gpuCards}>
-                  {GPU_CATALOG.map((g) => {
-                    const sel = v.gpu_sku_id === g.id;
-                    return (
-                      <Card
-                        as="button"
-                        key={g.id}
-                        type="button"
-                        onClick={() => onChange?.({ ...v, gpu_sku_id: g.id, gpu_hour_price: REFERENCE_GPU_HOUR_PRICES[g.id] || v.gpu_hour_price })}
-                        padding="sm"
-                        hover
-                        accent={sel}
-                        aria-pressed={sel}
-                        surface={2}
-                        style={S.gpuCard}
-                      >
-                        <div style={S.gpuSku}>{g.sku}</div>
-                        <div style={S.gpuMeta}>
-                          {g.vendor} · {g.rack_scale ? `${(g.tdp_w / 1000000).toFixed(1)} MW/rack` : `${g.tdp_w}W`} · {g.hbm_gb}GB
-                        </div>
-                        <div style={S.gpuPrice}>
-                          ${g.rack_scale ? `${(g.msrp_usd / 1000000).toFixed(1)}M/rack` : `${(g.msrp_usd / 1000).toFixed(0)}k/GPU`}
-                        </div>
-                      </Card>
-                    );
-                  })}
-                </div>
-
-                <div style={S.aiControls}>
-                  <label style={S.ctrlBlock}>
-                    <span style={S.ctrlLabel}>{UI.HW_ADV_UTILIZATION}</span>
-                    <input type="range" min={40} max={95} step={1} value={v.utilization_pct}
-                      aria-label={UI.HW_GPU_UTIL_ARIA}
-                      aria-valuetext={`${v.utilization_pct} %`}
-                      onChange={(e) => onChange?.({ ...v, utilization_pct: Number(e.target.value) })} style={S.range} />
-                    <span style={S.ctrlValue}>{v.utilization_pct}%</span>
-                  </label>
-                  <label style={S.ctrlBlock}>
-                    <span style={S.ctrlLabel}>{UI.HW_ADV_PRICE}</span>
-                    <input type="number" step={0.10} min={0} max={20} value={v.gpu_hour_price}
-                      aria-label={UI.HW_ADV_PRICE}
-                      onChange={(e) => onChange?.({ ...v, gpu_hour_price: Number(e.target.value) })} style={S.numInput} />
-                  </label>
-                </div>
-              </div>
-            )}
+          )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -386,13 +383,54 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-4)',
+    minWidth: 0,
+  },
+  fineTuneToggle: {
+    display: 'flex',
+    justifyContent: 'center',
+    padding: 'var(--cp-space-2) 0',
+    borderTop: '1px dashed var(--cp-border)',
+  },
+  fineTuneButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-1) var(--cp-space-3)',
+    background: 'transparent',
+    border: 'none',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-widest)',
+    cursor: 'pointer',
+    opacity: 0.85,
+    transition: 'opacity 0.2s',
+  },
+  advanced: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-4)',
+    minWidth: 0,
   },
   presetRail: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
     gap: 'var(--cp-space-3)',
   },
+  presetWrap: {
+    position: 'relative',
+    display: 'flex',
+    minWidth: 0,
+  },
+  presetHintSlot: {
+    position: 'absolute',
+    top: 'var(--cp-space-2)',
+    right: 'var(--cp-space-2)',
+    zIndex: 'var(--cp-z-floating)',
+  },
   presetCard: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
@@ -403,6 +441,7 @@ const S = {
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-primary)',
+    paddingRight: 'var(--cp-space-5)',
   },
   presetTagline: {
     fontSize: 'var(--cp-font-xs)',
@@ -529,41 +568,6 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
     fontVariantNumeric: 'tabular-nums',
-  },
-  fineTuneToggle: {
-    display: 'flex',
-    justifyContent: 'center',
-    padding: 'var(--cp-space-2) 0',
-    borderTop: '1px dashed var(--cp-border)',
-  },
-  fineTuneButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--cp-space-2)',
-    padding: 'var(--cp-space-1) var(--cp-space-3)',
-    background: 'transparent',
-    border: 'none',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-bold)',
-    color: 'var(--cp-text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: 'var(--cp-tracking-widest)',
-    cursor: 'pointer',
-    opacity: 0.7,
-    transition: 'all 0.2s',
-  },
-  advancedToggle: {
-    alignSelf: 'stretch',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-black)',
-    padding: 'var(--cp-space-3) var(--cp-space-4)',
-    background: 'var(--cp-surface-0)',
-    color: 'var(--cp-text-primary)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    cursor: 'pointer',
-    letterSpacing: 'var(--cp-tracking-wider)',
-    textTransform: 'uppercase',
   },
   grid: {
     display: 'grid',

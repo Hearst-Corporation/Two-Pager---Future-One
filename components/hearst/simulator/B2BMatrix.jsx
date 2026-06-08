@@ -8,6 +8,35 @@ import { UI } from '@/lib/ui-strings';
 const BM_ID_TO_LABEL = Object.fromEntries(BUSINESS_MODELS.map(b => [b.id, b.label]));
 const CT_ID_TO_LABEL = Object.fromEntries(CLIENT_TYPES.map(c => [c.id, c.label]));
 
+/** Short column headers — full label stays in `title` (matrix must fit panel width, no horizontal scroll). */
+const CT_SHORT_LABEL = {
+  hyperscalers: 'Hyperscalers',
+  operators: 'Operators',
+  neocloud: 'Neocloud',
+  qatar_gov: 'Qatar Gov',
+  defense: 'Defense',
+  banks: 'Banks',
+  telecoms: 'Telecoms',
+  enterprise: 'Enterprise',
+  ai_startups: 'Startups',
+};
+
+const BM_SHORT_LABEL = {
+  retail_colo: 'Retail colo',
+  wholesale_colo: 'Wholesale',
+  hyperscale_lease: 'Hyperscale',
+  powered_shell: 'Powered shell',
+  turnkey: 'Turnkey',
+  equinix_zone: 'Equinix zone',
+  multi_operator: 'Multi-op',
+  sovereign_ai: 'Gov AI cloud',
+  gpu_cloud: 'GPU cloud',
+  ai_training: 'AI training',
+  ai_inference: 'AI inference',
+  government: 'Government',
+  enterprise: 'Enterprise',
+};
+
 const COL_GROUPS = [
   { label: 'Businesses', ids: CLIENT_GROUPS.b2b, color: 'var(--cp-accent-maroon)' },
   { label: 'Government', ids: CLIENT_GROUPS.b2g, color: 'var(--cp-accent-maroon)' },
@@ -35,9 +64,17 @@ function fmtMargin(m) {
 function B2BMatrix({ selected, onCellClick }) {
   const allClientIds = COL_GROUPS.flatMap(g => g.ids);
 
+  const colPct = `${(100 - 17) / allClientIds.length}%`;
+
   return (
-    <div style={S.scroller}>
+    <div data-b2b-matrix style={S.scroller}>
       <table style={S.table}>
+        <colgroup>
+          <col style={{ width: '17%' }} />
+          {allClientIds.map((ct) => (
+            <col key={ct} style={{ width: colPct }} />
+          ))}
+        </colgroup>
         <thead>
           <tr>
             <th style={S.thCorner}>{UI.B2B_TH_CORNER}</th>
@@ -51,7 +88,9 @@ function B2BMatrix({ selected, onCellClick }) {
           <tr>
             <th style={S.thSub}></th>
             {allClientIds.map(ct => (
-              <th key={ct} style={S.thCol}>{CT_ID_TO_LABEL[ct] || ct}</th>
+              <th key={ct} style={S.thCol} title={CT_ID_TO_LABEL[ct] || ct}>
+                {CT_SHORT_LABEL[ct] || CT_ID_TO_LABEL[ct] || ct}
+              </th>
             ))}
           </tr>
         </thead>
@@ -63,7 +102,9 @@ function B2BMatrix({ selected, onCellClick }) {
               </tr>
               {rowGroup.ids.map(bm => (
                 <tr key={bm}>
-                  <td style={S.tdRowLabel}>{BM_ID_TO_LABEL[bm] || bm}</td>
+                  <td style={S.tdRowLabel} title={BM_ID_TO_LABEL[bm] || bm}>
+                    {BM_SHORT_LABEL[bm] || BM_ID_TO_LABEL[bm] || bm}
+                  </td>
                   {allClientIds.map(ct => {
                     const fit = getFit(bm, ct);
                     const isSelected = selected?.businessModelId === bm && selected?.clientTypeId === ct;
@@ -79,7 +120,7 @@ function B2BMatrix({ selected, onCellClick }) {
                         }}
                         onClick={() => onCellClick?.({ businessModelId: bm, clientTypeId: ct, fit })}
                         title={fit.note}>
-                        <div style={S.tdPricing}>{fmtPricing(fit.pricing)}</div>
+                        <div className="b2b-pricing" style={S.tdPricing}>{fmtPricing(fit.pricing)}</div>
                         <div style={S.tdMargin}>{fmtMargin(fit.margin)}</div>
                       </td>
                     );
@@ -100,19 +141,20 @@ const S = {
   scroller: {
     width: '100%',
     maxWidth: '100%',
-    overflowX: 'auto',
+    minWidth: 0,
+    overflowX: 'hidden',
     overflowY: 'hidden',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-md)',
   },
   table: {
     width: '100%',
-    minWidth: 980,
+    minWidth: 0,
+    tableLayout: 'fixed',
     borderCollapse: 'collapse',
     fontSize: 'var(--cp-font-micro)',
     background: 'var(--cp-surface-2)',
     borderRadius: 'var(--cp-radius-md)',
-    overflow: 'hidden',
   },
   thCorner: {
     padding: 'var(--cp-space-2) var(--cp-space-3)',
@@ -123,9 +165,6 @@ const S = {
     letterSpacing: 'var(--cp-tracking-wider)',
     color: 'var(--cp-text-muted)',
     borderBottom: '2px solid var(--cp-border)',
-    position: 'sticky',
-    left: 0,
-    zIndex: 'var(--cp-z-content)',
   },
   thGroup: {
     padding: 'var(--cp-space-2) var(--cp-space-3)',
@@ -139,17 +178,17 @@ const S = {
   },
   thSub: { background: 'var(--cp-surface-0)' },
   thCol: {
-    padding: 'var(--cp-space-2) var(--cp-space-2)',
+    padding: 'var(--cp-space-1) var(--cp-space-1)',
     fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-semibold)',
     textAlign: 'center',
     color: 'var(--cp-text-primary)',
     background: 'var(--cp-surface-0)',
     borderBottom: '1px solid var(--cp-border)',
-    maxWidth: 90,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    whiteSpace: 'normal',
+    lineHeight: 'var(--cp-leading-tight)',
+    overflowWrap: 'anywhere',
+    verticalAlign: 'bottom',
   },
   rowGroupHdr: {
     padding: 'var(--cp-space-2) var(--cp-space-3)',
@@ -163,25 +202,24 @@ const S = {
     borderBottom: '1px solid var(--cp-border)',
   },
   tdRowLabel: {
-    padding: 'var(--cp-space-2) var(--cp-space-3)',
-    fontSize: 'var(--cp-font-xs)',
+    padding: 'var(--cp-space-1) var(--cp-space-2)',
+    fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-semibold)',
     color: 'var(--cp-text-primary)',
     background: 'var(--cp-surface-0)',
     borderBottom: '1px solid var(--cp-border)',
-    position: 'sticky',
-    left: 0,
-    zIndex: 'var(--cp-z-content)',
-    minWidth: 132,
-    maxWidth: 150,
+    whiteSpace: 'normal',
+    lineHeight: 'var(--cp-leading-tight)',
+    overflowWrap: 'anywhere',
+    verticalAlign: 'middle',
   },
   tdCell: {
-    padding: 'var(--cp-space-2) var(--cp-space-1)',
+    padding: 'var(--cp-space-1)',
     textAlign: 'center',
     cursor: 'pointer',
     borderBottom: '1px solid var(--cp-border)',
     borderLeft: '1px solid var(--cp-border)',
-    minWidth: 68,
+    verticalAlign: 'middle',
   },
   tdEmpty: {
     padding: 'var(--cp-space-2) var(--cp-space-1)',

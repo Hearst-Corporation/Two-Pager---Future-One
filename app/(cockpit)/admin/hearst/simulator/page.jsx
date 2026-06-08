@@ -397,8 +397,8 @@ export default function SimulatorPage() {
               />
             </div>
 
-            <div style={S.advancedContent}>
-              <div style={S.advancedSection}>
+            <div data-sim-advanced>
+              <div data-sim-advanced-section>
                 <Eyebrow block>{UI.SIM_CONFIG_MODEL_LABEL}</Eyebrow>
                 <ArchetypePicker
                   archetypes={PRIMARY_DEAL_ARCHETYPES}
@@ -406,7 +406,7 @@ export default function SimulatorPage() {
                   onSelectPrimary={onSelectPrimary}
                 />
               </div>
-              <div style={S.advancedSection}>
+              <div data-sim-advanced-section>
                 <Eyebrow block>{UI.SIM_CONFIG_HW_LABEL}</Eyebrow>
                 <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
               </div>
@@ -469,12 +469,12 @@ const S = {
   configCard: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
+    gap: 'var(--cp-space-3)',
     minWidth: 0,
   },
   configHeader: {
     ...L.rowBetween,
-    marginBottom: 'var(--cp-space-2)',
+    flexShrink: 0,
   },
   eyebrow: {
     color: 'var(--cp-text-muted)',
@@ -484,18 +484,6 @@ const S = {
     textTransform: 'uppercase',
     opacity: 0.8,
   },
-  advancedContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-6)',
-    paddingTop: 'var(--cp-space-4)',
-    borderTop: '1px solid var(--cp-border-base)',
-  },
-  advancedSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
-  },
   validateHint: {
     fontSize: 'var(--cp-font-base)',
     color: 'var(--cp-text-muted)',
@@ -503,9 +491,8 @@ const S = {
   },
   configFooter: {
     ...L.rowBetween,
-    gap: 'var(--cp-space-4)',
+    gap: 'var(--cp-space-3)',
     flexWrap: 'wrap',
-    marginTop: 'var(--cp-space-4)',
     paddingTop: 'var(--cp-space-4)',
     borderTop: '1px solid var(--cp-border-base)',
   },

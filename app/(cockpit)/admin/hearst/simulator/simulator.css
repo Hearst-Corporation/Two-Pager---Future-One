@@ -1,4 +1,9 @@
-/* simulator.css — viewport-fill layout, config card scroll interne */
+/* simulator.css — layout Config page
+   Container: [data-sim-config] (panneau centre réel, pas le viewport).
+   2 seuils synchronisés avec results :
+     · 640px  — narrow ↔ medium
+     · 1080px — medium ↔ wide
+*/
 
 body.oracle-simulator-page .ct-center-panel {
   flex: 1 1 auto !important;
@@ -22,7 +27,6 @@ body.oracle-simulator-page .oracle-page {
 }
 
 /* oracle-page → sim-wrap → case + config */
-/* Scroll interne à la card config, case + footer CTA restent accessibles */
 body.oracle-simulator-page [data-sim-wrap] {
   flex: 1 1 auto;
   min-height: 0;
@@ -59,16 +63,23 @@ body.oracle-simulator-page [data-sim-config-body] {
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scroll-padding-block-end: var(--cp-space-4);
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cp-border-strong) transparent;
   display: flex;
   flex-direction: column;
-  gap: var(--cp-space-3);
+  gap: var(--cp-space-4);
+  padding-block-end: var(--cp-space-2);
 }
 
 body.oracle-simulator-page [data-sim-config-body]::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+}
+
+body.oracle-simulator-page [data-sim-config-body]::-webkit-scrollbar-thumb {
+  background: var(--cp-border-strong);
+  border-radius: var(--cp-radius-pill);
 }
 
 body.oracle-simulator-page [data-sim-config-footer] {
@@ -76,7 +87,6 @@ body.oracle-simulator-page [data-sim-config-footer] {
   min-width: 0;
 }
 
-/* Bloc mode (switcher + hero) — hauteurs réservées, pas de layout shift */
 body.oracle-simulator-page [data-sim-mode-stack] {
   display: flex;
   flex-direction: column;
@@ -84,116 +94,187 @@ body.oracle-simulator-page [data-sim-mode-stack] {
   flex-shrink: 0;
 }
 
-body.oracle-simulator-page {
-  --cp-sim-hero-row-min: 11.5rem;
-}
-
 body.oracle-simulator-page [data-sim-input-hero] {
   flex-shrink: 0;
-  min-height: var(--cp-sim-hero-row-min);
+  min-height: var(--cp-sim-hero-row-min-stack);
 }
 
-/* ── Container queries : panneau centre étroit (rail chat) ── */
-@container sim-config (max-width: 880px) {
-  [data-archetype-grid] {
-    grid-template-columns: 1fr !important;
-  }
-
-  [data-hardware-presets] {
-    grid-template-columns: 1fr !important;
-  }
-
-  [data-hardware-spine] {
-    grid-template-columns: 1fr !important;
-  }
-
-  [data-hardware-advanced-grid] {
-    grid-template-columns: 1fr !important;
-  }
+body.oracle-simulator-page [data-sim-advanced] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-section-gap);
+  padding-top: var(--cp-space-4);
+  border-top: 1px solid var(--cp-border-base);
 }
 
-@container sim-config (max-width: 720px) {
-  body.oracle-simulator-page {
-    --cp-sim-hero-row-min: 18.5rem;
-  }
-
-  [data-brief-bar-row] {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Segments restent sur 1 ligne — pas de passage en 3 rangées (layout shift) */
-  [data-input-mode-grid] button {
-    padding: 0 var(--cp-space-2) !important;
-    font-size: var(--cp-font-xs) !important;
-  }
+body.oracle-simulator-page [data-sim-advanced-section] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-3);
+  min-width: 0;
 }
 
-@container sim-config (max-width: 640px) {
-  [data-hardware-summary] {
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER NARROW — container < 640px
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.oracle-simulator-page [data-brief-bar-row] {
+  grid-template-columns: 1fr !important;
+  gap: var(--cp-space-4) !important;
+}
+
+body.oracle-simulator-page [data-input-mode-grid] button {
+  padding: 0 var(--cp-space-2) !important;
+  font-size: var(--cp-font-xs) !important;
+  gap: var(--cp-space-1) !important;
+}
+
+body.oracle-simulator-page [data-archetype-grid] {
+  grid-template-columns: 1fr !important;
+}
+
+body.oracle-simulator-page [data-hardware-presets] {
+  grid-template-columns: 1fr !important;
+}
+
+body.oracle-simulator-page [data-hardware-spine] {
+  grid-template-columns: 1fr !important;
+}
+
+body.oracle-simulator-page [data-hardware-summary] {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body.oracle-simulator-page [data-hardware-advanced-grid] {
+  grid-template-columns: 1fr !important;
+}
+
+body.oracle-simulator-page [data-hardware-gpu-grid] {
+  grid-template-columns: 1fr !important;
+}
+
+body.oracle-simulator-page [data-hardware-ai-controls] {
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+body.oracle-simulator-page [data-sim-config-footer] {
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+body.oracle-simulator-page [data-sim-config-footer] .sim-config-cta {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER MEDIUM — 640px ≤ container < 1080px
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@container sim-config (min-width: 640px) {
+  body.oracle-simulator-page [data-sim-input-hero] {
+    min-height: var(--cp-sim-hero-row-min);
+  }
+
+  body.oracle-simulator-page [data-brief-bar-row] {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) !important;
+    gap: var(--cp-space-5) !important;
+  }
+
+  body.oracle-simulator-page [data-input-mode-grid] button {
+    padding: 0 var(--cp-space-3) !important;
+    font-size: var(--cp-font-sm) !important;
+    gap: var(--cp-space-2) !important;
+  }
+
+  body.oracle-simulator-page [data-archetype-grid] {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  [data-hardware-advanced-grid],
-  [data-hardware-gpu-grid] {
+  body.oracle-simulator-page [data-hardware-presets] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  body.oracle-simulator-page [data-hardware-spine] {
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 0.34fr) !important;
+  }
+
+  body.oracle-simulator-page [data-hardware-summary] {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  body.oracle-simulator-page [data-hardware-advanced-grid] {
     grid-template-columns: 1fr !important;
   }
 
-  [data-sim-size] {
-    flex-wrap: wrap;
+  body.oracle-simulator-page [data-hardware-gpu-grid] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.oracle-simulator-page [data-hardware-ai-controls] {
+    flex-direction: row !important;
     align-items: center !important;
   }
 
-  [data-sim-size] input {
-    font-size: clamp(var(--cp-font-xl), 8vw, var(--cp-font-2xl)) !important;
-    width: 100% !important;
-    flex: 1 1 100% !important;
+  body.oracle-simulator-page [data-sim-config-footer] {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+
+  body.oracle-simulator-page [data-sim-config-footer] .sim-config-cta {
+    width: auto;
+    flex: 0 0 auto;
   }
 }
 
-/* ── Viewport : tablette / mobile ── */
+@container sim-config (min-width: 640px) and (max-width: 1079px) {
+  body.oracle-simulator-page [data-hardware-advanced-grid] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER WIDE — container ≥ 1080px
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@container sim-config (min-width: 1080px) {
+  body.oracle-simulator-page [data-archetype-grid] {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  body.oracle-simulator-page [data-hardware-spine] {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.34fr) !important;
+  }
+
+  body.oracle-simulator-page [data-hardware-advanced-grid] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Viewport : padding page sur petits écrans ── */
 @media (max-width: 900px) {
   body.oracle-simulator-page .oracle-page {
     padding-inline: var(--cp-space-4);
   }
 
-  [data-archetype-grid] {
-    grid-template-columns: 1fr !important;
-  }
-
-  [data-hardware-presets],
-  [data-hardware-spine] {
-    grid-template-columns: 1fr !important;
-  }
-
-  [data-sim-config-footer] {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-
-  [data-sim-config-footer] .sim-config-cta {
-    width: 100%;
-  }
-
-  [data-sim-case] .sim-case-sentence,
-  [data-sim-case] [style*="clamp(20px"] {
+  body.oracle-simulator-page [data-sim-case] .sim-case-sentence,
+  body.oracle-simulator-page [data-sim-case] [style*="clamp(20px"] {
     font-size: clamp(18px, 4.5vw, 24px) !important;
     line-height: 1.35 !important;
   }
 }
 
 @media (max-width: 600px) {
-  [data-hardware-summary],
-  [data-hardware-gpu-grid],
-  [data-hardware-advanced-grid] {
-    grid-template-columns: 1fr !important;
-  }
-
   body.oracle-simulator-page [data-sim-config] {
     padding: var(--cp-space-4) !important;
   }
 
   body.oracle-simulator-page [data-sim-case] {
     padding: var(--cp-space-4) !important;
+  }
+
+  body.oracle-simulator-page [data-hardware-summary] {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -223,4 +304,3 @@ body.oracle-simulator-page [data-sim-input-hero] {
     min-height: 64px;
   }
 }
-

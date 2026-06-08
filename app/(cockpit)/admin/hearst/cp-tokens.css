@@ -33,6 +33,7 @@
      --cp-chat-rail-width (padding-right de .ct-page-area). Ne pas le retirer. */
   --ct-rail-right: 0px;
   --cp-chat-rail-width: min(420px, 32vw);
+  --cp-chat-rail-collapsed-width: 40px;
 }
 
 body.oracle-simulator-page {
@@ -186,6 +187,8 @@ body.oracle-simulator-page {
   --cp-icon-lg:        28px;
   --cp-icon-stroke:    1.6;
   --cp-archetype-card-min-height: 100px;
+  --cp-sim-hero-row-min:       11.5rem;
+  --cp-sim-hero-row-min-stack: 18.5rem;
   --cp-display-input:  46px;
   --cp-display-unit:   22px;
   --cp-chart-tick:     11px;
@@ -236,9 +239,9 @@ body.oracle-simulator-page {
   --cp-op-uptime:          #555555;
   --cp-op-sec:             #1A3560;
   --cp-op-default:    var(--ct-text-muted);
-  --cp-op-brookfield: #0ea5e9;
+  --cp-op-brookfield: var(--cp-accent);
   --cp-op-qai:        #6366f1;
-  --cp-op-qia:        #a855f7;
+  --cp-op-qia:        var(--cp-accent-strong);
 }
 
 /* =====================================================================

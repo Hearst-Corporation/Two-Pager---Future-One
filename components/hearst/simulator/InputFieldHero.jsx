@@ -153,10 +153,9 @@ const S = {
   },
   row: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
-    gap: 'var(--cp-space-5)',
     alignItems: 'stretch',
-    minHeight: 'var(--cp-sim-hero-row-min, 11.5rem)',
+    minHeight: '100%',
+    minWidth: 0,
   },
   fieldCol: {
     display: 'flex',

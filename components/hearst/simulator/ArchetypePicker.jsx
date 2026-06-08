@@ -2,7 +2,8 @@
 
 import PropTypes from 'prop-types';
 import { Card } from '@/components/hearst/ui';
-import { T, L } from '@/lib/cp-styles';
+import InfoHint from '@/components/hearst/InfoHint';
+import { T } from '@/lib/cp-styles';
 
 // One glyph per operating model. Simple line icons on currentColor — neutral
 // selection (no accent tint). Keyed by archetype id; falls back to a
@@ -73,27 +74,33 @@ ArchetypeIcon.propTypes = { id: PropTypes.string };
  */
 export default function ArchetypePicker({ archetypes = [], primaryId, onSelectPrimary }) {
   return (
-    <div data-archetype-grid style={L.grid2Min}>
+    <div data-archetype-grid style={S.grid}>
       {archetypes.map((a) => {
         const isPrimary = primaryId === a.id;
         return (
-          <Card
-            as="button"
-            key={a.id}
-            type="button"
-            onClick={() => onSelectPrimary?.(a.id)}
-            padding="md"
-            hover
-            aria-pressed={isPrimary}
-            surface={isPrimary ? 3 : 2}
-            style={{ ...S.card, ...(isPrimary ? S.cardSelected : {}) }}
-          >
-            <div style={{ ...S.icon, color: isPrimary ? 'var(--cp-text-primary)' : 'var(--cp-text-muted)' }}>
-              <ArchetypeIcon id={a.id} />
-            </div>
-            <span style={S.title}>{a.label}</span>
-            <div style={S.desc}>{a.short}</div>
-          </Card>
+          <div key={a.id} style={S.cardWrap}>
+            <Card
+              as="button"
+              type="button"
+              onClick={() => onSelectPrimary?.(a.id)}
+              padding="md"
+              hover
+              aria-pressed={isPrimary}
+              surface={isPrimary ? 3 : 2}
+              style={{ ...S.card, ...(isPrimary ? S.cardSelected : {}) }}
+            >
+              <div style={{ ...S.icon, color: isPrimary ? 'var(--cp-text-primary)' : 'var(--cp-text-muted)' }}>
+                <ArchetypeIcon id={a.id} />
+              </div>
+              <span style={S.title}>{a.label}</span>
+              <div style={S.desc}>{a.short}</div>
+            </Card>
+            {a.description && (
+              <span style={S.hintSlot}>
+                <InfoHint label={a.label} align="right" content={{ title: a.label, body: a.description }} />
+              </span>
+            )}
+          </div>
         );
       })}
     </div>
@@ -107,7 +114,27 @@ ArchetypePicker.propTypes = {
 };
 
 const S = {
+  grid: {
+    display: 'grid',
+    gap: 'var(--cp-space-3)',
+    alignItems: 'stretch',
+    minWidth: 0,
+  },
+  // Wrapper so the (i) lives as a sibling of the card button (no nested button),
+  // pinned to the card's top-right corner.
+  cardWrap: {
+    position: 'relative',
+    display: 'flex',
+    minWidth: 0,
+  },
+  hintSlot: {
+    position: 'absolute',
+    top: 'var(--cp-space-2)',
+    right: 'var(--cp-space-2)',
+    zIndex: 'var(--cp-z-floating)',
+  },
   card: {
+    width: '100%',
     display: 'grid',
     gridTemplateRows: 'auto auto 1fr',
     gap: 'var(--cp-space-1)',

@@ -117,7 +117,7 @@ const S = {
     display: 'grid',
     gridTemplateColumns: '1fr',
     gap: 'var(--cp-space-4)',
-    alignItems: 'stretch',
+    alignItems: 'start',
   },
   vizRail: {
     display: 'grid',
@@ -156,6 +156,10 @@ const S = {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-sm)',
     lineHeight: 'var(--cp-leading-normal)',
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
   },
   vizPanelHead: {
     display: 'flex',
@@ -187,8 +191,10 @@ const S = {
   vizContainer: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+    width: '100%',
+    minWidth: 0,
     overflow: 'hidden',
   },
 };

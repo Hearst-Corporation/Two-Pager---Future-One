@@ -2,21 +2,27 @@
 
 import { memo } from 'react';
 import PropTypes from 'prop-types';
-import { fmtPctRaw, fmtUSD, MISSING } from '@/lib/hearst-format';
+import { fmtPctFromRatio, fmtPctRaw, fmtUSD, fmtX, MISSING } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
-import { DECISION_METRICS, verdictDecision } from '@/lib/hearst-results-view';
+import { DECISION_METRICS } from '@/lib/hearst-results-view';
 import { deriveReturnsComposition } from '@/lib/returns-composition';
+import InfoHint from '@/components/hearst/InfoHint';
 
-// Tone → token color for the decision verdict / warnings. Presentation only.
-const TONE_COLOR = {
-  positive: 'var(--cp-success)',
-  caution: 'var(--cp-warning)',
-  negative: 'var(--cp-error)',
-};
-const TONE_SOFT = {
-  positive: 'var(--cp-success-bg)',
-  caution: 'var(--cp-warning-bg)',
-  negative: 'var(--cp-error-bg)',
+// LabelWithHint — label + a subtle (i) education affordance on one baseline.
+// `hint` keys into UI.KPI_EDU; absent → plain label (no behaviour change).
+function LabelWithHint({ label, hint, labelStyle }) {
+  if (!hint) return <span style={labelStyle}>{label}</span>;
+  return (
+    <span style={S.labelRow}>
+      <span style={labelStyle}>{label}</span>
+      <InfoHint id={hint} label={label} />
+    </span>
+  );
+}
+LabelWithHint.propTypes = {
+  label: PropTypes.string.isRequired,
+  hint: PropTypes.string,
+  labelStyle: PropTypes.object,
 };
 
 // ── InlineMetric ─────────────────────────────────────────────────────────────
@@ -24,10 +30,10 @@ const TONE_SOFT = {
  * Single label + value row used in the capital panel sidebar.
  * @param {{ label: string, value: string|null }} props
  */
-export const InlineMetric = memo(function InlineMetric({ label, value }) {
+export const InlineMetric = memo(function InlineMetric({ label, value, hint }) {
   return (
     <div style={S.inlineMetric}>
-      <span style={S.metricLabel}>{label}</span>
+      <LabelWithHint label={label} hint={hint} labelStyle={S.metricLabel} />
       <strong style={S.inlineMetricValue}>{value ?? MISSING}</strong>
     </div>
   );
@@ -35,6 +41,7 @@ export const InlineMetric = memo(function InlineMetric({ label, value }) {
 InlineMetric.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string,
+  hint: PropTypes.string,
 };
 
 // ── BoardMetric ──────────────────────────────────────────────────────────────
@@ -42,10 +49,10 @@ InlineMetric.propTypes = {
  * KPI card for the economics band (label + value + note).
  * @param {{ label: string, value: string|null, note: string }} props
  */
-export const BoardMetric = memo(function BoardMetric({ label, value, note }) {
+export const BoardMetric = memo(function BoardMetric({ label, value, note, hint }) {
   return (
     <div style={S.boardMetric}>
-      <span style={S.metricLabel}>{label}</span>
+      <LabelWithHint label={label} hint={hint} labelStyle={S.metricLabel} />
       <strong style={S.boardMetricValue}>{value ?? MISSING}</strong>
       <span style={S.boardMetricNote}>{note}</span>
     </div>
@@ -55,6 +62,7 @@ BoardMetric.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string,
   note: PropTypes.string,
+  hint: PropTypes.string,
 };
 
 // ── CapitalDonut ─────────────────────────────────────────────────────────────
@@ -78,7 +86,7 @@ export const CapitalDonut = memo(function CapitalDonut({ segments }) {
           <strong style={S.donutValue}>{UI.RESULTS_DONUT_VALUE}</strong>
         </div>
       </div>
-      <div style={S.donutLegend}>
+      <div data-donut-legend style={S.donutLegend}>
         {segments.map(s => (
           <div key={s.label} style={S.donutLegendRow}>
             <span style={{ ...S.donutDot, background: s.color }} />
@@ -99,18 +107,53 @@ CapitalDonut.propTypes = {
   })).isRequired,
 };
 
+// ── CapitalStructureGrid ─────────────────────────────────────────────────────
+/** Structure metrics — 2 colonnes fixes (gauche / droite), ordre board screenshot. */
+export const CapitalStructureGrid = memo(function CapitalStructureGrid({ projection, scenario }) {
+  const occupancy = scenario?.target_occupancy_pct != null
+    ? fmtPctRaw(scenario.target_occupancy_pct)
+    : MISSING;
+  const exitYear = scenario?.exit_year
+    ? UI.RESULTS_IM_EXIT_YEAR(scenario.exit_year)
+    : MISSING;
+
+  return (
+    <div data-structure-rows style={S.structureGrid}>
+      <InlineMetric label={UI.RESULTS_IM_BUILD_COST} value={fmtUSD(projection?.total_capex)} hint="capex" />
+      <InlineMetric label={UI.RESULTS_IM_EQUITY_IDC} value={fmtUSD(projection?.equity_invested)} hint="equity" />
+      <InlineMetric label={UI.RESULTS_IM_TERMINAL} value={fmtUSD(projection?.terminal_value)} hint="terminal_value" />
+      <InlineMetric
+        label={UI.RESULTS_IM_TERMINAL_EQUITY}
+        value={fmtUSD(projection?.terminal_value_to_equity)}
+        hint="terminal_value_to_equity"
+      />
+      <InlineMetric
+        label={UI.RESULTS_DM_IRR}
+        value={fmtPctFromRatio(projection?.irr_post_tax ?? projection?.irr)}
+        hint="irr"
+      />
+      <InlineMetric label={UI.RESULTS_IM_DSCR} value={fmtX(projection?.dscr_stabilized)} hint="dscr" />
+      <InlineMetric label={UI.RESULTS_IM_OCCUPANCY} value={occupancy} hint="occupancy" />
+      <InlineMetric label={UI.RESULTS_IM_EXIT_LABEL} value={exitYear} hint="exit_year" />
+    </div>
+  );
+});
+CapitalStructureGrid.propTypes = {
+  projection: PropTypes.object,
+  scenario: PropTypes.object,
+};
+
 // ── DecisionKpiCell ──────────────────────────────────────────────────────────
 /**
- * One KPI inside the investment-case header grid. Sits as a co-equal member next
- * to the verdict — same row, same baseline. Value clamps and never wraps; the
- * cell is minmax(0,1fr) so four of them stay on one stable grid with no overflow.
+ * One KPI inside the investment-case header grid. Value clamps and never wraps;
+ * four cells share one stable grid with no overflow.
  * @param {{ label: string, value: string, sub?: string|null }} props
  */
-export const DecisionKpiCell = memo(function DecisionKpiCell({ label, value, sub }) {
+export const DecisionKpiCell = memo(function DecisionKpiCell({ label, value, sub, hint }) {
   return (
     <div style={S.kpiCell}>
-      <span style={S.kpiLabel}>{label}</span>
-      <strong style={S.kpiValue} title={value ?? undefined}>{value ?? MISSING}</strong>
+      <LabelWithHint label={label} hint={hint} labelStyle={S.kpiLabel} />
+      <strong data-kpi-value style={S.kpiValue} title={value ?? undefined}>{value ?? MISSING}</strong>
       {sub ? <span style={S.kpiSub}>{sub}</span> : null}
     </div>
   );
@@ -119,26 +162,21 @@ DecisionKpiCell.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string,
   sub: PropTypes.string,
+  hint: PropTypes.string,
 };
 
 // ── DecisionHeader ───────────────────────────────────────────────────────────
 /**
  * Investment-case header (UI V2 — Phase 1, refactored). The PRIMARY OBJECT is the
- * full line "APPROVE + IRR + MOIC + NPV + CAPITAL" — verdict and KPIs are co-equal
- * members of ONE stable grid, not a banner over a separate row. A thin case-header
- * line sits at the top; a compact meta strip (returns composition · terminal-value
- * flag · DSCR) sits below — no full-width stacked chunks, no duplicated hierarchy.
+ * KPI strip IRR + MOIC + NPV + CAPITAL. Investment-case narrative lives in the
+ * hero above — no duplicate meta line here.
  *
  * PRESENTATION ONLY — every value comes from existing engine fields via
- * verdictDecision() / DECISION_METRICS / deriveReturnsComposition(). No new math.
+ * DECISION_METRICS / deriveReturnsComposition(). No new math.
  *
- * @param {{ projection: object|null, caseHeader: string }} props
+ * @param {{ projection: object|null }} props
  */
-export const DecisionHeader = memo(function DecisionHeader({ projection, caseHeader }) {
-  const v = verdictDecision(projection);
-  const color = TONE_COLOR[v.tone] || 'var(--cp-text-primary)';
-  const soft = TONE_SOFT[v.tone] || 'var(--cp-surface-1)';
-
+export const DecisionHeader = memo(function DecisionHeader({ projection }) {
   const capital = fmtUSD(projection?.total_capex);
   const irr = DECISION_METRICS.find(m => m.id === 'irr');
   const moic = DECISION_METRICS.find(m => m.id === 'moic');
@@ -146,27 +184,17 @@ export const DecisionHeader = memo(function DecisionHeader({ projection, caseHea
 
   return (
     <div data-decision-header style={S.dhWrap}>
-      {/* Case header — thin line at the top of the same card */}
-      <div style={S.caseHeader}>{caseHeader}</div>
-
-      {/* Investment-case header: verdict + 4 KPIs on ONE grid. Primary object. */}
       <div data-decision-kpis style={S.caseGrid}>
-        <div data-verdict-cell style={{ ...S.verdictCell, borderColor: color }}>
-          <span style={S.verdictEyebrow}>{UI.RESULTS_DECISION_EYEBROW}</span>
-          <strong data-verdict style={{ ...S.verdictWord, color }}>{v.decision}</strong>
-          <span style={{ ...S.verdictDetail, background: soft, color }}>{v.detail}</span>
-        </div>
-        <DecisionKpiCell label={UI.RESULTS_KPI_IRR} value={irr?.value(projection)} sub={irr?.subValue?.(projection)} />
-        <DecisionKpiCell label={UI.RESULTS_KPI_MOIC} value={moic?.value(projection)} sub={moic?.subValue?.(projection)} />
-        <DecisionKpiCell label={UI.RESULTS_KPI_NPV} value={npv?.value(projection)} sub={npv?.subValue?.(projection)} />
-        <DecisionKpiCell label={UI.RESULTS_KPI_CAPITAL} value={capital} />
+        <DecisionKpiCell label={UI.RESULTS_DM_IRR} value={irr?.value(projection)} sub={irr?.subValue?.(projection)} hint="irr" />
+        <DecisionKpiCell label={UI.RESULTS_KPI_MOIC} value={moic?.value(projection)} sub={moic?.subValue?.(projection)} hint="moic" />
+        <DecisionKpiCell label={UI.RESULTS_KPI_NPV} value={npv?.value(projection)} sub={npv?.subValue?.(projection)} hint="npv" />
+        <DecisionKpiCell label={UI.RESULTS_KPI_CAPITAL} value={capital} hint="capex" />
       </div>
     </div>
   );
 });
 DecisionHeader.propTypes = {
   projection: PropTypes.object,
-  caseHeader: PropTypes.string.isRequired,
 };
 
 // ── ReturnsComposition ───────────────────────────────────────────────────────
@@ -184,10 +212,10 @@ export const ReturnsComposition = memo(function ReturnsComposition({ projection 
   const strong = c.tier === 'terminal_dominant' || c.tier === 'terminal_only' || c.tier === 'no_positive_proceeds';
   return (
     <div data-returns-composition style={S.rcWrap}>
-      <span style={S.rcTitle}>{UI.RESULTS_RC_TITLE}</span>
+      <LabelWithHint label={UI.RESULTS_RC_TITLE} hint="returns_composition" labelStyle={S.cardEyebrow} />
       {hasSplit ? (
         <>
-          <div style={S.rcRows}>
+          <div data-rc-rows style={S.rcRows}>
             <span style={S.rcCell}><span style={S.rcLabel}>{UI.RESULTS_RC_OPERATIONS}</span><strong style={S.rcValue}>{Math.round(c.operationsPct * 100)}%</strong></span>
             <span style={S.rcCell}><span style={S.rcLabel}>{UI.RESULTS_RC_TERMINAL}</span><strong style={S.rcValue}>{Math.round(c.terminalPct * 100)}%</strong></span>
           </div>
@@ -197,7 +225,7 @@ export const ReturnsComposition = memo(function ReturnsComposition({ projection 
           </div>
         </>
       ) : null}
-      <span style={{ ...S.rcNote, color: strong ? 'var(--cp-text-primary)' : 'var(--cp-text-muted)' }}>{c.note}</span>
+      <span data-rc-note style={{ ...S.rcNote, color: strong ? 'var(--cp-text-primary)' : 'var(--cp-text-muted)' }}>{c.note}</span>
     </div>
   );
 });
@@ -236,6 +264,13 @@ LayerCard.propTypes = {
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 const S = {
+  // Label + (i) hint on one baseline. The icon never grows the row height.
+  labelRow: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-1)',
+    minWidth: 0,
+  },
   // Investment-case header (UI V2 — Phase 1, refactored)
   dhWrap: {
     display: 'flex',
@@ -243,63 +278,14 @@ const S = {
     gap: 'var(--cp-space-3)',
     minWidth: 0,
   },
-  caseHeader: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-md)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-tight)',
-    lineHeight: 'var(--cp-leading-tight)',
-  },
-  // ONE grid: verdict cell + 4 KPI cells. Single stable row; the verdict column
-  // sizes to content, KPIs share the rest as equal minmax(0,1fr) tracks so they
-  // never overflow or wrap. This whole line is the primary object.
   caseGrid: {
     display: 'grid',
     alignItems: 'stretch',
     gap: 'var(--cp-space-4)',
-    padding: 'var(--cp-space-4)',
+    padding: 'var(--cp-space-4) var(--cp-space-5)',
     background: 'var(--cp-surface-1)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-lg)',
-  },
-  verdictCell: {
-    minWidth: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    gap: 'var(--cp-space-1)',
-    paddingRight: 'var(--cp-space-4)',
-    borderLeft: 'var(--cp-space-1) solid currentColor',
-    paddingLeft: 'var(--cp-space-3)',
-    borderRight: '1px solid var(--cp-border)',
-  },
-  verdictEyebrow: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    textTransform: 'uppercase',
-  },
-  // ~35% smaller than the previous 48–80px banner and bounded to fit the verdict
-  // column so it never collides with the KPIs; cell height ~half the old block.
-  verdictWord: {
-    fontSize: 'clamp(24px, 2.3vw, 34px)',
-    lineHeight: 0.95,
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-tight)',
-    fontVariantNumeric: 'tabular-nums',
-    whiteSpace: 'nowrap',
-  },
-  verdictDetail: {
-    width: 'fit-content',
-    maxWidth: '100%',
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-bold)',
-    padding: 'calc(var(--cp-space-1) / 2) var(--cp-space-2)',
-    borderRadius: 'var(--cp-radius-pill)',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
   },
   kpiCell: {
     minWidth: 0,
@@ -319,7 +305,6 @@ const S = {
   // fits its track. nowrap + ellipsis is a hard backstop, never the normal state.
   kpiValue: {
     color: 'var(--cp-text-strong)',
-    fontSize: 'clamp(18px, 1.5vw, 24px)',
     lineHeight: 1.05,
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
@@ -336,56 +321,10 @@ const S = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
-  // Compact meta strip — returns composition · TV flag · DSCR on one row.
-  metaStrip: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 'var(--cp-space-2) var(--cp-space-5)',
-    padding: 'var(--cp-space-2) var(--cp-space-4)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    background: 'var(--cp-surface-1)',
-  },
-  metaItem: {
-    display: 'inline-flex',
-    alignItems: 'baseline',
-    gap: 'var(--cp-space-2)',
-    minWidth: 0,
-  },
-  metaRisk: {
-    display: 'inline-flex',
-    alignItems: 'baseline',
-    gap: 'var(--cp-space-2)',
-    marginLeft: 'auto',
-  },
-  metaLabel: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    textTransform: 'uppercase',
-  },
-  metaValue: {
-    color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-bold)',
-    fontVariantNumeric: 'tabular-nums',
-  },
-  metaFlag: {
-    color: 'var(--cp-text-strong)',
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-bold)',
-    lineHeight: 'var(--cp-leading-tight)',
-  },
   rcWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-2)',
-    padding: 'var(--cp-space-4)',
-    background: 'var(--cp-surface-1)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
+    gap: 'var(--cp-space-4)',
   },
   rcTitle: {
     color: 'var(--cp-text-muted)',
@@ -433,10 +372,10 @@ const S = {
   donutWrap: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 'var(--cp-space-4)',
-    '--donut-size': '150px',
-    '--donut-hole': '88px',
+    width: '100%',
+    minWidth: 0,
   },
   donut: {
     width: 'var(--donut-size)',
@@ -446,6 +385,7 @@ const S = {
     placeItems: 'center',
     boxShadow: 'inset 0 0 0 1px var(--cp-border)',
     flexShrink: 0,
+    alignSelf: 'center',
   },
   donutHole: {
     width: 'var(--donut-hole)',
@@ -461,13 +401,19 @@ const S = {
   donutLabel: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
   },
   donutValue: {
     color: 'var(--cp-text-strong)',
     fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-black)',
+    lineHeight: 1.1,
+  },
+  structureGrid: {
+    width: '100%',
+    minWidth: 0,
   },
   donutLegend: {
     width: '100%',
@@ -482,8 +428,8 @@ const S = {
     alignItems: 'center',
   },
   donutDot: {
-    width: 9,
-    height: 9,
+    width: 'var(--cp-space-2)',
+    height: 'var(--cp-space-2)',
     borderRadius: '50%',
   },
   donutLegendLabel: {
@@ -493,33 +439,37 @@ const S = {
   donutLegendValue: {
     color: 'var(--cp-text-primary)',
     fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-bold)',
     whiteSpace: 'nowrap',
   },
   inlineMetric: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
+    gap: 'var(--cp-space-2)',
     minWidth: 0,
+    paddingBottom: 'var(--cp-space-1)',
   },
   metricLabel: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-black)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
-    fontWeight: 700,
   },
   inlineMetricValue: {
     color: 'var(--cp-text-strong)',
     fontSize: 'var(--cp-font-base)',
+    fontWeight: 'var(--cp-weight-bold)',
     lineHeight: 'var(--cp-leading-tight)',
     fontVariantNumeric: 'tabular-nums',
   },
   boardMetric: {
     minWidth: 0,
+    height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-4)',
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-4) var(--cp-space-5)',
     background: 'var(--cp-surface-1)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-md)',
@@ -535,19 +485,25 @@ const S = {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-sm)',
     lineHeight: 'var(--cp-leading-normal)',
+    marginTop: 'auto',
   },
   layerCard: {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
     background: 'var(--cp-surface-1)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-md)',
-    padding: 'var(--cp-space-4)',
+    padding: 'var(--cp-space-4) var(--cp-space-5)',
     minWidth: 0,
   },
   layerHead: {
     display: 'flex',
     alignItems: 'baseline',
     gap: 'var(--cp-space-3)',
-    marginBottom: 'var(--cp-space-3)',
+    marginBottom: 'var(--cp-space-4)',
+    paddingBottom: 'var(--cp-space-3)',
+    borderBottom: '1px solid var(--cp-border)',
   },
   layerIndex: {
     color: 'var(--cp-accent-maroon)',
@@ -559,28 +515,35 @@ const S = {
     margin: 0,
     color: 'var(--cp-text-primary)',
     fontSize: 'var(--cp-font-base)',
-    fontWeight: 800,
+    fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
   },
   layerRows: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
+    gap: 'var(--cp-space-4)',
+    flex: 1,
   },
   layerRow: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 0.8fr) minmax(0, 1.2fr)',
+    gridTemplateColumns: 'minmax(0, 0.85fr) minmax(0, 1.15fr)',
     gap: 'var(--cp-space-3)',
+    alignItems: 'baseline',
   },
   layerLabel: {
     color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    textTransform: 'uppercase',
   },
   layerValue: {
-    color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-sm)',
+    color: 'var(--cp-text-strong)',
+    fontSize: 'var(--cp-font-base)',
+    fontWeight: 'var(--cp-weight-bold)',
     textAlign: 'right',
+    fontVariantNumeric: 'tabular-nums',
     overflowWrap: 'anywhere',
   },
 };

@@ -57,6 +57,7 @@ const S = {
     borderRadius: 'var(--cp-radius-pill)',
     minHeight: 'calc(var(--cp-icon-btn-size) + var(--cp-space-2))',
     flexShrink: 0,
+    minWidth: 0,
   },
   segment: {
     display: 'inline-flex',
