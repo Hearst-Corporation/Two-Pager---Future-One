@@ -56,7 +56,8 @@ function computedResults(mode, { projection, scenario, derived, solver }) {
     ];
   }
   // target_irr_first — the solver may not converge; show MISSING then, never a fake number.
-  const solvedMw = solver?.converged && solver?.lever === 'mw' ? solver.lever_value : null;
+  // The lever lives on `derived` (not `solver`); when it's 'mw' the solved size is lever_value.
+  const solvedMw = solver?.converged && derived?.lever === 'mw' ? solver.lever_value : null;
   return [
     { key: 'size', label: UI.SIM_RESULT_SIZE, value: solvedMw != null ? fmtMW(solvedMw, 0) : (scenario?.total_mw != null ? fmtMW(scenario.total_mw, 0) : MISSING) },
     { key: 'budget', label: UI.SIM_RESULT_BUDGET, value: capex != null ? fmtUSD(capex) : MISSING },

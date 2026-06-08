@@ -13,7 +13,7 @@ const HARDWARE_PRESETS = [
     id: 'colo',
     name: UI.HW_PRESET_COLO_NAME,
     tagline: UI.HW_PRESET_COLO_TAGLINE,
-    patch: { classic_pct: 80, liquid_pct: 15, ai_pct: 5, gpu_sku_id: 'h200_sxm5', utilization_pct: 70, gpu_hour_price: 3 },
+    patch: { classic_pct: 80, liquid_pct: 15, ai_pct: 5, gpu_sku_id: 'h200_sxm5', utilization_pct: 70, gpu_hour_price: 2.99 },
   },
   {
     id: 'mixed',
@@ -25,15 +25,21 @@ const HARDWARE_PRESETS = [
     id: 'ai_factory',
     name: UI.HW_PRESET_AI_NAME,
     tagline: UI.HW_PRESET_AI_TAGLINE,
-    patch: { classic_pct: 10, liquid_pct: 20, ai_pct: 70, gpu_sku_id: 'gb200_nvl72', utilization_pct: 85, gpu_hour_price: 6 },
+    patch: { classic_pct: 10, liquid_pct: 20, ai_pct: 70, gpu_sku_id: 'gb200_nvl72', utilization_pct: 85, gpu_hour_price: 5 },
   },
 ];
 
+// A preset is "active" only when the FULL patch still matches the live mix —
+// tier split AND gpu/utilization/price. Otherwise editing any advanced dial would
+// leave the preset card lit while the config has diverged (stale selection).
 function matchPreset(v) {
   const p = HARDWARE_PRESETS.find((p) =>
     p.patch.classic_pct === v.classic_pct &&
     p.patch.liquid_pct === v.liquid_pct &&
-    p.patch.ai_pct === v.ai_pct,
+    p.patch.ai_pct === v.ai_pct &&
+    p.patch.gpu_sku_id === v.gpu_sku_id &&
+    p.patch.utilization_pct === v.utilization_pct &&
+    p.patch.gpu_hour_price === v.gpu_hour_price,
   );
   return p?.id || null;
 }
@@ -121,6 +127,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
               padding="md"
               hover
               accent={sel}
+              aria-pressed={sel}
               surface={2}
               style={S.presetCard}
             >
@@ -216,6 +223,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                       padding="sm"
                       hover
                       accent={sel}
+                      aria-pressed={sel}
                       surface={2}
                       style={S.gpuCard}
                     >

@@ -50,6 +50,7 @@ export default function ArchetypePicker({ archetypes = [], primaryId, onSelectPr
             padding="md"
             hover
             accent={isPrimary}
+            aria-pressed={isPrimary}
             surface={2}
             style={S.card}
           >
@@ -158,7 +159,7 @@ const S = {
   footAnchor: {
     fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-bold)',
-    color: 'var(--cp-text-faint)',
+    color: 'var(--cp-text-muted)',
   },
   footDot: {
     fontSize: 'var(--cp-font-micro)',
@@ -166,7 +167,7 @@ const S = {
   },
   footPrev: {
     fontSize: 'var(--cp-font-micro)',
-    color: 'var(--cp-text-faint)',
+    color: 'var(--cp-text-muted)',
   },
   footTag: {
     marginLeft: 'auto',

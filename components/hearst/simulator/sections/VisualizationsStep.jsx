@@ -76,6 +76,7 @@ export default function VisualizationsStep({
               <button
                 key={id}
                 type="button"
+                aria-current={activeViz === id ? 'true' : undefined}
                 onClick={() => onSelectViz(id)}
                 style={{ ...S.vizRailBtn, ...(activeViz === id ? S.vizRailBtnActive : {}) }}
               >

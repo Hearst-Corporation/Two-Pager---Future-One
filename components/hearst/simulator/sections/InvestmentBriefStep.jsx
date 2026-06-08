@@ -109,6 +109,7 @@ export default function InvestmentBriefStep({
                 <button
                   key={l.id}
                   type="button"
+                  aria-pressed={targetIrrLever === l.id}
                   onClick={() => onSetIrrLever(l.id)}
                   style={{ ...S.leverBtn, ...(targetIrrLever === l.id ? S.leverBtnActive : {}) }}
                 >
