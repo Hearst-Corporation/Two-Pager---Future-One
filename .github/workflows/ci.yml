@@ -30,10 +30,13 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-      # npm install (not npm ci): npm ci skips installing cross-platform optional
-      # native binaries (rolldown via vitest) from a lockfile generated on another
-      # OS — a known npm bug. The committed lockfile still pins all versions.
-      - run: npm install --no-audit --no-fund
+      - run: npm ci
+      # npm/cli#4828: npm ci skips the platform-specific rolldown native binary
+      # (vitest 4 → rolldown), absent from a cross-OS lockfile. Install the binary
+      # matching the installed rolldown version; --no-save keeps the lockfile.
+      - name: Ensure rolldown linux binding (npm optional-deps bug)
+        run: |
+          npm install --no-save "@rolldown/binding-linux-x64-gnu@$(node -p "require('rolldown/package.json').version")"
       - name: npm run check
         run: npm run check
 
@@ -47,10 +50,7 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-      # npm install (not npm ci): npm ci skips installing cross-platform optional
-      # native binaries (rolldown via vitest) from a lockfile generated on another
-      # OS — a known npm bug. The committed lockfile still pins all versions.
-      - run: npm install --no-audit --no-fund
+      - run: npm ci
       - name: npm run build
         run: npm run build
         env:
@@ -105,10 +105,7 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-      # npm install (not npm ci): npm ci skips installing cross-platform optional
-      # native binaries (rolldown via vitest) from a lockfile generated on another
-      # OS — a known npm bug. The committed lockfile still pins all versions.
-      - run: npm install --no-audit --no-fund
+      - run: npm ci
       - name: Install pdftotext (poppler-utils) for PDF-truth assertion
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
       - name: Install Playwright Chromium + system deps
