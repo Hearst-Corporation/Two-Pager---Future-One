@@ -379,7 +379,7 @@ const S = {
   addFormTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
   addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--cp-space-3) var(--cp-space-4)' },
   overlay: { position: 'fixed', inset: 0, background: 'var(--cp-overlay)', zIndex: 'var(--cp-z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  modal: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-md)', width: 440, maxWidth: '90vw', boxShadow: 'var(--cp-shadow-lg)' },
+  modal: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-md)', width: 440, maxWidth: '90vw', boxShadow: 'var(--cp-shadow-lg)' }, // cockpit-lint-allow — dialog overlay dimensionné (width/maxWidth + header/body custom), pas une <Card> de contenu
   modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--cp-space-4)', borderBottom: '1px solid var(--cp-border)' },
   modalTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
   modalBody: { padding: 'var(--cp-space-4)' },

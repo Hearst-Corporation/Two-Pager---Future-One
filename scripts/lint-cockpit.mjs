@@ -89,13 +89,16 @@ const RULES = [
   },
 ];
 
-// ── GUARD-A : surface peinte en inline ────────────────────────────────────────
-// Détecte les lignes JS/JSX qui, dans un même bloc de style inline (objet littéral
-// sur une seule ligne ou style-object déclaré en const S = { ... }), contiennent à
-// la fois :
+// ── GUARD-A : carte peinte à la main en inline ────────────────────────────────
+// Détecte une VRAIE carte recodée en style inline plutôt qu'avec <Card> : la
+// signature complète d'un conteneur-carte sur une même ligne de style-object —
 //   • background: 'var(--cp-surface…'   (surface tokenisée)
-//   • ET  border:  OU  borderRadius:    (mise en forme de carte)
-// → antipattern "carte faite à la main" → utiliser <Card variant="card">.
+//   • ET  border  (1px solid …)         (cadre)
+//   • ET  borderRadius                  (coins arrondis)
+//   • ET  boxShadow                     (profondeur — propre aux cartes)
+// Les badges, boutons, selects, cellules de tableau et chips combinent surface +
+// border + radius mais N'ONT PAS de boxShadow : ils ne sont pas flaggés (légitimes
+// en inline). Exiger boxShadow élimine ces faux positifs et ne garde que les cartes.
 //
 // Périmètre : .jsx, .tsx, .js, .ts dans le cockpit scope.
 // Échappatoire ligne : // cockpit-lint-allow
@@ -103,8 +106,10 @@ function hasPaintedSurface(line) {
   if (!line.includes('--cp-surface')) return false;
   const hasBg = /background['"]?\s*:\s*['"]?var\(\s*--cp-surface/i.test(line);
   if (!hasBg) return false;
-  const hasBorder = /\bborder(Radius|Left|Right|Top|Bottom)?['"]?\s*:/i.test(line);
-  return hasBorder;
+  const hasBorder = /\bborder['"]?\s*:/i.test(line);
+  const hasRadius = /\bborderRadius['"]?\s*:/i.test(line);
+  const hasShadow = /\bboxShadow['"]?\s*:/i.test(line);
+  return hasBorder && hasRadius && hasShadow;
 }
 
 function walk(dir, files = []) {
