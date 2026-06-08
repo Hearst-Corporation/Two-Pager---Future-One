@@ -98,68 +98,35 @@ CapitalDonut.propTypes = {
   })).isRequired,
 };
 
-// ── DecisionKpis ─────────────────────────────────────────────────────────────
+// ── DecisionKpiCell ──────────────────────────────────────────────────────────
 /**
- * Decision metrics panel: IRR / NPV / MOIC + DSCR risk guardrail.
- * @param {{ projection: object|null }} props
+ * One KPI inside the investment-case header grid. Sits as a co-equal member next
+ * to the verdict — same row, same baseline. Value clamps and never wraps; the
+ * cell is minmax(0,1fr) so four of them stay on one stable grid with no overflow.
+ * @param {{ label: string, value: string, sub?: string|null }} props
  */
-export function DecisionKpis({ projection }) {
+export function DecisionKpiCell({ label, value, sub }) {
   return (
-    <div data-decision-panel style={S.decisionPanel}>
-      <span style={S.decisionEyebrow}>{UI.RESULTS_DECISION_METRICS}</span>
-      <div data-decision-metrics style={S.decisionMetrics}>
-        {DECISION_METRICS.map(metric => (
-          <div key={metric.id} style={S.decisionMetric}>
-            <span style={S.decisionMetricLabel}>{metric.label}</span>
-            <strong style={S.decisionMetricValue}>{metric.value(projection)}</strong>
-            {metric.subValue?.(projection) && (
-              <span style={S.decisionMetricSub}>{metric.subValue(projection)}</span>
-            )}
-            <span style={S.decisionMetricNote}>{metric.note}</span>
-          </div>
-        ))}
-      </div>
-      <div data-risk-strip style={S.riskStrip}>
-        <span style={S.riskLabel}>{UI.RESULTS_RISK_GUARDRAIL}</span>
-        <strong style={S.riskValue}>DSCR {fmtX(projection?.dscr_stabilized)}</strong>
-        <span style={S.riskNote}>{UI.RESULTS_RISK_NOTE}</span>
-      </div>
-    </div>
-  );
-}
-DecisionKpis.propTypes = {
-  projection: PropTypes.object,
-};
-
-// ── DecisionKpiTile ──────────────────────────────────────────────────────────
-/**
- * One promoted KPI in the decision row: dominant number, secondary label.
- * Tabular numerics so the four tiles align on the decimal.
- * @param {{ label: string, value: string, sub?: string|null, note?: string }} props
- */
-export function DecisionKpiTile({ label, value, sub, note }) {
-  return (
-    <div style={S.kpiTile}>
+    <div style={S.kpiCell}>
       <span style={S.kpiLabel}>{label}</span>
-      <strong style={S.kpiValue}>{value ?? MISSING}</strong>
+      <strong style={S.kpiValue} title={value ?? undefined}>{value ?? MISSING}</strong>
       {sub ? <span style={S.kpiSub}>{sub}</span> : null}
-      {note ? <span style={S.kpiNote}>{note}</span> : null}
     </div>
   );
 }
-DecisionKpiTile.propTypes = {
+DecisionKpiCell.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string,
   sub: PropTypes.string,
-  note: PropTypes.string,
 };
 
 // ── DecisionHeader ───────────────────────────────────────────────────────────
 /**
- * Decision-first header (UI V2 — Phase 1). The verdict (APPROVE / REVIEW / REJECT)
- * is the largest object on screen; the case header sits above it; the IRR / MOIC /
- * NPV / CAPITAL row dominates directly below; Returns Composition sits above the
- * fold with an immediate warning when terminal dependence exceeds 75%.
+ * Investment-case header (UI V2 — Phase 1, refactored). The PRIMARY OBJECT is the
+ * full line "APPROVE + IRR + MOIC + NPV + CAPITAL" — verdict and KPIs are co-equal
+ * members of ONE stable grid, not a banner over a separate row. A thin case-header
+ * line sits at the top; a compact meta strip (returns composition · terminal-value
+ * flag · DSCR) sits below — no full-width stacked chunks, no duplicated hierarchy.
  *
  * PRESENTATION ONLY — every value comes from existing engine fields via
  * verdictDecision() / DECISION_METRICS / deriveReturnsComposition(). No new math.
@@ -178,42 +145,43 @@ export function DecisionHeader({ projection, caseHeader }) {
 
   const rc = deriveReturnsComposition(projection);
   const tvPct = rc.available && rc.terminalPct != null ? Math.round(rc.terminalPct * 100) : null;
+  const opsPct = rc.available && rc.operationsPct != null ? Math.round(rc.operationsPct * 100) : null;
   const tvAlarm = tvPct != null && tvPct > 75;
 
   return (
     <div data-decision-header style={S.dhWrap}>
-      {/* Case header — above the verdict */}
+      {/* Case header — thin line at the top of the same card */}
       <div style={S.caseHeader}>{caseHeader}</div>
 
-      {/* Verdict — the largest object on screen */}
-      <div style={{ ...S.verdictBlock, borderColor: color, background: soft }}>
-        <span style={S.verdictEyebrow}>{UI.RESULTS_DECISION_EYEBROW}</span>
-        <strong data-verdict style={{ ...S.verdictWord, color }}>{v.decision}</strong>
-        <span style={S.verdictDetail}>{v.detail}</span>
-      </div>
-
-      {/* KPI row — numbers dominate, directly below verdict */}
-      <div data-decision-kpis style={S.kpiRow}>
-        <DecisionKpiTile label={UI.RESULTS_KPI_IRR} value={irr?.value(projection)} sub={irr?.subValue?.(projection)} note={irr?.note} />
-        <DecisionKpiTile label={UI.RESULTS_KPI_MOIC} value={moic?.value(projection)} sub={moic?.subValue?.(projection)} note={moic?.note} />
-        <DecisionKpiTile label={UI.RESULTS_KPI_NPV} value={npv?.value(projection)} sub={npv?.subValue?.(projection)} note={npv?.note} />
-        <DecisionKpiTile label={UI.RESULTS_KPI_CAPITAL} value={capital} note={UI.RESULTS_KPI_CAPITAL_NOTE} />
-      </div>
-
-      {/* Returns Composition — above the fold, directly under KPI row */}
-      <ReturnsComposition projection={projection} />
-      {tvAlarm ? (
-        <div data-tv-warning style={{ ...S.tvWarning, borderColor: 'var(--cp-warning)', background: 'var(--cp-warning-bg)' }}>
-          {UI.RESULTS_TV_WARNING(tvPct)}
+      {/* Investment-case header: verdict + 4 KPIs on ONE grid. Primary object. */}
+      <div data-decision-kpis style={S.caseGrid}>
+        <div data-verdict-cell style={{ ...S.verdictCell, borderColor: color }}>
+          <span style={S.verdictEyebrow}>{UI.RESULTS_DECISION_EYEBROW}</span>
+          <strong data-verdict style={{ ...S.verdictWord, color }}>{v.decision}</strong>
+          <span style={{ ...S.verdictDetail, background: soft, color }}>{v.detail}</span>
         </div>
-      ) : null}
+        <DecisionKpiCell label={UI.RESULTS_KPI_IRR} value={irr?.value(projection)} sub={irr?.subValue?.(projection)} />
+        <DecisionKpiCell label={UI.RESULTS_KPI_MOIC} value={moic?.value(projection)} sub={moic?.subValue?.(projection)} />
+        <DecisionKpiCell label={UI.RESULTS_KPI_NPV} value={npv?.value(projection)} sub={npv?.subValue?.(projection)} />
+        <DecisionKpiCell label={UI.RESULTS_KPI_CAPITAL} value={capital} />
+      </div>
 
-      {/* Risk guardrail — DSCR sits below returns in the hierarchy (preserved from
-          the previous decision panel; not promoted, but never dropped). */}
-      <div data-risk-strip style={S.riskStrip}>
-        <span style={S.riskLabel}>{UI.RESULTS_RISK_GUARDRAIL}</span>
-        <strong style={S.riskValue}>DSCR {fmtX(projection?.dscr_stabilized)}</strong>
-        <span style={S.riskNote}>{UI.RESULTS_RISK_NOTE}</span>
+      {/* Meta strip — returns composition · terminal-value flag · DSCR. Compact,
+          single row, above the fold; not a stack of full-width chunks. */}
+      <div data-decision-meta style={{ ...S.metaStrip, ...(tvAlarm ? { borderColor: 'var(--cp-warning)', background: 'var(--cp-warning-bg)' } : null) }}>
+        <span style={S.metaItem}>
+          <span style={S.metaLabel}>{UI.RESULTS_RC_TITLE}</span>
+          <strong style={S.metaValue}>
+            {opsPct != null && tvPct != null
+              ? `${UI.RESULTS_RC_OPERATIONS} ${opsPct}% · ${UI.RESULTS_RC_TERMINAL} ${tvPct}%`
+              : rc.note}
+          </strong>
+        </span>
+        {tvAlarm ? <span data-tv-warning style={{ ...S.metaFlag }}>{UI.RESULTS_TV_WARNING(tvPct)}</span> : null}
+        <span style={S.metaRisk}>
+          <span style={S.metaLabel}>{UI.RESULTS_RISK_GUARDRAIL}</span>
+          <strong style={S.metaValue}>DSCR {fmtX(projection?.dscr_stabilized)}</strong>
+        </span>
       </div>
     </div>
   );
@@ -290,28 +258,45 @@ LayerCard.propTypes = {
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 const S = {
-  // Decision-first header (UI V2 — Phase 1)
+  // Investment-case header (UI V2 — Phase 1, refactored)
   dhWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-5)',
+    gap: 'var(--cp-space-3)',
     minWidth: 0,
   },
   caseHeader: {
     color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-lg)',
+    fontSize: 'var(--cp-font-md)',
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-tight)',
     lineHeight: 'var(--cp-leading-tight)',
   },
-  verdictBlock: {
+  // ONE grid: verdict cell + 4 KPI cells. Single stable row; the verdict column
+  // sizes to content, KPIs share the rest as equal minmax(0,1fr) tracks so they
+  // never overflow or wrap. This whole line is the primary object.
+  caseGrid: {
+    display: 'grid',
+    // Verdict column is fixed/bounded so it can't starve the KPI tracks; the four
+    // KPIs share the remaining width as equal minmax(0,1fr) tracks.
+    gridTemplateColumns: 'clamp(150px, 15vw, 200px) repeat(4, minmax(0, 1fr))',
+    alignItems: 'stretch',
+    gap: 'var(--cp-space-4)',
+    padding: 'var(--cp-space-4)',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-lg)',
+  },
+  verdictCell: {
+    minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-2)',
-    padding: 'var(--cp-space-6)',
-    border: '1px solid var(--cp-border)',
-    borderLeftWidth: 'var(--cp-space-1)',
-    borderRadius: 'var(--cp-radius-lg)',
+    justifyContent: 'center',
+    gap: 'var(--cp-space-1)',
+    paddingRight: 'var(--cp-space-4)',
+    borderLeft: 'var(--cp-space-1) solid currentColor',
+    paddingLeft: 'var(--cp-space-3)',
+    borderRight: '1px solid var(--cp-border)',
   },
   verdictEyebrow: {
     color: 'var(--cp-text-muted)',
@@ -320,66 +305,103 @@ const S = {
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
   },
+  // ~35% smaller than the previous 48–80px banner and bounded to fit the verdict
+  // column so it never collides with the KPIs; cell height ~half the old block.
   verdictWord: {
-    fontSize: 'clamp(48px, 6vw, 80px)',
+    fontSize: 'clamp(24px, 2.3vw, 34px)',
     lineHeight: 0.95,
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
     fontVariantNumeric: 'tabular-nums',
+    whiteSpace: 'nowrap',
   },
   verdictDetail: {
-    color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-lg)',
+    width: 'fit-content',
+    maxWidth: '100%',
+    fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-bold)',
+    padding: 'calc(var(--cp-space-1) / 2) var(--cp-space-2)',
+    borderRadius: 'var(--cp-radius-pill)',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
-  kpiRow: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-    gap: 'var(--cp-space-4)',
-  },
-  kpiTile: {
+  kpiCell: {
     minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-4) var(--cp-space-5)',
-    background: 'var(--cp-surface-1)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
+    justifyContent: 'center',
+    gap: 'calc(var(--cp-space-1) / 2)',
   },
   kpiLabel: {
     color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
+    fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
   },
+  // Numbers dominate but stay bounded; clamp sized so the widest value ($142.9M)
+  // fits its track. nowrap + ellipsis is a hard backstop, never the normal state.
   kpiValue: {
     color: 'var(--cp-text-strong)',
-    fontSize: 'clamp(30px, 3vw, 44px)',
-    lineHeight: 1,
+    fontSize: 'clamp(18px, 1.5vw, 24px)',
+    lineHeight: 1.05,
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
     fontVariantNumeric: 'tabular-nums',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   kpiSub: {
     color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-xs)',
+    fontSize: 'var(--cp-font-micro)',
     lineHeight: 'var(--cp-leading-tight)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
-  kpiNote: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
-    lineHeight: 'var(--cp-leading-normal)',
-  },
-  tvWarning: {
-    padding: 'var(--cp-space-3) var(--cp-space-4)',
+  // Compact meta strip — returns composition · TV flag · DSCR on one row.
+  metaStrip: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 'var(--cp-space-2) var(--cp-space-5)',
+    padding: 'var(--cp-space-2) var(--cp-space-4)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-md)',
-    color: 'var(--cp-text-strong)',
+    background: 'var(--cp-surface-1)',
+  },
+  metaItem: {
+    display: 'inline-flex',
+    alignItems: 'baseline',
+    gap: 'var(--cp-space-2)',
+    minWidth: 0,
+  },
+  metaRisk: {
+    display: 'inline-flex',
+    alignItems: 'baseline',
+    gap: 'var(--cp-space-2)',
+    marginLeft: 'auto',
+  },
+  metaLabel: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    textTransform: 'uppercase',
+  },
+  metaValue: {
+    color: 'var(--cp-text-primary)',
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 'var(--cp-weight-bold)',
-    lineHeight: 'var(--cp-leading-normal)',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  metaFlag: {
+    color: 'var(--cp-text-strong)',
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-bold)',
+    lineHeight: 'var(--cp-leading-tight)',
   },
   rcWrap: {
     display: 'flex',
@@ -535,81 +557,6 @@ const S = {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-sm)',
     lineHeight: 'var(--cp-leading-normal)',
-  },
-  decisionPanel: {
-    minWidth: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
-    paddingLeft: 'var(--cp-space-6)',
-    borderLeft: '1px solid var(--cp-border)',
-  },
-  decisionEyebrow: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    textTransform: 'uppercase',
-  },
-  decisionMetrics: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gap: 'var(--cp-space-5)',
-  },
-  decisionMetric: {
-    minWidth: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-2)',
-  },
-  decisionMetricLabel: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-  },
-  decisionMetricValue: {
-    color: 'var(--cp-text-strong)',
-    fontSize: 'clamp(28px, 2.15vw, 34px)',
-    lineHeight: 1,
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-tight)',
-    fontVariantNumeric: 'tabular-nums',
-  },
-  decisionMetricNote: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
-    lineHeight: 'var(--cp-leading-normal)',
-  },
-  decisionMetricSub: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-xs)',
-    lineHeight: 'var(--cp-leading-tight)',
-  },
-  riskStrip: {
-    display: 'grid',
-    gridTemplateColumns: 'auto auto minmax(0, 1fr)',
-    gap: 'var(--cp-space-3)',
-    alignItems: 'center',
-    paddingTop: 'var(--cp-space-3)',
-    borderTop: '1px solid var(--cp-border)',
-  },
-  riskLabel: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-    textTransform: 'uppercase',
-  },
-  riskValue: {
-    color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-lg)',
-    fontWeight: 'var(--cp-weight-black)',
-    fontVariantNumeric: 'tabular-nums',
-  },
-  riskNote: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
   },
   layerCard: {
     background: 'var(--cp-surface-1)',

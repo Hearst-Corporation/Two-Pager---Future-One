@@ -232,8 +232,15 @@ export default function SimulatorResultsPage() {
         [data-economics-grid] {
           grid-template-columns: 1fr !important;
         }
+        /* Verdict drops to its own row; the 4 KPIs hold a 2×2 grid below it. */
         [data-decision-kpis] {
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        [data-decision-kpis] [data-verdict-cell] {
+          grid-column: 1 / -1 !important;
+          border-right: 0 !important;
+          border-bottom: 1px solid var(--cp-border) !important;
+          padding-bottom: var(--cp-space-3) !important;
         }
         [data-layer-grid] {
           grid-template-columns: 1fr !important;
@@ -241,19 +248,22 @@ export default function SimulatorResultsPage() {
         [data-capital-panel] {
           grid-template-columns: 1fr !important;
         }
-        [data-risk-strip] {
-          grid-template-columns: 1fr !important;
-        }
       }
       @media (max-width: 760px) {
         [data-economics-grid],
-        [data-decision-kpis],
         [data-layer-grid],
         [data-capital-panel] {
           grid-template-columns: 1fr !important;
         }
-        [data-risk-strip] {
-          grid-template-columns: 1fr !important;
+        /* Keep KPIs 2-up on phones — four single-column tiles would tower. */
+        [data-decision-kpis] {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        [data-decision-meta] {
+          row-gap: var(--cp-space-2) !important;
+        }
+        [data-decision-meta] [data-tv-warning] {
+          flex-basis: 100% !important;
         }
       }
     `}</style>
