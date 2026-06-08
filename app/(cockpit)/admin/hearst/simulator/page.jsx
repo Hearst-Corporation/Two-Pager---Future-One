@@ -7,17 +7,19 @@ import {
   INITIAL_STATE, ACTIONS, simulatorReducer,
   buildSimulatePayload, serializeStateToUrl, parseStateFromUrl, QATAR_PRESETS,
 } from '@/lib/hearst-simulator-state';
-import { SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
+import { SCENARIO_WRITABLE_KEYS, PRIMARY_DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 
 import { SIMULATOR_PARAM_EVENT } from '@/lib/hearst-simulator-bridge';
 import { UI } from '@/lib/ui-strings';
-import { S as CP } from '@/lib/cp-styles';
+import { S as CP, L } from '@/lib/cp-styles';
+import './simulator.css';
 
 import CaseHeaderStep from '@/components/hearst/simulator/sections/CaseHeaderStep';
-import WhyThisCaseStep from '@/components/hearst/simulator/sections/WhyThisCaseStep';
-import InvestmentSizeStep from '@/components/hearst/simulator/sections/InvestmentSizeStep';
+import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
+import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
+import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
 import { Button, Card, Eyebrow } from '@/components/hearst/ui';
 
@@ -276,6 +278,7 @@ export default function SimulatorPage() {
   const inputValue = state.mode === 'capital_first' ? state.capital_usd
     : state.mode === 'target_irr_first' ? state.target_irr_pct
     : state.total_mw;
+  const onModeChange = useCallback((id) => dispatch({ type: ACTIONS.SET_MODE, value: id }), []);
   const onInputChange = useCallback((val) => {
     if (state.mode === 'capital_first') dispatch({ type: ACTIONS.SET_CAPITAL, value: val });
     else if (state.mode === 'target_irr_first') dispatch({ type: ACTIONS.SET_IRR_TARGET, value: val });
@@ -353,67 +356,106 @@ export default function SimulatorPage() {
 
   const validateBlocked = !projection || !projectId || loading || !!simError || savingState === 'saving';
 
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   return (
-    <>
-    <style>{`
-      body.oracle-simulator-page {
-        --cp-chat-rail-width: min(360px, 27vw);
-      }
-      body.oracle-simulator-page .ct-center-panel {
-        flex: 1 1 auto !important;
-        width: auto !important;
-      }
-      body.oracle-simulator-page .ct-page-area {
-        width: 100% !important;
-      }
-      @media (max-width: 900px) {
-        /* Hardware grids own their breakpoints (HardwareMixer, 1100/1500px). */
-        /* Case Header: identity full-width, then the two metrics side by side. */
-        [data-sim-case-grid] {
-          grid-template-columns: 1fr 1fr !important;
-        }
-        [data-sim-case-identity] {
-          grid-column: 1 / -1 !important;
-        }
-        [data-archetype-grid] {
-          grid-template-columns: 1fr !important;
-        }
-        [data-sim-input-grid] {
-          grid-template-columns: 1fr !important;
-        }
-      }
-      @media (max-width: 600px) {
-        [data-sim-case-grid],
-        [data-hardware-summary],
-        [data-hardware-gpu-grid] {
-          grid-template-columns: 1fr !important;
-        }
-        [data-sim-input-grid] {
-          grid-template-columns: 1fr !important;
-        }
-      }
-    `}</style>
     <div className="oracle-page">
-      <div data-sim-wrap style={S.wrap}>
+      <div data-sim-wrap data-config-expanded={showAdvanced ? 'true' : 'false'} style={S.wrap}>
         {/* SETUP — inputs only. Decision metrics live on /simulator/results. */}
         <CaseHeaderStep
           archetypeId={state.primary_archetype_id}
           geography={state.geography}
           totalMw={state.total_mw}
           mode={state.mode}
+          scenario={scenario}
+          projection={projection}
         />
 
-        {/* INPUTS — clean setup cards, collapsed where detail is optional. */}
-        <div data-sim-editors style={S.editors}>
-          <Eyebrow block style={S.inputsEyebrow}>{UI.SIM_CASE_EDITORS}</Eyebrow>
-          <div data-sim-input-grid style={S.inputGrid}>
-            <WhyThisCaseStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
-            <div style={S.rightStack}>
-              <InvestmentSizeStep mode={state.mode} inputValue={inputValue} onInputChange={onInputChange} />
-              <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+        {/* CONFIGURATION — single card, primary input hero, collapsed details. */}
+        <Card
+          data-sim-config
+          data-advanced-open={showAdvanced ? 'true' : 'false'}
+          variant="card"
+          surface={1}
+          padding="lg"
+          style={S.configCard}
+        >
+          <div
+            data-sim-config-body
+            data-advanced-open={showAdvanced ? 'true' : 'false'}
+          >
+            <div style={S.configHeader}>
+              <span style={S.eyebrow}>{UI.SIM_CONFIG_EYEBROW}</span>
             </div>
+
+            <div data-sim-mode-stack>
+              <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
+
+              <InputFieldHero
+                embedded
+                mode={state.mode}
+                value={inputValue}
+                onChange={onInputChange}
+                projection={projection}
+                scenario={scenario}
+                derived={simResult?.derived}
+                solver={simResult?.solver}
+              />
+            </div>
+
+            <div style={S.advancedToggle}>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                style={S.advancedButton}
+              >
+                <span>{showAdvanced ? UI.SIM_CONFIG_ADVANCED_HIDE : UI.SIM_CONFIG_ADVANCED_SHOW}</span>
+                <span style={{ transform: showAdvanced ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+              </button>
+            </div>
+
+            {showAdvanced && (
+              <div style={S.advancedContent} className="advanced-content-enter">
+                <div style={S.advancedSection}>
+                  <Eyebrow block>{UI.SIM_CONFIG_MODEL_LABEL}</Eyebrow>
+                  <ArchetypePicker
+                    archetypes={PRIMARY_DEAL_ARCHETYPES}
+                    primaryId={state.primary_archetype_id}
+                    onSelectPrimary={onSelectPrimary}
+                  />
+                </div>
+                <div style={S.advancedSection}>
+                  <Eyebrow block>{UI.SIM_CONFIG_HW_LABEL}</Eyebrow>
+                  <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+
+          {/* VALIDATE CONFIG → integrated into card footer */}
+          <div data-sim-config-footer style={S.configFooter}>
+            <span style={S.validateHint}>
+              {simError ? UI.SIM_FIX_ERROR
+                : loading ? UI.STATE_CALCULATING
+                : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
+                : !projectId ? UI.SIM_LOADING_PROJECT
+                : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
+                : projection ? UI.SIM_READY
+                : UI.SIM_FILL}
+            </span>
+            <Button
+              variant="primary"
+              size="lg"
+              block
+              disabled={validateBlocked}
+              onClick={handleValidateAndReveal}
+              className="sim-config-cta"
+              style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
+            >
+              {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_CONFIG_GENERATE_MEMO}
+            </Button>
+          </div>
+        </Card>
 
         {projectLoadError && (
           <div className="cp-surface-accent-soft" style={{ ...CP.accentAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
@@ -422,81 +464,87 @@ export default function SimulatorPage() {
           </div>
         )}
         {simError && <div className="cp-surface-accent-soft" style={CP.accentAlert}>Error: {simError}</div>}
-
-        {/* VALIDATE CONFIG → dedicated results page */}
-        <Card style={S.validateBar} padding="md" surface={1}>
-          <span style={S.validateHint}>
-            {simError ? UI.SIM_FIX_ERROR
-              : loading ? UI.STATE_CALCULATING
-              : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
-              : !projectId ? UI.SIM_LOADING_PROJECT
-              : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
-              : projection ? UI.SIM_READY
-              : UI.SIM_FILL}
-          </span>
-          <Button
-            variant="primary"
-            size="lg"
-            disabled={validateBlocked}
-            onClick={handleValidateAndReveal}
-            style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
-          >
-            {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_VALIDATE}
-          </Button>
-        </Card>
         {saveError && (
           <div className="cp-surface-accent-soft" style={CP.accentAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
         )}
         {/* Modal/badge/toast montés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
       </div>
     </div>
-    </>
   );
 }
 
 const S = {
   wrap: {
     width: '100%',
-    maxWidth: 1440,
+    maxWidth: 'var(--cp-max-width, 1440px)',
     margin: '0 auto',
+    flex: '1 1 auto',
+    minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-section-gap)',
-    paddingBottom: 'var(--cp-scroll-clear)',
+    gap: 'var(--cp-space-3)',
+    minWidth: 0,
   },
-  // Editors group — secondary to the Case Header. Tighter gap than the page
-  // section-gap so the three editors read as one demoted block.
-  editors: {
+  configCard: {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-4)',
     minWidth: 0,
   },
-  inputsEyebrow: {
-    marginBottom: 'calc(var(--cp-space-2) * -1)',
+  configHeader: {
+    ...L.rowBetween,
+    marginBottom: 'var(--cp-space-2)',
   },
-  inputGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(300px, 0.9fr) minmax(360px, 1.1fr)',
-    gap: 'var(--cp-space-5)',
-    alignItems: 'start',
+  eyebrow: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-widest)',
+    textTransform: 'uppercase',
+    opacity: 0.8,
   },
-  rightStack: {
+  advancedToggle: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-5)',
-    minWidth: 0,
+    justifyContent: 'center',
+    marginTop: 'var(--cp-space-2)',
   },
-  validateBar: {
+  advancedButton: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 'var(--cp-space-4)',
-    flexWrap: 'wrap',
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-2) var(--cp-space-4)',
+    background: 'transparent',
+    border: '1px solid var(--cp-border-base)',
+    borderRadius: 'var(--cp-radius-full)',
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-semibold)',
+    color: 'var(--cp-text-muted)',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  advancedContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-6)',
+    paddingTop: 'var(--cp-space-4)',
+    borderTop: '1px solid var(--cp-border-base)',
+  },
+  advancedSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-3)',
   },
   validateHint: {
     fontSize: 'var(--cp-font-base)',
     color: 'var(--cp-text-muted)',
     fontWeight: 'var(--cp-weight-semibold)',
+  },
+  configFooter: {
+    ...L.rowBetween,
+    gap: 'var(--cp-space-4)',
+    flexWrap: 'wrap',
+    marginTop: 'var(--cp-space-4)',
+    paddingTop: 'var(--cp-space-4)',
+    borderTop: '1px solid var(--cp-border-base)',
   },
 };

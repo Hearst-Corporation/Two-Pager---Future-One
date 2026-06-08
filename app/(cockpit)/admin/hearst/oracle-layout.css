@@ -7,14 +7,26 @@
 /* ── Wrapper de page canonique ── */
 .oracle-page {
   width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
   margin: 0 auto;
-  padding:
-    var(--cp-space-6)
-    var(--cp-space-6)
-    var(--cp-scroll-clear, var(--cp-space-6));
+  padding-block-start: 0;
+  padding-block-end: var(--cp-scroll-clear, var(--cp-space-6));
+  padding-inline: var(--cp-space-6);
   display: flex;
   flex-direction: column;
   gap: var(--cp-section-gap);
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+/* Simulateur : zéro scroll vertical, pas de marge basse page (simulator.css). */
+body.oracle-simulator-page .oracle-page {
+  overflow-y: hidden;
+  padding-block-end: 0;
 }
 
 /* ── En-tête de page ── */

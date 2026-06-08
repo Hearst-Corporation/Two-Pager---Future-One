@@ -4,6 +4,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   DEAL_ARCHETYPES,
+  PRIMARY_DEAL_ARCHETYPES,
+  PRIMARY_MODEL_IDS,
   applyArchetype,
   projectArchetype,
 } from '@/lib/hearst-deal-structures.js';
@@ -38,6 +40,13 @@ const BASE_SCENARIO = {
 };
 
 const ID_TO_ARCHETYPE = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
+
+describe('PRIMARY_DEAL_ARCHETYPES — simulateur', () => {
+  it('expose exactement les 4 modèles du picker', () => {
+    expect(PRIMARY_DEAL_ARCHETYPES.map((a) => a.id)).toEqual(PRIMARY_MODEL_IDS);
+    expect(PRIMARY_DEAL_ARCHETYPES).toHaveLength(4);
+  });
+});
 
 describe('DEAL_ARCHETYPES — 3 nouveaux archétypes', () => {
   it('expose neocloud_gpu, hyperscaler_self_build, sovereign_ai', () => {

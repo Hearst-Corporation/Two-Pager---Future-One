@@ -49,12 +49,14 @@ InputModeSwitcher.propTypes = {
 const S = {
   segmented: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
     gap: 'var(--cp-space-1)',
     padding: 'var(--cp-space-1)',
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-pill)',
+    minHeight: 'calc(var(--cp-icon-btn-size) + var(--cp-space-2))',
+    flexShrink: 0,
   },
   segment: {
     display: 'inline-flex',
@@ -74,9 +76,9 @@ const S = {
     transition: 'background var(--cp-dur-base) var(--cp-ease), color var(--cp-dur-base) var(--cp-ease), border-color var(--cp-dur-base) var(--cp-ease)',
   },
   segmentActive: {
-    background: 'var(--cp-accent-maroon)',
-    color: 'var(--cp-text-strong)',
-    borderColor: 'var(--cp-border-accent)',
+    background: 'var(--cp-surface-3)',
+    color: 'var(--cp-text-primary)',
+    borderColor: 'var(--cp-border-strong)',
   },
   segmentLabel: {
     whiteSpace: 'nowrap',

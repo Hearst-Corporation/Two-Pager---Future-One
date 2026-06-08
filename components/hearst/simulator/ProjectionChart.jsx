@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import {
   ComposedChart, Bar, Line, Area, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, ReferenceLine,
@@ -13,7 +14,7 @@ const CHART_TOOLTIP = { ...RC.tooltip, fontSize: 'var(--cp-font-xs)' };
 const fmtAxisM = (v) => Math.abs(v) >= 1000 ? `$${(v / 1000).toFixed(1)}B` : `$${v.toFixed(0)}M`;
 const fmtTipM = (v) => Math.abs(v) >= 1000 ? `$${(v / 1000).toFixed(2)}B` : `$${v.toFixed(1)}M`;
 
-export default function ProjectionChart({ years = [], height = 280 }) {
+function ProjectionChart({ years = [], height = 280 }) {
   const [ref, size] = useContainerSize();
 
   if (!years.length) {
@@ -44,16 +45,18 @@ export default function ProjectionChart({ years = [], height = 280 }) {
           {/* break-even: where cumulative cash crosses 0 — the year an investor hunts for */}
           <ReferenceLine y={0} stroke="var(--cp-text-faint)" strokeDasharray="2 2" />
           <Area dataKey="cumFcf" name="Cumulative Cash" type="monotone"
-            stroke="var(--cp-text-primary)" fill="var(--cp-text-primary)" fillOpacity={0.10} />
+            stroke="var(--cp-accent)" fill="var(--cp-accent)" fillOpacity={0.10} />
           {/* Revenue (volume) muted; Profit (the headline) in bright bordeaux — separated by
               luminosity, not hue, so the chart stays on-charte but the two series read apart. */}
           <Bar dataKey="revenue" name="Revenue" fill="var(--cp-accent-maroon)" opacity={0.55} />
-          <Line dataKey="ebitda" name="Yearly Profit" stroke="var(--cp-accent)" strokeWidth={2.5} dot={{ r: 3 }} />
+          <Line dataKey="ebitda" name="Yearly Profit" stroke="var(--cp-success)" strokeWidth={2.5} dot={{ r: 3 }} />
         </ComposedChart>
       )}
     </div>
   );
 }
+
+export default memo(ProjectionChart);
 
 const S = {
   empty: {

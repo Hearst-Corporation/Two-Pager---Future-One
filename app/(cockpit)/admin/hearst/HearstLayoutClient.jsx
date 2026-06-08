@@ -1,11 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
 import { CockpitShell } from '@hearst/cockpit-shell';
 import { Suspense } from 'react';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleRailNav } from '@/components/OracleRailNav';
 import ChatToggleFAB from '@/components/hearst/ChatToggleFAB';
-import OracleAdvisorRail from '@/components/hearst/OracleAdvisorRail';
 import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
 import MemoJobBadge from '@/components/hearst/MemoJobBadge';
 import MemoToast from '@/components/hearst/MemoToast';
@@ -24,6 +24,15 @@ const ORACLE_CHAT_CONFIG = {
 };
 
 export default function HearstLayoutClient({ children }) {
+  useEffect(() => {
+    document.documentElement.classList.add('oracle-cockpit-root');
+    document.body.classList.add('oracle-cockpit-page');
+    return () => {
+      document.documentElement.classList.remove('oracle-cockpit-root');
+      document.body.classList.remove('oracle-cockpit-page');
+    };
+  }, []);
+
   return (
     <SimulationProvider>
       <Suspense fallback={null}>
@@ -32,9 +41,6 @@ export default function HearstLayoutClient({ children }) {
       <CockpitShell products={ORACLE_PRODUCTS} appId="oracle" chatConfig={ORACLE_CHAT_CONFIG}>
         <OracleRailNav />
         {children}
-        <Suspense fallback={null}>
-          <OracleAdvisorRail />
-        </Suspense>
         <ChatToggleFAB />
         <StrategicMemoModal />
         <MemoJobBadge />

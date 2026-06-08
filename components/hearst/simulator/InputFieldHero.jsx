@@ -69,17 +69,24 @@ function computedResults(mode, { projection, scenario, derived, solver }) {
  * quantities shown as engine-computed results riveted to its right (stacked below
  * on mobile). Layout only: all numbers come from the live simResult.
  */
-export default function InputFieldHero({ mode, value, onChange, projection, scenario, derived, solver }) {
+export default function InputFieldHero({ mode, value, onChange, projection, scenario, derived, solver, embedded = false }) {
   const cfg = MODE_CONFIG[mode] || MODE_CONFIG.mw_first;
   const results = computedResults(mode, { projection, scenario, derived, solver });
   const noSolution = mode === 'target_irr_first' && solver && !solver.converged;
 
-  return (
-    <Card surface={0} padding="lg" style={S.bar}>
+  const solverNote = noSolution
+    ? UI.SIM_SOLVER_NO_SOLUTION
+    : (mode === 'target_irr_first' && solver?.converged && solver?.iterations != null
+      ? UI.SIM_SOLVER_SOLVED(solver.iterations)
+      : null);
+
+  const body = (
       <div data-brief-bar-row style={S.row}>
         {/* Driven field — the one number the user controls */}
         <div style={S.fieldCol}>
-          <div style={S.choiceTag}>{UI.SIM_YOUR_CHOICE} · {cfg.label}</div>
+          <div style={S.choiceTag} title={`${UI.SIM_YOUR_CHOICE} · ${cfg.label}`}>
+            {UI.SIM_YOUR_CHOICE} · {cfg.label}
+          </div>
           <div style={S.inputRow}>
             <input
               type="text"
@@ -104,12 +111,22 @@ export default function InputFieldHero({ mode, value, onChange, projection, scen
               </div>
             ))}
           </div>
-          {noSolution && <div style={S.solverNote}>{UI.SIM_SOLVER_NO_SOLUTION}</div>}
-          {mode === 'target_irr_first' && solver?.converged && solver?.iterations != null && (
-            <div style={S.solverNote}>{UI.SIM_SOLVER_SOLVED(solver.iterations)}</div>
-          )}
+          <div style={S.solverNoteSlot} aria-live="polite">
+            <span style={solverNote ? S.solverNote : S.solverNoteGhost}>
+              {solverNote || '\u00a0'}
+            </span>
+          </div>
         </div>
       </div>
+  );
+
+  if (embedded) {
+    return <div data-sim-input-hero style={S.bar}>{body}</div>;
+  }
+
+  return (
+    <Card surface={0} padding="lg" style={S.bar}>
+      {body}
     </Card>
   );
 }
@@ -122,6 +139,7 @@ InputFieldHero.propTypes = {
   scenario: PropTypes.object,
   derived: PropTypes.object,
   solver: PropTypes.object,
+  embedded: PropTypes.bool,
 };
 
 const S = {
@@ -131,19 +149,19 @@ const S = {
     minWidth: 0,
   },
   row: {
-    // driven field ~1.6× the computed-results panel; stacks to 1 col ≤900px
-    // via the page-level [data-brief-bar-row] rule.
     display: 'grid',
     gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
     gap: 'var(--cp-space-5)',
     alignItems: 'stretch',
+    minHeight: 'var(--cp-sim-hero-row-min, 11.5rem)',
   },
   fieldCol: {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-2)',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     minWidth: 0,
+    minHeight: '100%',
   },
   choiceTag: {
     fontSize: 'var(--cp-font-xs)',
@@ -151,6 +169,12 @@ const S = {
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     color: 'var(--cp-accent-maroon)',
     textTransform: 'uppercase',
+    minHeight: '2.75em',
+    lineHeight: 'var(--cp-leading-tight)',
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
   },
   inputRow: {
     display: 'flex',
@@ -158,6 +182,8 @@ const S = {
     gap: 'var(--cp-space-2)',
     paddingBottom: 'var(--cp-space-2)',
     borderBottom: '2px solid var(--cp-border-accent)',
+    minHeight: 'var(--cp-space-12)',
+    flexShrink: 0,
   },
   input: {
     flex: 1,
@@ -182,6 +208,11 @@ const S = {
     fontSize: 'var(--cp-font-xs)',
     lineHeight: 'var(--cp-leading-tight)',
     color: 'var(--cp-text-muted)',
+    minHeight: 'calc(var(--cp-leading-tight) * 2 * 1em)',
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
   },
   // Computed-results panel — flat accent-soft band (no nested card), riveted right.
   resultsCol: {
@@ -191,6 +222,7 @@ const S = {
     padding: 'var(--cp-space-4)',
     borderRadius: 'var(--cp-radius-md)',
     minWidth: 0,
+    minHeight: '100%',
   },
   resultsTag: {
     fontSize: 'var(--cp-font-micro)',
@@ -221,9 +253,22 @@ const S = {
     color: 'var(--cp-text-strong)',
     fontVariantNumeric: 'tabular-nums',
   },
+  solverNoteSlot: {
+    minHeight: 'calc(var(--cp-leading-tight) * 2 * 1em)',
+    marginTop: 'auto',
+    flexShrink: 0,
+  },
   solverNote: {
+    display: 'block',
     fontSize: 'var(--cp-font-xs)',
     lineHeight: 'var(--cp-leading-tight)',
     color: 'var(--cp-text-muted)',
+  },
+  solverNoteGhost: {
+    display: 'block',
+    fontSize: 'var(--cp-font-xs)',
+    lineHeight: 'var(--cp-leading-tight)',
+    color: 'transparent',
+    userSelect: 'none',
   },
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { memo } from 'react';
 import { BUSINESS_MODELS, CLIENT_TYPES } from '@/lib/hearst-constants';
 import { BUSINESS_MODEL_GROUPS, CLIENT_GROUPS, getFit, fitColor } from '@/lib/hearst-fit-matrix';
 import { UI } from '@/lib/ui-strings';
@@ -32,7 +32,7 @@ function fmtMargin(m) {
   return `${Math.round(m * 100)}%`;
 }
 
-export default function B2BMatrix({ selected, onCellClick }) {
+function B2BMatrix({ selected, onCellClick }) {
   const allClientIds = COL_GROUPS.flatMap(g => g.ids);
 
   return (
@@ -93,6 +93,8 @@ export default function B2BMatrix({ selected, onCellClick }) {
     </div>
   );
 }
+
+export default memo(B2BMatrix);
 
 const S = {
   scroller: {

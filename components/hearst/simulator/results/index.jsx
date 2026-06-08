@@ -1,7 +1,8 @@
 'use client';
 
+import { memo } from 'react';
 import PropTypes from 'prop-types';
-import { fmtPctRaw, fmtUSD, fmtX, MISSING } from '@/lib/hearst-format';
+import { fmtPctRaw, fmtUSD, MISSING } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
 import { DECISION_METRICS, verdictDecision } from '@/lib/hearst-results-view';
 import { deriveReturnsComposition } from '@/lib/returns-composition';
@@ -23,14 +24,14 @@ const TONE_SOFT = {
  * Single label + value row used in the capital panel sidebar.
  * @param {{ label: string, value: string|null }} props
  */
-export function InlineMetric({ label, value }) {
+export const InlineMetric = memo(function InlineMetric({ label, value }) {
   return (
     <div style={S.inlineMetric}>
       <span style={S.metricLabel}>{label}</span>
       <strong style={S.inlineMetricValue}>{value ?? MISSING}</strong>
     </div>
   );
-}
+});
 InlineMetric.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string,
@@ -41,7 +42,7 @@ InlineMetric.propTypes = {
  * KPI card for the economics band (label + value + note).
  * @param {{ label: string, value: string|null, note: string }} props
  */
-export function BoardMetric({ label, value, note }) {
+export const BoardMetric = memo(function BoardMetric({ label, value, note }) {
   return (
     <div style={S.boardMetric}>
       <span style={S.metricLabel}>{label}</span>
@@ -49,7 +50,7 @@ export function BoardMetric({ label, value, note }) {
       <span style={S.boardMetricNote}>{note}</span>
     </div>
   );
-}
+});
 BoardMetric.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string,
@@ -61,7 +62,7 @@ BoardMetric.propTypes = {
  * Conic-gradient donut showing capital stack breakdown.
  * @param {{ segments: Array<{label:string, pct:number, value:number, color:string}> }} props
  */
-export function CapitalDonut({ segments }) {
+export const CapitalDonut = memo(function CapitalDonut({ segments }) {
   let cursor = 0;
   const gradient = segments.map((s) => {
     const start = cursor;
@@ -88,7 +89,7 @@ export function CapitalDonut({ segments }) {
       </div>
     </div>
   );
-}
+});
 CapitalDonut.propTypes = {
   segments: PropTypes.arrayOf(PropTypes.shape({
     label: PropTypes.string.isRequired,
@@ -105,7 +106,7 @@ CapitalDonut.propTypes = {
  * cell is minmax(0,1fr) so four of them stay on one stable grid with no overflow.
  * @param {{ label: string, value: string, sub?: string|null }} props
  */
-export function DecisionKpiCell({ label, value, sub }) {
+export const DecisionKpiCell = memo(function DecisionKpiCell({ label, value, sub }) {
   return (
     <div style={S.kpiCell}>
       <span style={S.kpiLabel}>{label}</span>
@@ -113,7 +114,7 @@ export function DecisionKpiCell({ label, value, sub }) {
       {sub ? <span style={S.kpiSub}>{sub}</span> : null}
     </div>
   );
-}
+});
 DecisionKpiCell.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string,
@@ -133,7 +134,7 @@ DecisionKpiCell.propTypes = {
  *
  * @param {{ projection: object|null, caseHeader: string }} props
  */
-export function DecisionHeader({ projection, caseHeader }) {
+export const DecisionHeader = memo(function DecisionHeader({ projection, caseHeader }) {
   const v = verdictDecision(projection);
   const color = TONE_COLOR[v.tone] || 'var(--cp-text-primary)';
   const soft = TONE_SOFT[v.tone] || 'var(--cp-surface-1)';
@@ -142,11 +143,6 @@ export function DecisionHeader({ projection, caseHeader }) {
   const irr = DECISION_METRICS.find(m => m.id === 'irr');
   const moic = DECISION_METRICS.find(m => m.id === 'moic');
   const npv = DECISION_METRICS.find(m => m.id === 'npv');
-
-  const rc = deriveReturnsComposition(projection);
-  const tvPct = rc.available && rc.terminalPct != null ? Math.round(rc.terminalPct * 100) : null;
-  const opsPct = rc.available && rc.operationsPct != null ? Math.round(rc.operationsPct * 100) : null;
-  const tvAlarm = tvPct != null && tvPct > 75;
 
   return (
     <div data-decision-header style={S.dhWrap}>
@@ -165,27 +161,9 @@ export function DecisionHeader({ projection, caseHeader }) {
         <DecisionKpiCell label={UI.RESULTS_KPI_NPV} value={npv?.value(projection)} sub={npv?.subValue?.(projection)} />
         <DecisionKpiCell label={UI.RESULTS_KPI_CAPITAL} value={capital} />
       </div>
-
-      {/* Meta strip — returns composition · terminal-value flag · DSCR. Compact,
-          single row, above the fold; not a stack of full-width chunks. */}
-      <div data-decision-meta style={{ ...S.metaStrip, ...(tvAlarm ? { borderColor: 'var(--cp-warning)', background: 'var(--cp-warning-bg)' } : null) }}>
-        <span style={S.metaItem}>
-          <span style={S.metaLabel}>{UI.RESULTS_RC_TITLE}</span>
-          <strong style={S.metaValue}>
-            {opsPct != null && tvPct != null
-              ? `${UI.RESULTS_RC_OPERATIONS} ${opsPct}% · ${UI.RESULTS_RC_TERMINAL} ${tvPct}%`
-              : rc.note}
-          </strong>
-        </span>
-        {tvAlarm ? <span data-tv-warning style={{ ...S.metaFlag }}>{UI.RESULTS_TV_WARNING(tvPct)}</span> : null}
-        <span style={S.metaRisk}>
-          <span style={S.metaLabel}>{UI.RESULTS_RISK_GUARDRAIL}</span>
-          <strong style={S.metaValue}>DSCR {fmtX(projection?.dscr_stabilized)}</strong>
-        </span>
-      </div>
     </div>
   );
-}
+});
 DecisionHeader.propTypes = {
   projection: PropTypes.object,
   caseHeader: PropTypes.string.isRequired,
@@ -198,7 +176,7 @@ DecisionHeader.propTypes = {
  * engine fields). Not a tooltip; sits in the decision flow near the headline.
  * @param {{ projection: object|null }} props
  */
-export function ReturnsComposition({ projection }) {
+export const ReturnsComposition = memo(function ReturnsComposition({ projection }) {
   const c = deriveReturnsComposition(projection);
   const hasSplit = c.available && c.operationsPct != null && c.terminalPct != null;
   const opsW = hasSplit ? Math.max(0, Math.min(100, c.operationsPct * 100)) : 0;
@@ -222,7 +200,7 @@ export function ReturnsComposition({ projection }) {
       <span style={{ ...S.rcNote, color: strong ? 'var(--cp-text-primary)' : 'var(--cp-text-muted)' }}>{c.note}</span>
     </div>
   );
-}
+});
 ReturnsComposition.propTypes = {
   projection: PropTypes.object,
 };
@@ -232,7 +210,7 @@ ReturnsComposition.propTypes = {
  * One of the 4 scenario layer cards (Starting Point / Operating Model / Hardware / Industry).
  * @param {{ index: string, title: string, rows: Array<[string, string|null]> }} props
  */
-export function LayerCard({ index, title, rows }) {
+export const LayerCard = memo(function LayerCard({ index, title, rows }) {
   return (
     <div style={S.layerCard}>
       <div style={S.layerHead}>
@@ -249,7 +227,7 @@ export function LayerCard({ index, title, rows }) {
       </div>
     </div>
   );
-}
+});
 LayerCard.propTypes = {
   index: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,

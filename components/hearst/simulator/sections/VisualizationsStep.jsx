@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
 import { Card, SectionHead } from '@/components/hearst/ui';
@@ -32,7 +32,7 @@ const FinancialSankey = dynamic(() => import('@/components/hearst/simulator/Fina
  *   projection: object|null,
  * }} props
  */
-export default function VisualizationsStep({
+function VisualizationsStep({
   activeViz,
   onSelectViz,
   state,
@@ -71,7 +71,7 @@ export default function VisualizationsStep({
           style={{ marginBottom: 0 }}
         />
         <div data-viz-shell style={S.vizShell}>
-          <aside data-viz-rail style={S.vizRail}>
+          <aside data-viz-step-controls data-viz-rail style={S.vizRail}>
             {vizEntries.map(([id, meta]) => (
               <button
                 key={id}
@@ -125,6 +125,8 @@ VisualizationsStep.propTypes = {
   scenario: PropTypes.object,
   projection: PropTypes.object,
 };
+
+export default memo(VisualizationsStep);
 
 const S = {
   vizShell: {

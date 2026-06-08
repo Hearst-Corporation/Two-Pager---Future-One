@@ -2,9 +2,10 @@
 
 import PropTypes from 'prop-types';
 import { Card } from '@/components/hearst/ui';
+import { T, L } from '@/lib/cp-styles';
 
-// One glyph per operating model. Simple line icons on currentColor so they inherit
-// the accent when the card is selected. Keyed by archetype id; falls back to a
+// One glyph per operating model. Simple line icons on currentColor — neutral
+// selection (no accent tint). Keyed by archetype id; falls back to a
 // neutral node icon for any model without a bespoke glyph.
 const ICONS = {
   // Shell + Long Lease — a powered building shell.
@@ -55,8 +56,9 @@ const FALLBACK_ICON = (
 function ArchetypeIcon({ id }) {
   return (
     <svg
-      width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+      viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+      style={S.iconSvg}
     >
       {ICONS[id] || FALLBACK_ICON}
     </svg>
@@ -71,7 +73,7 @@ ArchetypeIcon.propTypes = { id: PropTypes.string };
  */
 export default function ArchetypePicker({ archetypes = [], primaryId, onSelectPrimary }) {
   return (
-    <div data-archetype-grid style={S.grid}>
+    <div data-archetype-grid style={L.grid2Min}>
       {archetypes.map((a) => {
         const isPrimary = primaryId === a.id;
         return (
@@ -82,12 +84,11 @@ export default function ArchetypePicker({ archetypes = [], primaryId, onSelectPr
             onClick={() => onSelectPrimary?.(a.id)}
             padding="md"
             hover
-            accent={isPrimary}
             aria-pressed={isPrimary}
-            surface={2}
-            style={S.card}
+            surface={isPrimary ? 3 : 2}
+            style={{ ...S.card, ...(isPrimary ? S.cardSelected : {}) }}
           >
-            <div style={{ ...S.icon, color: isPrimary ? 'var(--cp-accent-maroon)' : 'var(--cp-text-muted)' }}>
+            <div style={{ ...S.icon, color: isPrimary ? 'var(--cp-text-primary)' : 'var(--cp-text-muted)' }}>
               <ArchetypeIcon id={a.id} />
             </div>
             <span style={S.title}>{a.label}</span>
@@ -106,34 +107,35 @@ ArchetypePicker.propTypes = {
 };
 
 const S = {
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-    gap: 'var(--cp-space-3)',
-    alignItems: 'stretch',
-  },
   card: {
     display: 'grid',
     gridTemplateRows: 'auto auto 1fr',
-    gap: 'var(--cp-space-2)',
+    gap: 'var(--cp-space-1)',
     textAlign: 'left',
-    minHeight: 124,
+    minHeight: 'var(--cp-archetype-card-min-height)',
+  },
+  cardSelected: {
+    borderColor: 'var(--cp-border-strong)',
+    boxShadow: 'inset 3px 0 0 var(--cp-text-muted)',
   },
   icon: {
     display: 'flex',
     transition: 'color var(--cp-dur-base) var(--cp-ease)',
   },
+  iconSvg: {
+    width: 'var(--cp-icon-lg)',
+    height: 'var(--cp-icon-lg)',
+    strokeWidth: 'var(--cp-icon-stroke)',
+  },
   title: {
-    fontSize: 'var(--cp-font-lg)',
-    lineHeight: 1.15,
+    ...T.cardTitle,
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-strong)',
-    letterSpacing: 'var(--cp-tracking-tight)',
     minWidth: 0,
   },
   desc: {
-    fontSize: 'var(--cp-font-sm)',
-    lineHeight: 'var(--cp-leading-normal)',
+    fontSize: 'var(--cp-font-xs)',
+    lineHeight: 'var(--cp-leading-tight)',
     color: 'var(--cp-text-muted)',
   },
 };

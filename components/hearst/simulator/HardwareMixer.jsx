@@ -83,7 +83,6 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
   const capex_hw = calcGpuCapex(racks_used, gpu);
   const revenue_ai = calcGpuAnnualRevenue(racks_used, gpu, v.utilization_pct, v.gpu_hour_price);
 
-  const [advanced, setAdvanced] = useState(false);
   const activePreset = matchPreset(v);
 
   function setTier(key, val) {
@@ -97,6 +96,8 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
   function applyPreset(p) {
     onChange?.({ ...v, ...p.patch });
   }
+
+  const [showFineTune, setShowFineTune] = useState(false);
 
   return (
     <div style={S.wrap}>
@@ -148,12 +149,6 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
             </div>
             <span style={S.aiBadge}>{UI.HW_AI_BADGE(v.ai_pct)}</span>
           </div>
-          <HardwareTopology
-            classicPct={v.classic_pct}
-            liquidPct={v.liquid_pct}
-            totalMw={totalMw}
-            aiMw={mw_ai}
-          />
           <MixBar classicPct={v.classic_pct} liquidPct={v.liquid_pct} aiPct={v.ai_pct} />
         </Card>
 
@@ -164,100 +159,109 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
         </Card>
       </div>
 
-      {/* KPI ROW — full width, breathing */}
-      <div data-hardware-summary style={S.summary}>
-        <SumKpi label={UI.HW_KPI_CHIPS} value={total_gpus.toLocaleString('en-US')} />
-        <SumKpi label={UI.HW_KPI_RACKS} value={racks_used.toLocaleString('en-US')} />
-        <SumKpi label={UI.HW_KPI_EQUIP} value={`$${(capex_hw / 1e6).toFixed(1)}M`} />
-        <SumKpi label={UI.HW_KPI_REVENUE} value={`$${(revenue_ai / 1e6).toFixed(1)}M`} accent />
+      <div style={S.fineTuneToggle}>
+        <button
+          type="button"
+          onClick={() => setShowFineTune(!showFineTune)}
+          style={S.fineTuneButton}
+        >
+          <span>{showFineTune ? UI.SIM_CONFIG_FINETUNE_HIDE : UI.SIM_CONFIG_FINETUNE_SHOW}</span>
+          <span style={{ transform: showFineTune ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+        </button>
       </div>
 
-      <button type="button" onClick={() => setAdvanced((a) => !a)} style={S.advancedToggle}>
-        {advanced ? UI.HW_ADV_HIDE : UI.HW_ADV_SHOW}
-      </button>
-
-      {advanced && (
-        <div data-hardware-advanced-grid style={S.grid}>
-          <div style={S.col}>
-            <div style={S.colTitle}>
-              {UI.HW_ADV_POWER_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_POWER_META}</span>
-            </div>
-            <div style={S.sliders}>
-              {['classic_pct', 'liquid_pct', 'ai_pct'].map((key) => (
-                <div key={key} style={S.sliderRow}>
-                  <div style={S.sliderHead}>
-                    <span style={S.sliderName}>{TIER_LABELS[key].name}</span>
-                    <span style={S.sliderMeta}>{TIER_LABELS[key].meta}</span>
-                  </div>
-                  <div style={S.sliderControl}>
-                    <input
-                      type="range" min={0} max={100} step={1}
-                      value={v[key]}
-                      aria-label={`${TIER_LABELS[key].name} %`}
-                      aria-valuetext={`${v[key]} %, ${(totalMw * v[key] / 100).toFixed(1)} MW`}
-                      onChange={(e) => setTier(key, Number(e.target.value))}
-                      style={S.range}
-                    />
-                    <span style={S.pct}>{v[key]}%</span>
-                    <span style={S.mw}>{(totalMw * v[key] / 100).toFixed(1)} MW</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+      {showFineTune && (
+        <>
+          {/* KPI ROW — full width, breathing */}
+          <div data-hardware-summary style={S.summary}>
+            <SumKpi label={UI.HW_KPI_CHIPS} value={total_gpus.toLocaleString('en-US')} />
+            <SumKpi label={UI.HW_KPI_RACKS} value={racks_used.toLocaleString('en-US')} />
+            <SumKpi label={UI.HW_KPI_EQUIP} value={`$${(capex_hw / 1e6).toFixed(1)}M`} />
+            <SumKpi label={UI.HW_KPI_REVENUE} value={`$${(revenue_ai / 1e6).toFixed(1)}M`} accent />
           </div>
 
-          {v.ai_pct > 0 && (
+          <div data-hardware-advanced-grid style={S.grid}>
             <div style={S.col}>
               <div style={S.colTitle}>
-                {UI.HW_ADV_AI_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_AI_META(mw_ai.toFixed(1))}</span>
+                {UI.HW_ADV_POWER_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_POWER_META}</span>
               </div>
-              <div data-hardware-gpu-grid style={S.gpuCards}>
-                {GPU_CATALOG.map((g) => {
-                  const sel = v.gpu_sku_id === g.id;
-                  return (
-                    <Card
-                      as="button"
-                      key={g.id}
-                      type="button"
-                      onClick={() => onChange?.({ ...v, gpu_sku_id: g.id, gpu_hour_price: REFERENCE_GPU_HOUR_PRICES[g.id] || v.gpu_hour_price })}
-                      padding="sm"
-                      hover
-                      accent={sel}
-                      aria-pressed={sel}
-                      surface={2}
-                      style={S.gpuCard}
-                    >
-                      <div style={S.gpuSku}>{g.sku}</div>
-                      <div style={S.gpuMeta}>
-                        {g.vendor} · {g.rack_scale ? `${(g.tdp_w / 1000000).toFixed(1)} MW/rack` : `${g.tdp_w}W`} · {g.hbm_gb}GB
-                      </div>
-                      <div style={S.gpuPrice}>
-                        ${g.rack_scale ? `${(g.msrp_usd / 1000000).toFixed(1)}M/rack` : `${(g.msrp_usd / 1000).toFixed(0)}k/GPU`}
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-
-              <div style={S.aiControls}>
-                <label style={S.ctrlBlock}>
-                  <span style={S.ctrlLabel}>{UI.HW_ADV_UTILIZATION}</span>
-                  <input type="range" min={40} max={95} step={1} value={v.utilization_pct}
-                    aria-label={UI.HW_GPU_UTIL_ARIA}
-                    aria-valuetext={`${v.utilization_pct} %`}
-                    onChange={(e) => onChange?.({ ...v, utilization_pct: Number(e.target.value) })} style={S.range} />
-                  <span style={S.ctrlValue}>{v.utilization_pct}%</span>
-                </label>
-                <label style={S.ctrlBlock}>
-                  <span style={S.ctrlLabel}>{UI.HW_ADV_PRICE}</span>
-                  <input type="number" step={0.10} min={0} max={20} value={v.gpu_hour_price}
-                    aria-label={UI.HW_ADV_PRICE}
-                    onChange={(e) => onChange?.({ ...v, gpu_hour_price: Number(e.target.value) })} style={S.numInput} />
-                </label>
+              <div style={S.sliders}>
+                {['classic_pct', 'liquid_pct', 'ai_pct'].map((key) => (
+                  <div key={key} style={S.sliderRow}>
+                    <div style={S.sliderHead}>
+                      <span style={S.sliderName}>{TIER_LABELS[key].name}</span>
+                      <span style={S.sliderMeta}>{TIER_LABELS[key].meta}</span>
+                    </div>
+                    <div style={S.sliderControl}>
+                      <input
+                        type="range" min={0} max={100} step={1}
+                        value={v[key]}
+                        aria-label={`${TIER_LABELS[key].name} %`}
+                        aria-valuetext={`${v[key]} %, ${(totalMw * v[key] / 100).toFixed(1)} MW`}
+                        onChange={(e) => setTier(key, Number(e.target.value))}
+                        style={S.range}
+                      />
+                      <span style={S.pct}>{v[key]}%</span>
+                      <span style={S.mw}>{(totalMw * v[key] / 100).toFixed(1)} MW</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          )}
-        </div>
+
+            {v.ai_pct > 0 && (
+              <div style={S.col}>
+                <div style={S.colTitle}>
+                  {UI.HW_ADV_AI_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_AI_META(mw_ai.toFixed(1))}</span>
+                </div>
+                <div data-hardware-gpu-grid style={S.gpuCards}>
+                  {GPU_CATALOG.map((g) => {
+                    const sel = v.gpu_sku_id === g.id;
+                    return (
+                      <Card
+                        as="button"
+                        key={g.id}
+                        type="button"
+                        onClick={() => onChange?.({ ...v, gpu_sku_id: g.id, gpu_hour_price: REFERENCE_GPU_HOUR_PRICES[g.id] || v.gpu_hour_price })}
+                        padding="sm"
+                        hover
+                        accent={sel}
+                        aria-pressed={sel}
+                        surface={2}
+                        style={S.gpuCard}
+                      >
+                        <div style={S.gpuSku}>{g.sku}</div>
+                        <div style={S.gpuMeta}>
+                          {g.vendor} · {g.rack_scale ? `${(g.tdp_w / 1000000).toFixed(1)} MW/rack` : `${g.tdp_w}W`} · {g.hbm_gb}GB
+                        </div>
+                        <div style={S.gpuPrice}>
+                          ${g.rack_scale ? `${(g.msrp_usd / 1000000).toFixed(1)}M/rack` : `${(g.msrp_usd / 1000).toFixed(0)}k/GPU`}
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                <div style={S.aiControls}>
+                  <label style={S.ctrlBlock}>
+                    <span style={S.ctrlLabel}>{UI.HW_ADV_UTILIZATION}</span>
+                    <input type="range" min={40} max={95} step={1} value={v.utilization_pct}
+                      aria-label={UI.HW_GPU_UTIL_ARIA}
+                      aria-valuetext={`${v.utilization_pct} %`}
+                      onChange={(e) => onChange?.({ ...v, utilization_pct: Number(e.target.value) })} style={S.range} />
+                    <span style={S.ctrlValue}>{v.utilization_pct}%</span>
+                  </label>
+                  <label style={S.ctrlBlock}>
+                    <span style={S.ctrlLabel}>{UI.HW_ADV_PRICE}</span>
+                    <input type="number" step={0.10} min={0} max={20} value={v.gpu_hour_price}
+                      aria-label={UI.HW_ADV_PRICE}
+                      onChange={(e) => onChange?.({ ...v, gpu_hour_price: Number(e.target.value) })} style={S.numInput} />
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
@@ -306,12 +310,12 @@ function HardwareTopology({ classicPct, liquidPct, totalMw, aiMw }) {
           </g>
         );
       })}
-      <text x="44" y="34" fill="var(--cp-text-muted)" fontSize="11" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_POWER_HALL.toUpperCase()}</text>
-      <text x="556" y="34" fill="var(--cp-text-primary)" fontSize="15" fontWeight="var(--cp-weight-black)">{totalMw} MW</text>
+      <text x="44" y="34" fill="var(--cp-text-muted)" fontSize="var(--cp-font-xs)" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_POWER_HALL.toUpperCase()}</text>
+      <text x="556" y="34" fill="var(--cp-text-primary)" fontSize="var(--cp-font-lg)" fontWeight="var(--cp-weight-black)">{totalMw} MW</text>
       <g>
         <rect x="556" y="96" width="150" height="58" rx="12" fill="var(--cp-surface-2)" stroke="var(--cp-border)" />
-        <text x="572" y="118" fill="var(--cp-text-muted)" fontSize="10" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_AI_FABRIC.toUpperCase()}</text>
-        <text x="572" y="142" fill="var(--cp-text-primary)" fontSize="22" fontWeight="var(--cp-weight-black)">{aiMw.toFixed(1)} MW</text>
+        <text x="572" y="118" fill="var(--cp-text-muted)" fontSize="var(--cp-font-micro)" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_AI_FABRIC.toUpperCase()}</text>
+        <text x="572" y="142" fill="var(--cp-text-primary)" fontSize="var(--cp-font-2xl)" fontWeight="var(--cp-weight-black)">{aiMw.toFixed(1)} MW</text>
       </g>
     </svg>
   );
@@ -434,7 +438,7 @@ const S = {
     margin: 'var(--cp-space-1) 0 0',
     color: 'var(--cp-text-primary)',
     fontSize: 'var(--cp-font-lg)',
-    lineHeight: 1.1,
+    lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
   },
@@ -525,6 +529,28 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
     fontVariantNumeric: 'tabular-nums',
+  },
+  fineTuneToggle: {
+    display: 'flex',
+    justifyContent: 'center',
+    padding: 'var(--cp-space-2) 0',
+    borderTop: '1px dashed var(--cp-border)',
+  },
+  fineTuneButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-1) var(--cp-space-3)',
+    background: 'transparent',
+    border: 'none',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-widest)',
+    cursor: 'pointer',
+    opacity: 0.7,
+    transition: 'all 0.2s',
   },
   advancedToggle: {
     alignSelf: 'stretch',

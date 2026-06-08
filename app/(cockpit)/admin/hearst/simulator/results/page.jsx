@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 
 import { buildSimulatePayload, INITIAL_STATE } from '@/lib/hearst-simulator-state';
@@ -31,7 +31,7 @@ import VisualizationsStep from '@/components/hearst/simulator/sections/Visualiza
 import GanttTimeline from '@/components/hearst/simulator/GanttTimeline';
 import ProjectionChart from '@/components/hearst/simulator/ProjectionChart';
 import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
-import { Card, SectionHead, KpiGrid } from '@/components/hearst/ui';
+import { Card, SectionHead, KpiGrid, Button } from '@/components/hearst/ui';
 import { S as CP } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
 
@@ -128,33 +128,45 @@ export default function SimulatorResultsPage() {
     return () => { cancelled = true; };
   }, [scenarioId, searchParams]);
 
-  const projection = simResult?.projection;
-  const scenario = simResult?.scenario || row;
-  const archetype = state ? ARCH_BY_ID[state.primary_archetype_id] : null;
-  const hardware = state?.hardware_mix || {};
+  const projection = useMemo(() => simResult?.projection, [simResult]);
+  const scenario = useMemo(() => simResult?.scenario || row, [simResult, row]);
+  const archetype = useMemo(() => state ? ARCH_BY_ID[state.primary_archetype_id] : null, [state]);
+  const hardware = useMemo(() => state?.hardware_mix || {}, [state]);
 
   // Case header — "Deploy $X · Model · MW · Geography" from existing data only.
-  const caseHeader = [
+  const caseHeader = useMemo(() => [
     projection?.total_capex != null ? UI.RESULTS_CASE_DEPLOY(fmtUSD(projection.total_capex)) : null,
     archetype?.label || state?.primary_archetype_id,
     scenario?.total_mw != null ? fmtMW(scenario.total_mw, 0) : null,
     state?.geography,
-  ].filter(Boolean).join(' · ');
+  ].filter(Boolean).join(' · '), [projection, archetype, state, scenario]);
+
+  // Investment Case sentence: "Deploy $X into a Y in Z targeting W% IRR"
+  const investmentCaseSentence = useMemo(() => projection ? (
+    <>
+      Deploy <strong style={{ color: 'var(--cp-text-strong)' }}>{fmtUSD(projection.total_capex)}</strong> into a{' '}
+      <strong style={{ color: 'var(--cp-text-strong)' }}>{archetype?.label || state?.primary_archetype_id}</strong> in{' '}
+      <strong style={{ color: 'var(--cp-text-strong)' }}>{state?.geography}</strong> targeting{' '}
+      <strong style={{ color: 'var(--cp-text-strong)' }}>{fmtPctFromRatio(projection.irr)} IRR</strong>.
+    </>
+  ) : null, [projection, archetype, state]);
+
+  const advisorContext = useMemo(() => ({
+    surface: 'results',
+    row,
+    state,
+    scenario,
+    projection,
+    simResult,
+    loading,
+    error,
+    scenarioId,
+  }), [row, state, scenario, projection, simResult, loading, error, scenarioId]);
 
   useEffect(() => {
-    setAdvisorContext?.({
-      surface: 'results',
-      row,
-      state,
-      scenario,
-      projection,
-      simResult,
-      loading,
-      error,
-      scenarioId,
-    });
+    setAdvisorContext?.(advisorContext);
     return () => setAdvisorContext?.(null);
-  }, [error, loading, projection, row, scenario, scenarioId, setAdvisorContext, simResult, state]);
+  }, [advisorContext, setAdvisorContext]);
 
   const handleExportMd = useCallback(() => {
     if (!row || !state || !projection) return;
@@ -183,6 +195,32 @@ export default function SimulatorResultsPage() {
     setSavingState('saved');
     setTimeout(() => setSavingState('idle'), 1800);
   }, []);
+
+  const donutSegments = useMemo(() => capitalStackSegments(scenario, projection), [scenario, projection]);
+
+  const layer1Rows = useMemo(() => [
+    [UI.RESULTS_ROW_MODE, state?.mode],
+    [UI.RESULTS_ROW_POWER, scenario?.total_mw != null ? fmtMW(scenario.total_mw, 0) : null],
+    [UI.RESULTS_ROW_PUE, scenario?.pue],
+  ], [state?.mode, scenario?.total_mw, scenario?.pue]);
+
+  const layer2Rows = useMemo(() => [
+    [UI.RESULTS_ROW_MODEL, archetype?.label],
+    [UI.RESULTS_ROW_BUSINESS, BUSINESS_BY_ID[state?.business_model_id]?.label],
+    [UI.RESULTS_ROW_CLIENT, CLIENT_BY_ID[state?.client_type_id]?.label],
+  ], [archetype?.label, state?.business_model_id, state?.client_type_id]);
+
+  const layer3Rows = useMemo(() => [
+    [UI.RESULTS_ROW_MIX, `${hardware.classic_pct ?? 0}% / ${hardware.liquid_pct ?? 0}% / ${hardware.ai_pct ?? 0}%`],
+    [UI.RESULTS_ROW_GPU, hardware.gpu_sku_id],
+    [UI.RESULTS_ROW_UTIL, hardware.utilization_pct != null ? fmtPctRaw(hardware.utilization_pct) : null],
+  ], [hardware]);
+
+  const layer4Rows = useMemo(() => [
+    [UI.RESULTS_ROW_REGION, state?.geography],
+    [UI.RESULTS_ROW_THESIS, archetype?.operator_role],
+    [UI.RESULTS_ROW_AI, hardware.ai_pct != null ? `${hardware.ai_pct}%` : null],
+  ], [state?.geography, archetype?.operator_role, hardware.ai_pct]);
 
   if (loading) {
     return (
@@ -266,14 +304,52 @@ export default function SimulatorResultsPage() {
           flex-basis: 100% !important;
         }
       }
+      @media print {
+        .oracle-rail-nav,
+        .ct-rail-left,
+        .ct-rail-right,
+        [data-results-hero] button,
+        [data-viz-step-controls],
+        [data-cta-bar],
+        .oracle-mobile-nav-root {
+          display: none !important;
+        }
+        .oracle-page {
+          padding: 0 !important;
+          margin: 0 !important;
+          background: white !important;
+          color: black !important;
+        }
+        [data-results-layout] {
+          max-width: none !important;
+          gap: var(--cp-space-4) !important;
+        }
+        .ct-center-panel {
+          overflow: visible !important;
+        }
+        .ct-page-area {
+          overflow: visible !important;
+          padding: 20px !important;
+        }
+      }
     `}</style>
     <div className="oracle-page">
     <div data-results-layout style={S.inner}>
       <Card as="header" data-results-hero variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <div style={S.heroTopRow}>
-          <Link href={`/admin/hearst/simulator?scenario=${scenarioId}`} style={S.backLink}>{UI.RESULTS_BACK_EDIT}</Link>
+          <Link href={`/admin/hearst/simulator?scenario=${scenarioId}`} style={{ textDecoration: 'none' }}>
+            <Button variant="secondary" size="sm" style={{ fontWeight: 'var(--cp-weight-bold)' }}>
+              {UI.RESULTS_BACK_EDIT}
+            </Button>
+          </Link>
           <span style={S.heroName}>{row?.name || UI.RESULTS_HERO_FALLBACK_NAME}</span>
         </div>
+
+        <div style={S.narrativeBox}>
+          <span style={S.cardEyebrow}>INVESTMENT CASE</span>
+          <p style={S.narrativeSentence}>{investmentCaseSentence}</p>
+        </div>
+
         <DecisionHeader projection={projection} caseHeader={caseHeader} />
       </Card>
 
@@ -298,18 +374,29 @@ export default function SimulatorResultsPage() {
           <Card data-results-chart variant="card" surface={1} style={{ minWidth: 0, minHeight: 430, paddingTop: 'var(--cp-space-4)', paddingBottom: 'var(--cp-space-2)', paddingLeft: 'var(--cp-space-3)', paddingRight: 'var(--cp-space-3)' }}>
             <ProjectionChart years={projection?.years || []} height={500} />
           </Card>
-          <Card as="aside" data-capital-panel variant="card" surface={1} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', padding: 'var(--cp-space-4)' }}>
-            <CapitalDonut segments={capitalStackSegments(scenario, projection)} />
-            <div style={S.structureRows}>
-              <InlineMetric label={UI.RESULTS_IM_BUILD_COST} value={fmtUSD(projection?.total_capex)} />
-              {projection?.equity_invested != null && <InlineMetric label={UI.RESULTS_IM_EQUITY_IDC} value={fmtUSD(projection.equity_invested)} />}
-              {projection?.idc != null && projection.idc > 0 && <InlineMetric label={UI.RESULTS_IM_IDC} value={fmtUSD(projection.idc)} />}
-              <InlineMetric label={UI.RESULTS_IM_TERMINAL} value={fmtUSD(projection?.terminal_value)} />
-              {projection?.terminal_value_to_equity != null && <InlineMetric label={UI.RESULTS_IM_TERMINAL_EQUITY} value={fmtUSD(projection.terminal_value_to_equity)} />}
-              <InlineMetric label={UI.RESULTS_IM_IRR} value={fmtPctFromRatio(projection?.irr)} />
-              <InlineMetric label={UI.RESULTS_IM_DSCR} value={fmtX(projection?.dscr_stabilized)} />
-              <InlineMetric label={UI.RESULTS_IM_OCCUPANCY} value={scenario?.target_occupancy_pct != null ? fmtPctRaw(scenario.target_occupancy_pct) : MISSING} />
-              <InlineMetric label={UI.RESULTS_IM_EXIT_LABEL} value={scenario?.exit_year ? UI.RESULTS_IM_EXIT_YEAR(scenario.exit_year) : MISSING} />
+          <Card as="aside" data-capital-panel variant="card" surface={1} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)', padding: 'var(--cp-space-4)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' }}>
+              <span style={S.cardEyebrow}>{UI.RESULTS_KPI_CAPITAL}</span>
+              <CapitalDonut segments={donutSegments} />
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--cp-border-base)', paddingTop: 'var(--cp-space-4)' }}>
+              <ReturnsComposition projection={projection} />
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--cp-border-base)', paddingTop: 'var(--cp-space-4)' }}>
+              <span style={{ ...S.cardEyebrow, marginBottom: 'var(--cp-space-3)', display: 'block' }}>STRUCTURE</span>
+              <div style={S.structureRows}>
+                <InlineMetric label={UI.RESULTS_IM_BUILD_COST} value={fmtUSD(projection?.total_capex)} />
+                {projection?.equity_invested != null && <InlineMetric label={UI.RESULTS_IM_EQUITY_IDC} value={fmtUSD(projection.equity_invested)} />}
+                {projection?.idc != null && projection.idc > 0 && <InlineMetric label={UI.RESULTS_IM_IDC} value={fmtUSD(projection.idc)} />}
+                <InlineMetric label={UI.RESULTS_IM_TERMINAL} value={fmtUSD(projection?.terminal_value)} />
+                {projection?.terminal_value_to_equity != null && <InlineMetric label={UI.RESULTS_IM_TERMINAL_EQUITY} value={fmtUSD(projection.terminal_value_to_equity)} />}
+                <InlineMetric label={UI.RESULTS_IM_IRR} value={fmtPctFromRatio(projection?.irr)} />
+                <InlineMetric label={UI.RESULTS_IM_DSCR} value={fmtX(projection?.dscr_stabilized)} />
+                <InlineMetric label={UI.RESULTS_IM_OCCUPANCY} value={scenario?.target_occupancy_pct != null ? fmtPctRaw(scenario.target_occupancy_pct) : MISSING} />
+                <InlineMetric label={UI.RESULTS_IM_EXIT_LABEL} value={scenario?.exit_year ? UI.RESULTS_IM_EXIT_YEAR(scenario.exit_year) : MISSING} />
+              </div>
             </div>
           </Card>
         </div>
@@ -318,26 +405,10 @@ export default function SimulatorResultsPage() {
       <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead title={UI.RESULTS_LAYERS_TITLE} hint={UI.RESULTS_LAYERS_HINT} style={{ marginBottom: 0 }} />
         <div data-layer-grid style={S.layerGrid}>
-          <LayerCard index="01" title={UI.RESULTS_LAYER_START} rows={[
-            [UI.RESULTS_ROW_MODE, state?.mode],
-            [UI.RESULTS_ROW_POWER, scenario?.total_mw != null ? fmtMW(scenario.total_mw, 0) : null],
-            [UI.RESULTS_ROW_PUE, scenario?.pue],
-          ]} />
-          <LayerCard index="02" title={UI.RESULTS_LAYER_MODEL} rows={[
-            [UI.RESULTS_ROW_MODEL, archetype?.label],
-            [UI.RESULTS_ROW_BUSINESS, BUSINESS_BY_ID[state?.business_model_id]?.label],
-            [UI.RESULTS_ROW_CLIENT, CLIENT_BY_ID[state?.client_type_id]?.label],
-          ]} />
-          <LayerCard index="03" title={UI.RESULTS_LAYER_HW} rows={[
-            [UI.RESULTS_ROW_MIX, `${hardware.classic_pct ?? 0}% / ${hardware.liquid_pct ?? 0}% / ${hardware.ai_pct ?? 0}%`],
-            [UI.RESULTS_ROW_GPU, hardware.gpu_sku_id],
-            [UI.RESULTS_ROW_UTIL, hardware.utilization_pct != null ? fmtPctRaw(hardware.utilization_pct) : null],
-          ]} />
-          <LayerCard index="04" title={UI.RESULTS_LAYER_INDUSTRY} rows={[
-            [UI.RESULTS_ROW_REGION, state?.geography],
-            [UI.RESULTS_ROW_THESIS, archetype?.operator_role],
-            [UI.RESULTS_ROW_AI, hardware.ai_pct != null ? `${hardware.ai_pct}%` : null],
-          ]} />
+          <LayerCard index="01" title={UI.RESULTS_LAYER_START} rows={layer1Rows} />
+          <LayerCard index="02" title={UI.RESULTS_LAYER_MODEL} rows={layer2Rows} />
+          <LayerCard index="03" title={UI.RESULTS_LAYER_HW} rows={layer3Rows} />
+          <LayerCard index="04" title={UI.RESULTS_LAYER_INDUSTRY} rows={layer4Rows} />
         </div>
       </Card>
 
@@ -392,6 +463,21 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
+  },
+  narrativeBox: {
+    padding: 'var(--cp-space-4)',
+    background: 'var(--cp-surface-2)',
+    borderRadius: 'var(--cp-radius-md)',
+    border: '1px solid var(--cp-border-base)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-2)',
+  },
+  narrativeSentence: {
+    margin: 0,
+    fontSize: 'var(--cp-font-lg)',
+    color: 'var(--cp-text-primary)',
+    lineHeight: 'var(--cp-leading-relaxed)',
   },
   backLink: {
     color: 'var(--cp-accent-maroon)',

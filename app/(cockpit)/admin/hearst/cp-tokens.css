@@ -33,7 +33,13 @@
      --cp-chat-rail-width (padding-right de .ct-page-area). Ne pas le retirer. */
   --ct-rail-right: 0px;
   --cp-chat-rail-width: min(420px, 32vw);
+}
 
+body.oracle-simulator-page {
+  --cp-chat-rail-width: min(360px, 27vw);
+}
+
+:root {
   /* ── Aliases directs vers --ct-* ── */
   --cp-accent:          var(--ct-accent);
   --cp-accent-maroon:   var(--ct-accent-maroon);
@@ -177,6 +183,9 @@
   --cp-btn-height-md:  36px;
   --cp-btn-height-lg:  44px;
   --cp-icon-md:        20px;
+  --cp-icon-lg:        28px;
+  --cp-icon-stroke:    1.6;
+  --cp-archetype-card-min-height: 100px;
   --cp-display-input:  46px;
   --cp-display-unit:   22px;
   --cp-chart-tick:     11px;

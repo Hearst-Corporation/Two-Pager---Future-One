@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip, Legend } from 'recharts';
 import { useContainerSize } from './useContainerSize';
 import { RC } from '@/lib/cp-styles';
@@ -29,7 +30,7 @@ const ARCHETYPE_PALETTE = {
   sovereign_ai:          'var(--cp-text-primary)',
 };
 
-export default function ArchetypeRadar({ archetypes = [], highlighted = null, height = 320 }) {
+function ArchetypeRadar({ archetypes = [], highlighted = null, height = 320 }) {
   const [ref, size] = useContainerSize();
 
   if (!archetypes.length) {
@@ -80,6 +81,8 @@ export default function ArchetypeRadar({ archetypes = [], highlighted = null, he
     </div>
   );
 }
+
+export default memo(ArchetypeRadar);
 
 const S = {
   empty: {

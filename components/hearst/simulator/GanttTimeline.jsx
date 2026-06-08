@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { SITE_READINESS } from '@/lib/hearst-constants';
 
 /**
@@ -7,7 +8,7 @@ import { SITE_READINESS } from '@/lib/hearst-constants';
  * The previous SVG used small milestone dots that looked like rendering noise.
  * This keeps the same scheduling logic but presents it as readable phase rows.
  */
-export default function GanttTimeline({ scenario, exit_year = 10 }) {
+function GanttTimeline({ scenario, exit_year = 10 }) {
   const readiness = SITE_READINESS[scenario?.site_readiness] || SITE_READINESS.greenfield;
   const dev_months = readiness.dev_months;
   const cod_offset_months = readiness.cod_offset_months;
@@ -100,6 +101,8 @@ function formatRange(start, end) {
   return `Y${Math.round(start / 12)}-Y${Math.round(end / 12)}`;
 }
 
+export default memo(GanttTimeline);
+
 const S = {
   wrap: {
     width: '100%',
@@ -121,12 +124,12 @@ const S = {
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-md)',
     background: 'var(--cp-surface-1)',
-    padding: 'var(--cp-space-5) var(--cp-space-4) var(--cp-space-6)',
+    padding: 'var(--cp-space-4) var(--cp-space-4) var(--cp-space-4)',
     overflow: 'hidden',
   },
   axis: {
     position: 'relative',
-    height: 24,
+    height: 20,
     borderBottom: '1px solid var(--cp-border)',
   },
   tick: {
@@ -142,8 +145,8 @@ const S = {
   },
   launchLine: {
     position: 'absolute',
-    top: 'var(--cp-space-5)',
-    bottom: 'var(--cp-space-6)',
+    top: 'var(--cp-space-4)',
+    bottom: 'var(--cp-space-4)',
     left: 'calc(var(--cp-space-4) + ((100% - var(--cp-space-8)) * var(--timeline-launch-frac, 0.25)))',
     width: 1,
     background: 'var(--cp-accent-maroon)',
@@ -152,19 +155,19 @@ const S = {
   phaseRow: {
     display: 'grid',
     gridTemplateColumns: '1fr',
-    gap: 'var(--cp-space-2)',
+    gap: 'var(--cp-space-1)',
   },
   phaseCopy: {
     display: 'grid',
     gridTemplateColumns: 'minmax(0, 1fr) auto',
     alignItems: 'end',
     gap: 'var(--cp-space-4)',
-    minHeight: 38,
+    minHeight: 32,
   },
   phaseCopyText: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
+    gap: '0px',
     minWidth: 0,
   },
   phaseLabel: {
@@ -175,7 +178,7 @@ const S = {
   },
   phaseDesc: {
     color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
+    fontSize: 'var(--cp-font-xs)',
     lineHeight: 'var(--cp-leading-normal)',
   },
   phaseRange: {
@@ -188,15 +191,15 @@ const S = {
   },
   track: {
     position: 'relative',
-    height: 30,
+    height: 24,
     borderRadius: 'var(--cp-radius-pill)',
     background: 'var(--cp-surface-0)',
     overflow: 'hidden',
   },
   phaseBar: {
     position: 'absolute',
-    top: 4,
-    bottom: 4,
+    top: 3,
+    bottom: 3,
     minWidth: 56,
     borderRadius: 'var(--cp-radius-pill)',
     display: 'flex',
