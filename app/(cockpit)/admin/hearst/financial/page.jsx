@@ -22,6 +22,7 @@ import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
 import { fmtUSD, fmtPctFromRatio, fmtPctRaw, fmtX } from '@/lib/hearst-format';
+import { boardValue } from '@/lib/hearst-board-metrics';
 import { UI } from '@/lib/ui-strings';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import {
@@ -273,9 +274,9 @@ export default function FinancialPage() {
       {/* Summary KPIs */}
       <KpiGrid cols={4} data-financial-kpi-grid style={{ marginBottom: 'var(--cp-space-6)' }}>
         <KpiCard label={UI.FIN_KPI_TOTAL_CAPEX} value={proj.total_capex} format="currency" />
-        <KpiCard label={UI.FIN_KPI_PROJECT_IRR} value={proj.irr} format="pct" sublabel={base?.source_score != null ? UI.FIN_KPI_SOURCE_SCORE(base.source_score) : undefined} highlight={proj.irr != null} />
-        <KpiCard label={UI.FIN_KPI_NPV} value={proj.npv} format="currency" />
-        <KpiCard label={UI.FIN_KPI_MOIC} value={proj.moic} format="x" />
+        <KpiCard label={UI.FIN_KPI_PROJECT_IRR} value={boardValue(proj, 'irr')} format="pct" sublabel={base?.source_score != null ? UI.FIN_KPI_SOURCE_SCORE(base.source_score) : undefined} highlight={boardValue(proj, 'irr') != null} />
+        <KpiCard label={UI.FIN_KPI_NPV} value={boardValue(proj, 'npv')} format="currency" />
+        <KpiCard label={UI.FIN_KPI_MOIC} value={boardValue(proj, 'moic')} format="x" />
         <KpiCard label={UI.FIN_KPI_DSCR} value={proj.dscr_stabilized} format="x" />
         <KpiCard label={UI.FIN_KPI_PAYBACK} value={proj.payback_years} format="years" />
         <KpiCard label={UI.FIN_KPI_TERMINAL} value={proj.terminal_value} format="currency" />
@@ -373,8 +374,8 @@ export default function FinancialPage() {
             <>
               <div style={S.debtSummary}>
                 {[
-                  { label: UI.FIN_DEBT_PRINCIPAL, value: '$' + (debtSchedule.summary.principal / 1e6).toFixed(1) + 'M' },
-                  { label: UI.FIN_DEBT_TOTAL_INTEREST, value: '$' + (debtSchedule.summary.total_interest / 1e6).toFixed(1) + 'M' },
+                  { label: UI.FIN_DEBT_PRINCIPAL, value: fmtUSD(debtSchedule.summary.principal) },
+                  { label: UI.FIN_DEBT_TOTAL_INTEREST, value: fmtUSD(debtSchedule.summary.total_interest) },
                   { label: UI.FIN_DEBT_TERM, value: debtSchedule.summary.debt_term_years + UI.FIN_DEBT_TERM_SUFFIX },
                   { label: UI.FIN_DEBT_IO_PERIOD, value: debtSchedule.summary.io_years + UI.FIN_DEBT_TERM_SUFFIX },
                   { label: UI.FIN_DEBT_MIN_DSCR, value: fmtX(debtSchedule.summary.min_dscr) },

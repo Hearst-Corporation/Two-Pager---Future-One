@@ -126,17 +126,17 @@ describe('reconcileMetricsWithEngine — edge cases', () => {
 // ── formatting spot checks ────────────────────────────────────────────────
 
 describe('reconcileMetricsWithEngine — formatting matches fmtUsd / fmtPct / fmtX / fmtYears', () => {
-  it('formats MOIC as "2.35×" with empty unit', () => {
+  it('formats MOIC as "2.35x" with empty unit', () => {
     const result = reconcileMetricsWithEngine([], makeProjection({ moic: 2.35 }));
     const row = result.find(r => r.label === 'MOIC');
-    expect(row.value).toBe('2.35×');
+    expect(row.value).toBe('2.35x');
     expect(row.unit).toBe('');
   });
 
   it('formats total_capex as "$550M" with empty unit', () => {
     const result = reconcileMetricsWithEngine([], makeProjection({ total_capex: 550_000_000 }));
     const row = result.find(r => r.label === 'Total CAPEX');
-    expect(row.value).toBe('$550M');
+    expect(row.value).toBe('$550.0M');
     expect(row.unit).toBe('');
   });
 
@@ -188,7 +188,7 @@ describe('reconcileMetricsWithEngine — label matching is case-insensitive', ()
     ];
     const result = reconcileMetricsWithEngine(metrics, makeProjection({ total_capex: 550_000_000 }));
     const row = result.find(r => r.label === 'Total CAPEX (USD)');
-    expect(row.value).toBe('$550M');
+    expect(row.value).toBe('$550.0M');
     expect(row.source).toBe('engine');
   });
 });
@@ -213,7 +213,7 @@ describe('reconcileMetricsWithEngine — Fix 2: keyword collision exclusions', (
     // Total CAPEX row must be overwritten
     const totalRow = result.find(r => r.label === 'Total CAPEX');
     expect(totalRow).toBeDefined();
-    expect(totalRow.value).toBe('$550M');
+    expect(totalRow.value).toBe('$550.0M');
     expect(totalRow.source).toBe('engine');
   });
 
@@ -234,7 +234,7 @@ describe('reconcileMetricsWithEngine — Fix 2: keyword collision exclusions', (
     // The MOIC row must be engine-pinned
     const moicRow = result.find(r => r.label === 'MOIC');
     expect(moicRow).toBeDefined();
-    expect(moicRow.value).toBe('2.35×');
+    expect(moicRow.value).toBe('2.35x');
     expect(moicRow.source).toBe('engine');
   });
 

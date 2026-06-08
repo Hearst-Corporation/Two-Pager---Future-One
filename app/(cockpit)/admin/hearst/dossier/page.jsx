@@ -27,9 +27,11 @@ import {
   deriveVerdict, deriveCategory, deriveKpis, topRisks, deriveDecision,
   deriveCapitalStack, fmtUsd,
 } from '@/lib/dossier-derive';
+import { deriveReturnsComposition } from '@/lib/returns-composition';
 import { Card, SectionHead, Button, Table, Row, Cell, KpiGrid, KpiCard } from '@/components/hearst/ui';
 import { S as CP } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
+import { resolveSourceLabel } from '@/lib/citation-resolver';
 
 const DOSSIER_ERR = { ...CP.error, padding: 'var(--cp-space-3)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-3)' };
 const DOSSIER_EMPTY = { ...CP.empty, padding: 'var(--cp-space-9)', fontSize: 'var(--cp-font-md)' };
@@ -187,6 +189,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
   const risks = topRisks(m, 5);
   const decision = deriveDecision(m, memo.status);
   const capStack = deriveCapitalStack(m, scenario);
+  const returnsComp = deriveReturnsComposition(m._exec_projection);
   const fresh = m.data_freshness || {};
   const phases = m.deployment_roadmap?.phases || [];
   const comparables = m.market_benchmarking?.comparables || [];
@@ -280,6 +283,19 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
           </Card>
         ))}
       </section>
+
+      {/* ── RETURNS COMPOSITION (audit P0: exit-dependence disclosure) ── */}
+      {returnsComp.available && (
+        <Card as="section" variant="card" surface={0} style={S.returnsComp}>
+          <span style={S.eyebrow}>{UI.RESULTS_RC_TITLE}</span>
+          {returnsComp.operationsPct != null && (
+            <span style={S.returnsCompSplit}>
+              {Math.round(returnsComp.operationsPct * 100)}% {UI.RESULTS_RC_OPERATIONS} · {Math.round(returnsComp.terminalPct * 100)}% {UI.RESULTS_RC_TERMINAL}
+            </span>
+          )}
+          <span style={S.returnsCompNote}>{returnsComp.note}</span>
+        </Card>
+      )}
 
       {/* ── OPPORTUNITY CATEGORY ──────────────────────────────────── */}
       <Card as="section" variant="card" surface={0} style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-4)', flexWrap: 'wrap', paddingTop: 'var(--cp-space-3)', paddingBottom: 'var(--cp-space-3)', paddingLeft: 'var(--cp-space-5)', paddingRight: 'var(--cp-space-5)' }}>
@@ -445,13 +461,20 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         {m.intelligence_sources?.length > 0 && (
           <AnalyticsBlock title={UI.DOSSIER_BLOCK_SOURCES}>
             <ul style={S.sourceList}>
-              {m.intelligence_sources.map((s, i) => (
-                <li key={i} style={S.sourceItem}>
-                  <span style={S.sourceId}>{s.datapoint_id}</span>
-                  <ConfidenceLabel level={s.trust} />
-                  <span style={S.sourceMeta}>· {s.used_for}</span>
-                </li>
-              ))}
+              {m.intelligence_sources.map((s, i) => {
+                const src = resolveSourceLabel(s);
+                return (
+                  <li key={i} style={S.sourceItem}>
+                    {src.url ? (
+                      <a href={src.url} target="_blank" rel="noopener noreferrer" style={S.sourceLink}>{src.label}</a>
+                    ) : (
+                      <span style={S.sourceId}>{src.label}</span>
+                    )}
+                    <ConfidenceLabel level={s.trust} />
+                    <span style={S.sourceMeta}>· {s.used_for}</span>
+                  </li>
+                );
+              })}
             </ul>
           </AnalyticsBlock>
         )}
@@ -775,6 +798,11 @@ const S = {
   govNote: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)' },
   govErr: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-error)', maxWidth: 'calc(var(--cp-space-9) * 5 + var(--cp-space-5))', textAlign: 'right' },
 
+  // ── Returns composition (exit-dependence disclosure) ──
+  returnsComp: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', paddingTop: 'var(--cp-space-3)', paddingBottom: 'var(--cp-space-3)', paddingLeft: 'var(--cp-space-5)', paddingRight: 'var(--cp-space-5)' },
+  returnsCompSplit: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', fontVariantNumeric: 'tabular-nums' },
+  returnsCompNote: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', lineHeight: 'var(--cp-leading-normal)' },
+
   // ── KPI strip (auto-fit grid → responsive) ──
   kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 3 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
   kpiLabel: { ...EYEBROW, marginBottom: 'var(--cp-space-2)' },
@@ -858,7 +886,8 @@ const S = {
   configVal: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-sm)' },
   sourceList: { margin: 'var(--cp-space-0)', padding: 'var(--cp-space-0)', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
   sourceItem: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-1)', flexWrap: 'wrap', fontSize: 'var(--cp-font-xs)' },
-  sourceId: { fontFamily: 'ui-monospace, monospace', color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-xs)' },
+  sourceId: { color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-xs)' },
+  sourceLink: { color: 'var(--cp-accent)', fontSize: 'var(--cp-font-xs)', textDecoration: 'none' },
   sourceMeta: { color: 'var(--cp-text-muted)' },
 
   // ── Version bar + appendix ──

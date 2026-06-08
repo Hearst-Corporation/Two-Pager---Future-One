@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { fmtPctRaw, fmtUSD, fmtX, MISSING } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
 import { DECISION_METRICS } from '@/lib/hearst-results-view';
+import { deriveReturnsComposition } from '@/lib/returns-composition';
 
 // ── InlineMetric ─────────────────────────────────────────────────────────────
 /**
@@ -99,6 +100,9 @@ export function DecisionKpis({ projection }) {
           <div key={metric.id} style={S.decisionMetric}>
             <span style={S.decisionMetricLabel}>{metric.label}</span>
             <strong style={S.decisionMetricValue}>{metric.value(projection)}</strong>
+            {metric.subValue?.(projection) && (
+              <span style={S.decisionMetricSub}>{metric.subValue(projection)}</span>
+            )}
             <span style={S.decisionMetricNote}>{metric.note}</span>
           </div>
         ))}
@@ -112,6 +116,42 @@ export function DecisionKpis({ projection }) {
   );
 }
 DecisionKpis.propTypes = {
+  projection: PropTypes.object,
+};
+
+// ── ReturnsComposition ───────────────────────────────────────────────────────
+/**
+ * Board-facing disclosure: how much of equity value comes from operations vs the
+ * terminal sale. Presentation-only — reads deriveReturnsComposition (existing
+ * engine fields). Not a tooltip; sits in the decision flow near the headline.
+ * @param {{ projection: object|null }} props
+ */
+export function ReturnsComposition({ projection }) {
+  const c = deriveReturnsComposition(projection);
+  const hasSplit = c.available && c.operationsPct != null && c.terminalPct != null;
+  const opsW = hasSplit ? Math.max(0, Math.min(100, c.operationsPct * 100)) : 0;
+  const tvW = hasSplit ? Math.max(0, Math.min(100, c.terminalPct * 100)) : 0;
+  const strong = c.tier === 'terminal_dominant' || c.tier === 'terminal_only' || c.tier === 'no_positive_proceeds';
+  return (
+    <div data-returns-composition style={S.rcWrap}>
+      <span style={S.rcTitle}>{UI.RESULTS_RC_TITLE}</span>
+      {hasSplit ? (
+        <>
+          <div style={S.rcRows}>
+            <span style={S.rcCell}><span style={S.rcLabel}>{UI.RESULTS_RC_OPERATIONS}</span><strong style={S.rcValue}>{Math.round(c.operationsPct * 100)}%</strong></span>
+            <span style={S.rcCell}><span style={S.rcLabel}>{UI.RESULTS_RC_TERMINAL}</span><strong style={S.rcValue}>{Math.round(c.terminalPct * 100)}%</strong></span>
+          </div>
+          <div style={S.rcBar}>
+            <div style={{ ...S.rcSeg, width: `${opsW}%`, background: 'var(--cp-text-muted)' }} />
+            <div style={{ ...S.rcSeg, width: `${tvW}%`, background: 'var(--cp-accent)' }} />
+          </div>
+        </>
+      ) : null}
+      <span style={{ ...S.rcNote, color: strong ? 'var(--cp-text-primary)' : 'var(--cp-text-muted)' }}>{c.note}</span>
+    </div>
+  );
+}
+ReturnsComposition.propTypes = {
   projection: PropTypes.object,
 };
 
@@ -146,6 +186,58 @@ LayerCard.propTypes = {
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 const S = {
+  rcWrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-4)',
+    background: 'var(--cp-surface-1)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-md)',
+  },
+  rcTitle: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    textTransform: 'uppercase',
+  },
+  rcRows: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 'var(--cp-space-4)',
+  },
+  rcCell: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: 'var(--cp-space-2)',
+    minWidth: 0,
+  },
+  rcLabel: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-sm)',
+  },
+  rcValue: {
+    color: 'var(--cp-text-strong)',
+    fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-black)',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  rcBar: {
+    display: 'flex',
+    width: '100%',
+    height: 'var(--cp-space-2)',
+    borderRadius: 'var(--cp-radius-pill)',
+    overflow: 'hidden',
+    background: 'var(--cp-surface-2)',
+  },
+  rcSeg: {
+    height: '100%',
+  },
+  rcNote: {
+    fontSize: 'var(--cp-font-sm)',
+    lineHeight: 'var(--cp-leading-normal)',
+  },
   donutWrap: {
     display: 'flex',
     flexDirection: 'column',
@@ -293,6 +385,11 @@ const S = {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-sm)',
     lineHeight: 'var(--cp-leading-normal)',
+  },
+  decisionMetricSub: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-xs)',
+    lineHeight: 'var(--cp-leading-tight)',
   },
   riskStrip: {
     display: 'grid',

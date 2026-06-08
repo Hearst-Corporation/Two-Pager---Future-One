@@ -24,6 +24,7 @@ import {
   BoardMetric,
   CapitalDonut,
   DecisionKpis,
+  ReturnsComposition,
   LayerCard,
 } from '@/components/hearst/simulator/results';
 
@@ -290,6 +291,7 @@ export default function SimulatorResultsPage() {
           <BoardMetric label={UI.RESULTS_BM_PAYBACK} value={projection?.payback_years != null ? `${projection.payback_years} yr` : MISSING} note={UI.RESULTS_BM_PAYBACK_NOTE} />
           <BoardMetric label={UI.RESULTS_BM_SOURCE} value={simResult?.source_score != null ? `${simResult.source_score}/100` : MISSING} note={UI.RESULTS_BM_SOURCE_NOTE} />
         </KpiGrid>
+        <ReturnsComposition projection={projection} />
       </Card>
 
       <Card as="section" variant="flat" padding="lg" style={{ minWidth: 0 }}>
