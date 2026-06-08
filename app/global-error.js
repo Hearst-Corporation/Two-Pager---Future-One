@@ -14,15 +14,15 @@ export default function GlobalError({ error, reset }) {
         <h1 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem' }}>
           Something went wrong
         </h1>
-        <p style={{ color: '#666', marginBottom: '1rem' }}>
+        <p style={{ color: 'var(--cp-text-muted)', marginBottom: '1rem' }}>
           An unexpected error occurred. The team has been notified.
         </p>
         <button
           onClick={() => reset()}
           style={{
             padding: '0.5rem 1rem',
-            background: '#000',
-            color: '#fff',
+            background: 'var(--cp-bg-deep)',
+            color: 'var(--cp-text-strong)',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',

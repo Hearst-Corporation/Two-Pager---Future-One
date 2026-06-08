@@ -8,6 +8,7 @@ import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getBrowserClient } from '@/lib/supabase-browser';
 import { safeNextPath } from '@/lib/url-helpers';
+import { UI } from '@/lib/ui-strings';
 
 export default function LoginPage() {
   return (
@@ -89,7 +90,7 @@ function LoginForm() {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
+            placeholder={UI.LOGIN_PASSWORD_PLACEHOLDER}
             style={S.input}
           />
         )}
@@ -116,7 +117,7 @@ function LoginForm() {
 const S = {
   wrap: {
     minHeight: '100vh',
-    background: 'var(--color-bg-main)',
+    background: '#F5F5F6',
     display: 'grid',
     placeItems: 'center',
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -126,29 +127,29 @@ const S = {
     width: 380,
     maxWidth: '100%',
     padding: 40,
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border-light)',
+    background: '#FFFFFF',
+    border: '1px solid #E4E6EA',
     display: 'flex',
     flexDirection: 'column',
     gap: 16,
   },
-  eyebrow: { fontSize: 11, letterSpacing: 3, fontWeight: 800, color: 'var(--color-accent-strong)' },
-  title: { fontSize: 28, fontWeight: 800, letterSpacing: -1, margin: 0, color: 'var(--color-text-primary)' },
-  sub: { fontSize: 13, margin: 0, color: 'var(--color-text-muted)' },
+  eyebrow: { fontSize: 11, letterSpacing: 3, fontWeight: 800, color: '#8A1538' },
+  title: { fontSize: 28, fontWeight: 800, letterSpacing: -1, margin: 0, color: '#1A1D24' },
+  sub: { fontSize: 13, margin: 0, color: '#8A9099' },
   input: {
     padding: '12px 14px',
-    border: '1px solid var(--color-border-medium)',
-    background: 'var(--color-bg-main)',
+    border: '1px solid #C9CDD2',
+    background: '#F5F5F6',
     fontSize: 14,
     fontFamily: 'inherit',
-    color: 'var(--color-text-primary)',
+    color: '#1A1D24',
     outline: 'none',
   },
   btn: {
     padding: '12px 14px',
     border: 0,
-    background: 'var(--color-accent-strong)',
-    color: 'var(--color-text-inverse)',
+    background: '#8A1538',
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: 800,
     letterSpacing: 2,
@@ -158,7 +159,7 @@ const S = {
   switch: {
     background: 'transparent',
     border: 0,
-    color: 'var(--color-text-muted)',
+    color: '#8A9099',
     fontSize: 11,
     fontWeight: 700,
     letterSpacing: 1,
@@ -166,6 +167,6 @@ const S = {
     fontFamily: 'inherit',
     padding: 4,
   },
-  err: { fontSize: 12, color: 'var(--color-accent-strong)', fontWeight: 600 },
-  msg: { fontSize: 12, color: 'var(--color-success)', fontWeight: 600 },
+  err: { fontSize: 12, color: '#8A1538', fontWeight: 600 },
+  msg: { fontSize: 12, color: '#1A7A4A', fontWeight: 600 },
 };

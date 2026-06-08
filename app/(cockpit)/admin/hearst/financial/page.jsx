@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { Table2, LineChart, Layers, GitBranch, Grid3x3, TriangleAlert } from 'lucide-react';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 import { buildAdvisorContextFromScenarioRow } from '@/lib/advisor-context-from-scenario';
 import {
@@ -9,13 +10,20 @@ import {
 } from 'recharts';
 import { detectAlerts } from '@/lib/hearst-alerts';
 import AlertBanner from '@/components/hearst/AlertBanner';
-import KpiCard from '@/components/hearst/KpiCard';
-import { Button } from '@/components/hearst/ui';
+import { Button, Card, KpiCard, KpiGrid } from '@/components/hearst/ui';
+import { S as CP, T, RC } from '@/lib/cp-styles';
+
+const FIN_TOOLTIP = {
+  contentStyle: { ...RC.tooltip, boxShadow: 'var(--cp-shadow-md)' },
+  itemStyle: RC.tooltipItem,
+  labelStyle: RC.tooltipLabel,
+};
 import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
 import { fmtUSD, fmtPctFromRatio, fmtPctRaw, fmtX } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
+import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import {
   canonicalScenarioColorType,
   dedupeSavedPlans,
@@ -27,20 +35,26 @@ import {
 // (downside is a true risk warning, not just a third color).
 const COLORS = { base: 'var(--cp-text-primary)', downside: 'var(--cp-error)', upside: 'var(--cp-accent)' };
 
+// Display-only palier thresholds — NOT lender covenants (use FINANCIAL_THRESHOLDS for those).
+// DSCR_STRONG: above this the coverage is "comfortable" (green), between covenant and here = neutral.
+const DSCR_STRONG = FINANCIAL_THRESHOLDS.dscr_strong_threshold;
+// IRR_WEAK: below this (but ≥ 0) the IRR is structurally weak — distinct red shade in heatmap.
+const IRR_WEAK = 0.08;
+
 // Delegated to the shared formatter so the financial page matches the simulator
 // result page (tiered $B/$M/$K, lowercase 'x', single "—" missing token).
 const fmtM = fmtUSD;
 
 const METRIC_COLS = [
-  { key: 'revenue', label: 'Revenue', fmt: fmtM },
-  { key: 'power_cost', label: 'Power Cost', fmt: fmtM },
-  { key: 'opex', label: 'OpEx', fmt: fmtM },
-  { key: 'ebitda', label: 'EBITDA', fmt: fmtM },
-  { key: 'ebitda_margin', label: 'EBITDA Margin', fmt: v => fmtPctRaw(v, 1) },
-  { key: 'debt_service', label: 'Debt Service', fmt: fmtM },
-  { key: 'free_cash_flow', label: 'Free Cash Flow', fmt: fmtM },
-  { key: 'cumulative_fcf', label: 'Cumulative FCF', fmt: fmtM },
-  { key: 'occupancy_pct', label: 'Occupancy', fmt: v => fmtPctRaw(v) },
+  { key: 'revenue', label: UI.FIN_ROW_REVENUE, fmt: fmtM },
+  { key: 'power_cost', label: UI.FIN_ROW_POWER_COST, fmt: fmtM },
+  { key: 'opex', label: UI.FIN_ROW_OPEX, fmt: fmtM },
+  { key: 'ebitda', label: UI.FIN_ROW_EBITDA, fmt: fmtM },
+  { key: 'ebitda_margin', label: UI.FIN_ROW_EBITDA_MARGIN, fmt: v => fmtPctRaw(v, 1) },
+  { key: 'debt_service', label: UI.FIN_ROW_DEBT_SERVICE, fmt: fmtM },
+  { key: 'free_cash_flow', label: UI.FIN_ROW_FREE_CASH_FLOW, fmt: fmtM },
+  { key: 'cumulative_fcf', label: UI.FIN_ROW_CUMULATIVE_FCF, fmt: fmtM },
+  { key: 'occupancy_pct', label: UI.FIN_ROW_OCCUPANCY, fmt: v => fmtPctRaw(v) },
 ];
 
 
@@ -115,8 +129,20 @@ export default function FinancialPage() {
     return () => setAdvisorContext?.(null);
   }, [base, setAdvisorContext]);
 
-  if (loading) return <div style={S.loading}>{UI.FIN_LOADING}</div>;
-  if (error) return <div style={S.error}>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className="oracle-page">
+        <div style={CP.loading}>{UI.FIN_LOADING}</div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="oracle-page">
+        <div style={CP.error}>Error: {error}</div>
+      </div>
+    );
+  }
 
   // Export: the memo PDF lives in the Dossier (the working per-memo PDF route).
   // Excel/server-side exports are not built yet, so we don't pretend — the
@@ -137,7 +163,7 @@ export default function FinancialPage() {
   return (
     <>
     <style>{`
-      @media (max-width: 1100px) {
+      @media (max-width: 900px) {
         [data-financial-kpi-grid] {
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
@@ -177,7 +203,7 @@ export default function FinancialPage() {
     <div className="oracle-page">
       {/* Scenario toggles */}
       <div data-financial-top-bar style={S.topBar}>
-        <div style={S.pageTitle}>{UI.FIN_PAGE_TITLE}</div>
+        <h1 style={S.pageTitle}>{UI.FIN_PAGE_TITLE}</h1>
         <div data-financial-scenario-row style={S.scenarioRow}>
           {canonicalScenarios.map((s) => {
             const active = primaryId === s.id;
@@ -220,40 +246,41 @@ export default function FinancialPage() {
         </div>
         <div data-financial-tab-row style={{ display: 'flex', gap: 'var(--cp-space-1)', marginLeft: 'auto', flexWrap: 'wrap' }}>
           {[
-            { id: 'table',       label: '⊞ Table' },
-            { id: 'charts',      label: '⟁ Charts' },
-            { id: 'debt',        label: '⬡ Debt Schedule' },
-            { id: 'waterfall',   label: '▣ Waterfall' },
-            { id: 'sensitivity', label: '⊠ Sensitivity' },
+            { id: 'table',       label: UI.FIN_TAB_TABLE,       Icon: Table2 },
+            { id: 'charts',      label: UI.FIN_TAB_CHARTS,      Icon: LineChart },
+            { id: 'debt',        label: UI.FIN_TAB_DEBT,        Icon: Layers },
+            { id: 'waterfall',   label: UI.FIN_TAB_WATERFALL,   Icon: GitBranch },
+            { id: 'sensitivity', label: UI.FIN_TAB_SENSITIVITY, Icon: Grid3x3 },
           ].map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{ ...S.tabBtn, ...(tab === t.id ? S.tabBtnActive : {}) }}>
+            <button key={t.id} onClick={() => setTab(t.id)} style={{ ...S.tabBtn, ...(tab === t.id ? S.tabBtnActive : {}), display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)' }}>
+              <t.Icon size={15} aria-hidden="true" />
               {t.label}
             </button>
           ))}
           <div style={{ width: 1, background: 'var(--cp-border)', margin: '0 var(--cp-space-1)' }} />
-          <Button variant="muted" size="sm" disabled title="Excel export is not available yet">Excel (soon)</Button>
+          <Button variant="muted" size="sm" disabled title={UI.FIN_EXCEL_SOON_TITLE}>{UI.FIN_BTN_EXCEL_SOON}</Button>
           <Button
             variant="muted"
             size="sm"
             href={base ? `/admin/hearst/dossier?scenario=${base.id}` : '/admin/hearst/dossier'}
-            title="Open this scenario's strategic memo in the Dossier (PDF export available there)"
+            title={UI.FIN_MEMO_DOSSIER_TITLE}
           >
-            Memo →
+            {UI.FIN_BTN_MEMO}
           </Button>
         </div>
       </div>
 
       {/* Summary KPIs */}
-      <div data-financial-kpi-grid style={S.kpiGrid}>
-        <KpiCard label="Total CAPEX" value={proj.total_capex} format="currency" />
-        <KpiCard label="Project IRR" value={proj.irr} format="pct" sublabel={base?.source_score != null ? `Source score: ${base.source_score}/100` : undefined} highlight={proj.irr != null} />
-        <KpiCard label="NPV (10yr)" value={proj.npv} format="currency" />
-        <KpiCard label="MOIC" value={proj.moic} format="x" />
-        <KpiCard label="DSCR (Stab.)" value={proj.dscr_stabilized} format="x" />
-        <KpiCard label="Payback" value={proj.payback_years} format="years" />
-        <KpiCard label="Terminal Value" value={proj.terminal_value} format="currency" />
-        <KpiCard label="Stab. Revenue" value={proj.stabilized_revenue} format="currency" sublabel="per year" />
-      </div>
+      <KpiGrid cols={4} data-financial-kpi-grid style={{ marginBottom: 'var(--cp-space-6)' }}>
+        <KpiCard label={UI.FIN_KPI_TOTAL_CAPEX} value={proj.total_capex} format="currency" />
+        <KpiCard label={UI.FIN_KPI_PROJECT_IRR} value={proj.irr} format="pct" sublabel={base?.source_score != null ? UI.FIN_KPI_SOURCE_SCORE(base.source_score) : undefined} highlight={proj.irr != null} />
+        <KpiCard label={UI.FIN_KPI_NPV} value={proj.npv} format="currency" />
+        <KpiCard label={UI.FIN_KPI_MOIC} value={proj.moic} format="x" />
+        <KpiCard label={UI.FIN_KPI_DSCR} value={proj.dscr_stabilized} format="x" />
+        <KpiCard label={UI.FIN_KPI_PAYBACK} value={proj.payback_years} format="years" />
+        <KpiCard label={UI.FIN_KPI_TERMINAL} value={proj.terminal_value} format="currency" />
+        <KpiCard label={UI.FIN_KPI_STAB_REVENUE} value={proj.stabilized_revenue} format="currency" sublabel={UI.FIN_KPI_PER_YEAR} />
+      </KpiGrid>
 
       {!hasProjection ? (
         <>
@@ -267,9 +294,9 @@ export default function FinancialPage() {
             ) : null;
           })()}
           <div style={S.noData}>
-            <div style={S.noDataTitle}>Projection Cannot Run</div>
+            <div style={S.noDataTitle}>{UI.FIN_NODATA_PROJECTION}</div>
             <div style={S.noDataSub}>
-              Configure and save a scenario in the <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link> to generate the 10-year financial model.
+              {UI.FIN_NODATA_PROJECTION_SUB} <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link> {UI.FIN_NODATA_PROJECTION_SUB2}
             </div>
             {proj.missing_inputs?.length > 0 && (
               <div style={{ marginTop: 'var(--cp-space-3)', display: 'flex', flexWrap: 'wrap', gap: 'var(--cp-space-2)' }}>
@@ -284,8 +311,8 @@ export default function FinancialPage() {
           <table style={S.table}>
             <thead>
               <tr>
-                <th style={S.th}>Metric</th>
-                {(proj.years || []).map(y => <th key={y.year} style={S.th}>Year {y.year}</th>)}
+                <th style={S.th}>{UI.FIN_TH_METRIC}</th>
+                {(proj.years || []).map(y => <th key={y.year} style={S.th}>{UI.FIN_TH_YEAR(y.year)}</th>)}
               </tr>
             </thead>
             <tbody>
@@ -305,32 +332,32 @@ export default function FinancialPage() {
       ) : (
         /* Charts */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-7)' }}>
-          <div style={S.chartCard}>
-            <div style={S.chartTitle}>Revenue & EBITDA ($M)</div>
+          <Card variant="card" surface={2} padding="md">
+            <div style={T.chartTitle}>{UI.FIN_CHART_REVENUE_EBITDA}</div>
             <ResponsiveContainer width="100%" height={260}>
               <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
                 <XAxis dataKey="year" style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} />
                 <YAxis style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
-                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 'var(--cp-radius-sm)', boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)' }} />
-                <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
+                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} {...FIN_TOOLTIP} />
+                <Legend wrapperStyle={RC.legend} />
                 <Bar dataKey="Revenue" fill="var(--cp-text-primary)" opacity={0.6} />
                 <Line type="monotone" dataKey="EBITDA" stroke="var(--cp-accent)" strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
-          </div>
-          <div style={S.chartCard}>
-            <div style={S.chartTitle}>Cumulative Free Cash Flow ($M)</div>
+          </Card>
+          <Card variant="card" surface={2} padding="md">
+            <div style={T.chartTitle}>{UI.FIN_CHART_CUMULATIVE_FCF}</div>
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
                 <XAxis dataKey="year" style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} />
                 <YAxis style={{ fontSize: 'var(--cp-font-xs)' }} tick={{ fill: 'var(--cp-text-body)' }} tickFormatter={v => '$' + v + 'M'} />
-                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 'var(--cp-radius-sm)', boxShadow: 'var(--cp-shadow-md)' }} itemStyle={{ color: 'var(--cp-text-body)' }} labelStyle={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)' }} />
+                <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} {...FIN_TOOLTIP} />
                 <Area type="monotone" dataKey="Cum. FCF" stroke="var(--cp-accent)" fill="var(--cp-accent-soft)" fillOpacity={0.45} strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
+          </Card>
         </div>
       )}
 
@@ -339,46 +366,46 @@ export default function FinancialPage() {
         <div>
           {!debtSchedule ? (
             <div style={S.noData}>
-              <div style={S.noDataTitle}>No Debt Configured</div>
-              <div style={S.noDataSub}>Set debt % and interest rate when saving a scenario in the <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link></div>
+              <div style={S.noDataTitle}>{UI.FIN_NODATA_DEBT}</div>
+              <div style={S.noDataSub}>{UI.FIN_NODATA_DEBT_SUB} <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link></div>
             </div>
           ) : (
             <>
               <div style={S.debtSummary}>
                 {[
-                  { label: 'Principal', value: '$' + (debtSchedule.summary.principal / 1e6).toFixed(1) + 'M' },
-                  { label: 'Total Interest', value: '$' + (debtSchedule.summary.total_interest / 1e6).toFixed(1) + 'M' },
-                  { label: 'Term', value: debtSchedule.summary.debt_term_years + ' yr' },
-                  { label: 'IO Period', value: debtSchedule.summary.io_years + ' yr' },
-                  { label: 'Min DSCR', value: fmtX(debtSchedule.summary.min_dscr) },
-                  { label: 'Avg DSCR', value: fmtX(debtSchedule.summary.avg_dscr) },
-                  { label: 'Covenant Breaches', value: debtSchedule.summary.breach_years?.length ? debtSchedule.summary.breach_years.join(', ') : 'None' },
+                  { label: UI.FIN_DEBT_PRINCIPAL, value: '$' + (debtSchedule.summary.principal / 1e6).toFixed(1) + 'M' },
+                  { label: UI.FIN_DEBT_TOTAL_INTEREST, value: '$' + (debtSchedule.summary.total_interest / 1e6).toFixed(1) + 'M' },
+                  { label: UI.FIN_DEBT_TERM, value: debtSchedule.summary.debt_term_years + UI.FIN_DEBT_TERM_SUFFIX },
+                  { label: UI.FIN_DEBT_IO_PERIOD, value: debtSchedule.summary.io_years + UI.FIN_DEBT_TERM_SUFFIX },
+                  { label: UI.FIN_DEBT_MIN_DSCR, value: fmtX(debtSchedule.summary.min_dscr) },
+                  { label: UI.FIN_DEBT_AVG_DSCR, value: fmtX(debtSchedule.summary.avg_dscr) },
+                  { label: UI.FIN_DEBT_COVENANT_BREACHES, value: debtSchedule.summary.breach_years?.length ? debtSchedule.summary.breach_years.join(', ') : UI.FIN_DEBT_NO_BREACH },
                 ].map(kpi => (
                   <KpiCard key={kpi.label} size="sm" label={kpi.label} value={kpi.value} format="number" />
                 ))}
               </div>
               <div style={{ marginBottom: 'var(--cp-space-5)' }}>
-                <div style={S.chartCard}>
-                  <div style={S.chartTitle}>Debt Balance Over Time ($M)</div>
+                <Card variant="card" surface={2} padding="md">
+                  <div style={T.chartTitle}>{UI.FIN_CHART_DEBT_BALANCE}</div>
                   <ResponsiveContainer width="100%" height={200}>
                     <ComposedChart data={debtSchedule.schedule.map(r => ({ year: 'Y' + r.year, Balance: +(r.closing_balance / 1e6).toFixed(1), 'Debt Service': +(r.total_service / 1e6).toFixed(2), IO: r.is_io }))}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
                       <XAxis dataKey="year" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                       <YAxis yAxisId="balance" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} tickFormatter={v => '$' + v + 'M'} />
                       <YAxis yAxisId="service" orientation="right" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} tickFormatter={v => '$' + v + 'M'} />
-                      <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', color: 'var(--cp-text-strong)', borderRadius: 'var(--cp-radius-sm)' }} />
+                      <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} {...FIN_TOOLTIP} />
                       <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                       <Area yAxisId="balance" type="monotone" dataKey="Balance" stroke="var(--cp-error)" fill="var(--cp-error-bg)" strokeWidth={2} fillOpacity={0.3} />
                       <Bar yAxisId="service" dataKey="Debt Service" fill="var(--cp-accent)" opacity={0.7} />
                     </ComposedChart>
                   </ResponsiveContainer>
-                </div>
+                </Card>
               </div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={S.table}>
                   <thead>
                     <tr>
-                      {['Year', 'Opening Balance', 'Interest', 'Principal', 'Closing Balance', 'Total Service', 'DSCR'].map(h => (
+                      {[UI.FIN_TH_YEAR_LABEL, UI.FIN_TH_OPENING_BALANCE, UI.FIN_TH_INTEREST, UI.FIN_TH_PRINCIPAL, UI.FIN_TH_CLOSING_BALANCE, UI.FIN_TH_TOTAL_SERVICE, UI.FIN_TH_DSCR].map(h => (
                         <th key={h} style={S.th}>{h}</th>
                       ))}
                     </tr>
@@ -392,7 +419,7 @@ export default function FinancialPage() {
                         <td style={S.td}>{fmtM(r.principal)}</td>
                         <td style={S.td}>{fmtM(r.closing_balance)}</td>
                         <td style={S.td}>{fmtM(r.total_service)}</td>
-                        <td style={{ ...S.td, color: r.dscr == null ? 'var(--cp-text-muted)' : r.dscr < 1.25 ? 'var(--cp-error)' : r.dscr < 1.5 ? 'var(--cp-text-body)' : 'var(--cp-accent)' }}>
+                        <td style={{ ...S.td, color: r.dscr == null ? 'var(--cp-text-muted)' : r.dscr < FINANCIAL_THRESHOLDS.dscr_breach_threshold ? 'var(--cp-error)' : r.dscr < DSCR_STRONG ? 'var(--cp-text-body)' : 'var(--cp-accent)' }}>
                           {fmtX(r.dscr)}
                         </td>
                       </tr>
@@ -410,8 +437,8 @@ export default function FinancialPage() {
         <div>
           {!waterfall ? (
             <div style={S.noData}>
-              <div style={S.noDataTitle}>No Equity Structure</div>
-              <div style={S.noDataSub}>Set HEARST / Brookfield / Qatar equity % when saving a scenario in the <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link></div>
+              <div style={S.noDataTitle}>{UI.FIN_NODATA_EQUITY}</div>
+              <div style={S.noDataSub}>{UI.FIN_NODATA_EQUITY_SUB} <Link href="/admin/hearst/simulator" style={S.noDataLink}>Simulator →</Link></div>
             </div>
           ) : (
             <>
@@ -436,8 +463,8 @@ export default function FinancialPage() {
                   valueColor={waterfall.by_investor.lender.total_repaid ? 'var(--cp-text-muted)' : undefined}
                 />
               </div>
-              <div style={S.chartCard}>
-                <div style={S.chartTitle}>Equity Distributions by Investor ($M)</div>
+              <Card variant="card" surface={2} padding="md">
+                <div style={T.chartTitle}>{UI.FIN_CHART_EQUITY_DIST}</div>
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={(proj.years || []).map((y, i) => ({
                     year: 'Y' + y.year,
@@ -448,14 +475,14 @@ export default function FinancialPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
                     <XAxis dataKey="year" tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                     <YAxis tick={{ fill: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} tickFormatter={v => '$' + v + 'M'} />
-                    <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} contentStyle={{ background: 'var(--cp-tooltip-bg)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-sm)' }} />
+                    <Tooltip formatter={(v, n) => ['$' + v + 'M', n]} {...FIN_TOOLTIP} />
                     <Legend wrapperStyle={{ color: 'var(--cp-text-body)', fontSize: 'var(--cp-font-xs)' }} />
                     <Bar dataKey="HEARST" stackId="a" fill="var(--cp-op-qia)" />
                     <Bar dataKey="Brookfield" stackId="a" fill="var(--cp-op-brookfield)" />
                     <Bar dataKey="Qatar" stackId="a" fill="var(--cp-op-qai)" />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+              </Card>
             </>
           )}
         </div>
@@ -465,20 +492,20 @@ export default function FinancialPage() {
       {hasProjection && tab === 'sensitivity' && (
         <div>
           <div style={{ display: 'flex', gap: 'var(--cp-space-3)', alignItems: 'center', marginBottom: 'var(--cp-space-4)' }}>
-            <div style={S.chartTitle}>Sensitivity Matrix — IRR</div>
+            <div style={T.chartTitle}>{UI.FIN_SENSITIVITY_TITLE}</div>
             <div style={{ display: 'flex', gap: 'var(--cp-space-2)', alignItems: 'center', marginLeft: 'auto' }}>
-              <label style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' }}>X-Axis</label>
+              <label style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' }}>{UI.FIN_SENSITIVITY_X_AXIS}</label>
               <select value={sensitivityX} onChange={e => setSensitivityX(e.target.value)} style={S.sensitivitySelect}>
                 {SENSITIVITY_PARAM_OPTIONS.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
               </select>
-              <label style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' }}>Y-Axis</label>
+              <label style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' }}>{UI.FIN_SENSITIVITY_Y_AXIS}</label>
               <select value={sensitivityY} onChange={e => setSensitivityY(e.target.value)} style={S.sensitivitySelect}>
                 {SENSITIVITY_PARAM_OPTIONS.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
               </select>
             </div>
           </div>
           {!sensitivity ? (
-            <div style={S.noData}><div style={S.noDataSub}>Could not compute sensitivity — check that both parameters are set in the base scenario.</div></div>
+            <div style={S.noData}><div style={S.noDataSub}>{UI.FIN_NODATA_SENSITIVITY}</div></div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ ...S.table, width: 'auto', minWidth: '100%' }}>
@@ -499,9 +526,8 @@ export default function FinancialPage() {
                           ...S.td,
                           background: cell.irr == null ? 'var(--cp-surface-2)'
                             : cell.irr < 0 ? 'color-mix(in srgb, var(--cp-status-danger) 30%, black)'
-                            : cell.irr < 0.08 ? 'color-mix(in srgb, var(--cp-status-danger) 60%, black)'
-                            : cell.irr < 0.12 ? 'color-mix(in srgb, var(--cp-status-warning) 50%, black)'
-                            : cell.irr < 0.15 ? 'color-mix(in srgb, var(--cp-status-success) 50%, black)'
+                            : cell.irr < IRR_WEAK ? 'color-mix(in srgb, var(--cp-status-danger) 60%, black)'
+                            : cell.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 ? 'color-mix(in srgb, var(--cp-status-warning) 50%, black)'
                             : 'color-mix(in srgb, var(--cp-status-success) 30%, black)',
                           color: 'var(--cp-text-primary)',
                           fontWeight: ri === 2 && ci === 2 ? 900 : 600,
@@ -518,18 +544,17 @@ export default function FinancialPage() {
               </table>
               <div style={{ display: 'flex', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-3)', flexWrap: 'wrap' }}>
                 {[
-                  { bg: 'color-mix(in srgb, var(--cp-status-danger) 30%, black)', label: '< 0% IRR' },
-                  { bg: 'color-mix(in srgb, var(--cp-status-danger) 60%, black)', label: '0–8%' },
-                  { bg: 'color-mix(in srgb, var(--cp-status-warning) 50%, black)', label: '8–12%' },
-                  { bg: 'color-mix(in srgb, var(--cp-status-success) 50%, black)', label: '12–15%' },
-                  { bg: 'color-mix(in srgb, var(--cp-status-success) 30%, black)', label: '> 15%' },
+                  { bg: 'color-mix(in srgb, var(--cp-status-danger) 30%, black)', label: UI.FIN_LEGEND_NEGATIVE_IRR },
+                  { bg: 'color-mix(in srgb, var(--cp-status-danger) 60%, black)', label: UI.FIN_LEGEND_WEAK_IRR },
+                  { bg: 'color-mix(in srgb, var(--cp-status-warning) 50%, black)', label: UI.FIN_LEGEND_BELOW_HURDLE },
+                  { bg: 'color-mix(in srgb, var(--cp-status-success) 30%, black)', label: UI.FIN_LEGEND_ABOVE_HURDLE },
                 ].map(l => (
                   <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)' }}>
                     <span style={{ width: 'var(--cp-space-3)', height: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-xs)', background: l.bg, display: 'inline-block' }} />
                     {l.label}
                   </div>
                 ))}
-                <span style={{ fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginLeft: 'var(--cp-space-2)' }}>Bold border = baseline scenario</span>
+                <span style={{ fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginLeft: 'var(--cp-space-2)' }}>{UI.FIN_LEGEND_BASELINE}</span>
               </div>
             </div>
           )}
@@ -539,8 +564,13 @@ export default function FinancialPage() {
       {/* Warnings */}
       {proj.warnings?.length > 0 && (
         <div style={S.warnBox}>
-          <div style={S.warnTitle}>INVESTMENT WARNINGS</div>
-          {proj.warnings.map((w, i) => <div key={i} style={S.warnRow}>⚠ {w}</div>)}
+          <div style={S.warnTitle}>{UI.FIN_WARNINGS_TITLE}</div>
+          {proj.warnings.map((w, i) => (
+            <div key={i} style={{ ...S.warnRow, display: 'flex', alignItems: 'flex-start', gap: 'var(--cp-space-2)' }}>
+              <TriangleAlert size={15} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span>{w}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -549,15 +579,15 @@ export default function FinancialPage() {
 }
 
 const SENSITIVITY_PARAM_OPTIONS = [
-  { key: 'electricity_price_mwh',     label: 'Electricity Price' },
-  { key: 'target_occupancy_pct',      label: 'Occupancy %' },
-  { key: 'price_retail_colo_kw_month',label: 'Retail Price' },
-  { key: 'price_wholesale_kw_month',  label: 'Wholesale Price' },
-  { key: 'price_hyperscale_kw_month', label: 'Hyperscale Price' },
-  { key: 'total_mw',                  label: 'IT Capacity (MW)' },
-  { key: 'debt_pct',                  label: 'Debt Leverage' },
-  { key: 'exit_multiple',             label: 'Exit Multiple' },
-  { key: 'pue',                       label: 'PUE' },
+  { key: 'electricity_price_mwh',     label: UI.FIN_PARAM_ELECTRICITY_PRICE },
+  { key: 'target_occupancy_pct',      label: UI.FIN_PARAM_OCCUPANCY_PCT },
+  { key: 'price_retail_colo_kw_month',label: UI.FIN_PARAM_RETAIL_PRICE },
+  { key: 'price_wholesale_kw_month',  label: UI.FIN_PARAM_WHOLESALE_PRICE },
+  { key: 'price_hyperscale_kw_month', label: UI.FIN_PARAM_HYPERSCALE_PRICE },
+  { key: 'total_mw',                  label: UI.FIN_PARAM_IT_CAPACITY },
+  { key: 'debt_pct',                  label: UI.FIN_PARAM_DEBT_LEVERAGE },
+  { key: 'exit_multiple',             label: UI.FIN_PARAM_EXIT_MULTIPLE },
+  { key: 'pue',                       label: UI.FIN_PARAM_PUE },
 ];
 
 function formatSensVal(v, unit) {
@@ -574,31 +604,26 @@ function formatSensVal(v, unit) {
 }
 
 const S = {
-  loading: { padding: 'var(--cp-space-12)', textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-md)' },
-  error: { padding: 'var(--cp-space-6)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-sm)' },
   topBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
-  pageTitle: { fontSize: 'var(--cp-font-xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
+  pageTitle: { margin: 0, fontSize: 'var(--cp-font-xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
   scenarioRow: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', alignItems: 'center', flex: '1 1 280px', minWidth: 0 },
-  scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 700, padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: '2px solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
+  scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: '2px solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
   savedPlanWrap: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', minWidth: 0, flex: '1 1 220px' },
-  savedPlanLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' },
+  savedPlanLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' },
   savedPlanSelect: { flex: '1 1 180px', minWidth: 0, maxWidth: 360, fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-pill)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
-  tabBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 600, padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
+  tabBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'transparent', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-xs)', cursor: 'pointer' },
   tabBtnActive: { background: 'var(--cp-text-primary)', color: 'var(--cp-bg-deep)' },
-  kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-6)' },
   noData: { background: 'var(--cp-surface-2)', border: '1px dashed var(--cp-border-strong)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-7) var(--cp-space-6)', textAlign: 'center', marginBottom: 'var(--cp-space-6)' },
-  noDataTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 700, color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-2)' },
+  noDataTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-2)' },
   noDataSub: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-muted)' },
-  noDataLink: { color: 'var(--cp-accent)', fontWeight: 700, textDecoration: 'underline' },
+  noDataLink: { color: 'var(--cp-accent)', fontWeight: 'var(--cp-weight-bold)', textDecoration: 'underline' },
   missingTag: { fontSize: 'var(--cp-font-xs)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-error)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) var(--cp-space-2)', borderRadius: 'var(--cp-radius-xs)' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)' },
-  th: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
+  th: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
   td: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-sm)' },
-  tdLabel: { padding: 'var(--cp-space-2) var(--cp-space-4)', fontWeight: 600, fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
-  chartCard: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4) var(--cp-space-5)' },
-  chartTitle: { fontSize: 'var(--cp-font-sm)', fontWeight: 700, color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)', letterSpacing: 'var(--cp-tracking-wider)' },
+  tdLabel: { padding: 'var(--cp-space-2) var(--cp-space-4)', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
   warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4)', marginTop: 'var(--cp-space-5)' },
-  warnTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
+  warnTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
   warnRow: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) 0', borderBottom: '1px solid var(--cp-error-bg)' },
   debtSummary: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-5)' },
   sensitivitySelect: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', color: 'var(--cp-text-primary)', cursor: 'pointer' },

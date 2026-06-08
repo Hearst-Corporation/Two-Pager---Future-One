@@ -1,13 +1,11 @@
 /* =====================================================================
    cp-tokens.css — Bridge --cp-* → --ct-* + valeurs manquantes.
-   Importé uniquement dans app/admin/hearst/layout.jsx.
+   Importé uniquement dans app/(cockpit)/admin/hearst/layout.jsx.
    Source des valeurs : ~/.claude/assets/cockpit/tokens.css + cockpit-shell/tokens.css
    ===================================================================== */
 
 /* Le shell rend une .ct-hub-bar « Overview » destinée au hub multi-produits.
-   Oracle est un produit standalone — la bottom-bar locale (5 sections)
-   remplace la hub-bar du shell.
-   La native est masquée pour éviter le doublon visuel signalé. */
+   Oracle est standalone : rail gauche desktop + nav mobile remplacent ce chrome. */
 .ct-hub-bar {
   display: none !important;
 }
@@ -15,21 +13,26 @@
 /* Status tokens projet (--cp-status-*) — absents du package upstream.
    Définis ICI (source de vérité --cp-*), JAMAIS en redéfinissant un --ct-*. */
 :root {
-  --cp-status-success:        rgb(16, 185, 129);
+  /* ── Status sémantiques (Core) ── */
+  --cp-status-success:        #10b981;
   --cp-status-success-soft:   rgba(16, 185, 129, 0.15);
   --cp-status-success-border: rgba(16, 185, 129, 0.40);
-  --cp-status-warning:        rgb(217, 119, 6);
+  --cp-status-warning:        #f59e0b;
   --cp-status-warning-soft:   rgba(245, 158, 11, 0.12);
   --cp-status-warning-border: rgba(245, 158, 11, 0.35);
-  --cp-status-danger:         rgb(239, 68, 68);
+  --cp-status-danger:         #ef4444;
   --cp-status-danger-soft:    rgba(239, 68, 68, 0.12);
   --cp-status-danger-border:  rgba(239, 68, 68, 0.40);
-}
 
-:root {
-  /* Rail droit = drawer overlay (FAB), jamais colonne grid — centre full-width. */
+  /* Rail droit = drawer overlay (FAB), jamais colonne grid — centre full-width.
+     Override DÉLIBÉRÉ de --ct-rail-right (normalement upstream-only) : le shell
+     traite ce token comme la largeur de la colonne flex .ct-rail-right dans
+     .ct-panels-row ET l'injecte dans --ct-rail-right-eff. Le mettre à 0 est le
+     SEUL levier upstream pour que le centre n'en réserve pas l'espace ; chat-fab.css
+     sort ensuite .ct-rail-right du flux (position:fixed) et réserve la place via
+     --cp-chat-rail-width (padding-right de .ct-page-area). Ne pas le retirer. */
   --ct-rail-right: 0px;
-  --cp-rail-right: 0px;
+  --cp-chat-rail-width: min(420px, 32vw);
 
   /* ── Aliases directs vers --ct-* ── */
   --cp-accent:          var(--ct-accent);
@@ -62,6 +65,10 @@
   --cp-dur-fast:        100ms;
   --cp-ease-out:        cubic-bezier(0, 0, 0.2, 1);
   --cp-grid-line:       1px solid var(--ct-border-soft);
+
+  /* ── Breakpoints ── */
+  --cp-bp-mobile: 600px;
+  --cp-bp-tablet: 900px;
 
   /* ── Typographie ── */
   --cp-font-micro:  10px;
@@ -111,7 +118,7 @@
   --cp-shadow-xs:        0 1px 3px rgba(0,0,0,0.30);
   --cp-shadow-sm:        0 4px 12px rgba(0,0,0,0.35);
   --cp-shadow-md:        0 8px 24px rgba(0,0,0,0.40);
-  --cp-shadow-lg:        0 10px 32px rgba(0,0,0,0.42); /* B1: comblé — référencé par chat-fab.css + StrategicMemoModal, jamais défini. Interpolé dans l'échelle xs→sm→md→lg→card-hover. */
+  --cp-shadow-lg:        0 10px 32px rgba(0,0,0,0.42);
   --cp-shadow-card-hover:0 12px 40px rgba(0,0,0,0.45);
 
   /* ── Overlays & hairlines (scrims de modale, lignes 1px subtiles) ── */
@@ -120,16 +127,20 @@
   --cp-hairline:        rgba(255, 255, 255, 0.06);
   --cp-hairline-faint:  rgba(255, 255, 255, 0.04);
 
-  /* ── Couleurs sémantiques ── */
-  --cp-error:          #ef4444;
+  /* ── Couleurs sémantiques ──
+     --cp-error / --cp-success / --cp-warning : alias vers --cp-status-danger /
+     --cp-status-success / --cp-status-warning (même hex — source unique sur --cp-status-*).
+     Variantes -bg/-strong gardées séparément : valeurs distinctes de leurs homologues
+     status-*-soft/-border (opacités/teintes différentes), donc pas aliasées. */
+  --cp-error:          var(--cp-status-danger);
   --cp-error-bg:       rgba(239,68,68,0.08);
   --cp-error-strong:   #fca5a5;
 
-  --cp-success:        #10b981;
+  --cp-success:        var(--cp-status-success);
   --cp-success-bg:     rgba(16,185,129,0.08);
   --cp-success-strong: #6ee7b7;
 
-  --cp-warning:        #f59e0b;
+  --cp-warning:        var(--cp-status-warning);
   --cp-warning-bg:     rgba(245,158,11,0.08);
   --cp-warning-strong: #fcd34d;
 
@@ -137,7 +148,6 @@
   --cp-info-bg:        rgba(59,130,246,0.08);
   --cp-info-strong:    #93c5fd;
   --cp-info-strong-bg: rgba(59,130,246,0.15);
-  --cp-info-strong-cta:#3b82f6;
 
   --cp-violet:         #8b5cf6;
   --cp-violet-bg:      rgba(139,92,246,0.08);
@@ -161,10 +171,19 @@
   --cp-op-sovereign:       #8B1C1C;
   --cp-op-sovereign-bg:    rgba(139,28,28,0.08);
 
-  /* ── Z-index ── */
+  /* ── Z-index ──
+     Échelle basse (sous 1000) : pas de collision avec skip-link upstream (z:1000).
+     Échelle haute : démarre à 2000 pour passer franchement au-dessus du skip-link
+     upstream (tokens.css, z-index:1000) et de tout overlay tiers. */
   --cp-z-content:  10;
-  --cp-z-rails:    20;
   --cp-z-floating: 30;
+  --cp-z-sticky:   40;
+  --cp-z-docked:   100;
+  --cp-z-overlay:  2000;
+  --cp-z-drawer:   2001;
+  --cp-z-fab:      2002;
+  --cp-z-toast:    2003;
+  --cp-z-modal:    2010;
 
   /* ── Tailles de composants ── */
   --cp-btn-height-sm:  32px;
@@ -173,6 +192,9 @@
   --cp-icon-sm:        16px;
   --cp-icon-md:        20px;
   --cp-icon-lg:        24px;
+  --cp-display-input:  46px;
+  --cp-display-unit:   22px;
+  --cp-chart-tick:     11px;
   --cp-section-gap:    var(--cp-space-6);
   --cp-avatar-size:    32px;
   --cp-badge-size:     18px;
@@ -180,14 +202,18 @@
   --cp-brand-inner:    24px;
   --cp-icon-btn-size:  32px;
   --cp-kpi-min-width:  160px;
-  --cp-min-center:     520px;
+  --cp-spinner-size:   14px;
+  --cp-op-dot-sm:       6px;
+  --cp-op-dot-md:       7px;
+  --cp-op-dot-lg:       8px;
   /* Bottom chrome — nav mobile + FAB drawer (<900px) + page scroll padding */
   --cp-fab-size:           52px;
   --cp-fab-gap:            var(--cp-space-4);
-  --cp-nav-bottom:         0px;   /* mobile section nav height; 0 on desktop */
+  --cp-chat-drawer-width:      min(420px, 92vw);
+  --cp-chat-input-min-height:  54px;
+  --cp-nav-bottom:             0px;   /* mobile section nav height; 0 on desktop */
   --cp-bar-bottom:         var(--cp-nav-bottom); /* FAB sits above this */
   --cp-scroll-clear:       var(--cp-space-6);
-  --cp-chat-dock-clear:    calc(54px + var(--cp-space-6) + var(--cp-space-2));
   --cp-toast-bottom:       calc(var(--cp-scroll-clear) + var(--cp-space-2));
 
   /* ── Couleurs opérateurs (source de vérité unique — déplacées depuis globals.css) ──
@@ -197,8 +223,8 @@
   --cp-op-digital_realty:  #0057A8;
   --cp-op-ntt:             #009FDB;
   --cp-op-vantage:         #6B3FA0;
-  --cp-op-coreweave:       #E05A1A;
-  --cp-op-lambda:          #4F5BD5;
+  --cp-op-coreweave:       var(--cp-op-neocloud);
+  --cp-op-lambda:          var(--cp-op-hyperscaler);
   --cp-op-aws:             #FF9900;
   --cp-op-microsoft:       #00A4EF;
   --cp-op-google:          #4285F4;
@@ -218,8 +244,6 @@
   --cp-op-baker_mckenzie:  #1C3A6B;
   --cp-op-uptime:          #555555;
   --cp-op-sec:             #1A3560;
-  /* Conflits résolus : valeurs cp-tokens conservées (celles rendues aujourd'hui) ;
-     les versions divergentes de globals.css ont été supprimées. */
   --cp-op-default:    var(--ct-text-muted);
   --cp-op-brookfield: #0ea5e9;
   --cp-op-qai:        #6366f1;
@@ -240,7 +264,7 @@
   left: 0;
   right: 0;
   transform: translateY(-50%);
-  z-index: 1;
+  z-index: var(--cp-z-content);
 }
 .oracle-rail-nav {
   display: flex;
@@ -273,8 +297,8 @@
 }
 .oracle-rail-nav-item svg {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: var(--cp-icon-md);
+  height: var(--cp-icon-md);
 }
 .oracle-rail-nav-label {
   font-size: var(--cp-font-micro);
@@ -290,6 +314,9 @@
 }
 @media (max-width: 600px) {
   :root {
+    /* Override délibéré de --ct-rail-left (cf. --ct-rail-right plus haut) : le shell
+       lit ce token comme largeur de la colonne rail gauche. À 0 + .ct-rail-left
+       { display:none } ci-dessous, l'espace est entièrement libéré en mobile. */
     --ct-rail-left: 0px;
     --cp-rail-left: 0px;
     --cp-nav-bottom: 64px;
@@ -342,64 +369,6 @@
     --cp-scroll-clear: calc(var(--cp-fab-size) + var(--cp-fab-gap) + var(--cp-space-6));
     --cp-toast-bottom: calc(var(--cp-scroll-clear) + var(--cp-space-2));
   }
-}
-
-/* ORACLE owns the first screen of the right rail. The native shell chat remains
-   mounted below for conversation/history, but its generic Kimi empty state is
-   hidden so the rail opens as an Investment Committee Advisor, not support chat. */
-.ct-rail-right-title {
-  font-size: 0;
-  line-height: 0;
-  color: transparent;
-}
-.ct-rail-right-title > * {
-  display: none !important;
-}
-.ct-rail-right-title::after {
-  content: "ORACLE · Investment Committee Advisor";
-  display: inline-block;
-  font-size: var(--cp-font-sm);
-  line-height: var(--cp-leading-normal);
-  font-weight: 600;
-  letter-spacing: var(--cp-tracking-wide);
-  color: var(--cp-text-strong);
-}
-.ct-chat-root {
-  min-height: 0;
-}
-.ct-chat-root .ct-chat-actionbar {
-  display: none;
-}
-.ct-chat-root .ct-placeholder {
-  display: none;
-}
-.ct-chat-list > .ct-chat-msg.assistant:first-child {
-  display: none;
-}
-.ct-chat-input::placeholder {
-  color: transparent;
-}
-.ct-chat-input {
-  min-height: 54px;
-}
-.ct-chat-form {
-  position: relative;
-}
-.ct-chat-form::before {
-  content: "Ask ORACLE";
-  position: absolute;
-  left: 14px;
-  top: 8px;
-  z-index: 1;
-  pointer-events: none;
-  font-size: var(--cp-font-micro);
-  font-weight: 800;
-  letter-spacing: var(--cp-tracking-wider);
-  text-transform: uppercase;
-  color: var(--ct-text-muted);
-}
-.ct-chat-input {
-  padding-top: 24px !important;
 }
 
 @media (max-width: 900px) {

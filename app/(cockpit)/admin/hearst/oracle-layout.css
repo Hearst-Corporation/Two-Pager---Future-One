@@ -6,11 +6,11 @@
 
 /* ── Wrapper de page canonique ── */
 .oracle-page {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding:
     var(--cp-space-6)
-    clamp(var(--cp-space-3), 4vw, var(--cp-space-8))
+    var(--cp-space-6)
     var(--cp-scroll-clear, var(--cp-space-6));
   display: flex;
   flex-direction: column;
@@ -36,46 +36,7 @@
   line-height: var(--cp-leading-normal);
 }
 
-/* ── Section card canonique ── */
-.oracle-section {
-  background: var(--cp-surface-1);
-  border: 1px solid var(--cp-border);
-  border-radius: var(--cp-radius-lg);
-  padding: var(--cp-space-5) var(--cp-space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--cp-space-4);
-}
-.oracle-section-title {
-  font-size: var(--cp-font-xs);
-  font-weight: var(--cp-weight-semibold);
-  color: var(--cp-text-muted);
-  letter-spacing: var(--cp-tracking-eyebrow);
-  text-transform: uppercase;
-  margin: 0;
-}
-
-/* ── KPI strip canonique — même pattern partout ── */
-.oracle-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--cp-kpi-min-width), 1fr));
-  gap: var(--cp-space-3);
-}
-
-/* ── Layout 2 colonnes ── */
-.oracle-two-col {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: var(--cp-space-5);
-}
-
-/* ── Boutons canoniques ── */
-.oracle-btn-primary {
-  height: var(--cp-btn-height-md);
-  padding: 0 var(--cp-space-6);
-  border-radius: var(--cp-radius-md);
-  font-size: var(--cp-font-base);
-  font-weight: var(--cp-weight-semibold);
-  cursor: pointer;
-  border: none;
-}
+/* ── Breakpoints canoniques cockpit ──
+   Tablet : max-width 900px (chat drawer, grilles 2 col)
+   Mobile : max-width 600px (nav bottom, grilles 1 col)
+   Aligner les media queries inline des pages sur ces seuils. */

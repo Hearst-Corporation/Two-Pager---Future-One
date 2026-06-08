@@ -1,11 +1,12 @@
 'use client';
 import { fmtUSD, fmtPctFromRatio, fmtX, fmtMW, fmtYears, fmtNum, MISSING } from '@/lib/hearst-format';
+import Card from './ui/Card';
 import SourceBadge from './SourceBadge';
 
 /**
  * Hero KPI card for the HEARST overview and financial pages.
- * value: number|null — null triggers "N/A — Source Required" display.
- * format: 'currency' | 'number' | 'pct' | 'x' | 'years' | 'mw'
+ * value: number|null — null renders MISSING ('—') via hearst-format.
+ * format: 'currency' | 'number' | 'pct' | 'x' | 'years' | 'mw' | 'display'
  */
 export default function KpiCard({ label, value, format = 'number', source_type, unit, sublabel, highlight, size = 'md', valueColor, emptyHint }) {
   const display = formatValue(value, format);
@@ -28,8 +29,10 @@ export default function KpiCard({ label, value, format = 'number', source_type, 
   const titleAttr = value == null && emptyHint ? emptyHint : undefined;
 
   return (
-    <div
-      className={`cp-card cp-card-hover${highlight ? ' cp-card-accent' : ''}`}
+    <Card
+      hover
+      accent={!!highlight}
+      padding={isSmall ? 'sm' : 'md'}
       style={cardStyle}
       title={titleAttr}
     >
@@ -46,7 +49,7 @@ export default function KpiCard({ label, value, format = 'number', source_type, 
           <SourceBadge source_type={source_type} size="xs" />
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -58,13 +61,13 @@ function formatValue(value, format) {
     case 'x':        return fmtX(value);
     case 'years':    return fmtYears(value);
     case 'mw':       return fmtMW(value);
+    case 'display':  return String(value);
     default:         return fmtNum(value);
   }
 }
 
 const S = {
   card: {
-    padding: 'var(--cp-space-4) var(--cp-space-5)',
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',

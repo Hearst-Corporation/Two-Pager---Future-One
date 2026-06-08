@@ -72,7 +72,7 @@ export default function EcosystemNetwork({ width = 720, height = 560, activeArch
           const labelPos = polarToXY(mid, g.radius + 35);
           return (
             <text key={g.type} x={labelPos.x} y={labelPos.y} textAnchor="middle"
-              fill="var(--cp-text-muted)" fontSize="10" fontWeight="700"
+              fill="var(--cp-text-muted)" fontSize="10" fontWeight="var(--cp-weight-bold)"
               style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-eyebrow)' }}>
               {g.label}
             </text>

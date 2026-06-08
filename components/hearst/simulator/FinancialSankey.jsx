@@ -2,6 +2,9 @@
 
 import { useMemo } from 'react';
 import { Sankey, Tooltip } from 'recharts';
+import { RC } from '@/lib/cp-styles';
+
+const SANKEY_TOOLTIP = { ...RC.tooltip, padding: 'var(--cp-space-2) var(--cp-space-3)', fontSize: 'var(--cp-font-xs)' };
 import { useContainerSize } from './useContainerSize';
 
 /**
@@ -81,7 +84,7 @@ function SankeyTooltip({ active, payload }) {
   const sourceName = item.source?.name || '';
   const targetName = item.target?.name || '';
   return (
-    <div style={S.tooltip}>
+    <div style={SANKEY_TOOLTIP}>
       {sourceName && targetName ? (
         <div>{sourceName} {'→'} {targetName}: <b>{value}</b></div>
       ) : (
@@ -149,13 +152,5 @@ const S = {
   empty: {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-base)', fontStyle: 'italic',
-  },
-  tooltip: {
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
-    padding: 'var(--cp-space-2) var(--cp-space-3)',
-    fontSize: 'var(--cp-font-xs)',
-    color: 'var(--cp-text-primary)',
   },
 };

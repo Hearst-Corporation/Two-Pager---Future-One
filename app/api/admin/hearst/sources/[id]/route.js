@@ -7,9 +7,18 @@ import { SourceUpdateSchema } from '@/lib/validators/hearst';
 export const PATCH = withValidationPartial(SourceUpdateSchema, async (req, parsed, { params }) => {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
+  try {
+    await requireRowOwnership({
+      table: 'hearst_sources',
+      id: params.id,
+      actorId: auth.actor,
+      allowSharedWorkspace: true,
+    });
+  } catch (err) {
+    if (err instanceof Response) return err;
+    throw err;
+  }
   const body = parsed;
-  const { data: existing } = await auth.supa.from('hearst_sources').select('id').eq('id', params.id).maybeSingle();
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const { data, error } = await auth.supa
     .from('hearst_sources')
     .update({ ...body, updated_at: new Date().toISOString() })

@@ -49,5 +49,3 @@ Table.propTypes = { head: PropTypes.arrayOf(PropTypes.node), scroll: PropTypes.b
 THead.propTypes = { children: PropTypes.node };
 Row.propTypes = { children: PropTypes.node, style: PropTypes.object };
 Cell.propTypes = { header: PropTypes.bool, label: PropTypes.bool, style: PropTypes.object, children: PropTypes.node };
-
-export default Table;

@@ -12,6 +12,7 @@ import {
   formatElapsed,
 } from '@/lib/hearst-memo-job-store';
 import { Z } from '@/lib/z-index';
+import { UI } from '@/lib/ui-strings';
 
 const SLA_WARNING_MS = 120_000;
 
@@ -26,12 +27,12 @@ export default function MemoJobBadge() {
     <button
       type="button"
       onClick={showMemoModal}
-      aria-label="Reopen the memo being generated"
+      aria-label={UI.MEMO_JOB_ARIA}
       style={S.badge}
     >
       <span style={S.spinner} />
       <span style={S.body}>
-        <span style={S.title}>Memo in progress</span>
+        <span style={S.title}>{UI.MEMO_JOB_TITLE}</span>
         <span style={{ ...S.sub, color: isSlowish ? 'var(--cp-status-warning)' : 'var(--cp-text-muted)' }}>
           {formatElapsed(job.elapsed_ms)}{isSlowish ? ' · still waiting for Kimi' : ''}
         </span>
@@ -47,7 +48,7 @@ const S = {
     right: 'var(--cp-space-4)',
     // Au-dessus du chrome bas (nav mobile + FAB) via --cp-toast-bottom
     bottom: 'var(--cp-toast-bottom)',
-    zIndex: Z.fabOpen,
+    zIndex: Z.fab,
     display: 'inline-flex',
     alignItems: 'center',
     gap: 'var(--cp-space-3)',

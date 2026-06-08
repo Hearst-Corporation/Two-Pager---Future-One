@@ -5,6 +5,13 @@
 //   • fonctions couleur littérales rgb()/rgba()/hsl()/hsla()
 //   • usage direct de var(--ct-*)  → doit passer par --cp-* (source de vérité projet)
 //   • usage de var(--color-*)      → palette legacy interdite dans le cockpit
+//   • [GUARD-A] surface peinte en inline : background:var(--cp-surface*) + border|borderRadius
+//     dans le même bloc de style → utiliser <Card> (baseline gelée, warn sur existant, err sur nouveau)
+//   [GUARD-B TODO] carte peinte imbriquée : deux cp-card / <Card> sans variant="flat|bare"
+//     détectés en imbrication dans le même fichier. Non implémenté : la détection multi-ligne
+//     JSX par regex est trop fragile (faux positifs sur les variantes conditionnelles, les Card
+//     dans les .map(), les Card<Button>…). À implémenter proprement avec un AST (babel/acorn)
+//     qui track la profondeur des JSXOpeningElements portant className~cp-card ou tag=Card.
 // Baseline legacy gelée par SIGNATURE (cf. _lint-baseline.mjs). exit 1 sur nouvelle violation.
 // Échappatoire ligne : // cockpit-lint-allow   ·   Régénérer : --update-baseline
 
@@ -15,6 +22,7 @@ import { loadBaseline, saveBaselineKey, sig } from './_lint-baseline.mjs';
 const ROOT = process.cwd();
 const UPDATE = process.argv.includes('--update-baseline');
 const BASELINE_KEY = 'cockpit';
+const BASELINE_KEY_SURFACE = 'cockpit-surface-painted';
 
 // Fichiers de définition de tokens — JAMAIS scannés (ils DÉFINISSENT les valeurs).
 const TOKEN_FILES = [
@@ -25,13 +33,28 @@ const TOKEN_FILES = [
 const ALLOW_PATHS = [
   /node_modules/, /\.next/, /\.bak/, /coverage/, /playwright-report/,
   /test\//, /\.spec\./, /\.test\./, /scripts\//, /public\//, /docs\//,
+  /\.claude\//,  // worktrees agents + artefacts : jamais scannés (copies du repo).
 ];
 
 const SCAN_EXTS = new Set(['.jsx', '.tsx', '.js', '.ts', '.css', '.scss']);
 
-// Scope : seulement app/(cockpit)/ et components/hearst/
-const COCKPIT_SCOPE = [join(ROOT, 'app/(cockpit)'), join(ROOT, 'components/hearst')];
-const inScope = (file) => COCKPIT_SCOPE.some(s => file.startsWith(s));
+// Scope : app/(cockpit)/, components/hearst/, components/admin/
+// + fichiers de présentation DS dans lib/ (source de vérité des styles inline).
+const COCKPIT_SCOPE_PREFIXES = [
+  join(ROOT, 'app/(cockpit)'),
+  join(ROOT, 'components/hearst'),
+  join(ROOT, 'components/admin'),
+];
+const COCKPIT_SCOPE_FILES = new Set([
+  join(ROOT, 'lib/cp-styles.js'),
+  join(ROOT, 'lib/admin-tokens.js'),
+  join(ROOT, 'lib/hearst-results-view.js'),
+  join(ROOT, 'lib/z-index.js'),
+  join(ROOT, 'components/OracleRailNav.jsx'),
+]);
+const inScope = (file) =>
+  COCKPIT_SCOPE_PREFIXES.some(s => file.startsWith(s)) ||
+  COCKPIT_SCOPE_FILES.has(file);
 
 // Règles de détection — chacune renvoie le 1er motif trouvé (ou null).
 const RULES = [
@@ -66,6 +89,24 @@ const RULES = [
   },
 ];
 
+// ── GUARD-A : surface peinte en inline ────────────────────────────────────────
+// Détecte les lignes JS/JSX qui, dans un même bloc de style inline (objet littéral
+// sur une seule ligne ou style-object déclaré en const S = { ... }), contiennent à
+// la fois :
+//   • background: 'var(--cp-surface…'   (surface tokenisée)
+//   • ET  border:  OU  borderRadius:    (mise en forme de carte)
+// → antipattern "carte faite à la main" → utiliser <Card variant="card">.
+//
+// Périmètre : .jsx, .tsx, .js, .ts dans le cockpit scope.
+// Échappatoire ligne : // cockpit-lint-allow
+function hasPaintedSurface(line) {
+  if (!line.includes('--cp-surface')) return false;
+  const hasBg = /background['"]?\s*:\s*['"]?var\(\s*--cp-surface/i.test(line);
+  if (!hasBg) return false;
+  const hasBorder = /\bborder(Radius|Left|Right|Top|Bottom)?['"]?\s*:/i.test(line);
+  return hasBorder;
+}
+
 function walk(dir, files = []) {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
@@ -80,6 +121,9 @@ function walk(dir, files = []) {
 
 // Collecte des violations : [{ rel, line, num, label, match, signature }]
 const violations = [];
+// Guard-A violations (surface peinte en inline) — baseline séparée.
+const surfaceViolations = [];
+
 for (const file of walk(ROOT)) {
   if (!inScope(file)) continue;
   const rel = relative(ROOT, file);
@@ -89,22 +133,41 @@ for (const file of walk(ROOT)) {
     const t = line.trim();
     if (t.startsWith('//') || t.startsWith('*') || t.startsWith('/*')) return;
     const noComment = line.replace(/\/\/.*/, '');
+
+    // ── Règles couleur/token existantes ──
     for (const rule of RULES) {
       const match = rule.find(noComment);
       if (match) {
         violations.push({ rel, num: i + 1, label: rule.label, match, signature: sig(rel, line) });
       }
     }
+
+    // ── Guard-A : surface peinte en inline ──
+    if (hasPaintedSurface(noComment)) {
+      surfaceViolations.push({
+        rel,
+        num: i + 1,
+        label: 'surface peinte en inline : utiliser <Card>',
+        signature: sig(rel, line),
+      });
+    }
   });
 }
 
 if (UPDATE) {
   saveBaselineKey(BASELINE_KEY, violations.map(v => v.signature));
-  console.log(`✓ lint-cockpit : baseline régénérée (${new Set(violations.map(v => v.signature)).size} signature(s) gelée(s))`);
+  saveBaselineKey(BASELINE_KEY_SURFACE, surfaceViolations.map(v => v.signature));
+  const total = new Set(violations.map(v => v.signature)).size
+              + new Set(surfaceViolations.map(v => v.signature)).size;
+  console.log(`✓ lint-cockpit : baseline régénérée (${total} signature(s) gelée(s))`);
   process.exit(0);
 }
 
-const baseline = new Set(loadBaseline()[BASELINE_KEY] || []);
+const allBaselines = loadBaseline();
+const baseline        = new Set(allBaselines[BASELINE_KEY]        || []);
+const baselineSurface = new Set(allBaselines[BASELINE_KEY_SURFACE] || []);
+
+// ── Rapport règles couleur/token ──
 let legacy = 0;
 const fresh = [];
 for (const v of violations) {
@@ -117,10 +180,35 @@ for (const v of violations) {
   }
 }
 
+// ── Rapport Guard-A : surface peinte en inline ──
+let legacySurface = 0;
+const freshSurface = [];
+for (const v of surfaceViolations) {
+  if (baselineSurface.has(v.signature)) {
+    legacySurface++;
+    console.warn(`WARN  ${v.rel}:${v.num}  [guard-a] ${v.label} [baseline]`);
+  } else {
+    freshSurface.push(v);
+    console.error(`ERR   ${v.rel}:${v.num}  [guard-a] ${v.label}`);
+  }
+}
+
 if (fresh.length > 0) {
   console.error(`\n✗ lint-cockpit : ${fresh.length} nouvelle(s) violation(s) hors baseline.`);
   console.error(`  Corrige-les, ou (si legacy assumé) régénère : node scripts/lint-cockpit.mjs --update-baseline`);
   process.exit(1);
 }
+if (freshSurface.length > 0) {
+  console.error(`\n✗ lint-cockpit [guard-a] : ${freshSurface.length} nouvelle(s) surface(s) peinte(s) en inline.`);
+  console.error(`  Remplace par <Card variant="card">, ou régénère : node scripts/lint-cockpit.mjs --update-baseline`);
+  process.exit(1);
+}
+
 if (legacy > 0) console.warn(`⚠ lint-cockpit : ${legacy} violation(s) legacy gelée(s) — corrige progressivement`);
 else console.log('✓ lint-cockpit : aucune couleur/token hardcodé hors tokens');
+
+if (legacySurface > 0) {
+  console.warn(`⚠ lint-cockpit [guard-a] : ${legacySurface} surface(s) inline legacy gelée(s) — migrer vers <Card>`);
+} else {
+  console.log('✓ lint-cockpit [guard-a] : aucune surface peinte en inline');
+}

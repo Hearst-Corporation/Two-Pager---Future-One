@@ -22,6 +22,7 @@ const UI_STRING_RES = [
 const ALLOW_PATHS = [
   /node_modules/, /\.next/, /\.bak/, /coverage/, /playwright-report/,
   /test\//, /\.spec\./, /\.test\./, /scripts\//,
+  /\.claude\//,  // worktrees agents + artefacts : jamais scannés (copies du repo).
 ];
 
 const ALLOW_FILES = [

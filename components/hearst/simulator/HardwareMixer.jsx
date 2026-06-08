@@ -1,54 +1,63 @@
 'use client';
 
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { GPU_CATALOG, calcRackPower, calcGpuCapex, calcGpuAnnualRevenue, REFERENCE_GPU_HOUR_PRICES } from '@/lib/hearst-gpu-catalog';
+import { Card } from '@/components/hearst/ui';
+import { UI } from '@/lib/ui-strings';
 
 // 3 ready-to-use hardware profiles. Click one to load the full mix; open
 // Advanced to fine-tune every dial by hand.
 const HARDWARE_PRESETS = [
   {
     id: 'colo',
-    name: 'Classic Colocation',
-    tagline: 'Mostly standard racks, little AI',
-    patch: { classic_pct: 80, liquid_pct: 15, ai_pct: 5, gpu_sku_id: 'h200_sxm5', utilization_pct: 70, gpu_hour_price: 3 },
+    name: UI.HW_PRESET_COLO_NAME,
+    tagline: UI.HW_PRESET_COLO_TAGLINE,
+    patch: { classic_pct: 80, liquid_pct: 15, ai_pct: 5, gpu_sku_id: 'h200_sxm5', utilization_pct: 70, gpu_hour_price: 2.99 },
   },
   {
     id: 'mixed',
-    name: 'Mixed AI-Ready',
-    tagline: 'Balanced colo + AI capacity',
+    name: UI.HW_PRESET_MIXED_NAME,
+    tagline: UI.HW_PRESET_MIXED_TAGLINE,
     patch: { classic_pct: 40, liquid_pct: 35, ai_pct: 25, gpu_sku_id: 'gb200_nvl72', utilization_pct: 75, gpu_hour_price: 5 },
   },
   {
     id: 'ai_factory',
-    name: 'AI Factory',
-    tagline: 'GPU-dense, liquid-cooled',
-    patch: { classic_pct: 10, liquid_pct: 20, ai_pct: 70, gpu_sku_id: 'gb200_nvl72', utilization_pct: 85, gpu_hour_price: 6 },
+    name: UI.HW_PRESET_AI_NAME,
+    tagline: UI.HW_PRESET_AI_TAGLINE,
+    patch: { classic_pct: 10, liquid_pct: 20, ai_pct: 70, gpu_sku_id: 'gb200_nvl72', utilization_pct: 85, gpu_hour_price: 5 },
   },
 ];
 
+// A preset is "active" only when the FULL patch still matches the live mix —
+// tier split AND gpu/utilization/price. Otherwise editing any advanced dial would
+// leave the preset card lit while the config has diverged (stale selection).
 function matchPreset(v) {
-  const p = HARDWARE_PRESETS.find(p =>
+  const p = HARDWARE_PRESETS.find((p) =>
     p.patch.classic_pct === v.classic_pct &&
     p.patch.liquid_pct === v.liquid_pct &&
-    p.patch.ai_pct === v.ai_pct,
+    p.patch.ai_pct === v.ai_pct &&
+    p.patch.gpu_sku_id === v.gpu_sku_id &&
+    p.patch.utilization_pct === v.utilization_pct &&
+    p.patch.gpu_hour_price === v.gpu_hour_price,
   );
   return p?.id || null;
 }
 
 function redistribute(prev, changedKey, newValue) {
-  const others = Object.keys(prev).filter(k => k !== changedKey);
+  const others = Object.keys(prev).filter((k) => k !== changedKey);
   const remaining = Math.max(0, 100 - newValue);
   const otherSum = others.reduce((s, k) => s + (prev[k] || 0), 0);
   const next = { ...prev, [changedKey]: newValue };
   if (otherSum > 0) {
-    others.forEach(k => {
+    others.forEach((k) => {
       next[k] = Math.round((prev[k] / otherSum) * remaining);
     });
   } else {
     const split = Math.round(remaining / others.length);
-    others.forEach(k => { next[k] = split; });
+    others.forEach((k) => { next[k] = split; });
   }
-  const sum = Object.values(next).reduce((s, v) => s + v, 0);
+  const sum = Object.values(next).reduce((s, val) => s + val, 0);
   const diff = 100 - sum;
   if (diff !== 0 && others.length > 0) {
     next[others[0]] = (next[others[0]] || 0) + diff;
@@ -57,16 +66,16 @@ function redistribute(prev, changedKey, newValue) {
 }
 
 const TIER_LABELS = {
-  classic_pct: { name: 'Standard',     meta: 'low power · ≤15 kW/rack' },
-  liquid_pct:  { name: 'High-density', meta: 'medium power · ≤60 kW/rack' },
-  ai_pct:      { name: 'AI clusters',  meta: 'very high power · ≥70 kW/rack' },
+  classic_pct: { name: UI.HW_TIER_STANDARD_NAME, meta: UI.HW_TIER_STANDARD_META },
+  liquid_pct:  { name: UI.HW_TIER_DENSE_NAME,    meta: UI.HW_TIER_DENSE_META },
+  ai_pct:      { name: UI.HW_TIER_AI_NAME,       meta: UI.HW_TIER_AI_META },
 };
 
 export default function HardwareMixer({ totalMw = 50, value, onChange }) {
   const v = value || { classic_pct: 60, liquid_pct: 25, ai_pct: 15, gpu_sku_id: 'gb200_nvl72', num_racks: null, utilization_pct: 75, gpu_hour_price: 5 };
 
   const mw_ai = totalMw * (v.ai_pct / 100);
-  const gpu = GPU_CATALOG.find(g => g.id === v.gpu_sku_id) || GPU_CATALOG[0];
+  const gpu = GPU_CATALOG.find((g) => g.id === v.gpu_sku_id) || GPU_CATALOG[0];
   const rack_kw = calcRackPower(gpu);
   const derived_racks = rack_kw > 0 ? Math.floor((mw_ai * 1000) / rack_kw) : 0;
   const racks_used = v.num_racks != null && v.num_racks > 0 ? v.num_racks : derived_racks;
@@ -91,75 +100,90 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
 
   return (
     <div style={S.wrap}>
+      {/* Hardware grids stack earlier than the page (1100/1500 vs 900) because the
+          chat rail narrows the centre panel — these react to container width, not
+          the viewport. This component owns its own breakpoints; the page-level
+          stack rule does not target the hardware grids. */}
       <style>{`
+        @media (max-width: 1100px) {
+          [data-hardware-presets] { grid-template-columns: 1fr !important; }
+          [data-hardware-spine] { grid-template-columns: 1fr !important; }
+        }
         @media (max-width: 1500px) {
-          [data-hardware-advanced-grid] {
-            grid-template-columns: 1fr !important;
-          }
+          [data-hardware-advanced-grid] { grid-template-columns: 1fr !important; }
         }
       `}</style>
-      <div data-hardware-stack style={S.stackGrid}>
-        <div style={S.visualPanel}>
-          <div style={S.visualHead}>
+
+      {/* PRESET RAIL — 3 horizontal choices, no redundant number triple */}
+      <div data-hardware-presets style={S.presetRail}>
+        {HARDWARE_PRESETS.map((p) => {
+          const sel = activePreset === p.id;
+          return (
+            <Card
+              as="button"
+              key={p.id}
+              type="button"
+              onClick={() => applyPreset(p)}
+              padding="md"
+              hover
+              accent={sel}
+              aria-pressed={sel}
+              surface={2}
+              style={S.presetCard}
+            >
+              <span style={S.presetName}>{p.name}</span>
+              <span style={S.presetTagline}>{p.tagline}</span>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* LIVE MIX SPINE — compact deployment visual + mix bar + power readout */}
+      <div data-hardware-spine style={S.spine}>
+        <Card variant="flat" surface={1} padding="md" style={S.spineMain}>
+          <div style={S.spineHead}>
             <div>
-              <span style={S.visualKicker}>GPU / rack topology</span>
-              <h3 style={S.visualTitle}>{gpu.sku} deployment map</h3>
+              <span style={S.kicker}>{UI.HW_DEPLOY_KICKER}</span>
+              <h3 style={S.spineTitle}>{UI.HW_DEPLOY_TITLE(gpu.sku)}</h3>
             </div>
-            <div style={S.aiBadge}>{v.ai_pct}% AI</div>
+            <span style={S.aiBadge}>{UI.HW_AI_BADGE(v.ai_pct)}</span>
           </div>
           <HardwareTopology
             classicPct={v.classic_pct}
             liquidPct={v.liquid_pct}
-            racks={racks_used}
             totalMw={totalMw}
             aiMw={mw_ai}
           />
           <MixBar classicPct={v.classic_pct} liquidPct={v.liquid_pct} aiPct={v.ai_pct} />
-        </div>
+        </Card>
 
-        <div style={S.controlPanel}>
-          <div style={S.presetGrid}>
-            {HARDWARE_PRESETS.map(p => {
-              const sel = activePreset === p.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => applyPreset(p)}
-                  style={{ ...S.presetCard, ...(sel ? S.presetCardSel : {}) }}>
-                  <div style={S.presetMix}>
-                    <span style={S.presetMixSeg}>{p.patch.classic_pct}</span>
-                    <span style={S.presetMixDiv}>/</span>
-                    <span style={S.presetMixSeg}>{p.patch.liquid_pct}</span>
-                    <span style={S.presetMixDiv}>/</span>
-                    <span style={{ ...S.presetMixSeg, ...S.presetMixAi }}>{p.patch.ai_pct}</span>
-                  </div>
-                  <div style={S.presetName}>{p.name}</div>
-                  <div style={S.presetTagline}>{p.tagline}</div>
-                </button>
-              );
-            })}
-          </div>
-
-          <div data-hardware-summary style={S.summary}>
-            <SumKpi label="AI chips" value={total_gpus.toLocaleString('en-US')} />
-            <SumKpi label="Racks" value={racks_used.toLocaleString('en-US')} />
-            <SumKpi label="Equipment cost" value={`$${(capex_hw / 1e6).toFixed(1)}M`} />
-            <SumKpi label="AI revenue / yr" value={`$${(revenue_ai / 1e6).toFixed(1)}M`} accent />
-          </div>
-
-          <button type="button" onClick={() => setAdvanced(a => !a)} style={S.advancedToggle}>
-            {advanced ? 'Hide advanced controls' : 'Tune GPU and power assumptions'}
-          </button>
-        </div>
+        <Card variant="flat" surface={1} padding="md" style={S.readout}>
+          <ReadoutRow label={UI.HW_READOUT_TOTAL} value={`${totalMw} MW`} />
+          <ReadoutRow label={UI.HW_READOUT_AI} value={`${mw_ai.toFixed(1)} MW`} accent />
+          <ReadoutRow label={UI.HW_READOUT_RACKS} value={racks_used.toLocaleString('en-US')} />
+        </Card>
       </div>
+
+      {/* KPI ROW — full width, breathing */}
+      <div data-hardware-summary style={S.summary}>
+        <SumKpi label={UI.HW_KPI_CHIPS} value={total_gpus.toLocaleString('en-US')} />
+        <SumKpi label={UI.HW_KPI_RACKS} value={racks_used.toLocaleString('en-US')} />
+        <SumKpi label={UI.HW_KPI_EQUIP} value={`$${(capex_hw / 1e6).toFixed(1)}M`} />
+        <SumKpi label={UI.HW_KPI_REVENUE} value={`$${(revenue_ai / 1e6).toFixed(1)}M`} accent />
+      </div>
+
+      <button type="button" onClick={() => setAdvanced((a) => !a)} style={S.advancedToggle}>
+        {advanced ? UI.HW_ADV_HIDE : UI.HW_ADV_SHOW}
+      </button>
 
       {advanced && (
         <div data-hardware-advanced-grid style={S.grid}>
           <div style={S.col}>
-            <div style={S.colTitle}>Power density per rack <span style={S.colTitleMeta}>(total 100%)</span></div>
+            <div style={S.colTitle}>
+              {UI.HW_ADV_POWER_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_POWER_META}</span>
+            </div>
             <div style={S.sliders}>
-              {['classic_pct', 'liquid_pct', 'ai_pct'].map(key => (
+              {['classic_pct', 'liquid_pct', 'ai_pct'].map((key) => (
                 <div key={key} style={S.sliderRow}>
                   <div style={S.sliderHead}>
                     <span style={S.sliderName}>{TIER_LABELS[key].name}</span>
@@ -169,9 +193,9 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                     <input
                       type="range" min={0} max={100} step={1}
                       value={v[key]}
-                      aria-label={`${TIER_LABELS[key].name} allocation percentage`}
-                      aria-valuetext={`${v[key]} percent, ${(totalMw * v[key] / 100).toFixed(1)} megawatts`}
-                      onChange={e => setTier(key, Number(e.target.value))}
+                      aria-label={`${TIER_LABELS[key].name} %`}
+                      aria-valuetext={`${v[key]} %, ${(totalMw * v[key] / 100).toFixed(1)} MW`}
+                      onChange={(e) => setTier(key, Number(e.target.value))}
                       style={S.range}
                     />
                     <span style={S.pct}>{v[key]}%</span>
@@ -185,17 +209,24 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
           {v.ai_pct > 0 && (
             <div style={S.col}>
               <div style={S.colTitle}>
-                AI chip <span style={S.colTitleMeta}>({mw_ai.toFixed(1)} MW dedicated)</span>
+                {UI.HW_ADV_AI_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_AI_META(mw_ai.toFixed(1))}</span>
               </div>
               <div data-hardware-gpu-grid style={S.gpuCards}>
-                {GPU_CATALOG.map(g => {
+                {GPU_CATALOG.map((g) => {
                   const sel = v.gpu_sku_id === g.id;
                   return (
-                    <button
+                    <Card
+                      as="button"
                       key={g.id}
                       type="button"
                       onClick={() => onChange?.({ ...v, gpu_sku_id: g.id, gpu_hour_price: REFERENCE_GPU_HOUR_PRICES[g.id] || v.gpu_hour_price })}
-                      style={{ ...S.gpuCard, ...(sel ? S.gpuCardSel : {}) }}>
+                      padding="sm"
+                      hover
+                      accent={sel}
+                      aria-pressed={sel}
+                      surface={2}
+                      style={S.gpuCard}
+                    >
                       <div style={S.gpuSku}>{g.sku}</div>
                       <div style={S.gpuMeta}>
                         {g.vendor} · {g.rack_scale ? `${(g.tdp_w / 1000000).toFixed(1)} MW/rack` : `${g.tdp_w}W`} · {g.hbm_gb}GB
@@ -203,24 +234,25 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                       <div style={S.gpuPrice}>
                         ${g.rack_scale ? `${(g.msrp_usd / 1000000).toFixed(1)}M/rack` : `${(g.msrp_usd / 1000).toFixed(0)}k/GPU`}
                       </div>
-                    </button>
+                    </Card>
                   );
                 })}
               </div>
 
               <div style={S.aiControls}>
                 <label style={S.ctrlBlock}>
-                  <span style={S.ctrlLabel}>Utilization</span>
+                  <span style={S.ctrlLabel}>{UI.HW_ADV_UTILIZATION}</span>
                   <input type="range" min={40} max={95} step={1} value={v.utilization_pct}
-                    aria-label="AI chip utilization percentage"
-                    aria-valuetext={`${v.utilization_pct} percent utilization`}
-                    onChange={e => onChange?.({ ...v, utilization_pct: Number(e.target.value) })} style={S.range} />
+                    aria-label={UI.HW_GPU_UTIL_ARIA}
+                    aria-valuetext={`${v.utilization_pct} %`}
+                    onChange={(e) => onChange?.({ ...v, utilization_pct: Number(e.target.value) })} style={S.range} />
                   <span style={S.ctrlValue}>{v.utilization_pct}%</span>
                 </label>
                 <label style={S.ctrlBlock}>
-                  <span style={S.ctrlLabel}>$/hr</span>
+                  <span style={S.ctrlLabel}>{UI.HW_ADV_PRICE}</span>
                   <input type="number" step={0.10} min={0} max={20} value={v.gpu_hour_price}
-                    onChange={e => onChange?.({ ...v, gpu_hour_price: Number(e.target.value) })} style={S.numInput} />
+                    aria-label={UI.HW_ADV_PRICE}
+                    onChange={(e) => onChange?.({ ...v, gpu_hour_price: Number(e.target.value) })} style={S.numInput} />
                 </label>
               </div>
             </div>
@@ -231,30 +263,36 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
   );
 }
 
-function HardwareTopology({ classicPct, liquidPct, racks, totalMw, aiMw }) {
+HardwareMixer.propTypes = {
+  totalMw: PropTypes.number,
+  value: PropTypes.object,
+  onChange: PropTypes.func,
+};
+
+// Compact rack-topology illustration (ambience, smaller than before).
+function HardwareTopology({ classicPct, liquidPct, totalMw, aiMw }) {
   const rackCount = 18;
   const classicCount = Math.round(rackCount * classicPct / 100);
   const liquidCount = Math.round(rackCount * liquidPct / 100);
   return (
-    <svg viewBox="0 0 760 300" role="img" aria-label="Hardware allocation topology" style={S.topology}>
+    <svg viewBox="0 0 760 180" role="img" aria-label={UI.HW_TOPOLOGY_ARIA} style={S.topology}>
       <defs>
         <linearGradient id="rackGlow" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="var(--cp-accent-maroon)" stopOpacity="0.85" />
           <stop offset="100%" stopColor="var(--cp-accent)" stopOpacity="0.25" />
         </linearGradient>
         <radialGradient id="coreGlow" cx="50%" cy="50%" r="60%">
-          <stop offset="0%" stopColor="var(--cp-accent-maroon)" stopOpacity="0.55" />
+          <stop offset="0%" stopColor="var(--cp-accent-maroon)" stopOpacity="0.45" />
           <stop offset="100%" stopColor="var(--cp-accent-maroon)" stopOpacity="0" />
         </radialGradient>
       </defs>
-      <rect x="1" y="1" width="758" height="298" rx="24" fill="var(--cp-surface-0)" stroke="var(--cp-border)" />
-      <circle cx="580" cy="92" r="118" fill="url(#coreGlow)" />
-      <path d="M70 228 C190 112 285 238 390 118 S590 66 690 150" fill="none" stroke="var(--cp-border)" strokeWidth="1.2" strokeDasharray="6 8" />
+      <rect x="1" y="1" width="758" height="178" rx="18" fill="var(--cp-surface-0)" stroke="var(--cp-border)" />
+      <circle cx="600" cy="70" r="92" fill="url(#coreGlow)" />
       {Array.from({ length: rackCount }).map((_, i) => {
         const col = i % 9;
         const row = Math.floor(i / 9);
-        const x = 58 + col * 58;
-        const y = 78 + row * 86;
+        const x = 44 + col * 50;
+        const y = 56 + row * 56;
         const fill = i < classicCount
           ? 'var(--cp-text-muted)'
           : i < classicCount + liquidCount
@@ -262,24 +300,29 @@ function HardwareTopology({ classicPct, liquidPct, racks, totalMw, aiMw }) {
             : 'url(#rackGlow)';
         return (
           <g key={i}>
-            <rect x={x} y={y} width="36" height="64" rx="8" fill={fill} opacity={i < classicCount ? 0.34 : 0.82} />
-            <rect x={x + 8} y={y + 10} width="20" height="4" rx="2" fill="var(--cp-text-strong)" opacity="0.48" />
-            <rect x={x + 8} y={y + 24} width="20" height="4" rx="2" fill="var(--cp-text-strong)" opacity="0.34" />
-            <rect x={x + 8} y={y + 38} width="20" height="4" rx="2" fill="var(--cp-text-strong)" opacity="0.26" />
+            <rect x={x} y={y} width="30" height="44" rx="6" fill={fill} opacity={i < classicCount ? 0.34 : 0.82} />
+            <rect x={x + 6} y={y + 8} width="18" height="3" rx="2" fill="var(--cp-text-strong)" opacity="0.44" />
+            <rect x={x + 6} y={y + 18} width="18" height="3" rx="2" fill="var(--cp-text-strong)" opacity="0.3" />
           </g>
         );
       })}
+      <text x="44" y="34" fill="var(--cp-text-muted)" fontSize="11" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_POWER_HALL.toUpperCase()}</text>
+      <text x="556" y="34" fill="var(--cp-text-primary)" fontSize="15" fontWeight="var(--cp-weight-black)">{totalMw} MW</text>
       <g>
-        <rect x="562" y="172" width="132" height="74" rx="16" fill="var(--cp-surface-2)" stroke="var(--cp-border)" />
-        <text x="580" y="198" fill="var(--cp-text-muted)" fontSize="12" fontWeight="800" letterSpacing="var(--cp-tracking-wider)">AI FABRIC</text>
-        <text x="580" y="224" fill="var(--cp-text-primary)" fontSize="26" fontWeight="var(--cp-weight-black)">{aiMw.toFixed(1)} MW</text>
+        <rect x="556" y="96" width="150" height="58" rx="12" fill="var(--cp-surface-2)" stroke="var(--cp-border)" />
+        <text x="572" y="118" fill="var(--cp-text-muted)" fontSize="10" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_AI_FABRIC.toUpperCase()}</text>
+        <text x="572" y="142" fill="var(--cp-text-primary)" fontSize="22" fontWeight="var(--cp-weight-black)">{aiMw.toFixed(1)} MW</text>
       </g>
-      <text x="58" y="48" fill="var(--cp-text-muted)" fontSize="12" fontWeight="800" letterSpacing="var(--cp-tracking-wider)">POWER HALL</text>
-      <text x="590" y="48" fill="var(--cp-text-primary)" fontSize="18" fontWeight="var(--cp-weight-black)">{totalMw} MW</text>
-      <text x="590" y="70" fill="var(--cp-text-muted)" fontSize="12">{racks.toLocaleString('en-US')} GPU racks implied</text>
     </svg>
   );
 }
+
+HardwareTopology.propTypes = {
+  classicPct: PropTypes.number,
+  liquidPct: PropTypes.number,
+  totalMw: PropTypes.number,
+  aiMw: PropTypes.number,
+};
 
 function MixBar({ classicPct, liquidPct, aiPct }) {
   return (
@@ -290,68 +333,113 @@ function MixBar({ classicPct, liquidPct, aiPct }) {
         <span style={{ ...S.mixSegAi, width: `${aiPct}%` }} />
       </div>
       <div style={S.mixLegend}>
-        <span>Standard {classicPct}%</span>
-        <span>Dense {liquidPct}%</span>
-        <span>AI {aiPct}%</span>
+        <span>{UI.HW_MIX_STANDARD} {classicPct}%</span>
+        <span>{UI.HW_MIX_DENSE} {liquidPct}%</span>
+        <span>{UI.HW_MIX_AI} {aiPct}%</span>
       </div>
     </div>
   );
 }
 
-function SumKpi({ label, value, accent }) {
+MixBar.propTypes = {
+  classicPct: PropTypes.number,
+  liquidPct: PropTypes.number,
+  aiPct: PropTypes.number,
+};
+
+function ReadoutRow({ label, value, accent }) {
   return (
-    <div style={S.sumCard}>
-      <div style={S.sumLabel}>{label}</div>
-      <div style={{ ...S.sumValue, color: accent ? 'var(--cp-accent-maroon)' : 'var(--cp-text-primary)' }}>{value}</div>
+    <div style={S.readoutRow}>
+      <span style={S.readoutLabel}>{label}</span>
+      <strong style={{ ...S.readoutValue, color: accent ? 'var(--cp-accent-maroon)' : 'var(--cp-text-primary)' }}>{value}</strong>
     </div>
   );
 }
+
+ReadoutRow.propTypes = {
+  label: PropTypes.string,
+  value: PropTypes.string,
+  accent: PropTypes.bool,
+};
+
+function SumKpi({ label, value, accent }) {
+  return (
+    <Card variant="flat" style={S.sumCard} padding="sm" surface={2}>
+      <div style={S.sumLabel}>{label}</div>
+      <div style={{ ...S.sumValue, color: accent ? 'var(--cp-accent-maroon)' : 'var(--cp-text-primary)' }}>{value}</div>
+    </Card>
+  );
+}
+
+SumKpi.propTypes = {
+  label: PropTypes.string,
+  value: PropTypes.string,
+  accent: PropTypes.bool,
+};
 
 const S = {
   wrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-5)',
+    gap: 'var(--cp-space-4)',
   },
-  stackGrid: {
+  presetRail: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1.25fr) minmax(320px, 0.75fr)',
-    gap: 'var(--cp-space-5)',
-    alignItems: 'stretch',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gap: 'var(--cp-space-3)',
   },
-  visualPanel: {
+  presetCard: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
-    padding: 'var(--cp-space-5)',
-    background: 'linear-gradient(145deg, var(--cp-surface-1), color-mix(in srgb, var(--cp-accent-maroon) 10%, var(--cp-surface-0)))',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
+    gap: 'var(--cp-space-1)',
+    textAlign: 'left',
+    minHeight: 64,
+  },
+  presetName: {
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-black)',
+    color: 'var(--cp-text-primary)',
+  },
+  presetTagline: {
+    fontSize: 'var(--cp-font-xs)',
+    color: 'var(--cp-text-muted)',
+    lineHeight: 'var(--cp-leading-tight)',
+  },
+  spine: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(220px, 0.34fr)',
+    gap: 'var(--cp-space-3)',
+    alignItems: 'stretch',
+  },
+  spineMain: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-3)',
     minWidth: 0,
   },
-  visualHead: {
+  spineHead: {
     display: 'flex',
     justifyContent: 'space-between',
-    gap: 'var(--cp-space-4)',
     alignItems: 'flex-start',
+    gap: 'var(--cp-space-3)',
   },
-  visualKicker: {
+  kicker: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-wider)',
     textTransform: 'uppercase',
   },
-  visualTitle: {
+  spineTitle: {
     margin: 'var(--cp-space-1) 0 0',
     color: 'var(--cp-text-primary)',
-    fontSize: 22,
+    fontSize: 'var(--cp-font-lg)',
     lineHeight: 1.1,
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
   },
   aiBadge: {
-    padding: 'var(--cp-space-2) var(--cp-space-3)',
+    padding: 'var(--cp-space-1) var(--cp-space-3)',
     color: 'var(--cp-text-strong)',
     background: 'var(--cp-accent-maroon)',
     borderRadius: 'var(--cp-radius-pill)',
@@ -370,7 +458,7 @@ const S = {
     gap: 'var(--cp-space-2)',
   },
   mixBar: {
-    height: 14,
+    height: 'calc(var(--cp-space-3) + var(--cp-space-1) / 2)',
     display: 'flex',
     overflow: 'hidden',
     borderRadius: 'var(--cp-radius-pill)',
@@ -390,49 +478,54 @@ const S = {
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-wider)',
   },
-  controlPanel: {
+  readout: {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-3)',
+    justifyContent: 'center',
     minWidth: 0,
   },
-  presetGrid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: 'var(--cp-space-3)',
+  readoutRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 'var(--cp-space-2)',
   },
-  presetCard: {
+  readoutLabel: {
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-semibold)',
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+  },
+  readoutValue: {
+    fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-black)',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  summary: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+    gap: 'var(--cp-space-2)',
+  },
+  sumCard: {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-4)',
-    background: 'var(--cp-surface-0)',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--cp-border)',
-    borderRadius: 'var(--cp-radius-lg)',
-    cursor: 'pointer',
-    textAlign: 'left',
-    color: 'var(--cp-text-primary)',
-    transition: 'all var(--cp-dur-fast) var(--cp-ease)',
   },
-  presetCardSel: {
-    borderColor: 'var(--cp-accent-maroon)',
-    outline: '1px solid var(--cp-accent-maroon)',
-    background: 'var(--cp-accent-soft)',
+  sumLabel: {
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-bold)',
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
   },
-  presetMix: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: 'var(--cp-space-1)',
+  sumValue: {
+    fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-tight)',
     fontVariantNumeric: 'tabular-nums',
   },
-  presetMixSeg: { fontSize: 18, fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
-  presetMixDiv: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)' },
-  presetMixAi: { color: 'var(--cp-accent-maroon)' },
-  presetName: { fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
-  presetTagline: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', lineHeight: '15px' },
-
   advancedToggle: {
     alignSelf: 'stretch',
     fontSize: 'var(--cp-font-sm)',
@@ -446,7 +539,6 @@ const S = {
     letterSpacing: 'var(--cp-tracking-wider)',
     textTransform: 'uppercase',
   },
-
   grid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
@@ -465,7 +557,6 @@ const S = {
     opacity: 0.7,
     textTransform: 'none',
   },
-
   sliders: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-3)' },
   sliderRow: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
   sliderHead: {
@@ -500,33 +591,17 @@ const S = {
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
   },
-
   gpuCards: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
     gap: 'var(--cp-space-2)',
   },
   gpuCard: {
-    padding: 'var(--cp-space-3)',
-    background: 'var(--cp-surface-0)',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
-    cursor: 'pointer',
     textAlign: 'left',
-    transition: 'all var(--cp-dur-fast) var(--cp-ease)',
-    color: 'var(--cp-text-primary)',
-  },
-  gpuCardSel: {
-    background: 'var(--cp-accent-maroon)',
-    color: 'var(--cp-text-strong)',
-    borderColor: 'var(--cp-accent-maroon)',
   },
   gpuSku: { fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)' },
-  gpuMeta: { fontSize: 'var(--cp-font-xs)', opacity: 0.75, marginTop: 'var(--cp-space-1)', lineHeight: '16px' },
+  gpuMeta: { fontSize: 'var(--cp-font-xs)', opacity: 0.75, marginTop: 'var(--cp-space-1)', lineHeight: 'var(--cp-leading-tight)' },
   gpuPrice: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', marginTop: 'var(--cp-space-1)' },
-
   aiControls: {
     display: 'flex',
     gap: 'var(--cp-space-3)',
@@ -548,43 +623,14 @@ const S = {
     fontVariantNumeric: 'tabular-nums',
   },
   numInput: {
-    width: 72,
+    width: 'calc(var(--cp-space-9) + var(--cp-space-8))',
     fontSize: 'var(--cp-font-sm)',
-    height: 28,
+    height: 'var(--cp-space-7)',
     padding: '0 var(--cp-space-2)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-sm)',
     background: 'var(--cp-surface-0)',
     color: 'var(--cp-text-primary)',
-    fontVariantNumeric: 'tabular-nums',
-  },
-
-  summary: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: 'var(--cp-space-2)',
-    paddingTop: 'var(--cp-space-0)',
-  },
-  sumCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-3) var(--cp-space-3)',
-    background: 'var(--cp-surface-0)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
-  },
-  sumLabel: {
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-bold)',
-    color: 'var(--cp-text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
-  },
-  sumValue: {
-    fontSize: 'var(--cp-font-lg)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-tight)',
     fontVariantNumeric: 'tabular-nums',
   },
 };

@@ -27,7 +27,12 @@ import {
   deriveVerdict, deriveCategory, deriveKpis, topRisks, deriveDecision,
   deriveCapitalStack, fmtUsd,
 } from '@/lib/dossier-derive';
-import { SectionHead, Button, Table, Row, Cell } from '@/components/hearst/ui';
+import { Card, SectionHead, Button, Table, Row, Cell, KpiGrid, KpiCard } from '@/components/hearst/ui';
+import { S as CP } from '@/lib/cp-styles';
+import { UI } from '@/lib/ui-strings';
+
+const DOSSIER_ERR = { ...CP.error, padding: 'var(--cp-space-3)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-3)' };
+const DOSSIER_EMPTY = { ...CP.empty, padding: 'var(--cp-space-9)', fontSize: 'var(--cp-font-md)' };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -49,31 +54,31 @@ const CATEGORY_DESC = {
 // Confidence rendered as a quiet typographic label (no badge / no colour).
 function ConfidenceLabel({ level }) {
   const lvl = (level || 'MEDIUM').toUpperCase();
-  const label = lvl === 'HIGH' ? 'High conf.' : lvl === 'LOW' ? 'Low vis.' : 'Med conf.';
+  const label = lvl === 'HIGH' ? UI.DOSSIER_CONF_HIGH : lvl === 'LOW' ? UI.DOSSIER_CONF_LOW : UI.DOSSIER_CONF_MED;
   return <span style={S.confLabel}>{label}</span>;
 }
 
 function Collapsible({ label, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <section style={S.appendix}>
+    <Card as="section" variant="card" surface={1} style={{ padding: 0, overflow: 'hidden' }}>
       <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open} style={S.appendixBtn}>
         <span style={S.appendixLabel}>{label}</span>
         <span style={S.appendixChevron}>{open ? '−' : '+'}</span>
       </button>
       {open && <div style={S.appendixBody}>{children}</div>}
-    </section>
+    </Card>
   );
 }
 
 function Placeholder({ children }) {
-  return <div style={S.placeholder}>{children || 'Not available for this memo version'}</div>;
+  return <div style={S.placeholder}>{children || UI.DOSSIER_PLACEHOLDER_DEFAULT}</div>;
 }
 
 // ─── Visual Story blocks ─────────────────────────────────────────────────────
 
 function CapitalStack({ stack }) {
-  if (!stack) return <Placeholder>Capital structure not available for this memo version</Placeholder>;
+  if (!stack) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_STACK}</Placeholder>;
   return (
     <div>
       <div style={S.stackBar}>
@@ -86,7 +91,7 @@ function CapitalStack({ stack }) {
       </div>
       {stack.split.length > 0 && (
         <div style={S.splitWrap}>
-          <div style={S.eyebrow}>Equity sponsors</div>
+          <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_EQUITY_SPONSORS}</div>
           {stack.split.map(s => (
             <div key={s.name} style={S.splitRow}>
               <span style={S.splitName}>{s.name}</span>
@@ -110,7 +115,7 @@ function parseMonths(v) {
 }
 
 function DeploymentTimeline({ phases }) {
-  if (!phases?.length) return <Placeholder>Deployment timeline not available for this memo version</Placeholder>;
+  if (!phases?.length) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_TIMELINE}</Placeholder>;
   const ranges = phases.map(p => parseMonths(p.months_from_t0));
   const maxMonth = Math.max(...ranges.map(r => r?.end || 0), 1);
   return (
@@ -134,7 +139,7 @@ function DeploymentTimeline({ phases }) {
 }
 
 function BenchmarkPosition({ comparables }) {
-  if (!comparables?.length) return <Placeholder>No comparable peers cited in this memo version</Placeholder>;
+  if (!comparables?.length) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_COMPARABLES}</Placeholder>;
   return (
     <ul style={S.benchList}>
       {comparables.map((c, i) => (
@@ -150,7 +155,7 @@ function BenchmarkPosition({ comparables }) {
 }
 
 function Cashflow({ years }) {
-  if (!years?.length) return <Placeholder>Year-by-year cashflow not available for this memo version</Placeholder>;
+  if (!years?.length) return <Placeholder>{UI.DOSSIER_CASHFLOW_PLACEHOLDER}</Placeholder>;
   const vals = years.flatMap(y => [y.rev, y.ebitda, y.fcf].filter(v => v != null));
   const max = Math.max(...vals.map(Math.abs), 1);
   return (
@@ -216,7 +221,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
   return (
     <div style={S.canvas}>
       {/* ── HERO VERDICT ──────────────────────────────────────────── */}
-      <section style={S.hero}>
+      <Card as="section" variant="card" surface={1} padding="lg" style={{ borderLeft: '3px solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <div style={S.heroTop}>
           <div style={S.heroIdent}>
             <div style={S.identLine}>{ident.join('  ·  ')}</div>
@@ -225,28 +230,28 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
           <div style={S.heroActions}>
             <a style={S.pdfBtn} href={`/api/admin/hearst/strategic-memos/${memo.id}/pdf`} target="_blank" rel="noreferrer">
-              Export PDF
+              {UI.DOSSIER_BTN_EXPORT_PDF}
             </a>
             <div style={S.govRow}>
               {memo.status === 'draft' && (
-                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('reviewed')}>Mark reviewed</Button>
+                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('reviewed')}>{UI.DOSSIER_BTN_MARK_REVIEWED}</Button>
               )}
               {memo.status === 'reviewed' && (
                 <>
-                  <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('approved')}>Approve</Button>
-                  <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('draft')}>Send back</Button>
+                  <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('approved')}>{UI.DOSSIER_BTN_APPROVE}</Button>
+                  <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('draft')}>{UI.DOSSIER_BTN_SEND_BACK}</Button>
                 </>
               )}
               {memo.status === 'approved' && (
-                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('archived')}>Archive</Button>
+                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('archived')}>{UI.DOSSIER_BTN_ARCHIVE}</Button>
               )}
               {memo.status === 'archived' && (
-                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('draft')}>Reopen</Button>
+                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('draft')}>{UI.DOSSIER_BTN_REOPEN}</Button>
               )}
             </div>
             {(memo.approved_at || memo.reviewed_at) && (
               <div style={S.govNote}>
-                {memo.approved_at ? `Approved · ${fmtDate(memo.approved_at)}` : `Reviewed · ${fmtDate(memo.reviewed_at)}`}
+                {memo.approved_at ? UI.DOSSIER_GOV_APPROVED(fmtDate(memo.approved_at)) : UI.DOSSIER_GOV_REVIEWED(fmtDate(memo.reviewed_at))}
               </div>
             )}
             {govErr && <div style={S.govErr}>{govErr}</div>}
@@ -256,71 +261,71 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         <div style={S.verdictRow}>
           <div style={S.verdictBadge}>{verdict.label}</div>
           <div style={S.verdictMeta}>
-            <span style={S.eyebrow}>Investment verdict</span>
+            <span style={S.eyebrow}>{UI.DOSSIER_EYEBROW_VERDICT}</span>
             {verdict.drivers?.length > 0 && <span style={S.verdictDrivers}>{verdict.drivers.join('  ·  ')}</span>}
-            <span style={S.verdictNote}>Synthesized from return, risk, freshness &amp; confidence signals</span>
+            <span style={S.verdictNote}>{UI.DOSSIER_VERDICT_NOTE}</span>
           </div>
         </div>
 
         {decision.recommendation && <p style={S.heroLead}>{decision.recommendation}</p>}
-      </section>
+      </Card>
 
       {/* ── KPI STRIP ─────────────────────────────────────────────── */}
       <section style={S.kpiStrip}>
         {kpis.map(k => (
-          <div key={k.key} style={S.kpiCard}>
+          <Card key={k.key} variant="card" surface={1} padding="md">
             <div style={S.kpiLabel}>{k.label}</div>
             <div style={S.kpiValue}>{k.value || '—'}</div>
             {k.sub && <div style={S.kpiSub}>{k.sub}</div>}
-          </div>
+          </Card>
         ))}
       </section>
 
       {/* ── OPPORTUNITY CATEGORY ──────────────────────────────────── */}
-      <section style={S.categoryBand}>
-        <span style={S.eyebrow}>Opportunity type</span>
-        <span style={S.categoryName}>{category || 'Not classified'}</span>
+      <Card as="section" variant="card" surface={0} style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-4)', flexWrap: 'wrap', paddingTop: 'var(--cp-space-3)', paddingBottom: 'var(--cp-space-3)', paddingLeft: 'var(--cp-space-5)', paddingRight: 'var(--cp-space-5)' }}>
+        <span style={S.eyebrow}>{UI.DOSSIER_EYEBROW_OPPORTUNITY}</span>
+        <span style={S.categoryName}>{category || UI.DOSSIER_CATEGORY_NOT_CLASSIFIED}</span>
         <span style={S.categoryDesc}>
-          {category ? CATEGORY_DESC[category] : 'Archetype could not be inferred from this memo version.'}
+          {category ? CATEGORY_DESC[category] : UI.DOSSIER_CATEGORY_NOT_INFERRED}
         </span>
-      </section>
+      </Card>
 
       {/* ── DECISION CARD + RISK CARDS ────────────────────────────── */}
       <section style={S.twoCol}>
-        <div style={S.decisionCard}>
-          <SectionHead title="Recommendation" />
+        <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-5)' }}>
+          <SectionHead title={UI.DOSSIER_SECTION_RECOMMENDATION} />
           {decision.why && <p style={S.body}>{decision.why}</p>}
           {decision.conditions.length > 0 && (
             <div style={S.condWrap}>
-              <div style={S.eyebrow}>Conditions before approval</div>
+              <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_CONDITIONS}</div>
               <ul style={S.condList}>
                 {decision.conditions.map((c, i) => <li key={i}>{c}</li>)}
               </ul>
             </div>
           )}
           <div style={S.nextAction}>
-            <div style={S.eyebrow}>Next action</div>
+            <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_NEXT_ACTION}</div>
             <div style={S.nextPrimary}>{decision.nextAction.primary}</div>
             <div style={S.nextDetail}>{decision.nextAction.detail}</div>
           </div>
-        </div>
+        </Card>
 
         <div style={S.riskCol}>
-          <SectionHead title="Top risks" hint={`${risks.length} shown`} />
-          {risks.length === 0 && <Placeholder>No risks logged for this memo version</Placeholder>}
+          <SectionHead title={UI.DOSSIER_SECTION_TOP_RISKS} hint={UI.DOSSIER_RISKS_HINT(risks.length)} />
+          {risks.length === 0 && <Placeholder>{UI.DOSSIER_PLACEHOLDER_RISKS}</Placeholder>}
           <div style={S.riskGrid}>
             {risks.map((r, i) => {
               const sv = (r.severity || 'MED').toUpperCase();
               return (
-                <div key={i} style={S.riskCard}>
+                <Card key={i} variant="card" surface={1} padding="sm" style={{ borderLeft: '3px solid var(--cp-border-strong)' }}>
                   <div style={S.riskHead}>
                     <span style={S.sevLabel}>{sv === 'MEDIUM' ? 'MED' : sv}</span>
                     {r.category && <span style={S.riskCat}>{r.category}</span>}
                   </div>
                   <div style={S.riskTitle}>{r.label}</div>
-                  {r.dependency && <div style={S.riskWhy}>Why it matters · {r.dependency}</div>}
-                  {r.mitigation && <div style={S.riskMit}>Mitigation · {r.mitigation}</div>}
-                </div>
+                  {r.dependency && <div style={S.riskWhy}>{UI.DOSSIER_RISK_WHY} {r.dependency}</div>}
+                  {r.mitigation && <div style={S.riskMit}>{UI.DOSSIER_MITIGATION_PREFIX}{r.mitigation}</div>}
+                </Card>
               );
             })}
           </div>
@@ -329,41 +334,41 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
       {/* ── VISUAL STORY ──────────────────────────────────────────── */}
       <section>
-        <SectionHead title="Visual story" hint="from existing projection data" />
+        <SectionHead title={UI.DOSSIER_SECTION_VISUAL_STORY} hint={UI.DOSSIER_SECTION_VISUAL_STORY_HINT} />
         <div style={S.vizGrid}>
-          <div style={S.vizCard}>
-            <div style={S.vizTitle}>Capital stack</div>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
+            <div style={S.vizTitle}>{UI.DOSSIER_VIZ_CAPITAL_STACK}</div>
             <CapitalStack stack={capStack} />
-          </div>
-          <div style={S.vizCard}>
-            <div style={S.vizTitle}>Deployment timeline</div>
+          </Card>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
+            <div style={S.vizTitle}>{UI.DOSSIER_VIZ_DEPLOYMENT_TIMELINE}</div>
             <DeploymentTimeline phases={phases} />
-          </div>
-          <div style={S.vizCard}>
-            <div style={S.vizTitle}>Benchmark position</div>
+          </Card>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
+            <div style={S.vizTitle}>{UI.DOSSIER_VIZ_BENCHMARK_POSITION}</div>
             <BenchmarkPosition comparables={comparables} />
-          </div>
-          <div style={S.vizCard}>
-            <div style={S.vizTitle}>Cashflow trajectory</div>
+          </Card>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
+            <div style={S.vizTitle}>{UI.DOSSIER_VIZ_CASHFLOW_TRAJECTORY}</div>
             <Cashflow years={m._exec_projection?.years} />
-          </div>
+          </Card>
         </div>
       </section>
 
       {/* ── ANALYTICS (continuous) ────────────────────────────────── */}
       <section style={S.analytics}>
-        <SectionHead title="Analytics" hint="full written memo · continuous" />
+        <SectionHead title={UI.DOSSIER_SECTION_ANALYTICS} hint={UI.DOSSIER_SECTION_ANALYTICS_HINT} />
 
         {m.strategic_context && !m.strategic_context.skip && (
-          <AnalyticsBlock title="Strategic context">
+          <AnalyticsBlock title={UI.DOSSIER_BLOCK_STRATEGIC_CONTEXT}>
             <p style={S.body}>{m.strategic_context.body}</p>
           </AnalyticsBlock>
         )}
 
         {m.key_financial_metrics && (
-          <AnalyticsBlock title="Financial metrics">
+          <AnalyticsBlock title={UI.DOSSIER_BLOCK_FINANCIAL_METRICS}>
             <table style={S.table}>
-              <thead><tr>{['Metric', 'Value', 'Conf.', 'Source'].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
+              <thead><tr>{[UI.DOSSIER_TH_METRIC, UI.DOSSIER_TH_VALUE, UI.DOSSIER_TH_CONF, UI.DOSSIER_TH_SOURCE].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
               <tbody>
                 {(m.key_financial_metrics.metrics || []).map((row, i) => (
                   <tr key={i}>
@@ -380,11 +385,11 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         )}
 
         {m.infrastructure_analysis && (
-          <AnalyticsBlock title="Infrastructure">
+          <AnalyticsBlock title={UI.DOSSIER_BLOCK_INFRASTRUCTURE}>
             {m.infrastructure_analysis.body && <p style={S.body}>{m.infrastructure_analysis.body}</p>}
             {m.infrastructure_analysis.tradeoffs?.length > 0 && (
               <>
-                <div style={S.eyebrow}>Trade-offs</div>
+                <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_TRADEOFFS}</div>
                 <ul style={S.bullets}>{m.infrastructure_analysis.tradeoffs.map((t, i) => <li key={i}>{t}</li>)}</ul>
               </>
             )}
@@ -402,21 +407,21 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         )}
 
         {m.market_benchmarking?.structural_differences?.length > 0 && (
-          <AnalyticsBlock title="Market benchmarking">
-            <div style={S.eyebrow}>Why peers aren&apos;t directly comparable</div>
+          <AnalyticsBlock title={UI.DOSSIER_BLOCK_MARKET_BENCHMARKING}>
+            <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_PEERS}</div>
             <ul style={S.bullets}>{m.market_benchmarking.structural_differences.map((d, i) => <li key={i}>{d}</li>)}</ul>
           </AnalyticsBlock>
         )}
 
         {m.commercialization_strategy && (
-          <AnalyticsBlock title="Revenue Model">
+          <AnalyticsBlock title={UI.DOSSIER_BLOCK_REVENUE_MODEL}>
             <table style={S.configTable}>
               <tbody>
                 {[
-                  ['Pricing', m.commercialization_strategy.pricing],
-                  ['Contract structure', m.commercialization_strategy.contract_structure],
-                  ['Anchor tenant', m.commercialization_strategy.anchor_tenant],
-                  ['Ramp profile', m.commercialization_strategy.ramp_profile],
+                  [UI.DOSSIER_ROW_PRICING, m.commercialization_strategy.pricing],
+                  [UI.DOSSIER_ROW_CONTRACT, m.commercialization_strategy.contract_structure],
+                  [UI.DOSSIER_ROW_ANCHOR, m.commercialization_strategy.anchor_tenant],
+                  [UI.DOSSIER_ROW_RAMP, m.commercialization_strategy.ramp_profile],
                 ].filter(([, v]) => v).map(([k, v]) => (
                   <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
                 ))}
@@ -426,11 +431,11 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         )}
 
         {m.long_term_strategic_value && (
-          <AnalyticsBlock title="Long-term value">
+          <AnalyticsBlock title={UI.DOSSIER_BLOCK_LONG_TERM_VALUE}>
             {m.long_term_strategic_value.ten_year_arc && <p style={S.body}>{m.long_term_strategic_value.ten_year_arc}</p>}
             {m.long_term_strategic_value.speculative_branches?.length > 0 && (
               <>
-                <div style={S.eyebrow}>Speculative branches · low visibility</div>
+                <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_SPECULATIVE}</div>
                 <ul style={S.bullets}>{m.long_term_strategic_value.speculative_branches.map((s, i) => <li key={i}>{s}</li>)}</ul>
               </>
             )}
@@ -438,7 +443,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         )}
 
         {m.intelligence_sources?.length > 0 && (
-          <AnalyticsBlock title="Sources">
+          <AnalyticsBlock title={UI.DOSSIER_BLOCK_SOURCES}>
             <ul style={S.sourceList}>
               {m.intelligence_sources.map((s, i) => (
                 <li key={i} style={S.sourceItem}>
@@ -454,21 +459,21 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
       {/* ── APPENDIX (collapsed) ──────────────────────────────────── */}
       {versions && versions.length > 1 && (
-        <div style={S.versionBar}>
-          <span style={S.eyebrow}>Versions</span>
+        <Card variant="card" surface={0} style={{ display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', flexWrap: 'wrap', paddingTop: 'var(--cp-space-2)', paddingBottom: 'var(--cp-space-2)', paddingLeft: 'var(--cp-space-4)', paddingRight: 'var(--cp-space-4)' }}>
+          <span style={S.eyebrow}>{UI.DOSSIER_EYEBROW_VERSIONS}</span>
           {versions.map(v => (
             <button key={v.id} type="button" onClick={() => onVersionSelect(v.id)}
               style={{ ...S.versionChip, ...(v.id === memo.id ? S.versionChipActive : {}) }}>
               v{v.version}{v.status ? ` · ${v.status}` : ''}
             </button>
           ))}
-        </div>
+        </Card>
       )}
 
-      <Collapsible label="Appendix · raw detail, metadata & audit">
+      <Collapsible label={UI.DOSSIER_APPENDIX_LABEL}>
         {m.decision_tensions?.length > 0 && (
           <div>
-            <div style={S.eyebrow}>Decision tensions</div>
+            <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_DECISION_TENSIONS}</div>
             <ul style={S.tensionList}>
               {m.decision_tensions.map((t, i) => (
                 <li key={i} style={S.tensionItem}>
@@ -480,18 +485,18 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
           </div>
         )}
         <div>
-          <div style={S.eyebrow}>Generation metadata</div>
+          <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_GEN_METADATA}</div>
           <table style={S.configTable}>
             <tbody>
               {[
-                ['Provider', memo.provider_used],
-                ['Confidence', memo.confidence_level],
-                ['Stakeholder', memo.stakeholder],
-                ['Audience', memo.audience],
-                ['Generation time', memo.generation_time_ms != null ? `${(memo.generation_time_ms / 1000).toFixed(1)}s` : null],
-                ['Created', fmtDate(memo.created_at)],
-                ['Data as of', memo.data_as_of],
-                ['Scenario', memo.scenario_id || '—'],
+                [UI.DOSSIER_META_PROVIDER, memo.provider_used],
+                [UI.DOSSIER_META_CONFIDENCE, memo.confidence_level],
+                [UI.DOSSIER_META_STAKEHOLDER, memo.stakeholder],
+                [UI.DOSSIER_META_AUDIENCE, memo.audience],
+                [UI.DOSSIER_META_GEN_TIME, memo.generation_time_ms != null ? `${(memo.generation_time_ms / 1000).toFixed(1)}s` : null],
+                [UI.DOSSIER_META_CREATED, fmtDate(memo.created_at)],
+                [UI.DOSSIER_META_DATA_AS_OF, memo.data_as_of],
+                [UI.DOSSIER_META_SCENARIO, memo.scenario_id || '—'],
               ].filter(([, v]) => v != null).map(([k, v]) => (
                 <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
               ))}
@@ -499,7 +504,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
           </table>
         </div>
         <div>
-          <div style={S.eyebrow}>Full memo JSON</div>
+          <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_FULL_JSON}</div>
           <pre style={S.pre}>{JSON.stringify(m, null, 2)}</pre>
         </div>
       </Collapsible>
@@ -543,27 +548,27 @@ function ScenarioView({ scenarioId }) {
     load();
   }, [scenarioId]);
 
-  if (err) return <div style={S.err}>Error: {err}</div>;
-  if (memos === null) return <div style={S.empty}>Loading scenario…</div>;
+  if (err) return <div style={DOSSIER_ERR}>Error: {err}</div>;
+  if (memos === null) return <div style={DOSSIER_EMPTY}>{UI.DOSSIER_LOADING_SCENARIO}</div>;
 
   return (
     <div>
       <div style={S.breadcrumb}>
-        <Link href="/admin/hearst/dossier" style={S.breadcrumbLink}>All memos</Link>
+        <Link href="/admin/hearst/dossier" style={S.breadcrumbLink}>{UI.DOSSIER_BREADCRUMB_ALL_MEMOS}</Link>
         <span style={S.breadcrumbSep}>/</span>
-        <span>Scenario · {scenario?.name || scenario?.title || scenarioId.slice(0, 8) + '…'}</span>
+        <span>{UI.DOSSIER_BREADCRUMB_SCENARIO} · {scenario?.name || scenario?.title || scenarioId.slice(0, 8) + '…'}</span>
       </div>
 
       <header style={S.sectionHeader}>
-        <h2 style={S.h2}>Scenario · {scenario?.name || scenario?.title || scenarioId.slice(0, 8) + '…'}</h2>
-        <p style={S.sub}>{memos.length} report version{memos.length !== 1 ? 's' : ''}</p>
+        <h2 style={S.h2}>{UI.DOSSIER_BREADCRUMB_SCENARIO} · {scenario?.name || scenario?.title || scenarioId.slice(0, 8) + '…'}</h2>
+        <p style={S.sub}>{UI.DOSSIER_REPORT_VERSIONS(memos.length)}</p>
       </header>
 
-      {memos.length === 0 && <div style={S.empty}>No reports for this scenario yet.</div>}
+      {memos.length === 0 && <div style={DOSSIER_EMPTY}>{UI.DOSSIER_NO_SCENARIO_REPORTS}</div>}
 
       <div style={S.memoCardList}>
         {memos.map(mm => (
-          <button key={mm.id} type="button" onClick={() => router.push(`/admin/hearst/dossier?memo=${mm.id}`)} style={S.memoCard}>
+          <Card key={mm.id} as="button" variant="card" surface={1} padding="sm" onClick={() => router.push(`/admin/hearst/dossier?memo=${mm.id}`)} style={{ cursor: 'pointer', textAlign: 'left', width: '100%', font: 'inherit', color: 'inherit' }}>
             <div style={S.memoCardTop}>
               <span style={S.memoCardVersion}>v{mm.version}</span>
               <ConfidenceLabel level={mm.confidence_level} />
@@ -574,7 +579,7 @@ function ScenarioView({ scenarioId }) {
               {mm.provider_used && <span>{mm.provider_used}</span>}
               <span>{fmtDateShort(mm.created_at)}</span>
             </div>
-          </button>
+          </Card>
         ))}
       </div>
     </div>
@@ -600,17 +605,17 @@ function MemoDetailView({ memoId }) {
 
   useEffect(() => { load(memoId); }, [memoId, load]);
 
-  if (err) return <div style={S.err}>Error: {err}</div>;
-  if (!data) return <div style={S.empty}>Loading memo…</div>;
+  if (err) return <div style={DOSSIER_ERR}>Error: {err}</div>;
+  if (!data) return <div style={DOSSIER_EMPTY}>{UI.DOSSIER_LOADING_MEMO}</div>;
 
   return (
     <div>
       <div style={S.breadcrumb}>
-        <Link href="/admin/hearst/dossier" style={S.breadcrumbLink}>All memos</Link>
+        <Link href="/admin/hearst/dossier" style={S.breadcrumbLink}>{UI.DOSSIER_BREADCRUMB_ALL_MEMOS}</Link>
         {data.memo?.scenario_id && (
           <>
             <span style={S.breadcrumbSep}>/</span>
-            <Link href={`/admin/hearst/dossier?scenario=${data.memo.scenario_id}`} style={S.breadcrumbLink}>Scenario</Link>
+            <Link href={`/admin/hearst/dossier?scenario=${data.memo.scenario_id}`} style={S.breadcrumbLink}>{UI.DOSSIER_BREADCRUMB_SCENARIO}</Link>
           </>
         )}
         <span style={S.breadcrumbSep}>/</span>
@@ -666,27 +671,25 @@ function AllMemosView() {
 
   return (
     <div>
-      <header style={S.sectionHeader}>
-        <div>
-          <h1 style={S.h1}>Project Dossier</h1>
-          <p style={S.sub}>Decision-first strategic reports · versioned · exportable. Open any report for its Decision Canvas.</p>
-        </div>
+      <header className="oracle-page-header">
+        <h1>{UI.DOSSIER_PAGE_TITLE}</h1>
+        <p className="oracle-subtitle">{UI.DOSSIER_PAGE_SUBTITLE}</p>
       </header>
 
-      <div style={S.statRow}>
-        <div style={S.statBox}><div style={S.statN}>{(memos || []).length}</div><div style={S.statL}>Reports</div></div>
-        <div style={S.statBox}><div style={S.statN}>{approvedCount}</div><div style={S.statL}>Approved</div></div>
-        <div style={S.statBox}><div style={S.statN}>{scenarios.length}</div><div style={S.statL}>Scenarios</div></div>
-      </div>
+      <KpiGrid cols={3} style={{ marginBottom: 'var(--cp-space-6)' }}>
+        <KpiCard label={UI.DOSSIER_KPI_REPORTS} value={(memos || []).length} format="display" size="sm" />
+        <KpiCard label={UI.DOSSIER_KPI_APPROVED} value={approvedCount} format="display" size="sm" />
+        <KpiCard label={UI.DOSSIER_KPI_SCENARIOS} value={scenarios.length} format="display" size="sm" />
+      </KpiGrid>
 
-      {err && <div style={S.err}>Error: {err}</div>}
-      {memos === null && <div style={S.empty}>Loading memos…</div>}
-      {memos && memos.length === 0 && <div style={S.empty}>No reports yet. Generate a strategic memo from the Simulator.</div>}
+      {err && <div style={DOSSIER_ERR}>Error: {err}</div>}
+      {memos === null && <div style={DOSSIER_EMPTY}>{UI.DOSSIER_LOADING_MEMOS}</div>}
+      {memos && memos.length === 0 && <div style={DOSSIER_EMPTY}>{UI.WS_NO_REPORTS}</div>}
 
       {memos && memos.length > 0 && (
         <Table
           scroll
-          head={['Title', 'Scenario', 'Date', 'v', 'Provider', 'Confidence', 'Status', '']}
+          head={[UI.DOSSIER_TH_TITLE, UI.DOSSIER_TH_SCENARIO, UI.DOSSIER_TH_DATE, UI.DOSSIER_TH_VERSION_COL, UI.DOSSIER_TH_PROVIDER, UI.DOSSIER_TH_CONFIDENCE, UI.DOSSIER_TH_STATUS, '']}
         >
           {memos.map(mm => (
             <Row key={mm.id}>
@@ -730,7 +733,7 @@ function DossierInner() {
 
 export default function DossierPage() {
   return (
-    <Suspense fallback={<div style={S.empty}>Loading…</div>}>
+    <Suspense fallback={<div style={DOSSIER_EMPTY}>{UI.DOSSIER_LOADING_FALLBACK}</div>}>
       <DossierInner />
     </Suspense>
   );
@@ -745,8 +748,7 @@ const EYEBROW = {
 
 const S = {
   // Typography / shared (canon)
-  h1: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
-  h2: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
+  h2: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)' },
   sub: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-1)' },
   body: { margin: 'var(--cp-space-1) var(--cp-space-0)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   eyebrow: { ...EYEBROW, display: 'block', marginBottom: 'var(--cp-space-1)' },
@@ -755,8 +757,6 @@ const S = {
   // Canvas
   canvas: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)' },
 
-  // ── Hero ── (single bordeaux accent = left keyline)
-  hero: { padding: 'var(--cp-space-6)', borderRadius: 'var(--cp-radius-lg)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   heroTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
   heroIdent: { flex: '1 1 calc(var(--cp-space-8) * 10)', minWidth: 0 },
   identLine: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'capitalize', marginBottom: 'var(--cp-space-2)' },
@@ -777,19 +777,15 @@ const S = {
 
   // ── KPI strip (auto-fit grid → responsive) ──
   kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 3 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
-  kpiCard: { padding: 'var(--cp-space-4) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
   kpiLabel: { ...EYEBROW, marginBottom: 'var(--cp-space-2)' },
   kpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', fontVariantNumeric: 'tabular-nums' },
   kpiSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
-  // ── Category band ──
-  categoryBand: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-4)', flexWrap: 'wrap', padding: 'var(--cp-space-3) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)' },
   categoryName: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
   categoryDesc: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', flex: '1 1 calc(var(--cp-space-9) * 6)' },
 
   // ── Two-col (decision + risks) ──
   twoCol: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-8) * 10), 1fr))', gap: 'var(--cp-space-4)', alignItems: 'start' },
-  decisionCard: { padding: 'var(--cp-space-5)', borderRadius: 'var(--cp-radius-lg)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
   condWrap: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', margin: 'var(--cp-space-3) var(--cp-space-0)' },
   condList: { margin: 'var(--cp-space-0)', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   nextAction: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-accent)' },
@@ -798,7 +794,6 @@ const S = {
 
   riskCol: { minWidth: 0 },
   riskGrid: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
-  riskCard: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-border-strong)' },
   riskHead: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
   sevLabel: { ...EYEBROW, color: 'var(--cp-text-primary)' },
   riskCat: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' },
@@ -810,7 +805,6 @@ const S = {
 
   // ── Visual story ──
   vizGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 6 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
-  vizCard: { padding: 'var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)' },
   vizTitle: { ...EYEBROW, marginBottom: 'var(--cp-space-3)' },
   placeholder: { padding: 'var(--cp-space-4) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', fontStyle: 'italic', textAlign: 'center' },
 
@@ -868,11 +862,9 @@ const S = {
   sourceMeta: { color: 'var(--cp-text-muted)' },
 
   // ── Version bar + appendix ──
-  versionBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', flexWrap: 'wrap', padding: 'var(--cp-space-2) var(--cp-space-4)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' },
   versionChip: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', cursor: 'pointer' },
   versionChipActive: { background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', borderColor: 'var(--cp-border-strong)' },
 
-  appendix: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', overflow: 'hidden' },
   appendixBtn: { width: '100%', padding: 'var(--cp-space-3) var(--cp-space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit' },
   appendixLabel: { ...EYEBROW },
   appendixChevron: { fontSize: 'var(--cp-font-lg)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
@@ -884,11 +876,6 @@ const S = {
 
   // ── Shared (list/scenario views) ──
   sectionHeader: { marginBottom: 'var(--cp-space-5)' },
-  statRow: { display: 'flex', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-6)', flexWrap: 'wrap' },
-  statBox: { padding: 'var(--cp-space-3) var(--cp-space-5)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border)', minWidth: 'calc(var(--cp-space-9) * 2 + var(--cp-space-6) + var(--cp-space-1) + var(--cp-space-1) / 2)' },
-  statN: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
-  statL: { ...EYEBROW, marginTop: 'calc(var(--cp-space-1) / 2)' },
-  tr: { borderBottom: '1px solid var(--cp-border)', cursor: 'pointer' },
   link: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-medium)' },
   muted: { color: 'var(--cp-text-faint)' },
   pdf: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)' },
@@ -897,13 +884,10 @@ const S = {
   breadcrumbLink: { color: 'var(--cp-accent)', textDecoration: 'none' },
   breadcrumbSep: { color: 'var(--cp-text-faint)' },
   memoCardList: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
-  memoCard: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', cursor: 'pointer', textAlign: 'left', width: '100%', font: 'inherit', color: 'inherit' },
   memoCardTop: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
   memoCardVersion: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
   memoCardStatus: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
   memoCardTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-1)' },
   memoCardMeta: { display: 'flex', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
 
-  err: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-3)' },
-  empty: { padding: 'var(--cp-space-9)', color: 'var(--cp-text-muted)', textAlign: 'center', fontSize: 'var(--cp-font-md)' },
 };

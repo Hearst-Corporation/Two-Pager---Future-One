@@ -20,56 +20,6 @@
   --font-sans: "Inter var", "Inter", -apple-system, BlinkMacSystemFont,
     "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
 
-  /* Primary / Base */
-  --color-bg-main: #F5F5F6;
-  --color-bg-secondary: #ECECEE;
-  --color-surface: #FFFFFF;
-
-  /* Gris */
-  --color-gray-900: #1A1D24;
-  --color-gray-850: #22262E;
-  --color-gray-800: #2A2F38;
-  --color-gray-750: #323842;
-  --color-gray-700: #3D4450;
-  --color-gray-600: #4B5363;
-  --color-gray-500: #5B616A;
-  --color-gray-400: #8A9099;
-  --color-gray-300: #C9CDD2;
-  --color-gray-200: #E4E6EA;
-  --color-gray-100: #F2F3F5;
-
-  /* Footer / zones agressives — PRINT: imprimer en rich black (C60 M40 Y40 K100), pas en K100 seul */
-  --color-dark-surface: #22262E;
-  --color-dark-elevated: #2A2F38;
-  --color-dark-contrast: #1A1D24;
-
-  /* Accent — PRINT: Pantone 199 C en ton direct */
-  --color-accent-primary: #9F1239;
-  --color-accent-strong: #BE123C;
-  --color-accent-soft: #E11D48;
-
-  /* Support / status — foreground */
-  --color-success: #059669;
-  --color-warning: #D97706;
-  --color-error:   #DC2626;
-  --color-info:    #2563EB;
-
-  /* Support / status — background tints */
-  --color-success-bg: #D1FAE5;
-  --color-warning-bg: #FFFBEB;
-  --color-error-bg:   #FEF2F2;
-  --color-info-bg:    #EFF6FF;
-
-  /* Texte */
-  --color-text-primary: #1A1D24;
-  --color-text-secondary: #3A4048;
-  --color-text-muted: #8A9099;
-  --color-text-inverse: #FFFFFF;
-
-  /* Borders */
-  --color-border-light: #E4E6EA;
-  --color-border-medium: #C9CDD2;
-  --color-border-strong: #2A2F36;
 
   /* Operator color tokens (--cp-op-*) déplacés vers la source de vérité --cp-* :
      app/(cockpit)/admin/hearst/cp-tokens.css. globals.css ne définit plus que --color-*. */
@@ -77,10 +27,13 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* NOTE: background/color ici = fallback pour login (/admin/login/) qui n'a pas accès
+   aux --cp-*. Sur les routes cockpit, tokens.css (html,body) et .ct-root écrasent
+   background via --ct-bg-deep. Ces règles ne "fuient" pas visuellement sur le cockpit. */
 html, body {
   font-family: var(--font-sans);
-  background: var(--color-gray-900);
-  color: var(--color-text-inverse);
+  background: #1A1D24; /* Fallback matching old --color-gray-900 */
+  color: #FFFFFF; /* Fallback matching old --color-text-inverse */
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -91,9 +44,11 @@ html, body {
    pour que SectionMethod puisse pin pendant son scroll horizontal. */
 body { overflow-x: clip; }
 
+/* Fallback ::selection pour /admin/login/ (n'a pas --cp-*).
+   Sur le cockpit, cockpit.css surcharge via .ct-root ::selection (accent courant). */
 ::selection {
-  background: var(--color-accent-strong);
-  color: var(--color-text-inverse);
+  background: #6B102B; /* --cp-accent-strong fallback: hors scope cp-tokens.css sur routes non-cockpit */
+  color: #FFFFFF;
 }
 
 button {
@@ -104,67 +59,4 @@ button {
 a {
   color: inherit;
   text-decoration: none;
-}
-
-/* ============================================================
-   OPENCLAW · GLOBAL ANIMATIONS
-   ============================================================ */
-
-@keyframes oc-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 1; }
-}
-
-/* ============================================================
-   PRINT helpers — used by /admin/roadmap "Export PDF"
-   ============================================================ */
-.print-only { display: none; }
-
-@media print {
-  @page { size: A3 landscape; margin: 12mm; }
-
-  html, body {
-    background: #fff !important;
-    color: #000 !important;
-  }
-
-  /* Hide everything outside the roadmap shell when printing */
-  body * { visibility: hidden; }
-  .roadmap-print-root, .roadmap-print-root * { visibility: visible; }
-  .roadmap-print-root {
-    position: absolute !important;
-    inset: 0 !important;
-    padding: 0 !important;
-    max-width: none !important;
-    background: #fff !important;
-  }
-
-  .no-print { display: none !important; }
-  .print-only { display: block !important; }
-
-  /* Workstream cards — keep them readable on paper */
-  .ws-card {
-    page-break-inside: avoid;
-    break-inside: avoid;
-    border: 1px solid #ccc !important;
-    box-shadow: none !important;
-  }
-
-  /* Force readable contrast for hearst printed content (overrides cockpit
-     inline styles using --cp-text-muted etc. which are near-invisible on
-     white paper). */
-  .roadmap-print-root,
-  .roadmap-print-root * {
-    color: #000 !important;
-    background: transparent !important;
-    border-color: #999 !important;
-    box-shadow: none !important;
-  }
-
-  /* Escape hatch: KPI values that NEED their semantic color (green/red/amber)
-     to convey meaning when printed (e.g. IRR delta, status pills). Opt-in via
-     className="print-keep-color" on the value span. */
-  .roadmap-print-root .print-keep-color {
-    color: inherit !important;
-  }
 }

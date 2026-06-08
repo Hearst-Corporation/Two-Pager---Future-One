@@ -5,6 +5,13 @@
 
 /* --cp-bg-deep vit dans cp-tokens.css (alias var(--ct-bg-deep)) — source de vérité unique. */
 
+/* ::selection cockpit — override le fallback globals.css (qui ne connaît pas --cp-*).
+   Scopé au shell cockpit pour laisser le login intact. */
+.ct-root ::selection {
+  background: var(--cp-accent-strong);
+  color: var(--cp-text-strong);
+}
+
 /* Scrollbars + focus (hearst layout only — fichier non importé ailleurs) */
 html ::-webkit-scrollbar {
   width: var(--cp-space-2);
@@ -14,11 +21,11 @@ html ::-webkit-scrollbar-track {
   background: transparent;
 }
 html ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--cp-hairline);
   border-radius: var(--cp-radius-xs);
 }
 html ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--cp-border);
 }
 html :focus-visible {
   outline: 2px solid var(--cp-accent-strong);
@@ -51,6 +58,34 @@ html :focus-visible {
               background var(--cp-dur-base) var(--cp-ease-out),
               border-color var(--cp-dur-base) var(--cp-ease-out);
 }
+
+/* Rôles de surface : une section peut être structurante sans repeindre
+   border/ombre, tandis que les feuilles interactives gardent `.cp-card`. */
+.cp-card-flat {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.cp-card-bare {
+  position: relative;
+}
+.cp-card-button {
+  appearance: none;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cp-surface-0 { background: var(--cp-surface-0); }
+.cp-surface-1 { background: var(--cp-surface-1); }
+.cp-surface-2 { background: var(--cp-surface-2); }
+.cp-surface-3 { background: var(--cp-surface-3); }
+.cp-surface-accent-soft { background: var(--cp-accent-soft); }
+
 .cp-card-hover:hover {
   transform: translateY(-2px);
   box-shadow: var(--cp-shadow-card-hover);
@@ -58,14 +93,16 @@ html :focus-visible {
   border-color: var(--cp-border-strong);
 }
 
-.cp-btn-hover {
+.cp-btn--primary {
   transition: filter var(--cp-dur-fast) var(--cp-ease),
-              transform var(--cp-dur-fast) var(--cp-ease);
+              transform var(--cp-dur-fast) var(--cp-ease),
+              background var(--cp-dur-base) var(--cp-ease),
+              border-color var(--cp-dur-base) var(--cp-ease);
 }
-.cp-btn-hover:hover {
+.cp-btn--primary:hover:not(:disabled) {
   filter: brightness(1.12);
 }
-.cp-btn-hover:active {
+.cp-btn--primary:active:not(:disabled) {
   filter: brightness(0.95);
   transform: translateY(1px);
 }
@@ -94,23 +131,19 @@ html :focus-visible {
   pointer-events: none;
   box-shadow:
     inset 4px 0 0 var(--cp-accent-strong),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 1px 0 var(--cp-border-strong),
     0 0 32px -8px color-mix(in srgb, var(--cp-accent-strong) 35%, transparent);
 }
 
 @keyframes memo-spin {
   to { transform: rotate(360deg); }
 }
-@keyframes memo-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.3); opacity: 0.7; }
-}
 @keyframes memo-toast-in {
   from { transform: translateY(var(--cp-space-3)); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* === Centre full-width (rail droit = drawer, voir chat-fab.css) === */
+/* === Centre : flex max entre rail gauche et chat docké (chat-fab.css) === */
 .ct-center-panel {
   flex: 1 1 auto !important;
   min-width: 0 !important;
@@ -119,36 +152,30 @@ html :focus-visible {
 .ct-page-area {
   width: 100% !important;
   min-height: 0;
+  box-sizing: border-box;
 }
 
-/* === Chat input always reachable (drawer ouvert) === */
-.ct-rail-right .ct-chat-form {
-  position: absolute !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  margin: 0 !important;
-  padding: var(--cp-space-2) var(--cp-space-3);
-  background: var(--cp-surface-1);
-  border-top: 1px solid var(--cp-border);
-  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.35);
-  z-index: 6;
+/* === Rail droit : IC au-dessus du chat (flex natif shell, pas d'input absolute) === */
+.ct-rail-right .ct-rail-right-body {
+  overflow: hidden !important;
+  padding-bottom: var(--cp-space-4);
 }
-.ct-rail-right .ct-rail-right-body { padding-bottom: var(--cp-chat-dock-clear); }
-
-/* Modeling pages: IC snapshot stacked above chat (no tab toggle) */
+.ct-rail-right-body [data-oracle-advisor-slot] {
+  flex-shrink: 0;
+  max-height: min(38vh, 340px);
+  overflow-y: auto;
+  border-bottom: 1px solid var(--cp-border);
+}
 .ct-rail-right-body .ct-chat-root {
   display: flex !important;
   flex-direction: column;
   flex: 1 1 0%;
   min-height: 0;
 }
-.ct-rail-right-body [data-oracle-advisor-slot] {
-  flex-shrink: 0;
-  max-height: 42vh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
 /* Reference pages (deals, sources, workspace, dossier list) — chat only, no IC snapshot */
 body.oracle-advisor-chat-only [data-oracle-advisor-slot] { display: none !important; }
+
+/* === Chat input padding fix (shell override) === */
+.ct-chat-input {
+  min-height: var(--cp-chat-input-min-height);
+}

@@ -78,3 +78,9 @@ A[0-9]-*.png
 /oracle-sim-raw.png
 /uiux-audit-*.html
 *.bak
+/brief-*.png
+/hardware-*.png
+/opmodel-*.png
+/section-*.png
+/other-sections.png
+/financial-*.png

@@ -2,11 +2,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import SourceBadge from '@/components/hearst/SourceBadge';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
-import { Table, Row, Cell, Field, Button, Badge } from '@/components/hearst/ui';
+import { X, ExternalLink } from 'lucide-react';
+import { Table, Row, Cell, Field, Button, Badge, Eyebrow } from '@/components/hearst/ui';
 import {
   SOURCE_TYPES, OPERATORS,
   PUBLIC_SOURCES_LIBRARY, DOC_TYPES,
 } from '@/lib/hearst-constants';
+import { UI } from '@/lib/ui-strings';
+import { S as CP } from '@/lib/cp-styles';
+
+const SOURCES_ERR = { ...CP.error, padding: 'var(--cp-space-5)' };
+const SOURCES_EMPTY = { ...CP.empty, padding: 'var(--cp-space-5)', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-sm)' };
 
 const SOURCE_FIELDS = [
   { key: 'metric_id',    label: 'Metric ID',    required: true },
@@ -165,8 +171,20 @@ export default function SourcesPage() {
     }
   }
 
-  if (loading) return <div style={S.loading}>Loading market intelligence…</div>;
-  if (error) return <div style={S.error}>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className="oracle-page">
+        <div style={CP.loading}>{UI.SOURCES_LOADING}</div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="oracle-page">
+        <div style={SOURCES_ERR}>Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -180,17 +198,17 @@ export default function SourcesPage() {
     `}</style>
     <div className="oracle-page">
       {/* Header */}
-      <div data-sources-topbar style={S.topBar}>
-        <div style={S.pageTitle}>Market Intelligence — {PUBLIC_SOURCES_LIBRARY.length} benchmarks</div>
+      <header data-sources-topbar className="oracle-page-header" style={S.topBar}>
+        <h1>Market Intelligence — {PUBLIC_SOURCES_LIBRARY.length} benchmarks</h1>
         <div style={S.flexRow}>
           <Button variant="ghost" size="sm" onClick={() => setShowMyS(v => !v)}>
             My Sources ({adminSources.length})
           </Button>
-          <Button variant="primary" size="sm" className="cp-btn-hover" onClick={() => setShowAdd(v => !v)}>
+          <Button variant="primary" size="sm" onClick={() => setShowAdd(v => !v)}>
             + Add Source
           </Button>
         </div>
-      </div>
+      </header>
 
       {/* Filters row */}
       <div data-sources-filter-row style={S.filterRow}>
@@ -219,7 +237,7 @@ export default function SourcesPage() {
       <div style={S.tableSpacer}>
       <Table scroll head={['Operator', 'Metric', 'Value', 'Source', 'Geography', 'Confidence', 'Date', '']}>
         {libFiltered.length === 0 ? (
-          <Row><Cell style={{ textAlign: 'center', padding: 'var(--cp-space-7)' }} colSpan={8}>No results matching filters.</Cell></Row>
+          <Row><Cell style={{ textAlign: 'center', padding: 'var(--cp-space-7)' }} colSpan={8}>{UI.SOURCES_NO_FILTER}</Cell></Row>
         ) : libFiltered.map(src => (
           <Row key={src.id}>
             <Cell><OperatorBadge operatorId={src.operator_id} size="sm" /></Cell>
@@ -244,7 +262,7 @@ export default function SourcesPage() {
       {/* My Sources (collapsible) */}
       {showMyS && (
         <div style={S.mySourcesWrap}>
-          <div style={S.sectionLabel}>MY SOURCES — Admin &amp; Project-specific</div>
+          <Eyebrow block>{UI.SOURCES_MY_SECTION}</Eyebrow>
 
           {showAdd && (
             <div style={S.addForm}>
@@ -273,21 +291,21 @@ export default function SourcesPage() {
           )}
 
           {adminSources.length === 0 ? (
-            <div style={S.empty}>No admin sources yet.</div>
+            <div style={SOURCES_EMPTY}>{UI.SOURCES_NO_ADMIN}</div>
           ) : (
             <Table head={['Metric ID', 'Type', 'Source', 'Value', 'Confidence', 'Date', 'URL', '']}>
               {adminSources.map(s => (
                 <Row key={s.id}>
                   <Cell label>
                     {s.metric_id}
-                    {s.used_in_model && <Badge tone="accent" pill={false} style={{ marginLeft: 'var(--cp-space-2)' }}>● in model</Badge>}
+                    {s.used_in_model && <Badge tone="accent" pill={false} style={{ marginLeft: 'var(--cp-space-2)' }}>{UI.SOURCES_IN_MODEL}</Badge>}
                   </Cell>
                   <Cell><SourceBadge source_type={s.source_type} /></Cell>
                   <Cell>{s.source_name || '—'}</Cell>
                   <Cell style={{ fontWeight: 'var(--cp-weight-bold)', fontVariantNumeric: 'tabular-nums' }}>{s.value != null ? s.value : (s.value_text || '—')}{s.unit ? ' ' + s.unit : ''}</Cell>
                   <Cell>{s.confidence_score != null ? s.confidence_score + '/5' : '—'}</Cell>
                   <Cell>{s.date_published || '—'}</Cell>
-                  <Cell>{s.source_url ? <a href={s.source_url} target="_blank" rel="noopener noreferrer" style={S.link}>↗</a> : '—'}</Cell>
+                  <Cell>{s.source_url ? <a href={s.source_url} target="_blank" rel="noopener noreferrer" style={S.link} aria-label={UI.SOURCES_OPEN_URL}><ExternalLink size={14} aria-hidden="true" /></a> : '—'}</Cell>
                   <Cell>
                     {confirmDel === s.id ? (
                       <span style={S.delActions}>
@@ -295,7 +313,7 @@ export default function SourcesPage() {
                         <Button variant="ghost" size="sm" onClick={() => setConfirmDel(null)}>Cancel</Button>
                       </span>
                     ) : (
-                      <Button variant="danger" size="sm" style={{ border: 'none' }} onClick={() => setConfirmDel(s.id)}>✕</Button>
+                      <Button variant="danger" size="sm" style={{ border: 'none' }} onClick={() => setConfirmDel(s.id)} aria-label={UI.ACTION_DELETE}><X size={16} aria-hidden="true" /></Button>
                     )}
                   </Cell>
                 </Row>
@@ -311,7 +329,7 @@ export default function SourcesPage() {
           <div style={S.modal} onClick={e => e.stopPropagation()}>
             <div style={S.modalHeader}>
               <span style={S.modalTitle}>Add to Source Ledger</span>
-              <Button variant="ghost" size="sm" style={{ border: 'none' }} onClick={() => setUimSrc(null)}>✕</Button>
+              <Button variant="ghost" size="sm" style={{ border: 'none' }} onClick={() => setUimSrc(null)} aria-label={UI.ACTION_CANCEL}><X size={16} aria-hidden="true" /></Button>
             </div>
             <div style={S.modalBody}>
               <div style={S.modalRow}>
@@ -350,22 +368,17 @@ export default function SourcesPage() {
 }
 
 const S = {
-  loading: { padding: 'var(--cp-space-12)', textAlign: 'center', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-md)' },
-  error: { padding: 'var(--cp-space-5)', color: 'var(--cp-error)', fontSize: 'var(--cp-font-base)', background: 'var(--cp-error-bg)', borderRadius: 'var(--cp-radius-sm)' },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  pageTitle: { fontSize: 'var(--cp-font-xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
   filterRow: { display: 'flex', gap: 'var(--cp-space-2)', alignItems: 'center', marginBottom: 'var(--cp-space-4)' },
   filterSelect: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
   searchInput: { flex: 1, padding: 'var(--cp-space-2) var(--cp-space-3)', fontSize: 'var(--cp-font-sm)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', outline: 'none' },
   resultCount: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', whiteSpace: 'nowrap' },
   tableSpacer: { marginBottom: 'var(--cp-space-6)' },
   link: { color: 'var(--cp-accent)', textDecoration: 'none' },
-  sectionLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-3)' },
   addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-4)', marginBottom: 'var(--cp-space-4)' },
   addFormTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
   addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--cp-space-3) var(--cp-space-4)' },
-  empty: { padding: 'var(--cp-space-5)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-sm)', textAlign: 'center' },
-  overlay: { position: 'fixed', inset: 0, background: 'var(--cp-overlay)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--cp-overlay)', zIndex: 'var(--cp-z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   modal: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-md)', width: 440, maxWidth: '90vw', boxShadow: 'var(--cp-shadow-lg)' },
   modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--cp-space-4)', borderBottom: '1px solid var(--cp-border)' },
   modalTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },

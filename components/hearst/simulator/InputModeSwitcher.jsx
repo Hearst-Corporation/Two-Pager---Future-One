@@ -1,105 +1,94 @@
 'use client';
 
+import PropTypes from 'prop-types';
+import { UI } from '@/lib/ui-strings';
 
+// The three control variables. One is active at a time — it drives the model;
+// the other two are shown as computed results in InputFieldHero.
 const MODES = [
-  { id: 'capital_first',     label: 'Budget',        sub: '$',       hint: 'How much money do you have?' },
-  { id: 'mw_first',          label: 'Size',          sub: 'MW',      hint: 'How big do you want it?' },
-  { id: 'target_irr_first',  label: 'Target return', sub: '%',       hint: 'What yearly return do you want?' },
+  { id: 'capital_first',    label: UI.SIM_MODE_BUDGET, unit: UI.SIM_MODE_BUDGET_UNIT },
+  { id: 'mw_first',         label: UI.SIM_MODE_SIZE,   unit: UI.SIM_MODE_SIZE_UNIT },
+  { id: 'target_irr_first', label: UI.SIM_MODE_RETURN, unit: UI.SIM_MODE_RETURN_UNIT },
 ];
 
-export default function InputModeSwitcher({ mode, onChange, onBootstrap }) {
+/**
+ * InputModeSwitcher — a single segmented control welded directly above the hero
+ * field. Picking a segment only re-labels the field below; it never swaps a panel.
+ * @param {object} props
+ * @param {string} props.mode active mode id
+ * @param {(id: string) => void} props.onChange
+ */
+export default function InputModeSwitcher({ mode, onChange }) {
   return (
-    <div style={S.wrap}>
-      <div data-input-mode-grid style={S.modes} role="radiogroup" aria-label="Input mode">
-        {MODES.map(m => {
-          const active = mode === m.id;
-          return (
-            <button
-              key={m.id}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => onChange?.(m.id)}
-              style={{ ...S.modeBtn, ...(active ? S.modeBtnActive : {}) }}>
-              <div style={S.modeRow}>
-                <span style={S.modeLabel}>{m.label}</span>
-                <span style={{ ...S.modeSub, ...(active ? S.modeSubActive : {}) }}>{m.sub}</span>
-              </div>
-              <div style={S.modeHint}>{m.hint}</div>
-            </button>
-          );
-        })}
-      </div>
-
-      <button type="button" onClick={onBootstrap} style={S.bootstrap}>
-        Auto-fill with Qatar market data →
-      </button>
+    <div data-input-mode-grid style={S.segmented} role="radiogroup" aria-label={UI.SIM_INPUT_MODE_ARIA}>
+      {MODES.map((m) => {
+        const active = mode === m.id;
+        return (
+          <button
+            key={m.id}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange?.(m.id)}
+            style={{ ...S.segment, ...(active ? S.segmentActive : {}) }}
+          >
+            <span style={S.segmentLabel}>{m.label}</span>
+            <span style={{ ...S.segmentUnit, ...(active ? S.segmentUnitActive : {}) }}>{m.unit}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
 
+InputModeSwitcher.propTypes = {
+  mode: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+};
+
 const S = {
-  wrap: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
-  },
-  modes: {
+  segmented: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 'var(--cp-space-3)',
-  },
-  modeBtn: {
-    display: 'flex',
-    flexDirection: 'column',
     gap: 'var(--cp-space-1)',
-    padding: 'var(--cp-space-3)',
-    background: 'var(--cp-surface-0)',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
+    padding: 'var(--cp-space-1)',
+    background: 'var(--cp-surface-2)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-pill)',
+  },
+  segment: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 'var(--cp-space-2)',
+    height: 'var(--cp-icon-btn-size)',
+    padding: '0 var(--cp-space-3)',
     cursor: 'pointer',
-    textAlign: 'left',
-    color: 'var(--cp-text-primary)',
-    transition: 'all var(--cp-dur-base) var(--cp-ease)',
-    minHeight: 72,
-  },
-  modeBtnActive: {
-    background: 'linear-gradient(180deg, var(--cp-accent-maroon), color-mix(in srgb, var(--cp-accent-maroon) 70%, var(--cp-surface-0)))',
-    color: 'var(--cp-text-strong)',
-    borderColor: 'var(--cp-accent-maroon)',
-    boxShadow: '0 14px 36px -24px var(--cp-accent-maroon)',
-  },
-  modeRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--cp-space-1)' },
-  modeLabel: {
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-wide)',
-  },
-  modeSub: {
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-bold)',
+    background: 'transparent',
     color: 'var(--cp-text-muted)',
+    border: '1px solid transparent',
+    borderRadius: 'var(--cp-radius-pill)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-wide)',
+    transition: 'background var(--cp-dur-base) var(--cp-ease), color var(--cp-dur-base) var(--cp-ease), border-color var(--cp-dur-base) var(--cp-ease)',
+  },
+  segmentActive: {
+    background: 'var(--cp-accent-maroon)',
+    color: 'var(--cp-text-strong)',
+    borderColor: 'var(--cp-border-accent)',
+  },
+  segmentLabel: {
+    whiteSpace: 'nowrap',
+  },
+  segmentUnit: {
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-black)',
+    color: 'var(--cp-text-faint)',
     fontVariantNumeric: 'tabular-nums',
   },
-  modeSubActive: { color: 'var(--cp-text-strong)', opacity: 0.85 },
-  modeHint: {
-    fontSize: 'var(--cp-font-micro)',
+  segmentUnitActive: {
+    color: 'var(--cp-text-strong)',
     opacity: 0.8,
-    lineHeight: '14px',
-  },
-
-  bootstrap: {
-    alignSelf: 'flex-start',
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-bold)',
-    padding: 'var(--cp-space-0)',
-    background: 'transparent',
-    color: 'var(--cp-accent-maroon)',
-    border: 'none',
-    cursor: 'pointer',
-    textDecoration: 'underline',
-    textUnderlineOffset: 2,
   },
 };

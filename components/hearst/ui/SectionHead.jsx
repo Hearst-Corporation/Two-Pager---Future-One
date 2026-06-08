@@ -4,8 +4,8 @@ import Eyebrow from './Eyebrow';
 
 // SectionHead — en-tête de section canonique. Unifie les ~4 variantes inline.
 // Défaut = CANON cockpit : H2 13px/700 + filet bas + hint italique
-// (tel que dossier/workspace). `hero` = gros titre 20px/800 (+num/eyebrow optionnels)
-// pour les sections "tableau de bord" (deals/results/simulator). Tokens --cp-* only.
+// (tel que dossier/workspace). `hero` = titre page/section 20px/800 (+num/eyebrow optionnels)
+// — aligné sur .oracle-page-header h1 (oracle-layout.css). Tokens --cp-* only.
 
 const S = {
   // Canon (défaut)

@@ -3,6 +3,7 @@
 import React from 'react';
 import { BUSINESS_MODELS, CLIENT_TYPES } from '@/lib/hearst-constants';
 import { BUSINESS_MODEL_GROUPS, CLIENT_GROUPS, getFit, fitColor } from '@/lib/hearst-fit-matrix';
+import { UI } from '@/lib/ui-strings';
 
 const BM_ID_TO_LABEL = Object.fromEntries(BUSINESS_MODELS.map(b => [b.id, b.label]));
 const CT_ID_TO_LABEL = Object.fromEntries(CLIENT_TYPES.map(c => [c.id, c.label]));
@@ -39,7 +40,7 @@ export default function B2BMatrix({ selected, onCellClick }) {
       <table style={S.table}>
         <thead>
           <tr>
-            <th style={S.thCorner}>What we sell</th>
+            <th style={S.thCorner}>{UI.B2B_TH_CORNER}</th>
             {COL_GROUPS.map(g => (
               <th key={g.label} colSpan={g.ids.length}
                 style={{ ...S.thGroup, color: g.color, borderBottomColor: g.color }}>
@@ -122,7 +123,7 @@ const S = {
     borderBottom: '2px solid var(--cp-border)',
     position: 'sticky',
     left: 0,
-    zIndex: 2,
+    zIndex: 'var(--cp-z-content)',
   },
   thGroup: {
     padding: 'var(--cp-space-2) var(--cp-space-3)',
@@ -168,7 +169,7 @@ const S = {
     borderBottom: '1px solid var(--cp-border)',
     position: 'sticky',
     left: 0,
-    zIndex: 1,
+    zIndex: 'var(--cp-z-content)',
     minWidth: 132,
     maxWidth: 150,
   },

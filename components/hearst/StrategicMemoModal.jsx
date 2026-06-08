@@ -12,6 +12,7 @@
 
 import { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { RotateCw, Copy, Download, X } from 'lucide-react';
 import {
   useMemoJob,
   startMemoJob,
@@ -20,6 +21,7 @@ import {
 } from '@/lib/hearst-memo-job-store';
 import { deriveVerdict, deriveCategory, deriveKpis } from '@/lib/dossier-derive';
 import { Z } from '@/lib/z-index';
+import { UI } from '@/lib/ui-strings';
 
 /**
  * Live timeline shown during loading.
@@ -48,7 +50,7 @@ function MemoTimeline({ elapsedMs, cascade }) {
     <div style={S.timelineWrap}>
       <div style={S.timelineHeader}>
         <span style={S.timelineSpinner} />
-        <span style={S.timelineLabel}>Generating strategic memo…</span>
+        <span style={S.timelineLabel}>{UI.MEMO_GENERATING_LABEL}</span>
         <span style={S.timelineElapsed}>{formatElapsed(elapsedMs)}</span>
       </div>
 
@@ -184,7 +186,7 @@ function SuccessState({ memo, meta, title, router }) {
  * (lib/hearst-memo-job-store.js). The job survives the modal unmounting; a
  * bottom-right badge + toast take over the visual relay.
  */
-export default function StrategicMemoModal(_legacyProps) {
+export default function StrategicMemoModal() {
   const job = useMemoJob();
   const router = useRouter();
   const open    = job.modal_visible;
@@ -256,10 +258,10 @@ export default function StrategicMemoModal(_legacyProps) {
             )}
           </div>
           <div style={S.actions}>
-            <button type="button" onClick={refetch} disabled={loading} style={S.actionBtn} title="Regenerate">↻</button>
-            <button type="button" onClick={copyMd} disabled={!memo} style={S.actionBtn} title="Copy markdown">⧉</button>
-            <button type="button" onClick={downloadMd} disabled={!memo} style={S.actionBtn} title="Download .md">↓</button>
-            <button type="button" onClick={hideMemoModal} style={S.closeBtn} aria-label="Close (job continues in background)">×</button>
+            <button type="button" onClick={refetch} disabled={loading} style={S.actionBtn} title={UI.MEMO_REGENERATE_TITLE} aria-label={UI.MEMO_REGENERATE_TITLE}><RotateCw size={15} aria-hidden="true" /></button>
+            <button type="button" onClick={copyMd} disabled={!memo} style={S.actionBtn} title={UI.MEMO_COPY_TITLE} aria-label={UI.MEMO_COPY_TITLE}><Copy size={15} aria-hidden="true" /></button>
+            <button type="button" onClick={downloadMd} disabled={!memo} style={S.actionBtn} title={UI.MEMO_DOWNLOAD_TITLE} aria-label={UI.MEMO_DOWNLOAD_TITLE}><Download size={15} aria-hidden="true" /></button>
+            <button type="button" onClick={hideMemoModal} style={S.closeBtn} title={UI.MEMO_CLOSE_TITLE} aria-label={UI.MEMO_CLOSE_TITLE}><X size={16} aria-hidden="true" /></button>
           </div>
         </header>
 
@@ -292,7 +294,7 @@ const S = {
     maxHeight: '90vh',
     display: 'flex',
     flexDirection: 'column',
-    background: 'linear-gradient(var(--cp-surface-2), var(--cp-surface-2)), var(--cp-bg-deep)',
+    background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border-strong, var(--cp-border))',
     borderRadius: 'var(--cp-radius-lg)',
     overflow: 'hidden',
@@ -311,33 +313,33 @@ const S = {
 
   // Timeline (loading)
   timelineWrap: { padding: 'var(--cp-space-6) var(--cp-space-5)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
-  timelineHeader: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-base)', fontWeight: 700, color: 'var(--cp-text-primary)' },
-  timelineSpinner: { display: 'inline-block', width: 14, height: 14, borderRadius: '50%', border: '2px solid var(--cp-border)', borderTopColor: 'var(--cp-accent-maroon, var(--cp-accent))', animation: 'memo-spin 0.9s linear infinite' },
+  timelineHeader: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' },
+  timelineSpinner: { display: 'inline-block', width: 'var(--cp-spinner-size)', height: 'var(--cp-spinner-size)', borderRadius: '50%', border: '2px solid var(--cp-border)', borderTopColor: 'var(--cp-accent-maroon, var(--cp-accent))', animation: 'memo-spin 0.9s linear infinite' },
   timelineLabel: { flex: 1 },
-  timelineElapsed: { fontFamily: 'ui-monospace, monospace', fontSize: 'var(--cp-font-sm)', fontWeight: 800, color: 'var(--cp-text-strong)', fontVariantNumeric: 'tabular-nums' },
+  timelineElapsed: { fontFamily: 'ui-monospace, monospace', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-strong)', fontVariantNumeric: 'tabular-nums' },
   slaWrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
   slaBar: { position: 'relative', height: 6, background: 'var(--cp-surface-0)', borderRadius: 'var(--cp-radius-pill)', overflow: 'hidden' },
   slaFill: { position: 'absolute', inset: 0, right: 'auto', height: '100%', borderRadius: 'var(--cp-radius-pill)', transition: 'width 1s linear, background var(--cp-dur-base) var(--cp-ease)' },
   slaTarget: { position: 'absolute', top: -2, height: 10, width: 2, background: 'var(--cp-border-strong)' },
-  slaLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)' },
+  slaLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)' },
   cascadeWrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
-  cascadeLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 700, color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)' },
+  cascadeLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)' },
   cascadeList: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap' },
   cascadeChip: { display: 'inline-flex', alignItems: 'center', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-pill)', fontSize: 'var(--cp-font-micro)', fontFamily: 'ui-monospace, monospace', letterSpacing: 'var(--cp-tracking-wide)' },
   timelineHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontStyle: 'italic', lineHeight: 1.5, paddingTop: 'var(--cp-space-2)', borderTop: '1px dashed var(--cp-border)' },
 
-  error: { padding: 'var(--cp-space-4)', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', fontSize: 'var(--cp-font-sm)', fontWeight: 600 },
+  error: { padding: 'var(--cp-space-4)', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)' },
 
   // Success state (sober — no status colours, no badges)
   success: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   successBanner: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)' },
   successText: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)', flex: 1 },
-  statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize', fontWeight: 600 },
+  statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize', fontWeight: 'var(--cp-weight-semibold)' },
   successTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 1.35, margin: 0 },
 
   successVerdictRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
   verdictBadge: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 1.2, paddingLeft: 'var(--cp-space-3)', borderLeft: '3px solid var(--cp-accent)' },
-  categoryText: { fontSize: 'var(--cp-font-base)', fontWeight: 800, color: 'var(--cp-text-primary)' },
+  categoryText: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
   driversText: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)' },
 
   successKpis: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--cp-space-3)' },
@@ -347,7 +349,7 @@ const S = {
   successKpiSub: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
   successActions: { display: 'flex', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
-  ctaPrimary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', fontSize: 'var(--cp-font-base)', fontWeight: 700, cursor: 'pointer' },
-  ctaSecondary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-base)', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' },
+  ctaPrimary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', cursor: 'pointer' },
+  ctaSecondary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-semibold)', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' },
   successNote: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', lineHeight: 1.5, paddingTop: 'var(--cp-space-3)', borderTop: '1px dashed var(--cp-border)', fontStyle: 'italic' },
 };

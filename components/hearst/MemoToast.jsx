@@ -9,6 +9,7 @@
 //
 // Notification persistante par défaut, l'utilisateur doit l'acquitter.
 
+import { Check, AlertTriangle } from 'lucide-react';
 import {
   useMemoJob,
   showMemoModal,
@@ -17,6 +18,7 @@ import {
   formatElapsed,
 } from '@/lib/hearst-memo-job-store';
 import { Z } from '@/lib/z-index';
+import { UI } from '@/lib/ui-strings';
 
 export default function MemoToast() {
   const job = useMemoJob();
@@ -35,7 +37,7 @@ export default function MemoToast() {
       style={{ ...S.toast, ...(isErr ? S.toastError : S.toastDone) }}
     >
       <span style={isErr ? S.iconError : S.iconDone}>
-        {isErr ? '!' : '✓'}
+        {isErr ? <AlertTriangle size={16} aria-hidden="true" /> : <Check size={16} aria-hidden="true" />}
       </span>
       <button
         type="button"
@@ -56,7 +58,7 @@ export default function MemoToast() {
         type="button"
         onClick={isErr ? clearMemoJob : markSeenDone}
         style={S.dismiss}
-        aria-label="Dismiss notification"
+        aria-label={UI.MEMO_TOAST_DISMISS_ARIA}
         title="Dismiss"
       >
         ×

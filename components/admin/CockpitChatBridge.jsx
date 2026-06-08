@@ -119,5 +119,3 @@ export function CockpitChatBridge() {
 
   return null;
 }
-
-export default CockpitChatBridge;
