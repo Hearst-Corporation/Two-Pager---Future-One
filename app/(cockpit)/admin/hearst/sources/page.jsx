@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import SourceBadge from '@/components/hearst/SourceBadge';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
+import { X } from 'lucide-react';
 import { Table, Row, Cell, Field, Button, Badge, Eyebrow } from '@/components/hearst/ui';
 import {
   SOURCE_TYPES, OPERATORS,
@@ -312,7 +313,7 @@ export default function SourcesPage() {
                         <Button variant="ghost" size="sm" onClick={() => setConfirmDel(null)}>Cancel</Button>
                       </span>
                     ) : (
-                      <Button variant="danger" size="sm" style={{ border: 'none' }} onClick={() => setConfirmDel(s.id)}>✕</Button>
+                      <Button variant="danger" size="sm" style={{ border: 'none' }} onClick={() => setConfirmDel(s.id)} aria-label={UI.ACTION_DELETE}><X size={16} aria-hidden="true" /></Button>
                     )}
                   </Cell>
                 </Row>
@@ -328,7 +329,7 @@ export default function SourcesPage() {
           <div style={S.modal} onClick={e => e.stopPropagation()}>
             <div style={S.modalHeader}>
               <span style={S.modalTitle}>Add to Source Ledger</span>
-              <Button variant="ghost" size="sm" style={{ border: 'none' }} onClick={() => setUimSrc(null)}>✕</Button>
+              <Button variant="ghost" size="sm" style={{ border: 'none' }} onClick={() => setUimSrc(null)} aria-label={UI.ACTION_CANCEL}><X size={16} aria-hidden="true" /></Button>
             </div>
             <div style={S.modalBody}>
               <div style={S.modalRow}>

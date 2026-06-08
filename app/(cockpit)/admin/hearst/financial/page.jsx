@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { Table2, LineChart, Layers, GitBranch, Grid3x3, TriangleAlert } from 'lucide-react';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 import { buildAdvisorContextFromScenarioRow } from '@/lib/advisor-context-from-scenario';
 import {
@@ -245,13 +246,14 @@ export default function FinancialPage() {
         </div>
         <div data-financial-tab-row style={{ display: 'flex', gap: 'var(--cp-space-1)', marginLeft: 'auto', flexWrap: 'wrap' }}>
           {[
-            { id: 'table',       label: '⊞ Table' },
-            { id: 'charts',      label: '⟁ Charts' },
-            { id: 'debt',        label: '⬡ Debt Schedule' },
-            { id: 'waterfall',   label: '▣ Waterfall' },
-            { id: 'sensitivity', label: '⊠ Sensitivity' },
+            { id: 'table',       label: 'Table',         Icon: Table2 },
+            { id: 'charts',      label: 'Charts',        Icon: LineChart },
+            { id: 'debt',        label: 'Debt Schedule', Icon: Layers },
+            { id: 'waterfall',   label: 'Waterfall',     Icon: GitBranch },
+            { id: 'sensitivity', label: 'Sensitivity',   Icon: Grid3x3 },
           ].map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{ ...S.tabBtn, ...(tab === t.id ? S.tabBtnActive : {}) }}>
+            <button key={t.id} onClick={() => setTab(t.id)} style={{ ...S.tabBtn, ...(tab === t.id ? S.tabBtnActive : {}), display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)' }}>
+              <t.Icon size={15} aria-hidden="true" />
               {t.label}
             </button>
           ))}
@@ -563,7 +565,12 @@ export default function FinancialPage() {
       {proj.warnings?.length > 0 && (
         <div style={S.warnBox}>
           <div style={S.warnTitle}>INVESTMENT WARNINGS</div>
-          {proj.warnings.map((w, i) => <div key={i} style={S.warnRow}>⚠ {w}</div>)}
+          {proj.warnings.map((w, i) => (
+            <div key={i} style={{ ...S.warnRow, display: 'flex', alignItems: 'flex-start', gap: 'var(--cp-space-2)' }}>
+              <TriangleAlert size={15} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span>{w}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

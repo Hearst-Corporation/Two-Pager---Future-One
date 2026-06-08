@@ -9,6 +9,7 @@
 //
 // Notification persistante par défaut, l'utilisateur doit l'acquitter.
 
+import { Check, AlertTriangle } from 'lucide-react';
 import {
   useMemoJob,
   showMemoModal,
@@ -36,7 +37,7 @@ export default function MemoToast() {
       style={{ ...S.toast, ...(isErr ? S.toastError : S.toastDone) }}
     >
       <span style={isErr ? S.iconError : S.iconDone}>
-        {isErr ? '!' : '✓'}
+        {isErr ? <AlertTriangle size={16} aria-hidden="true" /> : <Check size={16} aria-hidden="true" />}
       </span>
       <button
         type="button"
