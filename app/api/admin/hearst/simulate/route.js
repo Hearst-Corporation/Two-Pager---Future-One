@@ -44,10 +44,14 @@ const ARCHETYPE_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
 // always define equity_share, but this guards against future archetypes that forget it).
 const DEFAULT_MINORITY_EQUITY_SHARE = 0.20;
 
-// In-memory rate limit pour /simulate : 10 req/min par actorId
+// In-memory rate limit pour /simulate : 120 req/min par actorId.
+// /simulate est un calcul interactif live (chaque slider/sélection POST, debounce
+// 300ms côté UI) — read-only, pur CPU, pas d'effet de bord ni d'appel coûteux. La
+// limite protège d'une boucle folle, PAS de l'usage humain normal : 10/min bridait
+// le simulateur après ~2 ajustements. 120/min = 1 toutes les 500ms en continu.
 const _simRl = new Map();
 const SIM_RL_WINDOW = 60_000;
-const SIM_RL_MAX = 10;
+const SIM_RL_MAX = 120;
 function checkSimRl(actorId) {
   const now = Date.now();
   const b = _simRl.get(actorId);
