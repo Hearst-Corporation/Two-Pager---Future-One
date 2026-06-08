@@ -49,21 +49,6 @@ function VisualizationsStep({
   const activeMeta = VIZ_META[activeViz] || VIZ_META[vizEntries[0][0]];
 
   return (
-    <>
-      <style>{`
-        @media (max-width: 1120px) {
-          [data-viz-rail] {
-            max-width: none !important;
-            display: grid !important;
-            grid-template-columns: 1fr !important;
-          }
-        }
-        @media (max-width: 760px) {
-          [data-viz-rail] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
       <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead
           title={UI.RESULTS_VIZ_TITLE}
@@ -89,14 +74,14 @@ function VisualizationsStep({
             <div style={CP.loadingPanel}>{UI.SIM_FILL}</div>
           ) : (
             <Card data-viz-panel variant="card" surface={0} padding="lg" style={{ minWidth: 0 }}>
-              <div style={S.vizPanelHead}>
+              <div data-viz-panel-head style={S.vizPanelHead}>
                 <div>
                   <h3 style={S.vizTitle}>{activeMeta.title}</h3>
                   <p style={S.vizDetail}>{activeMeta.detail}</p>
                 </div>
                 <span style={S.vizMode}>{activeMeta.label}</span>
               </div>
-              <div style={S.vizContainer}>
+              <div data-viz-container style={S.vizContainer}>
                 {activeViz === 'radar' && (
                   <ArchetypeRadar archetypes={radarArchetypes} highlighted={[state?.primary_archetype_id]} height={420} />
                 )}
@@ -114,7 +99,6 @@ function VisualizationsStep({
           )}
         </div>
       </Card>
-    </>
   );
 }
 
@@ -201,7 +185,6 @@ const S = {
     letterSpacing: 'var(--cp-tracking-eyebrow)',
   },
   vizContainer: {
-    minHeight: 440,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',

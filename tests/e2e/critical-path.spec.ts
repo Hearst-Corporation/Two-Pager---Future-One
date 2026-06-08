@@ -6,7 +6,7 @@
 // Auth: dev autologin (every request is authenticated server-side). If autologin
 // is off, the whole suite skips with a clear message (the gate needs an authed env).
 //
-// Flow A drives the real UI (simulator Validate CTA + Generate-Memo button).
+// Flow A drives the real UI (simulator Generate Investment Memo CTA + results memo button).
 // Flows B–E exercise the exact API contracts the UI calls and assert persistence,
 // versioning, PDF truth and loud failures. All created scenarios are tracked and
 // best-effort-deleted afterwards (memos have no delete route — tagged via RUN_TAG).
@@ -70,12 +70,13 @@ test('Flow A — happy path: login → simulator → save → memo → dossier �
   // Login (dev autologin) → Simulator renders authenticated (no redirect to /login).
   await page.goto('/admin/hearst/simulator', { waitUntil: 'networkidle' });
   expect(page.url(), 'authenticated — not bounced to login').not.toContain('/admin/login');
-  await expect(page.getByRole('heading', { name: /Investment Simulator/i })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('CONFIGURATION', { exact: true })).toBeVisible({ timeout: 15_000 });
 
-  // Save scenario via the real "Validate & see results" CTA (persists + navigates).
-  const validate = page.getByText(/Validate & see results/i).first();
-  await expect(validate, 'Validate CTA visible').toBeVisible({ timeout: 15_000 });
-  await validate.click();
+  // Save scenario via Generate Investment Memo (persists + navigates to results).
+  const saveCta = page.getByRole('button', { name: 'Generate Investment Memo' });
+  await expect(saveCta, 'Generate Investment Memo CTA visible').toBeVisible({ timeout: 15_000 });
+  await expect(saveCta).toBeEnabled({ timeout: 30_000 });
+  await saveCta.click();
   await page.waitForURL(/\/simulator\/results\?scenario=/, { timeout: 30_000 });
   const scenarioId = new URL(page.url()).searchParams.get('scenario')!;
   expect(scenarioId, 'scenario id in results URL').toBeTruthy();
@@ -118,7 +119,7 @@ test('Flow B — refresh resilience: reload + return → identical metrics, no d
 
   const readMetrics = async () => {
     await page.goto(`/admin/hearst/simulator/results?scenario=${scenarioId}`, { waitUntil: 'networkidle' });
-    await expect(page.getByText(/IRR \(Post-tax\)/i).first()).toBeVisible({ timeout: 25_000 });
+    await expect(page.locator('[data-decision-kpis]')).toBeVisible({ timeout: 25_000 });
     const area = await page.locator('.ct-page-area').first().innerText();
     const irr = (area.match(/(\d+\.\d+%)/) || [])[1];
     const moic = (area.match(/(\d+\.\d+x)/) || [])[1];

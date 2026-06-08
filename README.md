@@ -49,10 +49,10 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 
 ### Cockpit HEARST
 
-- **Design system — copie locale éditable** : le DS Cockpit vit dans ce repo (`cockpit-shell/` + CSS local). C'est LA copie de ce repo, éditable librement ici : composants, tokens (`--ct-*`), CSS se modifient directement. Pas de source centrale à mettre à jour, pas de resync, pas de repack. Les pages applicatives passent par `app/(cockpit)/admin/hearst/cp-tokens.css` (`--cp-*`), `Card`, `KpiGrid`, `KpiCard` et `lib/cp-styles.js` (`T`/`S`/`RC`). Strings UI : `lib/ui-strings.ts`. Seule règle : garder la cohérence visuelle interne du repo.
+- **Design system — copie locale éditable** : le DS Cockpit vit dans ce repo (`cockpit-shell/` + CSS local). C'est LA copie de ce repo, éditable librement ici : composants, tokens (`--ct-*`), CSS se modifient directement. Pas de source centrale à mettre à jour, pas de resync, pas de repack. Les pages applicatives passent par `app/(cockpit)/admin/hearst/cp-tokens.css` (`--cp-*`), `Card`, `KpiGrid`, `KpiCard` et `lib/cp-styles.js` (`T`/`S`/`RC`). Strings UI Oracle : `lib/ui-strings.ts` ; chat shell : `cockpit-shell/src/chat/strings.ts` (`CHAT_STRINGS`). Accent produit chat : `--ct-chat-accent` sur `.ct-chat-root`. Seule règle : garder la cohérence visuelle interne du repo.
 - **Nav** : `OracleRailNav` porté dans `.ct-rail-left` (desktop) + `.oracle-mobile-nav` sur `body` (<600px).
 - **Chat** : rail droit toujours visible desktop (`chat-fab.css`, `--cp-chat-rail-width`) ; drawer + `ChatToggleFAB` uniquement &lt;900px.
-- **Viewport** : pas de scroll vertical document (`oracle-layout.css` + `cockpit.css`). Largeur clampée au panneau central (`overflow-x: hidden`, `max-width: 100%`). Simulateur : hauteur viewport-fill (`simulator.css`) ; card **Configuration** en advanced = scroll interne + grilles responsive (`container-type` sur `[data-sim-config]`, breakpoints 900/600px).
+- **Viewport** : pas de scroll vertical document (`oracle-layout.css` + `cockpit.css`). Largeur clampée au panneau central (`overflow-x: hidden`, `max-width: 100%`). Simulateur : hauteur viewport-fill (`simulator.css`) ; card **Configuration** (modèle + hardware toujours visibles) = scroll interne + grilles responsive (`container-type` sur `[data-sim-config]`). Results : grilles pilotées par `container-type` sur `[data-results-layout]` (`results.css`) — pas de breakpoints viewport (évite KPIs écrasés quand le rail chat est ouvert).
 - **Accent shell** : `HearstLayoutClient` → `ORACLE_PRODUCTS[].color` doit être un **hex** (`#8A1538`), jamais `var(--cp-accent)` — `ThemeAccent` écrit `--ct-accent` sur `<html>` et une référence circulaire casse toutes les couleurs au mount.
 - **Vérif DS** : `npm run test:e2e -- tests/e2e/coherence-visual.spec.ts` (8 tests). Journal : `docs/coherence-fix-plan.md`.
 
@@ -75,5 +75,6 @@ Ouvrir [http://localhost:5005](http://localhost:5005).
 npx tsc --noEmit
 npm test
 npm run test:e2e -- tests/e2e/coherence-visual.spec.ts
+npm run test:e2e -- tests/e2e/chat-kimi-live.spec.ts  # chat Kimi rail droit (live + mock bridge)
 npm run test:e2e   # login.spec skip si ADMIN_DEV_AUTOLOGIN_EMAIL dans .env.local
 ```

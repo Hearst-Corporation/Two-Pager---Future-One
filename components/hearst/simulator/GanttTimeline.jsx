@@ -36,19 +36,6 @@ function GanttTimeline({ scenario, exit_year = 10 }) {
   ];
 
   return (
-    <>
-    <style>{`
-      @media (max-width: 760px) {
-        [data-gantt-row] {
-          gap: var(--cp-space-2) !important;
-          padding-top: var(--cp-space-3) !important;
-        }
-        [data-gantt-copy] {
-          grid-template-columns: 1fr !important;
-          min-height: 52px !important;
-        }
-      }
-    `}</style>
     <div style={S.wrap}>
       <div style={S.metaRow}>
         <span>{readiness.label}</span>
@@ -90,7 +77,6 @@ function GanttTimeline({ scenario, exit_year = 10 }) {
         ))}
       </div>
     </div>
-    </>
   );
 }
 
@@ -124,8 +110,11 @@ const S = {
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-md)',
     background: 'var(--cp-surface-1)',
-    padding: 'var(--cp-space-4) var(--cp-space-4) var(--cp-space-4)',
+    padding: 'var(--cp-space-4)',
     overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-3)',
   },
   axis: {
     position: 'relative',

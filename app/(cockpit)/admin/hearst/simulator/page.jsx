@@ -356,11 +356,9 @@ export default function SimulatorPage() {
 
   const validateBlocked = !projection || !projectId || loading || !!simError || savingState === 'saving';
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
   return (
     <div className="oracle-page">
-      <div data-sim-wrap data-config-expanded={showAdvanced ? 'true' : 'false'} style={S.wrap}>
+      <div data-sim-wrap style={S.wrap}>
         {/* SETUP — inputs only. Decision metrics live on /simulator/results. */}
         <CaseHeaderStep
           archetypeId={state.primary_archetype_id}
@@ -371,19 +369,15 @@ export default function SimulatorPage() {
           projection={projection}
         />
 
-        {/* CONFIGURATION — single card, primary input hero, collapsed details. */}
+        {/* CONFIGURATION — single card, primary input hero + model/hardware always visible. */}
         <Card
           data-sim-config
-          data-advanced-open={showAdvanced ? 'true' : 'false'}
           variant="card"
           surface={1}
           padding="lg"
           style={S.configCard}
         >
-          <div
-            data-sim-config-body
-            data-advanced-open={showAdvanced ? 'true' : 'false'}
-          >
+          <div data-sim-config-body>
             <div style={S.configHeader}>
               <span style={S.eyebrow}>{UI.SIM_CONFIG_EYEBROW}</span>
             </div>
@@ -403,33 +397,20 @@ export default function SimulatorPage() {
               />
             </div>
 
-            <div style={S.advancedToggle}>
-              <button
-                type="button"
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                style={S.advancedButton}
-              >
-                <span>{showAdvanced ? UI.SIM_CONFIG_ADVANCED_HIDE : UI.SIM_CONFIG_ADVANCED_SHOW}</span>
-                <span style={{ transform: showAdvanced ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
-              </button>
-            </div>
-
-            {showAdvanced && (
-              <div style={S.advancedContent} className="advanced-content-enter">
-                <div style={S.advancedSection}>
-                  <Eyebrow block>{UI.SIM_CONFIG_MODEL_LABEL}</Eyebrow>
-                  <ArchetypePicker
-                    archetypes={PRIMARY_DEAL_ARCHETYPES}
-                    primaryId={state.primary_archetype_id}
-                    onSelectPrimary={onSelectPrimary}
-                  />
-                </div>
-                <div style={S.advancedSection}>
-                  <Eyebrow block>{UI.SIM_CONFIG_HW_LABEL}</Eyebrow>
-                  <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
-                </div>
+            <div style={S.advancedContent}>
+              <div style={S.advancedSection}>
+                <Eyebrow block>{UI.SIM_CONFIG_MODEL_LABEL}</Eyebrow>
+                <ArchetypePicker
+                  archetypes={PRIMARY_DEAL_ARCHETYPES}
+                  primaryId={state.primary_archetype_id}
+                  onSelectPrimary={onSelectPrimary}
+                />
               </div>
-            )}
+              <div style={S.advancedSection}>
+                <Eyebrow block>{UI.SIM_CONFIG_HW_LABEL}</Eyebrow>
+                <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+              </div>
+            </div>
           </div>
 
           {/* VALIDATE CONFIG → integrated into card footer */}
@@ -502,25 +483,6 @@ const S = {
     letterSpacing: 'var(--cp-tracking-widest)',
     textTransform: 'uppercase',
     opacity: 0.8,
-  },
-  advancedToggle: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginTop: 'var(--cp-space-2)',
-  },
-  advancedButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--cp-space-2)',
-    padding: 'var(--cp-space-2) var(--cp-space-4)',
-    background: 'transparent',
-    border: '1px solid var(--cp-border-base)',
-    borderRadius: 'var(--cp-radius-full)',
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-semibold)',
-    color: 'var(--cp-text-muted)',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
   },
   advancedContent: {
     display: 'flex',

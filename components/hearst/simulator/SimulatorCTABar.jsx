@@ -62,7 +62,6 @@ const S = {
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 'var(--cp-space-4)',
-    marginTop: 'var(--cp-space-4)',
     minHeight: 56,
     flexWrap: 'wrap',
   },

@@ -46,13 +46,13 @@ function computedResults(mode, { projection, scenario, derived, solver }) {
   if (mode === 'capital_first') {
     return [
       { key: 'size', label: UI.SIM_RESULT_SIZE, value: mw != null ? fmtMW(mw, 0) : MISSING },
-      { key: 'return', label: UI.SIM_RESULT_RETURN, value: irr != null ? fmtPctFromRatio(irr) : MISSING },
+      { key: 'return', label: UI.SIM_RESULT_RETURN, note: UI.SIM_RESULT_RETURN_NOTE, value: irr != null ? fmtPctFromRatio(irr) : MISSING },
     ];
   }
   if (mode === 'mw_first') {
     return [
       { key: 'budget', label: UI.SIM_RESULT_BUDGET, value: capex != null ? fmtUSD(capex) : MISSING },
-      { key: 'return', label: UI.SIM_RESULT_RETURN, value: irr != null ? fmtPctFromRatio(irr) : MISSING },
+      { key: 'return', label: UI.SIM_RESULT_RETURN, note: UI.SIM_RESULT_RETURN_NOTE, value: irr != null ? fmtPctFromRatio(irr) : MISSING },
     ];
   }
   // target_irr_first — the solver may not converge; show MISSING then, never a fake number.
@@ -106,7 +106,10 @@ export default function InputFieldHero({ mode, value, onChange, projection, scen
           <div style={S.resultsGrid}>
             {results.map((r) => (
               <div key={r.key} style={S.resultItem}>
-                <span style={S.resultLabel}>{r.label}</span>
+                <div style={S.resultLabelCol}>
+                  <span style={S.resultLabel}>{r.label}</span>
+                  {r.note ? <span style={S.resultNote}>{r.note}</span> : null}
+                </div>
                 <strong style={S.resultValue}>{r.value}</strong>
               </div>
             ))}
@@ -242,10 +245,22 @@ const S = {
     justifyContent: 'space-between',
     gap: 'var(--cp-space-3)',
   },
+  resultLabelCol: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-0)',
+    minWidth: 0,
+  },
   resultLabel: {
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 'var(--cp-weight-semibold)',
     color: 'var(--cp-text-muted)',
+  },
+  resultNote: {
+    fontSize: 'var(--cp-font-micro)',
+    lineHeight: 'var(--cp-leading-tight)',
+    color: 'var(--cp-text-muted)',
+    opacity: 0.85,
   },
   resultValue: {
     fontSize: 'var(--cp-font-lg)',

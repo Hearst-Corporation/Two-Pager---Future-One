@@ -34,6 +34,7 @@ import SimulatorCTABar from '@/components/hearst/simulator/SimulatorCTABar';
 import { Card, SectionHead, KpiGrid, Button } from '@/components/hearst/ui';
 import { S as CP } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
+import './results.css';
 
 const RESULTS_ERROR = { ...CP.accentAlert, padding: 'var(--cp-space-4)', background: 'var(--cp-accent-soft)' };
 
@@ -78,8 +79,8 @@ export default function SimulatorResultsPage() {
   }, []);
 
   useEffect(() => {
-    document.body.classList.add('oracle-results-wide');
-    return () => document.body.classList.remove('oracle-results-wide');
+    document.body.classList.add('oracle-results-wide', 'oracle-results-page');
+    return () => document.body.classList.remove('oracle-results-wide', 'oracle-results-page');
   }, []);
 
   const scenarioId = searchParams?.get('scenario') || null;
@@ -245,94 +246,6 @@ export default function SimulatorResultsPage() {
 
   return (
     <>
-    <style>{`
-      body.oracle-results-wide .ct-center-panel {
-        flex: 1 1 auto !important;
-        width: auto !important;
-      }
-      body.oracle-results-wide .ct-page-area {
-        width: 100% !important;
-      }
-      @media (max-width: 1500px) {
-        [data-analysis-layout] {
-          grid-template-columns: 1fr !important;
-        }
-        [data-capital-panel] {
-          display: grid !important;
-          grid-template-columns: 220px minmax(0, 1fr) !important;
-          align-items: center !important;
-        }
-        [data-layer-grid] {
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
-      }
-      @media (max-width: 1120px) {
-        [data-economics-grid] {
-          grid-template-columns: 1fr !important;
-        }
-        /* Verdict drops to its own row; the 4 KPIs hold a 2×2 grid below it. */
-        [data-decision-kpis] {
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
-        [data-decision-kpis] [data-verdict-cell] {
-          grid-column: 1 / -1 !important;
-          border-right: 0 !important;
-          border-bottom: 1px solid var(--cp-border) !important;
-          padding-bottom: var(--cp-space-3) !important;
-        }
-        [data-layer-grid] {
-          grid-template-columns: 1fr !important;
-        }
-        [data-capital-panel] {
-          grid-template-columns: 1fr !important;
-        }
-      }
-      @media (max-width: 760px) {
-        [data-economics-grid],
-        [data-layer-grid],
-        [data-capital-panel] {
-          grid-template-columns: 1fr !important;
-        }
-        /* Keep KPIs 2-up on phones — four single-column tiles would tower. */
-        [data-decision-kpis] {
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
-        [data-decision-meta] {
-          row-gap: var(--cp-space-2) !important;
-        }
-        [data-decision-meta] [data-tv-warning] {
-          flex-basis: 100% !important;
-        }
-      }
-      @media print {
-        .oracle-rail-nav,
-        .ct-rail-left,
-        .ct-rail-right,
-        [data-results-hero] button,
-        [data-viz-step-controls],
-        [data-cta-bar],
-        .oracle-mobile-nav-root {
-          display: none !important;
-        }
-        .oracle-page {
-          padding: 0 !important;
-          margin: 0 !important;
-          background: white !important;
-          color: black !important;
-        }
-        [data-results-layout] {
-          max-width: none !important;
-          gap: var(--cp-space-4) !important;
-        }
-        .ct-center-panel {
-          overflow: visible !important;
-        }
-        .ct-page-area {
-          overflow: visible !important;
-          padding: 20px !important;
-        }
-      }
-    `}</style>
     <div className="oracle-page">
     <div data-results-layout style={S.inner}>
       <Card as="header" data-results-hero variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
@@ -355,7 +268,7 @@ export default function SimulatorResultsPage() {
 
       <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead title={UI.RESULTS_ECON_TITLE} hint={UI.RESULTS_ECON_HINT} style={{ marginBottom: 0 }} />
-        <KpiGrid cols={3} data-economics-grid style={{ gap: 'var(--cp-space-4)' }}>
+        <KpiGrid data-economics-grid style={{ gap: 'var(--cp-space-4)' }}>
           <BoardMetric label={UI.RESULTS_BM_CAPEX} value={fmtUSD(projection?.total_capex)} note={UI.RESULTS_BM_CAPEX_NOTE} />
           <BoardMetric label={UI.RESULTS_BM_REVENUE} value={fmtUSD(projection?.stabilized_revenue)} note={UI.RESULTS_BM_REVENUE_NOTE} />
           <BoardMetric label={UI.RESULTS_BM_EBITDA} value={fmtUSD(projection?.stabilized_ebitda)} note={UI.RESULTS_BM_EBITDA_NOTE} />
@@ -366,25 +279,25 @@ export default function SimulatorResultsPage() {
       </Card>
 
       <Card as="section" variant="flat" padding="lg" style={{ minWidth: 0 }}>
-        <div style={S.analysisHead}>
-          <SectionHead title={UI.RESULTS_PROJ_TITLE} hint={UI.RESULTS_PROJ_HINT} style={{ marginBottom: 0, flex: '1 1 auto' }} />
-          <span style={S.cardEyebrow}>{UI.RESULTS_PROJ_EYEBROW}</span>
+        <div data-analysis-head>
+          <SectionHead title={UI.RESULTS_PROJ_TITLE} hint={UI.RESULTS_PROJ_HINT} style={{ marginBottom: 0, flex: '1 1 auto', minWidth: 0 }} />
+          <span data-analysis-eyebrow style={S.cardEyebrow}>{UI.RESULTS_PROJ_EYEBROW}</span>
         </div>
         <div data-analysis-layout style={S.analysisLayout}>
-          <Card data-results-chart variant="card" surface={1} style={{ minWidth: 0, minHeight: 430, paddingTop: 'var(--cp-space-4)', paddingBottom: 'var(--cp-space-2)', paddingLeft: 'var(--cp-space-3)', paddingRight: 'var(--cp-space-3)' }}>
-            <ProjectionChart years={projection?.years || []} height={500} />
+          <Card data-results-chart variant="card" surface={1} style={{ minWidth: 0 }}>
+            <ProjectionChart years={projection?.years || []} height={400} />
           </Card>
-          <Card as="aside" data-capital-panel variant="card" surface={1} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)', padding: 'var(--cp-space-4)' }}>
+          <Card as="aside" data-capital-panel variant="card" surface={1} padding="sm">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' }}>
               <span style={S.cardEyebrow}>{UI.RESULTS_KPI_CAPITAL}</span>
               <CapitalDonut segments={donutSegments} />
             </div>
 
-            <div style={{ borderTop: '1px solid var(--cp-border-base)', paddingTop: 'var(--cp-space-4)' }}>
+            <div>
               <ReturnsComposition projection={projection} />
             </div>
 
-            <div style={{ borderTop: '1px solid var(--cp-border-base)', paddingTop: 'var(--cp-space-4)' }}>
+            <div>
               <span style={{ ...S.cardEyebrow, marginBottom: 'var(--cp-space-3)', display: 'block' }}>STRUCTURE</span>
               <div style={S.structureRows}>
                 <InlineMetric label={UI.RESULTS_IM_BUILD_COST} value={fmtUSD(projection?.total_capex)} />
@@ -446,13 +359,12 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-section-gap)',
-    maxWidth: 1240,
-    margin: '0 auto',
     width: '100%',
+    minWidth: 0,
   },
   heroTopRow: {
     display: 'flex',
-    alignItems: 'baseline',
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: 'var(--cp-space-4)',
     flexWrap: 'wrap',
@@ -485,18 +397,10 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     textDecoration: 'none',
   },
-  analysisHead: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 'var(--cp-space-4)',
-    marginBottom: 'var(--cp-space-4)',
-  },
   analysisLayout: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) 300px',
     gap: 'var(--cp-space-6)',
-    alignItems: 'stretch',
+    alignItems: 'start',
   },
   cardEyebrow: {
     color: 'var(--cp-text-muted)',
@@ -512,7 +416,6 @@ const S = {
   },
   layerGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
     gap: 'var(--cp-space-4)',
   },
 };

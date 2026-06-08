@@ -1,4 +1,4 @@
-/* simulator.css — viewport-fill layout, config card scroll quand advanced ouvert */
+/* simulator.css — viewport-fill layout, config card scroll interne */
 
 body.oracle-simulator-page .ct-center-panel {
   flex: 1 1 auto !important;
@@ -22,27 +22,16 @@ body.oracle-simulator-page .oracle-page {
 }
 
 /* oracle-page → sim-wrap → case + config */
+/* Scroll interne à la card config, case + footer CTA restent accessibles */
 body.oracle-simulator-page [data-sim-wrap] {
   flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--cp-space-3);
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-body.oracle-simulator-page [data-sim-wrap]::-webkit-scrollbar {
-  display: none;
-}
-
-/* Advanced ouvert : scroll interne à la card, case + footer CTA restent accessibles */
-body.oracle-simulator-page [data-sim-wrap][data-config-expanded="true"] {
-  overflow-y: hidden;
 }
 
 body.oracle-simulator-page [data-sim-case] {
@@ -53,18 +42,14 @@ body.oracle-simulator-page [data-sim-case] {
 body.oracle-simulator-page [data-sim-config] {
   container-type: inline-size;
   container-name: sim-config;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
+  max-height: 100%;
   overflow: hidden;
   display: flex !important;
   flex-direction: column !important;
   margin-bottom: calc(var(--cp-space-6) + 1px);
-}
-
-body.oracle-simulator-page [data-sim-wrap][data-config-expanded="true"] [data-sim-config] {
-  flex: 1 1 auto;
-  max-height: 100%;
 }
 
 body.oracle-simulator-page [data-sim-config-body] {
@@ -72,21 +57,17 @@ body.oracle-simulator-page [data-sim-config-body] {
   min-height: 0;
   min-width: 0;
   overflow-x: hidden;
-  overflow-y: visible;
-  display: flex;
-  flex-direction: column;
-  gap: var(--cp-space-3);
-}
-
-body.oracle-simulator-page [data-sim-config-body][data-advanced-open="true"] {
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-3);
 }
 
-body.oracle-simulator-page [data-sim-config-body][data-advanced-open="true"]::-webkit-scrollbar {
+body.oracle-simulator-page [data-sim-config-body]::-webkit-scrollbar {
   display: none;
 }
 
@@ -243,18 +224,3 @@ body.oracle-simulator-page [data-sim-input-hero] {
   }
 }
 
-/* Ouverture advanced — pas de max-height qui clippe le hardware */
-.advanced-content-enter {
-  animation: sim-advanced-in 0.26s ease-out forwards;
-}
-
-@keyframes sim-advanced-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}

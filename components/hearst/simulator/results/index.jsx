@@ -255,9 +255,6 @@ const S = {
   // never overflow or wrap. This whole line is the primary object.
   caseGrid: {
     display: 'grid',
-    // Verdict column is fixed/bounded so it can't starve the KPI tracks; the four
-    // KPIs share the remaining width as equal minmax(0,1fr) tracks.
-    gridTemplateColumns: 'clamp(150px, 15vw, 200px) repeat(4, minmax(0, 1fr))',
     alignItems: 'stretch',
     gap: 'var(--cp-space-4)',
     padding: 'var(--cp-space-4)',
@@ -438,18 +435,21 @@ const S = {
     flexDirection: 'column',
     alignItems: 'center',
     gap: 'var(--cp-space-4)',
+    '--donut-size': '150px',
+    '--donut-hole': '88px',
   },
   donut: {
-    width: 150,
-    height: 150,
+    width: 'var(--donut-size)',
+    height: 'var(--donut-size)',
     borderRadius: '50%',
     display: 'grid',
     placeItems: 'center',
     boxShadow: 'inset 0 0 0 1px var(--cp-border)',
+    flexShrink: 0,
   },
   donutHole: {
-    width: 88,
-    height: 88,
+    width: 'var(--donut-hole)',
+    height: 'var(--donut-hole)',
     borderRadius: '50%',
     background: 'var(--cp-surface-2)',
     border: '1px solid var(--cp-border)',

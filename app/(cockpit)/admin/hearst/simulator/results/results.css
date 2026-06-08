@@ -1,0 +1,306 @@
+/* results.css — layout Results : container queries (panneau centre, pas viewport) */
+
+body.oracle-results-wide .ct-center-panel {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+body.oracle-results-wide .ct-page-area {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+body.oracle-results-page [data-results-layout] {
+  container-type: inline-size;
+  container-name: results;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+/* ── Decision header — narrow default, wide at min-width ── */
+body.oracle-results-page [data-decision-kpis] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.oracle-results-page [data-decision-kpis] [data-verdict-cell] {
+  grid-column: 1 / -1;
+  border-right: 0;
+  border-bottom: 1px solid var(--cp-border);
+  padding-right: 0;
+  padding-bottom: var(--cp-space-3);
+}
+
+@container results (min-width: 921px) {
+  body.oracle-results-page [data-decision-kpis] {
+    grid-template-columns: minmax(148px, 196px) repeat(4, minmax(0, 1fr));
+  }
+
+  body.oracle-results-page [data-decision-kpis] [data-verdict-cell] {
+    grid-column: auto;
+    border-right: 1px solid var(--cp-border);
+    border-bottom: 0;
+    padding-right: var(--cp-space-4);
+    padding-bottom: 0;
+  }
+}
+
+/* ── Economics band ── */
+body.oracle-results-page [data-economics-grid] {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@container results (min-width: 721px) {
+  body.oracle-results-page [data-economics-grid] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@container results (max-width: 520px) {
+  body.oracle-results-page [data-economics-grid] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Analysis: chart + capital sidebar ── */
+body.oracle-results-page [data-analysis-layout] {
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+@container results (min-width: 961px) {
+  body.oracle-results-page [data-analysis-layout] {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+  }
+
+  /* Sidebar capital — compact donut, legend beside ring */
+  body.oracle-results-page [data-capital-panel] {
+    --donut-size: 108px;
+    --donut-hole: 64px;
+  }
+
+  body.oracle-results-page [data-capital-panel] [data-capital-donut] {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--cp-space-3);
+  }
+
+  body.oracle-results-page [data-capital-panel] [data-capital-donut] > div:last-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  body.oracle-results-page [data-capital-panel] [data-capital-donut] strong {
+    font-size: var(--cp-font-xs);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@container results (max-width: 960px) {
+  body.oracle-results-page [data-capital-panel] {
+    display: grid;
+    grid-template-columns: minmax(140px, 200px) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--cp-space-4) var(--cp-space-5);
+  }
+
+  body.oracle-results-page [data-capital-panel] > div:first-child {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  body.oracle-results-page [data-capital-panel] [data-capital-donut] {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@container results (max-width: 560px) {
+  body.oracle-results-page [data-capital-panel] {
+    grid-template-columns: 1fr;
+  }
+
+  body.oracle-results-page [data-capital-panel] > div:first-child {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  body.oracle-results-page [data-capital-panel] [data-capital-donut] {
+    align-items: center;
+  }
+}
+
+/* Capital panel — base stack; grid override below on mid widths */
+body.oracle-results-page [data-capital-panel] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-4);
+  min-width: 0;
+}
+
+/* Capital panel — flatten nested returns box (divider sections only) */
+body.oracle-results-page [data-capital-panel] [data-returns-composition] {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  gap: var(--cp-space-2);
+}
+
+body.oracle-results-page [data-capital-panel] > div:not(:first-child) {
+  border-top: 1px solid var(--cp-border-base);
+  padding-top: var(--cp-space-4);
+  min-width: 0;
+}
+
+/* ── Scenario layers ── */
+body.oracle-results-page [data-layer-grid] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@container results (min-width: 721px) {
+  body.oracle-results-page [data-layer-grid] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@container results (max-width: 520px) {
+  body.oracle-results-page [data-layer-grid] {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Chart card ── */
+body.oracle-results-page [data-results-chart] {
+  min-height: 0;
+  min-width: 0;
+  padding: var(--cp-space-4);
+  overflow: hidden;
+}
+
+body.oracle-results-page [data-results-chart] > div {
+  min-height: 320px;
+  width: 100%;
+}
+
+@container results (min-width: 721px) {
+  body.oracle-results-page [data-results-chart] > div {
+    min-height: 360px;
+  }
+}
+
+@container results (min-width: 961px) {
+  body.oracle-results-page [data-results-chart] > div {
+    min-height: 400px;
+  }
+}
+
+/* ── Analysis section header ── */
+body.oracle-results-page [data-analysis-head] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cp-space-4);
+  margin-bottom: var(--cp-space-4);
+  min-width: 0;
+}
+
+body.oracle-results-page [data-analysis-head] [data-analysis-eyebrow] {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ── Viz step — container queries (not viewport) ── */
+@container results (max-width: 900px) {
+  body.oracle-results-page [data-viz-rail] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@container results (max-width: 520px) {
+  body.oracle-results-page [data-viz-rail] {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.oracle-results-page [data-viz-panel-head] {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+body.oracle-results-page [data-viz-container] {
+  min-height: 360px;
+  width: 100%;
+}
+
+@container results (min-width: 721px) {
+  body.oracle-results-page [data-viz-container] {
+    min-height: 420px;
+  }
+}
+
+/* ── Gantt timeline ── */
+@container results (max-width: 560px) {
+  body.oracle-results-page [data-gantt-copy] {
+    grid-template-columns: 1fr !important;
+    min-height: 52px;
+  }
+
+  body.oracle-results-page [data-gantt-row] {
+    gap: var(--cp-space-2);
+  }
+}
+
+/* ── CTA bar ── */
+body.oracle-results-page [data-cta-bar] {
+  flex-wrap: wrap;
+  row-gap: var(--cp-space-3);
+}
+
+@container results (max-width: 640px) {
+  body.oracle-results-page [data-cta-bar] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body.oracle-results-page [data-cta-bar] > div:last-child {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
+@media print {
+  .oracle-rail-nav,
+  .ct-rail-left,
+  .ct-rail-right,
+  [data-results-hero] button,
+  [data-viz-step-controls],
+  [data-cta-bar],
+  .oracle-mobile-nav-root {
+    display: none !important;
+  }
+
+  .oracle-page {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  body.oracle-results-page [data-results-layout] {
+    max-width: none !important;
+    gap: var(--cp-space-4) !important;
+  }
+
+  .ct-center-panel,
+  .ct-page-area {
+    overflow: visible !important;
+  }
+
+  .ct-page-area {
+    padding: 20px !important;
+  }
+}
