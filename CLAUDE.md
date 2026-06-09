@@ -3,7 +3,7 @@
 <!-- enable-adrien:start -->
 ## Agent — lire avant de coder
 - Guide complet : **`AGENTS.md`** (source de vérité locale, ≤200 lignes).
-- Gate : `npm run check` (lint:secrets + lint:cockpit + lint:strings + tests).
+- Gate : `npm run check` (lint:secrets + lint:strings + lint:tokens + lint:nav + tests).
 - Scaffolder : `node scripts/new-feature.mjs <resource> --ts=YYYYMMDDHHMMSS`
 <!-- enable-adrien:end -->
 
@@ -63,18 +63,20 @@ Auth + login : `app/admin/login/`, `app/admin/auth/callback/`. APIs : 10 routes 
 - Principe : pas de nombre inventé → champ manquant = `null` / `MISSING_LABEL`
   (`'N/A — Source Required'`).
 
-## Design system — tokens
-- Canon : `--cp-*` défini dans `app/(cockpit)/admin/hearst/cp-tokens.css` (bridge `--cp-*` →
-  `--ct-*` upstream `@hearst/cockpit-shell/tokens.css`). Surfaces dans `cockpit.css`, FAB chat
-  dans `components/hearst/chat-fab.css`.
+## Design system — copie locale éditable
+Le DS Cockpit vit dans ce repo (`./cockpit-shell/` : composants TS + `tokens.css`). C'est LA copie
+de ce repo, éditable librement ici : composants, tokens (`--ct-*`), CSS se modifient directement.
+Pas de source centrale à mettre à jour, pas de resync, pas de repack tarball.
+- Les `--ct-*` se modifient désormais dans `cockpit-shell/tokens.css` (plus d'« upstream »).
+- Les pages/composants applicatifs continuent de référencer `--cp-*` (bridge
+  `app/(cockpit)/admin/hearst/cp-tokens.css`) pour la cohérence interne. Surfaces dans `cockpit.css`,
+  FAB chat dans `components/hearst/chat-fab.css`.
 - `app/globals.css` `--color-*` = **legacy login uniquement** — interdit dans le module Hearst.
-- Source de vérité par couche (zéro chevauchement) : `--ct-*` = upstream
-  `@hearst/cockpit-shell/tokens.css` seul · `--cp-*` = `cp-tokens.css` seul · `--color-*` =
-  `globals.css` legacy seul. Les pages/composants **référencent** `--cp-*`, ne définissent jamais.
-- **Jamais de hex / `rgb()` / `hsl()` hardcodé, ni `var(--ct-*)`/`var(--color-*)` en direct** dans
-  `components/hearst/**` et les pages `app/(cockpit)/admin/hearst/**` : utiliser un `--cp-*`.
-  Gardé par `npm run lint:cockpit` (scope correct) ET ESLint `no-restricted-syntax`
-  (glob `app/(cockpit)/admin/hearst/**` corrigé — couvre désormais les pages).
+- Dans `components/hearst/**` et les pages `app/(cockpit)/admin/hearst/**` : convention (non gardée
+  par lint) de passer par un `--cp-*` plutôt que hex / `rgb()` / `hsl()` ou `var(--ct-*)`/`var(--color-*)`
+  en direct — pour la cohérence interne. `cockpit-shell/` (le DS lui-même) définit légitimement les
+  `--ct-*` et reste librement éditable.
+- Seule règle : garder la cohérence visuelle interne du repo.
 
 ## Tests
 - `npm test` → vitest (214 tests : calculs, solver, archétypes, bootstrap, validators, auth,

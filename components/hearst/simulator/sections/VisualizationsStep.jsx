@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
 import dynamic from 'next/dynamic';
 import { Card, SectionHead } from '@/components/hearst/ui';
@@ -32,7 +32,7 @@ const FinancialSankey = dynamic(() => import('@/components/hearst/simulator/Fina
  *   projection: object|null,
  * }} props
  */
-export default function VisualizationsStep({
+function VisualizationsStep({
   activeViz,
   onSelectViz,
   state,
@@ -49,21 +49,6 @@ export default function VisualizationsStep({
   const activeMeta = VIZ_META[activeViz] || VIZ_META[vizEntries[0][0]];
 
   return (
-    <>
-      <style>{`
-        @media (max-width: 1120px) {
-          [data-viz-rail] {
-            max-width: none !important;
-            display: grid !important;
-            grid-template-columns: 1fr !important;
-          }
-        }
-        @media (max-width: 760px) {
-          [data-viz-rail] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
       <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <SectionHead
           title={UI.RESULTS_VIZ_TITLE}
@@ -71,7 +56,7 @@ export default function VisualizationsStep({
           style={{ marginBottom: 0 }}
         />
         <div data-viz-shell style={S.vizShell}>
-          <aside data-viz-rail style={S.vizRail}>
+          <aside data-viz-step-controls data-viz-rail style={S.vizRail}>
             {vizEntries.map(([id, meta]) => (
               <button
                 key={id}
@@ -89,14 +74,14 @@ export default function VisualizationsStep({
             <div style={CP.loadingPanel}>{UI.SIM_FILL}</div>
           ) : (
             <Card data-viz-panel variant="card" surface={0} padding="lg" style={{ minWidth: 0 }}>
-              <div style={S.vizPanelHead}>
+              <div data-viz-panel-head style={S.vizPanelHead}>
                 <div>
                   <h3 style={S.vizTitle}>{activeMeta.title}</h3>
                   <p style={S.vizDetail}>{activeMeta.detail}</p>
                 </div>
                 <span style={S.vizMode}>{activeMeta.label}</span>
               </div>
-              <div style={S.vizContainer}>
+              <div data-viz-container style={S.vizContainer}>
                 {activeViz === 'radar' && (
                   <ArchetypeRadar archetypes={radarArchetypes} highlighted={[state?.primary_archetype_id]} height={420} />
                 )}
@@ -114,7 +99,6 @@ export default function VisualizationsStep({
           )}
         </div>
       </Card>
-    </>
   );
 }
 
@@ -126,12 +110,14 @@ VisualizationsStep.propTypes = {
   projection: PropTypes.object,
 };
 
+export default memo(VisualizationsStep);
+
 const S = {
   vizShell: {
     display: 'grid',
     gridTemplateColumns: '1fr',
     gap: 'var(--cp-space-4)',
-    alignItems: 'stretch',
+    alignItems: 'start',
   },
   vizRail: {
     display: 'grid',
@@ -170,6 +156,10 @@ const S = {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-sm)',
     lineHeight: 'var(--cp-leading-normal)',
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
   },
   vizPanelHead: {
     display: 'flex',
@@ -199,11 +189,12 @@ const S = {
     letterSpacing: 'var(--cp-tracking-eyebrow)',
   },
   vizContainer: {
-    minHeight: 440,
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+    width: '100%',
+    minWidth: 0,
     overflow: 'hidden',
   },
 };

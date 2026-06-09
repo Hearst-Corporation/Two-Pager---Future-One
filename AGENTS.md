@@ -11,7 +11,7 @@
 - Tests : `npm test` (vitest, 224 tests)
 - Gate : `npm run check` — la mauvaise façon ÉCHOUE ici.
 - Auth : toutes les routes API passent par `requireProfile` / `authedWrite`.
-- Tokens : `var(--cp-*)` uniquement — jamais de hex hardcodé dans `app/(cockpit)/` ni `components/hearst/`.
+- Tokens : dans les pages/composants applicatifs (`app/(cockpit)/` · `components/hearst/`) → `var(--cp-*)` uniquement, pas de hex hardcodé. Le DS lui-même (`cockpit-shell/` · `tokens.css`) est librement éditable (`--ct-*` s'y définissent).
 
 <!-- enable:section=recette -->
 ## 2. Recette canonique (nouvelle page)
@@ -40,6 +40,7 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 - **Calculs** : `lib/hearst-calculations.js` (IRR Newton-Raphson, NPV, MOIC, waterfall)
 - **Solver** : `lib/hearst-solver.js` (3 modes : mw_first / capital_first / target_irr_first)
 - **Tokens DS** : `grep -r "var(--cp-" app/(cockpit)/admin/hearst/cp-tokens.css`
+- **Tokens morts** : `npm run prune:tokens` (rapport ; `--write` supprime). Protège les préfixes résolus en runtime (`--cp-op-*`) — ne jamais supprimer un token dont le préfixe est consommé via `var(--cp-PREFIX-${...})`.
 - **Styles inline** : `lib/cp-styles.js` — `T` (typo), `S` (états), `L` (layout), `RC` (Recharts). **Chercher ici avant d'écrire un `fontWeight`, `fontSize` ou état inline.**
 - **Nav routes** : `grep -n "href:" components/OracleRailNav.jsx`
 - **Strings UI** : `lib/ui-strings.ts` → `UI.*`
@@ -49,9 +50,6 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 
 | INTERDIT | ÉCHOUE VIA |
 |---|---|
-| Couleur hex / `rgb()` / `hsl()` hors `var(--cp-*)` dans cockpit | `npm run lint:cockpit` |
-| `fontWeight: 700\|800\|600` (chiffre brut) dans cockpit — utiliser `T.*` de `lib/cp-styles.js` | `npm run lint:cockpit` (à étendre) |
-| `var(--ct-*)` ou `var(--color-*)` en direct dans le cockpit | `npm run lint:cockpit` (passe par `--cp-*`) |
 | Token défini hors de sa source (`--cp-*`→cp-tokens.css · `--color-*`→globals.css) ou en double | `npm run lint:tokens` |
 | String UI en dur (nouvelle ligne) | `npm run lint:strings` |
 | Secret hardcodé (`sk-ant-`, `ghp_`, etc.) | `npm run lint:secrets` |
@@ -59,9 +57,9 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 | Build cassé (import/JSX) dans une page sans test | `npm run check:ci` (lance `next build`) |
 | `getAdminClient()` dans un composant client | convention — import server-only |
 
-> Baselines gelées par **signature** (`scripts/.lint-baseline.json`) : seules les
+> Baseline gelée par **signature** (`scripts/.lint-baseline.json`, clé `strings`) : seules les
 > *nouvelles* violations échouent. Toucher une ligne legacy la « réactive » → corrige-la.
-> Régénérer (legacy assumé) : `node scripts/lint-cockpit.mjs --update-baseline`.
+> Régénérer (legacy assumé) : `node scripts/lint-strings.mjs --update-baseline`.
 
 <!-- enable:section=gotchas -->
 ## 6. Gotchas du repo
@@ -74,16 +72,16 @@ Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV 
 - Le moteur financier **ne fabrique jamais** de données : `null` / `'N/A — Source Required'` si manquant.
 - IC Advisor rail : `lib/oracle-advisor-routes.js` — chat-only sur deals/sources/workspace/dossier liste ; full sur simulator/financial/dossier `?memo=`.
 - Chat voie A : `CockpitChatBridge` injecte `deal` + `oracle.pathname` dans POST `/api/cockpit-chat`. Prompts IC → `COCKPIT_CHAT_SEND_EVENT`.
-- Chat scope : `resolveChatScope()` → `oracle:chat-id:{scope}` ; `syncScopedChatToShell()` + `setActiveChat` (export shell 0.2.0 patché) recharge l’historique.
+- Chat scope : `resolveChatScope()` → `oracle:chat-id:{scope}` ; `syncScopedChatToShell()` + `setActiveChat` (exporté par `cockpit-shell/src/index.ts`) recharge l’historique.
 - Rail droit : chat **toujours visible** desktop (fixe + `--cp-chat-rail-width` padding centre) ; drawer+FAB mobile. `--ct-rail-right: 0`. IC si `advisorContext.projection` présent.
-- `@hearst/cockpit-shell` : `hearst-cockpit-shell-0.2.0.tgz` exporte `setActiveChat` (patch dist) — repack après upgrade shell.
+- `@hearst/cockpit-shell` : **copie locale éditable** dans `./cockpit-shell/` (alias tsconfig/jsconfig → `cockpit-shell/src/index.ts`). `setActiveChat` exporté depuis `src/index.ts`. Pas de tarball, pas de repack.
 - `useEffect(..., [])` init-only = pattern intentionnel sur simulator/page.jsx.
 - CSP : `unsafe-eval` retiré en prod (Next.js HMR en dev uniquement).
 
 <!-- enable:section=livrer -->
 ## 7. Avant de livrer
 ```bash
-npm run check     # lint:secrets + lint:cockpit + lint:strings + lint:nav + test (rapide)
+npm run check     # lint:secrets + lint:strings + lint:tokens + lint:nav + test (rapide)
 npm run check:ci  # + next build — PROUVE que l'app compile (à lancer avant toute PR)
 npm run doctor    # préflight env (dit ce qui manque pour dev/build)
 ```

@@ -1,6 +1,6 @@
 // @enable-adrien:layer=front-cockpit v=1
 // lint-secrets.mjs — détecte les secrets hardcodés dans le code source.
-// Zéro dépendance. Calqué sur lint-cockpit.mjs. exit 1 sur violation.
+// Zéro dépendance. exit 1 sur violation.
 // Échappatoire ligne : // secret-lint-allow
 
 import { readFileSync, readdirSync, statSync } from 'fs';

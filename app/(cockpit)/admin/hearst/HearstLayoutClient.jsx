@@ -1,24 +1,22 @@
 'use client';
 
+import { useEffect } from 'react';
 import { CockpitShell } from '@hearst/cockpit-shell';
 import { Suspense } from 'react';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleRailNav } from '@/components/OracleRailNav';
 import ChatToggleFAB from '@/components/hearst/ChatToggleFAB';
-import OracleAdvisorRail from '@/components/hearst/OracleAdvisorRail';
 import StrategicMemoModal from '@/components/hearst/StrategicMemoModal';
 import MemoJobBadge from '@/components/hearst/MemoJobBadge';
 import MemoToast from '@/components/hearst/MemoToast';
 import { CockpitChatBridge } from '@/components/admin/CockpitChatBridge';
 
-// ThemeAccent (cockpit-shell) fait setProperty('--ct-accent', color) sur <html>.
-// INTERDIT var(--cp-accent) ici : --cp-accent = var(--ct-accent) → boucle circulaire → couleurs mortes au mount shell.
-  // eslint-disable-next-line no-restricted-syntax -- ThemeAccent contract requires a hex literal for setProperty('--ct-accent') (var(--cp-accent) would loop).
-const ORACLE_ACCENT_HEX = '#8A1538'; // cockpit-lint-allow — hex obligatoire pour ThemeAccent (pas var(--cp-accent))
-
+// Accent Oracle : SOURCE UNIQUE = --ct-accent dans cockpit-shell/tokens.css.
+// On NE passe PAS de `color` ici : ThemeAccent ne pose alors aucun override JS,
+// le fallback CSS reste seul maître → zéro flash, et la couleur s'édite dans
+// tokens.css (plus de hex câblé en double ici).
 const ORACLE_PRODUCTS = [
-  // eslint-disable-next-line no-restricted-syntax -- CockpitProduct.color contract requires a hex literal (ThemeAccent → --ct-accent).
-  { id: 'oracle', name: 'Hearst Oracle', short: 'OR', color: ORACLE_ACCENT_HEX },
+  { id: 'oracle', name: 'Hearst Oracle', short: 'OR' },
 ];
 
 const ORACLE_CHAT_CONFIG = {
@@ -26,6 +24,15 @@ const ORACLE_CHAT_CONFIG = {
 };
 
 export default function HearstLayoutClient({ children }) {
+  useEffect(() => {
+    document.documentElement.classList.add('oracle-cockpit-root');
+    document.body.classList.add('oracle-cockpit-page');
+    return () => {
+      document.documentElement.classList.remove('oracle-cockpit-root');
+      document.body.classList.remove('oracle-cockpit-page');
+    };
+  }, []);
+
   return (
     <SimulationProvider>
       <Suspense fallback={null}>
@@ -34,9 +41,6 @@ export default function HearstLayoutClient({ children }) {
       <CockpitShell products={ORACLE_PRODUCTS} appId="oracle" chatConfig={ORACLE_CHAT_CONFIG}>
         <OracleRailNav />
         {children}
-        <Suspense fallback={null}>
-          <OracleAdvisorRail />
-        </Suspense>
         <ChatToggleFAB />
         <StrategicMemoModal />
         <MemoJobBadge />

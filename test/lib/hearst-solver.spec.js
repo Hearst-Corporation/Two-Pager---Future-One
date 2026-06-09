@@ -5,7 +5,13 @@ import {
   mwFromCapital,
   solveForTargetIrr,
   solveScenarioForMode,
+  solveMwForCapital,
 } from '@/lib/hearst-solver.js';
+import { projectArchetype, DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
+import { foldGpuRevenue } from '@/lib/hearst-calculations';
+import { calcHardwareBreakdown } from '@/lib/hearst-gpu-catalog';
+import { bootstrapScenarioFromSources } from '@/lib/hearst-bootstrap';
+import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 
 // Scénario de base "Qatar greenfield 50MW" calibré sur PUBLIC_SOURCES_LIBRARY.
 const QATAR_BASE_SCENARIO = {
@@ -135,5 +141,168 @@ describe('solveScenarioForMode', () => {
 
   it('rejette un mode inconnu', () => {
     expect(() => solveScenarioForMode('weird_mode', {}, {})).toThrow();
+  });
+
+  // P0-3: capital_first must NOT change mw_first / target_irr_first behaviour even
+  // when the new opts.totalCapexForMw is supplied (those modes ignore it).
+  it('mw_first unchanged when totalCapexForMw opt is present', () => {
+    const r = solveScenarioForMode('mw_first', { total_mw: 100 }, QATAR_BASE_SCENARIO, { totalCapexForMw: () => 1 });
+    expect(r.scenario.total_mw).toBe(100);
+    expect(r.derived.total_mw).toBe(100);
+    expect(r.solver).toBeUndefined();
+  });
+
+  it('target_irr_first unchanged when totalCapexForMw opt is present', () => {
+    const a = solveScenarioForMode('target_irr_first', { target_irr_pct: 15, lever: 'pricing', total_mw: 50 }, QATAR_BASE_SCENARIO);
+    const b = solveScenarioForMode('target_irr_first', { target_irr_pct: 15, lever: 'pricing', total_mw: 50 }, QATAR_BASE_SCENARIO, { totalCapexForMw: () => 1 });
+    expect(b.derived.lever_value).toBe(a.derived.lever_value);
+    expect(b.derived.target_irr).toBe(a.derived.target_irr);
+  });
+
+  it('capital_first falls back to facility-only mwFromCapital when no evaluator', () => {
+    const r = solveScenarioForMode('capital_first', { total_capex_usd: 1_000_000_000 }, QATAR_BASE_SCENARIO);
+    expect(r.derived.archetype_aware).toBe(false);
+    expect(r.derived.mw).toBe(r.scenario.total_mw);
+  });
+
+  it('capital_first uses the archetype-aware solve when an evaluator is supplied', () => {
+    // synthetic engine: $10M/MW everywhere → $1.0B should solve to ~100 MW
+    const r = solveScenarioForMode('capital_first', { total_capex_usd: 1_000_000_000 }, QATAR_BASE_SCENARIO, { totalCapexForMw: (mw) => mw * 10_000_000 });
+    expect(r.derived.archetype_aware).toBe(true);
+    expect(r.solver.converged).toBe(true);
+    expect(r.scenario.total_mw).toBeCloseTo(100, 0);
+    expect(Math.abs(r.solver.capex - 1_000_000_000)).toBeLessThanOrEqual(r.solver.tolerance);
+  });
+});
+
+describe('solveMwForCapital — bounded binary search (P0-3)', () => {
+  const TOL = (b) => Math.max(0.01 * b, 1_000_000);
+
+  it('converges so total_capex(MW) is within tolerance of the budget', () => {
+    const budget = 1_000_000_000;
+    const r = solveMwForCapital(budget, (mw) => mw * 33_000_000); // facility+GPU-heavy curve
+    expect(r.converged).toBe(true);
+    expect(r.iterations).toBeLessThanOrEqual(30);
+    expect(Math.abs(r.capex - budget)).toBeLessThanOrEqual(TOL(budget));
+    expect(r.mw).toBeCloseTo(budget / 33_000_000, 0);
+  });
+
+  it('solves a GPU-shaped curve a facility-only divide would overshoot ~200%', () => {
+    const budget = 1_000_000_000;
+    const facilityPerMw = 11_000_000, hardwarePerMw = 22_000_000; // 2× facility = GPU dominates
+    const total = (mw) => mw * (facilityPerMw + hardwarePerMw);
+    // facility-only sizing (the old bug): budget / facilityPerMw MW
+    const facilityOnlyMw = budget / facilityPerMw;
+    expect(total(facilityOnlyMw) / budget).toBeGreaterThan(2.5); // would overshoot >150%
+    const r = solveMwForCapital(budget, total);
+    expect(r.converged).toBe(true);
+    expect(Math.abs(r.capex - budget) / budget).toBeLessThanOrEqual(0.01); // ≤1%
+  });
+
+  it('budget <= 0 → 0 MW, not converged, honest diagnostic', () => {
+    const r = solveMwForCapital(0, (mw) => mw * 10_000_000);
+    expect(r.mw).toBe(0);
+    expect(r.converged).toBe(false);
+    expect(r.diagnostic).toMatch(/positive/i);
+  });
+
+  it('budget below minimum-scale CAPEX → floor MW with diagnostic (no silent overshoot)', () => {
+    // bounds [5,1000]; at 5 MW this curve costs $250M; budget $100M cannot fund it
+    const r = solveMwForCapital(100_000_000, (mw) => mw * 50_000_000);
+    expect(r.converged).toBe(false);
+    expect(r.mw).toBe(5);
+    expect(r.diagnostic).toMatch(/below the minimum-scale/i);
+  });
+
+  it('budget above max-scale CAPEX → ceiling MW with diagnostic', () => {
+    const r = solveMwForCapital(100_000_000_000, (mw) => mw * 10_000_000); // 1000 MW = $10B < $100B
+    expect(r.converged).toBe(false);
+    expect(r.mw).toBe(1000);
+    expect(r.diagnostic).toMatch(/exceeds CAPEX at the max/i);
+  });
+
+  it('fails honestly when total_capex is not computable', () => {
+    const r = solveMwForCapital(1_000_000_000, () => null);
+    expect(r.converged).toBe(false);
+    expect(r.mw).toBeNull();
+    expect(r.diagnostic).toMatch(/not computable or not monotonic/i);
+  });
+
+  it('fails honestly when total_capex is not monotonic across bounds', () => {
+    const r = solveMwForCapital(1_000_000_000, (mw) => 1_000_000_000 - mw); // decreasing
+    expect(r.converged).toBe(false);
+    expect(r.diagnostic).toMatch(/monotonic/i);
+  });
+});
+
+// Integration: real engine pipeline. Mirrors app/api/.../simulate/route.js
+// buildArchetypeProjection so the solver sees the engine's TRUE total_capex.
+describe('capital_first archetype-aware — real engine, $1.0B budget', () => {
+  const ARCH = Object.fromEntries(DEAL_ARCHETYPES.map((a) => [a.id, a]));
+  const DEFAULT_MINORITY_EQUITY_SHARE = 0.20; // mirrors simulate/route.js
+  const BUDGET = 1_000_000_000;
+
+  function evaluatorFor(archetype_id, business_model_id, hardware_mix) {
+    const boot = bootstrapScenarioFromSources({ geography: 'qatar', business_model_id, mw_target: 50, archetype_id, extraSources: [] });
+    const defaults = boot.scenario;
+    const archetype = ARCH[archetype_id];
+    const evalFn = (mw) => {
+      const ar = projectArchetype({ ...defaults, total_mw: mw }, archetype);
+      const proj = ar.projection;
+      const hb = calcHardwareBreakdown(ar.scenario, hardware_mix);
+      if (hb) {
+        const hw_share = archetype.compute_as === 'minority_equity'
+          ? (archetype.equity_share || DEFAULT_MINORITY_EQUITY_SHARE)
+          : (archetype.revenue_factor ?? 1.0);
+        if (hw_share !== 1.0) {
+          hb.revenue_ai_annual = (hb.revenue_ai_annual || 0) * hw_share;
+          hb.capex_hardware = (hb.capex_hardware || 0) * hw_share;
+          hb.total_gpus = Math.round((hb.total_gpus || 0) * hw_share);
+        }
+      }
+      if (hb && (hb.revenue_ai_annual > 0 || hb.capex_hardware > 0)) {
+        foldGpuRevenue(proj, hb, ar.scenario, {
+          rfs_year: ar.scenario.phase1_complete_year || 3,
+          ramp_years: 2,
+          exit_year: ar.scenario.exit_year || 10,
+          discount_rate_pct: ar.scenario.discount_rate_pct ?? FINANCIAL_THRESHOLDS.discount_rate_pct,
+        });
+      }
+      return proj?.total_capex ?? null;
+    };
+    return { defaults, evalFn };
+  }
+
+  const CASES = [
+    { name: 'powered_shell', bm: 'hyperscale_lease', hw: { classic_pct: 80, liquid_pct: 20, ai_pct: 0, utilization_pct: 80 }, facilityOnlyOk: true },
+    { name: 'neocloud_gpu', bm: 'gpu_cloud', hw: { classic_pct: 0, liquid_pct: 20, ai_pct: 80, utilization_pct: 85, gpu_sku_id: 'gb200_nvl72' }, facilityOnlyOk: false },
+    { name: 'sovereign_ai', bm: 'sovereign_ai', hw: { classic_pct: 10, liquid_pct: 30, ai_pct: 60, utilization_pct: 85, gpu_sku_id: 'gb200_nvl72' }, facilityOnlyOk: false },
+  ];
+
+  for (const c of CASES) {
+    it(`${c.name}: solved CAPEX within 1% of $1.0B`, () => {
+      const { evalFn } = evaluatorFor(c.name, c.bm, c.hw);
+      const r = solveMwForCapital(BUDGET, evalFn);
+      expect(r.converged).toBe(true);
+      expect(Math.abs(r.capex - BUDGET) / BUDGET).toBeLessThanOrEqual(0.01);
+      expect(r.mw).toBeGreaterThan(0);
+    });
+  }
+
+  it('facility-only sizing overshoots for GPU/AI archetypes (the bug being fixed)', () => {
+    for (const c of CASES.filter((x) => !x.facilityOnlyOk)) {
+      const { defaults, evalFn } = evaluatorFor(c.name, c.bm, c.hw);
+      const facilityOnlyMw = mwFromCapital(BUDGET, defaults).mw;
+      const realCapex = evalFn(facilityOnlyMw);
+      expect(realCapex / BUDGET).toBeGreaterThan(1.1); // >10% overshoot under the old path
+    }
+  });
+
+  it('powered_shell stays stable (facility-only already ≈ correct)', () => {
+    const { defaults, evalFn } = evaluatorFor('powered_shell', 'hyperscale_lease', { classic_pct: 80, liquid_pct: 20, ai_pct: 0, utilization_pct: 80 });
+    const facilityOnlyMw = mwFromCapital(BUDGET, defaults).mw;
+    const r = solveMwForCapital(BUDGET, evalFn);
+    // archetype-aware result is within a few % of the facility-only result (no GPU CAPEX)
+    expect(Math.abs(r.mw - facilityOnlyMw) / facilityOnlyMw).toBeLessThan(0.1);
   });
 });

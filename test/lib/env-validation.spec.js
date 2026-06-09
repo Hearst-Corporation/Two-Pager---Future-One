@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { validateEnv } from '@/lib/env-validation';
 
 // Required schema (see lib/env-validation.js):
-//   server : SUPABASE_SERVICE_ROLE_KEY, HYPERCLI_API_KEY
+//   server : SUPABASE_SERVICE_ROLE_KEY, MOONSHOT_API_KEY
 //   public : NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
 const VALID_ENV = {
   SUPABASE_SERVICE_ROLE_KEY: 'test-srk',
-  HYPERCLI_API_KEY: 'hyper_api_test',
+  MOONSHOT_API_KEY: 'sk-test-moonshot',
   NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
   NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon',
 };
@@ -21,9 +21,9 @@ describe('env-validation', () => {
     expect(() => validateEnv(env)).toThrow(/SUPABASE_SERVICE_ROLE_KEY/);
   });
 
-  it('should throw when HYPERCLI_API_KEY is missing', () => {
-    const { HYPERCLI_API_KEY, ...env } = VALID_ENV;
-    expect(() => validateEnv(env)).toThrow(/HYPERCLI_API_KEY/);
+  it('should throw when MOONSHOT_API_KEY is missing', () => {
+    const { MOONSHOT_API_KEY, ...env } = VALID_ENV;
+    expect(() => validateEnv(env)).toThrow(/MOONSHOT_API_KEY/);
   });
 
   it('should throw when NEXT_PUBLIC_SUPABASE_URL is not https', () => {

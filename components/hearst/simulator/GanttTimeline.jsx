@@ -1,138 +1,285 @@
 'use client';
 
+import { memo } from 'react';
 import { SITE_READINESS } from '@/lib/hearst-constants';
+import { UI } from '@/lib/ui-strings';
 
-/**
- * Board-style deployment timeline.
- * The previous SVG used small milestone dots that looked like rendering noise.
- * This keeps the same scheduling logic but presents it as readable phase rows.
- */
-export default function GanttTimeline({ scenario, exit_year = 10 }) {
-  const readiness = SITE_READINESS[scenario?.site_readiness] || SITE_READINESS.greenfield;
-  const dev_months = readiness.dev_months;
-  const cod_offset_months = readiness.cod_offset_months;
+const PERMIT_MONTHS = 6;
 
-  const X_MIN = -(cod_offset_months + 6);
-  const X_MAX = exit_year * 12;
-  const span = Math.max(1, X_MAX - X_MIN);
-  const launchFrac = (0 - X_MIN) / span;
-  const pos = (month) => `${((month - X_MIN) / span) * 100}%`;
-  const widthPct = (start, end) => `${Math.max(1.5, ((end - start) / span) * 100)}%`;
+function pctInSpan(month, spanStart, spanEnd) {
+  const span = Math.max(1, spanEnd - spanStart);
+  return ((month - spanStart) / span) * 100;
+}
 
-  const phases = [
-    { label: 'Permits', start: X_MIN, end: X_MIN + 6, tone: 'muted', description: 'Site control, permits, utility coordination' },
-    { label: 'Construction', start: -dev_months, end: 0, tone: 'build', description: 'Shell, power, cooling and commissioning' },
-    { label: 'Lease-up', start: 0, end: 24, tone: 'ramp', description: 'Customer ramp and occupancy build-up' },
-    { label: 'Stabilized operations', start: 24, end: Math.max(30, X_MAX - 12), tone: 'operate', description: 'Run-rate revenue and steady operations' },
-    { label: 'Exit / refinance', start: Math.max(0, X_MAX - 6), end: X_MAX, tone: 'exit', description: 'Refinance or sale window' },
-  ];
+function pos(month, spanStart, spanEnd) {
+  return `${pctInSpan(month, spanStart, spanEnd)}%`;
+}
 
-  const axisTicks = [
-    { label: 'Pre-dev', month: X_MIN },
-    { label: 'Launch', month: 0 },
-    { label: `Y${Math.max(1, Math.round(exit_year / 2))}`, month: Math.round(exit_year * 6) },
-    { label: `Y${exit_year}`, month: X_MAX },
-  ];
+function widthPct(start, end, spanStart, spanEnd) {
+  const span = Math.max(1, spanEnd - spanStart);
+  return `${Math.max(1.5, ((end - start) / span) * 100)}%`;
+}
+
+/** Keep axis labels inside the rail — no clipped Start/Launch at the edges. */
+function tickStyle(pct) {
+  if (pct <= 6) return { left: '0%', transform: 'translateX(0)' };
+  if (pct >= 94) return { left: '100%', transform: 'translateX(-100%)' };
+  return { left: `${pct}%`, transform: 'translateX(-50%)' };
+}
+
+function formatDuration(start, end, mode) {
+  const dur = end - start;
+  if (mode === 'mo') return UI.GANTT_RANGE_MO(dur);
+  if (dur < 12) return UI.GANTT_RANGE_TAIL(Math.max(1, Math.round(end / 12)));
+  const y0 = Math.max(0, Math.round(start / 12));
+  const y1 = Math.max(y0 + 1, Math.round(end / 12));
+  return UI.GANTT_RANGE_YR(y0, y1);
+}
+
+function PhaseTrack({ title, hint, spanStart, spanEnd, phases, ticks, durationMode, codMonth = null }) {
+  const showCod = codMonth != null && codMonth >= spanStart && codMonth <= spanEnd;
+  const codPct = showCod ? pctInSpan(codMonth, spanStart, spanEnd) : null;
 
   return (
-    <>
-    <style>{`
-      @media (max-width: 760px) {
-        [data-gantt-row] {
-          gap: var(--cp-space-2) !important;
-          padding-top: var(--cp-space-3) !important;
-        }
-        [data-gantt-copy] {
-          grid-template-columns: 1fr !important;
-          min-height: 52px !important;
-        }
-      }
-    `}</style>
-    <div style={S.wrap}>
-      <div style={S.metaRow}>
-        <span>{readiness.label}</span>
-        <span>COD offset {cod_offset_months} months</span>
-        <span>Exit year {exit_year}</span>
-      </div>
+    <section data-gantt-track style={S.trackSection}>
+      <header style={S.trackHead}>
+        <strong style={S.trackTitle}>{title}</strong>
+        <span style={S.trackHint}>{hint}</span>
+      </header>
 
-      <div
-        data-gantt-timeline
-        style={{
-          ...S.timeline,
-          '--timeline-launch-frac': launchFrac,
-        }}
-      >
-        <div data-gantt-axis style={S.axis}>
-          {axisTicks.map(t => (
-            <span key={t.label} style={{ ...S.tick, left: pos(t.month) }}>{t.label}</span>
-          ))}
-        </div>
-        <div data-gantt-launch style={S.launchLine} aria-hidden="true" />
-        {phases.map((phase) => (
-          <div data-gantt-row key={phase.label} style={S.phaseRow}>
-            <div data-gantt-copy style={S.phaseCopy}>
-              <div style={S.phaseCopyText}>
-                <strong style={S.phaseLabel}>{phase.label}</strong>
-                <span style={S.phaseDesc}>{phase.description}</span>
-              </div>
-              <span style={S.phaseRange}>{formatRange(phase.start, phase.end)}</span>
-            </div>
-            <div style={S.track}>
-              <div style={{
-                ...S.phaseBar,
-                ...S[`phase_${phase.tone}`],
-                left: pos(phase.start),
-                width: widthPct(phase.start, phase.end),
-              }} aria-label={`${phase.label}: ${formatRange(phase.start, phase.end)}`} />
-            </div>
+      <div data-gantt-track-body style={S.trackBody}>
+        <div data-gantt-rail style={S.rail}>
+          <div data-gantt-axis style={S.axis}>
+            {ticks.map((t) => (
+              <span
+                key={`${title}-${t.month}-${t.label}`}
+                style={{ ...S.tick, ...tickStyle(pctInSpan(t.month, spanStart, spanEnd)) }}
+              >
+                {t.label}
+              </span>
+            ))}
           </div>
-        ))}
+
+          {showCod ? (
+            <div
+              data-gantt-cod-line
+              style={{ ...S.codLine, ...tickStyle(codPct) }}
+              aria-hidden="true"
+            />
+          ) : null}
+
+          <div data-gantt-rows style={S.rows}>
+            {phases.map((phase) => (
+              <div data-gantt-row key={phase.label} style={S.row}>
+                <div data-gantt-label style={S.labelCol}>
+                  <strong style={S.phaseLabel}>{phase.label}</strong>
+                  <span style={S.phaseDesc}>{phase.description}</span>
+                  <span style={S.phaseRange}>{formatDuration(phase.start, phase.end, durationMode)}</span>
+                </div>
+                <div data-gantt-bar-track style={S.barTrack}>
+                  <div
+                    style={{
+                      ...S.phaseBar,
+                      ...S[`phase_${phase.tone}`],
+                      left: pos(phase.start, spanStart, spanEnd),
+                      width: widthPct(phase.start, phase.end, spanStart, spanEnd),
+                    }}
+                    aria-label={`${phase.label}: ${formatDuration(phase.start, phase.end, durationMode)}`}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
-    </>
+    </section>
   );
 }
 
-function formatRange(start, end) {
-  if (end <= 0) return `${Math.abs(start)}-${Math.abs(end)} mo pre-launch`;
-  if (start < 0) return `${Math.abs(start)} mo pre-launch to launch`;
-  if (end < 24) return `${start}-${end} mo`;
-  return `Y${Math.round(start / 12)}-Y${Math.round(end / 12)}`;
+/**
+ * Board deployment timeline — two rails (pre-COD / post-COD) sharing COD as month 0.
+ */
+function GanttTimeline({ scenario, exit_year = 10 }) {
+  const readiness = SITE_READINESS[scenario?.site_readiness] || SITE_READINESS.greenfield;
+  const cod_offset_months = readiness.cod_offset_months;
+  const dev_months = readiness.dev_months;
+
+  const permitStart = -(cod_offset_months + PERMIT_MONTHS);
+  const constructionStart = -dev_months;
+  const preStart = Math.min(permitStart, constructionStart);
+  const preEnd = 0;
+  const preSpanMo = Math.abs(preStart);
+
+  const opsEnd = exit_year * 12;
+  const stabilizedEnd = Math.max(30, opsEnd - 12);
+  const exitStart = Math.max(stabilizedEnd, opsEnd - 6);
+
+  const prePhases = [
+    {
+      label: UI.GANTT_PHASE_PERMITS,
+      description: UI.GANTT_PHASE_PERMITS_DESC,
+      start: permitStart,
+      end: permitStart + PERMIT_MONTHS,
+      tone: 'prep',
+    },
+    {
+      label: UI.GANTT_PHASE_CONSTRUCTION,
+      description: UI.GANTT_PHASE_CONSTRUCTION_DESC,
+      start: constructionStart,
+      end: 0,
+      tone: 'build',
+    },
+  ];
+
+  const opsPhases = [
+    {
+      label: UI.GANTT_PHASE_LEASEUP,
+      description: UI.GANTT_PHASE_LEASEUP_DESC,
+      start: 0,
+      end: 24,
+      tone: 'ramp',
+    },
+    {
+      label: UI.GANTT_PHASE_STABILIZED,
+      description: UI.GANTT_PHASE_STABILIZED_DESC,
+      start: 24,
+      end: stabilizedEnd,
+      tone: 'operate',
+    },
+    {
+      label: UI.GANTT_PHASE_EXIT,
+      description: UI.GANTT_PHASE_EXIT_DESC,
+      start: exitStart,
+      end: opsEnd,
+      tone: 'exit',
+    },
+  ];
+
+  const midPre = Math.round(preStart / 2);
+
+  return (
+    <div data-gantt-root style={S.wrap}>
+      <div style={S.metaRow}>
+        <span>{readiness.label}</span>
+        <span>{UI.GANTT_META_COD(cod_offset_months)}</span>
+        <span>{UI.GANTT_META_EXIT(exit_year)}</span>
+      </div>
+      <p style={S.codNote}>{UI.GANTT_COD_NOTE}</p>
+
+      <div data-gantt-timeline style={S.timelineStack}>
+        <PhaseTrack
+          title={UI.GANTT_TRACK_PRE}
+          hint={UI.GANTT_TRACK_PRE_HINT}
+          spanStart={preStart}
+          spanEnd={preEnd}
+          phases={prePhases}
+          durationMode="mo"
+          codMonth={0}
+          ticks={[
+            { label: UI.GANTT_TICK_KICKOFF, month: preStart },
+            ...(preSpanMo >= 18 ? [{ label: UI.GANTT_TICK_BEFORE_COD(Math.round(preSpanMo / 2)), month: midPre }] : []),
+            { label: UI.GANTT_TICK_COD, month: 0 },
+          ]}
+        />
+
+        <PhaseTrack
+          title={UI.GANTT_TRACK_OPS}
+          hint={UI.GANTT_TRACK_OPS_HINT}
+          spanStart={0}
+          spanEnd={opsEnd}
+          phases={opsPhases}
+          durationMode="yr"
+          codMonth={0}
+          ticks={[
+            { label: UI.GANTT_TICK_COD, month: 0 },
+            ...(exit_year >= 6 ? [{ label: `Y${Math.round(exit_year / 2)}`, month: Math.round(exit_year * 6) }] : []),
+            { label: UI.GANTT_TICK_EXIT(exit_year), month: opsEnd },
+          ]}
+        />
+      </div>
+    </div>
+  );
 }
+
+export default memo(GanttTimeline);
 
 const S = {
   wrap: {
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
+    gap: 'var(--cp-space-3)',
   },
   metaRow: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: 'var(--cp-space-2)',
+    gap: 'var(--cp-space-2) var(--cp-space-4)',
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 'var(--cp-weight-bold)',
   },
-  timeline: {
-    position: 'relative',
+  codNote: {
+    margin: 0,
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-xs)',
+    lineHeight: 'var(--cp-leading-normal)',
+  },
+  timelineStack: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-4)',
+    width: '100%',
+    minWidth: 0,
+  },
+  trackSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-2)',
+    minWidth: 0,
+  },
+  trackHead: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'baseline',
+    gap: 'var(--cp-space-2) var(--cp-space-3)',
+  },
+  trackTitle: {
+    color: 'var(--cp-text-primary)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-wide)',
+    textTransform: 'uppercase',
+  },
+  trackHint: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-xs)',
+    fontStyle: 'italic',
+  },
+  trackBody: {
     width: '100%',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-md)',
     background: 'var(--cp-surface-1)',
-    padding: 'var(--cp-space-5) var(--cp-space-4) var(--cp-space-6)',
-    overflow: 'hidden',
+    padding: 'var(--cp-space-4)',
+    minWidth: 0,
+  },
+  rail: {
+    position: 'relative',
+    width: '100%',
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-3)',
   },
   axis: {
     position: 'relative',
     height: 24,
     borderBottom: '1px solid var(--cp-border)',
+    marginBottom: 'var(--cp-space-1)',
   },
   tick: {
     position: 'absolute',
     top: 0,
-    transform: 'translateX(-50%)',
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
@@ -140,31 +287,33 @@ const S = {
     textTransform: 'uppercase',
     whiteSpace: 'nowrap',
   },
-  launchLine: {
+  codLine: {
     position: 'absolute',
-    top: 'var(--cp-space-5)',
-    bottom: 'var(--cp-space-6)',
-    left: 'calc(var(--cp-space-4) + ((100% - var(--cp-space-8)) * var(--timeline-launch-frac, 0.25)))',
-    width: 1,
+    top: 24,
+    bottom: 0,
+    width: 2,
+    marginLeft: -1,
+    borderRadius: 1,
     background: 'var(--cp-accent-maroon)',
-    opacity: 0.75,
+    opacity: 0.5,
+    pointerEvents: 'none',
+    zIndex: 1,
   },
-  phaseRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: 'var(--cp-space-2)',
-  },
-  phaseCopy: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) auto',
-    alignItems: 'end',
-    gap: 'var(--cp-space-4)',
-    minHeight: 38,
-  },
-  phaseCopyText: {
+  rows: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
+    gap: 'var(--cp-space-3)',
+  },
+  row: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr)',
+    gap: 'var(--cp-space-2)',
+    alignItems: 'center',
+  },
+  labelCol: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
     minWidth: 0,
   },
   phaseLabel: {
@@ -175,42 +324,47 @@ const S = {
   },
   phaseDesc: {
     color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-sm)',
+    fontSize: 'var(--cp-font-xs)',
     lineHeight: 'var(--cp-leading-normal)',
   },
   phaseRange: {
-    color: 'var(--cp-text-muted)',
+    color: 'var(--cp-accent-maroon)',
     fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
-    whiteSpace: 'nowrap',
+    fontVariantNumeric: 'tabular-nums',
   },
-  track: {
+  barTrack: {
     position: 'relative',
-    height: 30,
+    height: 14,
     borderRadius: 'var(--cp-radius-pill)',
     background: 'var(--cp-surface-0)',
+    border: '1px solid var(--cp-border)',
     overflow: 'hidden',
   },
   phaseBar: {
     position: 'absolute',
-    top: 4,
-    bottom: 4,
-    minWidth: 56,
+    top: 1,
+    bottom: 1,
     borderRadius: 'var(--cp-radius-pill)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'var(--cp-text-strong)',
-    fontWeight: 'var(--cp-weight-semibold)',
-    fontSize: 'var(--cp-font-micro)',
-    whiteSpace: 'nowrap',
-    padding: '0 var(--cp-space-2)',
   },
-  phase_muted: { background: 'var(--cp-text-muted)' },
-  phase_build: { background: 'var(--cp-accent-maroon)' },
-  phase_ramp: { background: 'var(--cp-accent)' },
-  phase_operate: { background: 'var(--cp-accent-maroon)' },
-  phase_exit: { background: 'var(--cp-accent)' },
+  phase_prep: {
+    background: 'var(--cp-surface-3)',
+    border: '1px solid var(--cp-border-strong)',
+  },
+  phase_build: {
+    background: 'var(--cp-accent-maroon)',
+  },
+  phase_ramp: {
+    background: 'var(--cp-accent)',
+    opacity: 0.75,
+  },
+  phase_operate: {
+    background: 'var(--cp-accent-maroon)',
+    opacity: 0.9,
+  },
+  phase_exit: {
+    background: 'var(--cp-accent)',
+  },
 };

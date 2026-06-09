@@ -7,33 +7,25 @@ import {
   INITIAL_STATE, ACTIONS, simulatorReducer,
   buildSimulatePayload, serializeStateToUrl, parseStateFromUrl, QATAR_PRESETS,
 } from '@/lib/hearst-simulator-state';
-import { SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
+import { SCENARIO_WRITABLE_KEYS, PRIMARY_DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 
 import { SIMULATOR_PARAM_EVENT } from '@/lib/hearst-simulator-bridge';
 import { UI } from '@/lib/ui-strings';
-import { S as CP } from '@/lib/cp-styles';
+import { S as CP, L } from '@/lib/cp-styles';
+import './simulator.css';
 
-import SimulatorHeader from '@/components/hearst/simulator/sections/SimulatorHeader';
-import InvestmentBriefStep from '@/components/hearst/simulator/sections/InvestmentBriefStep';
-import OperatingModelStep from '@/components/hearst/simulator/sections/OperatingModelStep';
+import CaseHeaderStep from '@/components/hearst/simulator/sections/CaseHeaderStep';
+import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
+import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
+import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
-import { Button, Card } from '@/components/hearst/ui';
+import { Button, Card, Eyebrow } from '@/components/hearst/ui';
 
 // Valid viz tab ids — the chat bridge may set active_viz for the dedicated /results
 // page (single source of truth: VIZ_META). This config page stays results-free.
 const VIZ_TAB_IDS = new Set(['radar', 'network', 'matrix', 'sankey']);
-
-// Highlights the active scenario card when the current config matches a preset.
-function matchScenarioPreset(state) {
-  const p = QATAR_PRESETS.find(q =>
-    q.mode === state.mode &&
-    q.primary_archetype_id === state.primary_archetype_id &&
-    (q.mode === 'capital_first' ? q.capital_usd === state.capital_usd : q.total_mw === state.total_mw),
-  );
-  return p?.id || null;
-}
 
 export default function SimulatorPage() {
   const router = useRouter();
@@ -274,7 +266,6 @@ export default function SimulatorPage() {
     return () => setAdvisorContext?.(null);
   }, [loading, projection, savedScenarioId, scenario, setAdvisorContext, simError, simResult, state]);
 
-  const onModeChange = useCallback((v) => dispatch({ type: ACTIONS.SET_MODE, value: v }), []);
   const onSelectPrimary = useCallback((id) => {
     // Selecting an operating model also sets its canonical buyer/product pair
     // (MODEL_DEFAULTS) in one dispatch, so the B2B matrix stays on-grid and the
@@ -282,25 +273,17 @@ export default function SimulatorPage() {
     const def = MODEL_DEFAULTS[id];
     dispatch({ type: ACTIONS.APPLY_PRESET, value: { primary_archetype_id: id, ...(def || {}) } });
   }, []);
-  const onPreset = useCallback((p) => {
-    const { id: _id, label: _label, ...payload } = p;
-    dispatch({ type: ACTIONS.APPLY_PRESET, value: payload });
-  }, []);
-  const onBootstrap = useCallback(() => {
-    dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: 'qatar' } });
-  }, []);
   const onHwChange = useCallback((next) => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: next }), []);
 
   const inputValue = state.mode === 'capital_first' ? state.capital_usd
     : state.mode === 'target_irr_first' ? state.target_irr_pct
     : state.total_mw;
+  const onModeChange = useCallback((id) => dispatch({ type: ACTIONS.SET_MODE, value: id }), []);
   const onInputChange = useCallback((val) => {
     if (state.mode === 'capital_first') dispatch({ type: ACTIONS.SET_CAPITAL, value: val });
     else if (state.mode === 'target_irr_first') dispatch({ type: ACTIONS.SET_IRR_TARGET, value: val });
     else dispatch({ type: ACTIONS.SET_MW, value: val });
   }, [state.mode]);
-
-  const onSetIrrLever = useCallback((id) => dispatch({ type: ACTIONS.SET_IRR_LEVER, value: id }), []);
 
   // Returns the saved scenario id (string) on success, null on failure.
   async function handleSave() {
@@ -372,49 +355,88 @@ export default function SimulatorPage() {
   }
 
   const validateBlocked = !projection || !projectId || loading || !!simError || savingState === 'saving';
-  const activeScenarioPreset = matchScenarioPreset(state);
 
   return (
-    <>
-    <style>{`
-      @media (max-width: 900px) {
-        /* Hardware grids own their breakpoints (HardwareMixer, 1100/1500px). */
-        [data-brief-bar-row],
-        [data-archetype-grid] {
-          grid-template-columns: 1fr !important;
-        }
-        [data-sim-preset-grid] {
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
-      }
-      @media (max-width: 600px) {
-        [data-sim-preset-grid],
-        [data-hardware-summary],
-        [data-hardware-gpu-grid] {
-          grid-template-columns: 1fr !important;
-        }
-      }
-    `}</style>
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
-        <SimulatorHeader loading={loading} />
-        <InvestmentBriefStep
+        {/* SETUP — inputs only. Decision metrics live on /simulator/results. */}
+        <CaseHeaderStep
+          archetypeId={state.primary_archetype_id}
+          geography={state.geography}
+          totalMw={state.total_mw}
           mode={state.mode}
-          inputValue={inputValue}
-          activeScenarioPreset={activeScenarioPreset}
-          projection={projection}
           scenario={scenario}
-          derived={simResult?.derived}
-          solver={simResult?.solver}
-          targetIrrLever={state.target_irr_lever}
-          onModeChange={onModeChange}
-          onBootstrap={onBootstrap}
-          onPreset={onPreset}
-          onInputChange={onInputChange}
-          onSetIrrLever={onSetIrrLever}
+          projection={projection}
         />
-        <OperatingModelStep primaryId={state.primary_archetype_id} onSelectPrimary={onSelectPrimary} />
-        <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+
+        {/* CONFIGURATION — single card, primary input hero + model/hardware always visible. */}
+        <Card
+          data-sim-config
+          variant="card"
+          surface={1}
+          padding="lg"
+          style={S.configCard}
+        >
+          <div data-sim-config-body>
+            <div style={S.configHeader}>
+              <span style={S.eyebrow}>{UI.SIM_CONFIG_EYEBROW}</span>
+            </div>
+
+            <div data-sim-mode-stack>
+              <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
+
+              <InputFieldHero
+                embedded
+                mode={state.mode}
+                value={inputValue}
+                onChange={onInputChange}
+                projection={projection}
+                scenario={scenario}
+                derived={simResult?.derived}
+                solver={simResult?.solver}
+              />
+            </div>
+
+            <div data-sim-advanced>
+              <div data-sim-advanced-section>
+                <Eyebrow block>{UI.SIM_CONFIG_MODEL_LABEL}</Eyebrow>
+                <ArchetypePicker
+                  archetypes={PRIMARY_DEAL_ARCHETYPES}
+                  primaryId={state.primary_archetype_id}
+                  onSelectPrimary={onSelectPrimary}
+                />
+              </div>
+              <div data-sim-advanced-section>
+                <Eyebrow block>{UI.SIM_CONFIG_HW_LABEL}</Eyebrow>
+                <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+              </div>
+            </div>
+          </div>
+
+          {/* VALIDATE CONFIG → integrated into card footer */}
+          <div data-sim-config-footer style={S.configFooter}>
+            <span style={S.validateHint}>
+              {simError ? UI.SIM_FIX_ERROR
+                : loading ? UI.STATE_CALCULATING
+                : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
+                : !projectId ? UI.SIM_LOADING_PROJECT
+                : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
+                : projection ? UI.SIM_READY
+                : UI.SIM_FILL}
+            </span>
+            <Button
+              variant="primary"
+              size="lg"
+              block
+              disabled={validateBlocked}
+              onClick={handleValidateAndReveal}
+              className="sim-config-cta"
+              style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
+            >
+              {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_CONFIG_GENERATE_MEMO}
+            </Button>
+          </div>
+        </Card>
 
         {projectLoadError && (
           <div className="cp-surface-accent-soft" style={{ ...CP.accentAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
@@ -423,58 +445,55 @@ export default function SimulatorPage() {
           </div>
         )}
         {simError && <div className="cp-surface-accent-soft" style={CP.accentAlert}>Error: {simError}</div>}
-
-        {/* VALIDATE CONFIG → dedicated results page */}
-        <Card style={S.validateBar} padding="md" surface={1}>
-          <span style={S.validateHint}>
-            {simError ? UI.SIM_FIX_ERROR
-              : loading ? UI.STATE_CALCULATING
-              : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
-              : !projectId ? UI.SIM_LOADING_PROJECT
-              : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
-              : projection ? UI.SIM_READY
-              : UI.SIM_FILL}
-          </span>
-          <Button
-            variant="primary"
-            size="lg"
-            disabled={validateBlocked}
-            onClick={handleValidateAndReveal}
-            style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
-          >
-            {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_VALIDATE}
-          </Button>
-        </Card>
         {saveError && (
           <div className="cp-surface-accent-soft" style={CP.accentAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
         )}
         {/* Modal/badge/toast montés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
       </div>
     </div>
-    </>
   );
 }
 
 const S = {
   wrap: {
     width: '100%',
-    maxWidth: 1280,
+    maxWidth: 'var(--cp-max-width, 1440px)',
     margin: '0 auto',
+    flex: '1 1 auto',
+    minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-section-gap)',
-    paddingBottom: 'var(--cp-scroll-clear)',
+    gap: 'var(--cp-space-3)',
+    minWidth: 0,
   },
-  validateBar: {
+  configCard: {
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 'var(--cp-space-4)',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-3)',
+    minWidth: 0,
+  },
+  configHeader: {
+    ...L.rowBetween,
+    flexShrink: 0,
+  },
+  eyebrow: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    letterSpacing: 'var(--cp-tracking-widest)',
+    textTransform: 'uppercase',
+    opacity: 0.8,
   },
   validateHint: {
     fontSize: 'var(--cp-font-base)',
     color: 'var(--cp-text-muted)',
     fontWeight: 'var(--cp-weight-semibold)',
+  },
+  configFooter: {
+    ...L.rowBetween,
+    gap: 'var(--cp-space-3)',
+    flexWrap: 'wrap',
+    paddingTop: 'var(--cp-space-4)',
+    borderTop: '1px solid var(--cp-border-base)',
   },
 };

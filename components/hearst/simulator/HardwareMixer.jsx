@@ -4,6 +4,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { GPU_CATALOG, calcRackPower, calcGpuCapex, calcGpuAnnualRevenue, REFERENCE_GPU_HOUR_PRICES } from '@/lib/hearst-gpu-catalog';
 import { Card } from '@/components/hearst/ui';
+import InfoHint from '@/components/hearst/InfoHint';
 import { UI } from '@/lib/ui-strings';
 
 // 3 ready-to-use hardware profiles. Click one to load the full mix; open
@@ -13,18 +14,21 @@ const HARDWARE_PRESETS = [
     id: 'colo',
     name: UI.HW_PRESET_COLO_NAME,
     tagline: UI.HW_PRESET_COLO_TAGLINE,
+    info: UI.HW_PRESET_COLO_INFO,
     patch: { classic_pct: 80, liquid_pct: 15, ai_pct: 5, gpu_sku_id: 'h200_sxm5', utilization_pct: 70, gpu_hour_price: 2.99 },
   },
   {
     id: 'mixed',
     name: UI.HW_PRESET_MIXED_NAME,
     tagline: UI.HW_PRESET_MIXED_TAGLINE,
+    info: UI.HW_PRESET_MIXED_INFO,
     patch: { classic_pct: 40, liquid_pct: 35, ai_pct: 25, gpu_sku_id: 'gb200_nvl72', utilization_pct: 75, gpu_hour_price: 5 },
   },
   {
     id: 'ai_factory',
     name: UI.HW_PRESET_AI_NAME,
     tagline: UI.HW_PRESET_AI_TAGLINE,
+    info: UI.HW_PRESET_AI_INFO,
     patch: { classic_pct: 10, liquid_pct: 20, ai_pct: 70, gpu_sku_id: 'gb200_nvl72', utilization_pct: 85, gpu_hour_price: 5 },
   },
 ];
@@ -83,7 +87,6 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
   const capex_hw = calcGpuCapex(racks_used, gpu);
   const revenue_ai = calcGpuAnnualRevenue(racks_used, gpu, v.utilization_pct, v.gpu_hour_price);
 
-  const [advanced, setAdvanced] = useState(false);
   const activePreset = matchPreset(v);
 
   function setTier(key, val) {
@@ -98,42 +101,36 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
     onChange?.({ ...v, ...p.patch });
   }
 
-  return (
-    <div style={S.wrap}>
-      {/* Hardware grids stack earlier than the page (1100/1500 vs 900) because the
-          chat rail narrows the centre panel — these react to container width, not
-          the viewport. This component owns its own breakpoints; the page-level
-          stack rule does not target the hardware grids. */}
-      <style>{`
-        @media (max-width: 1100px) {
-          [data-hardware-presets] { grid-template-columns: 1fr !important; }
-          [data-hardware-spine] { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width: 1500px) {
-          [data-hardware-advanced-grid] { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
+  const [showFineTune, setShowFineTune] = useState(false);
 
+  return (
+    <div data-hardware-mixer style={S.wrap}>
       {/* PRESET RAIL — 3 horizontal choices, no redundant number triple */}
       <div data-hardware-presets style={S.presetRail}>
         {HARDWARE_PRESETS.map((p) => {
           const sel = activePreset === p.id;
           return (
-            <Card
-              as="button"
-              key={p.id}
-              type="button"
-              onClick={() => applyPreset(p)}
-              padding="md"
-              hover
-              accent={sel}
-              aria-pressed={sel}
-              surface={2}
-              style={S.presetCard}
-            >
-              <span style={S.presetName}>{p.name}</span>
-              <span style={S.presetTagline}>{p.tagline}</span>
-            </Card>
+            <div key={p.id} style={S.presetWrap}>
+              <Card
+                as="button"
+                type="button"
+                onClick={() => applyPreset(p)}
+                padding="md"
+                hover
+                accent={sel}
+                aria-pressed={sel}
+                surface={2}
+                style={S.presetCard}
+              >
+                <span style={S.presetName}>{p.name}</span>
+                <span style={S.presetTagline}>{p.tagline}</span>
+              </Card>
+              {p.info && (
+                <span style={S.presetHintSlot}>
+                  <InfoHint label={p.name} align="right" content={{ title: p.name, body: p.info }} />
+                </span>
+              )}
+            </div>
           );
         })}
       </div>
@@ -148,12 +145,6 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
             </div>
             <span style={S.aiBadge}>{UI.HW_AI_BADGE(v.ai_pct)}</span>
           </div>
-          <HardwareTopology
-            classicPct={v.classic_pct}
-            liquidPct={v.liquid_pct}
-            totalMw={totalMw}
-            aiMw={mw_ai}
-          />
           <MixBar classicPct={v.classic_pct} liquidPct={v.liquid_pct} aiPct={v.ai_pct} />
         </Card>
 
@@ -164,20 +155,29 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
         </Card>
       </div>
 
-      {/* KPI ROW — full width, breathing */}
-      <div data-hardware-summary style={S.summary}>
-        <SumKpi label={UI.HW_KPI_CHIPS} value={total_gpus.toLocaleString('en-US')} />
-        <SumKpi label={UI.HW_KPI_RACKS} value={racks_used.toLocaleString('en-US')} />
-        <SumKpi label={UI.HW_KPI_EQUIP} value={`$${(capex_hw / 1e6).toFixed(1)}M`} />
-        <SumKpi label={UI.HW_KPI_REVENUE} value={`$${(revenue_ai / 1e6).toFixed(1)}M`} accent />
+      <div data-hardware-finetune-toggle style={S.fineTuneToggle}>
+        <button
+          type="button"
+          onClick={() => setShowFineTune((open) => !open)}
+          style={S.fineTuneButton}
+          aria-expanded={showFineTune}
+          aria-controls="hardware-finetune-panel"
+        >
+          <span>{showFineTune ? UI.SIM_CONFIG_FINETUNE_HIDE : UI.SIM_CONFIG_FINETUNE_SHOW}</span>
+          <span aria-hidden style={{ transform: showFineTune ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+        </button>
       </div>
 
-      <button type="button" onClick={() => setAdvanced((a) => !a)} style={S.advancedToggle}>
-        {advanced ? UI.HW_ADV_HIDE : UI.HW_ADV_SHOW}
-      </button>
+      {showFineTune && (
+        <div id="hardware-finetune-panel" data-hardware-advanced style={S.advanced}>
+          <div data-hardware-summary style={S.summary}>
+            <SumKpi label={UI.HW_KPI_CHIPS} value={total_gpus.toLocaleString('en-US')} />
+            <SumKpi label={UI.HW_KPI_RACKS} value={racks_used.toLocaleString('en-US')} />
+            <SumKpi label={UI.HW_KPI_EQUIP} value={`$${(capex_hw / 1e6).toFixed(1)}M`} />
+            <SumKpi label={UI.HW_KPI_REVENUE} value={`$${(revenue_ai / 1e6).toFixed(1)}M`} accent />
+          </div>
 
-      {advanced && (
-        <div data-hardware-advanced-grid style={S.grid}>
+          <div data-hardware-advanced-grid style={S.grid}>
           <div style={S.col}>
             <div style={S.colTitle}>
               {UI.HW_ADV_POWER_TITLE} <span style={S.colTitleMeta}>{UI.HW_ADV_POWER_META}</span>
@@ -239,7 +239,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                 })}
               </div>
 
-              <div style={S.aiControls}>
+              <div data-hardware-ai-controls style={S.aiControls}>
                 <label style={S.ctrlBlock}>
                   <span style={S.ctrlLabel}>{UI.HW_ADV_UTILIZATION}</span>
                   <input type="range" min={40} max={95} step={1} value={v.utilization_pct}
@@ -257,6 +257,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
               </div>
             </div>
           )}
+          </div>
         </div>
       )}
     </div>
@@ -306,12 +307,12 @@ function HardwareTopology({ classicPct, liquidPct, totalMw, aiMw }) {
           </g>
         );
       })}
-      <text x="44" y="34" fill="var(--cp-text-muted)" fontSize="11" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_POWER_HALL.toUpperCase()}</text>
-      <text x="556" y="34" fill="var(--cp-text-primary)" fontSize="15" fontWeight="var(--cp-weight-black)">{totalMw} MW</text>
+      <text x="44" y="34" fill="var(--cp-text-muted)" fontSize="var(--cp-font-xs)" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_POWER_HALL.toUpperCase()}</text>
+      <text x="556" y="34" fill="var(--cp-text-primary)" fontSize="var(--cp-font-lg)" fontWeight="var(--cp-weight-black)">{totalMw} MW</text>
       <g>
         <rect x="556" y="96" width="150" height="58" rx="12" fill="var(--cp-surface-2)" stroke="var(--cp-border)" />
-        <text x="572" y="118" fill="var(--cp-text-muted)" fontSize="10" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_AI_FABRIC.toUpperCase()}</text>
-        <text x="572" y="142" fill="var(--cp-text-primary)" fontSize="22" fontWeight="var(--cp-weight-black)">{aiMw.toFixed(1)} MW</text>
+        <text x="572" y="118" fill="var(--cp-text-muted)" fontSize="var(--cp-font-micro)" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_AI_FABRIC.toUpperCase()}</text>
+        <text x="572" y="142" fill="var(--cp-text-primary)" fontSize="var(--cp-font-2xl)" fontWeight="var(--cp-weight-black)">{aiMw.toFixed(1)} MW</text>
       </g>
     </svg>
   );
@@ -382,13 +383,54 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-4)',
+    minWidth: 0,
+  },
+  fineTuneToggle: {
+    display: 'flex',
+    justifyContent: 'center',
+    padding: 'var(--cp-space-2) 0',
+    borderTop: '1px dashed var(--cp-border)',
+  },
+  fineTuneButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-2)',
+    padding: 'var(--cp-space-1) var(--cp-space-3)',
+    background: 'transparent',
+    border: 'none',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    color: 'var(--cp-text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-widest)',
+    cursor: 'pointer',
+    opacity: 0.85,
+    transition: 'opacity 0.2s',
+  },
+  advanced: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-4)',
+    minWidth: 0,
   },
   presetRail: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
     gap: 'var(--cp-space-3)',
   },
+  presetWrap: {
+    position: 'relative',
+    display: 'flex',
+    minWidth: 0,
+  },
+  presetHintSlot: {
+    position: 'absolute',
+    top: 'var(--cp-space-2)',
+    right: 'var(--cp-space-2)',
+    zIndex: 'var(--cp-z-floating)',
+  },
   presetCard: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
@@ -399,6 +441,7 @@ const S = {
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-primary)',
+    paddingRight: 'var(--cp-space-5)',
   },
   presetTagline: {
     fontSize: 'var(--cp-font-xs)',
@@ -434,7 +477,7 @@ const S = {
     margin: 'var(--cp-space-1) 0 0',
     color: 'var(--cp-text-primary)',
     fontSize: 'var(--cp-font-lg)',
-    lineHeight: 1.1,
+    lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
   },
@@ -525,19 +568,6 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
     fontVariantNumeric: 'tabular-nums',
-  },
-  advancedToggle: {
-    alignSelf: 'stretch',
-    fontSize: 'var(--cp-font-sm)',
-    fontWeight: 'var(--cp-weight-black)',
-    padding: 'var(--cp-space-3) var(--cp-space-4)',
-    background: 'var(--cp-surface-0)',
-    color: 'var(--cp-text-primary)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    cursor: 'pointer',
-    letterSpacing: 'var(--cp-tracking-wider)',
-    textTransform: 'uppercase',
   },
   grid: {
     display: 'grid',

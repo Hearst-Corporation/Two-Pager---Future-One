@@ -151,8 +151,23 @@ html :focus-visible {
 }
 .ct-page-area {
   width: 100% !important;
-  min-height: 0;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: var(--cp-space-6) 0 0 0 !important;
   box-sizing: border-box;
+}
+
+/* Cockpit = hauteur 100dvh, pas de scroll vertical document. */
+html.oracle-cockpit-root,
+html.oracle-cockpit-root body {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 /* === Rail droit : IC au-dessus du chat (flex natif shell, pas d'input absolute) === */

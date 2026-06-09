@@ -1,9 +1,10 @@
 'use client';
 
+import { memo } from 'react';
 import { Button } from '@/components/hearst/ui';
 import { UI } from '@/lib/ui-strings';
 
-export default function SimulatorCTABar({
+function SimulatorCTABar({
   onSave,
   onExportMd,
   onGenerateMemo,
@@ -19,7 +20,7 @@ export default function SimulatorCTABar({
     : null;
 
   return (
-    <div style={S.bar}>
+    <div data-cta-bar style={S.bar}>
       <div style={S.left}>
         {hasProjection && planCaution ? (
           <span style={S.statusCaution}>
@@ -49,6 +50,8 @@ export default function SimulatorCTABar({
   );
 }
 
+export default memo(SimulatorCTABar);
+
 const S = {
   bar: {
     background: 'var(--cp-surface-2)',
@@ -59,7 +62,6 @@ const S = {
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 'var(--cp-space-4)',
-    marginTop: 'var(--cp-space-4)',
     minHeight: 56,
     flexWrap: 'wrap',
   },

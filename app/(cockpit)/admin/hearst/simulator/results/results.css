@@ -1,0 +1,506 @@
+/* results.css — layout Results
+   Container: [data-results-layout] (panneau centre réel, pas le viewport).
+   2 seuils synchronisés pour TOUTE la page :
+     · 640px  — narrow ↔ medium
+     · 1080px — medium ↔ wide
+*/
+
+body.oracle-results-wide .ct-center-panel {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+body.oracle-results-wide .ct-page-area {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+body.oracle-results-page [data-results-layout] {
+  container-type: inline-size;
+  container-name: results;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+/* Padding réduit : avec rail chat, le conteneur queries doit atteindre 640px (ex. viewport 1280). */
+body.oracle-results-page .oracle-page {
+  padding-inline: var(--cp-space-4);
+  box-sizing: border-box;
+}
+
+@media (min-width: 1080px) {
+  body.oracle-results-page .oracle-page {
+    padding-inline: var(--cp-space-6);
+  }
+}
+
+body.oracle-results-page [data-decision-kpis] > * {
+  min-width: 0;
+}
+
+body.oracle-results-page [data-kpi-value] {
+  font-size: clamp(18px, 1.5vw, 24px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER NARROW  — container < 640px
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Decision KPIs — 2×2 narrow */
+body.oracle-results-page [data-decision-kpis] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.oracle-results-page [data-economics-grid] {
+  grid-template-columns: 1fr !important;
+  align-items: stretch;
+}
+
+body.oracle-results-page [data-economics-grid] > * {
+  height: 100%;
+}
+
+body.oracle-results-page [data-layer-grid] {
+  display: grid;
+  gap: var(--cp-space-4);
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+body.oracle-results-page [data-layer-grid] > * {
+  height: 100%;
+}
+
+body.oracle-results-page [data-analysis-layout] {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--cp-space-5);
+  align-items: start;
+}
+
+body.oracle-results-page [data-capital-panel] {
+  container-type: inline-size;
+  container-name: capital;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-5);
+  min-width: 0;
+  align-items: stretch;
+}
+
+body.oracle-results-page [data-capital-zone] {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-4);
+}
+
+body.oracle-results-page [data-capital-zone]:not(:first-child) {
+  border-top: 1px solid var(--cp-border-base);
+  padding-top: var(--cp-space-5);
+}
+
+body.oracle-results-page [data-capital-donut] {
+  width: 100%;
+  min-width: 0;
+  --donut-size: clamp(120px, 36cqi, 148px);
+  --donut-hole: calc(var(--donut-size) * 0.58);
+}
+
+body.oracle-results-page [data-donut-legend] {
+  width: 100%;
+  min-width: 0;
+}
+
+body.oracle-results-page [data-capital-panel] [data-structure-rows] {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: var(--cp-space-6);
+  row-gap: var(--cp-space-5);
+  width: 100%;
+  align-content: start;
+}
+
+/* Structure en 2 colonnes dès que la zone structure a la place (medium + wide) */
+@container capital (min-width: 280px) {
+  body.oracle-results-page [data-capital-panel] [data-structure-rows] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+body.oracle-results-page [data-viz-rail] {
+  grid-template-columns: 1fr !important;
+}
+
+body.oracle-results-page [data-viz-shell] {
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+body.oracle-results-page [data-viz-rail] {
+  align-content: start;
+  align-self: start;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER MEDIUM — 640px ≤ container < 1080px
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@container results (min-width: 640px) {
+  body.oracle-results-page [data-economics-grid] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.oracle-results-page [data-layer-grid] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.oracle-results-page [data-viz-rail] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* Capital bande : donut pleine largeur, returns | structure en dessous */
+  body.oracle-results-page [data-capital-panel] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'donut donut'
+      'returns structure';
+    gap: var(--cp-space-5);
+    align-items: start;
+  }
+
+  body.oracle-results-page [data-capital-zone='donut'] {
+    grid-area: donut;
+  }
+
+  body.oracle-results-page [data-capital-zone='returns'] {
+    grid-area: returns;
+    justify-content: flex-start;
+    align-self: start;
+  }
+
+  body.oracle-results-page [data-capital-zone='structure'] {
+    grid-area: structure;
+    align-self: start;
+  }
+
+  body.oracle-results-page [data-capital-zone]:not(:first-child) {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  body.oracle-results-page [data-capital-zone='returns'],
+  body.oracle-results-page [data-capital-zone='structure'] {
+    border-top: 1px solid var(--cp-border-base);
+    padding-top: var(--cp-space-5);
+  }
+
+  body.oracle-results-page [data-capital-zone='structure'] {
+    border-left: 1px solid var(--cp-border-base);
+    padding-left: var(--cp-space-5);
+  }
+
+  body.oracle-results-page [data-capital-donut] {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(var(--cp-space-3), 4cqi, var(--cp-space-5));
+    --donut-size: clamp(108px, 16cqi, 136px);
+  }
+
+  body.oracle-results-page [data-donut-legend] {
+    flex: 1 1 0;
+    max-width: min(100%, 300px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER WIDE — container ≥ 1080px
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@container results (min-width: 1080px) {
+  /* Decision: 4 KPIs en ligne */
+  body.oracle-results-page [data-decision-kpis] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  body.oracle-results-page [data-economics-grid] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  body.oracle-results-page [data-layer-grid] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  /* Analysis reste empilé (chart pleine largeur + bande capital) — pas de sidebar étroite */
+
+  /* Capital : donut · returns · structure (screenshot board) */
+  body.oracle-results-page [data-capital-panel] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+    grid-template-areas: 'donut returns structure';
+    align-items: start;
+    gap: var(--cp-space-6);
+  }
+
+  body.oracle-results-page [data-capital-zone='donut'] {
+    justify-content: flex-start;
+    align-self: start;
+  }
+
+  body.oracle-results-page [data-capital-zone='returns'] {
+    justify-content: flex-start;
+    align-self: start;
+    border-top: 0;
+    padding-top: 0;
+    border-left: 1px solid var(--cp-border-base);
+    padding-left: var(--cp-space-5);
+  }
+
+  body.oracle-results-page [data-capital-zone='structure'] {
+    align-self: start;
+    border-top: 0;
+    padding-top: 0;
+    border-left: 1px solid var(--cp-border-base);
+    padding-left: var(--cp-space-5);
+  }
+
+  body.oracle-results-page [data-capital-donut] {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: var(--cp-space-5);
+    --donut-size: clamp(120px, 12cqi, 148px);
+  }
+
+  body.oracle-results-page [data-donut-legend] {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Viz : rail vertical + panneau */
+  body.oracle-results-page [data-viz-shell] {
+    grid-template-columns: minmax(200px, 220px) minmax(0, 1fr) !important;
+    align-items: start;
+  }
+
+  body.oracle-results-page [data-viz-rail] {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.oracle-results-page [data-viz-rail] button {
+    min-height: 0;
+  }
+}
+
+/* ── Hero ── */
+body.oracle-results-page [data-results-hero] {
+  gap: var(--cp-space-5);
+}
+
+body.oracle-results-page [data-narrative-box] {
+  gap: var(--cp-space-3);
+}
+
+/* ── Capital panel — returns composition garde sa sous-carte ── */
+body.oracle-results-page [data-capital-panel] [data-returns-composition] {
+  min-width: 0;
+  width: 100%;
+}
+
+body.oracle-results-page [data-capital-panel] [data-returns-composition] [data-rc-rows] {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cp-space-3);
+}
+
+@container capital (max-width: 280px) {
+  body.oracle-results-page [data-capital-panel] [data-returns-composition] [data-rc-rows] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--cp-space-2);
+  }
+}
+
+body.oracle-results-page [data-capital-panel] [data-returns-composition] [data-rc-note] {
+  line-height: var(--cp-leading-normal);
+  font-size: var(--cp-font-sm);
+}
+
+/* ── Chart ── */
+body.oracle-results-page [data-results-chart] {
+  min-height: 0;
+  min-width: 0;
+  padding: var(--cp-space-4);
+  overflow: hidden;
+}
+
+body.oracle-results-page [data-results-chart] > div {
+  min-height: 300px;
+  width: 100%;
+}
+
+@container results (min-width: 640px) {
+  body.oracle-results-page [data-results-chart] > div {
+    min-height: 360px;
+  }
+}
+
+@container results (min-width: 1080px) {
+  body.oracle-results-page [data-results-chart] > div {
+    min-height: 400px;
+  }
+}
+
+/* ── Analysis header ── */
+body.oracle-results-page [data-analysis-head] {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--cp-space-4);
+  margin-bottom: var(--cp-space-5);
+  padding-bottom: var(--cp-space-3);
+  border-bottom: 1px solid var(--cp-border);
+  min-width: 0;
+}
+
+body.oracle-results-page [data-analysis-head] [data-analysis-eyebrow] {
+  flex-shrink: 0;
+  padding-bottom: var(--cp-space-1);
+}
+
+@container results (max-width: 639px) {
+  body.oracle-results-page [data-analysis-head] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--cp-space-2);
+  }
+
+  body.oracle-results-page [data-analysis-head] [data-analysis-eyebrow] {
+    padding-bottom: 0;
+  }
+}
+
+/* ── Viz container heights ── */
+body.oracle-results-page [data-viz-container] {
+  min-height: 320px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* B2B matrix — pleine largeur du panneau, pas de scroll horizontal */
+body.oracle-results-page [data-b2b-matrix] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+  container-name: b2b-matrix;
+}
+
+@container b2b-matrix (max-width: 520px) {
+  [data-b2b-matrix] th,
+  [data-b2b-matrix] td {
+    padding: calc(var(--cp-space-1) / 2) var(--cp-space-1) !important;
+  }
+
+  [data-b2b-matrix] .b2b-pricing {
+    font-size: calc(var(--cp-font-micro) * 0.92);
+  }
+}
+
+@container results (min-width: 640px) {
+  body.oracle-results-page [data-viz-container] {
+    min-height: 380px;
+  }
+}
+
+@container results (min-width: 1080px) {
+  body.oracle-results-page [data-viz-container] {
+    min-height: 420px;
+  }
+}
+
+@container results (max-width: 639px) {
+  body.oracle-results-page [data-viz-panel-head] {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ── Gantt ── */
+body.oracle-results-page [data-gantt-row] {
+  grid-template-columns: minmax(148px, 220px) minmax(0, 1fr);
+  gap: var(--cp-space-3);
+}
+
+@container results (min-width: 640px) {
+  body.oracle-results-page [data-gantt-row] {
+    grid-template-columns: minmax(160px, 240px) minmax(0, 1fr);
+  }
+}
+
+@container results (max-width: 639px) {
+  body.oracle-results-page [data-gantt-row] {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER EXTRA WIDE — container ≥ 1280px
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.oracle-results-page [data-cta-bar] {
+  flex-wrap: wrap;
+  row-gap: var(--cp-space-3);
+}
+
+@container results (max-width: 639px) {
+  body.oracle-results-page [data-cta-bar] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body.oracle-results-page [data-cta-bar] > div:last-child {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
+@media print {
+  .oracle-rail-nav,
+  .ct-rail-left,
+  .ct-rail-right,
+  [data-results-hero] button,
+  [data-viz-step-controls],
+  [data-cta-bar],
+  .oracle-mobile-nav-root {
+    display: none !important;
+  }
+
+  .oracle-page {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  body.oracle-results-page [data-results-layout] {
+    max-width: none !important;
+    gap: var(--cp-space-4) !important;
+  }
+
+  .ct-center-panel,
+  .ct-page-area {
+    overflow: visible !important;
+  }
+
+  .ct-page-area {
+    padding: 20px !important;
+  }
+}

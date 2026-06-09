@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useSimulation } from '@/lib/hearst-simulation-context';
-import { fmtPctFromRatio, fmtX, MISSING } from '@/lib/hearst-format';
+import { boardFormatted, boardValue } from '@/lib/hearst-board-metrics';
+import { deriveReturnsComposition } from '@/lib/returns-composition';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import { hasAdvisorProjection } from '@/lib/advisor-context-from-scenario';
 import { getAdvisorRailMode } from '@/lib/oracle-advisor-routes';
@@ -22,8 +23,11 @@ const PROMPTS = [
 
 function verdictFor(projection) {
   if (!projection) return { label: 'UNKNOWN', risk: 'Unknown', confidence: 'Unknown' };
-  const irr = projection.irr;
-  const npv = projection.npv;
+  // Canonical board basis: POST-TAX returns (same fields Results' decisionVerdict
+  // reads) so the Advisor verdict can never diverge from the headline. Threshold
+  // logic unchanged.
+  const irr = boardValue(projection, 'irr');
+  const npv = boardValue(projection, 'npv');
   const dscr = projection.dscr_stabilized;
   if (irr == null || npv == null) {
     return { label: UI.RESULTS_VERDICT_NO_DATA, risk: 'Unknown', confidence: 'Unknown' };
@@ -52,7 +56,7 @@ function advisoryFor(ctx) {
   }
 
   let concern = warnings[0] || 'No critical warning surfaced by the engine.';
-  if (!warnings[0] && projection.irr != null && projection.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100) {
+  if (!warnings[0] && boardValue(projection, 'irr') != null && boardValue(projection, 'irr') < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100) {
     concern = 'Returns are below the investment committee threshold.';
   } else if (!warnings[0] && projection.payback_years != null && projection.payback_years > 9) {
     concern = 'Payback is long for an IC-ready base case.';
@@ -62,9 +66,17 @@ function advisoryFor(ctx) {
     ? 'AI allocation and utilization assumptions.'
     : 'Utilization, lease structure and capital intensity.';
 
-  const nextStep = state?.primary_archetype_id === 'powered_shell'
+  let nextStep = state?.primary_archetype_id === 'powered_shell'
     ? 'Stress utilization and CAPEX sensitivity before IC.'
     : 'Test powered-shell structure as the lower-risk benchmark.';
+
+  // Returns-composition disclosure (audit P0): when most of the equity return is
+  // realized at the terminal sale, that exit dependence is the IC's first concern.
+  const comp = deriveReturnsComposition(projection);
+  if (comp.available && comp.terminalPct != null && comp.terminalPct > 0.5) {
+    concern = comp.note;
+    nextStep = comp.diligence || nextStep;
+  }
 
   return { concern, driver, nextStep };
 }
@@ -98,9 +110,11 @@ function OracleAdvisorContent() {
   const projection = advisorContext?.projection;
   const verdict = useMemo(() => verdictFor(projection), [projection]);
   const advisory = useMemo(() => advisoryFor(advisorContext), [advisorContext]);
-  const irr = projection ? fmtPctFromRatio(projection.irr) : MISSING;
-  const moic = projection ? fmtX(projection.moic) : MISSING;
-  const payback = projection?.payback_years != null ? `${projection.payback_years} years` : MISSING;
+  // Canonical post-tax board values via the metric contract — identical to the
+  // Results decision band (audit P0-3).
+  const irr = boardFormatted(projection, 'irr');
+  const moic = boardFormatted(projection, 'moic');
+  const payback = boardFormatted(projection, 'payback');
 
   return (
     <aside style={S.wrap} aria-label={UI.ADVISOR_RAIL_ARIA}>

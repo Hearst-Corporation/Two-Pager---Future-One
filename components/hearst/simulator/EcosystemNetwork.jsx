@@ -47,7 +47,7 @@ function layoutNodes() {
   return positions;
 }
 
-export default function EcosystemNetwork({ width = 720, height = 560, activeArchetypeId = null, onNodeClick }) {
+export default function EcosystemNetwork({ width = 720, height = 420, activeArchetypeId = null, onNodeClick }) {
   const [hover, setHover] = useState(null);
   const positions = useMemo(layoutNodes, []);
 
@@ -64,8 +64,14 @@ export default function EcosystemNetwork({ width = 720, height = 560, activeArch
   const visibleNodes = Object.entries(positions);
 
   return (
-    <div style={{ width: '100%', overflow: 'auto', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-3)' }}>
-      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+    <div style={{ width: '100%', overflow: 'hidden', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-3)' }}>
+      <svg
+        width="100%"
+        height="auto"
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ display: 'block', maxHeight: height }}
+      >
         {/* Group labels */}
         {TYPE_GROUPS.map(g => {
           const mid = (g.angle_start + g.angle_end) / 2;

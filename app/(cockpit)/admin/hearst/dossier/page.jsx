@@ -27,9 +27,12 @@ import {
   deriveVerdict, deriveCategory, deriveKpis, topRisks, deriveDecision,
   deriveCapitalStack, fmtUsd,
 } from '@/lib/dossier-derive';
+import { deriveReturnsComposition } from '@/lib/returns-composition';
 import { Card, SectionHead, Button, Table, Row, Cell, KpiGrid, KpiCard } from '@/components/hearst/ui';
 import { S as CP } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
+import { resolveSourceLabel } from '@/lib/citation-resolver';
+import InfoHint from '@/components/hearst/InfoHint';
 
 const DOSSIER_ERR = { ...CP.error, padding: 'var(--cp-space-3)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-3)' };
 const DOSSIER_EMPTY = { ...CP.empty, padding: 'var(--cp-space-9)', fontSize: 'var(--cp-font-md)' };
@@ -39,14 +42,35 @@ const DOSSIER_EMPTY = { ...CP.empty, padding: 'var(--cp-space-9)', fontSize: 'va
 function fmtDate(s) { try { return new Date(s).toLocaleString(); } catch { return s; } }
 function fmtDateShort(s) { try { return new Date(s).toLocaleDateString(); } catch { return s; } }
 
+/** Map a free-text metric label (from LLM memo) to a KPI_EDU key, or null. */
+function metricEduKey(label) {
+  if (!label) return null;
+  const l = label.toLowerCase();
+  if (/\birr\b/.test(l)) return 'irr';
+  if (/\bmoic\b|equity multiple|money[- ]?on[- ]?money/.test(l)) return 'moic';
+  if (/\bnpv\b/.test(l)) return 'npv';
+  if (/dscr|debt service/.test(l)) return 'dscr';
+  if (/terminal.*equity/.test(l)) return 'terminal_value_to_equity';
+  if (/terminal/.test(l)) return 'terminal_value';
+  if (/payback/.test(l)) return 'payback';
+  if (/capex|capital expenditure|build cost|total build/.test(l)) return 'capex';
+  if (/ebitda/.test(l)) return 'ebitda';
+  if (/revenue/.test(l)) return 'revenue';
+  if (/occupancy/.test(l)) return 'occupancy';
+  if (/equity/.test(l)) return 'equity';
+  if (/exit/.test(l)) return 'exit_year';
+  if (/source/.test(l)) return 'source_score';
+  return null;
+}
+
 const CATEGORY_DESC = {
-  'Powered Shell':          'Landlord delivers shell + power; tenant fits out and operates. NNN lease, real-estate risk profile.',
-  'Hyperscale Campus':      'Multi-building campus leased to hyperscale operators at scale.',
-  'AI Factory':             'Dense GPU training / inference cluster, liquid-cooled.',
-  'GPU Cloud':              'Owned GPUs rented as compute — utilization and obsolescence exposure.',
-  'Enterprise Colocation':  'Retail / wholesale colocation for enterprise tenants.',
-  'Government Compute':     'State-anchored national AI / compute capacity.',
-  'Edge Campus':            'Distributed edge sites positioned close to demand.',
+  'Powered Shell':          UI.DOSSIER_CAT_POWERED_SHELL,
+  'Hyperscale Campus':      UI.DOSSIER_CAT_HYPERSCALE,
+  'AI Factory':             UI.DOSSIER_CAT_AI_FACTORY,
+  'GPU Cloud':              UI.DOSSIER_CAT_GPU_CLOUD,
+  'Enterprise Colocation':  UI.DOSSIER_CAT_ENTERPRISE_COLO,
+  'Government Compute':     UI.DOSSIER_CAT_GOV_COMPUTE,
+  'Edge Campus':            UI.DOSSIER_CAT_EDGE_CAMPUS,
 };
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -187,6 +211,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
   const risks = topRisks(m, 5);
   const decision = deriveDecision(m, memo.status);
   const capStack = deriveCapitalStack(m, scenario);
+  const returnsComp = deriveReturnsComposition(m._exec_projection);
   const fresh = m.data_freshness || {};
   const phases = m.deployment_roadmap?.phases || [];
   const comparables = m.market_benchmarking?.comparables || [];
@@ -220,7 +245,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
   return (
     <div style={S.canvas}>
-      {/* ── HERO VERDICT ──────────────────────────────────────────── */}
+      {/* ── UNIFIED DECISION HERO ──────────────────────────────────────────── */}
       <Card as="section" variant="card" surface={1} padding="lg" style={{ borderLeft: '3px solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <div style={S.heroTop}>
           <div style={S.heroIdent}>
@@ -255,45 +280,38 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
               </div>
             )}
             {govErr && <div style={S.govErr}>{govErr}</div>}
+            
+            <div style={{ marginTop: 'var(--cp-space-2)', textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)' }}>
+              <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_NEXT_ACTION}</div>
+              <div style={{ fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' }}>{decision.nextAction.primary}</div>
+              <div style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', lineHeight: 'var(--cp-leading-tight)' }}>{decision.nextAction.detail}</div>
+            </div>
           </div>
         </div>
 
-        <div style={S.verdictRow}>
-          <div style={S.verdictBadge}>{verdict.label}</div>
-          <div style={S.verdictMeta}>
-            <span style={S.eyebrow}>{UI.DOSSIER_EYEBROW_VERDICT}</span>
-            {verdict.drivers?.length > 0 && <span style={S.verdictDrivers}>{verdict.drivers.join('  ·  ')}</span>}
-            <span style={S.verdictNote}>{UI.DOSSIER_VERDICT_NOTE}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 7)), 1fr))', gap: 'var(--cp-space-6)', background: 'var(--cp-surface-0)', padding: 'var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--cp-space-4)', flexWrap: 'wrap' }}>
+              <div style={S.verdictBadge}>{verdict.label}</div>
+              <div style={S.verdictMeta}>
+                <span style={S.eyebrow}>{UI.DOSSIER_EYEBROW_VERDICT}</span>
+                {verdict.drivers?.length > 0 && <span style={S.verdictDrivers}>{verdict.drivers.join('  ·  ')}</span>}
+                <span style={S.verdictNote}>{UI.DOSSIER_VERDICT_NOTE}</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <span style={S.eyebrow}>{UI.DOSSIER_EYEBROW_OPPORTUNITY}</span>
+            <div style={S.categoryName}>{category || UI.DOSSIER_CATEGORY_NOT_CLASSIFIED}</div>
+            <div style={{ fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' }}>
+              {category ? CATEGORY_DESC[category] : UI.DOSSIER_CATEGORY_NOT_INFERRED}
+            </div>
           </div>
         </div>
 
-        {decision.recommendation && <p style={S.heroLead}>{decision.recommendation}</p>}
-      </Card>
-
-      {/* ── KPI STRIP ─────────────────────────────────────────────── */}
-      <section style={S.kpiStrip}>
-        {kpis.map(k => (
-          <Card key={k.key} variant="card" surface={1} padding="md">
-            <div style={S.kpiLabel}>{k.label}</div>
-            <div style={S.kpiValue}>{k.value || '—'}</div>
-            {k.sub && <div style={S.kpiSub}>{k.sub}</div>}
-          </Card>
-        ))}
-      </section>
-
-      {/* ── OPPORTUNITY CATEGORY ──────────────────────────────────── */}
-      <Card as="section" variant="card" surface={0} style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-4)', flexWrap: 'wrap', paddingTop: 'var(--cp-space-3)', paddingBottom: 'var(--cp-space-3)', paddingLeft: 'var(--cp-space-5)', paddingRight: 'var(--cp-space-5)' }}>
-        <span style={S.eyebrow}>{UI.DOSSIER_EYEBROW_OPPORTUNITY}</span>
-        <span style={S.categoryName}>{category || UI.DOSSIER_CATEGORY_NOT_CLASSIFIED}</span>
-        <span style={S.categoryDesc}>
-          {category ? CATEGORY_DESC[category] : UI.DOSSIER_CATEGORY_NOT_INFERRED}
-        </span>
-      </Card>
-
-      {/* ── DECISION CARD + RISK CARDS ────────────────────────────── */}
-      <section style={S.twoCol}>
-        <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-5)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' }}>
           <SectionHead title={UI.DOSSIER_SECTION_RECOMMENDATION} />
+          {decision.recommendation && <p style={S.heroLead}>{decision.recommendation}</p>}
           {decision.why && <p style={S.body}>{decision.why}</p>}
           {decision.conditions.length > 0 && (
             <div style={S.condWrap}>
@@ -303,32 +321,58 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
               </ul>
             </div>
           )}
-          <div style={S.nextAction}>
-            <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_NEXT_ACTION}</div>
-            <div style={S.nextPrimary}>{decision.nextAction.primary}</div>
-            <div style={S.nextDetail}>{decision.nextAction.detail}</div>
-          </div>
-        </Card>
+        </div>
+      </Card>
 
-        <div style={S.riskCol}>
-          <SectionHead title={UI.DOSSIER_SECTION_TOP_RISKS} hint={UI.DOSSIER_RISKS_HINT(risks.length)} />
-          {risks.length === 0 && <Placeholder>{UI.DOSSIER_PLACEHOLDER_RISKS}</Placeholder>}
-          <div style={S.riskGrid}>
-            {risks.map((r, i) => {
-              const sv = (r.severity || 'MED').toUpperCase();
-              return (
-                <Card key={i} variant="card" surface={1} padding="sm" style={{ borderLeft: '3px solid var(--cp-border-strong)' }}>
-                  <div style={S.riskHead}>
-                    <span style={S.sevLabel}>{sv === 'MEDIUM' ? 'MED' : sv}</span>
-                    {r.category && <span style={S.riskCat}>{r.category}</span>}
-                  </div>
-                  <div style={S.riskTitle}>{r.label}</div>
-                  {r.dependency && <div style={S.riskWhy}>{UI.DOSSIER_RISK_WHY} {r.dependency}</div>}
-                  {r.mitigation && <div style={S.riskMit}>{UI.DOSSIER_MITIGATION_PREFIX}{r.mitigation}</div>}
-                </Card>
-              );
-            })}
-          </div>
+      {/* ── KPI STRIP + RETURNS COMPOSITION ─────────────────────────── */}
+      <section style={S.kpiStrip}>
+        {kpis.map(k => (
+          <Card key={k.key} variant="card" surface={1} padding="md">
+            <div style={S.kpiLabel}>
+              <span style={S.kpiLabelRow}>
+                <span>{k.label}</span>
+                <InfoHint id={k.key} label={k.label} />
+              </span>
+            </div>
+            <div style={S.kpiValue}>{k.value || '—'}</div>
+            {k.sub && <div style={S.kpiSub}>{k.sub}</div>}
+          </Card>
+        ))}
+        {returnsComp.available && (
+          <Card variant="card" surface={0} style={{ padding: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <span style={S.kpiLabelRow}>
+              <span style={S.eyebrow}>{UI.RESULTS_RC_TITLE}</span>
+              <InfoHint id="returns_composition" label={UI.RESULTS_RC_TITLE} />
+            </span>
+            {returnsComp.operationsPct != null && (
+              <span style={S.returnsCompSplit}>
+                {Math.round(returnsComp.operationsPct * 100)}% {UI.RESULTS_RC_OPERATIONS} · {Math.round(returnsComp.terminalPct * 100)}% {UI.RESULTS_RC_TERMINAL}
+              </span>
+            )}
+            <span style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)', lineHeight: 'var(--cp-leading-tight)' }}>{returnsComp.note}</span>
+          </Card>
+        )}
+      </section>
+
+      {/* ── TOP RISKS ─────────────────────────────────────────────── */}
+      <section>
+        <SectionHead title={UI.DOSSIER_SECTION_TOP_RISKS} hint={UI.DOSSIER_RISKS_HINT(risks.length)} />
+        {risks.length === 0 && <Placeholder>{UI.DOSSIER_PLACEHOLDER_RISKS}</Placeholder>}
+        <div style={{ ...S.riskGrid, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 7)), 1fr))' }}>
+          {risks.map((r, i) => {
+            const sv = (r.severity || 'MED').toUpperCase();
+            return (
+              <Card key={i} variant="card" surface={1} padding="sm" style={{ borderLeft: '3px solid var(--cp-border-strong)' }}>
+                <div style={S.riskHead}>
+                  <span style={S.sevLabel}>{sv === 'MEDIUM' ? 'MED' : sv}</span>
+                  {r.category && <span style={S.riskCat}>{r.category}</span>}
+                </div>
+                <div style={S.riskTitle}>{r.label}</div>
+                {r.dependency && <div style={S.riskWhy}>{UI.DOSSIER_RISK_WHY} {r.dependency}</div>}
+                {r.mitigation && <div style={S.riskMit}>{UI.DOSSIER_MITIGATION_PREFIX}{r.mitigation}</div>}
+              </Card>
+            );
+          })}
         </div>
       </section>
 
@@ -367,19 +411,29 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
         {m.key_financial_metrics && (
           <AnalyticsBlock title={UI.DOSSIER_BLOCK_FINANCIAL_METRICS}>
-            <table style={S.table}>
-              <thead><tr>{[UI.DOSSIER_TH_METRIC, UI.DOSSIER_TH_VALUE, UI.DOSSIER_TH_CONF, UI.DOSSIER_TH_SOURCE].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
-              <tbody>
-                {(m.key_financial_metrics.metrics || []).map((row, i) => (
-                  <tr key={i}>
-                    <td style={S.td}>{row.label}</td>
-                    <td style={S.td}><strong>{row.value}</strong>{row.unit && <span style={S.unit}> {row.unit}</span>}</td>
-                    <td style={S.td}><ConfidenceLabel level={row.confidence} /></td>
-                    <td style={S.tdMuted}>{row.source || '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={S.table}>
+                <thead><tr>{[UI.DOSSIER_TH_METRIC, UI.DOSSIER_TH_VALUE, UI.DOSSIER_TH_CONF, UI.DOSSIER_TH_SOURCE].map(h => <th key={h} style={S.th}>{h}</th>)}</tr></thead>
+                <tbody>
+                  {(m.key_financial_metrics.metrics || []).map((row, i) => {
+                    const eduKey = metricEduKey(row.label);
+                    return (
+                    <tr key={i}>
+                      <td style={S.td}>
+                        <span style={S.kpiLabelRow}>
+                          <span>{row.label}</span>
+                          {eduKey && <InfoHint id={eduKey} label={row.label} />}
+                        </span>
+                      </td>
+                      <td style={S.td}><strong>{row.value}</strong>{row.unit && <span style={S.unit}> {row.unit}</span>}</td>
+                      <td style={S.td}><ConfidenceLabel level={row.confidence} /></td>
+                      <td style={S.tdMuted}>{row.source || '—'}</td>
+                    </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
             {m.key_financial_metrics.narrative && <p style={S.body}>{m.key_financial_metrics.narrative}</p>}
           </AnalyticsBlock>
         )}
@@ -394,13 +448,15 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
               </>
             )}
             {Object.keys(m.recommended_architecture?.config || {}).length > 0 && (
-              <table style={S.configTable}>
-                <tbody>
-                  {Object.entries(m.recommended_architecture.config).map(([k, v]) => (
-                    <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
-                  ))}
-                </tbody>
-              </table>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={S.configTable}>
+                  <tbody>
+                    {Object.entries(m.recommended_architecture.config).map(([k, v]) => (
+                      <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
             {m.recommended_architecture?.rationale && <p style={S.body}>{m.recommended_architecture.rationale}</p>}
           </AnalyticsBlock>
@@ -415,18 +471,20 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 
         {m.commercialization_strategy && (
           <AnalyticsBlock title={UI.DOSSIER_BLOCK_REVENUE_MODEL}>
-            <table style={S.configTable}>
-              <tbody>
-                {[
-                  [UI.DOSSIER_ROW_PRICING, m.commercialization_strategy.pricing],
-                  [UI.DOSSIER_ROW_CONTRACT, m.commercialization_strategy.contract_structure],
-                  [UI.DOSSIER_ROW_ANCHOR, m.commercialization_strategy.anchor_tenant],
-                  [UI.DOSSIER_ROW_RAMP, m.commercialization_strategy.ramp_profile],
-                ].filter(([, v]) => v).map(([k, v]) => (
-                  <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
-                ))}
-              </tbody>
-            </table>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={S.configTable}>
+                <tbody>
+                  {[
+                    [UI.DOSSIER_ROW_PRICING, m.commercialization_strategy.pricing],
+                    [UI.DOSSIER_ROW_CONTRACT, m.commercialization_strategy.contract_structure],
+                    [UI.DOSSIER_ROW_ANCHOR, m.commercialization_strategy.anchor_tenant],
+                    [UI.DOSSIER_ROW_RAMP, m.commercialization_strategy.ramp_profile],
+                  ].filter(([, v]) => v).map(([k, v]) => (
+                    <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </AnalyticsBlock>
         )}
 
@@ -445,13 +503,20 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         {m.intelligence_sources?.length > 0 && (
           <AnalyticsBlock title={UI.DOSSIER_BLOCK_SOURCES}>
             <ul style={S.sourceList}>
-              {m.intelligence_sources.map((s, i) => (
-                <li key={i} style={S.sourceItem}>
-                  <span style={S.sourceId}>{s.datapoint_id}</span>
-                  <ConfidenceLabel level={s.trust} />
-                  <span style={S.sourceMeta}>· {s.used_for}</span>
-                </li>
-              ))}
+              {m.intelligence_sources.map((s, i) => {
+                const src = resolveSourceLabel(s);
+                return (
+                  <li key={i} style={S.sourceItem}>
+                    {src.url ? (
+                      <a href={src.url} target="_blank" rel="noopener noreferrer" style={S.sourceLink}>{src.label}</a>
+                    ) : (
+                      <span style={S.sourceId}>{src.label}</span>
+                    )}
+                    <ConfidenceLabel level={s.trust} />
+                    <span style={S.sourceMeta}>· {s.used_for}</span>
+                  </li>
+                );
+              })}
             </ul>
           </AnalyticsBlock>
         )}
@@ -486,22 +551,24 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
         )}
         <div>
           <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_GEN_METADATA}</div>
-          <table style={S.configTable}>
-            <tbody>
-              {[
-                [UI.DOSSIER_META_PROVIDER, memo.provider_used],
-                [UI.DOSSIER_META_CONFIDENCE, memo.confidence_level],
-                [UI.DOSSIER_META_STAKEHOLDER, memo.stakeholder],
-                [UI.DOSSIER_META_AUDIENCE, memo.audience],
-                [UI.DOSSIER_META_GEN_TIME, memo.generation_time_ms != null ? `${(memo.generation_time_ms / 1000).toFixed(1)}s` : null],
-                [UI.DOSSIER_META_CREATED, fmtDate(memo.created_at)],
-                [UI.DOSSIER_META_DATA_AS_OF, memo.data_as_of],
-                [UI.DOSSIER_META_SCENARIO, memo.scenario_id || '—'],
-              ].filter(([, v]) => v != null).map(([k, v]) => (
-                <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
-              ))}
-            </tbody>
-          </table>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={S.configTable}>
+              <tbody>
+                {[
+                  [UI.DOSSIER_META_PROVIDER, memo.provider_used],
+                  [UI.DOSSIER_META_CONFIDENCE, memo.confidence_level],
+                  [UI.DOSSIER_META_STAKEHOLDER, memo.stakeholder],
+                  [UI.DOSSIER_META_AUDIENCE, memo.audience],
+                  [UI.DOSSIER_META_GEN_TIME, memo.generation_time_ms != null ? `${(memo.generation_time_ms / 1000).toFixed(1)}s` : null],
+                  [UI.DOSSIER_META_CREATED, fmtDate(memo.created_at)],
+                  [UI.DOSSIER_META_DATA_AS_OF, memo.data_as_of],
+                  [UI.DOSSIER_META_SCENARIO, memo.scenario_id || '—'],
+                ].filter(([, v]) => v != null).map(([k, v]) => (
+                  <tr key={k}><td style={S.configKey}>{k}</td><td style={S.configVal}>{v}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         <div>
           <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_FULL_JSON}</div>
@@ -532,16 +599,13 @@ function ScenarioView({ scenarioId }) {
   useEffect(() => {
     async function load() {
       try {
-        const pRes = await fetch('/api/admin/hearst/project');
-        const { project: proj } = await pRes.json();
         const [mRes, sRes] = await Promise.allSettled([
           fetch(`/api/admin/hearst/strategic-memos?scenario_id=${scenarioId}`).then(r => r.json()),
-          fetch(`/api/admin/hearst/scenarios?project_id=${proj?.id}`).then(r => r.json()),
+          fetch(`/api/admin/hearst/scenarios/${scenarioId}`).then(r => r.json()),
         ]);
         if (mRes.status === 'fulfilled') setMemos(mRes.value.memos || []);
         if (sRes.status === 'fulfilled') {
-          const list = sRes.value.scenarios || sRes.value.rows || sRes.value || [];
-          setScenario(Array.isArray(list) ? list.find(s => s.id === scenarioId) || null : null);
+          setScenario(sRes.value.scenario || sRes.value || null);
         }
       } catch (e) { setErr(String(e)); }
     }
@@ -594,7 +658,7 @@ function MemoDetailView({ memoId }) {
   const [err, setErr] = useState(null);
 
   const load = useCallback(async (id) => {
-    setData(null); setErr(null);
+    setErr(null);
     try {
       const r = await fetch(`/api/admin/hearst/strategic-memos/${id}`);
       const j = await r.json();
@@ -676,7 +740,7 @@ function AllMemosView() {
         <p className="oracle-subtitle">{UI.DOSSIER_PAGE_SUBTITLE}</p>
       </header>
 
-      <KpiGrid cols={3} style={{ marginBottom: 'var(--cp-space-6)' }}>
+      <KpiGrid style={{ marginBottom: 'var(--cp-space-6)' }}>
         <KpiCard label={UI.DOSSIER_KPI_REPORTS} value={(memos || []).length} format="display" size="sm" />
         <KpiCard label={UI.DOSSIER_KPI_APPROVED} value={approvedCount} format="display" size="sm" />
         <KpiCard label={UI.DOSSIER_KPI_SCENARIOS} value={scenarios.length} format="display" size="sm" />
@@ -693,8 +757,8 @@ function AllMemosView() {
         >
           {memos.map(mm => (
             <Row key={mm.id}>
-              <Cell label><Link href={`/admin/hearst/dossier?memo=${mm.id}`} style={S.link}>{mm.title}</Link></Cell>
-              <Cell>
+              <Cell label style={S.titleCell} title={mm.title}><Link href={`/admin/hearst/dossier?memo=${mm.id}`} style={S.link}>{mm.title}</Link></Cell>
+              <Cell style={S.scenarioCell}>
                 {mm.scenario_id
                   ? <Link href={`/admin/hearst/dossier?scenario=${mm.scenario_id}`} style={S.link}>{scenarioName(mm.scenario_id)}</Link>
                   : <span style={S.muted}>—</span>}
@@ -760,12 +824,11 @@ const S = {
   heroTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
   heroIdent: { flex: '1 1 calc(var(--cp-space-8) * 10)', minWidth: 0 },
   identLine: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'capitalize', marginBottom: 'var(--cp-space-2)' },
-  heroTitle: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)', lineHeight: 'var(--cp-leading-tight)' },
+  heroTitle: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)', lineHeight: 'var(--cp-leading-tight)' },
   heroActions: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)', alignItems: 'flex-end', flexShrink: 0 },
   heroLead: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', margin: 'var(--cp-space-0)', maxWidth: 'calc(var(--cp-space-9) * 22 + var(--cp-space-5))' },
 
-  verdictRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
-  verdictBadge: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 'var(--cp-leading-tight)', paddingLeft: 'var(--cp-space-4)', borderLeft: '3px solid var(--cp-accent)' },
+  verdictBadge:{ fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 'var(--cp-leading-tight)', paddingLeft: 'var(--cp-space-4)', borderLeft: '3px solid var(--cp-accent)' },
   verdictMeta: { display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)', minWidth: 0 },
   verdictDrivers: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-body)' },
   verdictNote: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
@@ -775,26 +838,22 @@ const S = {
   govNote: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)' },
   govErr: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-error)', maxWidth: 'calc(var(--cp-space-9) * 5 + var(--cp-space-5))', textAlign: 'right' },
 
+  // ── Returns composition (exit-dependence disclosure) ──
+  returnsCompSplit: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', fontVariantNumeric: 'tabular-nums' },
+
   // ── KPI strip (auto-fit grid → responsive) ──
-  kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 3 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
+  kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 4)), 1fr))', gap: 'var(--cp-space-3)' },
   kpiLabel: { ...EYEBROW, marginBottom: 'var(--cp-space-2)' },
+  kpiLabelRow: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-1)', minWidth: 0 },
   kpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', fontVariantNumeric: 'tabular-nums' },
   kpiSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
   categoryName: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
-  categoryDesc: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', flex: '1 1 calc(var(--cp-space-9) * 6)' },
-
-  // ── Two-col (decision + risks) ──
-  twoCol: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-8) * 10), 1fr))', gap: 'var(--cp-space-4)', alignItems: 'start' },
+  // ── Decision / conditions ──
   condWrap: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', margin: 'var(--cp-space-3) var(--cp-space-0)' },
   condList: { margin: 'var(--cp-space-0)', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
-  nextAction: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', borderLeft: '3px solid var(--cp-accent)' },
-  nextPrimary: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', marginTop: 'calc(var(--cp-space-1) / 2)' },
-  nextDetail: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', marginTop: 'calc(var(--cp-space-1) / 2)', lineHeight: 'var(--cp-leading-normal)' },
-
-  riskCol: { minWidth: 0 },
   riskGrid: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
-  riskHead: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
+  riskHead: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)', flexWrap: 'wrap' },
   sevLabel: { ...EYEBROW, color: 'var(--cp-text-primary)' },
   riskCat: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' },
   riskTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)' },
@@ -804,14 +863,14 @@ const S = {
   // ── Section headings (canon H2 13/700) ──
 
   // ── Visual story ──
-  vizGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(calc(var(--cp-space-9) * 6 + var(--cp-space-5)), 1fr))', gap: 'var(--cp-space-3)' },
+  vizGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 7)), 1fr))', gap: 'var(--cp-space-3)' },
   vizTitle: { ...EYEBROW, marginBottom: 'var(--cp-space-3)' },
   placeholder: { padding: 'var(--cp-space-4) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', fontStyle: 'italic', textAlign: 'center' },
 
   // Capital stack
   stackBar: { display: 'flex', height: 'calc(var(--cp-space-5) + var(--cp-space-1) / 2)', borderRadius: 'var(--cp-radius-sm)', overflow: 'hidden', border: '1px solid var(--cp-border)' },
   stackSeg: { height: '100%' },
-  stackLegend: { display: 'flex', gap: 'var(--cp-space-4)', marginTop: 'var(--cp-space-2)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)' },
+  stackLegend: { display: 'flex', gap: 'var(--cp-space-4)', marginTop: 'var(--cp-space-2)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', flexWrap: 'wrap' },
   dot: { display: 'inline-block', width: 'var(--cp-font-micro)', height: 'var(--cp-font-micro)', borderRadius: 'var(--cp-radius-xs)', marginRight: 'var(--cp-space-1)', verticalAlign: 'middle' },
   splitWrap: { marginTop: 'var(--cp-space-3)' },
   splitRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
@@ -858,7 +917,8 @@ const S = {
   configVal: { padding: 'var(--cp-space-1) var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-sm)' },
   sourceList: { margin: 'var(--cp-space-0)', padding: 'var(--cp-space-0)', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
   sourceItem: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-1)', flexWrap: 'wrap', fontSize: 'var(--cp-font-xs)' },
-  sourceId: { fontFamily: 'ui-monospace, monospace', color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-xs)' },
+  sourceId: { color: 'var(--cp-text-primary)', fontSize: 'var(--cp-font-xs)' },
+  sourceLink: { color: 'var(--cp-accent)', fontSize: 'var(--cp-font-xs)', textDecoration: 'none' },
   sourceMeta: { color: 'var(--cp-text-muted)' },
 
   // ── Version bar + appendix ──
@@ -877,17 +937,22 @@ const S = {
   // ── Shared (list/scenario views) ──
   sectionHeader: { marginBottom: 'var(--cp-space-5)' },
   link: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-medium)' },
+  // Cellule titre : libellé long et répété → on borne la largeur (ellipsis) pour ne pas
+  // affamer la colonne scénario (sinon noms de scénario à la ligne sur 5-6 lignes).
+  titleCell: { maxWidth: 'calc(var(--cp-space-9) * 8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  // Le nom de scénario est l'identifiant clé de la ligne → une seule ligne, jamais coupé.
+  scenarioCell: { whiteSpace: 'nowrap' },
   muted: { color: 'var(--cp-text-faint)' },
   pdf: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)' },
   statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
-  breadcrumb: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-5)' },
+  breadcrumb: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-5)', flexWrap: 'wrap' },
   breadcrumbLink: { color: 'var(--cp-accent)', textDecoration: 'none' },
   breadcrumbSep: { color: 'var(--cp-text-faint)' },
   memoCardList: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
-  memoCardTop: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
+  memoCardTop: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)', flexWrap: 'wrap' },
   memoCardVersion: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
   memoCardStatus: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
   memoCardTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-1)' },
-  memoCardMeta: { display: 'flex', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
+  memoCardMeta: { display: 'flex', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', flexWrap: 'wrap' },
 
 };

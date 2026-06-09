@@ -449,7 +449,7 @@ const S = {
   // hero
   hero: { borderLeft: '3px solid var(--cp-accent)', paddingLeft: 'var(--cp-space-5)', paddingTop: 'var(--cp-space-2)', paddingBottom: 'var(--cp-space-2)' },
   eyebrow: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)' },
-  h1: { fontSize: 'var(--cp-font-xl)', lineHeight: 1.18, fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-strong)', margin: '10px 0 10px' },
+  h1: { fontSize: 'var(--cp-font-2xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-strong)', margin: 'var(--cp-space-3) 0' },
   lede: { fontSize: 'clamp(13px, 1.4vw, 15px)', color: 'var(--cp-text-body)', maxWidth: 780, lineHeight: 1.55 },
 
   // kpi strip

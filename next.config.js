@@ -14,7 +14,6 @@ if (process.env.SKIP_ENV_VALIDATION !== 'true') {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@hearst/cockpit-shell'],
   reactStrictMode: true,
   devIndicators: false,
 

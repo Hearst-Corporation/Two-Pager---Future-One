@@ -7,6 +7,10 @@
 import { NextResponse } from 'next/server';
 import { requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { deriveVerdict, deriveRiskLevel, fmtPct as ddPct } from '@/lib/dossier-derive';
+import { fmtUSD, fmtPctFromRatio, fmtPctRaw as fmtPctRawCore, fmtYears, MISSING } from '@/lib/hearst-format';
+import { deriveReturnsComposition } from '@/lib/returns-composition';
+import { boardFormatted, boardLabel } from '@/lib/hearst-board-metrics';
+import { resolveCitationsInText, resolveCitation } from '@/lib/citation-resolver';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -19,15 +23,15 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c =>
 // Helper: render null from dossier-derive formatters as 'N/A'
 const orNA = (x) => x == null ? 'N/A' : x;
 
-// Local layout formatters — kept for display (different signature to dd* variants)
-const fmtUsd = (v, unit = 'M') => {
-  if (v == null) return 'N/A';
-  const n = unit === 'M' ? v / 1e6 : unit === 'B' ? v / 1e9 : v;
-  return `$${n.toFixed(n >= 10 ? 0 : 1)}${unit}`;
-};
-const fmtPct = (v) => v == null ? 'N/A' : `${(v * 100).toFixed(1)}%`;
-const fmtPctRaw = (v) => v == null ? 'N/A' : (v > 1 ? `${v.toFixed(1)}%` : `${(v * 100).toFixed(1)}%`);
-const fmtYr = (v) => v == null ? 'N/A' : `${Number(v).toFixed(1)} yrs`;
+// Layout formatters DELEGATE to lib/hearst-format (the single formatter layer) so
+// the board PDF renders identical glyph / rounding / tiers to every on-screen
+// surface (audit P0-2 / P1-2: the $B tier is now reached; payback is "yr" not
+// "yrs"). Missing values render as 'N/A' (PDF convention) instead of the screen "—".
+const naIf = (s) => (s === MISSING ? 'N/A' : s);
+const fmtUsd = (v) => naIf(fmtUSD(v));
+const fmtPct = (v) => naIf(fmtPctFromRatio(v));
+const fmtPctRaw = (v) => naIf(fmtPctRawCore(v));
+const fmtYr = (v) => naIf(fmtYears(v));
 const fmtDate = (s) => { try { return new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }); } catch { return String(s ?? ''); } };
 
 const REGION_MAP = {
@@ -147,9 +151,12 @@ function assumptions(snap, finMetrics) {
     { k: 'Hold period',   v: (typeof snap?.exit_year === 'number') ? `${snap.exit_year} years` : 'Not modeled' },
     { k: 'Total CAPEX',   v: fmtUsd(snap?.total_capex) },
     { k: 'Debt',          v: debt ? `${debt.value}% @ ${debt.unit.replace('% @ ', '') || 'not specified'}` : 'not specified' },
-    { k: 'IRR (base)',    v: fmtPct(snap?.irr) },
-    { k: 'NPV',           v: fmtUsd(snap?.npv) },
-    { k: 'Payback',       v: fmtYr(snap?.payback_years) },
+    { k: 'IRR (Pre-tax, base)', v: fmtPct(snap?.irr) },
+    { k: 'IRR (Post-tax)',      v: fmtPct(snap?.irr_post_tax ?? snap?.irr) },
+    { k: 'NPV (Post-tax)',      v: fmtUsd(snap?.npv_post_tax ?? snap?.npv) },
+    { k: 'Terminal Value',      v: fmtUsd(snap?.terminal_value) },
+    { k: 'Payback',             v: fmtYr(snap?.payback_years) },
+    { k: 'Tax',                 v: snap?.tax_assumptions ? `${snap.tax_assumptions.income_tax_rate_pct}% Qatar · straight-line ${snap.tax_assumptions.depreciable_life_years}y` : 'Not modeled' },
     { k: 'Utilization',   v: 'not specified' },
   ];
   return rows.map(r => `
@@ -159,7 +166,13 @@ function assumptions(snap, finMetrics) {
 // Sources from confidence block known_unknowns + fin_metrics sources
 function sourcesList(cb, finMetrics) {
   const kus = (cb?.known_unknowns || []).slice(0, 3);
-  const srcs = [...new Set((finMetrics?.metrics || []).map(m => m.source).filter(Boolean))].slice(0, 4);
+  // m.source is a raw datapoint_id (or "ASSUMED") — resolve to a human source name.
+  const srcs = [...new Set(
+    (finMetrics?.metrics || [])
+      .map(m => m.source)
+      .filter(Boolean)
+      .map(src => (src === 'ASSUMED' ? 'Assumed (no public comparable)' : resolveCitation(src).label)),
+  )].slice(0, 4);
   const all = [...srcs, ...kus.map(k => `Note: ${k}`)].slice(0, 6);
   if (!all.length) return '<li>ORACLE internal model</li>';
   return all.map(s => `<li><span class="src">${esc(s)}</span></li>`).join('');
@@ -242,17 +255,22 @@ function buildHtml(row) {
   const projDate  = fmtDate(row.created_at);
   const location  = regionLabel(row.region);
 
-  // Revenue proxy from commercialization pricing or fin_metrics
-  const rentMetric = (fin.metrics || []).find(r => r.label === 'Hyperscale rent');
-  const revenueNote = rentMetric ? `$${rentMetric.value}/kW/mo NNN` : (comm.pricing ? comm.pricing.slice(0, 60) + '…' : 'N/A');
+  // P0-4: financial figures come from the ENGINE snapshot, never scraped from LLM
+  // key_financial_metrics label strings. Stabilized revenue + EBITDA margin are
+  // engine-computed; when absent the PDF shows an honest 'N/A', not a label fallback.
+  const stabRevenue = snap.stabilized_revenue ?? null;
+  const stabEbitda = snap.stabilized_ebitda ?? null;
+  const ebitdaMarginRatio = (stabRevenue && stabEbitda != null && stabRevenue !== 0)
+    ? stabEbitda / stabRevenue
+    : null;
 
-  // EBITDA margin — only show if real metric exists
-  const ebitdaMetric = (fin.metrics || []).find(r => r.label?.includes('EBITDA'));
-  const ebitdaNote = ebitdaMetric ? `${ebitdaMetric.value}% landlord EBITDA margin` : null;
+  // Returns composition (audit P0): operations vs terminal-value share of equity
+  // value, from the engine snapshot (years[].fcf + terminal_value_to_equity).
+  const returnsComp = deriveReturnsComposition(snap);
 
   // Recommendation body — gated by verdictKey; LLM rationale only used for PROCEED family
   const approveBody = (verdictKey === 'PROCEED' || verdictKey === 'PROCEED_WITH_CONDITIONS')
-    ? (arch.rationale ? arch.rationale.replace(/^WHY:\s*/i, '').slice(0, 280) + '…' : reco.approve)
+    ? (arch.rationale ? resolveCitationsInText(arch.rationale.replace(/^WHY:\s*/i, '')).slice(0, 280) + '…' : reco.approve)
     : reco.approve;
 
   const holdBody = comm.ramp_profile
@@ -556,14 +574,14 @@ p { margin: 0; }
         <div class="fsub">${snap.total_mw ? `${snap.total_mw} MW IT load` : 'Phase 1'}</div>
       </div>
       <div class="fig">
-        <div class="fk">IRR (levered)</div>
-        <div class="fv tnum">${fmtPct(snap.irr)}</div>
-        <div class="fsub">Base case</div>
+        <div class="fk">IRR (Post-tax · Levered equity)</div>
+        <div class="fv tnum">${fmtPct(snap.irr_post_tax ?? snap.irr)}</div>
+        <div class="fsub">Base case${snap.irr_post_tax != null ? ` · Pre-tax ${fmtPct(snap.irr)}` : ''}</div>
       </div>
       <div class="fig">
-        <div class="fk">NPV (discount rate not modeled)</div>
-        <div class="fv tnum">${fmtUsd(snap.npv)}</div>
-        <div class="fsub">Base case</div>
+        <div class="fk">NPV (Post-tax)</div>
+        <div class="fv tnum">${fmtUsd(snap.npv_post_tax ?? snap.npv)}</div>
+        <div class="fsub">Base case${snap.npv_post_tax != null ? ` · Pre-tax ${fmtUsd(snap.npv)}` : ''}</div>
       </div>
       <div class="fig">
         <div class="fk">Payback</div>
@@ -597,25 +615,38 @@ p { margin: 0; }
     <h2 class="headline smaller">Financial summary — built on the lowest marginal cost of power.</h2>
     <div class="fin-hero">
       <div class="fin-kpi">
-        <div class="fk">Revenue (NNN)</div>
-        <div class="fv tnum">${esc(revenueNote)}</div>
-        <div class="fs">Hyperscale base rate</div>
+        <div class="fk">Revenue (stabilized)</div>
+        <div class="fv tnum">${fmtUsd(stabRevenue)}</div>
+        <div class="fs">Engine · per year at stabilization</div>
       </div>
       <div class="fin-kpi">
         <div class="fk">EBITDA Margin</div>
-        <div class="fv tnum">${ebitdaMetric ? `${esc(String(ebitdaMetric.value))}%` : 'N/A'}</div>
-        <div class="fs">Landlord NNN</div>
+        <div class="fv tnum">${fmtPct(ebitdaMarginRatio)}</div>
+        <div class="fs">Engine · ${fmtUsd(stabEbitda)} stabilized</div>
       </div>
       <div class="fin-kpi">
-        <div class="fk">IRR (base)</div>
-        <div class="fv accent tnum">${fmtPct(snap.irr)}</div>
-        <div class="fs">Levered · base case</div>
+        <div class="fk">IRR (Post-tax)</div>
+        <div class="fv accent tnum">${fmtPct(snap.irr_post_tax ?? snap.irr)}</div>
+        <div class="fs">${esc(boardLabel('moic'))} ${naIf(boardFormatted(snap, 'moic'))} · Levered equity${snap.irr_post_tax != null ? ` · Pre-tax ${fmtPct(snap.irr)}` : ''}</div>
       </div>
       <div class="fin-kpi">
-        <div class="fk">NPV · Payback</div>
-        <div class="fv tnum">${fmtUsd(snap.npv)}</div>
+        <div class="fk">NPV (Post-tax) · Payback</div>
+        <div class="fv tnum">${fmtUsd(snap.npv_post_tax ?? snap.npv)}</div>
         <div class="fs">${fmtYr(snap.payback_years)}</div>
       </div>
+    </div>
+    <div class="returns-comp" style="margin-top:6mm; padding:4mm 5mm; border:0.3mm solid var(--hair); border-radius:1.5mm;">
+      <div style="font-size:7.2pt; letter-spacing:.18em; text-transform:uppercase; color:var(--gray-1); font-weight:700; margin-bottom:2.5mm;">Returns Composition</div>
+      ${returnsComp.available && returnsComp.operationsPct != null ? `
+      <div style="display:flex; justify-content:space-between; font-size:9.5pt; margin-bottom:2mm;">
+        <span><b class="tnum">${Math.round(returnsComp.operationsPct * 100)}%</b> Operations</span>
+        <span><b class="tnum">${Math.round(returnsComp.terminalPct * 100)}%</b> Terminal value</span>
+      </div>
+      <div style="display:flex; height:2mm; border-radius:1mm; overflow:hidden; background:var(--whisper);">
+        <div style="width:${Math.max(0, Math.min(100, returnsComp.operationsPct * 100))}%; background:var(--gray-1);"></div>
+        <div style="width:${Math.max(0, Math.min(100, returnsComp.terminalPct * 100))}%; background:var(--oxblood);"></div>
+      </div>` : ''}
+      <div style="font-size:8.4pt; color:var(--ink-soft); margin-top:2.5mm;">${esc(returnsComp.note)}</div>
     </div>
     <div class="fin-body">
       <div class="break-avoid">
@@ -624,7 +655,7 @@ p { margin: 0; }
       </div>
       <div class="sens-wrap">
         <div class="sens-title">IRR Sensitivity — Power Price &amp; Utilization</div>
-        ${sensLine(snap.irr)}
+        ${sensLine(snap.irr_post_tax ?? snap.irr)}
       </div>
     </div>
   </div>
@@ -684,11 +715,12 @@ p { margin: 0; }
       </div>
       <div class="scen base">
         <div class="sc-name">Base</div>
-        <div class="sc-tag">${snap.total_mw ? snap.total_mw + ' MW' : 'Base'} at ${snap.irr ? fmtPct(snap.irr) : '—'} IRR — the underwriting case for FID.</div>
-        <div class="sc-irr-k">IRR</div>
-        <div class="sc-irr tnum">${fmtPct(snap.irr)}</div>
+        <div class="sc-tag">${snap.total_mw ? snap.total_mw + ' MW' : 'Base'} at ${(snap.irr_post_tax ?? snap.irr) != null ? fmtPct(snap.irr_post_tax ?? snap.irr) : '—'} post-tax IRR — the underwriting case for FID.</div>
+        <div class="sc-irr-k">IRR (Post-tax)</div>
+        <div class="sc-irr tnum">${fmtPct(snap.irr_post_tax ?? snap.irr)}</div>
         <div class="sc-rows">
-          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum">${fmtUsd(snap.npv)}</span></div>
+          ${snap.irr_post_tax != null ? `<div class="sc-line"><span class="sc-lk">Pre-tax IRR</span><span class="sc-lv tnum">${fmtPct(snap.irr)}</span></div>` : ''}
+          <div class="sc-line"><span class="sc-lk">NPV (Post-tax)</span><span class="sc-lv tnum">${fmtUsd(snap.npv_post_tax ?? snap.npv)}</span></div>
           <div class="sc-line"><span class="sc-lk">Payback</span><span class="sc-lv tnum">${fmtYr(snap.payback_years)}</span></div>
         </div>
       </div>

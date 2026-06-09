@@ -1,7 +1,7 @@
 /* =====================================================================
    cp-tokens.css — Bridge --cp-* → --ct-* + valeurs manquantes.
    Importé uniquement dans app/(cockpit)/admin/hearst/layout.jsx.
-   Source des valeurs : ~/.claude/assets/cockpit/tokens.css + cockpit-shell/tokens.css
+   Source locale : cockpit-shell/tokens.css + compléments applicatifs ci-dessous.
    ===================================================================== */
 
 /* Le shell rend une .ct-hub-bar « Overview » destinée au hub multi-produits.
@@ -10,7 +10,7 @@
   display: none !important;
 }
 
-/* Status tokens projet (--cp-status-*) — absents du package upstream.
+/* Status tokens projet (--cp-status-*) — compléments applicatifs locaux.
    Définis ICI (source de vérité --cp-*), JAMAIS en redéfinissant un --ct-*. */
 :root {
   /* ── Status sémantiques (Core) ── */
@@ -25,15 +25,22 @@
   --cp-status-danger-border:  rgba(239, 68, 68, 0.40);
 
   /* Rail droit = drawer overlay (FAB), jamais colonne grid — centre full-width.
-     Override DÉLIBÉRÉ de --ct-rail-right (normalement upstream-only) : le shell
+     Override DÉLIBÉRÉ de --ct-rail-right dans la copie locale : le shell
      traite ce token comme la largeur de la colonne flex .ct-rail-right dans
      .ct-panels-row ET l'injecte dans --ct-rail-right-eff. Le mettre à 0 est le
-     SEUL levier upstream pour que le centre n'en réserve pas l'espace ; chat-fab.css
+     levier local pour que le centre n'en réserve pas l'espace ; chat-fab.css
      sort ensuite .ct-rail-right du flux (position:fixed) et réserve la place via
      --cp-chat-rail-width (padding-right de .ct-page-area). Ne pas le retirer. */
   --ct-rail-right: 0px;
   --cp-chat-rail-width: min(420px, 32vw);
+  --cp-chat-rail-collapsed-width: 40px;
+}
 
+body.oracle-simulator-page {
+  --cp-chat-rail-width: min(360px, 27vw);
+}
+
+:root {
   /* ── Aliases directs vers --ct-* ── */
   --cp-accent:          var(--ct-accent);
   --cp-accent-maroon:   var(--ct-accent-maroon);
@@ -46,8 +53,6 @@
   --cp-border-strong:   var(--ct-border-strong);
   --cp-dur-base:        var(--ct-dur-base);
   --cp-ease:            var(--ct-ease);
-  --cp-rail-left:       var(--ct-rail-left);
-  --cp-rail-right:      var(--ct-rail-right);
   --cp-shadow-depth:    var(--ct-shadow-depth);
   --cp-surface-0:       var(--ct-surface-0);
   --cp-surface-1:       var(--ct-surface-1);
@@ -65,10 +70,6 @@
   --cp-dur-fast:        100ms;
   --cp-ease-out:        cubic-bezier(0, 0, 0.2, 1);
   --cp-grid-line:       1px solid var(--ct-border-soft);
-
-  /* ── Breakpoints ── */
-  --cp-bp-mobile: 600px;
-  --cp-bp-tablet: 900px;
 
   /* ── Typographie ── */
   --cp-font-micro:  10px;
@@ -116,7 +117,6 @@
 
   /* ── Ombres ── */
   --cp-shadow-xs:        0 1px 3px rgba(0,0,0,0.30);
-  --cp-shadow-sm:        0 4px 12px rgba(0,0,0,0.35);
   --cp-shadow-md:        0 8px 24px rgba(0,0,0,0.40);
   --cp-shadow-lg:        0 10px 32px rgba(0,0,0,0.42);
   --cp-shadow-card-hover:0 12px 40px rgba(0,0,0,0.45);
@@ -130,24 +130,20 @@
   /* ── Couleurs sémantiques ──
      --cp-error / --cp-success / --cp-warning : alias vers --cp-status-danger /
      --cp-status-success / --cp-status-warning (même hex — source unique sur --cp-status-*).
-     Variantes -bg/-strong gardées séparément : valeurs distinctes de leurs homologues
-     status-*-soft/-border (opacités/teintes différentes), donc pas aliasées. */
+     Variante -bg gardée séparément : valeur distincte de status-*-soft (opacité
+     différente), donc pas aliasée. */
   --cp-error:          var(--cp-status-danger);
   --cp-error-bg:       rgba(239,68,68,0.08);
-  --cp-error-strong:   #fca5a5;
 
   --cp-success:        var(--cp-status-success);
   --cp-success-bg:     rgba(16,185,129,0.08);
-  --cp-success-strong: #6ee7b7;
 
   --cp-warning:        var(--cp-status-warning);
   --cp-warning-bg:     rgba(245,158,11,0.08);
-  --cp-warning-strong: #fcd34d;
 
   --cp-info:           #3b82f6;
   --cp-info-bg:        rgba(59,130,246,0.08);
   --cp-info-strong:    #93c5fd;
-  --cp-info-strong-bg: rgba(59,130,246,0.15);
 
   --cp-violet:         #8b5cf6;
   --cp-violet-bg:      rgba(139,92,246,0.08);
@@ -158,9 +154,7 @@
   --cp-status-cool:        var(--cp-violet);
   --cp-status-cool-bg:     var(--cp-violet-bg);
   --cp-status-positive:    var(--cp-success);
-  --cp-status-positive-bg: var(--cp-success-bg);
   --cp-status-negative:    var(--cp-error);
-  --cp-status-negative-bg: var(--cp-error-bg);
 
   /* ── Brand colors operators (Radar archétypes simulator) ──
      Couleurs marque (CoreWeave/hyperscaler/QIA) sans équivalent sémantique. */
@@ -189,17 +183,17 @@
   --cp-btn-height-sm:  32px;
   --cp-btn-height-md:  36px;
   --cp-btn-height-lg:  44px;
-  --cp-icon-sm:        16px;
   --cp-icon-md:        20px;
-  --cp-icon-lg:        24px;
+  --cp-icon-lg:        28px;
+  --cp-icon-stroke:    1.6;
+  --cp-archetype-card-min-height: 100px;
+  --cp-sim-hero-row-min:       11.5rem;
+  --cp-sim-hero-row-min-stack: 18.5rem;
   --cp-display-input:  46px;
   --cp-display-unit:   22px;
   --cp-chart-tick:     11px;
   --cp-section-gap:    var(--cp-space-6);
-  --cp-avatar-size:    32px;
   --cp-badge-size:     18px;
-  --cp-brand-size:     36px;
-  --cp-brand-inner:    24px;
   --cp-icon-btn-size:  32px;
   --cp-kpi-min-width:  160px;
   --cp-spinner-size:   14px;
@@ -245,9 +239,9 @@
   --cp-op-uptime:          #555555;
   --cp-op-sec:             #1A3560;
   --cp-op-default:    var(--ct-text-muted);
-  --cp-op-brookfield: #0ea5e9;
+  --cp-op-brookfield: var(--cp-accent);
   --cp-op-qai:        #6366f1;
-  --cp-op-qia:        #a855f7;
+  --cp-op-qia:        var(--cp-accent-strong);
 }
 
 /* =====================================================================
@@ -318,7 +312,6 @@
        lit ce token comme largeur de la colonne rail gauche. À 0 + .ct-rail-left
        { display:none } ci-dessous, l'espace est entièrement libéré en mobile. */
     --ct-rail-left: 0px;
-    --cp-rail-left: 0px;
     --cp-nav-bottom: 64px;
     --cp-bar-bottom: var(--cp-nav-bottom);
     --cp-scroll-clear: calc(var(--cp-nav-bottom) + var(--cp-fab-size) + var(--cp-fab-gap));

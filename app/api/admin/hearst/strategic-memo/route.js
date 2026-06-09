@@ -11,7 +11,7 @@
 // (collapsible, confidence tag, source citations, charts ré-utilisés).
 //
 // Auth : editor requis (la route persiste une ligne versionnée du mémo en DB via persistMemo).
-// Modèle : Hypercli/Kimi K2.6 UNIQUEMENT (aucun fallback provider). Si l'appel
+// Modèle : Moonshot AI/Kimi K2.6 UNIQUEMENT (aucun fallback provider). Si l'appel
 // échoue/timeout, on retombe sur un mémo déterministe local (sans LLM).
 // Rate-limit : 5 req/min/actor en prod, skip en dev.
 
@@ -37,7 +37,7 @@ export const maxDuration = 300;
 
 const RL_WINDOW = 60_000;
 const RL_MAX = 5;
-const MEMO_LLM_SOFT_TIMEOUT_MS = 45_000;
+const MEMO_LLM_SOFT_TIMEOUT_MS = 90_000; // élevé à 90s : kimi-k2.6 est un modèle à raisonnement, le thinking peut prendre 30-60s
 const rlBuckets = new Map();
 
 function checkRl(actorId) {
@@ -190,7 +190,7 @@ STAKEHOLDER MATCH :
 
 EXPLAINABILITY RULES :
 - explainability.simplified_takeaways MUST exclude every term flagged by lib/oracle-explainability.detectJargon() for the chosen audience. Re-write any takeaway that contains banned jargon.
-- explainability.why_this_recommendation MUST start with "We recommend X because Y supported by [datapoint_id Z]." Not "This is an opportunity to..."`;
+- explainability.why_this_recommendation MUST start with "We recommend X because Y" and name the supporting evidence in plain prose (e.g. "supported by Equinix FY2024 10-K"). Do NOT emit bracketed tokens like [datapoint_id Z]; cite the source by its real name. Not "This is an opportunity to..."`;
 
 // Strip raw_excerpt + any debug payload from the live brief before sending to
 // the client. raw_excerpt carries the first 200 chars of provider HTML, useful
@@ -225,7 +225,7 @@ function buildScenarioSummary(payload) {
   }
   if (projection) {
     const f = (v, k) => v == null ? 'N/A' : (k === 'pct' ? fmtPctFromRatio(v) : k === 'usd' ? fmtUSD(v) : k === 'x' ? fmtX(v) : v);
-    parts.push(`Projection : total CAPEX ${f(projection.total_capex, 'usd')} · stab. EBITDA ${f(projection.stabilized_ebitda, 'usd')} · IRR ${f(projection.irr, 'pct')} · MOIC ${f(projection.moic, 'x')} · payback ${projection.payback_years ?? '?'} yr · DSCR ${projection.dscr_stabilized ? f(projection.dscr_stabilized, 'x') : 'N/A'} · NPV ${f(projection.npv, 'usd')} · TV ${f(projection.terminal_value, 'usd')}`);
+    parts.push(`Projection : total CAPEX ${f(projection.total_capex, 'usd')} · stab. EBITDA ${f(projection.stabilized_ebitda, 'usd')} · IRR post-tax ${f(projection.irr_post_tax ?? projection.irr, 'pct')} (pre-tax ${f(projection.irr, 'pct')}) · MOIC post-tax ${f(projection.moic_post_tax ?? projection.moic, 'x')} (pre-tax ${f(projection.moic, 'x')}) · payback ${projection.payback_years ?? '?'} yr · DSCR ${projection.dscr_stabilized ? f(projection.dscr_stabilized, 'x') : 'N/A'} · NPV post-tax ${f(projection.npv_post_tax ?? projection.npv, 'usd')} (pre-tax ${f(projection.npv, 'usd')}) · TV ${f(projection.terminal_value, 'usd')}${projection.tax_assumptions ? ` · Tax ${projection.tax_assumptions.income_tax_rate_pct}% (Qatar, straight-line D&A ${projection.tax_assumptions.depreciable_life_years}y; returns are levered equity)` : ''}`);
     if (projection?.warnings?.length) {
       parts.push(`Engine warnings : ${projection.warnings.join(' | ')}`);
     }
@@ -309,6 +309,9 @@ function buildProjectionSnapshot(payload) {
   return {
     total_capex: pj.total_capex, terminal_value: pj.terminal_value, irr: pj.irr, npv: pj.npv,
     moic: pj.moic, payback_years: pj.payback_years, dscr_stabilized: pj.dscr_stabilized,
+    // P0-2 — post-tax board-facing returns + tax basis (pre-tax kept above).
+    irr_post_tax: pj.irr_post_tax ?? null, npv_post_tax: pj.npv_post_tax ?? null,
+    moic_post_tax: pj.moic_post_tax ?? null, tax_assumptions: pj.tax_assumptions ?? null,
     stabilized_ebitda: pj.stabilized_ebitda ?? null,
     stabilized_revenue: pj.stabilized_revenue ?? null,
     total_mw: sc?.total_mw ?? null, pue: sc?.pue ?? null,
@@ -360,9 +363,10 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
     },
     key_financial_metrics: {
       metrics: [
-        { label: 'IRR', value: fmtMaybe(projection.irr, 'pct'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
-        { label: 'MOIC', value: fmtMaybe(projection.moic, 'x'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
-        { label: 'NPV', value: fmtMaybe(projection.npv, 'usd'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'IRR (Post-tax, levered equity)', value: fmtMaybe(projection.irr_post_tax ?? projection.irr, 'pct'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'IRR (Pre-tax, levered equity)', value: fmtMaybe(projection.irr, 'pct'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'MOIC (Post-tax)', value: fmtMaybe(projection.moic_post_tax ?? projection.moic, 'x'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'NPV (Post-tax)', value: fmtMaybe(projection.npv_post_tax ?? projection.npv, 'usd'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
         { label: 'CAPEX', value: fmtMaybe(projection.total_capex, 'usd'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
         { label: 'Payback', value: projection.payback_years ?? 'Not modeled', unit: projection.payback_years == null ? '' : 'years', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
       ],
@@ -431,7 +435,11 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
         DSCR: explainMetric('DSCR', audience).short,
         payback: explainMetric('payback', audience).short,
       },
-      why_this_recommendation: `We recommend IC review because simulator metrics show ${fmtMaybe(projection.irr, 'pct')} IRR supported by [datapoint_id ${topDatapoints[0]?.id || 'ENGINE'}].`,
+      why_this_recommendation: (() => {
+        const src = topDatapoints[0]?.source_name;
+        const tail = src ? ` supported by ${src}` : '';
+        return `We recommend IC review because simulator metrics show ${fmtMaybe(projection.irr, 'pct')} IRR${tail}.`;
+      })(),
     },
     _exec_projection: buildProjectionSnapshot(payload),
     data_freshness: dataFreshness,
@@ -589,7 +597,7 @@ export async function POST(req) {
     'These are infrastructure intelligence signals. Cite freshness tags and signals in the relevant sections (live_intelligence block). Where live data is unavailable, surface it as a known unknown rather than fabricating a value. Do not describe figures as "real-time" unless the freshness_tag is FRESH.',
     `Audience for this memo: ${audience}. Use the explainability_seed jargon_translations to simplify technical terms in the explainability section.`,
     `- explainability.simplified_takeaways MUST exclude every term flagged by lib/oracle-explainability.detectJargon() for the chosen audience. Re-write any takeaway that contains banned jargon.`,
-    `- explainability.why_this_recommendation MUST start with "We recommend X because Y supported by [datapoint_id Z]." Not "This is an opportunity to..."`,
+    `- explainability.why_this_recommendation MUST start with "We recommend X because Y" and name the supporting evidence in plain prose (e.g. "supported by Equinix FY2024 10-K"). Do NOT emit bracketed tokens like [datapoint_id Z]; cite the source by its real name. Not "This is an opportunity to..."`,
     '',
     JSON.stringify(modelLiveBrief),
     '',
@@ -634,7 +642,7 @@ export async function POST(req) {
         console.log(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM call completed in ${llmDurationMs}ms via ${model_used}`);
 
         const rawContent = llmResult.response.choices?.[0]?.message?.content || '';
-        // Strip markdown fences (Claude sometimes wraps JSON in ```json ... ``` despite instructions)
+        // Strip markdown fences (kimi-k2.6 sometimes wraps JSON in ```json ... ``` despite instructions)
         const content = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
         try { memo = JSON.parse(content); }
         catch (e) {

@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const COCKPIT_PAGES = [
   { path: '/admin/hearst/simulator', name: 'simulator' },
+  { path: '/admin/hearst/simulator/results', name: 'results' },
   { path: '/admin/hearst/financial', name: 'financial' },
   { path: '/admin/hearst/sources', name: 'sources' },
   { path: '/admin/hearst/workspace', name: 'workspace' },
@@ -24,16 +25,18 @@ test.describe('coherence DS — cockpit shell', () => {
       expect(scrollClear).toBe('24px');
 
       if (name === 'simulator') {
-        const wrapPadBottom = await page.evaluate(() => {
-          for (const el of document.querySelectorAll('div')) {
-            const s = getComputedStyle(el);
-            if (s.maxWidth === '1280px' && s.flexDirection === 'column') {
-              return s.paddingBottom;
-            }
-          }
-          return null;
+        const simWrap = page.locator('[data-sim-wrap]');
+        await expect(simWrap).toBeVisible({ timeout: 20_000 });
+        const wrapLayout = await simWrap.evaluate((el) => {
+          const s = getComputedStyle(el);
+          return { flexDirection: s.flexDirection, maxWidth: s.maxWidth };
         });
-        expect(wrapPadBottom).toBe('24px');
+        expect(wrapLayout.flexDirection).toBe('column');
+        expect(wrapLayout.maxWidth).toBe('1440px');
+      }
+
+      if (name === 'results') {
+        await expect(page.locator('[data-results-layout]')).toBeVisible({ timeout: 20_000 });
       }
 
       await page.screenshot({
