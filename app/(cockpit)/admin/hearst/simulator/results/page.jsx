@@ -25,6 +25,7 @@ import {
   CapitalDonut,
   DecisionKpis,
   LayerCard,
+  ReturnsComposition,
 } from '@/components/hearst/simulator/results';
 
 import VisualizationsStep from '@/components/hearst/simulator/sections/VisualizationsStep';
@@ -290,6 +291,7 @@ export default function SimulatorResultsPage() {
           <BoardMetric label={UI.RESULTS_BM_PAYBACK} value={projection?.payback_years != null ? `${projection.payback_years} yr` : MISSING} note={UI.RESULTS_BM_PAYBACK_NOTE} />
           <BoardMetric label={UI.RESULTS_BM_SOURCE} value={simResult?.source_score != null ? `${simResult.source_score}/100` : MISSING} note={UI.RESULTS_BM_SOURCE_NOTE} />
         </KpiGrid>
+        <ReturnsComposition projection={projection} />
       </Card>
 
       <Card as="section" variant="flat" padding="lg" style={{ minWidth: 0 }}>
@@ -309,7 +311,7 @@ export default function SimulatorResultsPage() {
               {projection?.idc != null && projection.idc > 0 && <InlineMetric label={UI.RESULTS_IM_IDC} value={fmtUSD(projection.idc)} />}
               <InlineMetric label={UI.RESULTS_IM_TERMINAL} value={fmtUSD(projection?.terminal_value)} />
               {projection?.terminal_value_to_equity != null && <InlineMetric label={UI.RESULTS_IM_TERMINAL_EQUITY} value={fmtUSD(projection.terminal_value_to_equity)} />}
-              <InlineMetric label={UI.RESULTS_IM_IRR} value={fmtPctFromRatio(projection?.irr)} />
+              <InlineMetric label={UI.RESULTS_IM_IRR} value={fmtPctFromRatio(projection?.irr_post_tax ?? projection?.irr)} />
               <InlineMetric label={UI.RESULTS_IM_DSCR} value={fmtX(projection?.dscr_stabilized)} />
               <InlineMetric label={UI.RESULTS_IM_OCCUPANCY} value={scenario?.target_occupancy_pct != null ? fmtPctRaw(scenario.target_occupancy_pct) : MISSING} />
               <InlineMetric label={UI.RESULTS_IM_EXIT_LABEL} value={scenario?.exit_year ? UI.RESULTS_IM_EXIT_YEAR(scenario.exit_year) : MISSING} />

@@ -22,8 +22,8 @@ const PROMPTS = [
 
 function verdictFor(projection) {
   if (!projection) return { label: 'UNKNOWN', risk: 'Unknown', confidence: 'Unknown' };
-  const irr = projection.irr;
-  const npv = projection.npv;
+  const irr = projection.irr_post_tax ?? projection.irr;
+  const npv = projection.npv_post_tax ?? projection.npv;
   const dscr = projection.dscr_stabilized;
   if (irr == null || npv == null) {
     return { label: UI.RESULTS_VERDICT_NO_DATA, risk: 'Unknown', confidence: 'Unknown' };
@@ -52,7 +52,8 @@ function advisoryFor(ctx) {
   }
 
   let concern = warnings[0] || 'No critical warning surfaced by the engine.';
-  if (!warnings[0] && projection.irr != null && projection.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100) {
+  const _irr = projection.irr_post_tax ?? projection.irr;
+  if (!warnings[0] && _irr != null && _irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100) {
     concern = 'Returns are below the investment committee threshold.';
   } else if (!warnings[0] && projection.payback_years != null && projection.payback_years > 9) {
     concern = 'Payback is long for an IC-ready base case.';
@@ -98,8 +99,8 @@ function OracleAdvisorContent() {
   const projection = advisorContext?.projection;
   const verdict = useMemo(() => verdictFor(projection), [projection]);
   const advisory = useMemo(() => advisoryFor(advisorContext), [advisorContext]);
-  const irr = projection ? fmtPctFromRatio(projection.irr) : MISSING;
-  const moic = projection ? fmtX(projection.moic) : MISSING;
+  const irr = projection ? fmtPctFromRatio(projection.irr_post_tax ?? projection.irr) : MISSING;
+  const moic = projection ? fmtX(projection.moic_post_tax ?? projection.moic) : MISSING;
   const payback = projection?.payback_years != null ? `${projection.payback_years} years` : MISSING;
 
   return (

@@ -41,7 +41,7 @@ const MODE_CONFIG = {
 function computedResults(mode, { projection, scenario, derived, solver }) {
   const mw = derived?.mw ?? scenario?.total_mw;
   const capex = projection?.total_capex;
-  const irr = projection?.irr;
+  const irr = projection?.irr_post_tax ?? projection?.irr;
 
   if (mode === 'capital_first') {
     return [

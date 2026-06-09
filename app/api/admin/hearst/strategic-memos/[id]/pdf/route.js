@@ -27,7 +27,7 @@ const fmtUsd = (v, unit = 'M') => {
 };
 const fmtPct = (v) => v == null ? 'N/A' : `${(v * 100).toFixed(1)}%`;
 const fmtPctRaw = (v) => v == null ? 'N/A' : (v > 1 ? `${v.toFixed(1)}%` : `${(v * 100).toFixed(1)}%`);
-const fmtYr = (v) => v == null ? 'N/A' : `${Number(v).toFixed(1)} yrs`;
+const fmtYr = (v) => { if (v == null) return 'N/A'; const n = Number(v); return `${n % 1 === 0 ? n : n.toFixed(1)} yr`; };
 const fmtDate = (s) => { try { return new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }); } catch { return String(s ?? ''); } };
 
 const REGION_MAP = {
@@ -43,6 +43,7 @@ function regionLabel(r) {
 
 // IRR sensitivity — base case only, no stress engine available
 function sensLine(irr) {
+  // irr is already resolved to post-tax at call sites
   if (irr == null) return '<div class="muted-note">IRR sensitivity — base case only. No value shown.</div>';
   const base = irr > 1 ? irr / 100 : irr;
   const scale = { min: 0.05, max: 0.35 };
@@ -147,8 +148,8 @@ function assumptions(snap, finMetrics) {
     { k: 'Hold period',   v: (typeof snap?.exit_year === 'number') ? `${snap.exit_year} years` : 'Not modeled' },
     { k: 'Total CAPEX',   v: fmtUsd(snap?.total_capex) },
     { k: 'Debt',          v: debt ? `${debt.value}% @ ${debt.unit.replace('% @ ', '') || 'not specified'}` : 'not specified' },
-    { k: 'IRR (base)',    v: fmtPct(snap?.irr) },
-    { k: 'NPV',           v: fmtUsd(snap?.npv) },
+    { k: 'IRR (post-tax)', v: fmtPct(snap?.irr_post_tax ?? snap?.irr) },
+    { k: 'NPV (post-tax)', v: fmtUsd(snap?.npv_post_tax ?? snap?.npv) },
     { k: 'Payback',       v: fmtYr(snap?.payback_years) },
     { k: 'Utilization',   v: 'not specified' },
   ];
@@ -199,6 +200,10 @@ function buildHtml(row) {
   const verdict    = v.label;
   const verdictKey = v.key;
   const riskLevel  = deriveRiskLevel(m).label;
+
+  // Board return figures — always post-tax with pre-tax fallback
+  const boardIrr  = snap.irr_post_tax  ?? snap.irr;
+  const boardNpv  = snap.npv_post_tax  ?? snap.npv;
 
   // Verdict-gated copy map — ALL approval language is derived from here
   const RECO = {
@@ -556,18 +561,18 @@ p { margin: 0; }
         <div class="fsub">${snap.total_mw ? `${snap.total_mw} MW IT load` : 'Phase 1'}</div>
       </div>
       <div class="fig">
-        <div class="fk">IRR (levered)</div>
-        <div class="fv tnum">${fmtPct(snap.irr)}</div>
+        <div class="fk">IRR (levered post-tax)</div>
+        <div class="fv tnum">${fmtPct(boardIrr)}</div>
         <div class="fsub">Base case</div>
       </div>
       <div class="fig">
-        <div class="fk">NPV (discount rate not modeled)</div>
-        <div class="fv tnum">${fmtUsd(snap.npv)}</div>
+        <div class="fk">NPV (post-tax)</div>
+        <div class="fv tnum">${fmtUsd(boardNpv)}</div>
         <div class="fsub">Base case</div>
       </div>
       <div class="fig">
         <div class="fk">Payback</div>
-        <div class="fv tnum">${snap.payback_years ? snap.payback_years.toFixed(1) + ' yrs' : 'N/A'}</div>
+        <div class="fv tnum">${fmtYr(snap.payback_years)}</div>
         <div class="fsub">Stabilized from Yr 2–3</div>
       </div>
     </div>
@@ -607,13 +612,13 @@ p { margin: 0; }
         <div class="fs">Landlord NNN</div>
       </div>
       <div class="fin-kpi">
-        <div class="fk">IRR (base)</div>
-        <div class="fv accent tnum">${fmtPct(snap.irr)}</div>
-        <div class="fs">Levered · base case</div>
+        <div class="fk">IRR (post-tax)</div>
+        <div class="fv accent tnum">${fmtPct(boardIrr)}</div>
+        <div class="fs">Levered post-tax · base case</div>
       </div>
       <div class="fin-kpi">
-        <div class="fk">NPV · Payback</div>
-        <div class="fv tnum">${fmtUsd(snap.npv)}</div>
+        <div class="fk">NPV (post-tax) · Payback</div>
+        <div class="fv tnum">${fmtUsd(boardNpv)}</div>
         <div class="fs">${fmtYr(snap.payback_years)}</div>
       </div>
     </div>
@@ -624,7 +629,7 @@ p { margin: 0; }
       </div>
       <div class="sens-wrap">
         <div class="sens-title">IRR Sensitivity — Power Price &amp; Utilization</div>
-        ${sensLine(snap.irr)}
+        ${sensLine(boardIrr)}
       </div>
     </div>
   </div>
@@ -684,11 +689,11 @@ p { margin: 0; }
       </div>
       <div class="scen base">
         <div class="sc-name">Base</div>
-        <div class="sc-tag">${snap.total_mw ? snap.total_mw + ' MW' : 'Base'} at ${snap.irr ? fmtPct(snap.irr) : '—'} IRR — the underwriting case for FID.</div>
-        <div class="sc-irr-k">IRR</div>
-        <div class="sc-irr tnum">${fmtPct(snap.irr)}</div>
+        <div class="sc-tag">${snap.total_mw ? snap.total_mw + ' MW' : 'Base'} at ${boardIrr ? fmtPct(boardIrr) : '—'} IRR (post-tax) — the underwriting case for FID.</div>
+        <div class="sc-irr-k">IRR (post-tax)</div>
+        <div class="sc-irr tnum">${fmtPct(boardIrr)}</div>
         <div class="sc-rows">
-          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum">${fmtUsd(snap.npv)}</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV (post-tax)</span><span class="sc-lv tnum">${fmtUsd(boardNpv)}</span></div>
           <div class="sc-line"><span class="sc-lk">Payback</span><span class="sc-lv tnum">${fmtYr(snap.payback_years)}</span></div>
         </div>
       </div>

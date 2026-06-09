@@ -66,10 +66,37 @@ describe('deriveVerdict — financial gates', () => {
     expect(result.key).not.toBe('PROCEED_WITH_CONDITIONS');
   });
 
+  // ── REVIEW: IRR between 10% and 15% (below 15% IC hurdle) ──────────────────
+  it('REVIEW — IRR 12% is below 15% IC hurdle (between 10% and 15%)', () => {
+    const memo = makeMemo({
+      irr: 0.12,
+      moic: 1.8,
+      npv: 30e6,
+      payback_years: 8,
+      dscr_stabilized: 1.5,
+    });
+    const result = deriveVerdict(memo);
+    expect(result.key).toBe('REVIEW');
+    expect(result.drivers.some(d => d.includes('IC hurdle'))).toBe(true);
+  });
+
+  // ── REVIEW: IRR just below 15% IC hurdle (14.9%) ─────────────────────────
+  it('REVIEW — IRR 14.9% is just below 15% IC hurdle', () => {
+    const memo = makeMemo({
+      irr: 0.149,
+      moic: 2.0,
+      npv: 50e6,
+      payback_years: 6,
+      dscr_stabilized: 1.6,
+    });
+    const result = deriveVerdict(memo);
+    expect(result.key).toBe('REVIEW');
+  });
+
   // ── REVIEW: low DSCR breaches covenant (< 1.25) ──────────────────────────
   it('REVIEW — DSCR below covenant (1.1 < 1.25)', () => {
     const memo = makeMemo({
-      irr: 0.15,
+      irr: 0.16,
       moic: 2.0,
       npv: 50e6,
       payback_years: 6,

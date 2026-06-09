@@ -83,7 +83,7 @@ describe('solveForTargetIrr — bissection', () => {
   });
 
   it('returns diagnostic when target is unreachable', () => {
-    // 50% IRR impossible avec ces inputs Qatar — soit out-of-range,
+    // 50% post-tax IRR impossible avec ces inputs Qatar — soit out-of-range,
     // soit IRR non-computable aux bornes (EBITDA<0 à pricing=$50).
     const result = solveForTargetIrr(QATAR_BASE_SCENARIO, 0.50, 'pricing');
     expect(result.converged).toBe(false);

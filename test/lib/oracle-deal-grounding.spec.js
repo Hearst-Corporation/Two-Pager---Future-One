@@ -46,10 +46,20 @@ describe('buildDealGroundingBlock — SC1-like deal', () => {
     expect(block.length).toBeGreaterThan(0);
   });
 
-  it('contains the formatted IRR (8.5%)', () => {
+  it('contains the formatted IRR (8.5%) — falls back to p.irr when post-tax absent', () => {
     block = buildDealGroundingBlock(SC1_DEAL);
-    // fmtPctFromRatio(0.085) → "8.5%"
+    // irr_post_tax absent → falls back to p.irr=0.085 → fmtPctFromRatio(0.085) → "8.5%"
     expect(block).toContain('8.5%');
+  });
+
+  it('uses post-tax IRR when irr_post_tax is present', () => {
+    const deal = {
+      ...SC1_DEAL,
+      projection: { ...SC1_DEAL.projection, irr_post_tax: 0.072 },
+    };
+    const b = buildDealGroundingBlock(deal);
+    // irr_post_tax=0.072 → "7.2%"; p.irr=0.085 should NOT appear as the primary value
+    expect(b).toContain('7.2%');
   });
 
   it('contains the formatted MOIC (2.24)', () => {
@@ -67,6 +77,11 @@ describe('buildDealGroundingBlock — SC1-like deal', () => {
     const hasOverrides = block.includes('overrides');
     const hasEngineNumbers = block.includes('engine numbers are correct');
     expect(hasOverrides || hasEngineNumbers).toBe(true);
+  });
+
+  it('labels the engine line as post-tax', () => {
+    block = buildDealGroundingBlock(SC1_DEAL);
+    expect(block).toContain('post-tax');
   });
 
   it('lists the warning text', () => {

@@ -21,7 +21,7 @@ const FIN_TOOLTIP = {
 import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
-import { fmtUSD, fmtPctFromRatio, fmtPctRaw, fmtX } from '@/lib/hearst-format';
+import { fmtUSD, fmtPctRaw, fmtX } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import {
@@ -103,7 +103,8 @@ export default function FinancialPage() {
   const debtSchedule = useMemo(() => {
     if (!base) return null;
     const ebitda_by_year = (proj.years || []).map(y => y.ebitda ?? 0);
-    return generateDebtSchedule(base, { ebitda_by_year });
+    const cads_by_year = (proj.years || []).map(y => (y.ebitda ?? 0) - (y.maintenance_capex ?? 0));
+    return generateDebtSchedule(base, { ebitda_by_year, cads_by_year });
   }, [base, proj.years]);
 
   const waterfall = useMemo(() => {
@@ -273,9 +274,9 @@ export default function FinancialPage() {
       {/* Summary KPIs */}
       <KpiGrid cols={4} data-financial-kpi-grid style={{ marginBottom: 'var(--cp-space-6)' }}>
         <KpiCard label={UI.FIN_KPI_TOTAL_CAPEX} value={proj.total_capex} format="currency" />
-        <KpiCard label={UI.FIN_KPI_PROJECT_IRR} value={proj.irr} format="pct" sublabel={base?.source_score != null ? UI.FIN_KPI_SOURCE_SCORE(base.source_score) : undefined} highlight={proj.irr != null} />
-        <KpiCard label={UI.FIN_KPI_NPV} value={proj.npv} format="currency" />
-        <KpiCard label={UI.FIN_KPI_MOIC} value={proj.moic} format="x" />
+        <KpiCard label={UI.FIN_KPI_PROJECT_IRR} value={proj.irr_post_tax ?? proj.irr} format="pct" sublabel={base?.source_score != null ? UI.FIN_KPI_SOURCE_SCORE(base.source_score) : undefined} highlight={(proj.irr_post_tax ?? proj.irr) != null} />
+        <KpiCard label={UI.FIN_KPI_NPV} value={proj.npv_post_tax ?? proj.npv} format="currency" />
+        <KpiCard label={UI.FIN_KPI_MOIC} value={proj.moic_post_tax ?? proj.moic} format="x" />
         <KpiCard label={UI.FIN_KPI_DSCR} value={proj.dscr_stabilized} format="x" />
         <KpiCard label={UI.FIN_KPI_PAYBACK} value={proj.payback_years} format="years" />
         <KpiCard label={UI.FIN_KPI_TERMINAL} value={proj.terminal_value} format="currency" />
@@ -459,7 +460,7 @@ export default function FinancialPage() {
                   label="LENDER"
                   value={waterfall.by_investor.lender.total_repaid ? fmtM(waterfall.by_investor.lender.total_repaid) : '—'}
                   format="number"
-                  sublabel={`Interest: ${fmtM(waterfall.by_investor.lender.total_interest)} · Principal: ${fmtM(waterfall.by_investor.lender.total_principal)}`}
+                  sublabel={`Interest: ${fmtM(waterfall.by_investor.lender.total_interest)} · Principal: ${fmtM(waterfall.by_investor.lender.total_principal_incl_balloon ?? waterfall.by_investor.lender.total_principal)}`}
                   valueColor={waterfall.by_investor.lender.total_repaid ? 'var(--cp-text-muted)' : undefined}
                 />
               </div>
@@ -492,7 +493,7 @@ export default function FinancialPage() {
       {hasProjection && tab === 'sensitivity' && (
         <div>
           <div style={{ display: 'flex', gap: 'var(--cp-space-3)', alignItems: 'center', marginBottom: 'var(--cp-space-4)' }}>
-            <div style={T.chartTitle}>{UI.FIN_SENSITIVITY_TITLE}</div>
+            <div style={T.chartTitle}>{UI.FIN_SENSITIVITY_TITLE} (post-tax)</div>
             <div style={{ display: 'flex', gap: 'var(--cp-space-2)', alignItems: 'center', marginLeft: 'auto' }}>
               <label style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' }}>{UI.FIN_SENSITIVITY_X_AXIS}</label>
               <select value={sensitivityX} onChange={e => setSensitivityX(e.target.value)} style={S.sensitivitySelect}>

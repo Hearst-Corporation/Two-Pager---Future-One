@@ -228,8 +228,9 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
   let waterfall = null;
   try {
     const ebitda_by_year = (projection?.years || []).map(y => y.ebitda ?? 0);
+    const cads_by_year = (projection?.years || []).map(y => (y.ebitda ?? 0) - (y.maintenance_capex ?? 0));
     if (solvedScenario.debt_pct > 0) {
-      debt_schedule = generateDebtSchedule(archResult.scenario, { ebitda_by_year });
+      debt_schedule = generateDebtSchedule(archResult.scenario, { ebitda_by_year, cads_by_year });
     }
     if (projection?.years?.length > 0) {
       waterfall = generateWaterfall(archResult.scenario, projection);

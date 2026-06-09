@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { fmtPctRaw, fmtUSD, fmtX, MISSING } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
 import { DECISION_METRICS } from '@/lib/hearst-results-view';
+import { computeReturnsComposition, returnsCompositionLabel } from '@/lib/returns-composition';
 
 // ── InlineMetric ─────────────────────────────────────────────────────────────
 /**
@@ -142,6 +143,66 @@ LayerCard.propTypes = {
   index: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   rows: PropTypes.array.isRequired,
+};
+
+// ── ReturnsComposition ───────────────────────────────────────────────────────
+/**
+ * Bar visualization showing the Operations vs Terminal split of total return.
+ * Labels are clamped to [0, 100]% — when terminalPct > 1 a textual note replaces
+ * the numeric label to avoid rendering ">100%".
+ * @param {{ projection: object|null }} props
+ */
+export function ReturnsComposition({ projection }) {
+  const { operationsPct, terminalPct, valid } = computeReturnsComposition(projection);
+  const label = returnsCompositionLabel(operationsPct, terminalPct);
+
+  // Bar widths: clamped to [0, 100] for display
+  const opsBarPct   = Math.max(0, Math.min(100, (operationsPct * 100)));
+  const termBarPct  = Math.max(0, Math.min(100, (terminalPct  * 100)));
+
+  // Label integers: clamped to [0, 100]; when terminal exceeds 100%, show note instead
+  const opsLabelPct  = Math.max(0, Math.min(100, Math.round(operationsPct * 100)));
+  const termLabelPct = Math.max(0, Math.min(100, Math.round(terminalPct   * 100)));
+  const terminalExceeds = valid && terminalPct > 1;
+
+  if (!valid) {
+    return (
+      <div style={S.rcWrap}>
+        <span style={S.rcEyebrow}>Returns Composition</span>
+        <span style={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)' }}>{MISSING}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div style={S.rcWrap}>
+      <div style={S.rcHeader}>
+        <span style={S.rcEyebrow}>Returns Composition</span>
+        <span style={S.rcLabel}>{label}</span>
+      </div>
+      <div style={S.rcBar}>
+        <div style={{ ...S.rcBarOps,      width: `${opsBarPct}%`  }} title={`Operations: ${opsLabelPct}%`} />
+        <div style={{ ...S.rcBarTerminal, width: `${termBarPct}%` }} title={`Terminal: ${terminalExceeds ? '>100%' : termLabelPct + '%'}`} />
+      </div>
+      <div style={S.rcLegend}>
+        <div style={S.rcLegendItem}>
+          <span style={{ ...S.rcDot, background: 'var(--cp-accent)' }} />
+          <span style={S.rcLegendLabel}>Operations</span>
+          <strong style={S.rcLegendValue}>{opsLabelPct}%</strong>
+        </div>
+        <div style={S.rcLegendItem}>
+          <span style={{ ...S.rcDot, background: 'var(--cp-text-muted)' }} />
+          <span style={S.rcLegendLabel}>Terminal</span>
+          <strong style={S.rcLegendValue}>
+            {terminalExceeds ? 'Exit-driven (>100%)' : `${termLabelPct}%`}
+          </strong>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReturnsComposition.propTypes = {
+  projection: PropTypes.object,
 };
 
 // ── Styles ───────────────────────────────────────────────────────────────────
@@ -365,5 +426,72 @@ const S = {
     fontSize: 'var(--cp-font-sm)',
     textAlign: 'right',
     overflowWrap: 'anywhere',
+  },
+  // ReturnsComposition styles
+  rcWrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-space-3)',
+    minWidth: 0,
+  },
+  rcHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    gap: 'var(--cp-space-2)',
+  },
+  rcEyebrow: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-black)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
+  },
+  rcLabel: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-sm)',
+  },
+  rcBar: {
+    display: 'flex',
+    height: 8,
+    borderRadius: 'var(--cp-radius-xs)',
+    overflow: 'hidden',
+    background: 'var(--cp-surface-0)',
+    border: '1px solid var(--cp-border)',
+  },
+  rcBarOps: {
+    background: 'var(--cp-accent)',
+    height: '100%',
+    transition: 'width 0.3s ease',
+  },
+  rcBarTerminal: {
+    background: 'var(--cp-text-muted)',
+    height: '100%',
+    transition: 'width 0.3s ease',
+  },
+  rcLegend: {
+    display: 'flex',
+    gap: 'var(--cp-space-4)',
+    flexWrap: 'wrap',
+  },
+  rcLegendItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--cp-space-2)',
+  },
+  rcDot: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    flexShrink: 0,
+  },
+  rcLegendLabel: {
+    color: 'var(--cp-text-muted)',
+    fontSize: 'var(--cp-font-sm)',
+  },
+  rcLegendValue: {
+    color: 'var(--cp-text-primary)',
+    fontSize: 'var(--cp-font-sm)',
+    fontVariantNumeric: 'tabular-nums',
   },
 };

@@ -25,6 +25,7 @@ import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from 
 import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
 import { fmtUSD, fmtPctFromRatio, fmtX } from '@/lib/hearst-format';
 import { generateProjection, foldGpuRevenue } from '@/lib/hearst-calculations';
+import { projectArchetype, DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, computeConfidenceBlock } from '@/lib/memo-confidence';
 import { persistMemo } from '@/lib/strategic-memo-store';
@@ -225,7 +226,7 @@ function buildScenarioSummary(payload) {
   }
   if (projection) {
     const f = (v, k) => v == null ? 'N/A' : (k === 'pct' ? fmtPctFromRatio(v) : k === 'usd' ? fmtUSD(v) : k === 'x' ? fmtX(v) : v);
-    parts.push(`Projection : total CAPEX ${f(projection.total_capex, 'usd')} · stab. EBITDA ${f(projection.stabilized_ebitda, 'usd')} · IRR ${f(projection.irr, 'pct')} · MOIC ${f(projection.moic, 'x')} · payback ${projection.payback_years ?? '?'} yr · DSCR ${projection.dscr_stabilized ? f(projection.dscr_stabilized, 'x') : 'N/A'} · NPV ${f(projection.npv, 'usd')} · TV ${f(projection.terminal_value, 'usd')}`);
+    parts.push(`Projection : total CAPEX ${f(projection.total_capex, 'usd')} · stab. EBITDA ${f(projection.stabilized_ebitda, 'usd')} · IRR ${f(projection.irr_post_tax ?? projection.irr, 'pct')} (post-tax) · MOIC ${f(projection.moic_post_tax ?? projection.moic, 'x')} (post-tax) · payback ${projection.payback_years ?? '?'} yr · DSCR ${projection.dscr_stabilized ? f(projection.dscr_stabilized, 'x') : 'N/A'} · NPV ${f(projection.npv_post_tax ?? projection.npv, 'usd')} (post-tax) · TV ${f(projection.terminal_value, 'usd')}`);
     if (projection?.warnings?.length) {
       parts.push(`Engine warnings : ${projection.warnings.join(' | ')}`);
     }
@@ -315,7 +316,7 @@ function buildProjectionSnapshot(payload) {
     capex_per_mw: (pj.total_capex && sc?.total_mw) ? pj.total_capex / sc.total_mw : null,
     cod_offset_months: pj.cod_offset_months ?? null,
     capex_reconciliation: pj.capex_reconciliation ?? null,
-    years: (pj.years || []).map(y => ({ y: y.year, rev: y.revenue, ebitda: y.ebitda, fcf: y.free_cash_flow, cum: y.cumulative_fcf })),
+    years: (pj.years || []).map(y => ({ y: y.year, rev: y.revenue, ebitda: y.ebitda, fcf: y.free_cash_flow, cum: y.cumulative_fcf, free_cash_flow_post_tax: y.free_cash_flow_post_tax ?? null })),
     // Extended fields (AC-C3)
     equity_invested: pj.equity_invested ?? null,
     idc: pj.idc ?? null,
@@ -325,6 +326,15 @@ function buildProjectionSnapshot(payload) {
     revenue_start_year: pj.revenue_start_year ?? null,
     warnings: pj.warnings ?? [],
     gpu_refresh: pj.gpu_refresh ?? null,
+    // Post-tax fields (B-fix-1) — populated when engine provides them;
+    // gracefully null for sale_leaseback/one_time_sale projections so
+    // consumers fall back to the already-net irr/npv/moic.
+    irr_post_tax: pj.irr_post_tax ?? null,
+    npv_post_tax: pj.npv_post_tax ?? null,
+    moic_post_tax: pj.moic_post_tax ?? null,
+    tax_assumptions: pj.tax_assumptions ?? null,
+    terminal_tax: pj.terminal_tax ?? null,
+    book_value_at_exit: pj.book_value_at_exit ?? null,
   };
 }
 
@@ -332,8 +342,9 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
   const projection = payload?.projection || {};
   const scenario = payload?.scenario || {};
   const fmtMaybe = (value, kind) => value == null ? 'Not modeled' : kind === 'pct' ? fmtPctFromRatio(value) : kind === 'usd' ? fmtUSD(value) : kind === 'x' ? fmtX(value) : String(value);
+  const _irr_board = projection.irr_post_tax ?? projection.irr;
   const primaryConcern = projection?.warnings?.[0]
-    || (projection.irr != null && projection.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 ? 'IRR is below the IC review threshold.' : 'No blocking engine warning surfaced.');
+    || (_irr_board != null && _irr_board < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 ? 'IRR (post-tax) is below the IC review threshold.' : 'No blocking engine warning surfaced.');
   const realityFlags = intelligenceBrief.reality_violations || [];
   const topDatapoints = (intelligenceBrief.datapoints || []).slice(0, 5);
   const tensions = intelligenceBrief.tensions || [];
@@ -342,7 +353,7 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
     executive_summary: {
       headline: 'Engine-backed strategic memo generated without LLM narrative',
       bullets: [
-        `IRR ${fmtMaybe(projection.irr, 'pct')} · MOIC ${fmtMaybe(projection.moic, 'x')} · Payback ${projection.payback_years ?? 'Not modeled'} years.`,
+        `IRR ${fmtMaybe(projection.irr_post_tax ?? projection.irr, 'pct')} (post-tax) · MOIC ${fmtMaybe(projection.moic_post_tax ?? projection.moic, 'x')} (post-tax) · Payback ${projection.payback_years ?? 'Not modeled'} years.`,
         `Total CAPEX ${fmtMaybe(projection.total_capex, 'usd')} for ${scenario.total_mw ?? 'unknown'} MW.`,
         primaryConcern,
       ],
@@ -360,9 +371,9 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
     },
     key_financial_metrics: {
       metrics: [
-        { label: 'IRR', value: fmtMaybe(projection.irr, 'pct'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
-        { label: 'MOIC', value: fmtMaybe(projection.moic, 'x'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
-        { label: 'NPV', value: fmtMaybe(projection.npv, 'usd'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'IRR (post-tax)', value: fmtMaybe(projection.irr_post_tax ?? projection.irr, 'pct'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'MOIC (post-tax)', value: fmtMaybe(projection.moic_post_tax ?? projection.moic, 'x'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
+        { label: 'NPV (post-tax)', value: fmtMaybe(projection.npv_post_tax ?? projection.npv, 'usd'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
         { label: 'CAPEX', value: fmtMaybe(projection.total_capex, 'usd'), unit: '', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
         { label: 'Payback', value: projection.payback_years ?? 'Not modeled', unit: projection.payback_years == null ? '' : 'years', confidence: computedConfidence.confidence_level, source: 'ENGINE' },
       ],
@@ -402,7 +413,7 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
         networking: 'Not modeled',
         phasing: scenario.phase1_complete_year ? `Phase 1 by year ${scenario.phase1_complete_year}` : 'Not modeled',
       },
-      rationale: `We recommend IC review because the engine shows ${fmtMaybe(projection.irr, 'pct')} IRR supported by ENGINE metrics, while ${primaryConcern}`,
+      rationale: `We recommend IC review because the engine shows ${fmtMaybe(projection.irr_post_tax ?? projection.irr, 'pct')} IRR (post-tax) supported by ENGINE metrics, while ${primaryConcern}`,
     },
     commercialization_strategy: {
       pricing: scenario.price_hyperscale_kw_month != null ? `$${scenario.price_hyperscale_kw_month}/kW/mo hyperscale` : 'Not modeled',
@@ -431,7 +442,7 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
         DSCR: explainMetric('DSCR', audience).short,
         payback: explainMetric('payback', audience).short,
       },
-      why_this_recommendation: `We recommend IC review because simulator metrics show ${fmtMaybe(projection.irr, 'pct')} IRR supported by [datapoint_id ${topDatapoints[0]?.id || 'ENGINE'}].`,
+      why_this_recommendation: `We recommend IC review because simulator metrics show ${fmtMaybe(projection.irr_post_tax ?? projection.irr, 'pct')} IRR (post-tax) supported by [datapoint_id ${topDatapoints[0]?.id || 'ENGINE'}].`,
     },
     _exec_projection: buildProjectionSnapshot(payload),
     data_freshness: dataFreshness,
@@ -464,12 +475,21 @@ export async function POST(req) {
   // payload.scenario IS the post-archetype scenario (simulate returns archResult.scenario).
   // We recompute from the engine and use that as the source of truth instead of
   // whatever the client sent in payload.projection (which may be fabricated/empty).
+  // Archetype-aware: if an archetype is identified, use projectArchetype so the
+  // persisted snapshot matches what the Results page (which uses projectArchetype) displayed.
   let serverProjection = null;
   if (payload?.scenario) {
     try {
-      serverProjection = generateProjection(payload.scenario);
+      const arId = payload?.archetype_outcome?.id || payload?.scenario?.archetype_id;
+      const archetype = DEAL_ARCHETYPES.find(a => a.id === arId);
+      if (archetype) {
+        serverProjection = projectArchetype(payload.scenario, archetype).projection;
+      } else {
+        serverProjection = generateProjection(payload.scenario);
+      }
+      // Only fold GPU revenue for recurring/gpu projections; skip for sale_mode (one_time_sale is already final).
       const hb = payload.hardware_breakdown;
-      if (serverProjection?.years?.length && hb && ((hb.revenue_ai_annual > 0) || (hb.capex_hardware > 0))) {
+      if (serverProjection?.years?.length && !serverProjection.sale_mode && hb && ((hb.revenue_ai_annual > 0) || (hb.capex_hardware > 0))) {
         foldGpuRevenue(serverProjection, hb, payload.scenario, {
           rfs_year: payload.scenario.phase1_complete_year || 3, ramp_years: 2,
           exit_year: payload.scenario.exit_year || 10,
