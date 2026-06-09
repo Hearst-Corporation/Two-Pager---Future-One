@@ -153,17 +153,28 @@ LayerCard.propTypes = {
  * @param {{ projection: object|null }} props
  */
 export function ReturnsComposition({ projection }) {
-  const { operationsPct, terminalPct, valid } = computeReturnsComposition(projection);
+  const composition = computeReturnsComposition(projection);
+  const { operationsPct, terminalPct, valid, saleMode, note } = composition;
   const label = returnsCompositionLabel(operationsPct, terminalPct);
 
   // Bar widths: clamped to [0, 100] for display
-  const opsBarPct   = Math.max(0, Math.min(100, (operationsPct * 100)));
-  const termBarPct  = Math.max(0, Math.min(100, (terminalPct  * 100)));
+  const opsBarPct   = operationsPct != null ? Math.max(0, Math.min(100, (operationsPct * 100))) : 0;
+  const termBarPct  = terminalPct   != null ? Math.max(0, Math.min(100, (terminalPct   * 100))) : 0;
 
   // Label integers: clamped to [0, 100]; when terminal exceeds 100%, show note instead
-  const opsLabelPct  = Math.max(0, Math.min(100, Math.round(operationsPct * 100)));
-  const termLabelPct = Math.max(0, Math.min(100, Math.round(terminalPct   * 100)));
-  const terminalExceeds = valid && terminalPct > 1;
+  const opsLabelPct  = operationsPct != null ? Math.max(0, Math.min(100, Math.round(operationsPct * 100))) : 0;
+  const termLabelPct = terminalPct   != null ? Math.max(0, Math.min(100, Math.round(terminalPct   * 100))) : 0;
+  const terminalExceeds = valid && terminalPct != null && terminalPct > 1;
+
+  // Sale-mode: single-exit developer deal — render the honest note instead of a misleading bar
+  if (saleMode && note) {
+    return (
+      <div style={S.rcWrap}>
+        <span style={S.rcEyebrow}>Returns Composition</span>
+        <span style={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', fontStyle: 'italic' }}>{note}</span>
+      </div>
+    );
+  }
 
   if (!valid) {
     return (
