@@ -15,7 +15,9 @@ if (process.env.SKIP_ENV_VALIDATION !== 'true') {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  devIndicators: false,
+  devIndicators: {
+    buildActivity: false,
+  },
 
   experimental: {
     // @sparticuz/chromium ships a native binary — must not be bundled by Next.
@@ -45,8 +47,9 @@ const nextConfig = {
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
       : "script-src 'self'";
-    const supabaseHost = 'https://pjwyntugyswabgpavtyt.supabase.co';
-    const supabaseWs  = 'wss://pjwyntugyswabgpavtyt.supabase.co';
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zrvlmhuymhyrzonnihce.supabase.co';
+    const supabaseHost = supabaseUrl;
+    const supabaseWs  = supabaseUrl.replace('https://', 'wss://').replace('http://', 'ws://');
     return [
       {
         source: '/(.*)',
@@ -73,7 +76,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self'",
-              `connect-src 'self' ${supabaseHost} ${supabaseWs} https://maps.googleapis.com https://api.hypercli.com`,
+              `connect-src 'self' ${supabaseHost} ${supabaseWs} https://maps.googleapis.com https://api.openai.com`,
               "frame-ancestors 'self' http://localhost:4200 http://localhost:4201 https://oracle.hearst.app",
               "base-uri 'self'",
               "form-action 'self'",
