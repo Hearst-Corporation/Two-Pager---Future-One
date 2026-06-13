@@ -1,30 +1,6 @@
 /* simulator.css — layout Config page
    Container: [data-sim-config] (panneau centre réel, pas le viewport).
-   2 seuils synchronisés avec results :
-     · 640px  — narrow ↔ medium
-     · 1080px — medium ↔ wide
 */
-
-body.oracle-simulator-page .ct-center-panel {
-  flex: 1 1 auto !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
-
-body.oracle-simulator-page .ct-page-area {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-}
-
-body.oracle-simulator-page .oracle-page {
-  flex: 1 1 auto;
-  min-height: 0;
-  max-height: 100%;
-  overflow-x: hidden;
-  padding-block-end: 0;
-}
 
 /* oracle-page → sim-wrap → case + config */
 body.oracle-simulator-page [data-sim-wrap] {
@@ -55,6 +31,7 @@ body.oracle-simulator-page [data-sim-config] {
   flex-direction: column !important;
   margin-bottom: calc(var(--cp-space-6) + 1px);
 }
+
 
 body.oracle-simulator-page [data-sim-config-body] {
   flex: 1 1 auto;
@@ -251,12 +228,8 @@ body.oracle-simulator-page [data-sim-config-footer] .sim-config-cta {
   }
 }
 
-/* ── Viewport : padding page sur petits écrans ── */
+/* ── Viewport : petits écrans ── */
 @media (max-width: 900px) {
-  body.oracle-simulator-page .oracle-page {
-    padding-inline: var(--cp-space-4);
-  }
-
   body.oracle-simulator-page [data-sim-case] .sim-case-sentence,
   body.oracle-simulator-page [data-sim-case] [style*="clamp(20px"] {
     font-size: clamp(18px, 4.5vw, 24px) !important;
