@@ -1,21 +1,40 @@
 /* results.css — layout Results
    Container: [data-results-layout] (panneau centre réel, pas le viewport).
-   2 seuils synchronisés pour TOUTE la page :
-     · 640px  — narrow ↔ medium
-     · 1080px — medium ↔ wide
 */
 
-body.oracle-results-wide .ct-center-panel {
-  flex: 1 1 auto !important;
-  width: auto !important;
-  min-width: 0 !important;
+/* ── GANTT HOVER ── */
+body.oracle-results-page [data-gantt-rows]:hover [data-gantt-row] {
+  opacity: 0.4;
+}
+body.oracle-results-page [data-gantt-rows] [data-gantt-row]:hover {
+  opacity: 1;
+}
+body.oracle-results-page [data-gantt-rows] [data-gantt-row]:hover [data-gantt-bar-track] > div {
+  box-shadow: 0 0 12px var(--cp-accent-maroon);
 }
 
-body.oracle-results-wide .ct-page-area {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
+/* ── STICKY CONTEXT BAR ── */
+.cp-sticky-context {
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
+@keyframes cp-fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-stagger-1 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+.animate-stagger-2 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+.animate-stagger-3 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
+.animate-stagger-4 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+.animate-stagger-5 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both; }
 
 body.oracle-results-page [data-results-layout] {
   container-type: inline-size;
@@ -24,18 +43,6 @@ body.oracle-results-page [data-results-layout] {
   max-width: none;
   min-width: 0;
   overflow-x: clip;
-}
-
-/* Padding réduit : avec rail chat, le conteneur queries doit atteindre 640px (ex. viewport 1280). */
-body.oracle-results-page .oracle-page {
-  padding-inline: var(--cp-space-4);
-  box-sizing: border-box;
-}
-
-@media (min-width: 1080px) {
-  body.oracle-results-page .oracle-page {
-    padding-inline: var(--cp-space-6);
-  }
 }
 
 body.oracle-results-page [data-decision-kpis] > * {

@@ -36,13 +36,13 @@ function SimulatorCTABar({
         )}
       </div>
       <div style={S.actions}>
-        <Button variant="link" size="sm" disabled={!hasProjection} onClick={onExportMd}>
+        <Button variant="link" size="md" disabled={!hasProjection} onClick={onExportMd}>
           {UI.RESULTS_CTA_EXPORT}
         </Button>
-        <Button variant="secondary" size="sm" disabled={!hasProjection || saving} onClick={onSave}>
+        <Button variant="secondary" size="md" disabled={!hasProjection || saving} onClick={onSave}>
           {saving ? UI.STATE_SAVING : UI.RESULTS_CTA_SAVE}
         </Button>
-        <Button variant="primary" size="sm" disabled={!hasProjection} onClick={onGenerateMemo}>
+        <Button variant="primary" size="lg" disabled={!hasProjection} onClick={onGenerateMemo} style={{ padding: 'var(--cp-space-3) var(--cp-space-6)', fontSize: 'var(--cp-font-base)' }}>
           {UI.RESULTS_CTA_MEMO}
         </Button>
       </div>
@@ -54,16 +54,14 @@ export default memo(SimulatorCTABar);
 
 const S = {
   bar: {
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    padding: 'var(--cp-space-4) var(--cp-space-5)',
+    padding: 'var(--cp-space-6) 0',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 'var(--cp-space-4)',
     minHeight: 56,
     flexWrap: 'wrap',
+    borderTop: '1px solid var(--cp-border-base)',
   },
   left: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' },
   statusReady: {
@@ -102,5 +100,5 @@ const S = {
     boxShadow: '0 0 0 3px var(--cp-accent-soft)',
   },
   statusDim: { fontStyle: 'italic' },
-  actions: { display: 'flex', gap: 'var(--cp-space-2)', alignItems: 'center', flexWrap: 'wrap' },
+  actions: { display: 'flex', gap: 'var(--cp-space-4)', alignItems: 'center', flexWrap: 'wrap' },
 };
