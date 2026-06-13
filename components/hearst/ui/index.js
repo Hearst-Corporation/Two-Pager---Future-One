@@ -2,7 +2,7 @@
 
 export { default as Button } from './Button';
 export { default as Card } from './Card';
-export { Table, THead, Row, Cell } from './Table';
+export { Table, Row, Cell } from './Table';
 export { default as Field } from './Field';
 export { default as Badge } from './Badge';
 export { default as SectionHead } from './SectionHead';

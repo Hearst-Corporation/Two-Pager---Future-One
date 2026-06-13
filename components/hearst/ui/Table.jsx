@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 // Table — primitive de tableau. Remplace les 5 réimplémentations inline de
 // th/td/tdLabel (dossier, financial, deals, sources, workspace).
 // Usage : <Table head={['A','B']}><Row><Cell>…</Cell></Row></Table>
-//   ou plein contrôle : <Table><THead>…</THead><tbody>…</tbody></Table>
 
 const S = {
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)' },
@@ -37,7 +36,6 @@ export function Table({ head, scroll = false, style, children, ...rest }) {
   return scroll ? <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>{table}</div> : table;
 }
 
-export function THead({ children }) { return <thead>{children}</thead>; }
 export function Row({ children, style, ...rest }) { return <tr style={{ ...S.tr, ...style }} {...rest}>{children}</tr>; }
 /** @param {{header?:boolean, label?:boolean}} props — header=th, label=1ère colonne forte. */
 export function Cell({ header = false, label = false, style, children, ...rest }) {
@@ -46,6 +44,5 @@ export function Cell({ header = false, label = false, style, children, ...rest }
 }
 
 Table.propTypes = { head: PropTypes.arrayOf(PropTypes.node), scroll: PropTypes.bool, style: PropTypes.object, children: PropTypes.node };
-THead.propTypes = { children: PropTypes.node };
 Row.propTypes = { children: PropTypes.node, style: PropTypes.object };
 Cell.propTypes = { header: PropTypes.bool, label: PropTypes.bool, style: PropTypes.object, children: PropTypes.node };
