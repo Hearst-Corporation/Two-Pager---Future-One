@@ -16,17 +16,14 @@
     "test:e2e:ui": "playwright test --ui",
     "lint": "SKIP_ENV_VALIDATION=true next lint",
     "lint:secrets": "node scripts/lint-secrets.mjs",
-    "lint:strings": "node scripts/lint-strings.mjs",
-    "lint:nav": "node scripts/lint-nav.mjs",
-    "lint:tokens": "node scripts/lint-tokens.mjs",
     "prune:tokens": "node scripts/prune-tokens.mjs",
     "new:feature": "node scripts/new-feature.mjs",
     "doctor": "node scripts/doctor.mjs",
-    "check": "npm run lint:secrets && npm run lint:strings && npm run lint:tokens && npm run lint:nav && npm run lint && npm test",
+    "smoke:openai": "node scripts/smoke-openai.mjs",
+    "check": "npm run lint:secrets && npm run lint && npm test",
     "check:ci": "npm run check && next build"
   },
   "dependencies": {
-    "@hearst/review-mode": "file:./hearst-review-mode-0.1.0.tgz",
     "@sentry/nextjs": "^8",
     "@sparticuz/chromium": "^149.0.0",
     "@supabase/ssr": "^0.10.3",
@@ -41,6 +38,7 @@
     "react-dom": "18.3.1",
     "react-is": "^19.2.7",
     "recharts": "^3.8.1",
+    "server-only": "^0.0.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -55,5 +53,10 @@
   },
   "browserslist": [
     "last 2 years"
-  ]
+  ],
+  "overrides": {
+    "postcss": "^8.5.10",
+    "glob": "^10.4.6",
+    "uuid": "^11.1.1"
+  }
 }

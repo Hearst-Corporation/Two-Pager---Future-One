@@ -68,12 +68,12 @@ const S = {
     width: '100%', 
     position: 'relative' 
   },
-  line: { 
-    position: 'absolute', 
-    top: '50%', 
-    left: 'var(--cp-space-5)', 
-    right: 'var(--cp-space-5)', 
-    height: '2px', 
+  line: {
+    position: 'absolute',
+    top: '50%',
+    left: 'var(--cp-space-5)',
+    right: 'var(--cp-space-5)',
+    height: 'var(--cp-space-hair)',
     background: 'var(--cp-border-base)', 
     transform: 'translateY(-50%)', 
     zIndex: 1 
@@ -93,9 +93,9 @@ const S = {
     background: 'var(--cp-surface-0)', 
     padding: '0 var(--cp-space-4)' 
   },
-  dot: { 
-    width: '12px', 
-    height: '12px', 
+  dot: {
+    width: 'var(--cp-icon-xs)',
+    height: 'var(--cp-icon-xs)',
     borderRadius: '50%', 
     background: 'var(--cp-accent-maroon)',
     border: 'var(--cp-border-w-accent) solid var(--cp-surface-0)'

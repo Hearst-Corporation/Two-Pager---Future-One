@@ -18,6 +18,7 @@ export default function WorkspacePage() {
   const [scenarios, setScenarios] = useState(null);
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(null);
+  const [confirmDel, setConfirmDel] = useState(null);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -41,9 +42,9 @@ export default function WorkspacePage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function deleteScenario(id, name) {
-    if (!window.confirm(UI.WS_DELETE_CONFIRM(name))) return;
+  async function deleteScenario(id) {
     setBusy(id);
+    setConfirmDel(null);
     try {
       const r = await fetch(`/api/admin/hearst/scenarios/${id}`, { method: 'DELETE' });
       if (!r.ok) {
@@ -85,9 +86,19 @@ export default function WorkspacePage() {
                 <Cell><span style={S.statusText}>{s.is_active ? 'Active' : 'Saved'}</span></Cell>
                 <Cell style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                   <Link href={`/admin/hearst/simulator?scenario=${s.id}`} style={S.action}>Open in Simulator →</Link>
-                  <Button variant="ghost" size="sm" disabled={busy === s.id} onClick={() => deleteScenario(s.id, s.name)} style={{ marginLeft: 'var(--cp-space-3)' }}>
-                    {busy === s.id ? '…' : UI.ACTION_DELETE}
-                  </Button>
+                  {confirmDel === s.id ? (
+                    <span style={S.delActions}>
+                      <span style={S.delHint}>{UI.WS_DELETE_CONFIRM(s.name)}</span>
+                      <Button variant="dangerSolid" size="sm" disabled={busy === s.id} onClick={() => deleteScenario(s.id)}>
+                        {busy === s.id ? '…' : UI.ACTION_DELETE}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setConfirmDel(null)}>{UI.ACTION_CANCEL}</Button>
+                    </span>
+                  ) : (
+                    <Button variant="ghost" size="sm" disabled={busy === s.id} onClick={() => setConfirmDel(s.id)} style={{ marginLeft: 'var(--cp-space-3)' }}>
+                      {UI.ACTION_DELETE}
+                    </Button>
+                  )}
                 </Cell>
               </Row>
             ))}
@@ -103,4 +114,6 @@ const S = {
   statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
   action: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', marginLeft: 'var(--cp-space-3)' },
   dossierLink: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)' },
+  delActions: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginLeft: 'var(--cp-space-3)', flexWrap: 'wrap', justifyContent: 'flex-end' },
+  delHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', maxWidth: 220, textAlign: 'right' },
 };

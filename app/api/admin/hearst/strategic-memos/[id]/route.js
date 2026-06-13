@@ -5,6 +5,8 @@
 
 import { NextResponse } from 'next/server';
 import { requireProfile, authedWrite, getAdminClient } from '@/lib/supabase-admin';
+import { requireRowOwnership } from '@/lib/auth-guards';
+import { dbErrorResponse } from '@/lib/api-errors';
 
 const STATUSES = ['draft', 'reviewed', 'approved', 'archived'];
 
@@ -21,10 +23,21 @@ const TRANSITIONS = {
 export async function GET(_req, { params }) {
   const auth = await requireProfile('viewer');
   if (auth instanceof NextResponse) return auth;
+  try {
+    await requireRowOwnership({
+      table: 'strategic_memos',
+      id: params.id,
+      actorId: auth.actor,
+      allowSharedWorkspace: true,
+    });
+  } catch (err) {
+    if (err instanceof Response) return err;
+    throw err;
+  }
   const supa = getAdminClient();
 
   const { data: memo, error } = await supa.from('strategic_memos').select('*').eq('id', params.id).maybeSingle();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErrorResponse(error, '[strategic-memos/[id]][GET]');
   if (!memo) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
   // P3: open report -> see originating scenario; and all sibling versions.
@@ -46,6 +59,17 @@ export async function GET(_req, { params }) {
 export async function PATCH(req, { params }) {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
+  try {
+    await requireRowOwnership({
+      table: 'strategic_memos',
+      id: params.id,
+      actorId: auth.actor,
+      allowSharedWorkspace: true,
+    });
+  } catch (err) {
+    if (err instanceof Response) return err;
+    throw err;
+  }
   const supa = auth.supa;
   const actor = auth.actor;
 
@@ -60,7 +84,7 @@ export async function PATCH(req, { params }) {
   // Include memo_json so the approval guard can inspect engine-derived projection.
   const { data: current, error: loadErr } = await supa.from('strategic_memos')
     .select('id,status,title,project_id,memo_json').eq('id', params.id).maybeSingle();
-  if (loadErr) return NextResponse.json({ error: loadErr.message }, { status: 500 });
+  if (loadErr) return dbErrorResponse(loadErr, '[strategic-memos/[id]][PATCH][load]');
   if (!current) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
   // No-op transition: nothing to attribute or log.
@@ -100,7 +124,7 @@ export async function PATCH(req, { params }) {
   const { data, error } = await supa.from('strategic_memos')
     .update(patch).eq('id', params.id)
     .select('id,status,version,updated_at,reviewed_by,reviewed_at,approved_by,approved_at').maybeSingle();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErrorResponse(error, '[strategic-memos/[id]][PATCH][update]');
   if (!data) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
   // Governance audit trail — every transition is attributable.

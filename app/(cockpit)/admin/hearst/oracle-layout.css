@@ -1,8 +1,4 @@
-/* oracle-layout.css — anatomie de page canonique pour Oracle cockpit.
-   Importé depuis layout.jsx après cp-tokens.css.
-   Chaque page du cockpit doit utiliser .oracle-page comme enveloppe.
-   Ne jamais mettre de hex ici — var(--cp-*) uniquement.
-*/
+/* oracle-layout.css — layout pages cockpit (.oracle-page). */
 
 /* ── Wrapper de page canonique ── */
 .oracle-page {
@@ -23,10 +19,10 @@
   box-sizing: border-box;
 }
 
-/* Simulateur : zéro scroll vertical, pas de marge basse page (simulator.css). */
+/* Simulateur : scroll page autorisé. */
 body.oracle-simulator-page .oracle-page {
-  overflow-y: hidden;
-  padding-block-end: 0;
+  overflow-y: auto;
+  padding-block-end: var(--cp-scroll-clear, var(--cp-space-6));
 }
 
 /* ── En-tête de page ── */
@@ -49,6 +45,8 @@ body.oracle-simulator-page .oracle-page {
 }
 
 /* ── Breakpoints canoniques cockpit ──
+   Wide   : min-width 1080px (container queries)
    Tablet : max-width 900px (chat drawer, grilles 2 col)
+   Narrow : max-width 640px (container queries)
    Mobile : max-width 600px (nav bottom, grilles 1 col)
-   Aligner les media queries inline des pages sur ces seuils. */
+   Aligner les media queries inline des pages sur ces seuils (px ci-dessus). */

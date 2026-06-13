@@ -1,7 +1,4 @@
-// @enable-adrien:layer=front-cockpit v=1
-// ui-strings.ts — source de vérité pour les strings UI visibles par l'utilisateur.
-// Importer UI.* dans les composants au lieu de strings en dur.
-// Ajout de clés : additif uniquement (ne jamais réécrire une valeur existante).
+// ui-strings.ts — strings UI cockpit (UI.*).
 
 export const UI = {
   // Navigation
@@ -423,6 +420,14 @@ export const UI = {
   SOURCES_NO_ADMIN: 'No admin sources yet.',
   SOURCES_NO_FILTER: 'No results matching filters.',
   SOURCES_ADD: 'Add source',
+  SOURCES_UIM_TITLE: 'Add to Source Ledger',
+  SOURCES_UIM_HINT: 'This flags the source as used in the model — the simulator will use its value for this metric (overriding the benchmark median).',
+  SOURCES_UIM_SCENARIO_LABEL: 'Scenario context (for audit)',
+  SOURCES_UIM_DONE: 'Source added.',
+  SOURCES_UIM_ADD_BTN: 'Add to Ledger',
+  SOURCES_UIM_ADDING: 'Adding…',
+  SOURCES_UIM_ERR: 'Could not add source to ledger.',
+  SOURCES_ACTION_ERR: (msg: string) => msg || 'Action failed.',
   SOURCES_DELETE_CONFIRM: 'Delete this source? This cannot be undone.',
 
   // Dossier
@@ -653,6 +658,10 @@ export const UI = {
   MEMO_DOWNLOAD_TITLE: 'Download .md',
   MEMO_CLOSE_TITLE: 'Close (job continues in background)',
   MEMO_GENERATING_LABEL: 'Generating strategic memo…',
+  MEMO_SLA_WITHIN_TARGET: 'within target',
+  MEMO_SLA_SLOWER: 'slower than usual',
+  MEMO_STILL_WAITING_LLM: 'still waiting for the model',
+  MEMO_JOB_WAITING_LLM: ' · still waiting',
   ADVISOR_RAIL_ARIA: 'ORACLE Investment Committee Advisor',
 
   // ── KPI education layer ────────────────────────────────────────────────────

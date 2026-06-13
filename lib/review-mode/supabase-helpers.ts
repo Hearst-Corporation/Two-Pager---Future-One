@@ -129,7 +129,7 @@ export interface ReviewMessage {
 /**
  * Loads only the messages stamped with mode='review' for a given chat,
  * ordered chronologically. Used by /api/admin/review-document to build the
- * transcript fed to Kimi when generating the final document.
+ * transcript fed to the LLM when generating the final document.
  */
 export async function loadReviewMessages(chatId: string): Promise<ReviewMessage[]> {
   const supa = getPublicAdminClient();

@@ -1,32 +1,32 @@
 /* chat-fab.css — Rail chat/IC fixe à droite (toujours visible desktop).
    Hors grid (--ct-rail-right: 0) : le centre utilise padding-right pour ne pas passer sous le chat.
-   Mobile (<900px) : drawer + FAB (économie d’espace). */
+   Mobile (<900px) : drawer + FAB. */
 
 /* ── Desktop : chat docké permanent ── */
 @media (min-width: 901px) {
-  .ct-rail-right {
-    position: fixed !important;
+  body.oracle-chat-docked .ct-rail-right {
+    position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
-    width: var(--cp-chat-rail-width) !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    flex: none !important;
+    width: var(--cp-chat-rail-width);
+    min-width: 0;
+    max-width: none;
+    flex: none;
     z-index: var(--cp-z-docked);
-    transform: translateX(0) !important;
+    transform: translateX(0);
     box-shadow: var(--cp-shadow-md);
     border-left: 1px solid var(--cp-border);
   }
 
-  .ct-page-area {
-    padding-right: var(--cp-chat-rail-width) !important;
+  body.oracle-chat-docked .ct-page-area {
+    padding-right: var(--cp-chat-rail-width);
     box-sizing: border-box;
   }
 
-  .cp-chat-drawer-fab,
-  .cp-chat-drawer-backdrop {
-    display: none !important;
+  body.oracle-chat-docked .cp-chat-drawer-fab,
+  body.oracle-chat-docked .cp-chat-drawer-backdrop {
+    display: none;
   }
 }
 
@@ -76,23 +76,23 @@
     color: var(--cp-text-primary);
   }
 
-  .ct-rail-right {
-    position: fixed !important;
+  body.oracle-chat-docked .ct-rail-right {
+    position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
-    width: var(--cp-chat-drawer-width) !important;
-    min-width: 0 !important;
-    flex: none !important;
+    width: var(--cp-chat-drawer-width);
+    min-width: 0;
+    flex: none;
     z-index: var(--cp-z-drawer);
     transform: translateX(100%);
     transition: transform var(--cp-dur-base) var(--cp-ease-out);
     box-shadow: var(--cp-shadow-lg);
   }
-  body.cp-chat-drawer-open .ct-rail-right {
+  body.oracle-chat-docked.cp-chat-drawer-open .ct-rail-right {
     transform: translateX(0);
   }
-  body.cp-chat-drawer-open .ct-rail-right.collapsed .ct-rail-right-body {
+  body.oracle-chat-docked.cp-chat-drawer-open .ct-rail-right.collapsed .ct-rail-right-body {
     display: flex;
   }
 }

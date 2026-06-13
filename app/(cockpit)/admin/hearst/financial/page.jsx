@@ -531,7 +531,7 @@ export default function FinancialPage() {
           <div style={S.warnTitle}>{UI.FIN_WARNINGS_TITLE}</div>
           {proj.warnings.map((w, i) => (
             <div key={i} style={{ ...S.warnRow, display: 'flex', alignItems: 'flex-start', gap: 'var(--cp-space-2)' }}>
-              <TriangleAlert size={15} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <TriangleAlert size={15} aria-hidden="true" style={{ flexShrink: 0, marginTop: 'var(--cp-space-hair)' }} />
               <span>{w}</span>
             </div>
           ))}

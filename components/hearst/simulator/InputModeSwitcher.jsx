@@ -74,8 +74,8 @@ const S = {
   segmented: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gap: '1px',
-    padding: '1px',
+    gap: 'var(--cp-space-px)',
+    padding: 'var(--cp-space-px)',
     background: 'var(--cp-border)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-sm)',
@@ -118,8 +118,8 @@ const S = {
     color: 'var(--cp-text-primary)',
   },
   iconSvg: {
-    width: '16px',
-    height: '16px',
+    width: 'var(--cp-icon-sm)',
+    height: 'var(--cp-icon-sm)',
     strokeWidth: '1.5px',
   },
   segmentLabel: {

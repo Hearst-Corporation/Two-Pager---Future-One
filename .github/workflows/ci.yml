@@ -20,7 +20,7 @@ env:
   NEXT_TELEMETRY_DISABLED: '1'
 
 jobs:
-  # ── 1. Checks: lint:secrets + lint:strings + lint:tokens + lint:nav + eslint + vitest ──
+  # ── 1. Checks: lint:secrets + eslint + vitest ──
   checks:
     name: Checks (lint + unit tests)
     runs-on: ubuntu-latest
@@ -61,7 +61,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
           SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
-          MOONSHOT_API_KEY: placeholder-moonshot-key
+          OPENAI_API_KEY: placeholder-openai-key
 
   # ── Guard: enable E2E only when the required secrets are present ──
   e2e-guard:
@@ -96,9 +96,8 @@ jobs:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       ADMIN_DEV_AUTOLOGIN_EMAIL: ${{ secrets.ADMIN_DEV_AUTOLOGIN_EMAIL }}
-      # Optional — Kimi/Moonshot. If absent, memo generation uses the deterministic
-      # engine-backed fallback. The gate validates workflow integrity, not LLM text.
-      MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}
+      # Optional — OpenAI. If absent, memo generation uses the deterministic
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -117,7 +116,7 @@ jobs:
             echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
             echo "SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}"
             echo "ADMIN_DEV_AUTOLOGIN_EMAIL=${ADMIN_DEV_AUTOLOGIN_EMAIL}"
-            [ -n "${MOONSHOT_API_KEY}" ] && echo "MOONSHOT_API_KEY=${MOONSHOT_API_KEY}"
+            [ -n "${OPENAI_API_KEY}" ] && echo "OPENAI_API_KEY=${OPENAI_API_KEY}"
           } > .env.local
       - name: Run critical-path E2E (Playwright starts dev on :5005, waits for simulator)
         run: npx playwright test tests/e2e/critical-path.spec.ts

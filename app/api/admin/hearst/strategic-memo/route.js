@@ -11,18 +11,19 @@
 // (collapsible, confidence tag, source citations, charts ré-utilisés).
 //
 // Auth : editor requis (la route persiste une ligne versionnée du mémo en DB via persistMemo).
-// Modèle : Moonshot AI/Kimi K2.6 UNIQUEMENT (aucun fallback provider). Si l'appel
+// Modèle : OpenAI GPT-4.1 (aucun fallback provider). Si l'appel
 // échoue/timeout, on retombe sur un mémo déterministe local (sans LLM).
 // Rate-limit : 5 req/min/actor en prod, skip en dev.
 
 import { NextResponse } from 'next/server';
 import { authedWrite } from '@/lib/supabase-admin';
-import { kimiChatCompletion, KIMI_MODEL } from '@/lib/llm/kimi';
+import { MemoGenerateSchema } from '@/lib/validators/hearst';
+import { openaiChatCompletion, OPENAI_MEMO_MODEL } from '@/lib/llm/openai';
 import { buildOracleSystemPrompt } from '@/lib/oracle-system-prompt';
 import { buildIntelligenceBrief } from '@/lib/oracle-intelligence';
 import { getGpuPricingBrief, getEnergyBrief, getInfrastructureSignals } from '@/lib/oracle-live';
 import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from '@/lib/oracle-visualization';
-import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
+import { explainMetric, simplifyTechnicalTerm } from '@/lib/oracle-explainability';
 import { fmtUSD, fmtPctFromRatio, fmtX } from '@/lib/hearst-format';
 import { generateProjection, foldGpuRevenue } from '@/lib/hearst-calculations';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
@@ -30,14 +31,14 @@ import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, c
 import { persistMemo } from '@/lib/strategic-memo-store';
 import { reconcileMetricsWithEngine } from '@/lib/engine-reconcile';
 
-// Kimi K2.6 (no fallback) can run several minutes in the worst case. Without this
+// OpenAI GPT-4.1 can run several minutes in the worst case. Without this
 // the route inherits the Vercel default (~10-15s) and 504s mid-generation. 300s =
 // plan max, matched by the client timeout (MEMO_CLIENT_TIMEOUT_MS).
 export const maxDuration = 300;
 
 const RL_WINDOW = 60_000;
 const RL_MAX = 5;
-const MEMO_LLM_SOFT_TIMEOUT_MS = 90_000; // élevé à 90s : kimi-k2.6 est un modèle à raisonnement, le thinking peut prendre 30-60s
+const MEMO_LLM_SOFT_TIMEOUT_MS = 90_000;
 const rlBuckets = new Map();
 
 function checkRl(actorId) {
@@ -55,21 +56,6 @@ function checkRl(actorId) {
   b.count++;
   return { allowed: true };
 }
-
-const SECTION_IDS = [
-  'executive_summary',
-  'confidence_block',
-  'strategic_context',
-  'key_financial_metrics',
-  'infrastructure_analysis',
-  'market_benchmarking',
-  'risks_constraints',
-  'strategic_opportunities',
-  'recommended_architecture',
-  'commercialization_strategy',
-  'deployment_roadmap',
-  'long_term_strategic_value',
-];
 
 const MEMO_SCHEMA_INSTRUCTIONS = `Return a JSON object with the following exact keys (no markdown, no prose outside JSON) :
 
@@ -200,7 +186,7 @@ function sanitizeLiveBriefForClient(brief) {
   if (!brief || typeof brief !== 'object') return brief;
   const stripExcerpt = (o) => {
     if (!o || typeof o !== 'object') return o;
-    const { raw_excerpt, ...rest } = o;
+    const { raw_excerpt: _raw_excerpt, ...rest } = o;
     return rest;
   };
   return {
@@ -354,7 +340,7 @@ function buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence
     confidence_block: {
       ...computedConfidence,
       estimation_quality: 'Generated from the simulator output and curated intelligence because the LLM provider exceeded the response window.',
-      known_unknowns: ['Narrative synthesis was not produced by Kimi.', 'Human review is required before IC circulation.'],
+      known_unknowns: ['Narrative synthesis was not produced by the LLM.', 'Human review is required before IC circulation.'],
       computed_by: 'server',
     },
     strategic_context: {
@@ -459,14 +445,16 @@ export async function POST(req) {
     });
   }
 
-  let body;
-  try { body = await req.json(); }
-  catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+  let rawBody;
+  try { rawBody = await req.json(); }
+  catch { return NextResponse.json({ error: 'invalid_json' }, { status: 400 }); }
 
-  let { payload, oracle = {}, user_question, project_id = null, scenario_id = null, title = null } = body || {};
-  if (!payload || (!payload.scenario && !payload.projection)) {
-    return NextResponse.json({ error: 'payload.scenario or payload.projection required' }, { status: 400 });
+  const parseResult = MemoGenerateSchema.safeParse(rawBody);
+  if (!parseResult.success) {
+    return NextResponse.json({ error: 'validation_failed', issues: parseResult.error.issues }, { status: 400 });
   }
+
+  let { payload, oracle = {}, user_question, project_id = null, scenario_id = null, title = null } = parseResult.data;
 
   // ── Part A: server-side projection recompute (kills "trust client projection") ──
   // payload.scenario IS the post-archetype scenario (simulate returns archResult.scenario).
@@ -493,7 +481,7 @@ export async function POST(req) {
   // Replace payload.projection with the engine-authoritative value so all downstream reads use it.
   payload = { ...payload, projection: truthProjection };
 
-  const audience = SUPPORTED_AUDIENCES.includes(body?.audience) ? body.audience : 'investor';
+  const audience = parseResult.data.audience ?? 'investor';
 
   const oracleCtx = {
     stakeholder: oracle.stakeholder,
@@ -608,9 +596,8 @@ export async function POST(req) {
     // Timing transparent — pour identifier les hotspots et donner au caller
     // une indication de durée par étape (visible dans la réponse `timing`).
     const promptSize = systemPrompt.length + userMessage.length;
-    console.log(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] prompt size: ${promptSize} chars (system: ${systemPrompt.length}, user: ${userMessage.length})`);
     let memo;
-    let model_used = KIMI_MODEL;
+    let model_used = OPENAI_MEMO_MODEL;
     let llmDurationMs = 0;
     const llmStart = Date.now();
     const llmTimeout = new Promise(resolve => {
@@ -619,8 +606,8 @@ export async function POST(req) {
 
     try {
       const llmResult = await Promise.race([
-        kimiChatCompletion({
-          model: KIMI_MODEL,
+        openaiChatCompletion({
+          model: OPENAI_MEMO_MODEL,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user',   content: userMessage },
@@ -639,10 +626,9 @@ export async function POST(req) {
         model_used = 'deterministic-fallback';
       } else {
         model_used = llmResult.model_used;
-        console.log(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM call completed in ${llmDurationMs}ms via ${model_used}`);
 
         const rawContent = llmResult.response.choices?.[0]?.message?.content || '';
-        // Strip markdown fences (kimi-k2.6 sometimes wraps JSON in ```json ... ``` despite instructions)
+        // Strip markdown fences (model sometimes wraps JSON in ```json ... ```)
         const content = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
         try { memo = JSON.parse(content); }
         catch (e) {
@@ -701,7 +687,7 @@ export async function POST(req) {
       );
     }
 
-    // ── Post-Kimi server-side quality checks (Sprint 3.1) ─────────────
+    // ── Post-LLM server-side quality checks (Sprint 3.1) ─────────────
     const bannedPhrases = [
       'transformational', 'best-in-class', 'unlock', 'world-leading',
       'innovative', 'cutting-edge', 'industry-leading', 'next-generation',
@@ -754,7 +740,8 @@ export async function POST(req) {
         actor_id: auth.profile?.id || null,
       });
     } catch (e) {
-      persisted = { error: e?.message || 'persist_failed' };
+      console.error(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] persist error:`, e?.message);
+      persisted = { error: 'persist_failed' };
     }
 
     const persistFailed = !!(persisted && persisted.error);
@@ -798,6 +785,6 @@ export async function POST(req) {
     }, persistFailed ? { status: 207 } : undefined);
   } catch (e) {
     console.error(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] error:`, e?.message);
-    return NextResponse.json({ error: e?.message || 'Memo generation failed' }, { status: 500 });
+    return NextResponse.json({ error: 'memo_generation_failed' }, { status: 500 });
   }
 }

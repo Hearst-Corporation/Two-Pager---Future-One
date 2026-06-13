@@ -363,7 +363,7 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-3)',
-    maxWidth: '480px',
+    maxWidth: 'var(--cp-prose-max)',
     margin: '0 auto',
     width: '100%',
     alignItems: 'center',
@@ -401,7 +401,7 @@ const S = {
   rcBar: {
     display: 'flex',
     width: '100%',
-    height: '4px',
+    height: 'var(--cp-bar-h)',
     borderRadius: 'var(--cp-radius-pill)',
     overflow: 'hidden',
     background: 'var(--cp-surface-2)',

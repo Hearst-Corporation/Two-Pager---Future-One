@@ -6,6 +6,8 @@
 
 import { NextResponse } from 'next/server';
 import { requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { requireRowOwnership } from '@/lib/auth-guards';
+import { dbErrorResponse, notFoundResponse } from '@/lib/api-errors';
 import { deriveVerdict, deriveRiskLevel, fmtPct as ddPct } from '@/lib/dossier-derive';
 import { fmtUSD, fmtPctFromRatio, fmtPctRaw as fmtPctRawCore, fmtYears, MISSING } from '@/lib/hearst-format';
 import { deriveReturnsComposition } from '@/lib/returns-composition';
@@ -100,23 +102,6 @@ function riskRows(risks) {
     </div>`).join('');
 }
 
-// Opportunity drivers (max 4)
-function drivers(opportunities) {
-  const items = (opportunities?.items || []).slice(0, 4);
-  if (!items.length) return '';
-  const nums = ['i.', 'ii.', 'iii.', 'iv.'];
-  return `<div class="drivers">
-    <div class="dr-title">Key Value Drivers</div>
-    <div class="driver-row">
-      ${items.map((op, i) => `
-      <div class="driver">
-        <div class="di">${nums[i]}</div>
-        <div class="dv"><span class="dfig">${esc(op.label)}</span></div>
-      </div>`).join('')}
-    </div>
-  </div>`;
-}
-
 // Conditions precedent from roadmap phase 0 gating events (max 4)
 function condRows(roadmap) {
   const events = (roadmap?.phases?.[0]?.gating_events || []).slice(0, 4);
@@ -203,7 +188,6 @@ function buildHtml(row) {
   const roadmap = m.deployment_roadmap || {};
   const arch   = m.recommended_architecture || {};
   const ctx    = m.strategic_context || {};
-  const opps   = m.strategic_opportunities || {};
   const fin    = m.key_financial_metrics || {};
   const comm   = m.commercialization_strategy || {};
 
@@ -290,10 +274,11 @@ function buildHtml(row) {
 <style>
 @page { size: A4; margin: 0; }
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; background: #57534e; color: #111111;
+html, body { margin: 0; padding: 0; background: var(--preview-bg); color: var(--ink);
   font-family: "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased; }
 :root {
+  --preview-bg: #57534e;
   --ink: #111111; --ink-soft: #2A2A2A; --gray-1: #585858; --gray-2: #8C8C8C;
   --hair: #D7D3CD; --hair-soft: #E7E3DD; --paper: #FFFFFF; --whisper: #F6F4F1;
   --oxblood: #6E1423;
@@ -851,11 +836,22 @@ p { margin: 0; }
 export async function GET(_req, { params }) {
   const auth = await requireProfile('viewer');
   if (auth instanceof NextResponse) return auth;
+  try {
+    await requireRowOwnership({
+      table: 'strategic_memos',
+      id: params.id,
+      actorId: auth.actor,
+      allowSharedWorkspace: true,
+    });
+  } catch (err) {
+    if (err instanceof Response) return err;
+    throw err;
+  }
 
   const supa = getAdminClient();
   const { data: row, error } = await supa.from('strategic_memos').select('*').eq('id', params.id).maybeSingle();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!row) return NextResponse.json({ error: 'not_found' }, { status: 404 });
+  if (error) return dbErrorResponse(error, '[strategic-memos/[id]/pdf][GET]');
+  if (!row) return notFoundResponse();
 
   let browser;
   try {
@@ -889,6 +885,7 @@ export async function GET(_req, { params }) {
     }});
   } catch (e) {
     if (browser) { try { await browser.close(); } catch {} }
-    return NextResponse.json({ error: 'pdf_generation_failed', detail: e?.message }, { status: 500 });
+    console.error('[pdf/route] pdf_generation_failed', e);
+    return NextResponse.json({ error: 'pdf_generation_failed' }, { status: 500 });
   }
 }

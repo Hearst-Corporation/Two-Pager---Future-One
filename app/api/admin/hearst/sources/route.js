@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { withValidation } from '@/lib/validators/withValidation';
 import { SourceCreateSchema } from '@/lib/validators/hearst';
+import { dbErrorResponse } from '@/lib/api-errors';
 
 export async function GET(req) {
   const r = await requireProfile('viewer');
@@ -16,10 +17,10 @@ export async function GET(req) {
   if (project_id) q = q.eq('project_id', project_id);
   if (metric_id) q = q.eq('metric_id', metric_id);
   if (source_type) q = q.eq('source_type', source_type);
-  q = q.order('created_at', { ascending: false });
+  q = q.order('created_at', { ascending: false }).limit(500);
 
   const { data, error } = await q;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErrorResponse(error, '[sources][GET]');
   return NextResponse.json({ sources: data || [] });
 }
 
@@ -32,7 +33,7 @@ export const POST = withValidation(SourceCreateSchema, async (req, parsed) => {
     .insert({ ...body, created_by: auth.actor })
     .select()
     .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErrorResponse(error, '[sources][POST]');
 
   // Audit
   await auth.supa.from('hearst_audit_log').insert({

@@ -460,9 +460,9 @@ const S = {
   presetRail: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gap: '1px',
+    gap: 'var(--cp-space-px)',
     background: 'var(--cp-border)',
-    padding: '1px',
+    padding: 'var(--cp-space-px)',
     borderRadius: 'var(--cp-radius-sm)',
     border: '1px solid var(--cp-border)',
     overflow: 'hidden',
@@ -515,8 +515,8 @@ const S = {
     color: 'var(--cp-text-primary)',
   },
   iconSvg: {
-    width: '16px',
-    height: '16px',
+    width: 'var(--cp-icon-sm)',
+    height: 'var(--cp-icon-sm)',
     strokeWidth: '1.5px',
   },
   presetName: {
@@ -573,7 +573,7 @@ const S = {
     padding: '1px 4px',
     color: 'var(--cp-text-strong)',
     background: 'var(--cp-accent-maroon)',
-    borderRadius: '2px',
+    borderRadius: 'var(--cp-radius-2)',
     fontSize: 'var(--cp-font-nano)',
     fontWeight: 'var(--cp-weight-black)',
     whiteSpace: 'nowrap',
@@ -586,10 +586,10 @@ const S = {
   mixWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
+    gap: 'var(--cp-space-hair)',
   },
   mixBar: {
-    height: '4px',
+    height: 'var(--cp-bar-h)',
     display: 'flex',
     overflow: 'hidden',
     borderRadius: 'var(--cp-radius-pill)',
@@ -640,7 +640,7 @@ const S = {
   summary: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '1px',
+    gap: 'var(--cp-space-px)',
     background: 'var(--cp-border)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-xs)',
@@ -683,7 +683,7 @@ const S = {
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
     borderBottom: '1px solid var(--cp-border)',
-    paddingBottom: '1px',
+    paddingBottom: 'var(--cp-space-px)',
   },
   colTitleMeta: {
     fontWeight: 'var(--cp-weight-medium)',
@@ -728,7 +728,7 @@ const S = {
   gpuCards: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '1px',
+    gap: 'var(--cp-space-px)',
     background: 'var(--cp-border)',
     border: '1px solid var(--cp-border)',
     borderRadius: 'var(--cp-radius-xs)',
@@ -743,7 +743,7 @@ const S = {
   },
   gpuSku: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', lineHeight: 'var(--cp-leading-none)' },
   gpuMeta: { fontSize: 'var(--cp-font-nano)', opacity: 0.75, marginTop: '0', lineHeight: 'var(--cp-leading-none)' },
-  gpuPrice: { fontSize: 'var(--cp-font-nano)', fontWeight: 'var(--cp-weight-bold)', marginTop: '1px', lineHeight: 'var(--cp-leading-none)' },
+  gpuPrice: { fontSize: 'var(--cp-font-nano)', fontWeight: 'var(--cp-weight-bold)', marginTop: 'var(--cp-space-px)', lineHeight: 'var(--cp-leading-none)' },
   aiControls: {
     display: 'flex',
     gap: 'var(--cp-space-2)',
@@ -765,12 +765,12 @@ const S = {
     fontVariantNumeric: 'tabular-nums',
   },
   numInput: {
-    width: '50px',
+    width: 'var(--cp-readout-w)',
     fontSize: 'var(--cp-font-micro)',
     height: 'var(--cp-control-sm)',
     padding: '0 var(--cp-space-1)',
     border: '1px solid var(--cp-border)',
-    borderRadius: '2px',
+    borderRadius: 'var(--cp-radius-2)',
     background: 'var(--cp-surface-0)',
     color: 'var(--cp-text-primary)',
     fontVariantNumeric: 'tabular-nums',

@@ -241,7 +241,7 @@ const S = {
   resultsGrid: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
+    gap: 'var(--cp-space-hair)',
   },
   resultItem: {
     display: 'flex',
@@ -275,7 +275,7 @@ const S = {
   },
   solverNoteSlot: {
     minHeight: 'auto',
-    marginTop: '2px',
+    marginTop: 'var(--cp-space-hair)',
     flexShrink: 0,
   },
   solverNote: {

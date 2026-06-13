@@ -19,7 +19,7 @@ import {
   getServerSnapshot as getViewSSR,
   setView,
 } from "../stores/chatViewStore";
-import { ChatKimi } from "../chat/ChatKimi";
+import { ChatPanel } from "../chat/ChatPanel";
 import { ChatSettings } from "../chat/ChatSettings";
 import { ChatHistory } from "../chat/ChatHistory";
 import { useCockpit } from "./context";
@@ -89,7 +89,7 @@ export function RailRight() {
       <div className="ct-rail-right-body">
         {view === "settings" && <ChatSettings productName={product.name} productColor={product.color} />}
         {view === "history" && <ChatHistory productColor={product.color} />}
-        {view === "chat" && <ChatKimi productName={product.name} productColor={product.color} />}
+        {view === "chat" && <ChatPanel productName={product.name} productColor={product.color} />}
       </div>
     </aside>
   );

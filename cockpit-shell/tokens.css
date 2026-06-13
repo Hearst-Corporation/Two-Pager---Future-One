@@ -435,7 +435,7 @@ button, a, input, textarea, select, [role="button"], .ct-product-host {
     opacity var(--ct-dur-base) var(--ct-ease);
 }
 .ct-rail-right.collapsed { width: 48px; }
-/* Corps du chat masqué en CSS quand replié — ChatKimi reste monté (zéro perte de conversation) */
+/* Corps du chat masqué en CSS quand replié — ChatPanel reste monté (zéro perte de conversation) */
 .ct-rail-right.collapsed .ct-rail-right-body { display: none; }
 .ct-rail-right-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -533,7 +533,7 @@ button, a, input, textarea, select, [role="button"], .ct-product-host {
 .ct-card-body { font-size: 13px; color: var(--ct-text-body); line-height: 1.6; }
 .ct-placeholder { font-size: 12px; color: var(--ct-text-muted); font-style: italic; line-height: 1.6; }
 
-/* ── CHAT KIMI ── */
+/* ── CHAT (OpenAI / ChatPanel) ── */
 /* ct-chat-root doit être flex-column pour que ct-chat-list (flex:1) pousse ct-chat-form vers le bas */
 .ct-chat-root { display: flex; flex-direction: column; flex: 1; min-height: 0; height: 100%; }
 .ct-chat-actionbar { display: flex; justify-content: flex-end; padding-bottom: 8px; }
@@ -543,7 +543,37 @@ button, a, input, textarea, select, [role="button"], .ct-product-host {
 .ct-chat-msg { font-size: 13px; line-height: 1.6; border-radius: 12px; padding: 12px 14px; white-space: pre-wrap; word-break: break-word; }
 .ct-chat-msg.user { background: var(--ct-surface-3); color: var(--ct-text-primary); align-self: flex-end; max-width: 90%; }
 .ct-chat-msg.assistant { background: var(--ct-surface-1); color: var(--ct-text-body); align-self: flex-start; max-width: 95%; border: 1px solid var(--ct-border-soft); }
-.ct-chat-msg.assistant code { background: rgba(0,0,0,0.35); padding: 1px 5px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 12px; }
+.ct-chat-msg.assistant code {
+  background: color-mix(in srgb, var(--ct-bg-deep) 65%, transparent);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+.ct-chat-msg.assistant pre.ct-chat-md-pre {
+  background: color-mix(in srgb, var(--ct-bg-deep) 60%, transparent);
+  border: 1px solid var(--ct-border-soft);
+  border-radius: 6px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  margin: 6px 0;
+  font-size: 12px;
+  font-family: ui-monospace, monospace;
+  white-space: pre;
+}
+.ct-chat-msg.assistant pre.ct-chat-md-pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+.ct-chat-msg.assistant ul.ct-chat-md-list {
+  padding-left: 16px;
+  margin: 4px 0;
+  list-style: disc;
+}
+.ct-chat-msg.assistant li.ct-chat-md-li {
+  margin: 2px 0;
+}
 .ct-chat-form {
   display: flex; align-items: flex-end; gap: 8px;
   padding: 10px 10px 10px 14px;
@@ -817,6 +847,52 @@ button, a, input, textarea, select, [role="button"], .ct-product-host {
 .ct-chat-history-delete:hover {
   color: var(--ct-accent-strong);
   background: var(--ct-accent-soft);
+}
+.ct-chat-history-confirm,
+.ct-chat-history-clearconfirm {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+}
+.ct-chat-history-clearconfirm {
+  flex: 1;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.ct-chat-history-clearhint {
+  font-size: 10px;
+  color: var(--ct-text-muted);
+  letter-spacing: 0.02em;
+}
+.ct-chat-history-confirmbtn {
+  appearance: none;
+  font: inherit;
+  cursor: pointer;
+  background: var(--ct-surface-2);
+  border: 1px solid var(--ct-border);
+  border-radius: 8px;
+  color: var(--ct-text-muted);
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  transition: color var(--ct-dur-base) var(--ct-ease),
+              border-color var(--ct-dur-base) var(--ct-ease),
+              background var(--ct-dur-base) var(--ct-ease);
+}
+.ct-chat-history-confirmbtn:hover {
+  color: var(--ct-text-primary);
+  border-color: var(--ct-border-strong);
+}
+.ct-chat-history-confirmbtn.danger {
+  color: var(--ct-accent-strong);
+  border-color: color-mix(in srgb, var(--ct-accent-strong) 45%, var(--ct-border));
+  background: var(--ct-accent-soft);
+}
+.ct-chat-history-confirmbtn.danger:hover {
+  color: var(--ct-text-strong);
+  background: color-mix(in srgb, var(--ct-accent-strong) 35%, var(--ct-surface-2));
 }
 .ct-chat-error { font-size: 12px; color: var(--ct-accent-strong); margin: 8px 0; }
 

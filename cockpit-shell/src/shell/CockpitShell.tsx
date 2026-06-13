@@ -19,7 +19,7 @@ import type { CockpitShellProps, CockpitProduct } from "./types";
 /**
  * `<CockpitShell>` — point d'entrée unique.
  *
- * Enveloppe l'app : Rail gauche + centre + rail droit (chat Kimi). En mode
+ * Enveloppe l'app : Rail gauche + centre + rail droit (chat OpenAI). En mode
  * « immersif » (produit autre que `appId` actif) les rails du hub glissent
  * pour laisser le produit occuper l'écran (transition CSS).
  */

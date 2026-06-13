@@ -78,7 +78,7 @@ describe('DEAL_ARCHETYPES — 3 nouveaux archétypes', () => {
     expect(a.compute_as).toBe('recurring_revenue');
     // brand_premium_pct was removed: sovereign_ai now uses revenue_factor=0.90 only —
     // brand_premium dropped to avoid stacking that pushed effective above merchant (intent violation).
-    // See docs/audit/simulator-audit-2026-05-26.md P1-2.
+    // P1-2: archetype scoring regression guard.
     expect(a.brand_premium_pct).toBeUndefined();
     expect(a.scores.bankability).toBe(5);
     expect(a.scores.brand).toBe(5);
@@ -107,7 +107,7 @@ describe('projectArchetype — compute_as branches', () => {
     expect(r.projection.gpu_cloud_mode).toBeFalsy();
     // sovereign_ai now uses revenue_factor=0.90 only — brand_premium dropped to avoid stacking
     // that pushed effective above merchant (intent violation).
-    // See docs/audit/simulator-audit-2026-05-26.md P1-2.
+    // P1-2: archetype scoring regression guard.
     expect(r.scenario.price_hyperscale_kw_month).toBeCloseTo(115 * 0.90, 2);
   });
 

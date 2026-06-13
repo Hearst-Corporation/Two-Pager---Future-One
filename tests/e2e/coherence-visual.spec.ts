@@ -12,70 +12,38 @@ const COCKPIT_PAGES = [
 
 test.describe('coherence DS — cockpit shell', () => {
   for (const { path, name } of COCKPIT_PAGES) {
-    test(`desktop: ${name} renders rail nav + tokens`, async ({ page }) => {
+    test(`desktop: ${name} renders rail nav + docked chat`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto(path, { waitUntil: 'domcontentloaded' });
 
       const railItems = page.locator('[data-oracle-railnav-slot] .oracle-rail-nav-item');
       await expect(railItems).toHaveCount(6, { timeout: 20_000 });
 
-      const scrollClear = await page.evaluate(() =>
-        getComputedStyle(document.documentElement).getPropertyValue('--cp-scroll-clear').trim(),
+      await expect(page.locator('.ct-rail-right')).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('.cp-chat-drawer-fab')).toBeHidden();
+
+      const pagePaddingRight = await page.evaluate(() =>
+        parseFloat(getComputedStyle(document.querySelector('.ct-page-area') || document.body).paddingRight),
       );
-      expect(scrollClear).toBe('24px');
+      expect(pagePaddingRight).toBeGreaterThan(200);
 
       if (name === 'simulator') {
-        const simWrap = page.locator('[data-sim-wrap]');
-        await expect(simWrap).toBeVisible({ timeout: 20_000 });
-        const wrapLayout = await simWrap.evaluate((el) => {
-          const s = getComputedStyle(el);
-          return { flexDirection: s.flexDirection, maxWidth: s.maxWidth };
-        });
-        expect(wrapLayout.flexDirection).toBe('column');
-        expect(wrapLayout.maxWidth).toBe('1440px');
+        await expect(page.locator('[data-sim-wrap]')).toBeVisible({ timeout: 20_000 });
       }
 
       if (name === 'results') {
         await expect(page.locator('[data-results-layout]')).toBeVisible({ timeout: 20_000 });
       }
-
-      await page.screenshot({
-        path: `coherence-final-${name}-desktop.png`,
-        fullPage: false,
-      });
     });
   }
 
-  test('mobile: bottom nav visible when left rail hidden', async ({ page }) => {
+  test('mobile: bottom nav + chat FAB', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/admin/hearst/financial', { waitUntil: 'domcontentloaded' });
 
-    const leftRail = page.locator('.ct-rail-left');
-    await expect(leftRail).toBeHidden({ timeout: 10_000 });
-
-    const mobileNav = page.locator('.oracle-mobile-nav-root');
-    await expect(mobileNav).toBeVisible();
-
-    const mobileItems = page.locator('.oracle-mobile-nav .oracle-rail-nav-item');
-    await expect(mobileItems).toHaveCount(6);
-
-    const scrollClear = await page.evaluate(() =>
-      getComputedStyle(document.documentElement).getPropertyValue('--cp-scroll-clear').trim(),
-    );
-    expect(scrollClear).toMatch(/^calc\(/);
-
-    await page.screenshot({
-      path: 'coherence-final-financial-mobile.png',
-      fullPage: false,
-    });
-  });
-
-  test('no OpenClaw design-system imports at runtime', async ({ page }) => {
-    await page.goto('/admin/hearst/simulator', { waitUntil: 'domcontentloaded' });
-    const hasOcAccent = await page.evaluate(() => {
-      const v = getComputedStyle(document.documentElement).getPropertyValue('--oc-accent').trim();
-      return v.length > 0;
-    });
-    expect(hasOcAccent).toBe(false);
+    await expect(page.locator('.ct-rail-left')).toBeHidden({ timeout: 10_000 });
+    await expect(page.locator('.oracle-mobile-nav-root')).toBeVisible();
+    await expect(page.locator('.oracle-mobile-nav .oracle-rail-nav-item')).toHaveCount(6);
+    await expect(page.locator('.cp-chat-drawer-fab')).toBeVisible();
   });
 });

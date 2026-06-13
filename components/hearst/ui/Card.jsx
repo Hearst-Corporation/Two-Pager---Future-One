@@ -6,6 +6,8 @@ import PropTypes from 'prop-types';
 // S'appuie sur les classes `.cp-card*` (cockpit.css) + padding tokenisé.
 
 const PADDING = {
+  none: '0',
+  micro: 'var(--cp-space-1) var(--cp-space-2)',
   sm: 'var(--cp-space-3) var(--cp-space-4)',
   md: 'var(--cp-space-4) var(--cp-space-5)',
   lg: 'var(--cp-space-6)',
@@ -68,7 +70,7 @@ export default function Card({
 }
 
 Card.propTypes = {
-  padding: PropTypes.oneOf(['sm', 'md', 'lg']),
+  padding: PropTypes.oneOf(['none', 'micro', 'sm', 'md', 'lg']),
   surface: PropTypes.oneOf([0, 1, 2, 3]),
   accent: PropTypes.bool,
   hover: PropTypes.bool,

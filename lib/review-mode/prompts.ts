@@ -60,9 +60,5 @@ ${domainContext}
 
 # FIN CORPUS
 
-Réponds CONCIS. Profondeur uniquement sur demande.`;
+Réponds CONCIS. Profondeur uniquement sur demande explicite.`;
 }
-
-// Re-export the package helpers so consumers have a single import surface.
-export { buildFacilitatorPrompt, buildDocumentInstructions } from "@hearst/review-mode";
-export type { ProductContext, ReviewDocumentJson } from "@hearst/review-mode";

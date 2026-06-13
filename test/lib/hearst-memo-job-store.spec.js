@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe('hearst memo job store', () => {
-  it('keeps the client timeout above the Kimi server timeout', () => {
+  it('keeps the client timeout above the LLM server timeout', () => {
     expect(MEMO_CLIENT_TIMEOUT_MS).toBe(300_000);
     expect(MEMO_CLIENT_TIMEOUT_MS).toBeGreaterThan(120_000);
   });

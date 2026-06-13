@@ -20,9 +20,21 @@
   --font-sans: "Inter var", "Inter", -apple-system, BlinkMacSystemFont,
     "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
 
+  /* ── Login light surface (legacy — hors cockpit --cp-*) ── */
+  --color-login-bg:           #F5F5F6;
+  --color-login-surface:      #FFFFFF;
+  --color-login-border:       #E4E6EA;
+  --color-login-border-input: #C9CDD2;
+  --color-login-accent:       #8A1538;
+  --color-login-text:         #1A1D24;
+  --color-login-text-muted:   #8A9099;
+  --color-login-text-inverse: #FFFFFF;
+  --color-login-success:      #1A7A4A;
 
-  /* Operator color tokens (--cp-op-*) déplacés vers la source de vérité --cp-* :
-     app/(cockpit)/admin/hearst/cp-tokens.css. globals.css ne définit plus que --color-*. */
+  /* ── html/body fallback (routes sans cockpit shell) ── */
+  --color-gray-900:           #1A1D24;
+  --color-text-inverse:       #FFFFFF;
+  --color-accent-strong:      #6B102B;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,8 +44,8 @@
    background via --ct-bg-deep. Ces règles ne "fuient" pas visuellement sur le cockpit. */
 html, body {
   font-family: var(--font-sans);
-  background: #1A1D24; /* Fallback matching old --color-gray-900 */
-  color: #FFFFFF; /* Fallback matching old --color-text-inverse */
+  background: var(--color-gray-900);
+  color: var(--color-text-inverse);
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -47,8 +59,8 @@ body { overflow-x: clip; }
 /* Fallback ::selection pour /admin/login/ (n'a pas --cp-*).
    Sur le cockpit, cockpit.css surcharge via .ct-root ::selection (accent courant). */
 ::selection {
-  background: #6B102B; /* --cp-accent-strong fallback: hors scope cp-tokens.css sur routes non-cockpit */
-  color: #FFFFFF;
+  background: var(--color-accent-strong);
+  color: var(--color-text-inverse);
 }
 
 button {

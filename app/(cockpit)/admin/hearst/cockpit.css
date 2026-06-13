@@ -144,25 +144,24 @@ html :focus-visible {
 }
 
 /* === Centre : flex max entre rail gauche et chat docké (chat-fab.css) === */
-.ct-center-panel {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
+body.oracle-chat-docked .ct-center-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
 }
-.ct-page-area {
-  width: 100% !important;
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  max-height: 100% !important;
-  overflow-x: hidden !important;
-  overflow-y: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  padding: var(--cp-space-6) 0 0 0 !important;
+body.oracle-chat-docked .ct-page-area {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: var(--cp-space-6) 0 0 0;
   box-sizing: border-box;
 }
 
-/* Cockpit = hauteur 100dvh, pas de scroll vertical document. */
 html.oracle-cockpit-root,
 html.oracle-cockpit-root body {
   height: 100%;
@@ -171,18 +170,18 @@ html.oracle-cockpit-root body {
 }
 
 /* === Rail droit : IC au-dessus du chat (flex natif shell, pas d'input absolute) === */
-.ct-rail-right .ct-rail-right-body {
-  overflow: hidden !important;
+body.oracle-chat-docked .ct-rail-right .ct-rail-right-body {
+  overflow: hidden;
   padding-bottom: var(--cp-space-4);
 }
-.ct-rail-right-body [data-oracle-advisor-slot] {
+body.oracle-chat-docked .ct-rail-right-body [data-oracle-advisor-slot] {
   flex-shrink: 0;
   max-height: min(38vh, 340px);
   overflow-y: auto;
   border-bottom: 1px solid var(--cp-border);
 }
-.ct-rail-right-body .ct-chat-root {
-  display: flex !important;
+body.oracle-chat-docked .ct-rail-right-body .ct-chat-root {
+  display: flex;
   flex-direction: column;
   flex: 1 1 0%;
   min-height: 0;

@@ -120,6 +120,8 @@ body.oracle-simulator-page {
   --cp-leading-normal:  1.6;
 
   /* ── Espacement (base 4px) ── */
+  --cp-space-px:   1px;   /* hairline (gaps/paddings 1px) */
+  --cp-space-hair: 2px;   /* sous-grille (gaps/paddings 2px, marginTop micro) */
   --cp-space-0:  0px;
   --cp-space-1:  4px;
   --cp-space-2:  8px;
@@ -134,10 +136,19 @@ body.oracle-simulator-page {
 
   /* ── Border radius ── */
   --cp-radius-xs:   4px;
+  --cp-radius-2:    2px;   /* puce/segment ultra-petit */
   --cp-radius-sm:   6px;
   --cp-radius-md:   10px;
   --cp-radius-lg:   14px;
   --cp-radius-pill: 9999px;
+
+  /* ── Dimensions fixes (icônes, barres, conteneurs) ── */
+  --cp-icon-xs:    12px;  /* dot timeline */
+  --cp-icon-sm:    16px;  /* icône inline (svg badge) */
+  --cp-bar-h:       4px;  /* barre de progression / mix */
+  --cp-readout-w:  50px;  /* champ numérique readout compact */
+  --cp-kpi-minh:   80px;  /* hauteur mini carte KPI */
+  --cp-prose-max: 480px;  /* largeur de lecture max (prose centrée) */
 
   /* ── Épaisseurs de bord ── */
   --cp-border-w:        1px;   /* filet par défaut */

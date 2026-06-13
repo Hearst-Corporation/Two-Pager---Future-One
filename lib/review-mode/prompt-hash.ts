@@ -8,7 +8,7 @@
 // product-review checklists; Oracle needs IC-style memos grounded in the deal
 // corpus.
 
-import { sha256Hex } from "@hearst/review-mode";
+import { sha256Hex } from "@/lib/review-mode/hash";
 import { DOMAIN_CONTEXT } from "@/lib/oracle-product-context";
 import { buildConversationalPrompt } from "@/lib/review-mode/prompts";
 import {

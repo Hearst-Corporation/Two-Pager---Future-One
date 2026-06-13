@@ -7,7 +7,7 @@ import { Card, SectionHead } from '@/components/hearst/ui';
 import ArchetypeRadar from '@/components/hearst/simulator/ArchetypeRadar';
 import B2BMatrix from '@/components/hearst/simulator/B2BMatrix';
 import { VIZ_META, ARCH_BY_ID } from '@/lib/hearst-results-view';
-import { S as CP } from '@/lib/cp-styles';
+import { S as CP, G } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
 
 const EcosystemNetwork = dynamic(() => import('@/components/hearst/simulator/EcosystemNetwork'), {
@@ -49,7 +49,7 @@ function VisualizationsStep({
   const activeMeta = VIZ_META[activeViz] || VIZ_META[vizEntries[0][0]];
 
   return (
-      <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
+      <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', borderBottom: '1px solid var(--cp-border-base)' }}>
         <SectionHead
           title={UI.RESULTS_VIZ_TITLE}
           hint={UI.RESULTS_VIZ_HINT}
@@ -63,7 +63,7 @@ function VisualizationsStep({
                 type="button"
                 aria-current={activeViz === id ? 'true' : undefined}
                 onClick={() => onSelectViz(id)}
-                style={{ ...S.vizRailBtn, ...(activeViz === id ? S.vizRailBtnActive : {}) }}
+                style={{ ...S.vizRailBtn, ...(activeViz === id ? G.selected : {}) }}
               >
                 <span style={S.vizRailLabel}>{meta.label}</span>
                 <span style={S.vizRailDetail}>{meta.detail}</span>
@@ -73,7 +73,7 @@ function VisualizationsStep({
           {!projection ? (
             <div style={CP.loadingPanel}>{UI.SIM_FILL}</div>
           ) : (
-            <Card data-viz-panel variant="card" surface={0} padding="lg" style={{ minWidth: 0 }}>
+            <Card data-viz-panel variant="flat" padding="lg" style={{ minWidth: 0 }}>
               <div data-viz-panel-head style={S.vizPanelHead}>
                 <div>
                   <h3 style={S.vizTitle}>{activeMeta.title}</h3>
@@ -140,10 +140,6 @@ const S = {
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
     minHeight: 118,
-  },
-  vizRailBtnActive: {
-    borderColor: 'var(--cp-accent-maroon)',
-    background: 'var(--cp-accent-soft)',
   },
   vizRailLabel: {
     color: 'var(--cp-text-strong)',

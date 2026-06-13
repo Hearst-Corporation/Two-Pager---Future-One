@@ -3,6 +3,7 @@
 import './cp-tokens.css';
 import './cockpit.css';
 import './oracle-layout.css';
+import './oracle-responsive.css';
 import '@/components/hearst/chat-fab.css';
 import HearstLayoutClient from './HearstLayoutClient';
 

@@ -6,7 +6,7 @@
 // mocked `authedWrite` / `getAdminClient` so we exercise the actual
 // branch logic without standing up a database.
 //
-// Mock pattern follows docs/testing.md — module-boundary mocks via vi.mock.
+// Mock pattern — module-boundary mocks via vi.mock.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
