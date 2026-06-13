@@ -21,11 +21,10 @@ export default function AlertBanner({ alerts = [] }) {
   );
 }
 
-// Alert severities — critical = real danger (--cp-error), warning + info both
-// degrade to a single neutral surface treatment since the DS only allows one accent.
+// Alert severities — critical = danger, warning = status-warning (not brand accent).
 function severityStyle(s) {
   if (s === 'critical') return { borderLeftColor: 'var(--cp-error)',         background: 'var(--cp-error-bg)' };
-  if (s === 'warning')  return { borderLeftColor: 'var(--cp-accent)',        background: 'var(--cp-accent-soft)' };
+  if (s === 'warning')  return { borderLeftColor: 'var(--cp-status-warning)', background: 'var(--cp-status-warning-soft)' };
   return                       { borderLeftColor: 'var(--cp-border-strong)', background: 'var(--cp-surface-2)' };
 }
 
@@ -37,7 +36,7 @@ function SeverityIcon(s) {
     </svg>
   );
   if (s === 'warning') return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ color: 'var(--cp-accent)' }}>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ color: 'var(--cp-status-warning)' }}>
       <path d="M8 2L14.5 13.5H1.5L8 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
       <path d="M8 6.5V9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       <circle cx="8" cy="11.5" r="0.75" fill="currentColor" />
@@ -63,7 +62,7 @@ const S = {
     alignItems: 'flex-start',
     gap: 'var(--cp-space-3)',
     padding: 'var(--cp-space-3) var(--cp-space-4)',
-    borderLeft: '3px solid',
+    borderLeft: 'var(--cp-border-w-bar) solid',
     borderRadius: 'var(--cp-radius-md)',
     fontSize: 'var(--cp-font-sm)',
     lineHeight: 'var(--cp-leading-normal)',

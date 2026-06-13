@@ -1,24 +1,6 @@
 'use client';
 
-// /admin/hearst/dossier — Project Dossier · Decision Canvas (Critical Deliverables P8).
-//
-// A board user must understand the decision in 10 seconds: verdict → KPIs →
-// category → risks → recommendation → next action, all above the fold. The full
-// written memo lives below as continuous analytics; raw detail collapses into an
-// appendix. No accordion wall.
-//
-// Modes:
-//   ?memo=<id>      → fetch single memo, render the Decision Canvas
-//   ?scenario=<id>  → list all memos for that scenario
-//   (no params)     → list all memos
-//
-// Design: sober, near-monochrome, cockpit-canon typography. ONE bordeaux accent
-// (--cp-accent) reserved for the primary action + the verdict keyline. No status
-// colours, no badges/pills/chips. Tokens only — no hardcoded hex/rgb. Responsive
-// via auto-fit grids + intrinsic wrapping.
-//
-// Rendering / UX only — reads existing memo_json (+ _exec_projection), scenario
-// and report data. No financial-engine, memo-generation or approval-API changes.
+// /admin/hearst/dossier — Project Dossier · Decision Canvas
 
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -28,7 +10,7 @@ import {
   deriveCapitalStack, fmtUsd,
 } from '@/lib/dossier-derive';
 import { deriveReturnsComposition } from '@/lib/returns-composition';
-import { Card, SectionHead, Button, Table, Row, Cell, KpiGrid, KpiCard } from '@/components/hearst/ui';
+import { Card, SectionHead, Table, Row, Cell, KpiGrid, KpiCard } from '@/components/hearst/ui';
 import { S as CP } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
 import { resolveSourceLabel } from '@/lib/citation-resolver';
@@ -203,6 +185,8 @@ function Cashflow({ years }) {
 
 // ─── Decision Canvas ──────────────────────────────────────────────────────────
 
+import DossierHeader from '@/components/hearst/dossier/DossierHeader';
+
 function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusChange }) {
   const m = memo.memo_json || {};
   const verdict = deriveVerdict(m);
@@ -216,24 +200,6 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
   const phases = m.deployment_roadmap?.phases || [];
   const comparables = m.market_benchmarking?.comparables || [];
 
-  // Approval — buttons PATCH the status (server enforces the state machine +
-  // attributes who/when + writes the audit trail), then reload.
-  const [govBusy, setGovBusy] = useState(false);
-  const [govErr, setGovErr] = useState(null);
-  async function transition(next) {
-    setGovBusy(true); setGovErr(null);
-    try {
-      const r = await fetch(`/api/admin/hearst/strategic-memos/${memo.id}`, {
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ status: next }),
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) { setGovErr(j.error || `HTTP ${r.status}`); return; }
-      onStatusChange && onStatusChange();
-    } catch (e) { setGovErr(String(e)); } finally { setGovBusy(false); }
-  }
-
   // Quiet identity line — region · version · status · data freshness · provider.
   const ident = [
     memo.region,
@@ -246,48 +212,8 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
   return (
     <div style={S.canvas}>
       {/* ── UNIFIED DECISION HERO ──────────────────────────────────────────── */}
-      <Card as="section" variant="card" surface={1} padding="lg" style={{ borderLeft: '3px solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
-        <div style={S.heroTop}>
-          <div style={S.heroIdent}>
-            <div style={S.identLine}>{ident.join('  ·  ')}</div>
-            <h1 style={S.heroTitle}>{memo.title}</h1>
-          </div>
-
-          <div style={S.heroActions}>
-            <a style={S.pdfBtn} href={`/api/admin/hearst/strategic-memos/${memo.id}/pdf`} target="_blank" rel="noreferrer">
-              {UI.DOSSIER_BTN_EXPORT_PDF}
-            </a>
-            <div style={S.govRow}>
-              {memo.status === 'draft' && (
-                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('reviewed')}>{UI.DOSSIER_BTN_MARK_REVIEWED}</Button>
-              )}
-              {memo.status === 'reviewed' && (
-                <>
-                  <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('approved')}>{UI.DOSSIER_BTN_APPROVE}</Button>
-                  <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('draft')}>{UI.DOSSIER_BTN_SEND_BACK}</Button>
-                </>
-              )}
-              {memo.status === 'approved' && (
-                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('archived')}>{UI.DOSSIER_BTN_ARCHIVE}</Button>
-              )}
-              {memo.status === 'archived' && (
-                <Button variant="secondary" size="sm" disabled={govBusy} onClick={() => transition('draft')}>{UI.DOSSIER_BTN_REOPEN}</Button>
-              )}
-            </div>
-            {(memo.approved_at || memo.reviewed_at) && (
-              <div style={S.govNote}>
-                {memo.approved_at ? UI.DOSSIER_GOV_APPROVED(fmtDate(memo.approved_at)) : UI.DOSSIER_GOV_REVIEWED(fmtDate(memo.reviewed_at))}
-              </div>
-            )}
-            {govErr && <div style={S.govErr}>{govErr}</div>}
-            
-            <div style={{ marginTop: 'var(--cp-space-2)', textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)' }}>
-              <div style={S.eyebrow}>{UI.DOSSIER_EYEBROW_NEXT_ACTION}</div>
-              <div style={{ fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' }}>{decision.nextAction.primary}</div>
-              <div style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', lineHeight: 'var(--cp-leading-tight)' }}>{decision.nextAction.detail}</div>
-            </div>
-          </div>
-        </div>
+      <Card as="section" variant="card" surface={1} padding="lg" style={{ borderLeft: 'var(--cp-border-w-bar) solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
+        <DossierHeader memo={memo} decision={decision} ident={ident} onStatusChange={onStatusChange} />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 7)), 1fr))', gap: 'var(--cp-space-6)', background: 'var(--cp-surface-0)', padding: 'var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)' }}>
           <div>
@@ -362,7 +288,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
           {risks.map((r, i) => {
             const sv = (r.severity || 'MED').toUpperCase();
             return (
-              <Card key={i} variant="card" surface={1} padding="sm" style={{ borderLeft: '3px solid var(--cp-border-strong)' }}>
+              <Card key={i} variant="card" surface={1} padding="sm" style={{ borderLeft: 'var(--cp-border-w-bar) solid var(--cp-border-strong)' }}>
                 <div style={S.riskHead}>
                   <span style={S.sevLabel}>{sv === 'MEDIUM' ? 'MED' : sv}</span>
                   {r.category && <span style={S.riskCat}>{r.category}</span>}
@@ -699,11 +625,72 @@ function MemoDetailView({ memoId }) {
   );
 }
 
+// ─── Latest decision preview (leads the landing view) ─────────────────────────
+// Surfaces the strongest decision artifact — verdict, recommendation, headline
+// returns, primary risk — above the flat memo table, so the landing answers
+// "what's the call?" without requiring a ?memo= drill-down. Read-only: reuses the
+// same derive helpers and styles as the full DecisionCanvas, no data-model change.
+
+function LatestDecisionPreview({ memo }) {
+  const router = useRouter();
+  const m = memo.memo_json || {};
+  const verdict = deriveVerdict(m);
+  const decision = deriveDecision(m, memo.status);
+  const primaryRisk = topRisks(m, 1)[0] || null;
+
+  const byKey = Object.fromEntries(deriveKpis(m).map(k => [k.key, k]));
+  const headline = ['irr', 'moic', 'capex'].map(k => byKey[k]).filter(Boolean);
+
+  return (
+    <Card
+      as="section"
+      variant="card"
+      surface={1}
+      padding="lg"
+      style={S.previewCard}
+    >
+      <div style={S.previewTop}>
+        <div style={S.previewVerdictWrap}>
+          <span style={S.eyebrow}>{UI.DOSSIER_EYEBROW_VERDICT || 'Latest decision'}</span>
+          <div style={S.verdictBadge}>{verdict.label}</div>
+          {decision.recommendation && <p style={S.previewRec}>{decision.recommendation}</p>}
+        </div>
+        <button
+          type="button"
+          onClick={() => router.push(`/admin/hearst/dossier?memo=${memo.id}`)}
+          style={S.previewCta}
+        >
+          Open memo →
+        </button>
+      </div>
+
+      {headline.length > 0 && (
+        <div style={S.previewKpis}>
+          {headline.map(k => (
+            <div key={k.key} style={S.previewKpi}>
+              <span style={S.previewKpiLabel}>{k.label}</span>
+              <span style={S.previewKpiValue}>{k.value || '—'}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {primaryRisk && (
+        <div style={S.previewRisk}>
+          <span style={S.previewRiskLabel}>Primary risk</span>
+          <span style={S.previewRiskText}>{primaryRisk.label || primaryRisk.title || '—'}</span>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 // ─── All-memos list (default view) ───────────────────────────────────────────
 
 function AllMemosView() {
   const [memos, setMemos] = useState(null);
   const [scenarios, setScenarios] = useState([]);
+  const [latestMemo, setLatestMemo] = useState(null); // full latest memo for the decision preview
   const [err, setErr] = useState(null);
 
   useEffect(() => {
@@ -715,10 +702,21 @@ function AllMemosView() {
           fetch('/api/admin/hearst/strategic-memos').then(r => r.json()),
           fetch(`/api/admin/hearst/scenarios?project_id=${proj?.id}`).then(r => r.json()),
         ]);
-        if (mRes.status === 'fulfilled') setMemos(mRes.value.memos || []);
+        let rows = [];
+        if (mRes.status === 'fulfilled') { rows = mRes.value.memos || []; setMemos(rows); }
         if (sRes.status === 'fulfilled') {
           const rawS = sRes.value?.scenarios || sRes.value?.rows;
           setScenarios(Array.isArray(rawS) ? rawS : []);
+        }
+        // The list endpoint returns summary columns only; the decision preview
+        // needs the full memo body (projection, risks, recommendation). Fetch the
+        // most recent one (list is ordered created_at desc) to lead the page with
+        // the strongest decision artifact instead of a flat table.
+        if (rows.length > 0) {
+          try {
+            const full = await fetch(`/api/admin/hearst/strategic-memos/${rows[0].id}`).then(r => r.json());
+            if (full?.memo) setLatestMemo({ ...full.memo, status: rows[0].status });
+          } catch { /* preview is best-effort — table still renders below */ }
         }
       } catch (e) { setErr(String(e)); }
     }
@@ -734,7 +732,7 @@ function AllMemosView() {
   const approvedCount = (memos || []).filter(mm => mm.status === 'approved').length;
 
   return (
-    <div>
+    <div className="oracle-page">
       <header className="oracle-page-header">
         <h1>{UI.DOSSIER_PAGE_TITLE}</h1>
         <p className="oracle-subtitle">{UI.DOSSIER_PAGE_SUBTITLE}</p>
@@ -749,6 +747,8 @@ function AllMemosView() {
       {err && <div style={DOSSIER_ERR}>Error: {err}</div>}
       {memos === null && <div style={DOSSIER_EMPTY}>{UI.DOSSIER_LOADING_MEMOS}</div>}
       {memos && memos.length === 0 && <div style={DOSSIER_EMPTY}>{UI.WS_NO_REPORTS}</div>}
+
+      {latestMemo && <LatestDecisionPreview memo={latestMemo} />}
 
       {memos && memos.length > 0 && (
         <Table
@@ -828,7 +828,21 @@ const S = {
   heroActions: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)', alignItems: 'flex-end', flexShrink: 0 },
   heroLead: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', margin: 'var(--cp-space-0)', maxWidth: 'calc(var(--cp-space-9) * 22 + var(--cp-space-5))' },
 
-  verdictBadge:{ fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 'var(--cp-leading-tight)', paddingLeft: 'var(--cp-space-4)', borderLeft: '3px solid var(--cp-accent)' },
+  verdictBadge:{ fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 'var(--cp-leading-tight)', paddingLeft: 'var(--cp-space-4)', borderLeft: 'var(--cp-border-w-bar) solid var(--cp-accent)' },
+
+  // Latest-decision preview (landing lead)
+  previewCard: { borderLeft: 'var(--cp-border-w-bar) solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', marginBottom: 'var(--cp-space-6)' },
+  previewTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', flexWrap: 'wrap' },
+  previewVerdictWrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)', minWidth: 0, flex: '1 1 calc(var(--cp-space-9) * 8)' },
+  previewRec: { margin: 'var(--cp-space-0)', fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)' },
+  previewCta: { appearance: 'none', cursor: 'pointer', flexShrink: 0, font: 'inherit', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', background: 'var(--cp-accent)', border: '1px solid var(--cp-accent)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-2) var(--cp-space-4)', whiteSpace: 'nowrap' },
+  previewKpis: { display: 'flex', gap: 'var(--cp-space-6)', flexWrap: 'wrap', background: 'var(--cp-surface-0)', padding: 'var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)' },
+  previewKpi: { display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)', minWidth: 'var(--cp-kpi-min-width)' },
+  previewKpiLabel: { ...EYEBROW },
+  previewKpiValue: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)', fontVariantNumeric: 'tabular-nums' },
+  previewRisk: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)', flexWrap: 'wrap' },
+  previewRiskLabel: { ...EYEBROW, flexShrink: 0 },
+  previewRiskText: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   verdictMeta: { display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)', minWidth: 0 },
   verdictDrivers: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-body)' },
   verdictNote: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
@@ -931,7 +945,7 @@ const S = {
   appendixBody: { padding: 'var(--cp-space-0) var(--cp-space-4) var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   pre: { margin: 'var(--cp-space-0)', padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-xs)', lineHeight: 'var(--cp-leading-normal)', overflowX: 'auto', fontFamily: 'ui-monospace, monospace' },
   tensionList: { margin: 'var(--cp-space-0)', padding: 'var(--cp-space-0)', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
-  tensionItem: { borderLeft: '3px solid var(--cp-border-strong)', paddingLeft: 'var(--cp-space-3)' },
+  tensionItem: { borderLeft: 'var(--cp-border-w-bar) solid var(--cp-border-strong)', paddingLeft: 'var(--cp-space-3)' },
   tensionId: { ...EYEBROW, color: 'var(--cp-text-primary)', fontFamily: 'ui-monospace, monospace' },
 
   // ── Shared (list/scenario views) ──

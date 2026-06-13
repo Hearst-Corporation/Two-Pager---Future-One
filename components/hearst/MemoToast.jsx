@@ -143,7 +143,7 @@ const S = {
   sub: {
     fontSize: 'var(--cp-font-xs)',
     opacity: 0.85,
-    lineHeight: 1.4,
+    lineHeight: 'var(--cp-leading-relaxed)',
   },
   dismiss: {
     width: 22,
@@ -155,7 +155,7 @@ const S = {
     opacity: 0.7,
     cursor: 'pointer',
     fontSize: 'var(--cp-font-lg)',
-    lineHeight: 1,
+    lineHeight: 'var(--cp-leading-none)',
     flexShrink: 0,
   },
 };

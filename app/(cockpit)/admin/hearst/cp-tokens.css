@@ -1,8 +1,4 @@
-/* =====================================================================
-   cp-tokens.css — Bridge --cp-* → --ct-* + valeurs manquantes.
-   Importé uniquement dans app/(cockpit)/admin/hearst/layout.jsx.
-   Source locale : cockpit-shell/tokens.css + compléments applicatifs ci-dessous.
-   ===================================================================== */
+/* cp-tokens.css — tokens applicatifs Oracle (--cp-*), bridge vers --ct-* du shell. */
 
 /* Le shell rend une .ct-hub-bar « Overview » destinée au hub multi-produits.
    Oracle est standalone : rail gauche desktop + nav mobile remplacent ce chrome. */
@@ -24,16 +20,20 @@
   --cp-status-danger-soft:    rgba(239, 68, 68, 0.12);
   --cp-status-danger-border:  rgba(239, 68, 68, 0.40);
 
-  /* Rail droit = drawer overlay (FAB), jamais colonne grid — centre full-width.
-     Override DÉLIBÉRÉ de --ct-rail-right dans la copie locale : le shell
-     traite ce token comme la largeur de la colonne flex .ct-rail-right dans
-     .ct-panels-row ET l'injecte dans --ct-rail-right-eff. Le mettre à 0 est le
-     levier local pour que le centre n'en réserve pas l'espace ; chat-fab.css
-     sort ensuite .ct-rail-right du flux (position:fixed) et réserve la place via
-     --cp-chat-rail-width (padding-right de .ct-page-area). Ne pas le retirer. */
+  /* Bridge shell : --ct-status-* → --cp-status-* (une seule palette, deux préfixes) */
+  --ct-status-success:        var(--cp-status-success);
+  --ct-status-success-soft:   var(--cp-status-success-soft);
+  --ct-status-success-border: var(--cp-status-success-border);
+  --ct-status-warning:        var(--cp-status-warning);
+  --ct-status-warning-soft:   var(--cp-status-warning-soft);
+  --ct-status-warning-border: var(--cp-status-warning-border);
+  --ct-status-danger:         var(--cp-status-danger);
+  --ct-status-danger-soft:    var(--cp-status-danger-soft);
+  --ct-status-danger-border:  var(--cp-status-danger-border);
+
+  /* Rail droit fixe desktop — padding centre via --cp-chat-rail-width */
   --ct-rail-right: 0px;
   --cp-chat-rail-width: min(420px, 32vw);
-  --cp-chat-rail-collapsed-width: 40px;
 }
 
 body.oracle-simulator-page {
@@ -51,6 +51,7 @@ body.oracle-simulator-page {
   --cp-border-accent:   var(--ct-border-accent);
   --cp-border-soft:     var(--ct-border-soft);
   --cp-border-strong:   var(--ct-border-strong);
+  --cp-border-base:     var(--cp-border);
   --cp-dur-base:        var(--ct-dur-base);
   --cp-ease:            var(--ct-ease);
   --cp-shadow-depth:    var(--ct-shadow-depth);
@@ -70,8 +71,14 @@ body.oracle-simulator-page {
   --cp-dur-fast:        100ms;
   --cp-ease-out:        cubic-bezier(0, 0, 0.2, 1);
   --cp-grid-line:       1px solid var(--ct-border-soft);
+  --cp-highlight:       var(--cp-accent-strong);
+  --cp-font-sans:       var(--font-inter), "Inter", system-ui, sans-serif;
+  --cp-max-width:       none;
+
+  /* ── Breakpoints ── */
 
   /* ── Typographie ── */
+  --cp-font-nano:   9px;   /* plus petit niveau (métas/légendes denses) */
   --cp-font-micro:  10px;
   --cp-font-xs:     11px;
   --cp-font-sm:     12px;
@@ -81,19 +88,36 @@ body.oracle-simulator-page {
   --cp-font-xl:     20px;
   --cp-font-2xl:    24px;
 
+  /* Tailles fluides (clamp tokenisés) — chiffres héros & métriques responsives */
+  --cp-font-fluid-hero:    clamp(var(--cp-font-2xl), 4vw, 48px);   /* viz plein écran */
+  --cp-font-fluid-metric:  clamp(var(--cp-font-xl), 2.5vw, 32px);  /* KPI / board metric */
+  --cp-font-fluid-stat:    clamp(20px, 1.5vw, 28px);               /* stat secondaire */
+  --cp-font-fluid-lead:    clamp(18px, 1.8vw, var(--cp-font-2xl)); /* phrase narrative */
+  --cp-font-fluid-input:   clamp(var(--cp-font-2xl), 3vw, 40px);   /* saisie héro */
+
   --cp-weight-regular:  400;
   --cp-weight-medium:   500;
   --cp-weight-semibold: 600;
   --cp-weight-bold:     700;
   --cp-weight-black:    800;
+  --cp-weight-heavy:    900;
 
-  --cp-tracking-tight:   -0.02em;
-  --cp-tracking-wide:     0.06em;
-  --cp-tracking-wider:    0.10em;
-  --cp-tracking-eyebrow:  0.14em;
+  --cp-tracking-tighter:  -0.01em;
+  --cp-tracking-tight:    -0.02em;
+  --cp-tracking-snug:      0.02em;
+  --cp-tracking-caps:      0.05em;
+  --cp-tracking-wide:      0.06em;
+  --cp-tracking-wider:     0.10em;
+  --cp-tracking-eyebrow:   0.14em;
 
-  --cp-leading-tight:  1.3;
-  --cp-leading-normal: 1.6;
+  --cp-leading-none:    1;
+  --cp-leading-display: 1.05;
+  --cp-leading-snug:    1.15;
+  --cp-leading-heading: 1.2;
+  --cp-leading-tight:   1.3;
+  --cp-leading-relaxed: 1.45;
+  --cp-leading-body:    1.5;   /* corps de texte courant (paragraphes, listes) */
+  --cp-leading-normal:  1.6;
 
   /* ── Espacement (base 4px) ── */
   --cp-space-0:  0px;
@@ -115,6 +139,16 @@ body.oracle-simulator-page {
   --cp-radius-lg:   14px;
   --cp-radius-pill: 9999px;
 
+  /* ── Épaisseurs de bord ── */
+  --cp-border-w:        1px;   /* filet par défaut */
+  --cp-border-w-accent: 2px;   /* keyline accent / colonne active */
+  --cp-border-w-bar:    3px;   /* barre latérale (alertes, memo, dossier) */
+
+  /* ── Dimensions de contrôle ── */
+  --cp-control-sm:  20px;  /* badge/puce */
+  --cp-control-md:  28px;  /* icône-badge, segment */
+  --cp-tile-minh:   76px;  /* tuile cliquable (archetype, segment, preset) */
+
   /* ── Ombres ── */
   --cp-shadow-xs:        0 1px 3px rgba(0,0,0,0.30);
   --cp-shadow-md:        0 8px 24px rgba(0,0,0,0.40);
@@ -123,7 +157,6 @@ body.oracle-simulator-page {
 
   /* ── Overlays & hairlines (scrims de modale, lignes 1px subtiles) ── */
   --cp-overlay:         rgba(0, 0, 0, 0.65);
-  --cp-overlay-strong:  rgba(0, 0, 0, 0.72);
   --cp-hairline:        rgba(255, 255, 255, 0.06);
   --cp-hairline-faint:  rgba(255, 255, 255, 0.04);
 

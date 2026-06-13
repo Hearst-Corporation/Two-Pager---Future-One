@@ -12,6 +12,7 @@ import { detectAlerts } from '@/lib/hearst-alerts';
 import AlertBanner from '@/components/hearst/AlertBanner';
 import { Button, Card, KpiCard, KpiGrid } from '@/components/hearst/ui';
 import { S as CP, T, RC } from '@/lib/cp-styles';
+import './financial.css';
 
 const FIN_TOOLTIP = {
   contentStyle: { ...RC.tooltip, boxShadow: 'var(--cp-shadow-md)' },
@@ -21,7 +22,7 @@ const FIN_TOOLTIP = {
 import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
-import { fmtUSD, fmtPctFromRatio, fmtPctRaw, fmtX } from '@/lib/hearst-format';
+import { fmtUSD, fmtPctRaw, fmtX } from '@/lib/hearst-format';
 import { boardValue } from '@/lib/hearst-board-metrics';
 import { UI } from '@/lib/ui-strings';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
@@ -163,44 +164,6 @@ export default function FinancialPage() {
 
   return (
     <>
-    <style>{`
-      @media (max-width: 900px) {
-        [data-financial-kpi-grid] {
-          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
-      }
-      @media (max-width: 900px) {
-        [data-financial-tab-row] {
-          flex-wrap: nowrap !important;
-          overflow-x: auto;
-        }
-      }
-      @media (max-width: 600px) {
-        [data-financial-kpi-grid] {
-          grid-template-columns: 1fr !important;
-        }
-        [data-financial-top-bar] {
-          flex-direction: column !important;
-          align-items: stretch !important;
-        }
-        [data-financial-scenario-row] {
-          flex-direction: column !important;
-          align-items: stretch !important;
-        }
-        [data-financial-tab-row] {
-          overflow-x: auto !important;
-          flex-wrap: nowrap !important;
-          -webkit-overflow-scrolling: touch !important;
-          scrollbar-width: none !important;
-          margin-left: 0 !important;
-        }
-        [data-financial-tab-row]::-webkit-scrollbar { display: none; }
-        [data-financial-table-scroll] {
-          overflow-x: auto !important;
-          -webkit-overflow-scrolling: touch !important;
-        }
-      }
-    `}</style>
     <div className="oracle-page">
       {/* Scenario toggles */}
       <div data-financial-top-bar style={S.topBar}>
@@ -531,10 +494,10 @@ export default function FinancialPage() {
                             : cell.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 ? 'color-mix(in srgb, var(--cp-status-warning) 50%, black)'
                             : 'color-mix(in srgb, var(--cp-status-success) 30%, black)',
                           color: 'var(--cp-text-primary)',
-                          fontWeight: ri === 2 && ci === 2 ? 900 : 600,
+                          fontWeight: ri === 2 && ci === 2 ? 'var(--cp-weight-heavy)' : 600,
                           fontSize: 'var(--cp-font-xs)',
                           textAlign: 'center',
-                          border: ri === 2 && ci === 2 ? '2px solid var(--cp-text-primary)' : 'none',
+                          border: ri === 2 && ci === 2 ? 'var(--cp-border-w-accent) solid var(--cp-text-primary)' : 'none',
                         }}>
                           {cell.irr != null ? (cell.irr * 100).toFixed(1) + '%' : '—'}
                         </td>
@@ -608,7 +571,7 @@ const S = {
   topBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
   pageTitle: { margin: 0, fontSize: 'var(--cp-font-2xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-primary)' },
   scenarioRow: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', alignItems: 'center', flex: '1 1 280px', minWidth: 0 },
-  scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: '2px solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
+  scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: 'var(--cp-border-w-accent) solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
   savedPlanWrap: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', minWidth: 0, flex: '1 1 220px' },
   savedPlanLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' },
   savedPlanSelect: { flex: '1 1 180px', minWidth: 0, maxWidth: 360, fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-2) var(--cp-space-3)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-pill)', color: 'var(--cp-text-primary)', cursor: 'pointer' },

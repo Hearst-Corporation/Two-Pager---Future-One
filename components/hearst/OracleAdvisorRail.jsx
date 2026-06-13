@@ -12,6 +12,8 @@ import { getAdvisorRailMode } from '@/lib/oracle-advisor-routes';
 import { COCKPIT_CHAT_SEND_EVENT } from '@/lib/cockpit-chat-payload';
 import { UI } from '@/lib/ui-strings';
 
+import { Card, Button } from '@/components/hearst/ui';
+
 // First prompt is generated verdict-aware in the component (Why APPROVE? / REVIEW? / REWORK?).
 const PROMPTS = [
   'Explain CAPEX',
@@ -92,10 +94,10 @@ function SnapshotMetric({ label, value }) {
 
 function AdvisoryRow({ title, text }) {
   return (
-    <div style={S.advisoryRow}>
+    <Card variant="card" surface={0} padding="sm" style={{ borderLeft: 'var(--cp-border-w-accent) solid var(--cp-border-strong)', borderRadius: 0 }}>
       <div style={S.rowTitle}>{title}</div>
       <p style={S.rowText}>{text}</p>
-    </div>
+    </Card>
   );
 }
 
@@ -126,7 +128,7 @@ function OracleAdvisorContent() {
         <div style={S.mode}>IC</div>
       </header>
 
-      <section style={S.snapshot}>
+      <Card as="section" variant="card" surface={1} padding="md" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-3)' }}>
         <div style={S.sectionKicker}>Decision Snapshot</div>
         <div style={S.verdictBlock}>
           <span style={S.verdictLabel}>Current Verdict</span>
@@ -147,7 +149,7 @@ function OracleAdvisorContent() {
           <SnapshotMetric label="MOIC" value={moic} />
           <SnapshotMetric label="Payback" value={payback} />
         </div>
-      </section>
+      </Card>
 
       <section style={S.advisory}>
         <AdvisoryRow title="Main Concern" text={advisory.concern} />
@@ -159,9 +161,15 @@ function OracleAdvisorContent() {
         <div style={S.sectionKicker}>Ask ORACLE</div>
         <div style={S.promptGrid}>
           {[`Why ${verdict.label}?`, ...PROMPTS].map(prompt => (
-            <button key={prompt} type="button" onClick={() => sendPrompt(prompt)} style={S.promptBtn}>
+            <Button
+              key={prompt}
+              variant="secondary"
+              size="sm"
+              onClick={() => sendPrompt(prompt)}
+              style={{ borderRadius: 'var(--cp-radius-pill)', justifyContent: 'flex-start', textAlign: 'left', height: 'auto', padding: 'var(--cp-space-2) var(--cp-space-3)' }}
+            >
               {prompt}
-            </button>
+            </Button>
           ))}
         </div>
       </section>
@@ -252,15 +260,6 @@ const S = {
     borderRadius: 'var(--cp-radius-xs)',
     padding: 'var(--cp-space-1) var(--cp-space-2)',
   },
-  snapshot: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
-    padding: 'var(--cp-space-3)',
-    border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-md)',
-    background: 'var(--cp-surface-1)',
-  },
   sectionKicker: {
     fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
@@ -280,7 +279,7 @@ const S = {
   },
   verdict: {
     fontSize: 'var(--cp-font-2xl)',
-    lineHeight: 1,
+    lineHeight: 'var(--cp-leading-none)',
     letterSpacing: 'var(--cp-tracking-tight)',
     color: 'var(--cp-text-strong)',
   },
@@ -331,11 +330,6 @@ const S = {
     flexDirection: 'column',
     gap: 'var(--cp-space-2)',
   },
-  advisoryRow: {
-    padding: 'var(--cp-space-3)',
-    borderLeft: '2px solid var(--cp-border-strong)',
-    background: 'var(--cp-surface-0)',
-  },
   rowTitle: {
     fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
@@ -345,7 +339,7 @@ const S = {
   rowText: {
     margin: 'var(--cp-space-2) 0 0',
     fontSize: 'var(--cp-font-sm)',
-    lineHeight: 1.45,
+    lineHeight: 'var(--cp-leading-relaxed)',
     color: 'var(--cp-text-primary)',
   },
   ask: {
@@ -357,17 +351,5 @@ const S = {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: 'var(--cp-space-2)',
-  },
-  promptBtn: {
-    minHeight: 'var(--cp-btn-height-md)',
-    padding: 'var(--cp-space-2)',
-    border: '1px solid var(--cp-border-strong)',
-    borderRadius: 'var(--cp-radius-sm)',
-    background: 'var(--cp-surface-2)',
-    color: 'var(--cp-text-strong)',
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-bold)',
-    textAlign: 'left',
-    cursor: 'pointer',
   },
 };

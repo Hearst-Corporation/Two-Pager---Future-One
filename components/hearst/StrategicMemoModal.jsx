@@ -3,16 +3,16 @@
 // StrategicMemoModal — Sprint 1 + Decision Canvas sprint.
 //
 // Full-screen drawer/modal that calls /api/admin/hearst/strategic-memo. While
-// Kimi runs it shows a live timeline. On success it no longer renders an
+// While the LLM runs it shows a live timeline. On success it no longer renders an
 // 11-section accordion reader — it shows a decision-first SUCCESS STATE (verdict
 // + 4 KPIs + category + actions) that routes straight to the Dossier Decision
 // Canvas, where the full report and approval workflow live.
 //
 // No hex tokens — everything via var(--cp-*) / var(--ct-*).
 
-import { useEffect, useMemo, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { RotateCw, Copy, Download, X } from 'lucide-react';
+import { RotateCw, Copy, Download } from 'lucide-react';
 import {
   useMemoJob,
   startMemoJob,
@@ -20,7 +20,7 @@ import {
   formatElapsed,
 } from '@/lib/hearst-memo-job-store';
 import { deriveVerdict, deriveCategory, deriveKpis } from '@/lib/dossier-derive';
-import { Z } from '@/lib/z-index';
+import { Modal } from '@/components/hearst/ui';
 import { UI } from '@/lib/ui-strings';
 
 /**
@@ -40,9 +40,9 @@ function MemoTimeline({ elapsedMs, cascade }) {
     elapsedMs < SLA_WARNING_MS ? 'warning' :
     'danger';
   const slaLabel =
-    slaTone === 'normal' ? 'within target' :
-    slaTone === 'warning' ? 'slower than usual' :
-    'still waiting for Kimi';
+    slaTone === 'normal' ? UI.MEMO_SLA_WITHIN_TARGET :
+    slaTone === 'warning' ? UI.MEMO_SLA_SLOWER :
+    UI.MEMO_STILL_WAITING_LLM;
   // Single sober accent — the latency state is conveyed by the text label, not colour.
   const slaColor = 'var(--cp-accent)';
 
@@ -200,31 +200,7 @@ export default function StrategicMemoModal() {
     if (job.request) startMemoJob(job.request);
   }, [job.request]);
 
-  // B1 a11y — focus management: initial focus, Tab focus-trap, Escape, restore.
-  const modalRef = useRef(null);
-  useEffect(() => {
-    if (!open) return;
-    const node = modalRef.current;
-    const prevFocus = document.activeElement;
-    node?.focus();
-    function onKey(e) {
-      if (e.key === 'Escape') { hideMemoModal(); return; }
-      if (e.key !== 'Tab' || !node) return;
-      const focusables = node.querySelectorAll(
-        'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (!focusables.length) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      if (prevFocus instanceof HTMLElement) prevFocus.focus();
-    };
-  }, [open]);
+  // Focus trap handled by <Modal> (useFocusTrap).
 
   const md = useMemo(() => toMarkdown(memo, meta), [memo, meta]);
 
@@ -244,77 +220,46 @@ export default function StrategicMemoModal() {
   if (!open) return null;
 
   return (
-    <div style={S.backdrop} role="dialog" aria-modal="true" aria-label={title} onClick={hideMemoModal}>
-      <div ref={modalRef} tabIndex={-1} style={S.modal} onClick={e => e.stopPropagation()}>
-        <header style={S.head}>
-          <div>
-            <h2 style={S.title}>{title}</h2>
-            {meta && (
-              <div style={S.meta}>
-                <span>{meta.oracle_ctx?.stakeholder} · {meta.oracle_ctx?.region}</span>
-                <span> · {meta.model_used}</span>
-                {meta.generated_at && <span> · {new Date(meta.generated_at).toLocaleString()}</span>}
-              </div>
-            )}
-          </div>
-          <div style={S.actions}>
-            <button type="button" onClick={refetch} disabled={loading} style={S.actionBtn} title={UI.MEMO_REGENERATE_TITLE} aria-label={UI.MEMO_REGENERATE_TITLE}><RotateCw size={15} aria-hidden="true" /></button>
-            <button type="button" onClick={copyMd} disabled={!memo} style={S.actionBtn} title={UI.MEMO_COPY_TITLE} aria-label={UI.MEMO_COPY_TITLE}><Copy size={15} aria-hidden="true" /></button>
-            <button type="button" onClick={downloadMd} disabled={!memo} style={S.actionBtn} title={UI.MEMO_DOWNLOAD_TITLE} aria-label={UI.MEMO_DOWNLOAD_TITLE}><Download size={15} aria-hidden="true" /></button>
-            <button type="button" onClick={hideMemoModal} style={S.closeBtn} title={UI.MEMO_CLOSE_TITLE} aria-label={UI.MEMO_CLOSE_TITLE}><X size={16} aria-hidden="true" /></button>
-          </div>
-        </header>
-
-        <div style={S.body}>
-          {loading && <MemoTimeline elapsedMs={job.elapsed_ms} cascade={job.cascade} />}
-          {error && <div style={S.error}>Error : {error}</div>}
-          {memo && <SuccessState memo={memo} meta={meta} title={title} router={router} />}
+    <Modal
+      isOpen={true}
+      onClose={hideMemoModal}
+      title={
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span>{title}</span>
+          {meta && (
+            <div style={S.meta}>
+              <span>{meta.oracle_ctx?.stakeholder} · {meta.oracle_ctx?.region}</span>
+              <span> · {meta.model_used}</span>
+              {meta.generated_at && <span> · {new Date(meta.generated_at).toLocaleString()}</span>}
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+      }
+      footer={
+        <div style={S.actions}>
+          <button type="button" onClick={refetch} disabled={loading} style={S.actionBtn} title={UI.MEMO_REGENERATE_TITLE} aria-label={UI.MEMO_REGENERATE_TITLE}><RotateCw size={15} aria-hidden="true" /></button>
+          <button type="button" onClick={copyMd} disabled={!memo} style={S.actionBtn} title={UI.MEMO_COPY_TITLE} aria-label={UI.MEMO_COPY_TITLE}><Copy size={15} aria-hidden="true" /></button>
+          <button type="button" onClick={downloadMd} disabled={!memo} style={S.actionBtn} title={UI.MEMO_DOWNLOAD_TITLE} aria-label={UI.MEMO_DOWNLOAD_TITLE}><Download size={15} aria-hidden="true" /></button>
+        </div>
+      }
+    >
+      {loading && <MemoTimeline elapsedMs={job.elapsed_ms} cascade={job.cascade} />}
+      {error && <div style={S.error}>Error : {error}</div>}
+      {memo && <SuccessState memo={memo} meta={meta} title={title} router={router} />}
+    </Modal>
   );
 }
 
 const S = {
-  backdrop: {
-    position: 'fixed',
-    inset: 0,
-    zIndex: Z.modal,
-    background: 'var(--cp-overlay-strong)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 'var(--cp-space-8) var(--cp-space-4)',
-  },
-  modal: {
-    width: '100%',
-    maxWidth: 720,
-    maxHeight: '90vh',
-    display: 'flex',
-    flexDirection: 'column',
-    background: 'var(--cp-surface-2)',
-    border: '1px solid var(--cp-border-strong, var(--cp-border))',
-    borderRadius: 'var(--cp-radius-lg)',
-    overflow: 'hidden',
-    boxShadow: 'var(--cp-shadow-lg), 0 0 0 1px var(--cp-hairline) inset',
-  },
-
-  head: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-4)', padding: 'var(--cp-space-4) var(--cp-space-5)', borderBottom: '1px solid var(--cp-border)' },
-  title: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', margin: 0, letterSpacing: 'var(--cp-tracking-wide)' },
   meta: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)', fontFamily: 'ui-monospace, monospace' },
 
   actions: { display: 'flex', gap: 'var(--cp-space-2)' },
   actionBtn: { width: 'var(--cp-icon-btn-size)', height: 'var(--cp-icon-btn-size)', padding: 0, background: 'var(--cp-surface-2)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-sm)', cursor: 'pointer', fontSize: 'var(--cp-font-md)' },
-  closeBtn: { width: 'var(--cp-icon-btn-size)', height: 'var(--cp-icon-btn-size)', padding: 0, background: 'transparent', color: 'var(--cp-text-muted)', border: 'none', cursor: 'pointer', fontSize: 'var(--cp-font-lg)', lineHeight: 1 },
-
-  body: { padding: 'var(--cp-space-5)', overflowY: 'auto', flex: 1 },
 
   // Timeline (loading)
   timelineWrap: { padding: 'var(--cp-space-6) var(--cp-space-5)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
   timelineHeader: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' },
-  timelineSpinner: { display: 'inline-block', width: 'var(--cp-spinner-size)', height: 'var(--cp-spinner-size)', borderRadius: '50%', border: '2px solid var(--cp-border)', borderTopColor: 'var(--cp-accent-maroon, var(--cp-accent))', animation: 'memo-spin 0.9s linear infinite' },
+  timelineSpinner: { display: 'inline-block', width: 'var(--cp-spinner-size)', height: 'var(--cp-spinner-size)', borderRadius: '50%', border: 'var(--cp-border-w-accent) solid var(--cp-border)', borderTopColor: 'var(--cp-accent-maroon, var(--cp-accent))', animation: 'memo-spin 0.9s linear infinite' },
   timelineLabel: { flex: 1 },
   timelineElapsed: { fontFamily: 'ui-monospace, monospace', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-strong)', fontVariantNumeric: 'tabular-nums' },
   slaWrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
@@ -326,7 +271,7 @@ const S = {
   cascadeLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)' },
   cascadeList: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap' },
   cascadeChip: { display: 'inline-flex', alignItems: 'center', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-muted)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-pill)', fontSize: 'var(--cp-font-micro)', fontFamily: 'ui-monospace, monospace', letterSpacing: 'var(--cp-tracking-wide)' },
-  timelineHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontStyle: 'italic', lineHeight: 1.5, paddingTop: 'var(--cp-space-2)', borderTop: '1px dashed var(--cp-border)' },
+  timelineHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontStyle: 'italic', lineHeight: 'var(--cp-leading-body)', paddingTop: 'var(--cp-space-2)', borderTop: '1px dashed var(--cp-border)' },
 
   error: { padding: 'var(--cp-space-4)', background: 'var(--cp-error-bg)', color: 'var(--cp-error)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)' },
 
@@ -335,21 +280,21 @@ const S = {
   successBanner: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)' },
   successText: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)', flex: 1 },
   statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize', fontWeight: 'var(--cp-weight-semibold)' },
-  successTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 1.35, margin: 0 },
+  successTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', margin: 0 },
 
   successVerdictRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
-  verdictBadge: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 1.2, paddingLeft: 'var(--cp-space-3)', borderLeft: '3px solid var(--cp-accent)' },
+  verdictBadge: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 'var(--cp-leading-heading)', paddingLeft: 'var(--cp-space-3)', borderLeft: 'var(--cp-border-w-bar) solid var(--cp-accent)' },
   categoryText: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
   driversText: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)' },
 
   successKpis: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--cp-space-3)' },
   successKpi: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)' },
   successKpiLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-eyebrow)' },
-  successKpiValue: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 1.1, marginTop: 'var(--cp-space-1)', fontVariantNumeric: 'tabular-nums' },
+  successKpiValue: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-snug)', marginTop: 'var(--cp-space-1)', fontVariantNumeric: 'tabular-nums' },
   successKpiSub: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
   successActions: { display: 'flex', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
   ctaPrimary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', cursor: 'pointer' },
   ctaSecondary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-semibold)', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' },
-  successNote: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', lineHeight: 1.5, paddingTop: 'var(--cp-space-3)', borderTop: '1px dashed var(--cp-border)', fontStyle: 'italic' },
+  successNote: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', lineHeight: 'var(--cp-leading-body)', paddingTop: 'var(--cp-space-3)', borderTop: '1px dashed var(--cp-border)', fontStyle: 'italic' },
 };

@@ -376,24 +376,34 @@ export default function SimulatorPage() {
         >
           <div data-sim-config-body>
             <div data-sim-advanced>
-              <SectionHead title="1. What?" hint="Archetype & Infrastructure" style={{ marginBottom: 'var(--cp-space-3)' }} />
-              <div data-sim-advanced-section>
-                <ArchetypePicker
-                  archetypes={PRIMARY_DEAL_ARCHETYPES}
-                  primaryId={state.primary_archetype_id}
-                  onSelectPrimary={onSelectPrimary}
-                />
-                <div style={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-micro)', marginTop: 'var(--cp-space-2)', opacity: 0.8 }}>
-                  Implies: {MODEL_DEFAULTS[state.primary_archetype_id]?.business_model_id?.replace(/_/g, ' ')} / {MODEL_DEFAULTS[state.primary_archetype_id]?.client_type_id?.replace(/_/g, ' ')}
+            <div data-sim-setup-row>
+              <div data-sim-setup-col>
+                <SectionHead title="1. What?" hint="Archetype & Infrastructure" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <div data-sim-advanced-section>
+                  <ArchetypePicker
+                    archetypes={PRIMARY_DEAL_ARCHETYPES}
+                    primaryId={state.primary_archetype_id}
+                    onSelectPrimary={onSelectPrimary}
+                  />
+                  <div style={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-nano)', marginTop: '2px', opacity: 0.8, textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)', textAlign: 'center' }}>
+                    Implies: {MODEL_DEFAULTS[state.primary_archetype_id]?.business_model_id?.replace(/_/g, ' ')} / {MODEL_DEFAULTS[state.primary_archetype_id]?.client_type_id?.replace(/_/g, ' ')}
+                  </div>
                 </div>
               </div>
 
-              <SectionHead title="2. Tech Stack" hint="Hardware & Cooling" style={{ marginTop: 'var(--cp-space-5)', marginBottom: 'var(--cp-space-3)' }} />
-              <div data-sim-advanced-section>
-                <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+              <div data-sim-setup-col>
+                <SectionHead title="2. Tech Stack" hint="Hardware & Cooling" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <div data-sim-advanced-section>
+                  <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} presetsOnly />
+                </div>
               </div>
+            </div>
 
-              <SectionHead title="3. Scale" hint="Capacity or Capital Target" style={{ marginTop: 'var(--cp-space-5)', marginBottom: 'var(--cp-space-3)' }} />
+            <div data-sim-hardware-detail>
+              <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} detailOnly />
+            </div>
+
+              <SectionHead title="3. Scale" hint="Capacity or Capital Target" style={{ marginTop: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
               <div data-sim-mode-stack>
                 <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
 
@@ -424,12 +434,11 @@ export default function SimulatorPage() {
             </span>
             <Button
               variant="primary"
-              size="lg"
-              block
+              size="sm"
               disabled={validateBlocked}
               onClick={handleValidateAndReveal}
               className="sim-config-cta"
-              style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)', marginTop: 'var(--cp-space-4)' }}
+              style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)', fontSize: 'var(--cp-font-micro)' }}
             >
               {savingState === 'saving' ? UI.SIM_SAVING : `Simulate ${state.total_mw || ''}MW ${PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)?.label || state.primary_archetype_id} in ${state.geography} →`}
             </Button>
@@ -437,14 +446,14 @@ export default function SimulatorPage() {
         </div>
 
         {projectLoadError && (
-          <div className="cp-surface-accent-soft" style={{ ...CP.accentAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
+          <div style={{ ...CP.dangerAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
             <span>{projectLoadError}</span>
             <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>{UI.ACTION_RETRY}</Button>
           </div>
         )}
-        {simError && <div className="cp-surface-accent-soft" style={CP.accentAlert}>Error: {simError}</div>}
+        {simError && <div style={CP.dangerAlert} role="alert">Error: {simError}</div>}
         {saveError && (
-          <div className="cp-surface-accent-soft" style={CP.accentAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
+          <div style={CP.dangerAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
         )}
         {/* Modal/badge/toast montés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
       </div>
@@ -455,8 +464,8 @@ export default function SimulatorPage() {
 const S = {
   wrap: {
     width: '100%',
-    maxWidth: 'var(--cp-max-width, 1440px)',
-    margin: '0 auto',
+    maxWidth: 'none',
+    margin: 0,
     flex: '1 1 auto',
     minHeight: 0,
     display: 'flex',
@@ -483,15 +492,18 @@ const S = {
     opacity: 0.8,
   },
   validateHint: {
-    fontSize: 'var(--cp-font-base)',
+    fontSize: 'var(--cp-font-nano)',
     color: 'var(--cp-text-muted)',
-    fontWeight: 'var(--cp-weight-semibold)',
+    fontWeight: 'var(--cp-weight-bold)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-wider)',
   },
   configFooter: {
     ...L.rowBetween,
-    gap: 'var(--cp-space-3)',
+    gap: 'var(--cp-space-2)',
     flexWrap: 'wrap',
-    paddingTop: 'var(--cp-space-4)',
+    paddingTop: 'var(--cp-space-1)',
     borderTop: '1px solid var(--cp-border-base)',
+    alignItems: 'center',
   },
 };

@@ -97,8 +97,8 @@ const S = {
     width: '12px', 
     height: '12px', 
     borderRadius: '50%', 
-    background: 'var(--cp-accent-maroon)', 
-    border: '2px solid var(--cp-surface-0)' 
+    background: 'var(--cp-accent-maroon)',
+    border: 'var(--cp-border-w-accent) solid var(--cp-surface-0)'
   },
   label: { 
     fontSize: 'var(--cp-font-sm)', 
@@ -108,7 +108,7 @@ const S = {
   sub: { 
     fontSize: 'var(--cp-font-micro)', 
     color: 'var(--cp-text-muted)', 
-    textTransform: 'uppercase', 
-    letterSpacing: '0.05em' 
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-caps)'
   }
 };

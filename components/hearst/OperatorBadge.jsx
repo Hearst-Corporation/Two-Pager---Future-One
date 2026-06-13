@@ -49,6 +49,6 @@ const S = {
   label: {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
-    lineHeight: 1,
+    lineHeight: 'var(--cp-leading-none)',
   },
 };

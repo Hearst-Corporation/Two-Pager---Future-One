@@ -6,6 +6,7 @@ import { GPU_CATALOG, calcRackPower, calcGpuCapex, calcGpuAnnualRevenue, REFEREN
 import { Card } from '@/components/hearst/ui';
 import InfoHint from '@/components/hearst/InfoHint';
 import { UI } from '@/lib/ui-strings';
+import { G } from '@/lib/cp-styles';
 
 // 3 ready-to-use hardware profiles. Click one to load the full mix; open
 // Advanced to fine-tune every dial by hand.
@@ -32,6 +33,41 @@ const HARDWARE_PRESETS = [
     patch: { classic_pct: 10, liquid_pct: 20, ai_pct: 70, gpu_sku_id: 'gb200_nvl72', utilization_pct: 85, gpu_hour_price: 5 },
   },
 ];
+
+const PRESET_ICONS = {
+  colo: (
+    <>
+      <rect x="5" y="4" width="14" height="16" rx="1" />
+      <line x1="8" y1="8" x2="8" y2="8.01" /><line x1="12" y1="8" x2="12" y2="8.01" /><line x1="16" y1="8" x2="16" y2="8.01" />
+      <line x1="8" y1="12" x2="8" y2="12.01" /><line x1="12" y1="12" x2="12" y2="12.01" /><line x1="16" y1="12" x2="16" y2="12.01" />
+    </>
+  ),
+  mixed: (
+    <>
+      <rect x="4" y="5" width="16" height="4" rx="0.5" />
+      <rect x="6" y="10" width="12" height="4" rx="0.5" />
+      <rect x="8" y="15" width="8" height="4" rx="0.5" />
+    </>
+  ),
+  ai_factory: (
+    <>
+      <rect x="6" y="6" width="12" height="12" rx="1" />
+      <path d="M9 9h6M9 12h6M9 15h6" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+    </>
+  ),
+};
+
+function PresetIcon({ id, selected }) {
+  return (
+    <span style={{ ...S.iconBadge, ...(selected ? S.iconBadgeSelected : {}) }}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={S.iconSvg}>
+        {PRESET_ICONS[id]}
+      </svg>
+    </span>
+  );
+}
+PresetIcon.propTypes = { id: PropTypes.string, selected: PropTypes.bool };
 
 // A preset is "active" only when the FULL patch still matches the live mix —
 // tier split AND gpu/utilization/price. Otherwise editing any advanced dial would
@@ -75,7 +111,7 @@ const TIER_LABELS = {
   ai_pct:      { name: UI.HW_TIER_AI_NAME,       meta: UI.HW_TIER_AI_META },
 };
 
-export default function HardwareMixer({ totalMw = 50, value, onChange }) {
+export default function HardwareMixer({ totalMw = 50, value, onChange, variant = 'full' }) {
   const v = value || { classic_pct: 60, liquid_pct: 25, ai_pct: 15, gpu_sku_id: 'gb200_nvl72', num_racks: null, utilization_pct: 75, gpu_hour_price: 5 };
 
   const mw_ai = totalMw * (v.ai_pct / 100);
@@ -103,9 +139,12 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
 
   const [showFineTune, setShowFineTune] = useState(false);
 
+  const showPresets = variant === 'full' || variant === 'presets';
+  const showDetail = variant === 'full' || variant === 'detail';
+
   return (
     <div data-hardware-mixer style={S.wrap}>
-      {/* PRESET RAIL — 3 horizontal choices, no redundant number triple */}
+      {showPresets && (
       <div data-hardware-presets style={S.presetRail}>
         {HARDWARE_PRESETS.map((p) => {
           const sel = activePreset === p.id;
@@ -115,13 +154,13 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
                 as="button"
                 type="button"
                 onClick={() => applyPreset(p)}
-                padding="md"
+                padding="none"
                 hover
-                accent={sel}
                 aria-pressed={sel}
                 surface={2}
-                style={S.presetCard}
+                style={{ ...S.presetCard, ...(sel ? G.selected : {}) }}
               >
+                <PresetIcon id={p.id} selected={sel} />
                 <span style={S.presetName}>{p.name}</span>
                 <span style={S.presetTagline}>{p.tagline}</span>
               </Card>
@@ -134,10 +173,12 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
           );
         })}
       </div>
+      )}
 
-      {/* LIVE MIX SPINE — compact deployment visual + mix bar + power readout */}
+      {showDetail && (
+      <>
       <div data-hardware-spine style={S.spine}>
-        <Card variant="flat" surface={1} padding="md" style={S.spineMain}>
+        <Card variant="flat" surface={1} padding="none" style={S.spineMain}>
           <div style={S.spineHead}>
             <div>
               <span style={S.kicker}>{UI.HW_DEPLOY_KICKER}</span>
@@ -148,7 +189,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
           <MixBar classicPct={v.classic_pct} liquidPct={v.liquid_pct} aiPct={v.ai_pct} />
         </Card>
 
-        <Card variant="flat" surface={1} padding="md" style={S.readout}>
+        <Card variant="flat" surface={1} padding="none" style={S.readout}>
           <ReadoutRow label={UI.HW_READOUT_TOTAL} value={`${totalMw} MW`} />
           <ReadoutRow label={UI.HW_READOUT_AI} value={`${mw_ai.toFixed(1)} MW`} accent />
           <ReadoutRow label={UI.HW_READOUT_RACKS} value={racks_used.toLocaleString('en-US')} />
@@ -260,6 +301,8 @@ export default function HardwareMixer({ totalMw = 50, value, onChange }) {
           </div>
         </div>
       )}
+      </>
+      )}
     </div>
   );
 }
@@ -268,6 +311,7 @@ HardwareMixer.propTypes = {
   totalMw: PropTypes.number,
   value: PropTypes.object,
   onChange: PropTypes.func,
+  variant: PropTypes.oneOf(['full', 'presets', 'detail']),
 };
 
 // Compact rack-topology illustration (ambience, smaller than before).
@@ -382,14 +426,14 @@ const S = {
   wrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
+    gap: 'var(--cp-space-3)',
     minWidth: 0,
   },
   fineTuneToggle: {
     display: 'flex',
     justifyContent: 'center',
-    padding: 'var(--cp-space-2) 0',
-    borderTop: '1px dashed var(--cp-border)',
+    padding: 'var(--cp-space-1) 0',
+    borderTop: '1px solid var(--cp-border)',
   },
   fineTuneButton: {
     display: 'flex',
@@ -410,83 +454,127 @@ const S = {
   advanced: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-4)',
+    gap: 'var(--cp-space-3)',
     minWidth: 0,
   },
   presetRail: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gap: 'var(--cp-space-3)',
+    gap: '1px',
+    background: 'var(--cp-border)',
+    padding: '1px',
+    borderRadius: 'var(--cp-radius-sm)',
+    border: '1px solid var(--cp-border)',
+    overflow: 'hidden',
+    minHeight: 'var(--cp-tile-minh)',
   },
   presetWrap: {
     position: 'relative',
     display: 'flex',
     minWidth: 0,
+    background: 'var(--cp-surface-2)',
   },
   presetHintSlot: {
     position: 'absolute',
-    top: 'var(--cp-space-2)',
-    right: 'var(--cp-space-2)',
+    top: 'var(--cp-space-1)',
+    right: 'var(--cp-space-1)',
     zIndex: 'var(--cp-z-floating)',
+    opacity: 0.55,
+    transform: 'scale(0.85)',
   },
   presetCard: {
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 'var(--cp-space-1)',
-    textAlign: 'left',
-    minHeight: 64,
+    textAlign: 'center',
+    minHeight: 'var(--cp-tile-minh)',
+    border: 'none',
+    borderRadius: 0,
+    padding: 'var(--cp-space-2) var(--cp-space-1)',
+    background: 'transparent',
+    transition: 'background var(--cp-dur-base) var(--cp-ease)',
+  },
+  iconBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 'var(--cp-control-md)',
+    height: 'var(--cp-control-md)',
+    borderRadius: 'var(--cp-radius-xs)',
+    border: '1px solid var(--cp-border)',
+    background: 'var(--cp-surface-1)',
+    color: 'var(--cp-text-muted)',
+    flexShrink: 0,
+  },
+  iconBadgeSelected: {
+    borderColor: 'var(--cp-border-strong)',
+    background: 'var(--cp-surface-0)',
+    color: 'var(--cp-text-primary)',
+  },
+  iconSvg: {
+    width: '16px',
+    height: '16px',
+    strokeWidth: '1.5px',
   },
   presetName: {
-    fontSize: 'var(--cp-font-sm)',
+    fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-primary)',
-    paddingRight: 'var(--cp-space-5)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-wide)',
+    lineHeight: 'var(--cp-leading-snug)',
+    padding: '0 var(--cp-space-1)',
   },
   presetTagline: {
-    fontSize: 'var(--cp-font-xs)',
+    fontSize: 'var(--cp-font-nano)',
     color: 'var(--cp-text-muted)',
-    lineHeight: 'var(--cp-leading-tight)',
+    lineHeight: 'var(--cp-leading-heading)',
+    padding: '0 var(--cp-space-1)',
   },
   spine: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) minmax(220px, 0.34fr)',
-    gap: 'var(--cp-space-3)',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(140px, 0.25fr)',
+    gap: 'var(--cp-space-1)',
     alignItems: 'stretch',
   },
   spineMain: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
+    gap: 'var(--cp-space-1)',
     minWidth: 0,
+    border: '1px solid var(--cp-border)',
+    padding: 'var(--cp-space-2)',
   },
   spineHead: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 'var(--cp-space-3)',
+    alignItems: 'baseline',
+    gap: 'var(--cp-space-2)',
   },
   kicker: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-black)',
+    fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wider)',
     textTransform: 'uppercase',
+    opacity: 0.7,
   },
   spineTitle: {
-    margin: 'var(--cp-space-1) 0 0',
+    margin: '0',
     color: 'var(--cp-text-primary)',
-    fontSize: 'var(--cp-font-lg)',
-    lineHeight: 'var(--cp-leading-tight)',
+    fontSize: 'var(--cp-font-xs)',
+    lineHeight: 'var(--cp-leading-none)',
     fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-tight)',
   },
   aiBadge: {
-    padding: 'var(--cp-space-1) var(--cp-space-3)',
+    padding: '1px 4px',
     color: 'var(--cp-text-strong)',
     background: 'var(--cp-accent-maroon)',
-    borderRadius: 'var(--cp-radius-pill)',
-    fontSize: 'var(--cp-font-sm)',
+    borderRadius: '2px',
+    fontSize: 'var(--cp-font-nano)',
     fontWeight: 'var(--cp-weight-black)',
     whiteSpace: 'nowrap',
   },
@@ -498,10 +586,10 @@ const S = {
   mixWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-2)',
+    gap: '2px',
   },
   mixBar: {
-    height: 'calc(var(--cp-space-3) + var(--cp-space-1) / 2)',
+    height: '4px',
     display: 'flex',
     overflow: 'hidden',
     borderRadius: 'var(--cp-radius-pill)',
@@ -514,81 +602,97 @@ const S = {
   mixLegend: {
     display: 'flex',
     justifyContent: 'space-between',
-    gap: 'var(--cp-space-3)',
+    gap: 'var(--cp-space-2)',
     color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-black)',
+    fontSize: 'var(--cp-font-nano)',
+    fontWeight: 'var(--cp-weight-bold)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-wider)',
   },
   readout: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
+    gap: '0',
     justifyContent: 'center',
     minWidth: 0,
+    border: '1px solid var(--cp-border)',
+    padding: 'var(--cp-space-1) var(--cp-space-2)',
   },
   readoutRow: {
     display: 'flex',
     alignItems: 'baseline',
     justifyContent: 'space-between',
     gap: 'var(--cp-space-2)',
+    lineHeight: 'var(--cp-leading-relaxed)',
   },
   readoutLabel: {
-    fontSize: 'var(--cp-font-xs)',
+    fontSize: 'var(--cp-font-nano)',
     fontWeight: 'var(--cp-weight-semibold)',
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
   },
   readoutValue: {
-    fontSize: 'var(--cp-font-lg)',
+    fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-black)',
     fontVariantNumeric: 'tabular-nums',
   },
   summary: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-    gap: 'var(--cp-space-2)',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '1px',
+    background: 'var(--cp-border)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-xs)',
+    overflow: 'hidden',
   },
   sumCard: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-1)',
+    gap: '0',
+    border: 'none',
+    borderRadius: '0',
+    padding: 'var(--cp-space-1) var(--cp-space-2)',
+    background: 'var(--cp-surface-2)',
   },
   sumLabel: {
-    fontSize: 'var(--cp-font-xs)',
+    fontSize: 'var(--cp-font-nano)',
     fontWeight: 'var(--cp-weight-bold)',
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
+    lineHeight: 'var(--cp-leading-none)',
   },
   sumValue: {
-    fontSize: 'var(--cp-font-lg)',
+    fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
     fontVariantNumeric: 'tabular-nums',
+    lineHeight: 'var(--cp-leading-heading)',
   },
   grid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: 'var(--cp-space-6)',
+    gap: 'var(--cp-space-3)',
   },
-  col: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-3)' },
+  col: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
   colTitle: {
-    fontSize: 'var(--cp-font-xs)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    fontSize: 'var(--cp-font-nano)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-wider)',
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
+    borderBottom: '1px solid var(--cp-border)',
+    paddingBottom: '1px',
   },
   colTitleMeta: {
     fontWeight: 'var(--cp-weight-medium)',
     opacity: 0.7,
     textTransform: 'none',
+    float: 'right',
   },
-  sliders: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-3)' },
-  sliderRow: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
+  sliders: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
+  sliderRow: { display: 'flex', flexDirection: 'column', gap: '0' },
   sliderHead: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -596,69 +700,77 @@ const S = {
     gap: 'var(--cp-space-2)',
   },
   sliderName: {
-    fontSize: 'var(--cp-font-sm)',
+    fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-bold)',
     color: 'var(--cp-text-primary)',
   },
   sliderMeta: {
-    fontSize: 'var(--cp-font-xs)',
+    fontSize: 'var(--cp-font-nano)',
     color: 'var(--cp-text-muted)',
   },
-  sliderControl: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)' },
-  range: { flex: 1, accentColor: 'var(--cp-accent-maroon)' },
+  sliderControl: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' },
+  range: { flex: 1, accentColor: 'var(--cp-accent-maroon)', height: '8px' },
   pct: {
-    fontSize: 'var(--cp-font-sm)',
+    fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-primary)',
-    minWidth: 36,
+    minWidth: 24,
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
   },
   mw: {
-    fontSize: 'var(--cp-font-xs)',
+    fontSize: 'var(--cp-font-nano)',
     color: 'var(--cp-text-muted)',
-    minWidth: 60,
+    minWidth: 40,
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
   },
   gpuCards: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: 'var(--cp-space-2)',
+    gap: '1px',
+    background: 'var(--cp-border)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-xs)',
+    overflow: 'hidden',
   },
   gpuCard: {
     textAlign: 'left',
+    border: 'none',
+    borderRadius: '0',
+    background: 'var(--cp-surface-2)',
+    padding: 'var(--cp-space-1) var(--cp-space-2)',
   },
-  gpuSku: { fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)' },
-  gpuMeta: { fontSize: 'var(--cp-font-xs)', opacity: 0.75, marginTop: 'var(--cp-space-1)', lineHeight: 'var(--cp-leading-tight)' },
-  gpuPrice: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', marginTop: 'var(--cp-space-1)' },
+  gpuSku: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', lineHeight: 'var(--cp-leading-none)' },
+  gpuMeta: { fontSize: 'var(--cp-font-nano)', opacity: 0.75, marginTop: '0', lineHeight: 'var(--cp-leading-none)' },
+  gpuPrice: { fontSize: 'var(--cp-font-nano)', fontWeight: 'var(--cp-weight-bold)', marginTop: '1px', lineHeight: 'var(--cp-leading-none)' },
   aiControls: {
     display: 'flex',
-    gap: 'var(--cp-space-3)',
-    paddingTop: 'var(--cp-space-2)',
+    gap: 'var(--cp-space-2)',
+    paddingTop: 'var(--cp-space-1)',
     borderTop: '1px dashed var(--cp-border)',
   },
   ctrlBlock: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', flex: 1 },
   ctrlLabel: {
-    fontSize: 'var(--cp-font-xs)',
+    fontSize: 'var(--cp-font-nano)',
     color: 'var(--cp-text-muted)',
     fontWeight: 'var(--cp-weight-bold)',
-    minWidth: 60,
+    minWidth: 40,
   },
   ctrlValue: {
-    fontSize: 'var(--cp-font-sm)',
+    fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-bold)',
-    minWidth: 36,
+    minWidth: 24,
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
   },
   numInput: {
-    width: 'calc(var(--cp-space-9) + var(--cp-space-8))',
-    fontSize: 'var(--cp-font-sm)',
-    height: 'var(--cp-space-7)',
-    padding: '0 var(--cp-space-2)',
+    width: '50px',
+    fontSize: 'var(--cp-font-micro)',
+    height: 'var(--cp-control-sm)',
+    padding: '0 var(--cp-space-1)',
     border: '1px solid var(--cp-border)',
-    borderRadius: 'var(--cp-radius-sm)',
+    borderRadius: '2px',
     background: 'var(--cp-surface-0)',
     color: 'var(--cp-text-primary)',
     fontVariantNumeric: 'tabular-nums',

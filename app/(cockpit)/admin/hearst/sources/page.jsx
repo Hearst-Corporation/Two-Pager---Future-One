@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import SourceBadge from '@/components/hearst/SourceBadge';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
 import { X, ExternalLink } from 'lucide-react';
@@ -10,6 +10,7 @@ import {
 } from '@/lib/hearst-constants';
 import { UI } from '@/lib/ui-strings';
 import { S as CP } from '@/lib/cp-styles';
+import { useFocusTrap } from '@/lib/use-focus-trap';
 
 const SOURCES_ERR = { ...CP.error, padding: 'var(--cp-space-5)' };
 const SOURCES_EMPTY = { ...CP.empty, padding: 'var(--cp-space-5)', fontSize: 'var(--cp-font-sm)', background: 'var(--cp-surface-2)', borderRadius: 'var(--cp-radius-sm)' };
@@ -66,7 +67,8 @@ export default function SourcesPage() {
   const [scenarios, setScenarios]   = useState([]);
   const [adminSources, setAdminSources] = useState([]);
   const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState(null);
+  const [loadError, setLoadError]   = useState(null);
+  const [actionError, setActionError] = useState(null);
 
   const [selectedOp, setSelectedOp]   = useState('all');
   const [docType, setDocType]         = useState('all');
@@ -82,24 +84,29 @@ export default function SourcesPage() {
   const [uimScenario, setUimScenario] = useState('');
   const [uimSaving, setUimSaving]     = useState(false);
   const [uimDone, setUimDone]         = useState(false);
+  const [uimError, setUimError]       = useState(null);
+  const closeUim = useCallback(() => { setUimSrc(null); setUimError(null); }, []);
+  const uimModalRef = useFocusTrap(!!uimSrc, { onEscape: closeUim });
 
   useEffect(() => {
     async function load() {
       try {
         const pRes = await fetch('/api/admin/hearst/project');
+        if (!pRes.ok) throw new Error('Failed to load project');
         const { project: proj } = await pRes.json();
         setProject(proj);
         const [sRes, scRes] = await Promise.all([
           fetch(`/api/admin/hearst/sources?project_id=${proj.id}`),
           fetch(`/api/admin/hearst/scenarios?project_id=${proj.id}`),
         ]);
+        if (!sRes.ok || !scRes.ok) throw new Error('Failed to load sources');
         const { sources: s } = await sRes.json();
         const { scenarios: sc } = await scRes.json();
         setAdminSources(s || []);
         setScenarios(sc || []);
         setUimScenario(sc?.[0]?.id || '');
       } catch (e) {
-        setError(e.message);
+        setLoadError(e.message);
       } finally {
         setLoading(false);
       }
@@ -119,15 +126,21 @@ export default function SourcesPage() {
 
   async function addSource() {
     setSaving(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/admin/hearst/sources', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, project_id: project.id }),
       });
-      const { source } = await res.json();
-      setAdminSources(prev => [source, ...prev]);
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || 'Add failed');
+      if (!j.source?.id) throw new Error('Invalid response');
+      setAdminSources(prev => [j.source, ...prev]);
       setForm({ source_type: 'admin_input', currency: 'USD' });
       setShowAdd(false);
+    } catch (e) {
+      setActionError(UI.SOURCES_ACTION_ERR(e.message));
+      setTimeout(() => setActionError(null), 4000);
     } finally {
       setSaving(false);
     }
@@ -142,16 +155,17 @@ export default function SourcesPage() {
       if (!res.ok) throw new Error('Delete failed');
     } catch (e) {
       setAdminSources(prev);
-      setError(e.message);
-      setTimeout(() => setError(null), 4000);
+      setActionError(UI.SOURCES_ACTION_ERR(e.message));
+      setTimeout(() => setActionError(null), 4000);
     }
   }
 
   async function useInModel() {
     if (!project || !uimSrc) return;
     setUimSaving(true);
+    setUimError(null);
     try {
-      await fetch('/api/admin/hearst/sources', {
+      const res = await fetch('/api/admin/hearst/sources', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           project_id: project.id,
@@ -164,8 +178,12 @@ export default function SourcesPage() {
           used_in_model: true,
         }),
       });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error || UI.SOURCES_UIM_ERR);
       setUimDone(true);
       setTimeout(() => { setUimSrc(null); setUimDone(false); fetch(`/api/admin/hearst/sources?project_id=${project.id}`).then(r => r.json()).then(({ sources: s }) => setAdminSources(s || [])); }, 1000);
+    } catch (e) {
+      setUimError(UI.SOURCES_ACTION_ERR(e.message));
     } finally {
       setUimSaving(false);
     }
@@ -178,16 +196,17 @@ export default function SourcesPage() {
       </div>
     );
   }
-  if (error) {
+  if (loadError) {
     return (
       <div className="oracle-page">
-        <div style={SOURCES_ERR}>Error: {error}</div>
+        <div style={SOURCES_ERR}>Error: {loadError}</div>
       </div>
     );
   }
 
   return (
     <>
+    {actionError && <div style={{ ...SOURCES_ERR, marginBottom: 'var(--cp-space-4)' }}>{actionError}</div>}
     <style>{`
       @media (max-width: 600px) {
         [data-sources-topbar] { flex-direction: column !important; align-items: stretch !important; }
@@ -199,7 +218,10 @@ export default function SourcesPage() {
     <div className="oracle-page">
       {/* Header */}
       <header data-sources-topbar className="oracle-page-header" style={S.topBar}>
-        <h1>Market Intelligence — {PUBLIC_SOURCES_LIBRARY.length} benchmarks</h1>
+        <div>
+          <h1>Market Intelligence</h1>
+          <p className="oracle-subtitle">{`${PUBLIC_SOURCES_LIBRARY.length} benchmarks`}</p>
+        </div>
         <div style={S.flexRow}>
           <Button variant="ghost" size="sm" onClick={() => setShowMyS(v => !v)}>
             My Sources ({adminSources.length})
@@ -309,8 +331,8 @@ export default function SourcesPage() {
                   <Cell>
                     {confirmDel === s.id ? (
                       <span style={S.delActions}>
-                        <Button variant="dangerSolid" size="sm" onClick={() => deleteSource(s.id)}>Delete</Button>
-                        <Button variant="ghost" size="sm" onClick={() => setConfirmDel(null)}>Cancel</Button>
+                        <Button variant="dangerSolid" size="sm" onClick={() => deleteSource(s.id)}>{UI.ACTION_DELETE}</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setConfirmDel(null)}>{UI.ACTION_CANCEL}</Button>
                       </span>
                     ) : (
                       <Button variant="danger" size="sm" style={{ border: 'none' }} onClick={() => setConfirmDel(s.id)} aria-label={UI.ACTION_DELETE}><X size={16} aria-hidden="true" /></Button>
@@ -325,11 +347,11 @@ export default function SourcesPage() {
 
       {/* Use in Model modal */}
       {uimSrc && (
-        <div style={S.overlay} onClick={() => setUimSrc(null)}>
-          <div style={S.modal} onClick={e => e.stopPropagation()}>
+        <div style={S.overlay} role="dialog" aria-modal="true" aria-label={UI.SOURCES_UIM_TITLE} onClick={closeUim}>
+          <div ref={uimModalRef} tabIndex={-1} style={S.modal} onClick={e => e.stopPropagation()}>
             <div style={S.modalHeader}>
-              <span style={S.modalTitle}>Add to Source Ledger</span>
-              <Button variant="ghost" size="sm" style={{ border: 'none' }} onClick={() => setUimSrc(null)} aria-label={UI.ACTION_CANCEL}><X size={16} aria-hidden="true" /></Button>
+              <span style={S.modalTitle}>{UI.SOURCES_UIM_TITLE}</span>
+              <Button variant="ghost" size="sm" style={{ border: 'none' }} onClick={closeUim} aria-label={UI.ACTION_CANCEL}><X size={16} aria-hidden="true" /></Button>
             </div>
             <div style={S.modalBody}>
               <div style={S.modalRow}>
@@ -337,11 +359,9 @@ export default function SourcesPage() {
                 <span style={S.modalMetric}>{uimSrc.metric_name}</span>
                 <span style={S.modalValue}>{fmtVal(uimSrc)}</span>
               </div>
-              <div style={S.modalHint}>
-                This flags the source as used in the model — the simulator will use its value for this metric (overriding the benchmark median).
-              </div>
+              <div style={S.modalHint}>{UI.SOURCES_UIM_HINT}</div>
               <Field
-                label="Scenario context (for audit)"
+                label={UI.SOURCES_UIM_SCENARIO_LABEL}
                 type="select"
                 value={uimScenario}
                 onChange={e => setUimScenario(e.target.value)}
@@ -349,12 +369,13 @@ export default function SourcesPage() {
                 style={{ marginBottom: 'var(--cp-space-4)' }}
               />
               {uimDone ? (
-                <div style={S.uimDone}>Source added.</div>
+                <div style={S.uimDone}>{UI.SOURCES_UIM_DONE}</div>
               ) : (
                 <div style={S.flexEnd}>
-                  <Button variant="ghost" size="sm" onClick={() => setUimSrc(null)}>Cancel</Button>
+                  {uimError && <div style={S.uimErr}>{uimError}</div>}
+                  <Button variant="ghost" size="sm" onClick={closeUim}>{UI.ACTION_CANCEL}</Button>
                   <Button variant="primary" size="sm" onClick={useInModel} disabled={uimSaving}>
-                    {uimSaving ? 'Adding…' : 'Add to Ledger'}
+                    {uimSaving ? UI.SOURCES_UIM_ADDING : UI.SOURCES_UIM_ADD_BTN}
                   </Button>
                 </div>
               )}
@@ -395,4 +416,5 @@ const S = {
   modalValue: { fontWeight: 'var(--cp-weight-black)', fontSize: 'var(--cp-font-lg)', fontVariantNumeric: 'tabular-nums' },
   modalHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-font-md)' },
   uimDone: { color: 'var(--cp-accent)', fontWeight: 'var(--cp-weight-bold)', textAlign: 'center', padding: 'var(--cp-space-3)' },
+  uimErr: { flex: 1, fontSize: 'var(--cp-font-xs)', color: 'var(--cp-accent-strong)', fontWeight: 'var(--cp-weight-semibold)' },
 };

@@ -218,7 +218,7 @@ const S = {
     width: '100%',
     minWidth: 0,
     flex: '1 1 auto',
-    fontSize: 'clamp(32px, 4vw, 48px)',
+    fontSize: 'var(--cp-font-fluid-hero)',
     lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',

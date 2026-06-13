@@ -164,7 +164,7 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wider)',
     color: 'var(--cp-text-muted)',
-    borderBottom: '2px solid var(--cp-border)',
+    borderBottom: 'var(--cp-border-w-accent) solid var(--cp-border)',
   },
   thGroup: {
     padding: 'var(--cp-space-2) var(--cp-space-3)',
@@ -172,7 +172,7 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
     textAlign: 'center',
     background: 'var(--cp-surface-0)',
-    borderBottom: '2px solid',
+    borderBottom: 'var(--cp-border-w-accent) solid',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
   },

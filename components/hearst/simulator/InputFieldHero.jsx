@@ -82,10 +82,12 @@ export default function InputFieldHero({ mode, value, onChange, projection, scen
 
   const body = (
       <div data-brief-bar-row style={S.row}>
-        {/* Driven field — the one number the user controls */}
         <div style={S.fieldCol}>
-          <div style={S.choiceTag} title={`${UI.SIM_YOUR_CHOICE} · ${cfg.label}`}>
-            {UI.SIM_YOUR_CHOICE} · {cfg.label}
+          <div style={S.fieldHead}>
+            <span style={S.choiceTag} title={`${UI.SIM_YOUR_CHOICE} · ${cfg.label}`}>
+              {cfg.label}
+            </span>
+            <span style={S.desc}>{cfg.description}</span>
           </div>
           <div style={S.inputRow}>
             <input
@@ -97,11 +99,9 @@ export default function InputFieldHero({ mode, value, onChange, projection, scen
             />
             <span style={S.unit}>{cfg.unit}</span>
           </div>
-          <div style={S.desc}>{cfg.description}</div>
         </div>
 
-        {/* Computed results — the two quantities the engine derives */}
-        <div data-brief-results style={S.resultsCol} className="cp-surface-accent-soft">
+        <div data-brief-results style={S.resultsCol}>
           <div style={S.resultsTag}>{UI.SIM_COMPUTED}</div>
           <div style={S.resultsGrid}>
             {results.map((r) => (
@@ -114,11 +114,11 @@ export default function InputFieldHero({ mode, value, onChange, projection, scen
               </div>
             ))}
           </div>
-          <div style={S.solverNoteSlot} aria-live="polite">
-            <span style={solverNote ? S.solverNote : S.solverNoteGhost}>
-              {solverNote || '\u00a0'}
-            </span>
-          </div>
+          {solverNote ? (
+            <div style={S.solverNoteSlot} aria-live="polite">
+              <span style={S.solverNote}>{solverNote}</span>
+            </div>
+          ) : null}
         </div>
       </div>
   );
@@ -150,47 +150,52 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     minWidth: 0,
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-sm)',
+    background: 'var(--cp-surface-1)',
+    overflow: 'hidden',
   },
   row: {
     display: 'grid',
     alignItems: 'stretch',
-    minHeight: '100%',
     minWidth: 0,
   },
   fieldCol: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-2)',
-    justifyContent: 'flex-start',
+    gap: 'var(--cp-space-1)',
+    justifyContent: 'center',
     minWidth: 0,
-    minHeight: '100%',
+    padding: 'var(--cp-space-2) var(--cp-space-3)',
+    borderRight: '1px solid var(--cp-border)',
+  },
+  fieldHead: {
+    display: 'flex',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 'var(--cp-space-2)',
+    minWidth: 0,
   },
   choiceTag: {
-    fontSize: 'var(--cp-font-xs)',
+    fontSize: 'var(--cp-font-nano)',
     fontWeight: 'var(--cp-weight-black)',
-    letterSpacing: 'var(--cp-tracking-eyebrow)',
+    letterSpacing: 'var(--cp-tracking-wider)',
     color: 'var(--cp-accent-maroon)',
     textTransform: 'uppercase',
-    minHeight: '2.75em',
-    lineHeight: 'var(--cp-leading-tight)',
-    overflow: 'hidden',
-    display: '-webkit-box',
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: 'vertical',
+    lineHeight: 'var(--cp-leading-none)',
+    flexShrink: 0,
   },
   inputRow: {
     display: 'flex',
     alignItems: 'baseline',
-    gap: 'var(--cp-space-2)',
-    paddingBottom: 'var(--cp-space-2)',
-    borderBottom: '2px solid var(--cp-border-accent)',
-    minHeight: 'var(--cp-space-12)',
+    gap: 'var(--cp-space-1)',
+    minHeight: 'auto',
     flexShrink: 0,
   },
   input: {
     flex: 1,
-    fontSize: 'var(--cp-display-input)',
-    lineHeight: 'var(--cp-space-12)',
+    fontSize: 'var(--cp-font-fluid-input)',
+    lineHeight: 'var(--cp-leading-snug)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-tight)',
     padding: 0,
@@ -202,87 +207,81 @@ const S = {
     fontVariantNumeric: 'tabular-nums',
   },
   unit: {
-    fontSize: 'var(--cp-display-unit)',
-    fontWeight: 'var(--cp-weight-black)',
+    fontSize: 'var(--cp-font-sm)',
+    fontWeight: 'var(--cp-weight-bold)',
     color: 'var(--cp-text-muted)',
   },
   desc: {
-    fontSize: 'var(--cp-font-xs)',
-    lineHeight: 'var(--cp-leading-tight)',
-    color: 'var(--cp-text-muted)',
-    minHeight: 'calc(var(--cp-leading-tight) * 2 * 1em)',
+    fontSize: 'var(--cp-font-nano)',
+    lineHeight: 'var(--cp-leading-heading)',
+    color: 'var(--cp-text-faint)',
+    textAlign: 'right',
+    minWidth: 0,
     overflow: 'hidden',
-    display: '-webkit-box',
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: 'vertical',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
-  // Computed-results panel — flat accent-soft band (no nested card), riveted right.
   resultsCol: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
-    padding: 'var(--cp-space-4)',
-    borderRadius: 'var(--cp-radius-md)',
+    gap: 'var(--cp-space-1)',
+    padding: 'var(--cp-space-2) var(--cp-space-3)',
     minWidth: 0,
-    minHeight: '100%',
+    background: 'var(--cp-surface-2)',
+    justifyContent: 'center',
   },
   resultsTag: {
-    fontSize: 'var(--cp-font-micro)',
+    fontSize: 'var(--cp-font-nano)',
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
+    lineHeight: 'var(--cp-leading-none)',
   },
   resultsGrid: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
+    gap: '2px',
   },
   resultItem: {
     display: 'flex',
     alignItems: 'baseline',
     justifyContent: 'space-between',
-    gap: 'var(--cp-space-3)',
+    gap: 'var(--cp-space-2)',
   },
   resultLabelCol: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-0)',
+    gap: '0',
     minWidth: 0,
   },
   resultLabel: {
-    fontSize: 'var(--cp-font-sm)',
+    fontSize: 'var(--cp-font-micro)',
     fontWeight: 'var(--cp-weight-semibold)',
     color: 'var(--cp-text-muted)',
+    lineHeight: 'var(--cp-leading-heading)',
   },
   resultNote: {
-    fontSize: 'var(--cp-font-micro)',
-    lineHeight: 'var(--cp-leading-tight)',
+    fontSize: 'var(--cp-font-nano)',
+    lineHeight: 'var(--cp-leading-none)',
     color: 'var(--cp-text-muted)',
-    opacity: 0.85,
+    opacity: 0.7,
   },
   resultValue: {
-    fontSize: 'var(--cp-font-lg)',
+    fontSize: 'var(--cp-font-xs)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-strong)',
     fontVariantNumeric: 'tabular-nums',
   },
   solverNoteSlot: {
-    minHeight: 'calc(var(--cp-leading-tight) * 2 * 1em)',
-    marginTop: 'auto',
+    minHeight: 'auto',
+    marginTop: '2px',
     flexShrink: 0,
   },
   solverNote: {
     display: 'block',
-    fontSize: 'var(--cp-font-xs)',
-    lineHeight: 'var(--cp-leading-tight)',
+    fontSize: 'var(--cp-font-nano)',
+    lineHeight: 'var(--cp-leading-none)',
     color: 'var(--cp-text-muted)',
-  },
-  solverNoteGhost: {
-    display: 'block',
-    fontSize: 'var(--cp-font-xs)',
-    lineHeight: 'var(--cp-leading-tight)',
-    color: 'transparent',
-    userSelect: 'none',
   },
 };

@@ -6,14 +6,14 @@
 // data-center JV / equity / build-to-suit / off-take deals — who owns what, who
 // operates, who pays. Static presentation (no engine, no API). Hybrid register:
 // sober hero + KPI strip, then denser sections with the equity-split bars and a
-// deal table. Tokens only (--cp-*), cockpit-canon. Mirrors docs/deal-models-cockpit.html.
+// deal reference table.
 
 import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
-import { Table, Row, Cell as Td, SectionHead, KpiGrid, KpiCard } from '@/components/hearst/ui';
-import { RC } from '@/lib/cp-styles';
+import { Table, Row, Cell as Td, SectionHead, KpiGrid, KpiCard, Button } from '@/components/hearst/ui';
+import { RC, G } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
 
 // ─── Content data ────────────────────────────────────────────────────────────
@@ -26,13 +26,15 @@ const KPIS = [
   { label: 'Qatar wholesale deal', value: '750M QAR', sub: 'MEEZA · 6→44 MW lease' },
 ];
 
+// Playbook leads — it is the recommendation. The six models and real deals that
+// follow are the evidence beneath the conclusion (reading order = decision first).
 const SECTIONS = [
-  { id: 'models', label: '1 · The 6 models' },
-  { id: 'deals', label: '2 · Real deals' },
-  { id: 'splits', label: '3 · Splits' },
-  { id: 'roles', label: '4 · Who does what' },
-  { id: 'gulf', label: '5 · Gulf / Qatar' },
-  { id: 'playbook', label: '6 · Playbook' },
+  { id: 'playbook', label: '1 · Playbook' },
+  { id: 'models', label: '2 · The 6 models' },
+  { id: 'deals', label: '3 · Real deals' },
+  { id: 'splits', label: '4 · Splits' },
+  { id: 'roles', label: '5 · Who does what' },
+  { id: 'gulf', label: '6 · Gulf / Qatar' },
 ];
 
 const MODELS = [
@@ -196,7 +198,7 @@ function SplitBar({ row }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function DealsPage() {
-  const [active, setActive] = useState('models');
+  const [active, setActive] = useState('playbook');
 
   const go = (id) => {
     setActive(id);
@@ -232,13 +234,13 @@ export default function DealsPage() {
       <div data-deals-root className="oracle-page">
 
         {/* HERO */}
-        <header style={S.hero}>
-          <div style={S.eyebrow}>HEARST · STRATEGIC REFERENCE · HYPERSCALE / AI INFRA</div>
-          <h1 style={S.h1}>How the majors structure their deals<br />— JV, equity, build-to-suit, off-take</h1>
-          <p style={S.lede}>
-            How data-center operators and hyperscalers finance and run capacity — who takes which share,
-            who operates, who pays. A reference frame for designing a deal around a hub like Futur One.
-          </p>
+        <header className="oracle-page-header" style={{ marginBottom: 'var(--cp-space-4)' }}>
+          <SectionHead
+            hero
+            eyebrow="HEARST · STRATEGIC REFERENCE · HYPERSCALE / AI INFRA"
+            title={<>How the majors structure their deals<br />— JV, equity, build-to-suit, off-take</>}
+            hint="Which deal structure Qatar should pursue for a hub like Futur One — and why. The playbook leads; the six models, real deals and equity splits below are the evidence behind it."
+          />
         </header>
 
         {/* KPI STRIP */}
@@ -258,13 +260,39 @@ export default function DealsPage() {
         {/* ANCHOR NAV */}
         <nav data-deals-nav style={S.nav} aria-label={UI.DEALS_NAV_ARIA}>
           {SECTIONS.map((s) => (
-            <button key={s.id} onClick={() => go(s.id)} style={{ ...S.navBtn, ...(active === s.id ? S.navBtnActive : {}) }}>
+            <Button
+              key={s.id}
+              onClick={() => go(s.id)}
+              variant="ghost"
+              size="sm"
+              aria-current={active === s.id ? 'true' : undefined}
+              style={{
+                borderRadius: 'var(--cp-radius-pill)',
+                ...(active === s.id ? G.selected : {}),
+              }}
+            >
               {s.label}
-            </button>
+            </Button>
           ))}
         </nav>
 
-        {/* §1 MODELS */}
+        {/* §1 PLAYBOOK — the recommendation leads; everything below is evidence. */}
+        <section id="sec-playbook" style={S.section}>
+          <SectionHead title="Playbook for a hub — which model to aim for"
+            hint="The actionable synthesis: which structure Qatar should pursue, depending on what it brings to the table. The models, deals and splits below are the evidence." />
+          <div className="cp-card cp-card-accent" style={S.playbook}>
+            <ol style={S.ol}>
+              {PLAYBOOK.map((p, i) => (
+                <li key={i} style={S.li}><b style={S.b}>{p.lead}</b> {p.body}</li>
+              ))}
+            </ol>
+          </div>
+          <p style={S.closing}>
+            <b style={S.b}>{UI.DEALS_CLOSING_BOLD}</b> {UI.DEALS_CLOSING_BODY}
+          </p>
+        </section>
+
+        {/* §2 MODELS */}
         <section id="sec-models" style={S.section}>
           <SectionHead title="The 6 deal models used across the industry"
             hint="From the least capital-intensive for the operator (lease) to the most committing (equity JV). All coexist." />
@@ -290,13 +318,13 @@ export default function DealsPage() {
           </div>
         </section>
 
-        {/* §2 REAL DEALS */}
+        {/* §3 REAL DEALS */}
         <section id="sec-deals" style={S.section}>
           <SectionHead title="Real deals — what the majors have signed"
             hint="The recurring structure: majority long-term capital + minority operator that keeps operational control." />
           <div data-deals-grid-2 style={S.grid2}>
             {DEALS.map((d) => (
-              <div key={d.who} className="cp-card" style={{ ...S.dealCard, borderLeft: `3px solid ${OP_BAR[d.op]}` }}>
+              <div key={d.who} className="cp-card" style={{ ...S.dealCard, borderLeft: `var(--cp-border-w-bar) solid ${OP_BAR[d.op]}` }}>
                 <div style={S.dealTop}>
                   <span style={S.dealWho}><span style={{ ...S.dot, background: OP_BAR[d.op] }} />{d.who}</span>
                   <span style={S.dealAmt}>{d.amt}</span>
@@ -308,7 +336,7 @@ export default function DealsPage() {
           </div>
         </section>
 
-        {/* §3 SPLITS */}
+        {/* §4 SPLITS */}
         <section id="sec-splits" style={S.section}>
           <SectionHead title="The equity splits — who owns what"
             hint="Outside the Gulf, the dominant rule: long-term capital owns, the operator keeps 20–25% + operations." />
@@ -363,7 +391,7 @@ export default function DealsPage() {
           </div>
         </section>
 
-        {/* §4 ROLES */}
+        {/* §5 ROLES */}
         <section id="sec-roles" style={S.section}>
           <SectionHead title="Who does what in a hyperscale deal"
             hint="A deal can involve up to 5 distinct roles. One actor can hold several — but thinking in roles tells you what you bring and what you capture." />
@@ -378,7 +406,7 @@ export default function DealsPage() {
           </div>
         </section>
 
-        {/* §5 GULF */}
+        {/* §6 GULF */}
         <section id="sec-gulf" style={S.section}>
           <SectionHead title="Gulf / Qatar specifics"
             hint="The regional pattern differs from the West: sovereignty first, the state/national champion owns, tech enters in minority." />
@@ -407,22 +435,6 @@ export default function DealsPage() {
           </div>
         </section>
 
-        {/* §6 PLAYBOOK */}
-        <section id="sec-playbook" style={S.section}>
-          <SectionHead title="Playbook for a hub — which model to aim for"
-            hint="Actionable synthesis depending on what you bring to the table." />
-          <div className="cp-card cp-card-accent" style={S.playbook}>
-            <ol style={S.ol}>
-              {PLAYBOOK.map((p, i) => (
-                <li key={i} style={S.li}><b style={S.b}>{p.lead}</b> {p.body}</li>
-              ))}
-            </ol>
-          </div>
-          <p style={S.closing}>
-            <b style={S.b}>{UI.DEALS_CLOSING_BOLD}</b> {UI.DEALS_CLOSING_BODY}
-          </p>
-        </section>
-
         {/* FOOTER */}
         <footer style={S.footer}>
           <div style={S.footHead}>SOURCES (PUBLIC DEALS)</div>
@@ -446,17 +458,9 @@ export default function DealsPage() {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const S = {
-  // hero
-  hero: { borderLeft: '3px solid var(--cp-accent)', paddingLeft: 'var(--cp-space-5)', paddingTop: 'var(--cp-space-2)', paddingBottom: 'var(--cp-space-2)' },
-  eyebrow: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)' },
-  h1: { fontSize: 'var(--cp-font-2xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-strong)', margin: 'var(--cp-space-3) 0' },
-  lede: { fontSize: 'clamp(13px, 1.4vw, 15px)', color: 'var(--cp-text-body)', maxWidth: 780, lineHeight: 1.55 },
-
   // kpi strip
   // anchor nav
   nav: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 'var(--cp-z-sticky)', padding: 'var(--cp-space-2) 0', background: 'var(--cp-bg-deep)' },
-  navBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-semibold)', padding: 'var(--cp-space-2) var(--cp-space-3)', border: '1px solid var(--cp-border)', background: 'var(--cp-surface-1)', color: 'var(--cp-text-muted)', borderRadius: 'var(--cp-radius-pill)', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
-  navBtnActive: { background: 'var(--cp-accent-maroon, var(--cp-accent))', color: 'var(--cp-text-strong)', borderColor: 'var(--cp-border-accent)' },
 
   // section (en-têtes via <SectionHead/> canon)
   section: { scrollMarginTop: 56, display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
@@ -469,19 +473,19 @@ const S = {
   modelTag: { display: 'inline-block', alignSelf: 'flex-start', fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wide)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)', background: 'var(--cp-accent-soft)', border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-1) var(--cp-space-2)', marginBottom: 'var(--cp-space-3)' },
   modelTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', letterSpacing: 'var(--cp-tracking-tight)' },
   modelSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)', marginTop: 'var(--cp-space-1)' },
-  modelBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.55 },
+  modelBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   pc: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-4)' },
   pcCol: { border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-3)', background: 'var(--cp-surface-0)' },
   pcHead: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wider)', textTransform: 'uppercase', marginBottom: 'var(--cp-space-2)' },
-  pcItem: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', lineHeight: 1.5, marginBottom: 'var(--cp-space-1)' },
+  pcItem: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-body)', marginBottom: 'var(--cp-space-1)' },
 
   // deal card
   dealCard: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column' },
   dealTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-1)' },
-  dealWho: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', display: 'flex', alignItems: 'center', minWidth: 0, lineHeight: 1.3 },
+  dealWho: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', display: 'flex', alignItems: 'center', minWidth: 0, lineHeight: 'var(--cp-leading-tight)' },
   dealAmt: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-strong)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
   dealStruct: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-accent-strong)', fontWeight: 'var(--cp-weight-semibold)', marginBottom: 'var(--cp-space-3)' },
-  dealDesc: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.55 },
+  dealDesc: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
 
   // split panel
   splitPanel: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
@@ -505,18 +509,18 @@ const S = {
   roleCardAccent: { borderColor: 'var(--cp-border-accent)' },
   roleTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', marginBottom: 'var(--cp-space-1)' },
   roleWho: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
-  roleDesc: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.55 },
+  roleDesc: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
 
   // callouts
   callout: { padding: 'var(--cp-space-5)' },
   calloutTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', marginBottom: 'var(--cp-space-3)', display: 'flex', alignItems: 'center' },
-  calloutBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.6 },
+  calloutBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
 
   // playbook
   playbook: { padding: 'var(--cp-space-6)' },
   ol: { margin: 0, paddingLeft: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-3)' },
-  li: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 1.6 },
-  closing: { fontSize: 'var(--cp-font-md)', color: 'var(--cp-text-body)', lineHeight: 1.6, maxWidth: 880, marginTop: 'var(--cp-space-2)' },
+  li: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
+  closing: { fontSize: 'var(--cp-font-md)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)', maxWidth: 880, marginTop: 'var(--cp-space-2)' },
   b: { color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' },
 
   // footer
@@ -524,7 +528,7 @@ const S = {
   footHead: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', textTransform: 'uppercase', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
   srcList: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
   srcLink: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', transition: 'color var(--cp-dur-base) var(--cp-ease)', textDecoration: 'none' },
-  disclaimer: { marginTop: 'var(--cp-space-5)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', maxWidth: 860, lineHeight: 1.5 },
+  disclaimer: { marginTop: 'var(--cp-space-5)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', maxWidth: 860, lineHeight: 'var(--cp-leading-body)' },
 
   dot: { width: 9, height: 9, borderRadius: '50%', marginRight: 8, flex: 'none', display: 'inline-block' },
 };

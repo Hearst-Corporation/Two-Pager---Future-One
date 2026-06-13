@@ -6,9 +6,10 @@ import PropTypes from 'prop-types';
 // Tokens --cp-* uniquement. Rend <button> ou, si href, <a>.
 
 const SIZES = {
-  sm: { height: 'var(--cp-btn-height-sm)', padding: '0 var(--cp-space-3)', fontSize: 'var(--cp-font-xs)' },
-  md: { height: 'var(--cp-btn-height-md)', padding: '0 var(--cp-space-4)', fontSize: 'var(--cp-font-sm)' },
-  lg: { height: 'var(--cp-btn-height-lg)', padding: '0 var(--cp-space-6)', fontSize: 'var(--cp-font-base)' },
+  micro: { height: 'var(--cp-control-sm)', padding: '0 var(--cp-space-2)', fontSize: 'var(--cp-font-nano)' },
+  sm: { height: '24px', padding: '0 var(--cp-space-3)', fontSize: 'var(--cp-font-micro)' },
+  md: { height: '32px', padding: '0 var(--cp-space-4)', fontSize: 'var(--cp-font-xs)' },
+  lg: { height: '40px', padding: '0 var(--cp-space-6)', fontSize: 'var(--cp-font-sm)' },
 };
 
 const VARIANTS = {
@@ -56,7 +57,7 @@ export default function Button({
 
 Button.propTypes = {
   variant: PropTypes.oneOf(['primary', 'secondary', 'ghost', 'muted', 'danger', 'dangerSolid', 'link']),
-  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  size: PropTypes.oneOf(['micro', 'sm', 'md', 'lg']),
   href: PropTypes.string,
   disabled: PropTypes.bool,
   block: PropTypes.bool,
