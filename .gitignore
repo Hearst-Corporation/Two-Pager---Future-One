@@ -84,3 +84,17 @@ A[0-9]-*.png
 /section-*.png
 /other-sections.png
 /financial-*.png
+
+# screenshots de session (smoke / verify / scan) — générés par Playwright/agents, jamais versionnés
+/smoke-*.png
+/screenshot_*.png
+/screenshot-*.png
+/val-*.png
+/verify-*.png
+/scenario*.png
+/campus3d-*.png
+/dossier-*.png
+/executive-*.png
+/recovery-*.png
+/deals-*.png
+/_concept-*.png
