@@ -22,6 +22,9 @@ out/
 export/
 futur-one-brochure.zip
 
+# Large media — keep on disk, never version
+Google Chrome.mp4
+
 # Raw Midjourney source assets (use renamed versions instead)
 public/u2883995211_*
 
