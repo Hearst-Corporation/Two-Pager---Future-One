@@ -754,5 +754,3 @@ export const UI = {
   // Login (legacy layer — hors cockpit)
   LOGIN_PASSWORD_PLACEHOLDER: 'Password',
 } as const;
-
-export type UIKey = keyof typeof UI;

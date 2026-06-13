@@ -1,47 +1,5 @@
 // lib/oracle-product-context.ts
-// Two contexts injected into the Cockpit chat depending on mode :
-//   - PAGES_CONTEXT  → review facilitator (oracle-prompts.ts)
-//   - DOMAIN_CONTEXT → buildConversationalPrompt (normal mode)
-
-export type ProductContext = { text: string };
-
-// ────────────────────────────────────────────────────────────────────────────
-// PAGES_CONTEXT — for review mode
-// ────────────────────────────────────────────────────────────────────────────
-
-const PAGES_CONTEXT_TEXT = `# Carte des pages Oracle / Future One Qatar
-
-Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (2 pages actives). Stack Next.js 14 (App Router) + Supabase + OpenAI (GPT-4o / GPT-4.1).
-
-## Routes publiques (présentation A3 + pitches)
-
-- \`/\` — Redirige vers \`/admin/hearst\`.
-- \`/pitch\` — Pitch deck principal (hub).
-- \`/pitch-hub\`, \`/pitch-datacenter\`, \`/pitch-mining\` — Variantes thématiques.
-- \`/pitch-op-hub\`, \`/pitch-op-datacenter\`, \`/pitch-op-mining\` — Variantes "operator".
-- \`/datacenter\` — Page data center publique.
-- \`/brochure\` — Brochure deux-pager.
-- \`/print\` — Vue print A3 plié (FoldableA3 — REF_W=480, REF_H=680, 4 pages portrait).
-  - P1 Cover (\`components/pages/P1Cover.jsx\`) — image cover-facade + titre FUTUR ONE.
-  - P2 InsideLeft (\`components/pages/P2InsideLeft.jsx\`) — hero dark 270px + opportunity band 230px + building 100px + footer 80px.
-  - P3 InsideRight (\`components/pages/P3InsideRight.jsx\`) — header 122 + phases 102 + mid 282 + picture 82 + building 92 (total 680).
-  - P4 Back (\`components/pages/P4Back.jsx\`) — image back-cover + "AI is the new gas."
-- \`/rdc-3d\`, \`/rdc-photos\` — Pages immersives.
-
-## Routes Cockpit admin HEARST (\`/admin/hearst/*\`)
-
-- \`/admin/hearst/simulator\` — Investment Simulator. Zone : mode switcher (Simple / Pro), input hero (MW / Capital / IRR), deal archetypes, equipment mix, visualisations (radar / network / matrix / sankey), résultats (KPIs, gantt, 10-year projection), CTA bar (save plan, export MD), génération de mémo stratégique.
-- \`/admin/hearst/dossier\` — Decision Canvas & Memo Approval. Zone : canvas de décision, approbation de mémos stratégiques, workflow institutionnel.
-
-## Routes \`/admin/*\` (cockpit générique)
-
-\`/admin\`, \`/admin/login\`, et autres routes legacy sous \`/admin/*\`.
-
-## Vocabulaire produit
-
-Archétypes deals : \`powered_shell\` / \`branded_jv\` / \`manage_only\` / \`white_label\` / \`sale_leaseback\`. Tables Supabase : \`cockpit_chats\`, \`cockpit_messages\`, \`hearst_deals\`, \`hearst_scenarios\`, \`hearst_sources\`, \`hearst_contracts\`, \`admin_chat_mode\`, \`review_documents\`, \`llm_runs\`. Composants clés : \`OracleRailNav.jsx\` (nav sections, rail gauche + mobile), \`OracleAdvisorRail.jsx\` (IC advisor rail droit), \`StrategicMemoModal.jsx\` (génération mémo).`;
-
-export const PAGES_CONTEXT: ProductContext = { text: PAGES_CONTEXT_TEXT };
+// Domain context injected into the Cockpit chat (normal/conversational mode).
 
 // ────────────────────────────────────────────────────────────────────────────
 // DOMAIN_CONTEXT — for normal (conversational expert) mode

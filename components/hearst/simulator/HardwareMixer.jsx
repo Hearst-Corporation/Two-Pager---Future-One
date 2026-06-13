@@ -570,7 +570,7 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
   },
   aiBadge: {
-    padding: '1px 4px',
+    padding: 'var(--cp-space-px) var(--cp-space-1)',
     color: 'var(--cp-text-strong)',
     background: 'var(--cp-accent-maroon)',
     borderRadius: 'var(--cp-radius-2)',
