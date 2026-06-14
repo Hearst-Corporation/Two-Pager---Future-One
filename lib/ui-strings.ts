@@ -3,12 +3,15 @@
 export const UI = {
   // Navigation
   NAV_RAIL_ARIA: 'Hearst cockpit sections',
-  NAV_SIMULATOR: 'Simulator',
-  NAV_FINANCIAL: 'Financial',
-  NAV_DEALS: 'Deals',
-  NAV_WORKSPACE: 'Workspace',
-  NAV_DOSSIER: 'Dossier',
-  NAV_SOURCES: 'Sources',
+  // Demo-first nav wording (Batch 1 IA polish) — visible labels only; routes unchanged.
+  // Primary deal journey:
+  NAV_SIMULATOR: 'Model',           // /admin/hearst/simulator
+  NAV_SOURCES: 'Evidence',          // /admin/hearst/sources
+  NAV_DOSSIER: 'Decision',          // /admin/hearst/dossier
+  // Analyst tools (secondary):
+  NAV_FINANCIAL: 'Underwriting',    // /admin/hearst/financial
+  NAV_DEALS: 'Playbook',            // /admin/hearst/deals
+  NAV_WORKSPACE: 'Saved scenarios', // /admin/hearst/workspace
 
   // Actions génériques
   ACTION_SAVE: 'Save',

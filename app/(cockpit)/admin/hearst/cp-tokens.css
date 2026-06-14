@@ -352,6 +352,21 @@ body.oracle-simulator-page {
   line-height: 1;
   text-align: center;
 }
+/* Demo-first grouping: a short hairline + extra space separate the primary
+   deal journey from the secondary analyst tools, which rest at a fainter
+   colour. Hover/active rules above (higher specificity) restore full clarity,
+   so every tool stays reachable and legible. Tokens only — no chrome, no badge. */
+.oracle-rail-nav-sep {
+  flex: none;
+  align-self: center;
+  width: var(--cp-space-5);
+  height: 1px;
+  margin: var(--cp-space-3) 0;
+  background: var(--cp-border);
+}
+.oracle-rail-nav-item--analyst {
+  color: var(--cp-text-faint);
+}
 
 /* Mobile fallback — rail gauche masqué <600px (cockpit.css) */
 .oracle-mobile-nav-root {
@@ -405,6 +420,14 @@ body.oracle-simulator-page {
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100%;
+  }
+  /* In the horizontal mobile bar the group separator becomes a short
+     vertical hairline between primary and analyst tools. */
+  .oracle-mobile-nav .oracle-rail-nav-sep {
+    width: 1px;
+    height: var(--cp-space-5);
+    margin: 0 var(--cp-space-1);
+    align-self: center;
   }
 }
 

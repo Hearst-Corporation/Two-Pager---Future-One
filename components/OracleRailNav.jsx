@@ -20,13 +20,19 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UI } from '@/lib/ui-strings';
 
+// Demo-first hierarchy: a primary deal journey (Model → Evidence → Decision)
+// above the secondary analyst tools. Visible labels come from UI.NAV_* —
+// routes, order-independent active matching and icons are unchanged. Every
+// route stays reachable; this is wording + grouping only, not a route split.
 const SECTIONS = [
-  { id: 'sim', href: '/admin/hearst/simulator', label: 'Simulator', matchAny: ['/admin/hearst/simulator'] },
-  { id: 'financial', href: '/admin/hearst/financial', label: 'Financial', matchAny: ['/admin/hearst/financial'] },
-  { id: 'deals', href: '/admin/hearst/deals', label: 'Deals', matchAny: ['/admin/hearst/deals'] },
-  { id: 'workspace', href: '/admin/hearst/workspace', label: 'Workspace', matchAny: ['/admin/hearst/workspace'] },
-  { id: 'dossier', href: '/admin/hearst/dossier', label: 'Dossier', matchAny: ['/admin/hearst/dossier'] },
-  { id: 'sources', href: '/admin/hearst/sources', label: 'Sources', matchAny: ['/admin/hearst/sources'] },
+  // Primary — the demo deal journey
+  { id: 'sim', href: '/admin/hearst/simulator', label: UI.NAV_SIMULATOR, group: 'primary', matchAny: ['/admin/hearst/simulator'] },
+  { id: 'sources', href: '/admin/hearst/sources', label: UI.NAV_SOURCES, group: 'primary', matchAny: ['/admin/hearst/sources'] },
+  { id: 'dossier', href: '/admin/hearst/dossier', label: UI.NAV_DOSSIER, group: 'primary', matchAny: ['/admin/hearst/dossier'] },
+  // Analyst tools — secondary, still fully reachable
+  { id: 'financial', href: '/admin/hearst/financial', label: UI.NAV_FINANCIAL, group: 'analyst', matchAny: ['/admin/hearst/financial'] },
+  { id: 'deals', href: '/admin/hearst/deals', label: UI.NAV_DEALS, group: 'analyst', matchAny: ['/admin/hearst/deals'] },
+  { id: 'workspace', href: '/admin/hearst/workspace', label: UI.NAV_WORKSPACE, group: 'analyst', matchAny: ['/admin/hearst/workspace'] },
 ];
 
 function isSectionActive(section, pathname) {
@@ -96,24 +102,37 @@ function Icon({ id }) {
   }
 }
 
+function NavItem({ section, pathname }) {
+  const active = isSectionActive(section, pathname);
+  const className =
+    'oracle-rail-nav-item' +
+    (active ? ' active' : '') +
+    (section.group === 'analyst' ? ' oracle-rail-nav-item--analyst' : '');
+  return (
+    <Link
+      href={section.href}
+      className={className}
+      aria-current={active ? 'page' : undefined}
+      title={section.label}
+    >
+      <Icon id={section.id} />
+      <span className="oracle-rail-nav-label">{section.label}</span>
+    </Link>
+  );
+}
+
 function NavContent({ pathname, className = 'oracle-rail-nav' }) {
+  const primary = SECTIONS.filter((s) => s.group === 'primary');
+  const analyst = SECTIONS.filter((s) => s.group === 'analyst');
   return (
     <nav className={className} aria-label={UI.NAV_RAIL_ARIA}>
-      {SECTIONS.map((section) => {
-        const active = isSectionActive(section, pathname);
-        return (
-          <Link
-            key={section.id}
-            href={section.href}
-            className={active ? 'oracle-rail-nav-item active' : 'oracle-rail-nav-item'}
-            aria-current={active ? 'page' : undefined}
-            title={section.label}
-          >
-            <Icon id={section.id} />
-            <span className="oracle-rail-nav-label">{section.label}</span>
-          </Link>
-        );
-      })}
+      {primary.map((section) => (
+        <NavItem key={section.id} section={section} pathname={pathname} />
+      ))}
+      <div className="oracle-rail-nav-sep" aria-hidden="true" />
+      {analyst.map((section) => (
+        <NavItem key={section.id} section={section} pathname={pathname} />
+      ))}
     </nav>
   );
 }
