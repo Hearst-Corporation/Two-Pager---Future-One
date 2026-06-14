@@ -16,7 +16,8 @@ import { UI } from '@/lib/ui-strings';
 import { S as CP, L } from '@/lib/cp-styles';
 import './simulator.css';
 
-import CaseHeaderStep from '@/components/hearst/simulator/sections/CaseHeaderStep';
+import InvestmentCaseSurface from '@/components/hearst/simulator/InvestmentCaseSurface';
+import JvStructureVisual from '@/components/hearst/simulator/JvStructureVisual';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
@@ -359,14 +360,15 @@ export default function SimulatorPage() {
   return (
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
-        {/* SETUP — inputs only. Decision metrics live on /simulator/results. */}
-        <CaseHeaderStep
-          archetypeId={state.primary_archetype_id}
-          geography={state.geography}
-          totalMw={state.total_mw}
-          mode={state.mode}
+        {/* HERO SURFACE — Replaces CaseHeaderStep and the old footer */}
+        <InvestmentCaseSurface
+          state={state}
           scenario={scenario}
           projection={projection}
+          selectedArchetype={PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)}
+          validateBlocked={validateBlocked}
+          validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Simulate ${state.total_mw || ''}MW ${PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)?.label || state.primary_archetype_id} in ${state.geography} →`}
+          onValidate={handleValidateAndReveal}
         />
 
         {/* CONFIGURATION — naked canvas, no cards */}
@@ -403,45 +405,30 @@ export default function SimulatorPage() {
               <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} detailOnly />
             </div>
 
-              <SectionHead title="3. Scale" hint="Capacity or Capital Target" style={{ marginTop: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
-              <div data-sim-mode-stack>
-                <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
+            <div data-sim-setup-row style={{ marginTop: 'var(--cp-space-4)' }}>
+              <div data-sim-setup-col>
+                <SectionHead title="3. Scale" hint="Capacity or Capital Target" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <div data-sim-mode-stack>
+                  <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
 
-                <InputFieldHero
-                  embedded
-                  mode={state.mode}
-                  value={inputValue}
-                  onChange={onInputChange}
-                  projection={projection}
-                  scenario={scenario}
-                  derived={simResult?.derived}
-                  solver={simResult?.solver}
-                />
+                  <InputFieldHero
+                    embedded
+                    mode={state.mode}
+                    value={inputValue}
+                    onChange={onInputChange}
+                    projection={projection}
+                    scenario={scenario}
+                    derived={simResult?.derived}
+                    solver={simResult?.solver}
+                  />
+                </div>
+              </div>
+              <div data-sim-setup-col>
+                <SectionHead title="4. Structure" hint="Joint Venture & Equity" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <JvStructureVisual />
               </div>
             </div>
-          </div>
-
-          {/* VALIDATE CONFIG → integrated into card footer */}
-          <div data-sim-config-footer style={S.configFooter}>
-            <span style={S.validateHint}>
-              {simError ? UI.SIM_FIX_ERROR
-                : loading ? UI.STATE_CALCULATING
-                : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
-                : !projectId ? UI.SIM_LOADING_PROJECT
-                : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
-                : projection ? UI.SIM_READY
-                : UI.SIM_FILL}
-            </span>
-            <Button
-              variant="primary"
-              size="sm"
-              disabled={validateBlocked}
-              onClick={handleValidateAndReveal}
-              className="sim-config-cta"
-              style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)', fontSize: 'var(--cp-font-micro)' }}
-            >
-              {savingState === 'saving' ? UI.SIM_SAVING : `Simulate ${state.total_mw || ''}MW ${PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)?.label || state.primary_archetype_id} in ${state.geography} →`}
-            </Button>
+            </div>
           </div>
         </div>
 

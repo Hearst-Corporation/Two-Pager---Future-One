@@ -63,7 +63,7 @@ export default function WorkspacePage() {
   return (
     <div className="oracle-page">
       <header className="oracle-page-header">
-        <h1>Workspace</h1>
+        <h1>{UI.WS_PAGE_TITLE}</h1>
         <p className="oracle-subtitle">
           {UI.WS_PAGE_SUBTITLE}{' '}
           <Link href="/admin/hearst/dossier" style={S.dossierLink}>Dossier</Link>.
@@ -73,19 +73,19 @@ export default function WorkspacePage() {
       {err && <div style={WS_ERR}>Error: {err}</div>}
 
       <Card as="section" variant="flat" surface={1} padding="lg" style={S.section}>
-        <SectionHead title="Saved scenarios" hint={`${scenarios?.length ?? '—'} saved`} />
+        <SectionHead title={UI.WS_SECTION_SCENARIOS} hint={`${scenarios?.length ?? '—'} saved`} />
         {scenarios === null && <div style={CP.empty}>{UI.STATE_LOADING}</div>}
         {scenarios && scenarios.length === 0 && <div style={CP.empty}>{UI.WS_NO_SCENARIOS}</div>}
         {scenarios && scenarios.length > 0 && (
-          <Table head={['Name', 'Type', 'Created', 'Status', '']}>
+          <Table head={[UI.WS_TH_NAME, UI.WS_TH_TYPE, UI.WS_TH_CREATED, UI.WS_TH_STATUS, '']}>
             {scenarios.map(s => (
               <Row key={s.id}>
                 <Cell label>{s.name}</Cell>
                 <Cell>{s.scenario_type || '—'}</Cell>
                 <Cell>{fmtDate(s.created_at)}</Cell>
-                <Cell><span style={S.statusText}>{s.is_active ? 'Active' : 'Saved'}</span></Cell>
+                <Cell><span style={S.statusText}>{s.is_active ? UI.WS_STATUS_ACTIVE : UI.WS_STATUS_SAVED}</span></Cell>
                 <Cell style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  <Link href={`/admin/hearst/simulator?scenario=${s.id}`} style={S.action}>Open in Simulator →</Link>
+                  <Link href={`/admin/hearst/simulator?scenario=${s.id}`} style={S.action}>{UI.WS_OPEN_IN_SIMULATOR}</Link>
                   {confirmDel === s.id ? (
                     <span style={S.delActions}>
                       <span style={S.delHint}>{UI.WS_DELETE_CONFIRM(s.name)}</span>

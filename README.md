@@ -44,6 +44,9 @@ app/api/cockpit-chat/         chat OpenAI
 cockpit-shell/                shell UI (éditable localement)
 components/hearst/            widgets Oracle
 lib/                          moteur financier, validators, LLM
+lib/hearst-config-presets.js  defaults modèle + structure JV (timeline, split equity)
 ```
+
+Modèle standalone : `models/futur-one-dc-model.html` contient le business plan data center éditable avec recalcul automatique des hypothèses projet, tenants, dette, sortie et deal/JV.
 
 Chat : rail droit **fixe** desktop (`chat-fab.css`) ; drawer + FAB uniquement &lt;900px.
