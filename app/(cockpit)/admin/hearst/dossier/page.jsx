@@ -542,10 +542,11 @@ function ScenarioView({ scenarioId }) {
           fetch(`/api/admin/hearst/scenarios/${scenarioId}`).then(r => r.json()),
         ]);
         if (mRes.status === 'fulfilled') setMemos(mRes.value.memos || []);
+        else { setErr(mRes.reason ? String(mRes.reason) : 'Failed to load memos'); setMemos([]); }
         if (sRes.status === 'fulfilled') {
           setScenario(sRes.value.scenario || sRes.value || null);
         }
-      } catch (e) { setErr(String(e)); }
+      } catch (e) { setErr(String(e)); setMemos([]); }
     }
     load();
   }, [scenarioId]);
@@ -716,6 +717,7 @@ function AllMemosView() {
         ]);
         let rows = [];
         if (mRes.status === 'fulfilled') { rows = mRes.value.memos || []; setMemos(rows); }
+        else { setErr(mRes.reason ? String(mRes.reason) : 'Failed to load memos'); setMemos([]); }
         if (sRes.status === 'fulfilled') {
           const rawS = sRes.value?.scenarios || sRes.value?.rows;
           setScenarios(Array.isArray(rawS) ? rawS : []);
@@ -730,7 +732,7 @@ function AllMemosView() {
             if (full?.memo) setLatestMemo({ ...full.memo, status: rows[0].status });
           } catch { /* preview is best-effort — table still renders below */ }
         }
-      } catch (e) { setErr(String(e)); }
+      } catch (e) { setErr(String(e)); setMemos([]); }
     }
     load();
   }, []);

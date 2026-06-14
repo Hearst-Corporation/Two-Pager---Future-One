@@ -71,7 +71,6 @@ export default function SimulatorResultsPage() {
   const [simResult, setSimResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [savingState, setSavingState] = useState('idle');
   const [activeViz, setActiveViz] = useState('radar');
   const [searchParams, setSearchParams] = useState(null);
 
@@ -186,10 +185,6 @@ export default function SimulatorResultsPage() {
     });
   }, [row, scenarioId, simResult]);
 
-  const handleSave = useCallback(() => {
-    setSavingState('saved');
-    setTimeout(() => setSavingState('idle'), 1800);
-  }, []);
 
   const donutSegments = useMemo(() => capitalStackSegments(scenario, projection), [scenario, projection]);
 
@@ -334,15 +329,12 @@ export default function SimulatorResultsPage() {
       <div style={{ margin: 'var(--cp-space-6) 0' }}>
         <SimulatorCTABar
           hasProjection={!!projection}
-          savingState={savingState}
-          onSave={handleSave}
           onExportMd={handleExportMd}
           onGenerateMemo={handleGenerateMemo}
           planCaution={!!projection?.warnings?.length}
           cautionReason={projection?.warnings?.[0] || null}
         />
       </div>
-      {savingState === 'saved' && <div style={CP.toastAccent}>{UI.RESULTS_SCENARIO_SAVED}</div>}
     </div>
     </div>
     </>

@@ -39,9 +39,11 @@ function SimulatorCTABar({
         <Button variant="link" size="md" disabled={!hasProjection} onClick={onExportMd}>
           {UI.RESULTS_CTA_EXPORT}
         </Button>
-        <Button variant="secondary" size="md" disabled={!hasProjection || saving} onClick={onSave}>
-          {saving ? UI.STATE_SAVING : UI.RESULTS_CTA_SAVE}
-        </Button>
+        {onSave && (
+          <Button variant="secondary" size="md" disabled={!hasProjection || saving} onClick={onSave}>
+            {saving ? UI.STATE_SAVING : UI.RESULTS_CTA_SAVE}
+          </Button>
+        )}
         <Button variant="primary" size="lg" disabled={!hasProjection} onClick={onGenerateMemo} style={{ padding: 'var(--cp-space-3) var(--cp-space-6)', fontSize: 'var(--cp-font-base)' }}>
           {UI.RESULTS_CTA_MEMO}
         </Button>

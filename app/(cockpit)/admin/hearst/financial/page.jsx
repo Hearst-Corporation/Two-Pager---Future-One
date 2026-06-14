@@ -177,6 +177,7 @@ export default function FinancialPage() {
               <button
                 key={s.id}
                 type="button"
+                aria-current={active ? 'true' : undefined}
                 onClick={() => setPrimaryId(s.id)}
                 style={{
                   ...S.scBtn,
@@ -216,7 +217,7 @@ export default function FinancialPage() {
             { id: 'waterfall',   label: UI.FIN_TAB_WATERFALL,   Icon: GitBranch },
             { id: 'sensitivity', label: UI.FIN_TAB_SENSITIVITY, Icon: Grid3x3 },
           ].map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{ ...S.tabBtn, ...(tab === t.id ? S.tabBtnActive : {}), display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)' }}>
+            <button key={t.id} onClick={() => setTab(t.id)} aria-current={tab === t.id ? 'true' : undefined} style={{ ...S.tabBtn, ...(tab === t.id ? S.tabBtnActive : {}), display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)' }}>
               <t.Icon size={15} aria-hidden="true" />
               {t.label}
             </button>
