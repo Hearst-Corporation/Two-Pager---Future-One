@@ -30,15 +30,17 @@ import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, computeConfidenceBlock } from '@/lib/memo-confidence';
 import { persistMemo } from '@/lib/strategic-memo-store';
 import { reconcileMetricsWithEngine } from '@/lib/engine-reconcile';
+import {
+  RATE_LIMIT_WINDOW_MS as RL_WINDOW,
+  RATE_LIMIT_MAX_REQUESTS as RL_MAX,
+  MEMO_LLM_SOFT_TIMEOUT_MS,
+} from '@/lib/constants';
 
 // OpenAI GPT-4.1 can run several minutes in the worst case. Without this
 // the route inherits the Vercel default (~10-15s) and 504s mid-generation. 300s =
 // plan max, matched by the client timeout (MEMO_CLIENT_TIMEOUT_MS).
 export const maxDuration = 300;
 
-const RL_WINDOW = 60_000;
-const RL_MAX = 5;
-const MEMO_LLM_SOFT_TIMEOUT_MS = 90_000;
 const rlBuckets = new Map();
 
 function checkRl(actorId) {

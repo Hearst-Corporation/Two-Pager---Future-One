@@ -4,19 +4,20 @@
 // OPENAI_CHAT_MODEL (défaut gpt-4o), OPENAI_MEMO_MODEL (défaut gpt-4.1).
 
 import OpenAI from "openai";
+import { LLM_CHAT_MODEL, LLM_MEMO_MODEL, LLM_SDK_TIMEOUT_MS } from "../constants";
 
 export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "build-placeholder",
   baseURL: process.env.OPENAI_BASE_URL || undefined,
-  timeout: Number(process.env.LLM_MODEL_TIMEOUT_MS || 300_000),
+  timeout: Number(process.env.LLM_MODEL_TIMEOUT_MS ?? LLM_SDK_TIMEOUT_MS),
   maxRetries: 0,
 });
 
 /** Rail chat cockpit — streaming */
-export const OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || "gpt-4o";
+export const OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || LLM_CHAT_MODEL;
 
 /** Génération mémo stratégique — JSON structuré */
-export const OPENAI_MEMO_MODEL = process.env.OPENAI_MEMO_MODEL || "gpt-4.1";
+export const OPENAI_MEMO_MODEL = process.env.OPENAI_MEMO_MODEL || LLM_MEMO_MODEL;
 
 type ChatParams = Omit<
   Parameters<typeof openai.chat.completions.create>[0],
