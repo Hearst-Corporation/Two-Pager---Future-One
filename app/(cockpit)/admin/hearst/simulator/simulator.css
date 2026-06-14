@@ -128,10 +128,10 @@ body.oracle-simulator-page [data-sim-case-surface] {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: var(--cp-radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--cp-border);
   box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
   overflow: hidden;
-  color: #fff;
+  color: var(--cp-text-strong);
 }
 
 body.oracle-simulator-page .sim-surface-bg-grid {
@@ -208,8 +208,8 @@ body.oracle-simulator-page [data-sim-case-copy] h1 {
 
 body.oracle-simulator-page [data-sim-case-copy] h1 strong {
   font-weight: var(--cp-weight-black);
-  color: #fff;
-  background: linear-gradient(90deg, #fff, var(--cp-accent-light, #e0e7ff));
+  color: var(--cp-text-strong);
+  background: linear-gradient(90deg, var(--cp-text-strong), var(--cp-accent-light, #e0e7ff));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -256,7 +256,7 @@ body.oracle-simulator-page [data-sim-metric-tile] span {
 body.oracle-simulator-page [data-sim-metric-tile] strong {
   font-size: var(--cp-font-2xl);
   font-weight: var(--cp-weight-black);
-  color: #fff;
+  color: var(--cp-text-strong);
   font-variant-numeric: tabular-nums;
   line-height: 1;
   text-shadow: 0 2px 10px rgba(0,0,0,0.3);
@@ -269,7 +269,7 @@ body.oracle-simulator-page .sim-surface-footer {
   gap: var(--cp-space-6);
   margin-top: var(--cp-space-2);
   padding-top: var(--cp-space-5);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--cp-border);
   flex-wrap: wrap;
 }
 
@@ -303,7 +303,7 @@ body.oracle-simulator-page [data-sim-timeline-rail] span {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--cp-text-strong);
   transform: translateY(-4px);
   box-shadow: 0 0 0 3px rgba(15, 17, 21, 1);
 }
@@ -331,7 +331,7 @@ body.oracle-simulator-page [data-sim-timeline-labels] div:last-child { align-ite
 body.oracle-simulator-page [data-sim-timeline-labels] strong {
   font-size: var(--cp-font-sm);
   font-weight: var(--cp-weight-bold);
-  color: #fff;
+  color: var(--cp-text-strong);
 }
 
 body.oracle-simulator-page [data-sim-timeline-labels] span {

@@ -46,6 +46,10 @@ body.oracle-simulator-page {
   --cp-accent-maroon:   var(--ct-accent-maroon);
   --cp-accent-soft:     var(--ct-accent-soft);
   --cp-accent-strong:   var(--ct-accent-strong);
+  /* Accent as an RGB triple for rgba(var(--cp-accent-rgb), α) glows/shadows.
+     Matches --ct-accent #8A1538 (Hearst maroon, Pantone 199 C). CSS cannot
+     extract channels from a colour var, so this is the literal triple. */
+  --cp-accent-rgb:      138, 21, 56;
   --cp-bg-deep:         var(--ct-bg-deep);
   --cp-border:          var(--ct-border);
   --cp-border-accent:   var(--ct-border-accent);
@@ -95,6 +99,7 @@ body.oracle-simulator-page {
   --cp-font-fluid-lead:    clamp(18px, 1.8vw, var(--cp-font-2xl)); /* phrase narrative */
   --cp-font-fluid-input:   clamp(var(--cp-font-2xl), 3vw, 40px);   /* saisie héro */
 
+  --cp-weight-light:    300;   /* hero display headings only */
   --cp-weight-regular:  400;
   --cp-weight-medium:   500;
   --cp-weight-semibold: 600;
@@ -109,6 +114,7 @@ body.oracle-simulator-page {
   --cp-tracking-wide:      0.06em;
   --cp-tracking-wider:     0.10em;
   --cp-tracking-eyebrow:   0.14em;
+  --cp-tracking-widest:    0.18em;
 
   --cp-leading-none:    1;
   --cp-leading-display: 1.05;
@@ -140,6 +146,7 @@ body.oracle-simulator-page {
   --cp-radius-sm:   6px;
   --cp-radius-md:   10px;
   --cp-radius-lg:   14px;
+  --cp-radius-xl:   20px;   /* hero / large surface cards */
   --cp-radius-pill: 9999px;
 
   /* ── Dimensions fixes (icônes, barres, conteneurs) ── */
