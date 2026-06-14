@@ -10,6 +10,8 @@ import {
   deriveCapitalStack, fmtUsd,
 } from '@/lib/dossier-derive';
 import { deriveReturnsComposition } from '@/lib/returns-composition';
+import { deriveMemoMetricsAssetPreview } from '@/lib/memo-metrics-asset-preview';
+import { SafeHtmlPreview } from '@hearst/cockpit-shell';
 import { Card, SectionHead, Table, Row, Cell, KpiGrid, KpiCard } from '@/components/hearst/ui';
 import { S as CP } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
@@ -196,6 +198,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
   const decision = deriveDecision(m, memo.status);
   const capStack = deriveCapitalStack(m, scenario);
   const returnsComp = deriveReturnsComposition(m._exec_projection);
+  const metricsPreview = deriveMemoMetricsAssetPreview(memo);
   const fresh = m.data_freshness || {};
   const phases = m.deployment_roadmap?.phases || [];
   const comparables = m.market_benchmarking?.comparables || [];
@@ -361,6 +364,15 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
               </table>
             </div>
             {m.key_financial_metrics.narrative && <p style={S.body}>{m.key_financial_metrics.narrative}</p>}
+            {metricsPreview && (
+              <div style={{ marginTop: 'var(--cp-space-4)' }}>
+                <SafeHtmlPreview
+                  sanitizedHtml={metricsPreview.sanitizedHtml}
+                  fallbackLabel={metricsPreview.fallbackLabel}
+                  className="oracle-metrics-preview"
+                />
+              </div>
+            )}
           </AnalyticsBlock>
         )}
 
