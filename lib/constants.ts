@@ -88,7 +88,7 @@ export const OCCUPANCY_RAMP = [
 export const SCRAPER_TIMEOUT_MS = 8_000 as const;
 
 /** In-memory cache TTL for GPU pricing data (ms). */
-export const GPU_PRICING_CACHE_TTL_MS = 60 * 60 * 1_000 as const; // 1 hour
+export const GPU_PRICING_CACHE_TTL_MS = 3_600_000; // 1 hour in ms
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RATE_LIMIT — strategic-memo API route
