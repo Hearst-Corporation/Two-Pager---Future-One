@@ -39,6 +39,15 @@ export {
   Card,
 } from "./primitives";
 
+// Asset render gate (M.5-A foundation — client-only sanitized HTML)
+export { SafeHtmlPreview } from "./asset/SafeHtmlPreview";
+export type { SafeHtmlPreviewProps } from "./asset/SafeHtmlPreview";
+export {
+  sanitizeAssetHtml,
+  resolveAssetPreviewHtml,
+} from "./asset/sanitize-asset-html";
+export type { AssetPreview } from "./asset/sanitize-asset-html";
+
 // Stores (pour les apps qui veulent piloter l'état du shell depuis l'extérieur)
 export {
   subscribe as subscribeActiveProduct,
