@@ -12,7 +12,7 @@ const CT_ID_TO_LABEL = Object.fromEntries(CLIENT_TYPES.map(c => [c.id, c.label])
 const CT_SHORT_LABEL = {
   hyperscalers: 'Hyperscalers',
   operators: 'Operators',
-  neocloud: 'Neocloud',
+  neocloud: 'Compute Cloud',
   qatar_gov: 'Qatar Gov',
   defense: 'Defense',
   banks: 'Banks',
@@ -30,9 +30,9 @@ const BM_SHORT_LABEL = {
   equinix_zone: 'Equinix zone',
   multi_operator: 'Multi-op',
   sovereign_ai: 'Gov AI cloud',
-  gpu_cloud: 'GPU cloud',
-  ai_training: 'AI training',
-  ai_inference: 'AI inference',
+  gpu_cloud: 'Compute cloud',
+  ai_training: 'HPC',
+  ai_inference: 'Managed compute',
   government: 'Government',
   enterprise: 'Enterprise',
 };
@@ -46,8 +46,8 @@ const COL_GROUPS = [
 const ROW_GROUPS = [
   { label: 'Renting space',    ids: BUSINESS_MODEL_GROUPS.colocation },
   { label: 'Leasing buildings', ids: BUSINESS_MODEL_GROUPS.lease },
-  { label: 'Cloud / AI',        ids: BUSINESS_MODEL_GROUPS.cloud_ai },
-  { label: 'Government AI',     ids: BUSINESS_MODEL_GROUPS.sovereign },
+  { label: 'Cloud / Compute',    ids: BUSINESS_MODEL_GROUPS.cloud_ai },
+  { label: 'Government',        ids: BUSINESS_MODEL_GROUPS.sovereign },
   { label: 'Enterprise',        ids: BUSINESS_MODEL_GROUPS.enterprise },
 ];
 
