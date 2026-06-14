@@ -21,7 +21,8 @@
     "doctor": "node scripts/doctor.mjs",
     "smoke:openai": "node scripts/smoke-openai.mjs",
     "check": "npm run lint:secrets && npm run lint && npm test",
-    "check:ci": "npm run check && next build"
+    "check:ci": "npm run check && next build",
+    "check:deploy-env": "node scripts/check-deploy-env.mjs"
   },
   "dependencies": {
     "@sentry/nextjs": "^8",
