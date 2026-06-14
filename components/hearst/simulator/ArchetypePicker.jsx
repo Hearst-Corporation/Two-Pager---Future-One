@@ -126,7 +126,7 @@ const S = {
     top: 'var(--cp-space-1)',
     right: 'var(--cp-space-1)',
     zIndex: 'var(--cp-z-floating)',
-    opacity: 0.55,
+    opacity: 'var(--cp-opacity-subtle)',
   },
   card: {
     width: '100%',

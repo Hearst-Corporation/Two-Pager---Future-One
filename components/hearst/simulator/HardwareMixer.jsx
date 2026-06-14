@@ -448,7 +448,7 @@ const S = {
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-widest)',
     cursor: 'pointer',
-    opacity: 0.85,
+    opacity: 'var(--cp-opacity-hover)',
     transition: 'opacity 0.2s',
   },
   advanced: {
@@ -479,7 +479,7 @@ const S = {
     top: 'var(--cp-space-1)',
     right: 'var(--cp-space-1)',
     zIndex: 'var(--cp-z-floating)',
-    opacity: 0.55,
+    opacity: 'var(--cp-opacity-subtle)',
     transform: 'scale(0.85)',
   },
   presetCard: {
@@ -560,7 +560,7 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wider)',
     textTransform: 'uppercase',
-    opacity: 0.7,
+    opacity: 'var(--cp-opacity-tertiary)',
   },
   spineTitle: {
     margin: '0',
@@ -596,7 +596,7 @@ const S = {
     background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
   },
-  mixSegStandard: { display: 'block', background: 'var(--cp-text-muted)', opacity: 0.5 },
+  mixSegStandard: { display: 'block', background: 'var(--cp-text-muted)', opacity: 'var(--cp-opacity-faint)' },
   mixSegDense: { display: 'block', background: 'var(--cp-accent)' },
   mixSegAi: { display: 'block', background: 'var(--cp-accent-maroon)' },
   mixLegend: {
@@ -687,7 +687,7 @@ const S = {
   },
   colTitleMeta: {
     fontWeight: 'var(--cp-weight-medium)',
-    opacity: 0.7,
+    opacity: 'var(--cp-opacity-tertiary)',
     textTransform: 'none',
     float: 'right',
   },
@@ -742,7 +742,7 @@ const S = {
     padding: 'var(--cp-space-1) var(--cp-space-2)',
   },
   gpuSku: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', lineHeight: 'var(--cp-leading-none)' },
-  gpuMeta: { fontSize: 'var(--cp-font-nano)', opacity: 0.75, marginTop: '0', lineHeight: 'var(--cp-leading-none)' },
+  gpuMeta: { fontSize: 'var(--cp-font-nano)', opacity: 'var(--cp-opacity-meta)', marginTop: '0', lineHeight: 'var(--cp-leading-none)' },
   gpuPrice: { fontSize: 'var(--cp-font-nano)', fontWeight: 'var(--cp-weight-bold)', marginTop: 'var(--cp-space-px)', lineHeight: 'var(--cp-leading-none)' },
   aiControls: {
     display: 'flex',

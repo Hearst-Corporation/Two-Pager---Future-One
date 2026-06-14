@@ -193,3 +193,8 @@ body.oracle-advisor-chat-only [data-oracle-advisor-slot] { display: none !import
 .ct-chat-input {
   min-height: var(--cp-chat-input-min-height);
 }
+
+/* Utilitaires opacité / sections secondaires — tokens --cp-opacity-* */
+.cp-section-head--quiet {
+  opacity: var(--cp-opacity-section-quiet);
+}

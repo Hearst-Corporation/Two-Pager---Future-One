@@ -45,7 +45,7 @@ export default function Button({
   const merged = {
     ...BASE, ...SIZES[size], ...VARIANTS[variant],
     ...(block ? { width: '100%' } : {}),
-    ...(disabled ? { opacity: 0.5, cursor: 'not-allowed', pointerEvents: 'none' } : {}),
+    ...(disabled ? { opacity: 'var(--cp-opacity-disabled)', cursor: 'not-allowed', pointerEvents: 'none' } : {}),
     ...style,
   };
   const cls = [variant === 'primary' ? 'cp-btn--primary' : '', className].filter(Boolean).join(' ');

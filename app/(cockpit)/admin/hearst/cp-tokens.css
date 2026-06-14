@@ -72,7 +72,64 @@ body.oracle-simulator-page {
   --cp-text-faint:      rgba(245,245,245,0.28);
   --cp-tooltip-bg:      var(--ct-surface-3);
   --cp-blur-md:         blur(12px);
+  --cp-blur-lg:         blur(24px);
+  --cp-accent-light:    var(--cp-accent-strong);
+  --cp-font-family-mono: ui-monospace, "SF Mono", "Cascadia Code", "Menlo", monospace;
   --cp-dur-fast:        100ms;
+  --cp-dur-interact:    200ms;
+
+  /* Opacité — échelle unique (inline styles, hover, sections secondaires) */
+  --cp-opacity-section-quiet: 0.6;
+  --cp-opacity-label:       0.8;
+  --cp-opacity-secondary:   0.8;
+  --cp-opacity-tertiary:    0.7;
+  --cp-opacity-subtle:      0.55;
+  --cp-opacity-faint:       0.5;
+  --cp-opacity-meta:        0.75;
+  --cp-opacity-hover:       0.85;
+  --cp-opacity-disabled:    0.5;
+  --cp-opacity-prominent:   0.95;
+  --cp-opacity-gantt-idle:  0.4;
+  --cp-opacity-glow-min:    0.5;
+  --cp-opacity-glow-max:    0.8;
+
+  /* Surfaces glass / hero */
+  --cp-surface-glass:                color-mix(in srgb, var(--cp-bg-deep) 60%, transparent);
+  --cp-surface-glass-highlight:      color-mix(in srgb, white 15%, transparent);
+  --cp-surface-glass-highlight-soft: color-mix(in srgb, white 5%, transparent);
+  --cp-surface-glass-scrim:          color-mix(in srgb, black 60%, transparent);
+  --cp-surface-glass-scrim-soft:     color-mix(in srgb, black 30%, transparent);
+  --cp-surface-glass-scrim-light:    color-mix(in srgb, black 10%, transparent);
+  --cp-surface-glass-scrim-xs:       color-mix(in srgb, black 5%, transparent);
+  --cp-surface-glass-scrim-hover:    color-mix(in srgb, black 8%, transparent);
+
+  --cp-font-fluid-hero-surface: clamp(28px, 3.5vw, 42px);
+  --cp-kicker-dot-size:         var(--cp-op-dot-lg);
+  --cp-timeline-dot-size:       10px;
+  --cp-timeline-rail-h:         2px;
+
+  --cp-shadow-hero:
+    0 30px 60px -15px var(--cp-surface-glass-scrim),
+    inset 0 1px 0 var(--cp-surface-glass-highlight);
+  --cp-shadow-inset-soft: inset 0 1px 0 var(--cp-surface-glass-highlight-soft);
+  --cp-shadow-metric-value: 0 2px 10px var(--cp-surface-glass-scrim-soft);
+  --cp-shadow-dot-ring: 0 0 0 3px var(--cp-bg-deep);
+  --cp-shadow-kicker-glow: 0 0 12px var(--cp-accent);
+  --cp-shadow-timeline-accent: 0 0 12px var(--cp-accent);
+  --cp-shadow-accent-glow-sm: 0 10px 25px -5px rgba(var(--cp-accent-rgb), 0.5);
+  --cp-shadow-accent-glow-md: 0 15px 30px -5px rgba(var(--cp-accent-rgb), 0.7);
+  --cp-shadow-accent-tile: 0 4px 15px rgba(var(--cp-accent-rgb), 0.15);
+  --cp-shadow-jv-panel:
+    0 10px 30px -10px var(--cp-surface-glass-scrim-light),
+    var(--cp-shadow-inset-soft);
+  --cp-shadow-jv-tile: 0 4px 12px var(--cp-surface-glass-scrim-xs);
+  --cp-shadow-jv-tile-hover: 0 8px 20px var(--cp-surface-glass-scrim-hover);
+  --cp-gradient-glow-surface:
+    radial-gradient(circle at 50% 0%, rgba(var(--cp-accent-rgb), 0.15) 0%, transparent 60%);
+  --cp-gradient-glow-jv:
+    radial-gradient(circle at 50% 100%, rgba(var(--cp-accent-rgb), 0.05) 0%, transparent 60%);
+  --cp-gradient-hero-strong:
+    linear-gradient(90deg, var(--cp-text-strong), var(--cp-accent-light));
   --cp-ease-out:        cubic-bezier(0, 0, 0.2, 1);
   --cp-grid-line:       1px solid var(--ct-border-soft);
   --cp-highlight:       var(--cp-accent-strong);
@@ -414,7 +471,7 @@ body.oracle-simulator-page {
     border-radius: var(--cp-radius-sm);
   }
   .oracle-mobile-nav .oracle-rail-nav-label {
-    font-size: 9px;
+    font-size: var(--cp-font-nano);
     letter-spacing: var(--cp-tracking-wide);
     overflow: hidden;
     text-overflow: ellipsis;

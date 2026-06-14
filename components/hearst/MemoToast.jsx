@@ -142,7 +142,7 @@ const S = {
   },
   sub: {
     fontSize: 'var(--cp-font-xs)',
-    opacity: 0.85,
+    opacity: 'var(--cp-opacity-hover)',
     lineHeight: 'var(--cp-leading-relaxed)',
   },
   dismiss: {
@@ -152,7 +152,7 @@ const S = {
     background: 'transparent',
     border: 'none',
     color: 'inherit',
-    opacity: 0.7,
+    opacity: 'var(--cp-opacity-tertiary)',
     cursor: 'pointer',
     fontSize: 'var(--cp-font-lg)',
     lineHeight: 'var(--cp-leading-none)',

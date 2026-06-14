@@ -197,7 +197,7 @@ export const DecisionHeader = memo(function DecisionHeader({ projection }) {
     irrDeltaSub = (
       <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' }}>
         <span>{irrDeltaSub}</span>
-        <span style={{ color, opacity: 0.8, fontSize: 'var(--cp-font-micro)', letterSpacing: 'var(--cp-tracking-snug)' }}>{sign}{bps}bps vs hurdle</span>
+        <span style={{ color, opacity: 'var(--cp-opacity-label)', fontSize: 'var(--cp-font-micro)', letterSpacing: 'var(--cp-tracking-snug)' }}>{sign}{bps}bps vs hurdle</span>
       </span>
     );
   }
@@ -234,7 +234,7 @@ export const RiskInline = memo(function RiskInline({ projection }) {
           alignItems: 'baseline',
           gap: 'var(--cp-space-2)',
           ...CP.warningInline,
-          opacity: 0.95,
+          opacity: 'var(--cp-opacity-prominent)',
         }}>
           <span style={{ fontSize: 'var(--cp-font-micro)', color: 'var(--cp-status-warning)' }} aria-hidden="true">⚠</span>
           <span>{w}</span>
@@ -335,7 +335,7 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
   // Numbers dominate but stay bounded; clamp sized so the widest value ($142.9M)
   // fits its track. nowrap + ellipsis is a hard backstop, never the normal state.
@@ -357,7 +357,7 @@ const S = {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    opacity: 0.7,
+    opacity: 'var(--cp-opacity-tertiary)',
   },
   rcWrap: {
     display: 'flex',
@@ -374,7 +374,7 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
   rcRows: {
     display: 'flex',
@@ -390,7 +390,7 @@ const S = {
   rcLabel: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-sm)',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
   rcValue: {
     color: 'var(--cp-text-strong)',
@@ -448,7 +448,7 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-wide)',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
   donutValue: {
     color: 'var(--cp-text-strong)',
@@ -481,7 +481,7 @@ const S = {
   donutLegendLabel: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-sm)',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
   donutLegendValue: {
     color: 'var(--cp-text-primary)',
@@ -503,7 +503,7 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     textTransform: 'uppercase',
     letterSpacing: 'var(--cp-tracking-wide)',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
   inlineMetricValue: {
     color: 'var(--cp-text-strong)',
@@ -534,7 +534,7 @@ const S = {
     fontSize: 'var(--cp-font-sm)',
     lineHeight: 'var(--cp-leading-normal)',
     marginTop: 'auto',
-    opacity: 0.7,
+    opacity: 'var(--cp-opacity-tertiary)',
   },
   layerCard: {
     height: '100%',
@@ -583,7 +583,7 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
   layerValue: {
     color: 'var(--cp-text-strong)',

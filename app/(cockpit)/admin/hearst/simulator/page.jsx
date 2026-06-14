@@ -387,7 +387,7 @@ export default function SimulatorPage() {
                     primaryId={state.primary_archetype_id}
                     onSelectPrimary={onSelectPrimary}
                   />
-                  <div style={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-nano)', marginTop: '2px', opacity: 0.8, textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)', textAlign: 'center' }}>
+                  <div data-sim-implies>
                     Implies: {MODEL_DEFAULTS[state.primary_archetype_id]?.business_model_id?.replace(/_/g, ' ')} / {MODEL_DEFAULTS[state.primary_archetype_id]?.client_type_id?.replace(/_/g, ' ')}
                   </div>
                 </div>
@@ -476,7 +476,7 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-widest)',
     textTransform: 'uppercase',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
   validateHint: {
     fontSize: 'var(--cp-font-nano)',

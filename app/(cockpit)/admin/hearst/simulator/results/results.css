@@ -6,17 +6,17 @@
 body.oracle-results-page a,
 body.oracle-results-page button,
 body.oracle-results-page [data-gantt-row] {
-  transition: opacity 150ms ease-out, background-color 150ms ease-out !important;
+  transition: opacity var(--cp-dur-fast) var(--cp-ease-out), background-color var(--cp-dur-fast) var(--cp-ease-out) !important;
 }
 
 body.oracle-results-page a:hover,
 body.oracle-results-page button:hover {
-  opacity: 0.85;
+  opacity: var(--cp-opacity-hover);
 }
 
 /* ── GANTT HOVER ── */
 body.oracle-results-page [data-gantt-rows]:hover [data-gantt-row] {
-  opacity: 0.4;
+  opacity: var(--cp-opacity-gantt-idle);
 }
 body.oracle-results-page [data-gantt-rows] [data-gantt-row]:hover {
   opacity: 1;

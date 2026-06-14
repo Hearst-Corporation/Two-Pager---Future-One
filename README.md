@@ -47,6 +47,11 @@ lib/                          moteur financier, validators, LLM
 lib/hearst-config-presets.js  defaults modèle + structure JV (timeline, split equity)
 ```
 
+## Design tokens
+
+Palette cockpit : `cockpit-shell/tokens.css` (`--ct-*`) → `app/(cockpit)/admin/hearst/cp-tokens.css` (`--cp-*`).
+Surfaces glass, ombres hero, échelle d’opacité et typo fluide : source unique dans `cp-tokens.css` ; pages consomment `var(--cp-*)` (pas de `rgba`/`#` en dur dans les CSS page).
+
 Modèle standalone : `models/futur-one-dc-model.html` contient le business plan data center éditable avec recalcul automatique des hypothèses projet, tenants, dette, sortie et deal/JV.
 
 Chat : rail droit **fixe** desktop (`chat-fab.css`) ; drawer + FAB uniquement &lt;900px.

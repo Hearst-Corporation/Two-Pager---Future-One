@@ -265,7 +265,7 @@ const S = {
     fontSize: 'var(--cp-font-nano)',
     lineHeight: 'var(--cp-leading-none)',
     color: 'var(--cp-text-muted)',
-    opacity: 0.7,
+    opacity: 'var(--cp-opacity-tertiary)',
   },
   resultValue: {
     fontSize: 'var(--cp-font-xs)',

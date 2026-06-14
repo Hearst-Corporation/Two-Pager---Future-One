@@ -45,7 +45,7 @@ export default function KpiCard({ label, value, format = 'number', source_type, 
       {source_type !== undefined && (
         // opacity mutes the badge's own background + text together;
         // switching to `color` alone would leave the badge background at full intensity.
-        <div style={{ marginTop: 'var(--cp-space-1)', opacity: 0.7 }}>
+        <div style={{ marginTop: 'var(--cp-space-1)', opacity: 'var(--cp-opacity-tertiary)' }}>
           <SourceBadge source_type={source_type} size="xs" />
         </div>
       )}

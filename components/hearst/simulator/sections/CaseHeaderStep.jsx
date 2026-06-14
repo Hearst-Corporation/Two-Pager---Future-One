@@ -164,6 +164,6 @@ const S = {
     fontStyle: 'italic',
   },
   dot: {
-    opacity: 0.5,
+    opacity: 'var(--cp-opacity-faint)',
   },
 };

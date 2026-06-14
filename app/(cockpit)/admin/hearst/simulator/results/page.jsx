@@ -271,7 +271,7 @@ export default function SimulatorResultsPage() {
       </div>
 
       <div as="section" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', paddingBottom: 'var(--cp-space-6)' }}>
-        <SectionHead title={UI.RESULTS_ECON_TITLE} hint={UI.RESULTS_ECON_HINT} style={{ marginBottom: 0, opacity: 0.6 }} />
+        <SectionHead title={UI.RESULTS_ECON_TITLE} hint={UI.RESULTS_ECON_HINT} className="cp-section-head--quiet" style={{ marginBottom: 0 }} />
         <KpiGrid data-economics-grid style={{ gap: 'var(--cp-space-4)' }}>
           <BoardMetric label={UI.RESULTS_BM_CAPEX} value={fmtUSD(projection?.total_capex)} note={UI.RESULTS_BM_CAPEX_NOTE} hint="capex" />
           <BoardMetric label={UI.RESULTS_BM_REVENUE} value={fmtUSD(projection?.stabilized_revenue)} note={UI.RESULTS_BM_REVENUE_NOTE} hint="revenue" title="Annual top-line revenue expected at stabilization." />
@@ -284,7 +284,7 @@ export default function SimulatorResultsPage() {
 
       <div as="section" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
         <div data-analysis-head>
-          <SectionHead title={UI.RESULTS_PROJ_TITLE} hint={UI.RESULTS_PROJ_HINT} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none', flex: '1 1 auto', minWidth: 0, opacity: 0.6 }} />
+          <SectionHead title={UI.RESULTS_PROJ_TITLE} hint={UI.RESULTS_PROJ_HINT} className="cp-section-head--quiet" style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none', flex: '1 1 auto', minWidth: 0 }} />
           <span data-analysis-eyebrow style={S.cardEyebrow}>{UI.RESULTS_PROJ_EYEBROW}</span>
         </div>
         <div data-analysis-layout>
@@ -306,7 +306,7 @@ export default function SimulatorResultsPage() {
       </div>
 
       <div as="section" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', paddingBottom: 'var(--cp-space-6)' }}>
-        <SectionHead title={UI.RESULTS_LAYERS_TITLE} hint={UI.RESULTS_LAYERS_HINT} style={{ marginBottom: 0, opacity: 0.6 }} />
+        <SectionHead title={UI.RESULTS_LAYERS_TITLE} hint={UI.RESULTS_LAYERS_HINT} className="cp-section-head--quiet" style={{ marginBottom: 0 }} />
         <div data-layer-grid>
           <LayerCard index="01" title={UI.RESULTS_LAYER_START} rows={layer1Rows} />
           <LayerCard index="02" title={UI.RESULTS_LAYER_MODEL} rows={layer2Rows} />
@@ -316,7 +316,7 @@ export default function SimulatorResultsPage() {
       </div>
 
       <div as="section" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', paddingBottom: 'var(--cp-space-6)' }}>
-        <SectionHead title={UI.RESULTS_TIMELINE_TITLE} hint={UI.RESULTS_TIMELINE_HINT} style={{ marginBottom: 0, opacity: 0.6 }} />
+        <SectionHead title={UI.RESULTS_TIMELINE_TITLE} hint={UI.RESULTS_TIMELINE_HINT} className="cp-section-head--quiet" style={{ marginBottom: 0 }} />
         <GanttTimeline scenario={scenario || { site_readiness: 'greenfield' }} exit_year={scenario?.exit_year || 10} />
       </div>
 
@@ -367,7 +367,7 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
   narrativeBox: {
     display: 'flex',
@@ -394,6 +394,6 @@ const S = {
     fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-label)',
   },
 };
