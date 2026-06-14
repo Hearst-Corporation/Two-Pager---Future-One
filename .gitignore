@@ -32,6 +32,7 @@ public/u2883995211_*
 audit-screenshots/
 .playwright-mcp/
 docs/audit/*.html
+docs/audit/*.json
 cockpit-*.png
 cockpit-step*.png
 hearst-*.png
