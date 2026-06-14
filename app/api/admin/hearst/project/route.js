@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
-import { DATA_ROOM_REQUIRED, PUBLIC_SOURCES_LIBRARY } from '@/lib/hearst-constants';
+import { DATA_ROOM_REQUIRED } from '@/lib/hearst-constants';
+import { PUBLIC_SOURCES_LIBRARY } from '@/lib/oracle-intelligence/source-library.js';
 import { withValidation } from '@/lib/validators/withValidation';
 import { ProjectUpdateSchema } from '@/lib/validators/hearst';
 import { dbErrorResponse } from '@/lib/api-errors';

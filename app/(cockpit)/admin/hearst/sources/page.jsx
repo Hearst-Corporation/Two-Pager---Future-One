@@ -5,9 +5,9 @@ import OperatorBadge from '@/components/hearst/OperatorBadge';
 import { X, ExternalLink } from 'lucide-react';
 import { Table, Row, Cell, Field, Button, Badge, Eyebrow } from '@/components/hearst/ui';
 import {
-  SOURCE_TYPES, OPERATORS,
-  PUBLIC_SOURCES_LIBRARY, DOC_TYPES,
+  SOURCE_TYPES, OPERATORS, DOC_TYPES,
 } from '@/lib/hearst-constants';
+import { PUBLIC_SOURCES_LIBRARY } from '@/lib/oracle-intelligence/source-library.js';
 import { UI } from '@/lib/ui-strings';
 import { S as CP } from '@/lib/cp-styles';
 import { useFocusTrap } from '@/lib/use-focus-trap';
