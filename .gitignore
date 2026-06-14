@@ -101,3 +101,13 @@ A[0-9]-*.png
 /recovery-*.png
 /deals-*.png
 /_concept-*.png
+/futurone-*.png
+/tmp-*.png
+
+# Business-plan / investment-brief deliverables (binaries — kept local, hosted externally)
+/Futur-One-*.pdf
+/models/
+
+# Capability / hardcode audit outputs (kept local, not versioned)
+/docs/*-audit.md
+/docs/*-audit.json
