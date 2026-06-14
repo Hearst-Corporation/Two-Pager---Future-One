@@ -268,7 +268,7 @@ export const UI = {
   HW_KPI_EQUIP: 'Equipment cost',
   HW_KPI_REVENUE: 'Compute revenue / yr',
   HW_DEPLOY_KICKER: 'Deployment',
-  HW_DEPLOY_TITLE: (sku: string) => `${sku} map`,
+  HW_DEPLOY_TITLE: (_sku: string) => `Capacity deployment map`,
   HW_AI_BADGE: (pct: number) => `${pct}% high-density`,
   HW_READOUT_TOTAL: 'Total power',
   HW_READOUT_AI: 'High-density fabric',
