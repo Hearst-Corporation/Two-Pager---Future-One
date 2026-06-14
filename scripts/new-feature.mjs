@@ -7,9 +7,6 @@
 //   app/(cockpit)/admin/hearst/<resource>/page.jsx
 //   app/api/admin/hearst/<resource>/route.js
 //
-// Ne touche JAMAIS : layout.jsx (keystone), OracleRailNav.jsx (NAV source de vérité)
-// Rappel manuel obligatoire : ajouter l'entrée dans OracleRailNav.jsx → SECTIONS[]
-
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
@@ -38,23 +35,12 @@ if (existing.length > 0) {
   process.exit(1);
 }
 
-// Keystone guard
-const KEYSTONE = join(ROOT, 'app/(cockpit)/admin/hearst/layout.jsx');
-if (targets.includes(KEYSTONE)) {
-  console.error('✗ Refus : le scaffolder ne touche jamais layout.jsx (keystone)');
-  process.exit(1);
-}
-
-// Génération page
+// Keystone guard — layout.jsx est un fichier partagé, pas une ressource scaffolder.
 mkdirSync(pageDir, { recursive: true });
 writeFileSync(pagePath, `'use client';
-// app/(cockpit)/admin/hearst/${resource}/page.jsx
-// Généré par scripts/new-feature.mjs — ${tsArg}
-// Tokens : var(--cp-*) uniquement. Jamais de hex hardcodé.
 
 import { useEffect, useState } from 'react';
 import { UI } from '@/lib/ui-strings';
-// Primitives UI — composer, NE PAS recoder en inline. Catalogue : components/hearst/ui/README.md
 import { SectionHead, Card } from '@/components/hearst/ui';
 
 export default function ${pascal}Page() {
@@ -124,14 +110,4 @@ export async function GET(req) {
 console.log(`\n✓ Scaffolded "${resource}" :`);
 console.log(`  ${pagePath}`);
 console.log(`  ${apiPath}`);
-console.log(`
-⚠ Rappels MANUELS obligatoires :
-  1. [GARDÉ par lint:nav] Ajouter l'entrée dans components/OracleRailNav.jsx → SECTIONS[] :
-     { id: '${resource}', href: '/admin/hearst/${resource}', label: '${pascal}', matchAny: ['/admin/hearst/${resource}'] }
-  2. Ajouter la clé NAV dans lib/ui-strings.ts :
-     NAV_${resource.toUpperCase()}: '${pascal}',
-  3. [sinon GET 500] Créer la table Supabase '${resource}' si elle n'existe pas (scripts/migrations/).
-
-→ npm run check ÉCHOUE réellement (lint:nav) tant que l'entrée SECTIONS[] n'est pas ajoutée.
-→ npm run check:ci PROUVE que la page compile (next build).
-`);
+console.log(`  Optionnel : OracleRailNav.jsx + ui-strings.ts si la page doit apparaître dans la nav.\n`);

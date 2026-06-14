@@ -3,23 +3,17 @@
 import PropTypes from 'prop-types';
 import { Card } from '@/components/hearst/ui';
 import InfoHint from '@/components/hearst/InfoHint';
-import { T } from '@/lib/cp-styles';
+import { G } from '@/lib/cp-styles';
 
-// One glyph per operating model. Simple line icons on currentColor — neutral
-// selection (no accent tint). Keyed by archetype id; falls back to a
-// neutral node icon for any model without a bespoke glyph.
 const ICONS = {
-  // Shell + Long Lease — a powered building shell.
   powered_shell: (
     <>
       <rect x="4" y="3" width="16" height="18" rx="1" />
       <line x1="9" y1="7" x2="9" y2="7.01" /><line x1="15" y1="7" x2="15" y2="7.01" />
       <line x1="9" y1="11" x2="9" y2="11.01" /><line x1="15" y1="11" x2="15" y2="11.01" />
-      <line x1="9" y1="15" x2="9" y2="15.01" /><line x1="15" y1="15" x2="15" y2="15.01" />
       <path d="M13 21v-3h-2v3" />
     </>
   ),
-  // GPU Rental Cloud — a cloud over a chip.
   neocloud_gpu: (
     <>
       <path d="M7 14a3 3 0 0 1 .4-6A4.5 4.5 0 0 1 16 7.5a3.2 3.2 0 0 1 .3 6.4" />
@@ -27,7 +21,6 @@ const ICONS = {
       <line x1="11" y1="14" x2="11" y2="20" /><line x1="13" y1="14" x2="13" y2="20" />
     </>
   ),
-  // Tech Giant Partnership (Minority Stake) — a handshake / two linked nodes.
   hyperscaler_self_build: (
     <>
       <circle cx="7" cy="8" r="2.5" /><circle cx="17" cy="8" r="2.5" />
@@ -35,14 +28,13 @@ const ICONS = {
       <line x1="12" y1="14" x2="12" y2="21" />
     </>
   ),
-  // Government AI Cluster — a civic / sovereign building.
   sovereign_ai: (
     <>
       <path d="M4 9l8-5 8 5" />
       <line x1="4" y1="9" x2="20" y2="9" />
       <line x1="6" y1="9" x2="6" y2="18" /><line x1="10" y1="9" x2="10" y2="18" />
       <line x1="14" y1="9" x2="14" y2="18" /><line x1="18" y1="9" x2="18" y2="18" />
-      <line x1="3" y1="18" x2="21" y2="18" /><line x1="3" y1="21" x2="21" y2="21" />
+      <line x1="3" y1="18" x2="21" y2="18" />
     </>
   ),
 };
@@ -54,24 +46,25 @@ const FALLBACK_ICON = (
   </>
 );
 
-function ArchetypeIcon({ id }) {
+function ArchetypeIcon({ id, selected }) {
   return (
-    <svg
-      viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
-      style={S.iconSvg}
-    >
-      {ICONS[id] || FALLBACK_ICON}
-    </svg>
+    <span style={{ ...S.iconBadge, ...(selected ? S.iconBadgeSelected : {}) }}>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        style={S.iconSvg}
+      >
+        {ICONS[id] || FALLBACK_ICON}
+      </svg>
+    </span>
   );
 }
-ArchetypeIcon.propTypes = { id: PropTypes.string };
+ArchetypeIcon.propTypes = { id: PropTypes.string, selected: PropTypes.bool };
 
-/**
- * ArchetypePicker — 2×2 grid of operating-model cards. Each card is intentionally
- * minimal: one icon, the model name, and a single plain-language sentence. No
- * market-proof footer — the thesis choice reads at a glance. Single-select.
- */
 export default function ArchetypePicker({ archetypes = [], primaryId, onSelectPrimary }) {
   return (
     <div data-archetype-grid style={S.grid}>
@@ -83,17 +76,15 @@ export default function ArchetypePicker({ archetypes = [], primaryId, onSelectPr
               as="button"
               type="button"
               onClick={() => onSelectPrimary?.(a.id)}
-              padding="md"
+              padding="none"
               hover
               aria-pressed={isPrimary}
-              surface={isPrimary ? 3 : 2}
-              style={{ ...S.card, ...(isPrimary ? S.cardSelected : {}) }}
+              surface={2}
+              style={{ ...S.card, ...(isPrimary ? G.selected : {}) }}
             >
-              <div style={{ ...S.icon, color: isPrimary ? 'var(--cp-text-primary)' : 'var(--cp-text-muted)' }}>
-                <ArchetypeIcon id={a.id} />
-              </div>
+              <ArchetypeIcon id={a.id} selected={isPrimary} />
               <span style={S.title}>{a.label}</span>
-              <div style={S.desc}>{a.short}</div>
+              <span style={S.desc}>{a.short}</span>
             </Card>
             {a.description && (
               <span style={S.hintSlot}>
@@ -116,53 +107,78 @@ ArchetypePicker.propTypes = {
 const S = {
   grid: {
     display: 'grid',
-    gap: 'var(--cp-space-3)',
-    alignItems: 'stretch',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: 'var(--cp-space-px)',
+    background: 'var(--cp-border)',
+    border: '1px solid var(--cp-border)',
+    borderRadius: 'var(--cp-radius-sm)',
+    overflow: 'hidden',
     minWidth: 0,
   },
-  // Wrapper so the (i) lives as a sibling of the card button (no nested button),
-  // pinned to the card's top-right corner.
   cardWrap: {
     position: 'relative',
     display: 'flex',
     minWidth: 0,
+    background: 'var(--cp-surface-2)',
   },
   hintSlot: {
     position: 'absolute',
-    top: 'var(--cp-space-2)',
-    right: 'var(--cp-space-2)',
+    top: 'var(--cp-space-1)',
+    right: 'var(--cp-space-1)',
     zIndex: 'var(--cp-z-floating)',
+    opacity: 0.55,
   },
   card: {
     width: '100%',
-    display: 'grid',
-    gridTemplateRows: 'auto auto 1fr',
-    gap: 'var(--cp-space-1)',
-    textAlign: 'left',
-    minHeight: 'var(--cp-archetype-card-min-height)',
-  },
-  cardSelected: {
-    borderColor: 'var(--cp-border-strong)',
-    boxShadow: 'inset 3px 0 0 var(--cp-text-muted)',
-  },
-  icon: {
     display: 'flex',
-    transition: 'color var(--cp-dur-base) var(--cp-ease)',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 'var(--cp-space-1)',
+    padding: 'var(--cp-space-2) var(--cp-space-1)',
+    textAlign: 'center',
+    minHeight: 'var(--cp-tile-minh)',
+    border: 'none',
+    borderRadius: 0,
+    background: 'transparent',
+    transition: 'background var(--cp-dur-base) var(--cp-ease)',
+  },
+  iconBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 'var(--cp-control-md)',
+    height: 'var(--cp-control-md)',
+    borderRadius: 'var(--cp-radius-xs)',
+    border: '1px solid var(--cp-border)',
+    background: 'var(--cp-surface-1)',
+    color: 'var(--cp-text-muted)',
+    flexShrink: 0,
+  },
+  iconBadgeSelected: {
+    borderColor: 'var(--cp-border-strong)',
+    background: 'var(--cp-surface-0)',
+    color: 'var(--cp-text-primary)',
   },
   iconSvg: {
-    width: 'var(--cp-icon-lg)',
-    height: 'var(--cp-icon-lg)',
-    strokeWidth: 'var(--cp-icon-stroke)',
+    width: 'var(--cp-icon-sm)',
+    height: 'var(--cp-icon-sm)',
+    strokeWidth: '1.5px',
   },
   title: {
-    ...T.cardTitle,
+    fontSize: 'var(--cp-font-micro)',
+    lineHeight: 'var(--cp-leading-snug)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-strong)',
-    minWidth: 0,
+    letterSpacing: 'var(--cp-tracking-wide)',
+    textTransform: 'uppercase',
+    padding: '0 var(--cp-space-1)',
   },
   desc: {
-    fontSize: 'var(--cp-font-xs)',
-    lineHeight: 'var(--cp-leading-tight)',
+    fontSize: 'var(--cp-font-nano)',
+    lineHeight: 'var(--cp-leading-heading)',
     color: 'var(--cp-text-muted)',
+    padding: '0 var(--cp-space-1)',
+    maxWidth: '100%',
   },
 };

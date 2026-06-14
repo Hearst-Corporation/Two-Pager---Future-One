@@ -3,6 +3,7 @@ import { authedWrite } from '@/lib/supabase-admin';
 import { requireRowOwnership } from '@/lib/auth-guards';
 import { withValidationPartial } from '@/lib/validators/withValidation';
 import { SourceUpdateSchema } from '@/lib/validators/hearst';
+import { dbErrorResponse } from '@/lib/api-errors';
 
 export const PATCH = withValidationPartial(SourceUpdateSchema, async (req, parsed, { params }) => {
   const auth = await authedWrite('editor');
@@ -25,7 +26,7 @@ export const PATCH = withValidationPartial(SourceUpdateSchema, async (req, parse
     .eq('id', params.id)
     .select()
     .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErrorResponse(error, '[sources/[id]][PATCH]');
   return NextResponse.json({ source: data });
 });
 
@@ -48,6 +49,6 @@ export async function DELETE(req, { params }) {
   }
 
   const { error } = await auth.supa.from('hearst_sources').delete().eq('id', params.id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErrorResponse(error, '[sources/[id]][DELETE]');
   return NextResponse.json({ ok: true });
 }

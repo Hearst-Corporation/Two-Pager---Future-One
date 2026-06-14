@@ -9,6 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { dbErrorResponse } from '@/lib/api-errors';
 
 const SUMMARY_COLS = 'id,title,project_id,scenario_id,region,stakeholder,audience,provider_used,confidence_level,data_as_of,generation_time_ms,status,version,created_at,updated_at';
 
@@ -30,6 +31,6 @@ export async function GET(req) {
   q = q.limit(Math.min(Number(sp.get('limit')) || 200, 500));
 
   const { data, error } = await q;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErrorResponse(error, '[strategic-memos][GET]');
   return NextResponse.json({ memos: data, count: data.length });
 }

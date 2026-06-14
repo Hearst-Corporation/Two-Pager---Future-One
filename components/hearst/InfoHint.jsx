@@ -2,6 +2,7 @@
 
 import { useId, useState, useCallback, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { Info } from 'lucide-react';
 import { UI } from '@/lib/ui-strings';
 
 /**
@@ -21,7 +22,7 @@ import { UI } from '@/lib/ui-strings';
  * @param {{ id?: string, label?: string, content?: {title?: string, body: string},
  *           align?: 'left'|'right' }} props
  */
-export default function InfoHint({ id, label, content, align = 'left' }) {
+export default function InfoHint({ id, label, content, align = 'left', buttonClassName, wrapClassName }) {
   const edu = id ? UI.KPI_EDU[id] : null;
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
@@ -49,7 +50,8 @@ export default function InfoHint({ id, label, content, align = 'left' }) {
   return (
     <span
       ref={wrapRef}
-      style={S.wrap}
+      className={wrapClassName}
+      style={wrapClassName ? undefined : S.wrap}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
@@ -63,13 +65,10 @@ export default function InfoHint({ id, label, content, align = 'left' }) {
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
         onKeyDown={onKeyDown}
-        style={S.icon}
+        className={buttonClassName}
+        style={buttonClassName ? undefined : S.icon}
       >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="9" />
-          <line x1="12" y1="11" x2="12" y2="16.5" />
-          <line x1="12" y1="7.5" x2="12" y2="7.51" />
-        </svg>
+        <Info size={13} strokeWidth={2} aria-hidden="true" />
       </button>
 
       {open && (
@@ -106,6 +105,8 @@ InfoHint.propTypes = {
   label: PropTypes.string,
   content: PropTypes.shape({ title: PropTypes.string, body: PropTypes.string.isRequired }),
   align: PropTypes.oneOf(['left', 'right']),
+  buttonClassName: PropTypes.string,
+  wrapClassName: PropTypes.string,
 };
 
 const S = {

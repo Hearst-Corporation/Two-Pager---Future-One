@@ -27,9 +27,11 @@ export default function HearstLayoutClient({ children }) {
   useEffect(() => {
     document.documentElement.classList.add('oracle-cockpit-root');
     document.body.classList.add('oracle-cockpit-page');
+    document.body.classList.add('oracle-chat-docked');
     return () => {
       document.documentElement.classList.remove('oracle-cockpit-root');
       document.body.classList.remove('oracle-cockpit-page');
+      document.body.classList.remove('oracle-chat-docked');
     };
   }, []);
 

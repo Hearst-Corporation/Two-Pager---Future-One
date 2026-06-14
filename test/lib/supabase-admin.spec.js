@@ -15,6 +15,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // --- Hoisted module mocks ----------------------------------------------------
 
+vi.mock('server-only', () => ({}));
+
 vi.mock('@/lib/supabase-server', () => ({
   getSessionProfile: vi.fn(),
 }));
@@ -98,7 +100,7 @@ describe('requireProfile', () => {
     getSessionProfile.mockResolvedValue(session);
     const result = await requireProfile('editor');
     expect(result instanceof NextResponse).toBe(false);
-    expect(result).toEqual({ profile: session.profile });
+    expect(result).toEqual({ profile: session.profile, actor: session.profile.id });
   });
 
   // 6. success — admin >= editor (hierarchy)
@@ -107,7 +109,7 @@ describe('requireProfile', () => {
     getSessionProfile.mockResolvedValue(session);
     const result = await requireProfile('editor');
     expect(result instanceof NextResponse).toBe(false);
-    expect(result).toEqual({ profile: session.profile });
+    expect(result).toEqual({ profile: session.profile, actor: session.profile.id });
   });
 
   // 7. success — default role is viewer (any authenticated user passes)
@@ -116,7 +118,7 @@ describe('requireProfile', () => {
     getSessionProfile.mockResolvedValue(session);
     const result = await requireProfile();
     expect(result instanceof NextResponse).toBe(false);
-    expect(result).toEqual({ profile: session.profile });
+    expect(result).toEqual({ profile: session.profile, actor: session.profile.id });
   });
 });
 

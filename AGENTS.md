@@ -1,87 +1,15 @@
-<!-- @enable-adrien:layer=front-cockpit v=1 -->
-<!-- AGENTS.md — cible ≤200 lignes. Source de vérité locale. Lis CECI avant toute feature. -->
-# Oracle — guide agent
+# Oracle — guide rapide
 
-> Stack : Next.js 14 · React 18 · Supabase · Kimi K2.6 · Port **5005**
-> Gate : `npm run check` (exit 0 = livrable)
+Stack : Next.js 14 · React 18 · Supabase (`crm`) · OpenAI · port dev **5005**.
 
-<!-- enable:section=tldr -->
-## 1. TL;DR
-- Scaffolder : `node scripts/new-feature.mjs <resource> --ts=YYYYMMDDHHMMSS`
-- Tests : `npm test` (vitest, 224 tests)
-- Gate : `npm run check` — la mauvaise façon ÉCHOUE ici.
-- Auth : toutes les routes API passent par `requireProfile` / `authedWrite`.
-- Tokens : dans les pages/composants applicatifs (`app/(cockpit)/` · `components/hearst/`) → `var(--cp-*)` uniquement, pas de hex hardcodé. Le DS lui-même (`cockpit-shell/` · `tokens.css`) est librement éditable (`--ct-*` s'y définissent).
-
-<!-- enable:section=recette -->
-## 2. Recette canonique (nouvelle page)
 ```bash
-node scripts/new-feature.mjs analytics --ts=20260607120000
-# → crée app/(cockpit)/admin/hearst/analytics/page.jsx
-# → crée app/api/admin/hearst/analytics/route.js
-# → imprime les 3 rappels manuels obligatoires
-npm run check  # doit passer
+npm install
+npm run dev          # http://localhost:5005
+npm run check        # lint:secrets + eslint + tests
+npm run check:ci     # + next build
+npm run doctor
 ```
 
-<!-- enable:section=rapide -->
-## 3. Le plus rapide
-1. `node scripts/new-feature.mjs <resource>` — génère page + route
-2. Ajouter entrée dans `components/OracleRailNav.jsx → SECTIONS[]` (keystone NAV)
-3. Ajouter clé `NAV_<RESOURCE>` dans `lib/ui-strings.ts`
-4. `npm run check` — vert = livrable
+Cockpit : `app/(cockpit)/admin/hearst/*` · APIs : `app/api/admin/hearst/*`, `app/api/cockpit-chat/`.
 
-Le scaffolder NE TOUCHE PAS : `layout.jsx` (keystone), `OracleRailNav.jsx` (NAV source de vérité).
-
-<!-- enable:section=primitives -->
-## 4. Primitives (composer, NE PAS recoder)
-- **UI** : `import { Button, Card, Table, Row, Cell, Field, Badge, SectionHead, Eyebrow, KpiGrid, KpiCard } from '@/components/hearst/ui'` — catalogue `components/hearst/ui/README.md`. Interdit de recoder un bouton/carte/table/champ en inline.
-- **Auth** : `requireProfile(req)` (viewer+) · `authedWrite(req)` (editor+) — `lib/auth-server.js`
-- **DB** : `getAdminClient()` — `lib/supabase-admin.js` (service_role, server-only)
-- **Calculs** : `lib/hearst-calculations.js` (IRR Newton-Raphson, NPV, MOIC, waterfall)
-- **Solver** : `lib/hearst-solver.js` (3 modes : mw_first / capital_first / target_irr_first)
-- **Tokens DS** : `grep -r "var(--cp-" app/(cockpit)/admin/hearst/cp-tokens.css`
-- **Tokens morts** : `npm run prune:tokens` (rapport ; `--write` supprime). Protège les préfixes résolus en runtime (`--cp-op-*`) — ne jamais supprimer un token dont le préfixe est consommé via `var(--cp-PREFIX-${...})`.
-- **Styles inline** : `lib/cp-styles.js` — `T` (typo), `S` (états), `L` (layout), `RC` (Recharts). **Chercher ici avant d'écrire un `fontWeight`, `fontSize` ou état inline.**
-- **Nav routes** : `grep -n "href:" components/OracleRailNav.jsx`
-- **Strings UI** : `lib/ui-strings.ts` → `UI.*`
-
-<!-- enable:section=interdits -->
-## 5. Interdits → gate
-
-| INTERDIT | ÉCHOUE VIA |
-|---|---|
-| Token défini hors de sa source (`--cp-*`→cp-tokens.css · `--color-*`→globals.css) ou en double | `npm run lint:tokens` |
-| String UI en dur (nouvelle ligne) | `npm run lint:strings` |
-| Secret hardcodé (`sk-ant-`, `ghp_`, etc.) | `npm run lint:secrets` |
-| Page-section sans entrée dans `OracleRailNav.jsx → SECTIONS[]` | `npm run lint:nav` |
-| Build cassé (import/JSX) dans une page sans test | `npm run check:ci` (lance `next build`) |
-| `getAdminClient()` dans un composant client | convention — import server-only |
-
-> Baseline gelée par **signature** (`scripts/.lint-baseline.json`, clé `strings`) : seules les
-> *nouvelles* violations échouent. Toucher une ligne legacy la « réactive » → corrige-la.
-> Régénérer (legacy assumé) : `node scripts/lint-strings.mjs --update-baseline`.
-
-<!-- enable:section=gotchas -->
-## 6. Gotchas du repo
-- Port **5005** toujours (`npm run dev` → localhost:5005). Ne jamais changer.
-- Ne pas lancer `check:ci` / `next build` pendant `npm run dev` (corrompt `.next` → 404 chunks). Après build : `npm run dev:clean`.
-- `requireProfile` est dans `lib/auth-server.js`, **pas** un middleware Next.js.
-- `service_role` = bypass RLS complet → uniquement dans `app/api/`, jamais côté client.
-- Kimi K2.6 via Hypercli (`HYPERCLI_API_KEY`) — endpoint `/api/cockpit-chat/`.
-- Mémo fallback = `_generation_mode: 'deterministic_fallback'` dans le JSON.
-- Le moteur financier **ne fabrique jamais** de données : `null` / `'N/A — Source Required'` si manquant.
-- IC Advisor rail : `lib/oracle-advisor-routes.js` — chat-only sur deals/sources/workspace/dossier liste ; full sur simulator/financial/dossier `?memo=`.
-- Chat voie A : `CockpitChatBridge` injecte `deal` + `oracle.pathname` dans POST `/api/cockpit-chat`. Prompts IC → `COCKPIT_CHAT_SEND_EVENT`.
-- Chat scope : `resolveChatScope()` → `oracle:chat-id:{scope}` ; `syncScopedChatToShell()` + `setActiveChat` (exporté par `cockpit-shell/src/index.ts`) recharge l’historique.
-- Rail droit : chat **toujours visible** desktop (fixe + `--cp-chat-rail-width` padding centre) ; drawer+FAB mobile. `--ct-rail-right: 0`. IC si `advisorContext.projection` présent.
-- `@hearst/cockpit-shell` : **copie locale éditable** dans `./cockpit-shell/` (alias tsconfig/jsconfig → `cockpit-shell/src/index.ts`). `setActiveChat` exporté depuis `src/index.ts`. Pas de tarball, pas de repack.
-- `useEffect(..., [])` init-only = pattern intentionnel sur simulator/page.jsx.
-- CSP : `unsafe-eval` retiré en prod (Next.js HMR en dev uniquement).
-
-<!-- enable:section=livrer -->
-## 7. Avant de livrer
-```bash
-npm run check     # lint:secrets + lint:strings + lint:tokens + lint:nav + test (rapide)
-npm run check:ci  # + next build — PROUVE que l'app compile (à lancer avant toute PR)
-npm run doctor    # préflight env (dit ce qui manque pour dev/build)
-```
+Scaffolder optionnel : `node scripts/new-feature.mjs <resource>`

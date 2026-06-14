@@ -3,6 +3,7 @@ import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admi
 import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
 import { withValidation } from '@/lib/validators/withValidation';
 import { ScenarioCreateSchema } from '@/lib/validators/hearst';
+import { dbErrorResponse } from '@/lib/api-errors';
 
 export async function GET(req) {
   const r = await requireProfile('viewer');
@@ -16,8 +17,9 @@ export async function GET(req) {
     .from('hearst_scenarios')
     .select('*')
     .eq('project_id', project_id)
-    .order('created_at');
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    .order('created_at')
+    .limit(100);
+  if (error) return dbErrorResponse(error, '[scenarios][GET]');
 
   // Attach calculated projections and source scores
   const enriched = (data || []).map((s) => {
@@ -40,6 +42,6 @@ export const POST = withValidation(ScenarioCreateSchema, async (req, parsed) => 
     .insert({ ...body, created_by: auth.actor })
     .select()
     .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErrorResponse(error, '[scenarios][POST]');
   return NextResponse.json({ scenario: data });
 });

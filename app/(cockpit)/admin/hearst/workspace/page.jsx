@@ -18,6 +18,7 @@ export default function WorkspacePage() {
   const [scenarios, setScenarios] = useState(null);
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(null);
+  const [confirmDel, setConfirmDel] = useState(null);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -41,9 +42,9 @@ export default function WorkspacePage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function deleteScenario(id, name) {
-    if (!window.confirm(UI.WS_DELETE_CONFIRM(name))) return;
+  async function deleteScenario(id) {
     setBusy(id);
+    setConfirmDel(null);
     try {
       const r = await fetch(`/api/admin/hearst/scenarios/${id}`, { method: 'DELETE' });
       if (!r.ok) {
@@ -62,7 +63,7 @@ export default function WorkspacePage() {
   return (
     <div className="oracle-page">
       <header className="oracle-page-header">
-        <h1>Workspace</h1>
+        <h1>{UI.WS_PAGE_TITLE}</h1>
         <p className="oracle-subtitle">
           {UI.WS_PAGE_SUBTITLE}{' '}
           <Link href="/admin/hearst/dossier" style={S.dossierLink}>Dossier</Link>.
@@ -72,22 +73,32 @@ export default function WorkspacePage() {
       {err && <div style={WS_ERR}>Error: {err}</div>}
 
       <Card as="section" variant="flat" surface={1} padding="lg" style={S.section}>
-        <SectionHead title="Saved scenarios" hint={`${scenarios?.length ?? '—'} saved`} />
+        <SectionHead title={UI.WS_SECTION_SCENARIOS} hint={`${scenarios?.length ?? '—'} saved`} />
         {scenarios === null && <div style={CP.empty}>{UI.STATE_LOADING}</div>}
         {scenarios && scenarios.length === 0 && <div style={CP.empty}>{UI.WS_NO_SCENARIOS}</div>}
         {scenarios && scenarios.length > 0 && (
-          <Table head={['Name', 'Type', 'Created', 'Status', '']}>
+          <Table head={[UI.WS_TH_NAME, UI.WS_TH_TYPE, UI.WS_TH_CREATED, UI.WS_TH_STATUS, '']}>
             {scenarios.map(s => (
               <Row key={s.id}>
                 <Cell label>{s.name}</Cell>
                 <Cell>{s.scenario_type || '—'}</Cell>
                 <Cell>{fmtDate(s.created_at)}</Cell>
-                <Cell><span style={S.statusText}>{s.is_active ? 'Active' : 'Saved'}</span></Cell>
+                <Cell><span style={S.statusText}>{s.is_active ? UI.WS_STATUS_ACTIVE : UI.WS_STATUS_SAVED}</span></Cell>
                 <Cell style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  <Link href={`/admin/hearst/simulator?scenario=${s.id}`} style={S.action}>Open in Simulator →</Link>
-                  <Button variant="ghost" size="sm" disabled={busy === s.id} onClick={() => deleteScenario(s.id, s.name)} style={{ marginLeft: 'var(--cp-space-3)' }}>
-                    {busy === s.id ? '…' : UI.ACTION_DELETE}
-                  </Button>
+                  <Link href={`/admin/hearst/simulator?scenario=${s.id}`} style={S.action}>{UI.WS_OPEN_IN_SIMULATOR}</Link>
+                  {confirmDel === s.id ? (
+                    <span style={S.delActions}>
+                      <span style={S.delHint}>{UI.WS_DELETE_CONFIRM(s.name)}</span>
+                      <Button variant="dangerSolid" size="sm" disabled={busy === s.id} onClick={() => deleteScenario(s.id)}>
+                        {busy === s.id ? '…' : UI.ACTION_DELETE}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setConfirmDel(null)}>{UI.ACTION_CANCEL}</Button>
+                    </span>
+                  ) : (
+                    <Button variant="ghost" size="sm" disabled={busy === s.id} onClick={() => setConfirmDel(s.id)} style={{ marginLeft: 'var(--cp-space-3)' }}>
+                      {UI.ACTION_DELETE}
+                    </Button>
+                  )}
                 </Cell>
               </Row>
             ))}
@@ -103,4 +114,6 @@ const S = {
   statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
   action: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', marginLeft: 'var(--cp-space-3)' },
   dossierLink: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)' },
+  delActions: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginLeft: 'var(--cp-space-3)', flexWrap: 'wrap', justifyContent: 'flex-end' },
+  delHint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', maxWidth: 220, textAlign: 'right' },
 };

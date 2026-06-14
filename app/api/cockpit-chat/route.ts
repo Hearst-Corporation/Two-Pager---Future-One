@@ -6,25 +6,22 @@
 //   { chatId?, message, messages?, productId?, system? }
 //
 // On each request:
-//   1. Resolve session via getSessionProfile() — anonymous users get the
-//      conversational prompt without persistence.
-//   2. If authenticated, look up admin_chat_mode(user_id) → mode.
+//   1. Resolve session via getSessionProfile() — 401 Unauthorized if no session.
+//   2. Look up admin_chat_mode(user_id) → mode.
 //   3. Pick the matching pre-computed system prompt
 //      (CONVERSATIONAL_PROMPT vs FACILITATOR_PROMPT).
 //   4. Load / create chat via getServerClient (RLS-bound, user-owned).
 //   5. Insert user message with mode column stamped.
-//   6. Stream Kimi, strip <think> blocks, accumulate full response.
+//   6. Stream OpenAI (GPT-4o), strip legacy thinking tags (if any), accumulate response.
 //   7. Persist assistant message with mode column stamped + llm_runs row.
 //
 // Returns: raw text stream with header `x-chat-id`.
 
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
-import {
-  estimateTokens,
-  estimateKimiCostUsd,
-} from "@hearst/review-mode";
-import { KIMI_MODEL, kimiChatStream } from "@/lib/llm/kimi";
+import { estimateTokens } from "@/lib/review-mode/tokens";
+import { OPENAI_CHAT_MODEL, openaiChatStream } from "@/lib/llm/openai";
+import { estimateOpenAICostUsd } from "@/lib/llm/cost";
 import { buildOracleSystemPrompt, inferOracleContextFromPath } from "@/lib/oracle-system-prompt";
 import { buildDealGroundingBlock } from "@/lib/oracle-deal-grounding";
 import { resolveActiveDeal } from "@/lib/oracle-active-deal";
@@ -40,6 +37,13 @@ import {
   renderTuningBlock,
   helpText,
 } from "@/lib/review-mode/user-tuning";
+import { userOwnsChat } from "@/lib/cockpit-chat-ownership";
+import {
+  CONVERSATIONAL_PROMPT,
+  CONVERSATIONAL_PROMPT_HASH,
+  FACILITATOR_PROMPT,
+  FACILITATOR_PROMPT_HASH,
+} from "@/lib/review-mode/prompt-hash";
 
 // Service-role client for chat persistence. We manually scope every operation
 // by user_id (resolved from getSessionProfile) so this bypasses RLS safely.
@@ -53,12 +57,6 @@ function getServiceClient() {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
-import {
-  CONVERSATIONAL_PROMPT,
-  CONVERSATIONAL_PROMPT_HASH,
-  FACILITATOR_PROMPT,
-  FACILITATOR_PROMPT_HASH,
-} from "@/lib/review-mode/prompt-hash";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -119,19 +117,21 @@ function checkRateLimit(key: string, max: number, windowMs: number) {
 // ────────────────────────────────────────────────────────────────────────────
 // <think>...</think> stream-safe stripper (mirrors cockpit-shell behaviour).
 // ────────────────────────────────────────────────────────────────────────────
-function makeThinkStripper(): (chunk: string) => string {
+function makeThinkStripper() {
   let buffer = "";
   let inThink = false;
   return function feed(chunk: string): string {
     buffer += chunk;
     let output = "";
     let i = 0;
+    const OPEN_TAG = "<redacted_thinking>";
+    const CLOSE_TAG = "</redacted_thinking>";
+
     while (i < buffer.length) {
       if (!inThink) {
-        const openIdx = buffer.indexOf("<think>", i);
+        const openIdx = buffer.indexOf(OPEN_TAG, i);
         if (openIdx === -1) {
           const tail = buffer.slice(i);
-          const OPEN_TAG = "<think>";
           let holdLen = 0;
           for (let p = Math.min(OPEN_TAG.length - 1, tail.length); p > 0; p--) {
             if (tail.endsWith(OPEN_TAG.slice(0, p))) {
@@ -145,27 +145,20 @@ function makeThinkStripper(): (chunk: string) => string {
         }
         output += buffer.slice(i, openIdx);
         inThink = true;
-        i = openIdx + 7;
+        i = openIdx + OPEN_TAG.length;
       } else {
-        const closeIdx = buffer.indexOf("</think>", i);
+        const closeIdx = buffer.indexOf(CLOSE_TAG, i);
         if (closeIdx === -1) {
           buffer = buffer.slice(i);
           return output;
         }
         inThink = false;
-        i = closeIdx + 8;
+        i = closeIdx + CLOSE_TAG.length;
       }
     }
     buffer = "";
     return output;
   };
-}
-
-function genId(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 export async function POST(req: Request) {
@@ -194,17 +187,21 @@ export async function POST(req: Request) {
   const message = body.message.trim();
   if (!message) return new Response("Empty message", { status: 400 });
 
-  // ── Resolve session + mode ──────────────────────────────────────────────
+  // ── Resolve session — authentication required ───────────────────────────
   const session = await getSessionProfile();
   const userId = session?.user?.id ?? null;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "authentication_required" }), {
+      status: 401,
+      headers: { "content-type": "application/json" },
+    });
+  }
 
   let mode: Mode = "normal";
-  if (userId) {
-    try {
-      mode = await getAdminChatMode(userId);
-    } catch (err) {
-      console.warn("[cockpit-chat] getAdminChatMode failed", err);
-    }
+  try {
+    mode = await getAdminChatMode(userId);
+  } catch (err) {
+    console.warn("[cockpit-chat] getAdminChatMode failed", err);
   }
 
   // ── Rate limit ──────────────────────────────────────────────────────────
@@ -238,6 +235,14 @@ export async function POST(req: Request) {
         if (createErr) throw createErr;
         chatId = newChat.id as string;
       } else {
+        const owned = await userOwnsChat(supa, chatId, userId);
+        if (!owned) {
+          console.warn("[cockpit-chat] chat ownership denied", { chatId, userId });
+          return new Response(JSON.stringify({ error: "chat_forbidden" }), {
+            status: 403,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
         const { data: rows, error: loadErr } = await supa
           .from("cockpit_messages")
           .select("role, content")
@@ -251,15 +256,12 @@ export async function POST(req: Request) {
       }
     } catch (err) {
       console.warn("[cockpit-chat] persistence load/create failed", err);
+      chatId = null;
       if (body.messages?.length) {
         for (const m of body.messages) {
           if (m.role && m.content) history.push({ role: m.role, content: m.content });
         }
       }
-    }
-  } else if (body.messages?.length) {
-    for (const m of body.messages) {
-      if (m.role && m.content) history.push({ role: m.role, content: m.content });
     }
   }
 
@@ -281,7 +283,7 @@ export async function POST(req: Request) {
   // ── Tuning slash commands (intercept BEFORE the LLM) ────────────────────
   // Lets the user say "/pref réponds plus court" / "/règles" / "/oublie tout".
   // We answer synthetically, stream the answer (so the UI sees it), persist
-  // it as an assistant message, and skip Kimi entirely.
+  // it as an assistant message, and skip the LLM entirely.
   const tuningCmd = userId ? parseTuningCommand(message) : null;
   if (tuningCmd && userId) {
     let reply = "";
@@ -395,19 +397,15 @@ export async function POST(req: Request) {
     ...history,
   ];
 
-  // ── Stream LLM — Kimi K2.6 via Moonshot AI (direct, éditeur officiel) ──────
-  // Do not route cockpit chat through Anthropic: billing/quota failures there
-  // should not break ORACLE's right rail when Moonshot is the configured provider.
-  // max_tokens ≥ 4096 obligatoire : kimi-k2.6 est un modèle à raisonnement —
-  // sans max_tokens large, delta.content peut rester vide (tout part en reasoning).
+  // ── Stream LLM — OpenAI GPT-4o (clé serveur OPENAI_API_KEY) ─────────────────
   const inputTokens = estimateTokens(finalSystemPrompt + history.map((h) => h.content).join("\n"));
   const startedAt = Date.now();
   const stripThink = makeThinkStripper();
   let full = "";
-  let modelUsed = KIMI_MODEL;
+  let modelUsed = OPENAI_CHAT_MODEL;
   let completion: any;
   try {
-    const out = await kimiChatStream({ model: KIMI_MODEL, messages, max_tokens: 8192 } as any);
+    const out = await openaiChatStream({ model: OPENAI_CHAT_MODEL, messages, max_tokens: 8192 } as any);
     completion = out.stream;
     modelUsed = out.model_used;
   } catch (err) {
@@ -482,10 +480,10 @@ export async function POST(req: Request) {
         }
       }
       const outputTokens = estimateTokens(full);
-      const costUsd = estimateKimiCostUsd({
-        prompt_tokens: inputTokens,
-        completion_tokens: outputTokens,
-      });
+      const costUsd = estimateOpenAICostUsd(
+        { prompt_tokens: inputTokens, completion_tokens: outputTokens },
+        modelUsed,
+      );
       await insertLlmRun({
         agentName,
         model: modelUsed,

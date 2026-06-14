@@ -22,6 +22,9 @@ out/
 export/
 futur-one-brochure.zip
 
+# Large media — keep on disk, never version
+Google Chrome.mp4
+
 # Raw Midjourney source assets (use renamed versions instead)
 public/u2883995211_*
 
@@ -84,3 +87,27 @@ A[0-9]-*.png
 /section-*.png
 /other-sections.png
 /financial-*.png
+
+# screenshots de session (smoke / verify / scan) — générés par Playwright/agents, jamais versionnés
+/smoke-*.png
+/screenshot_*.png
+/screenshot-*.png
+/val-*.png
+/verify-*.png
+/scenario*.png
+/campus3d-*.png
+/dossier-*.png
+/executive-*.png
+/recovery-*.png
+/deals-*.png
+/_concept-*.png
+/futurone-*.png
+/tmp-*.png
+
+# Business-plan / investment-brief deliverables (binaries — kept local, hosted externally)
+/Futur-One-*.pdf
+/models/
+
+# Capability / hardcode audit outputs (kept local, not versioned)
+/docs/*-audit.md
+/docs/*-audit.json

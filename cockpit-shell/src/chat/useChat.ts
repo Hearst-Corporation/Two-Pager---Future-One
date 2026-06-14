@@ -3,7 +3,7 @@
 /**
  * useChat.ts — Hook encapsulant toute la logique d'état et de streaming.
  *
- * Extrait de ChatKimi.tsx pour séparer la logique du rendu.
+ * Extrait de ChatPanel.tsx pour séparer la logique du rendu.
  * Gère : état messages/streaming/error, AbortController, pendingRef
  * (race-condition guard), signal d'erreur stream (\x00ERROR:), chatId.
  */
@@ -40,7 +40,7 @@ export interface UseChatReturn {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers locaux (repris de ChatKimi)
+// Helpers locaux (repris de ChatPanel)
 // ---------------------------------------------------------------------------
 
 function generateId(): string {
@@ -51,7 +51,7 @@ function generateId(): string {
 }
 
 /**
- * Filtre stream-safe des blocs `<think>...</think>` (raisonnement interne Kimi).
+ * Filtre stream-safe des blocs de raisonnement legacy (`<think>`).
  */
 function makeThinkStripper() {
   let buffer = "";
@@ -62,12 +62,14 @@ function makeThinkStripper() {
     let output = "";
     let i = 0;
 
+    const OPEN_TAG = "<redacted_thinking>";
+    const CLOSE_TAG = "</redacted_thinking>";
+
     while (i < buffer.length) {
       if (!inThink) {
-        const openIdx = buffer.indexOf("<think>", i);
+        const openIdx = buffer.indexOf(OPEN_TAG, i);
         if (openIdx === -1) {
           const tail = buffer.slice(i);
-          const OPEN_TAG = "<think>";
           let holdLen = 0;
           for (
             let prefLen = Math.min(OPEN_TAG.length - 1, tail.length);
@@ -86,16 +88,16 @@ function makeThinkStripper() {
         }
         output += buffer.slice(i, openIdx);
         inThink = true;
-        i = openIdx + 7; // skip '<think>'
+        i = openIdx + OPEN_TAG.length; // skip open tag
       } else {
-        const closeIdx = buffer.indexOf("</think>", i);
+        const closeIdx = buffer.indexOf(CLOSE_TAG, i);
         if (closeIdx === -1) {
           // Pas de fermeture — on garde pour le prochain feed.
           buffer = buffer.slice(i);
           return output;
         }
         inThink = false;
-        i = closeIdx + 8; // skip '</think>'
+        i = closeIdx + CLOSE_TAG.length; // skip close tag
       }
     }
     buffer = "";
@@ -110,7 +112,7 @@ function makeThinkStripper() {
 const WELCOME_MSG: DisplayMessage = {
   id: "welcome",
   role: "assistant",
-  content: "Bonjour ! Je suis Kimi K2.6, votre assistant Hearst. Comment puis-je vous aider aujourd'hui ?",
+  content: "Bonjour ! Je suis l'assistant Oracle (GPT-4o). Comment puis-je vous aider aujourd'hui ?",
   createdAt: 0,
 };
 

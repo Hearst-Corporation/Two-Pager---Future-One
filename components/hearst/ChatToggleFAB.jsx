@@ -1,11 +1,6 @@
 'use client';
 
-// ChatToggleFAB — mobile uniquement (<900px). Desktop : chat docké permanent (chat-fab.css).
-//
-// Mécanique : toggle la classe `cp-chat-drawer-open` sur <body>. cockpit.css
-// applique alors `transform: translateX(0)` au .ct-rail-right du shell + révèle
-// le backdrop. Le shell garde son ChatKimi monté en permanence (aucune perte
-// de conversation au open/close).
+// ChatToggleFAB — mobile/tablet uniquement (<900px). Desktop : chat docké permanent (chat-fab.css).
 
 import { useEffect, useState, useCallback } from 'react';
 import { UI } from '@/lib/ui-strings';

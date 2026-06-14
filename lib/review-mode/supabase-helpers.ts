@@ -39,44 +39,6 @@ export async function getAdminChatMode(userId: string): Promise<Mode> {
   return mode === "review" ? "review" : "normal";
 }
 
-export async function setAdminChatMode(userId: string, mode: Mode): Promise<void> {
-  const supa = getPublicAdminClient();
-  const { error } = await supa
-    .from("admin_chat_mode")
-    .upsert(
-      { user_id: userId, mode, updated_at: new Date().toISOString() },
-      { onConflict: "user_id" },
-    );
-  if (error) throw error;
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// review_documents
-// ────────────────────────────────────────────────────────────────────────────
-
-export interface InsertReviewDocumentArgs {
-  userId: string;
-  chatId: string;
-  contentMd: string;
-  contentJson: unknown | null;
-}
-
-export async function insertReviewDocument(args: InsertReviewDocumentArgs): Promise<{ id: string }> {
-  const supa = getPublicAdminClient();
-  const { data, error } = await supa
-    .from("review_documents")
-    .insert({
-      user_id: args.userId,
-      chat_id: args.chatId,
-      content_md: args.contentMd,
-      content_json: args.contentJson,
-    })
-    .select("id")
-    .single();
-  if (error) throw error;
-  return { id: data.id as string };
-}
-
 // ────────────────────────────────────────────────────────────────────────────
 // llm_runs
 // ────────────────────────────────────────────────────────────────────────────
@@ -116,54 +78,3 @@ export async function insertLlmRun(args: InsertLlmRunArgs): Promise<void> {
   }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// cockpit_messages — review-mode filtered loader
-// ────────────────────────────────────────────────────────────────────────────
-
-export interface ReviewMessage {
-  role: "user" | "assistant" | "system";
-  content: string;
-  created_at: string;
-}
-
-/**
- * Loads only the messages stamped with mode='review' for a given chat,
- * ordered chronologically. Used by /api/admin/review-document to build the
- * transcript fed to Kimi when generating the final document.
- */
-export async function loadReviewMessages(chatId: string): Promise<ReviewMessage[]> {
-  const supa = getPublicAdminClient();
-  const { data, error } = await supa
-    .from("cockpit_messages")
-    .select("role, content, created_at")
-    .eq("chat_id", chatId)
-    .eq("mode", "review")
-    .order("created_at", { ascending: true });
-  if (error) throw error;
-  return (data ?? []) as ReviewMessage[];
-}
-
-/**
- * Resolves the most recent cockpit_chat for a user that has at least one
- * message stamped with mode='review'. Used as a fallback by the review-document
- * route when the client doesn't know the active chatId (cockpit-shell does not
- * expose it). Returns null if no such chat exists.
- */
-export async function findLatestReviewChatId(userId: string): Promise<string | null> {
-  const supa = getPublicAdminClient();
-  // Get review-mode messages ordered most recent first, look up their chat,
-  // filter by user owning the chat (RLS-style done in SQL).
-  const { data, error } = await supa
-    .from("cockpit_messages")
-    .select("chat_id, created_at, cockpit_chats!inner(user_id)")
-    .eq("mode", "review")
-    .eq("cockpit_chats.user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(1);
-  if (error) {
-    console.warn("[findLatestReviewChatId]", error.message);
-    return null;
-  }
-  const first = (data ?? [])[0];
-  return (first?.chat_id as string | undefined) ?? null;
-}

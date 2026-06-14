@@ -9,6 +9,7 @@ import {
   applyArchetype,
   projectArchetype,
 } from '@/lib/hearst-deal-structures.js';
+import { buildDealGroundingBlock } from '@/lib/oracle-deal-grounding.js';
 
 const BASE_SCENARIO = {
   total_mw: 50,
@@ -78,7 +79,7 @@ describe('DEAL_ARCHETYPES — 3 nouveaux archétypes', () => {
     expect(a.compute_as).toBe('recurring_revenue');
     // brand_premium_pct was removed: sovereign_ai now uses revenue_factor=0.90 only —
     // brand_premium dropped to avoid stacking that pushed effective above merchant (intent violation).
-    // See docs/audit/simulator-audit-2026-05-26.md P1-2.
+    // P1-2: archetype scoring regression guard.
     expect(a.brand_premium_pct).toBeUndefined();
     expect(a.scores.bankability).toBe(5);
     expect(a.scores.brand).toBe(5);
@@ -107,7 +108,7 @@ describe('projectArchetype — compute_as branches', () => {
     expect(r.projection.gpu_cloud_mode).toBeFalsy();
     // sovereign_ai now uses revenue_factor=0.90 only — brand_premium dropped to avoid stacking
     // that pushed effective above merchant (intent violation).
-    // See docs/audit/simulator-audit-2026-05-26.md P1-2.
+    // P1-2: archetype scoring regression guard.
     expect(r.scenario.price_hyperscale_kw_month).toBeCloseTo(115 * 0.90, 2);
   });
 
@@ -136,4 +137,56 @@ describe('applyArchetype — backwards compat (5 original archetypes)', () => {
     // archetype.operator_fee_pct = 12 → s.opex_operator_mgmt_fee_pct = 12
     expect(s.opex_operator_mgmt_fee_pct).toBe(12);
   });
+});
+
+describe('sale_leaseback — post-tax field exposure (P1 regression lock)', () => {
+  const arch = DEAL_ARCHETYPES.find(a => a.id === 'sale_leaseback');
+  const { projection: p } = projectArchetype(BASE_SCENARIO, arch);
+
+  it('exposes *_post_tax fields equal to the pre-tax values (cash flows already net of capital-gains tax)', () => {
+    // Cash flows are already net of Qatar capital-gains tax (via sale_proceeds_net).
+    // Pre-tax == post-tax by construction; aliases must always be present and identical.
+    // irr may be null on non-convergent scenarios (MOIC < 1, no real root).
+    expect('irr_post_tax' in p).toBe(true);
+    expect(p.irr_post_tax).toBe(p.irr);
+
+    expect('npv_post_tax' in p).toBe(true);
+    expect(p.npv_post_tax).toBe(p.npv);
+
+    expect('moic_post_tax' in p).toBe(true);
+    expect(p.moic_post_tax).toBe(p.moic);
+
+    expect(Number.isFinite(p.npv_post_tax)).toBe(true);
+    expect(Number.isFinite(p.moic_post_tax)).toBe(true);
+  });
+
+  it('exposes terminal_value_to_equity (net proceeds minus residual debt at exit)', () => {
+    expect(Number.isFinite(p.terminal_value_to_equity)).toBe(true);
+
+    // terminal_value_to_equity = sale_proceeds_net − debt_outstanding_at_exit.
+    // Residual debt ≥ 0, so equity slice ≤ net sale proceeds.
+    expect(p.terminal_value_to_equity).toBeLessThanOrEqual(p.sale_proceeds_net);
+    // For this BASE_SCENARIO (50 MW, 60% leverage, profitable exit) equity slice must be positive.
+    expect(p.terminal_value_to_equity).toBeGreaterThan(0);
+  });
+
+  it('makes the grounding block treat the deal as post-tax (no legacy fallback)', () => {
+    // This is the end-to-end regression lock: the grounding block fed to Kimi/cockpit-chat
+    // must carry the "post-tax" basis label and must NOT carry the "predates tax layer" note
+    // that incorrectly appeared before the P1 fix.
+    const block = buildDealGroundingBlock({ scenario: BASE_SCENARIO, projection: p });
+    expect(block).toContain('post-tax');
+    expect(block).not.toContain('predates tax layer');
+  });
+
+  // Test #4 — RETIRED (documented here to explain the decision).
+  //
+  // The "Returns composition" line appears in the grounding block only when
+  // rc.available === true AND rc.terminalPct != null (see oracle-deal-grounding.js line 106).
+  // For BASE_SCENARIO + sale_leaseback: operatingValue = Σ yearly FCF ≈ -$295M (pre-stable),
+  // terminalEquityValue ≈ +$108M → totalEquityProceeds < 0 → deriveReturnsComposition()
+  // returns tier='no_positive_proceeds', terminalPct=null. The guard in buildDealGroundingBlock
+  // therefore suppresses the line. This is CORRECT behavior (the deal is capital-destructive
+  // in this scenario). The "Returns composition" line is NOT expected here; asserting it would
+  // be a false contract. Test retired rather than weakened to avoid a misleading assert.
 });

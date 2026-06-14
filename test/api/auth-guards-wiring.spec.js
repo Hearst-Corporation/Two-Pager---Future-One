@@ -1,8 +1,5 @@
 // test/api/auth-guards-wiring.spec.js
-// Verify that lib/auth-guards.js → requireRowOwnership is actually wired into
-// the destructive DELETE handlers of the routes that were flagged in the
-// IDOR audit. We assert on the source so the wiring can't silently regress
-// without us noticing.
+// Verify that lib/auth-guards.js → requireRowOwnership is wired into [id] routes.
 
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -10,10 +7,18 @@ import path from 'node:path';
 
 const root = path.resolve(__dirname, '../../');
 
-describe('requireRowOwnership wired into destructive routes', () => {
-  it('sources [id] DELETE imports auth-guards', () => {
-    const src = readFileSync(path.join(root, 'app/api/admin/hearst/sources/[id]/route.js'), 'utf8');
-    expect(src).toMatch(/requireRowOwnership/);
-  });
+const ROUTES = [
+  'app/api/admin/hearst/sources/[id]/route.js',
+  'app/api/admin/hearst/scenarios/[id]/route.js',
+  'app/api/admin/hearst/strategic-memos/[id]/route.js',
+  'app/api/admin/hearst/strategic-memos/[id]/pdf/route.js',
+];
 
+describe('requireRowOwnership wired into [id] routes', () => {
+  for (const rel of ROUTES) {
+    it(`${rel} imports requireRowOwnership`, () => {
+      const src = readFileSync(path.join(root, rel), 'utf8');
+      expect(src).toMatch(/requireRowOwnership/);
+    });
+  }
 });

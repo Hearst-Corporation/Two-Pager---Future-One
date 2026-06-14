@@ -8,8 +8,7 @@
 // Each scenario prints: inputs · expected band · obtained value · verdict.
 // Re-run with `node tests/simulator-audit.test.mjs` (Node 18+).
 //
-// NOTE: this audit is READ-ONLY on production code. It does not patch any
-// bugs — it documents them. See docs/audit/simulator-audit-2026-05-26.md.
+// NOTE: audit READ-ONLY sur le moteur — ne patch pas le code prod.
 
 import { bootstrapScenarioFromSources } from '../lib/hearst-bootstrap.js';
 import { solveScenarioForMode } from '../lib/hearst-solver.js';

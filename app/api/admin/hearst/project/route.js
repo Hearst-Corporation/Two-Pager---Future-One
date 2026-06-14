@@ -1,8 +1,19 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
-import { DATA_ROOM_REQUIRED, PUBLIC_SOURCES_LIBRARY } from '@/lib/hearst-constants';
+import { DATA_ROOM_REQUIRED } from '@/lib/hearst-constants';
+import { PUBLIC_SOURCES_LIBRARY } from '@/lib/oracle-intelligence/source-library.js';
 import { withValidation } from '@/lib/validators/withValidation';
 import { ProjectUpdateSchema } from '@/lib/validators/hearst';
+import { dbErrorResponse } from '@/lib/api-errors';
+
+/** Fetch the single HEARST project row (no .single() to avoid PostgREST 406 on empty). */
+async function fetchProject(supa) {
+  const { data } = await supa
+    .from('hearst_projects')
+    .select('*, hearst_scenarios(id,name,scenario_type,is_active)')
+    .limit(1);
+  return data?.[0] ?? null;
+}
 
 /** GET — fetch or auto-create the single HEARST project */
 export async function GET() {
@@ -10,16 +21,30 @@ export async function GET() {
   if (r instanceof NextResponse) return r;
   const supa = getAdminClient();
 
-  let { data: project } = await supa.from('hearst_projects').select('*, hearst_scenarios(id,name,scenario_type,is_active)').limit(1).single();
+  let project = await fetchProject(supa);
 
   if (!project) {
-    // Auto-create project + base scenario + data room index + public contract library
+    // Re-check existence immediately before insert to narrow the race window when no unique
+    // constraint is present.  If another concurrent request already seeded, return early.
+    const raceCheck = await fetchProject(supa);
+    if (raceCheck) return NextResponse.json({ project: raceCheck });
+
+    // Auto-create project + base scenario + data room index + public contract library.
+    // Race-safe: on unique violation (concurrent cold-start) we re-fetch instead of erroring.
     const { data: newProject, error: pe } = await supa
       .from('hearst_projects')
-      .insert({ name: 'HEARST Qatar AI & Data Center Hub' })
+      .insert({ name: 'HEARST Qatar AI & Data Center Hub', created_by: r.profile.id })
       .select()
       .single();
-    if (pe) return NextResponse.json({ error: pe.message }, { status: 500 });
+
+    if (pe) {
+      // 23505 = unique_violation — another request already seeded; re-fetch and return it.
+      if (pe.code === '23505') {
+        const existing = await fetchProject(supa);
+        if (existing) return NextResponse.json({ project: existing });
+      }
+      return dbErrorResponse(pe, '[project][GET][auto-create]');
+    }
 
     const { data: baseScenario } = await supa
       .from('hearst_scenarios')
@@ -80,6 +105,6 @@ export const PATCH = withValidation(ProjectUpdateSchema, async (req, parsed) => 
   if (auth instanceof NextResponse) return auth;
   const { id, ...fields } = parsed;
   const { data, error } = await auth.supa.from('hearst_projects').update(fields).eq('id', id).select().single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return dbErrorResponse(error, '[project][PATCH]');
   return NextResponse.json({ project: data });
 });

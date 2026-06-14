@@ -93,7 +93,7 @@ export async function generateMemo(req: APIRequestContext, opts: { projectId: st
       scenario_id: opts.scenarioId,
       title: opts.title || `${RUN_TAG} memo`,
     },
-    timeout: 120_000, // Kimi soft-timeout is 90s; deterministic fallback is ~3s
+    timeout: 120_000, // LLM soft-timeout is 90s; deterministic fallback is ~3s
   });
   const body = await r.json().catch(() => ({}));
   return { status: r.status(), persisted: body.persisted, model_used: body.model_used, persistFailed: body.persistFailed, body };

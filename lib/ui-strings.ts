@@ -1,7 +1,4 @@
-// @enable-adrien:layer=front-cockpit v=1
-// ui-strings.ts — source de vérité pour les strings UI visibles par l'utilisateur.
-// Importer UI.* dans les composants au lieu de strings en dur.
-// Ajout de clés : additif uniquement (ne jamais réécrire une valeur existante).
+// ui-strings.ts — strings UI cockpit (UI.*).
 
 export const UI = {
   // Navigation
@@ -127,6 +124,43 @@ export const UI = {
   SIM_CONFIG_GENERATE_MEMO: 'Generate Investment Memo',
   SIM_CONFIG_FINETUNE_SHOW: 'Tune power density per rack',
   SIM_CONFIG_FINETUNE_HIDE: 'Hide rack density controls',
+  SIM_INVESTMENT_STRUCTURE_TITLE: 'Investment structure',
+  SIM_INVESTMENT_STRUCTURE_PILL: 'QIA + Hearst → Equinix',
+  SIM_CASE_VERB: 'Deploy',
+  SIM_CASE_INTO: 'into',
+  SIM_CASE_IN_QATAR_WITH: 'in Qatar with',
+  SIM_METRIC_CAPITAL: 'Capital',
+  SIM_METRIC_CAPACITY: 'Capacity',
+  SIM_METRIC_MOIC: 'MOIC',
+  SIM_TIMELINE_START: 'Investment start',
+  SIM_TIMELINE_COD: 'COD / operations',
+  SIM_TIMELINE_EXIT: 'Exit model',
+  SIM_JV_PARTY_QIA: 'QIA',
+  SIM_JV_PARTY_HEARST: 'Hearst',
+  SIM_JV_QIA_ROLE: 'Anchor capital',
+  SIM_JV_HEARST_ROLE: 'Founder / sponsor',
+  SIM_JV1_LABEL: 'JV1',
+  SIM_JV1_NAME: 'QIA + Hearst vehicle',
+  SIM_JV_SHARE_QIA_HEARST: 'QIA + Hearst',
+  SIM_JV_SHARE_EQUINIX: 'Equinix',
+  SIM_JV_NOTE: 'Equinix co-invests and operates the campus. The strategic vehicle remains QIA + Hearst first.',
+  SIM_ELECTRICITY_UNIT: '$/MWh',
+  SIM_MODEL_HELD_TITLE: 'Model-held assumptions',
+  SIM_MODEL_HELD_HINT: 'Shown for transparency, not user inputs.',
+  SIM_ASSUMPTION_CONSTRUCTION_LABEL: 'Construction cost',
+  SIM_ASSUMPTION_CONSTRUCTION_VALUE: 'Auto-sourced from market comps',
+  SIM_ASSUMPTION_EXIT_LABEL: 'Exit year',
+  SIM_ASSUMPTION_EXIT_VALUE: 'Derived from start + COD + hold',
+  SIM_ASSUMPTION_PUE_LABEL: 'PUE',
+  SIM_ASSUMPTION_PUE_VALUE: 'Model benchmark, not a user lever',
+  SIM_ASSUMPTION_RESERVATION_LABEL: 'Reservation',
+  SIM_ASSUMPTION_RESERVATION_VALUE: '80% reserved capacity',
+  SIM_ASSUMPTION_USAGE_LABEL: 'Multitenant usage',
+  SIM_ASSUMPTION_USAGE_VALUE: '100% actual consumption',
+  SIM_ELECTRICITY_LABEL: 'Tenant electricity cost',
+  SIM_ELECTRICITY_DESC: 'Kept visible because it matters commercially, even when passed through.',
+  SIM_ELECTRICITY_ARIA: 'Tenant electricity cost in dollars per megawatt hour',
+  SIM_ELECTRICITY_NOTE: 'For powered-shell and operator-led structures, tenant power is passed through. The model uses this value to keep the Qatar advantage visible without asking users to tune PUE or construction inputs.',
   // Archetypes (Deal Structures)
   ARCH_POWERED_SHELL_LABEL: 'Shell + Long Lease',
   ARCH_POWERED_SHELL_SHORT: 'We build it, a big operator rents it for 15-20 years',
@@ -409,6 +443,15 @@ export const UI = {
   DEALS_CLOSING_BODY: 'value is not captured at the equity line alone. The operator keeps 20% but pockets recurring development + operations fees, and whoever holds land + power controls the bottleneck. Knowing which role you play determines what you negotiate.',
 
   // Workspace (scenarios only — reports → Dossier)
+  WS_PAGE_TITLE: 'Workspace',
+  WS_SECTION_SCENARIOS: 'Saved scenarios',
+  WS_STATUS_ACTIVE: 'Active',
+  WS_STATUS_SAVED: 'Saved',
+  WS_OPEN_IN_SIMULATOR: 'Open in Simulator →',
+  WS_TH_NAME: 'Name',
+  WS_TH_TYPE: 'Type',
+  WS_TH_CREATED: 'Created',
+  WS_TH_STATUS: 'Status',
   WS_PAGE_SUBTITLE: 'Saved scenarios for this project. Reopen in the Simulator; strategic reports live in',
   WS_NO_SCENARIOS: 'No saved scenarios yet. Build one in the Simulator and click "Save this plan".',
   WS_NO_REPORTS: 'No reports yet. Generate a strategic memo from the Simulator.',
@@ -423,6 +466,14 @@ export const UI = {
   SOURCES_NO_ADMIN: 'No admin sources yet.',
   SOURCES_NO_FILTER: 'No results matching filters.',
   SOURCES_ADD: 'Add source',
+  SOURCES_UIM_TITLE: 'Add to Source Ledger',
+  SOURCES_UIM_HINT: 'This flags the source as used in the model — the simulator will use its value for this metric (overriding the benchmark median).',
+  SOURCES_UIM_SCENARIO_LABEL: 'Scenario context (for audit)',
+  SOURCES_UIM_DONE: 'Source added.',
+  SOURCES_UIM_ADD_BTN: 'Add to Ledger',
+  SOURCES_UIM_ADDING: 'Adding…',
+  SOURCES_UIM_ERR: 'Could not add source to ledger.',
+  SOURCES_ACTION_ERR: (msg: string) => msg || 'Action failed.',
   SOURCES_DELETE_CONFIRM: 'Delete this source? This cannot be undone.',
 
   // Dossier
@@ -653,6 +704,10 @@ export const UI = {
   MEMO_DOWNLOAD_TITLE: 'Download .md',
   MEMO_CLOSE_TITLE: 'Close (job continues in background)',
   MEMO_GENERATING_LABEL: 'Generating strategic memo…',
+  MEMO_SLA_WITHIN_TARGET: 'within target',
+  MEMO_SLA_SLOWER: 'slower than usual',
+  MEMO_STILL_WAITING_LLM: 'still waiting for the model',
+  MEMO_JOB_WAITING_LLM: ' · still waiting',
   ADVISOR_RAIL_ARIA: 'ORACLE Investment Committee Advisor',
 
   // ── KPI education layer ────────────────────────────────────────────────────
@@ -745,5 +800,3 @@ export const UI = {
   // Login (legacy layer — hors cockpit)
   LOGIN_PASSWORD_PLACEHOLDER: 'Password',
 } as const;
-
-export type UIKey = keyof typeof UI;

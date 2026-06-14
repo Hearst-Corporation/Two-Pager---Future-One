@@ -16,12 +16,13 @@ import { UI } from '@/lib/ui-strings';
 import { S as CP, L } from '@/lib/cp-styles';
 import './simulator.css';
 
-import CaseHeaderStep from '@/components/hearst/simulator/sections/CaseHeaderStep';
+import InvestmentCaseSurface from '@/components/hearst/simulator/InvestmentCaseSurface';
+import JvStructureVisual from '@/components/hearst/simulator/JvStructureVisual';
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
-import { Button, Card, Eyebrow } from '@/components/hearst/ui';
+import { Button, SectionHead } from '@/components/hearst/ui';
 
 // Valid viz tab ids — the chat bridge may set active_viz for the dedicated /results
 // page (single source of truth: VIZ_META). This config page stays results-free.
@@ -359,94 +360,87 @@ export default function SimulatorPage() {
   return (
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
-        {/* SETUP — inputs only. Decision metrics live on /simulator/results. */}
-        <CaseHeaderStep
-          archetypeId={state.primary_archetype_id}
-          geography={state.geography}
-          totalMw={state.total_mw}
-          mode={state.mode}
+        {/* HERO SURFACE — Replaces CaseHeaderStep and the old footer */}
+        <InvestmentCaseSurface
+          state={state}
           scenario={scenario}
           projection={projection}
+          selectedArchetype={PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)}
+          validateBlocked={validateBlocked}
+          validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Simulate ${state.total_mw || ''}MW ${PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)?.label || state.primary_archetype_id} in ${state.geography} →`}
+          onValidate={handleValidateAndReveal}
         />
 
-        {/* CONFIGURATION — single card, primary input hero + model/hardware always visible. */}
-        <Card
+        {/* CONFIGURATION — naked canvas, no cards */}
+        <div
           data-sim-config
-          variant="card"
-          surface={1}
-          padding="lg"
           style={S.configCard}
         >
           <div data-sim-config-body>
-            <div style={S.configHeader}>
-              <span style={S.eyebrow}>{UI.SIM_CONFIG_EYEBROW}</span>
-            </div>
-
-            <div data-sim-mode-stack>
-              <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
-
-              <InputFieldHero
-                embedded
-                mode={state.mode}
-                value={inputValue}
-                onChange={onInputChange}
-                projection={projection}
-                scenario={scenario}
-                derived={simResult?.derived}
-                solver={simResult?.solver}
-              />
-            </div>
-
             <div data-sim-advanced>
-              <div data-sim-advanced-section>
-                <Eyebrow block>{UI.SIM_CONFIG_MODEL_LABEL}</Eyebrow>
-                <ArchetypePicker
-                  archetypes={PRIMARY_DEAL_ARCHETYPES}
-                  primaryId={state.primary_archetype_id}
-                  onSelectPrimary={onSelectPrimary}
-                />
+            <div data-sim-setup-row>
+              <div data-sim-setup-col>
+                <SectionHead title="1. What?" hint="Archetype & Infrastructure" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <div data-sim-advanced-section>
+                  <ArchetypePicker
+                    archetypes={PRIMARY_DEAL_ARCHETYPES}
+                    primaryId={state.primary_archetype_id}
+                    onSelectPrimary={onSelectPrimary}
+                  />
+                  <div style={{ color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-nano)', marginTop: '2px', opacity: 0.8, textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)', textAlign: 'center' }}>
+                    Implies: {MODEL_DEFAULTS[state.primary_archetype_id]?.business_model_id?.replace(/_/g, ' ')} / {MODEL_DEFAULTS[state.primary_archetype_id]?.client_type_id?.replace(/_/g, ' ')}
+                  </div>
+                </div>
               </div>
-              <div data-sim-advanced-section>
-                <Eyebrow block>{UI.SIM_CONFIG_HW_LABEL}</Eyebrow>
-                <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} />
+
+              <div data-sim-setup-col>
+                <SectionHead title="2. Tech Stack" hint="Hardware & Cooling" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <div data-sim-advanced-section>
+                  <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} presetsOnly />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* VALIDATE CONFIG → integrated into card footer */}
-          <div data-sim-config-footer style={S.configFooter}>
-            <span style={S.validateHint}>
-              {simError ? UI.SIM_FIX_ERROR
-                : loading ? UI.STATE_CALCULATING
-                : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
-                : !projectId ? UI.SIM_LOADING_PROJECT
-                : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
-                : projection ? UI.SIM_READY
-                : UI.SIM_FILL}
-            </span>
-            <Button
-              variant="primary"
-              size="lg"
-              block
-              disabled={validateBlocked}
-              onClick={handleValidateAndReveal}
-              className="sim-config-cta"
-              style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
-            >
-              {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_CONFIG_GENERATE_MEMO}
-            </Button>
+            <div data-sim-hardware-detail>
+              <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} detailOnly />
+            </div>
+
+            <div data-sim-setup-row style={{ marginTop: 'var(--cp-space-4)' }}>
+              <div data-sim-setup-col>
+                <SectionHead title="3. Scale" hint="Capacity or Capital Target" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <div data-sim-mode-stack>
+                  <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
+
+                  <InputFieldHero
+                    embedded
+                    mode={state.mode}
+                    value={inputValue}
+                    onChange={onInputChange}
+                    projection={projection}
+                    scenario={scenario}
+                    derived={simResult?.derived}
+                    solver={simResult?.solver}
+                  />
+                </div>
+              </div>
+              <div data-sim-setup-col>
+                <SectionHead title="4. Structure" hint="Joint Venture & Equity" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <JvStructureVisual />
+              </div>
+            </div>
+            </div>
           </div>
-        </Card>
+        </div>
 
         {projectLoadError && (
-          <div className="cp-surface-accent-soft" style={{ ...CP.accentAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
+          <div style={{ ...CP.dangerAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
             <span>{projectLoadError}</span>
             <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>{UI.ACTION_RETRY}</Button>
           </div>
         )}
-        {simError && <div className="cp-surface-accent-soft" style={CP.accentAlert}>Error: {simError}</div>}
+        {simError && <div style={CP.dangerAlert} role="alert">Error: {simError}</div>}
         {saveError && (
-          <div className="cp-surface-accent-soft" style={CP.accentAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
+          <div style={CP.dangerAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
         )}
         {/* Modal/badge/toast montés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
       </div>
@@ -457,8 +451,8 @@ export default function SimulatorPage() {
 const S = {
   wrap: {
     width: '100%',
-    maxWidth: 'var(--cp-max-width, 1440px)',
-    margin: '0 auto',
+    maxWidth: 'none',
+    margin: 0,
     flex: '1 1 auto',
     minHeight: 0,
     display: 'flex',
@@ -485,15 +479,18 @@ const S = {
     opacity: 0.8,
   },
   validateHint: {
-    fontSize: 'var(--cp-font-base)',
+    fontSize: 'var(--cp-font-nano)',
     color: 'var(--cp-text-muted)',
-    fontWeight: 'var(--cp-weight-semibold)',
+    fontWeight: 'var(--cp-weight-bold)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-wider)',
   },
   configFooter: {
     ...L.rowBetween,
-    gap: 'var(--cp-space-3)',
+    gap: 'var(--cp-space-2)',
     flexWrap: 'wrap',
-    paddingTop: 'var(--cp-space-4)',
+    paddingTop: 'var(--cp-space-1)',
     borderTop: '1px solid var(--cp-border-base)',
+    alignItems: 'center',
   },
 };

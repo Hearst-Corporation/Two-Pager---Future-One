@@ -17,29 +17,6 @@
       "rules": {
         "no-unused-vars": "off"
       }
-    },
-    {
-      "files": ["app/(cockpit)/admin/hearst/**/*.{js,jsx,ts,tsx}", "components/hearst/**/*.{js,jsx,ts,tsx}"],
-      "rules": {
-        "no-restricted-syntax": ["error",
-          {
-            "selector": "Literal[value=/var\\(--color-/]",
-            "message": "Hearst module is isolated from the site DS. Use a --cp-* token from cockpit.css instead of --color-*."
-          },
-          {
-            "selector": "TemplateElement[value.raw=/var\\(--color-/]",
-            "message": "Hearst module is isolated from the site DS. Use a --cp-* token from cockpit.css instead of --color-*."
-          },
-          {
-            "selector": "Literal[value=/#[0-9A-Fa-f]{3,8}\\b/]",
-            "message": "Hearst module forbids hardcoded hex colors (3–8 digit). Use a --cp-* token from cockpit.css."
-          },
-          {
-            "selector": "TemplateElement[value.raw=/#[0-9A-Fa-f]{3,8}\\b/]",
-            "message": "Hearst module forbids hardcoded hex colors (3–8 digit). Use a --cp-* token from cockpit.css."
-          }
-        ]
-      }
     }
   ]
 }

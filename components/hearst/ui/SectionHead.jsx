@@ -11,10 +11,10 @@ const S = {
   // Canon (défaut)
   wrap: {
     display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)',
-    marginBottom: 'var(--cp-space-3)', borderBottom: '1px solid var(--cp-border)', paddingBottom: 'var(--cp-space-2)',
+    marginBottom: 'var(--cp-space-1)', borderBottom: '1px solid var(--cp-border)', paddingBottom: '2px',
   },
-  title: { margin: 0, fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' },
-  hint: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
+  title: { margin: 0, fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)' },
+  hint: { fontSize: 'var(--cp-font-nano)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
   // Hero
   heroWrap: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
   numBadge: {

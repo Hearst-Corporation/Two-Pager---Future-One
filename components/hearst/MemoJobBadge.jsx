@@ -34,7 +34,7 @@ export default function MemoJobBadge() {
       <span style={S.body}>
         <span style={S.title}>{UI.MEMO_JOB_TITLE}</span>
         <span style={{ ...S.sub, color: isSlowish ? 'var(--cp-status-warning)' : 'var(--cp-text-muted)' }}>
-          {formatElapsed(job.elapsed_ms)}{isSlowish ? ' · still waiting for Kimi' : ''}
+          {formatElapsed(job.elapsed_ms)}{isSlowish ? UI.MEMO_JOB_WAITING_LLM : ''}
         </span>
       </span>
       <span style={S.chevron}>›</span>
@@ -68,7 +68,7 @@ const S = {
     width: 14,
     height: 14,
     borderRadius: '50%',
-    border: '2px solid var(--cp-border)',
+    border: 'var(--cp-border-w-accent) solid var(--cp-border)',
     borderTopColor: 'var(--cp-accent-maroon, var(--cp-accent))',
     animation: 'memo-spin 0.9s linear infinite',
     flexShrink: 0,
