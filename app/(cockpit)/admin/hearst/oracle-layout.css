@@ -50,3 +50,43 @@ body.oracle-simulator-page .oracle-page {
    Narrow : max-width 640px (container queries)
    Mobile : max-width 600px (nav bottom, grilles 1 col)
    Aligner les media queries inline des pages sur ces seuils (px ci-dessus). */
+
+/* ── Memo metrics asset preview (M.5-C/D — SafeHtmlPreview fragment) ──
+   Calm, compact metrics summary rendered under the dossier Financial-metrics
+   block. Scoped to .oracle-metrics-preview so nothing else is affected.
+   Token-only — no hardcoded colours/sizes. */
+.oracle-metrics-preview .ct-asset-metrics {
+  padding-top: var(--cp-space-4);
+  border-top: var(--cp-border-w, 1px) solid var(--cp-border-soft);
+}
+.oracle-metrics-preview .ct-asset-eyebrow {
+  margin: 0 0 var(--cp-space-3);
+  font-size: var(--cp-font-micro);
+  font-weight: var(--cp-weight-black);
+  letter-spacing: var(--cp-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--cp-text-muted);
+}
+.oracle-metrics-preview .ct-asset-metrics-list {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--cp-space-3) var(--cp-space-5);
+}
+.oracle-metrics-preview .ct-asset-metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-1);
+}
+.oracle-metrics-preview .ct-asset-metric-label {
+  font-size: var(--cp-font-xs);
+  color: var(--cp-text-muted);
+  line-height: var(--cp-leading-tight);
+}
+.oracle-metrics-preview .ct-asset-metric-value {
+  margin: 0;
+  font-size: var(--cp-font-md);
+  font-weight: var(--cp-weight-bold);
+  color: var(--cp-text-strong);
+  line-height: var(--cp-leading-tight);
+}
