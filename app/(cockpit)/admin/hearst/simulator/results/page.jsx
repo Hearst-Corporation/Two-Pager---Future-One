@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { buildSimulatePayload, INITIAL_STATE } from '@/lib/hearst-simulator-state';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { fmtMW, fmtPctFromRatio, fmtPctRaw, fmtUSD, MISSING } from '@/lib/hearst-format';
-import { startMemoJob } from '@/lib/hearst-memo-job-store';
+import { startMemoJob, buildMemoPayloadFromSimResult } from '@/lib/hearst-memo-job-store';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 
 import {
@@ -176,8 +176,12 @@ export default function SimulatorResultsPage() {
 
   const handleGenerateMemo = useCallback(() => {
     if (!simResult || !row) return;
+    // Whitelist to the strict MemoPayloadSchema shape — the raw /simulate
+    // response carries extra keys (waterfall, debt_schedule, solver, …) that the
+    // .strict() validator rejects with 400. The server still re-computes the
+    // projection from this payload, so engine authority is preserved.
     startMemoJob({
-      payload: simResult,
+      payload: buildMemoPayloadFromSimResult(simResult),
       title: `Strategic Memo — ${row.name || 'Scenario'}`,
       scenarioLabel: row.name || 'Scenario',
       scenarioId,
