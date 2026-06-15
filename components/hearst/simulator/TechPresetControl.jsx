@@ -33,26 +33,25 @@ export default function TechPresetControl({ hardwareMix, dispatch }) {
         return (
           <button
             key={p.id}
+            type="button"
             onClick={() => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: p.patch })}
             aria-pressed={selected}
             data-focus-item
-            data-focused={selected}
-            data-dimmed={!selected}
+            data-focused={selected ? 'true' : undefined}
+            data-dimmed={!selected ? 'true' : undefined}
           >
             <div data-focus-title>{PRESET_LABEL[p.id]}</div>
-            
+
             <div data-focus-detail>
-              <p style={{ fontSize: '13px', color: 'var(--cp-text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
-                {PRESET_INFO[p.id]}
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <p className="archetype-ideal-for">{PRESET_INFO[p.id]}</p>
+              <div className="archetype-meta-row">
                 <div>
-                  <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--cp-text-muted)' }}>Standard</div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--cp-text-strong)' }}>{p.patch.classic_pct}%</div>
+                  <span className="archetype-meta-label">Standard</span>
+                  <span className="archetype-meta-value">{p.patch.classic_pct}%</span>
                 </div>
                 <div>
-                  <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--cp-text-muted)' }}>High-Density</div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--cp-text-strong)' }}>{p.patch.ai_pct}%</div>
+                  <span className="archetype-meta-label">High-Density</span>
+                  <span className="archetype-meta-value">{p.patch.ai_pct}%</span>
                 </div>
               </div>
             </div>

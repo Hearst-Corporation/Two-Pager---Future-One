@@ -42,33 +42,34 @@
 .del-3 { animation-delay: var(--stagger-3); }
 .del-4 { animation-delay: var(--stagger-4); }
 
-/* ── Editorial Canvas Layout — plein-largeur institutionnel ── */
+/* ── Config panel — colonne gauche cockpit ── */
 [data-sim-config-v2] {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-space-12);
+  gap: var(--cp-space-9); /* Fixed gap */
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: var(--cp-space-9) 0;
+  padding: var(--cp-space-6) 0; /* Fixed padding */
+  /* Removed overflow-y: auto to let the page scroll naturally */
 }
 
 [data-sim-section] {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-space-6);
+  gap: var(--cp-space-3);
 }
 
 [data-sim-section-head] {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-space-2);
+  gap: var(--cp-space-1);
   border-bottom: var(--cp-border-w) solid var(--cp-border-soft);
-  padding-bottom: var(--cp-space-4);
+  padding-bottom: var(--cp-space-2);
 }
 
 .sim-config-label {
-  font-size: var(--cp-font-2xl);
+  font-size: var(--cp-font-lg);
   font-weight: var(--cp-weight-medium);
   color: var(--cp-text-primary);
   letter-spacing: var(--cp-tracking-tighter);
@@ -87,8 +88,8 @@
 /* ── Archetype Cards — Focus Stage ── */
 [data-focus-stage] {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cp-space-6);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cp-space-3);
   align-items: stretch;
 }
 
@@ -102,7 +103,7 @@
   -webkit-backdrop-filter: var(--cp-blur-lg);
   border: var(--cp-border-w) solid var(--cp-border);
   border-radius: var(--cp-radius-lg);
-  padding: var(--cp-space-6);
+  padding: var(--cp-space-4);
   cursor: pointer;
   transition:
     transform var(--t-fast) var(--ease-standard),
@@ -115,12 +116,33 @@
   /* All cards stay fully interactive — no pointer-events:none anywhere */
   pointer-events: auto;
   opacity: 1;
+  overflow: hidden;
+}
+
+[data-focus-item]::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at top right, var(--cp-accent-soft), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--t-normal) var(--ease-standard);
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-focus-item][data-focused="true"]::before {
+  opacity: 0.5;
+}
+
+[data-focus-item] > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Hover — non-selected cards get a gentle lift */
 [data-focus-item]:hover:not([data-focused="true"]) {
-  transform: translateY(-2px);
-  box-shadow: var(--depth-1);
+  transform: translateY(-3px) scale(1.005);
+  box-shadow: var(--depth-2);
   border-color: var(--cp-border-strong);
   background: var(--cp-surface-glass-highlight);
 }
@@ -159,12 +181,10 @@
   line-height: var(--cp-leading-relaxed);
 }
 
-/* Detail panel — always visible on all cards (institutional: board compares
-   all theses at a glance without clicking). Selected card is highlighted by
-   its accent border/surface, not by revealing the detail. */
+/* Detail panel — always visible on all cards */
 [data-focus-detail] {
-  margin-top: var(--cp-space-4);
-  padding-top: var(--cp-space-4);
+  margin-top: var(--cp-space-2);
+  padding-top: var(--cp-space-2);
   border-top: var(--cp-border-w) solid var(--cp-border-soft);
 }
 
@@ -204,11 +224,17 @@
 [data-capacity-field] {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-space-3);
-  padding: var(--cp-space-7);
+  gap: var(--cp-space-2);
+  padding: var(--cp-space-4);
   background: var(--cp-surface-glass-highlight-soft);
   border: var(--cp-border-w) solid var(--cp-border);
   border-radius: var(--cp-radius-md);
+  transition: border-color var(--t-fast) var(--ease-standard), box-shadow var(--t-fast) var(--ease-standard);
+}
+
+[data-capacity-field]:focus-within {
+  border-color: var(--cp-accent);
+  box-shadow: inset 0 0 0 1px var(--cp-accent), var(--depth-1);
 }
 
 .institutional-input {
@@ -235,9 +261,9 @@
   letter-spacing: var(--cp-tracking-wider);
 }
 
-/* ── Decision Control (CTA) ── */
+/* ── Decision Control (CTA) — panneau droit ── */
 [data-decision-ctrl] {
-  padding: var(--cp-space-8);
+  padding: var(--cp-space-4);
   border-radius: var(--cp-radius-lg);
   background: var(--cp-surface-glass-highlight);
   border-top: var(--cp-border-w) solid var(--cp-border-strong);
@@ -246,9 +272,25 @@
   border-bottom: var(--cp-border-w) solid var(--cp-border);
   display: flex;
   flex-direction: column;
-  gap: var(--cp-space-8);
+  gap: var(--cp-space-4);
   box-shadow: var(--cp-shadow-hero);
-  margin-top: var(--cp-space-12);
+  margin-top: 0;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--t-fast) var(--ease-standard), box-shadow var(--t-fast) var(--ease-standard);
+}
+
+[data-decision-ctrl]:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--depth-2);
+}
+
+[data-decision-ctrl]::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cp-accent), transparent);
+  opacity: 0.8;
 }
 
 [data-decision-title] {
@@ -268,18 +310,12 @@
 }
 
 /* ── Responsive ── */
-/* 1200px — 2 columns: chat rail open (~360px) leaves <840px for 4 cols → too narrow */
-@media (max-width: 1200px) {
+@media (max-width: 1100px) {
   [data-focus-stage] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-@media (max-width: 900px) {
-  /* grid already 2-col from 1200px; keep for spacing overrides */
   [data-sim-config-v2] {
-    padding: var(--cp-space-6) 0;
-    gap: var(--cp-space-9);
+    gap: var(--cp-space-4);
   }
 }
 
@@ -288,15 +324,9 @@
     grid-template-columns: 1fr;
   }
   [data-sim-config-v2] {
-    padding: var(--cp-space-4) 0;
-    gap: var(--cp-space-8);
+    gap: var(--cp-space-3);
   }
   .sim-config-label {
-    font-size: var(--cp-font-xl);
-  }
-  [data-decision-ctrl] {
-    padding: var(--cp-space-6);
-    gap: var(--cp-space-6);
-    margin-top: var(--cp-space-9);
+    font-size: var(--cp-font-md);
   }
 }

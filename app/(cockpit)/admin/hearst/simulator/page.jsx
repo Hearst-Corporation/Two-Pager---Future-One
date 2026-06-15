@@ -19,20 +19,8 @@ import './simulator.css';
 import InvestmentCaseSurface from '@/components/hearst/simulator/InvestmentCaseSurface';
 import SimulatorConfigPanel from '@/components/hearst/simulator/SimulatorConfigPanel';
 import { Button } from '@/components/hearst/ui';
-
-const S = {
-  wrap: {
-    width: '100%',
-    maxWidth: 'none',
-    margin: 0,
-    flex: '1 1 auto',
-    minHeight: 0,
-    minWidth: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-section-gap)',
-  },
-};
+import { fmtPctFromRatio, fmtUSD, MISSING } from '@/lib/hearst-format';
+import { PRESET_META, LEVEL_LABEL } from '@/components/hearst/simulator/preset-meta';
 
 export default function SimulatorPage() {
   const router = useRouter();
@@ -45,16 +33,12 @@ export default function SimulatorPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const sp = new URLSearchParams(window.location.search);
-    // If a saved scenario is being reopened, skip URL-param hydration —
-    // the scenario fetch below owns the state and avoids a double POST.
     if (sp.get('scenario')) return;
     const fromUrl = parseStateFromUrl(sp);
     if (fromUrl) dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: fromUrl });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
-  // Chat → simulator bridge (SIMULATOR_PARAM_EVENT). Ready-to-wire contract;
   useEffect(() => {
     if (typeof window === 'undefined') return;
     function handler(e) {
@@ -65,8 +49,6 @@ export default function SimulatorPage() {
         case 'capital_usd':           return dispatch({ type: ACTIONS.SET_CAPITAL, value: Number(value) });
         case 'target_irr_pct':        return dispatch({ type: ACTIONS.SET_IRR_TARGET, value: Number(value) });
         case 'target_irr_lever':      return dispatch({ type: ACTIONS.SET_IRR_LEVER, value: String(value) });
-        // Changing the model also applies its canonical buyer/product pair, exactly
-        // like clicking an operating-model card → never an off-grid combo.
         case 'primary_archetype_id': {
           const def = MODEL_DEFAULTS[String(value)];
           return dispatch({ type: ACTIONS.APPLY_PRESET, value: { primary_archetype_id: String(value), ...(def || {}) } });
@@ -75,8 +57,6 @@ export default function SimulatorPage() {
         case 'client_type_id':        return dispatch({ type: ACTIONS.SET_CLIENT_TYPE, value: String(value) });
         case 'mode':                  return dispatch({ type: ACTIONS.SET_MODE, value: String(value) });
         case 'geography':             return dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: String(value) } });
-        // Whole-bundle apply (size + model + hardware in one shot) — the safe path
-        // for multi-field changes; resolves a QATAR_PRESETS id.
         case 'apply_preset': {
           const p = QATAR_PRESETS.find(q => q.id === value);
           if (!p) return;
@@ -105,22 +85,15 @@ export default function SimulatorPage() {
   const [loading, setLoading] = useState(false);
   const [savingState, setSavingState] = useState('idle');
   const [projectId, setProjectId] = useState(null);
-  // Last saved scenario — carries the Scenario → Memo → Dossier linkage so a
-  // generated memo is persisted with its scenario_id. Set on Save and on reopen.
   const [savedScenarioId, setSavedScenarioId] = useState(null);
   const [projectLoadError, setProjectLoadError] = useState(null);
-  // dirtySinceSave: true whenever the config changed since the last successful
-  // save. Gates re-save on Validate / Generate Memo so we never persist a
-  // duplicate row nor build a memo on a stale scenario.
   const [dirtySinceSave, setDirtySinceSave] = useState(true);
   const [saveError, setSaveError] = useState(null);
   const debounceRef = useRef(null);
   const saveTimerRef = useRef(null);
-  const savingRef = useRef(false); // synchronous double-click guard for Validate
-  const resultsNavigationRef = useRef(false); // prevents URL sync from racing results navigation
+  const savingRef = useRef(false);
+  const resultsNavigationRef = useRef(false);
 
-  // When the user navigates back from /results to the simulator config page,
-  // reset the flag so the URL sync resumes and shared links stay fresh.
   useEffect(() => {
     if (pathname && !pathname.includes('/results')) {
       resultsNavigationRef.current = false;
@@ -129,13 +102,9 @@ export default function SimulatorPage() {
 
   useEffect(() => () => clearTimeout(saveTimerRef.current), []);
 
-  // Any config change marks the scenario dirty and invalidates the previous
-  // projection. Without this, a fast preset → validate click can save stale
-  // numbers from the prior configuration before the debounced /simulate returns.
-  // Ref-guarded: only simulate-relevant fields mark the scenario dirty.
   const prevSimKeyRef = useRef(null);
   useEffect(() => {
-    const next = JSON.stringify(buildSimulatePayload(state)); // state, NOT deferredState
+    const next = JSON.stringify(buildSimulatePayload(state));
     if (next !== prevSimKeyRef.current) {
       prevSimKeyRef.current = next;
       setDirtySinceSave(true);
@@ -168,11 +137,6 @@ export default function SimulatorPage() {
     return () => { cancelled = true; clearTimeout(t); };
   }, []);
 
-  // Reopen: Workspace links to /admin/hearst/simulator?scenario=<id>. Read the id
-  // (client-only, no Suspense needed), fetch the persisted row, and hydrate the
-  // reducer from input_mode / input_value / hardware_mix. Archetype has no column
-  // → fall back to the default. The saved scenario id is kept so a memo generated
-  // from the reopened scenario links straight back to it.
   useEffect(() => {
     const sid = new URLSearchParams(window.location.search).get('scenario');
     if (!sid) return;
@@ -197,15 +161,12 @@ export default function SimulatorPage() {
         dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: patch });
         setSavedScenarioId(sid);
       } catch (e) {
-    // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.warn('[simulator] failed to reopen scenario:', e.message);
       }
     })();
   }, []);
 
-  // simKey: JSON of the simulate payload derived from deferredState.
-  // Fields omitted from buildSimulatePayload do not trigger redundant POST /simulate.
-  // The mark-dirty effect above uses state directly (NOT simKey) to stay synchronous.
   const simKey = useMemo(() => JSON.stringify(buildSimulatePayload(deferredState)), [deferredState]);
 
   useEffect(() => {
@@ -256,6 +217,7 @@ export default function SimulatorPage() {
   const projection = simResult?.projection;
   const scenario = simResult?.scenario;
   const archetypeOutcome = simResult?.archetype_outcome;
+
   useEffect(() => {
     setAdvisorContext?.({
       surface: 'simulator',
@@ -270,7 +232,6 @@ export default function SimulatorPage() {
     return () => setAdvisorContext?.(null);
   }, [loading, projection, savedScenarioId, scenario, setAdvisorContext, simError, simResult, state]);
 
-  // Returns the saved scenario id (string) on success, null on failure.
   async function handleSave() {
     if (!projectId || !scenario) return null;
     setSavingState('saving');
@@ -314,10 +275,6 @@ export default function SimulatorPage() {
     }
   }
 
-  // Validate = persist THEN navigate to the dedicated results page. The graphs
-  // live in /admin/hearst/simulator/results; this page stays configuration-only.
-  // Synchronous savingRef guards
-  // against a double-click creating two rows before the first re-render.
   async function handleValidateAndReveal() {
     if (savingRef.current) return;
     if (!projection || !projectId || loading || simError) return;
@@ -325,7 +282,7 @@ export default function SimulatorPage() {
     try {
       let id = savedScenarioId;
       if (!id || dirtySinceSave) id = await handleSave();
-      if (!id) return; // save failed → stay on config, inline error already shown
+      if (!id) return;
       resultsNavigationRef.current = true;
       const params = new URLSearchParams({
         scenario: id,
@@ -340,11 +297,15 @@ export default function SimulatorPage() {
   }
 
   const validateBlocked = !projection || !projectId || loading || !!simError || savingState === 'saving';
+  const meta = PRESET_META[state.primary_archetype_id];
+  const irr = projection?.irr ?? projection?.return_metrics?.irr;
+  const npv = projection?.npv ?? projection?.return_metrics?.npv;
+  const capex = projection?.total_capex ?? scenario?.total_capex_usd ?? state.capital_usd;
 
   return (
     <div className="oracle-page oracle-simulator-page">
-      <div data-sim-wrap style={S.wrap}>
-        {/* Hero board-ready + config panel v2 */}
+      <div data-sim-wrap>
+        {/* Hero strip — compact, full width */}
         <InvestmentCaseSurface
           state={state}
           scenario={scenario}
@@ -352,13 +313,72 @@ export default function SimulatorPage() {
           selectedArchetype={PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)}
         />
 
-        <SimulatorConfigPanel 
-          state={state} 
-          dispatch={dispatch} 
-          validateBlocked={validateBlocked}
-          validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Generate Board Memo →`}
-          onValidate={handleValidateAndReveal}
-        />
+        {/* Cockpit 2-col: config left / live panel right */}
+        <div data-sim-cockpit>
+          {/* LEFT — configuration */}
+          <SimulatorConfigPanel
+            state={state}
+            dispatch={dispatch}
+          />
+
+          {/* RIGHT — live metrics + CTA */}
+          <aside data-sim-right-panel className="is-assembling del-3">
+            <div data-sim-live-metrics>
+              <div data-sim-live-label>
+                <span className="live-dot" data-loading={loading} />
+                {loading ? 'Computing…' : 'Live projection'}
+              </div>
+
+              <div data-sim-live-kpi>
+                <span data-sim-live-kpi-name>IRR</span>
+                <strong data-sim-live-kpi-value data-accent={irr != null && !loading}>
+                  {loading ? '—' : irr != null ? fmtPctFromRatio(irr) : MISSING}
+                </strong>
+              </div>
+
+              <div data-sim-live-kpi>
+                <span data-sim-live-kpi-name>Total CAPEX</span>
+                <strong data-sim-live-kpi-value>
+                  {loading ? '—' : fmtUSD(capex)}
+                </strong>
+              </div>
+
+              <div data-sim-live-kpi>
+                <span data-sim-live-kpi-name>NPV</span>
+                <strong data-sim-live-kpi-value>
+                  {loading ? '—' : npv != null ? fmtUSD(npv) : MISSING}
+                </strong>
+              </div>
+
+              <div data-sim-live-kpi>
+                <span data-sim-live-kpi-name>Risk</span>
+                <strong data-sim-live-kpi-value>
+                  {meta ? LEVEL_LABEL[meta.risk] : MISSING}
+                </strong>
+              </div>
+            </div>
+
+            <div data-decision-ctrl>
+              <div>
+                <span data-decision-label>Decision Required</span>
+                <div data-decision-title>Approve & Generate Memo</div>
+              </div>
+              <Button
+                variant="primary"
+                size="lg"
+                disabled={validateBlocked}
+                onClick={handleValidateAndReveal}
+                style={{ width: '100%', justifyContent: 'space-between', padding: '0 24px', height: '52px', fontSize: '15px' }}
+              >
+                {savingState === 'saving' ? UI.SIM_SAVING : 'Generate Board Memo →'}
+              </Button>
+            </div>
+
+            {saveError && (
+              <div style={CP.dangerAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
+            )}
+          </aside>
+        </div>
 
         {projectLoadError && (
           <div style={{ ...CP.dangerAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
@@ -367,12 +387,7 @@ export default function SimulatorPage() {
           </div>
         )}
         {simError && <div style={CP.dangerAlert} role="alert">Error: {simError}</div>}
-        {saveError && (
-          <div style={CP.dangerAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
-        )}
-        {/* Modal/badge/toast montés globalement dans app/(cockpit)/admin/hearst/layout.jsx */}
       </div>
     </div>
   );
 }
-
