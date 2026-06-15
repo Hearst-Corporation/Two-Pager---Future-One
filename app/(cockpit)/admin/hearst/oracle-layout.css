@@ -8,7 +8,7 @@
   max-height: 100%;
   margin: 0 auto;
   padding-block-start: 0;
-  padding-block-end: var(--cp-scroll-clear, var(--cp-space-6));
+  padding-block-end: calc(var(--cp-scroll-clear, var(--cp-space-6)) + 80px);
   padding-inline: var(--cp-space-6);
   display: flex;
   flex-direction: column;
