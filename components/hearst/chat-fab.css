@@ -15,8 +15,13 @@
     flex: none;
     z-index: var(--cp-z-docked);
     transform: translateX(0);
-    box-shadow: var(--cp-shadow-md);
+    box-shadow: none;
     border-left: 1px solid var(--cp-border);
+    background: var(--cp-bg-deep);
+  }
+
+  body.oracle-chat-docked .ct-rail-right-header {
+    border-bottom: none;
   }
 
   body.oracle-chat-docked .ct-page-area {

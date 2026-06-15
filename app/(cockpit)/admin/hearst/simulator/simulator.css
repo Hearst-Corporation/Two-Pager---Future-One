@@ -11,7 +11,7 @@
 }
 
 .oracle-page [data-sim-case-surface] {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
   position: relative;
   padding: var(--cp-space-6);
