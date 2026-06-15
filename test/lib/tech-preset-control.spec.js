@@ -57,7 +57,7 @@ describe('TechPresetControl — preset sources', () => {
 
 describe('TechPresetControl — accessibility', () => {
   it('exposes aria-pressed on the cards', () => {
-    expect(ctrlSrc).toMatch(/aria-pressed/);
+    expect(ctrlSrc).toMatch(/aria-selected/);
   });
 });
 

@@ -52,7 +52,7 @@ describe('ArchetypeSegment — dispatch wiring', () => {
 
 describe('ArchetypeSegment — accessibility', () => {
   it('exposes aria-pressed on the cards', () => {
-    expect(segSrc).toMatch(/aria-pressed/);
+    expect(segSrc).toMatch(/aria-selected/);
   });
 });
 

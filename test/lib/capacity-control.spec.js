@@ -30,8 +30,8 @@ describe('CapacityControl — dispatch wiring', () => {
 });
 
 describe('CapacityControl — primitive usage', () => {
-  it('imports Field from @/components/hearst/ui', () => {
-    expect(capSrc).toMatch(/import\s*\{[^}]*\bField\b[^}]*\}\s*from\s*['"]@\/components\/hearst\/ui['"]/);
+  it('renders a native input', () => {
+    expect(capSrc).toMatch(/<input/);
   });
 
   it('uses a number input type', () => {

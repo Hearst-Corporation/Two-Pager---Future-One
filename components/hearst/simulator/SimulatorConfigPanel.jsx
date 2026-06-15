@@ -1,5 +1,4 @@
 'use client';
-import { Card } from '@/components/hearst/ui';
 import { UI } from '@/lib/ui-strings';
 import ArchetypeSegment from './ArchetypeSegment';
 import CapacityControl from './CapacityControl';
@@ -9,26 +8,35 @@ import './simulator-config.css';
 export default function SimulatorConfigPanel({ state, dispatch }) {
   return (
     <div data-sim-config-v2>
-      <Card variant="card" surface={0} padding="lg" as="section" data-sim-config-section="archetype">
-        <label className="sim-config-label">{UI.SIM_THESIS_TITLE}</label>
+      <section data-sim-section>
+        <header data-sim-section-head>
+          <h2 className="sim-config-label">{UI.SIM_THESIS_TITLE}</h2>
+          <p className="sim-config-hint">{UI.SIM_THESIS_HINT}</p>
+        </header>
         <div data-arch-segment>
           <ArchetypeSegment primaryId={state.primary_archetype_id} dispatch={dispatch} />
         </div>
-      </Card>
+      </section>
 
-      <Card variant="card" surface={0} padding="lg" as="section" data-sim-config-section="capacity">
-        <label className="sim-config-label">{UI.SIM_SIZE_TITLE}</label>
+      <section data-sim-section>
+        <header data-sim-section-head>
+          <h2 className="sim-config-label">{UI.SIM_SIZE_TITLE}</h2>
+          <p className="sim-config-hint">{UI.SIM_SIZE_HINT}</p>
+        </header>
         <div data-capacity-control>
           <CapacityControl value={state.total_mw} dispatch={dispatch} />
         </div>
-      </Card>
+      </section>
 
-      <Card variant="card" surface={0} padding="lg" as="section" data-sim-config-section="tech">
-        <label className="sim-config-label">{UI.SIM_HW_TITLE}</label>
+      <section data-sim-section>
+        <header data-sim-section-head>
+          <h2 className="sim-config-label">{UI.SIM_HW_TITLE}</h2>
+          <p className="sim-config-hint">{UI.SIM_HW_HINT}</p>
+        </header>
         <div data-tech-preset>
           <TechPresetControl hardwareMix={state.hardware_mix} dispatch={dispatch} />
         </div>
-      </Card>
+      </section>
     </div>
   );
 }
