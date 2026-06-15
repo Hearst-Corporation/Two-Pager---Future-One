@@ -17,6 +17,7 @@ import { S as CP } from '@/lib/cp-styles';
 import './simulator.css';
 
 import InvestmentCaseSurface from '@/components/hearst/simulator/InvestmentCaseSurface';
+import SimulatorConfigPanel from '@/components/hearst/simulator/SimulatorConfigPanel';
 import { Button } from '@/components/hearst/ui';
 
 // Valid viz tab ids — the chat bridge may set active_viz for the dedicated /results
@@ -360,6 +361,8 @@ export default function SimulatorPage() {
           onValidate={handleValidateAndReveal}
         />
         </div>
+
+        <SimulatorConfigPanel state={state} dispatch={dispatch} />
 
         {projectLoadError && (
           <div style={{ ...CP.dangerAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">

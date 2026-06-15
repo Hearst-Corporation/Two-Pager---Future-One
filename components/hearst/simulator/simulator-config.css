@@ -1,0 +1,87 @@
+/* simulator-config.css — shell layout du SimulatorConfigPanel v2.
+   Scopé à body.oracle-simulator-page. Tokens uniquement (var(--cp-*)). */
+
+body.oracle-simulator-page [data-sim-config-v2] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-6);
+  width: 100%;
+}
+
+body.oracle-simulator-page [data-sim-config-v2] section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-3);
+}
+
+body.oracle-simulator-page [data-arch-segment] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cp-space-3);
+}
+
+body.oracle-simulator-page [data-capacity-control] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-3);
+}
+
+body.oracle-simulator-page [data-tech-preset] {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cp-space-3);
+}
+
+body.oracle-simulator-page [data-arch-card] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-2);
+  align-items: flex-start;
+  text-align: left;
+}
+
+body.oracle-simulator-page [data-arch-card-head] {
+  display: flex;
+  align-items: center;
+  gap: var(--cp-space-2);
+  width: 100%;
+}
+
+body.oracle-simulator-page [data-arch-label] {
+  font-size: var(--cp-font-base);
+  font-weight: var(--cp-weight-bold);
+  color: var(--cp-text-strong);
+}
+
+body.oracle-simulator-page [data-arch-short] {
+  font-size: var(--cp-font-sm);
+  color: var(--cp-text-muted);
+  line-height: var(--cp-leading-snug);
+}
+
+body.oracle-simulator-page [data-tech-card] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-space-2);
+  align-items: flex-start;
+  text-align: left;
+}
+
+body.oracle-simulator-page [data-tech-name] {
+  font-size: var(--cp-font-base);
+  font-weight: var(--cp-weight-bold);
+  color: var(--cp-text-strong);
+}
+
+body.oracle-simulator-page [data-tech-mix] {
+  font-size: var(--cp-font-sm);
+  color: var(--cp-text-muted);
+  line-height: var(--cp-leading-snug);
+}
+
+@media (max-width: 720px) {
+  body.oracle-simulator-page [data-arch-segment],
+  body.oracle-simulator-page [data-tech-preset] {
+    grid-template-columns: 1fr;
+  }
+}

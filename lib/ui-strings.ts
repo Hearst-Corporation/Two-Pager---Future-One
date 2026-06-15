@@ -194,6 +194,7 @@ export const UI = {
   SIM_ELECTRICITY_ARIA: 'Tenant electricity cost in dollars per megawatt hour',
   SIM_ELECTRICITY_NOTE: 'For powered-shell and operator-led structures, tenant power is passed through. The model uses this value to keep the Qatar advantage visible without asking users to tune PUE or construction inputs.',
   // Archetypes (Deal Structures)
+  ARCH_RECOMMENDED: 'Recommended',
   ARCH_POWERED_SHELL_LABEL: 'Shell + Long Lease',
   ARCH_POWERED_SHELL_SHORT: 'We build it, a big operator rents it for 15-20 years',
   ARCH_BRANDED_JV_LABEL: 'Co-branded Joint Venture (51 / 49)',

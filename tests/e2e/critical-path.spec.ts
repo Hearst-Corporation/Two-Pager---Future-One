@@ -6,7 +6,7 @@
 // Auth: dev autologin (every request is authenticated server-side). If autologin
 // is off, the whole suite skips with a clear message (the gate needs an authed env).
 //
-// Flow A drives the real UI (simulator Generate Investment Memo CTA + results memo button).
+// Flow A drives the real UI (simulator .sim-hero-cta + results Generate Strategic Memo button).
 // Flows B–E exercise the exact API contracts the UI calls and assert persistence,
 // versioning, PDF truth and loud failures. All created scenarios are tracked and
 // best-effort-deleted afterwards (memos have no delete route — tagged via RUN_TAG).
@@ -84,8 +84,10 @@ test('Flow A — happy path: login → simulator → save → memo → dossier �
   // Scenario persisted.
   await assertScenarioSaved(request, scenarioId);
 
-  // Results render (decision band) before generating the memo.
-  await expect(page.getByText(/Returns composition/i).first()).toBeVisible({ timeout: 20_000 });
+  // Results render (decision band) before generating the memo. The rebuilt results
+  // page exposes the decision KPIs via [data-decision-kpis] (the literal "Returns
+  // composition" string only renders on the dossier, not here).
+  await expect(page.locator('[data-decision-kpis]')).toBeVisible({ timeout: 20_000 });
 
   // Generate Memo via the UI button → poll persistence (async job hits /strategic-memo).
   await page.getByRole('button', { name: /Generate Strategic Memo/i }).click();
@@ -217,7 +219,9 @@ test('Flow E — failures are loud, never silent, never corrupting', async ({ pa
 // ── FLOW F — Simulator URL & Hydration Audit Fixes ───────────────────────────
 //
 // Covers 4 fixes from the June-2026 simulator URL audit (commit 97e1025):
-//   F1 — resultsNavigationRef reset: URL stays live after results → back → config (fix A)
+//   F1 — resultsNavigationRef reset: URL stays live after results → back → config (fix A);
+//        also exercises the rebuilt SimulatorConfigPanel v2 controls (CapacityControl
+//        MW input + ArchetypeSegment cards) driving serializeStateToUrl.
 //   F2 — ?viz= active on results page: deep-link to sankey shows sankey panel (fix E)
 //   F3 — viz absent from config URL: serializeStateToUrl never emits ?viz= (fix F)
 //   F4 — ?scenario= skips URL hydration: DB value wins over URL mw param (fix B)
@@ -250,11 +254,30 @@ test('Flow F1 — URL sync resumes after results → back → config change', as
   await backLink.click();
   await page.waitForURL(/\/admin\/hearst\/simulator/, { timeout: 15_000 });
 
-  // Config UI is gone — navigate via URL (config is URL-only now).
-  // This proves resultsNavigationRef was reset: the URL sync resumes.
-  await page.goto('/admin/hearst/simulator?mode=mw_first&mw=75&arch=powered_shell', { waitUntil: 'networkidle' });
-  const url = new URL(page.url());
-  expect(url.searchParams.get('mw'), 'URL contains mw=75').toBe('75');
+  // Config UI is back (SimulatorConfigPanel v2). Drive the REAL controls and prove
+  // resultsNavigationRef was reset — the state→URL sync resumes after back-nav.
+  //
+  // 1) CapacityControl: fill the real MW input → dispatch SET_MW → serializeStateToUrl
+  //    must emit ?mw=75. (Field renders a <input type="number"> inside
+  //    [data-capacity-field].) Blur via Tab so onChange settles before we poll.
+  const mwInput = page.locator('[data-capacity-field] input[type="number"]');
+  await expect(mwInput, 'CapacityControl MW input visible after back-nav').toBeVisible({ timeout: 15_000 });
+  await mwInput.fill('75');
+  await mwInput.press('Tab');
+  await expect.poll(
+    () => new URL(page.url()).searchParams.get('mw'),
+    { timeout: 15_000, message: 'CapacityControl SET_MW syncs URL to ?mw=75' }
+  ).toBe('75');
+
+  // 2) ArchetypeSegment: select a different archetype card → APPLY_PRESET →
+  //    serializeStateToUrl must emit ?arch=neocloud_gpu.
+  const archCard = page.locator('[data-arch-card="neocloud_gpu"]');
+  await expect(archCard, 'neocloud_gpu archetype card visible').toBeVisible({ timeout: 15_000 });
+  await archCard.click();
+  await expect.poll(
+    () => new URL(page.url()).searchParams.get('arch'),
+    { timeout: 15_000, message: 'ArchetypeSegment selection syncs URL to ?arch=neocloud_gpu' }
+  ).toBe('neocloud_gpu');
 });
 
 test('Flow F2 — ?viz=sankey deep-link activates sankey panel on results', async ({ page, request }) => {
