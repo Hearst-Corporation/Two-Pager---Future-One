@@ -3,14 +3,9 @@
 import PropTypes from 'prop-types';
 import { Card } from '@/components/hearst/ui';
 import { DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
-import { fmtUSD, fmtPctRaw, fmtMW } from '@/lib/hearst-format';
+import { fmtUSD, fmtPctRaw, fmtMW, fmtGeo } from '@/lib/hearst-format';
 
 const ARCH_LABEL = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a.label]));
-
-function prettyGeo(g) {
-  if (!g) return null;
-  return String(g).charAt(0).toUpperCase() + String(g).slice(1);
-}
 
 const MODE_LABEL = {
   mw_first: "Capacity Constraint",
@@ -28,7 +23,7 @@ const DRIVER_LABEL = {
 
 export default function CaseHeaderStep({ archetypeId, geography, totalMw, mode, scenario, projection }) {
   const model = ARCH_LABEL[archetypeId] || archetypeId;
-  const geo = prettyGeo(geography);
+  const geo = fmtGeo(geography);
 
   const capex = scenario?.total_capex_usd;
   const irr = projection?.return_metrics?.irr_pct;
