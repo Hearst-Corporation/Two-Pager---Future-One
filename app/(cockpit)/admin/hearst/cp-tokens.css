@@ -72,7 +72,6 @@
   --cp-tooltip-bg:      var(--ct-surface-3);
   --cp-blur-md:         blur(12px);
   --cp-dur-fast:        100ms;
-  --cp-dur-slow:        400ms;
 
   /* Opacité — échelle unique (inline styles, hover, sections secondaires) */
   --cp-opacity-section-quiet: 0.6;
@@ -82,9 +81,6 @@
   --cp-opacity-hover:       0.85;
   --cp-opacity-disabled:    0.5;
   --cp-opacity-prominent:   0.95;
-  --cp-opacity-gantt-idle:  0.4;
-
-  /* Surfaces glass / hero */
 
   --cp-kicker-dot-size:         var(--cp-op-dot-lg);
 

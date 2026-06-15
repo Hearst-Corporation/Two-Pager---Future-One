@@ -1,5 +1,6 @@
 /* oracle-responsive.css — shared responsive tiers for simulator and results
-   Container: [data-responsive-layout] (panneau centre réel, pas le viewport).
+   Containers: [data-sim-wrap] (simulator) · [data-results-layout] (results) —
+   le panneau centre réel, pas le viewport.
    2 seuils synchronisés :
      · 640px  — narrow ↔ medium
      · 1080px — medium ↔ wide

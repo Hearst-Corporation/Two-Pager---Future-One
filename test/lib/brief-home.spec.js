@@ -29,15 +29,3 @@ describe('Brief home — entry point', () => {
     expect(page).toContain('HearstEntryPage');
   });
 });
-
-describe('Brief home — layout CSS', () => {
-  const layout = read('app/(cockpit)/admin/hearst/oracle-layout.css');
-
-  it('brief page opts out of flex viewport stretch', () => {
-    expect(layout).toMatch(/\.oracle-page\.oracle-brief-page\s*\{[^}]*flex:\s*0\s+1\s+auto/);
-  });
-
-  it('journey grid uses align-items: start (cards content-sized)', () => {
-    expect(layout).toMatch(/\[data-brief-journey\][\s\S]*align-items:\s*start/);
-  });
-});

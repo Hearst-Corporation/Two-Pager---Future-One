@@ -84,7 +84,6 @@ html :focus-visible {
 .cp-surface-1 { background: var(--cp-surface-1); }
 .cp-surface-2 { background: var(--cp-surface-2); }
 .cp-surface-3 { background: var(--cp-surface-3); }
-.cp-surface-accent-soft { background: var(--cp-accent-soft); }
 
 .cp-card-hover:hover {
   transform: translateY(-2px);
@@ -174,21 +173,12 @@ body.oracle-chat-docked .ct-rail-right .ct-rail-right-body {
   overflow: hidden;
   padding-bottom: var(--cp-space-4);
 }
-body.oracle-chat-docked .ct-rail-right-body [data-oracle-advisor-slot] {
-  flex-shrink: 0;
-  max-height: min(38vh, 340px);
-  overflow-y: auto;
-  border-bottom: 1px solid var(--cp-border);
-}
 body.oracle-chat-docked .ct-rail-right-body .ct-chat-root {
   display: flex;
   flex-direction: column;
   flex: 1 1 0%;
   min-height: 0;
 }
-/* Reference pages (deals, sources, workspace, dossier list) — chat only, no IC snapshot */
-body.oracle-advisor-chat-only [data-oracle-advisor-slot] { display: none !important; }
-
 /* === Chat input padding fix (shell override) === */
 .ct-chat-input {
   min-height: var(--cp-chat-input-min-height);

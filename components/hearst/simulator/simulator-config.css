@@ -1,46 +1,14 @@
-/* ── Motion & Depth Tokens — mapped to --cp-* ── */
+/* ── Motion Tokens — mapped to --cp-* ── */
 :root {
-  --t-fast:       var(--cp-dur-fast);
-  --t-normal:     var(--cp-dur-base);
-  --t-slow:       var(--cp-dur-slow);
-
+  --t-fast:        var(--cp-dur-fast);
   --ease-standard: var(--cp-ease);
-  --ease-emphasis: var(--cp-ease-out);
-
-  --stagger-1: 0.05s;
-  --stagger-2: 0.10s;
-  --stagger-3: 0.15s;
-  --stagger-4: 0.20s;
-
-  --depth-1: var(--cp-shadow-md);
-  --depth-2: var(--cp-shadow-lg);
-  --depth-3: var(--cp-shadow-card-hover);
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --t-fast:       0s;
-    --t-normal:     0.05s;
-    --t-slow:       0.05s;
+    --t-fast: 0s;
   }
 }
-
-/* ── Surface Assembly Animation ── */
-.is-assembling {
-  animation: assembleIn var(--t-slow) var(--ease-emphasis) forwards;
-  opacity: 0;
-  transform: translateY(var(--cp-space-8)) scale(0.98);
-}
-
-@keyframes assembleIn {
-  0%   { opacity: 0; transform: translateY(var(--cp-space-8)) scale(0.98); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.del-1 { animation-delay: var(--stagger-1); }
-.del-2 { animation-delay: var(--stagger-2); }
-.del-3 { animation-delay: var(--stagger-3); }
-.del-4 { animation-delay: var(--stagger-4); }
 
 /* ── Simulator — hérite --sim-* de [data-sim-wrap] (simulator.css, échelle cqi) ── */
 [data-sim-config-v2] {

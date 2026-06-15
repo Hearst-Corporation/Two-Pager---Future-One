@@ -4,8 +4,7 @@
 
 /* ── MICRO-INTERACTIONS ── */
 body.oracle-results-page a,
-body.oracle-results-page button,
-body.oracle-results-page [data-gantt-row] {
+body.oracle-results-page button {
   transition: opacity var(--cp-dur-fast) var(--cp-ease-out), background-color var(--cp-dur-fast) var(--cp-ease-out) !important;
 }
 
@@ -14,40 +13,12 @@ body.oracle-results-page button:hover {
   opacity: var(--cp-opacity-hover);
 }
 
-/* ── GANTT HOVER ── */
-body.oracle-results-page [data-gantt-rows]:hover [data-gantt-row] {
-  opacity: var(--cp-opacity-gantt-idle);
-}
-body.oracle-results-page [data-gantt-rows] [data-gantt-row]:hover {
-  opacity: 1;
-}
-body.oracle-results-page [data-gantt-rows] [data-gantt-row]:hover [data-gantt-bar-track] > div {
-  box-shadow: 0 0 12px var(--cp-accent-maroon);
-}
-
 /* ── STICKY CONTEXT BAR ── */
 .cp-sticky-context {
   position: sticky;
   top: 0;
   z-index: 10;
 }
-@keyframes cp-fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-stagger-1 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
-.animate-stagger-2 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
-.animate-stagger-3 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
-.animate-stagger-4 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
-.animate-stagger-5 { animation: cp-fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both; }
-
 body.oracle-results-page [data-results-layout] {
   container-type: inline-size;
   container-name: results;
@@ -327,31 +298,6 @@ body.oracle-results-page [data-narrative-box] {
   gap: var(--cp-space-3);
 }
 
-/* ── Capital panel — returns composition garde sa sous-carte ── */
-body.oracle-results-page [data-capital-panel] [data-returns-composition] {
-  min-width: 0;
-  width: 100%;
-}
-
-body.oracle-results-page [data-capital-panel] [data-returns-composition] [data-rc-rows] {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--cp-space-3);
-}
-
-@container capital (max-width: 280px) {
-  body.oracle-results-page [data-capital-panel] [data-returns-composition] [data-rc-rows] {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--cp-space-2);
-  }
-}
-
-body.oracle-results-page [data-capital-panel] [data-returns-composition] [data-rc-note] {
-  line-height: var(--cp-leading-normal);
-  font-size: var(--cp-font-sm);
-}
-
 /* ── Chart ── */
 body.oracle-results-page [data-results-chart] {
   min-height: 0;
@@ -450,24 +396,6 @@ body.oracle-results-page [data-b2b-matrix] {
   body.oracle-results-page [data-viz-panel-head] {
     flex-direction: column;
     align-items: flex-start;
-  }
-}
-
-/* ── Gantt ── */
-body.oracle-results-page [data-gantt-row] {
-  grid-template-columns: minmax(148px, 220px) minmax(0, 1fr);
-  gap: var(--cp-space-3);
-}
-
-@container results (min-width: 640px) {
-  body.oracle-results-page [data-gantt-row] {
-    grid-template-columns: minmax(160px, 240px) minmax(0, 1fr);
-  }
-}
-
-@container results (max-width: 639px) {
-  body.oracle-results-page [data-gantt-row] {
-    grid-template-columns: 1fr;
   }
 }
 
