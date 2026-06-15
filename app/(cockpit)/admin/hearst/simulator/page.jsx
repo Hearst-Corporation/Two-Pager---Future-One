@@ -1,7 +1,7 @@
 'use client';
 
 import { useReducer, useState, useEffect, useCallback, useDeferredValue, useRef, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 import {
   INITIAL_STATE, ACTIONS, simulatorReducer,
@@ -30,6 +30,7 @@ const VIZ_TAB_IDS = new Set(['radar', 'network', 'matrix', 'sankey']);
 
 export default function SimulatorPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { setAdvisorContext } = useSimulation();
 
   const [state, dispatch] = useReducer(simulatorReducer, INITIAL_STATE);
@@ -38,6 +39,9 @@ export default function SimulatorPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const sp = new URLSearchParams(window.location.search);
+    // If a saved scenario is being reopened, skip URL-param hydration —
+    // the scenario fetch below owns the state and avoids a double POST.
+    if (sp.get('scenario')) return;
     const fromUrl = parseStateFromUrl(sp);
     if (fromUrl) dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: fromUrl });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,6 +126,15 @@ export default function SimulatorPage() {
   const saveTimerRef = useRef(null);
   const savingRef = useRef(false); // synchronous double-click guard for Validate
   const resultsNavigationRef = useRef(false); // prevents URL sync from racing results navigation
+
+  // When the user navigates back from /results to the simulator config page,
+  // reset the flag so the URL sync resumes and shared links stay fresh.
+  useEffect(() => {
+    if (pathname && !pathname.includes('/results')) {
+      resultsNavigationRef.current = false;
+    }
+  }, [pathname]);
+
   useEffect(() => () => clearTimeout(saveTimerRef.current), []);
 
   // Any config change marks the scenario dirty and invalidates the previous
@@ -361,6 +374,7 @@ export default function SimulatorPage() {
     <div className="oracle-page">
       <div data-sim-wrap style={S.wrap}>
         {/* HERO SURFACE — Replaces CaseHeaderStep and the old footer */}
+        <div data-sim-case>
         <InvestmentCaseSurface
           state={state}
           scenario={scenario}
@@ -370,6 +384,7 @@ export default function SimulatorPage() {
           validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Simulate ${state.total_mw || ''}MW ${PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)?.label || state.primary_archetype_id} in ${state.geography} →`}
           onValidate={handleValidateAndReveal}
         />
+        </div>
 
         {/* CONFIGURATION — naked canvas, no cards */}
         <div
@@ -380,7 +395,7 @@ export default function SimulatorPage() {
             <div data-sim-advanced>
             <div data-sim-setup-row>
               <div data-sim-setup-col>
-                <SectionHead title="1. What?" hint="Archetype & Infrastructure" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <SectionHead title={UI.SIM_STEP_WHAT_TITLE} hint={UI.SIM_STEP_WHAT_HINT} style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
                 <div data-sim-advanced-section>
                   <ArchetypePicker
                     archetypes={PRIMARY_DEAL_ARCHETYPES}
@@ -394,7 +409,7 @@ export default function SimulatorPage() {
               </div>
 
               <div data-sim-setup-col>
-                <SectionHead title="2. Tech Stack" hint="Hardware & Cooling" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <SectionHead title={UI.SIM_STEP_TECH_TITLE} hint={UI.SIM_STEP_TECH_HINT} style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
                 <div data-sim-advanced-section>
                   <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} presetsOnly />
                 </div>
@@ -407,7 +422,7 @@ export default function SimulatorPage() {
 
             <div data-sim-setup-row style={{ marginTop: 'var(--cp-space-4)' }}>
               <div data-sim-setup-col>
-                <SectionHead title="3. Scale" hint="Capacity or Capital Target" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <SectionHead title={UI.SIM_STEP_SCALE_TITLE} hint={UI.SIM_STEP_SCALE_HINT} style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
                 <div data-sim-mode-stack>
                   <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
 
@@ -424,7 +439,7 @@ export default function SimulatorPage() {
                 </div>
               </div>
               <div data-sim-setup-col>
-                <SectionHead title="4. Structure" hint="Joint Venture & Equity" style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
+                <SectionHead title={UI.SIM_STEP_STRUCTURE_TITLE} hint={UI.SIM_STEP_STRUCTURE_HINT} style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
                 <JvStructureVisual />
               </div>
             </div>

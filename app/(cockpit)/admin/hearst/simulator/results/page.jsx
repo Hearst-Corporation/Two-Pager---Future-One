@@ -39,6 +39,12 @@ import './results.css';
 
 const RESULTS_ERROR = { ...CP.dangerAlert, padding: 'var(--cp-space-4)' };
 
+const VALID_VIZ = new Set(['radar', 'network', 'matrix', 'sankey', 'gantt', 'diagram', 'topology']);
+
+function normalizeViz(raw) {
+  return VALID_VIZ.has(raw) ? raw : 'radar';
+}
+
 function buildStateFromScenario(row, searchParams) {
   const mode = row.input_mode || 'mw_first';
   const inputValue = row.input_value || {};
@@ -71,7 +77,10 @@ export default function SimulatorResultsPage() {
   const [simResult, setSimResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeViz, setActiveViz] = useState('radar');
+  const [activeViz, setActiveViz] = useState(() => {
+    if (typeof window === 'undefined') return 'radar';
+    return normalizeViz(new URLSearchParams(window.location.search).get('viz'));
+  });
   const [searchParams, setSearchParams] = useState(null);
 
   useEffect(() => {

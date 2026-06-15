@@ -127,7 +127,7 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
   //   other archetypes → revenue_factor; powered_shell 0.33 → GPU minimal).
   // Fix 5 (P1): also fold when capex_hardware > 0 but revenue=0 (orphan capex case).
   const buildArchetypeProjection = (scenario) => {
-    const ar = projectArchetype(scenario, archetype);
+    const ar = projectArchetype(scenario, archetype, { scenario_overrides });
     const proj = ar.projection;
     const hb = calcHardwareBreakdown(ar.scenario, hardware_mix);
     if (hb) {

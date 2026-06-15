@@ -40,45 +40,53 @@ export default function InvestmentCaseSurface({
 
   return (
     <div data-sim-case-surface>
-      <div data-sim-case-copy>
-        <span data-sim-kicker>{UI.SIM_PAGE_EYEBROW}</span>
-        <h1>
-          {UI.SIM_CASE_VERB} <strong>{fmtUSD(capex)}</strong> {UI.SIM_CASE_INTO}{' '}
-          <strong>{fmtMW(capacity, 0)}</strong> {UI.SIM_CASE_IN_QATAR_WITH}{' '}
-          <strong>{selectedArchetype?.label || state.primary_archetype_id}</strong>
-        </h1>
-        <p>{UI.SIM_PAGE_SUBTITLE}</p>
-      </div>
-
-      <div data-sim-case-metrics>
-        <MetricTile label={UI.SIM_RESULT_RETURN} value={irr != null ? fmtPctFromRatio(irr) : MISSING} />
-        <MetricTile label={UI.SIM_METRIC_CAPITAL} value={fmtUSD(capex)} />
-        <MetricTile label={UI.SIM_METRIC_CAPACITY} value={fmtMW(capacity, 0)} />
-        <MetricTile label={UI.SIM_METRIC_MOIC} value={fmtX(moic)} />
-      </div>
-
-      <div data-sim-case-timeline>
-        <div data-sim-timeline-rail>
-          <span />
-          <span />
-          <span />
+      <div className="sim-surface-bg-grid" aria-hidden="true" />
+      <div className="sim-surface-glow" aria-hidden="true" />
+      <div className="sim-surface-content">
+        <div data-sim-case-copy>
+          <span data-sim-kicker>{UI.SIM_PAGE_EYEBROW}</span>
+          <h1>
+            {UI.SIM_CASE_VERB} <strong>{fmtUSD(capex)}</strong> {UI.SIM_CASE_INTO}{' '}
+            <strong>{fmtMW(capacity, 0)}</strong> {UI.SIM_CASE_IN_QATAR_WITH}{' '}
+            <strong>{selectedArchetype?.label || state.primary_archetype_id}</strong>
+          </h1>
+          <p>{UI.SIM_PAGE_SUBTITLE}</p>
         </div>
-        <div data-sim-timeline-labels>
-          <div><strong>{startYear}</strong><span>{UI.SIM_TIMELINE_START}</span></div>
-          <div><strong>{codYear}</strong><span>{UI.SIM_TIMELINE_COD}</span></div>
-          <div><strong>{exitYear}</strong><span>{UI.SIM_TIMELINE_EXIT}</span></div>
+
+        <div data-sim-case-metrics>
+          <MetricTile label={UI.SIM_RESULT_RETURN} value={irr != null ? fmtPctFromRatio(irr) : MISSING} />
+          <MetricTile label={UI.SIM_METRIC_CAPITAL} value={fmtUSD(capex)} />
+          <MetricTile label={UI.SIM_METRIC_CAPACITY} value={fmtMW(capacity, 0)} />
+          <MetricTile label={UI.SIM_METRIC_MOIC} value={fmtX(moic)} />
+        </div>
+
+        <div className="sim-surface-footer">
+          <div data-sim-case-timeline>
+            <div data-sim-timeline-rail>
+              <span />
+              <span />
+              <span />
+            </div>
+            <div data-sim-timeline-labels>
+              <div><strong>{startYear}</strong><span>{UI.SIM_TIMELINE_START}</span></div>
+              <div><strong>{codYear}</strong><span>{UI.SIM_TIMELINE_COD}</span></div>
+              <div><strong>{exitYear}</strong><span>{UI.SIM_TIMELINE_EXIT}</span></div>
+            </div>
+          </div>
+
+          <div className="sim-surface-action">
+            <Button
+              variant="primary"
+              size="lg"
+              disabled={validateBlocked}
+              onClick={onValidate}
+              className="sim-hero-cta"
+            >
+              {validateLabel}
+            </Button>
+          </div>
         </div>
       </div>
-
-      <Button
-        variant="primary"
-        size="lg"
-        disabled={validateBlocked}
-        onClick={onValidate}
-        className="sim-hero-cta"
-      >
-        {validateLabel}
-      </Button>
     </div>
   );
 }

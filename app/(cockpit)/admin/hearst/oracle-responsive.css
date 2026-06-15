@@ -29,6 +29,10 @@ body.oracle-results-page .oracle-page {
   padding-block-end: 0;
 }
 
+body.oracle-simulator-page .oracle-page {
+  overflow-y: hidden;
+}
+
 /* Padding réduit : avec rail chat, le conteneur queries doit atteindre 640px (ex. viewport 1280). */
 body.oracle-results-page .oracle-page {
   padding-inline: var(--cp-space-4);

@@ -13,6 +13,18 @@ export const UI = {
   NAV_DEALS: 'Playbook',            // /admin/hearst/deals
   NAV_WORKSPACE: 'Saved scenarios', // /admin/hearst/workspace
 
+  // Brief — cockpit home (/admin/hearst)
+  BRIEF_EYEBROW: 'Hearst Oracle · Qatar infrastructure',
+  BRIEF_TITLE: 'Investment brief',
+  BRIEF_HINT: 'Model the case, ground it in evidence, then take a decision. Three steps — one deal journey.',
+  BRIEF_CTA_MODEL_TITLE: 'Shape the investment case',
+  BRIEF_CTA_MODEL_HINT: 'Archetype, size, technology mix and live simulation.',
+  BRIEF_CTA_EVIDENCE_TITLE: 'Review the evidence base',
+  BRIEF_CTA_EVIDENCE_HINT: 'Sources, operators and datapoints behind the model.',
+  BRIEF_CTA_DECISION_TITLE: 'Open the decision canvas',
+  BRIEF_CTA_DECISION_HINT: 'Memos, verdict and export-ready dossier.',
+  BRIEF_CTA_OPEN: 'Open',
+
   // Actions génériques
   ACTION_SAVE: 'Save',
   ACTION_DELETE: 'Delete',
@@ -42,6 +54,23 @@ export const UI = {
   SIM_BUILD_BRIEF_HINT: 'Pick how the IC wants to think first: budget, power capacity, or target return. The simulator keeps the downstream scenario coherent.',
   SIM_PANEL_START_EYEBROW: 'Starting Point',
   SIM_PANEL_START_TITLE: 'Choose the control variable',
+  SIM_STEP_WHAT_TITLE: '1. What?',
+  SIM_STEP_WHAT_HINT: 'Archetype & Infrastructure',
+  SIM_STEP_TECH_TITLE: '2. Tech Stack',
+  SIM_STEP_TECH_HINT: 'Hardware & Cooling',
+  SIM_STEP_SCALE_TITLE: '3. Scale',
+  SIM_STEP_SCALE_HINT: 'Capacity or Capital Target',
+  SIM_STEP_STRUCTURE_TITLE: '4. Structure',
+  SIM_STEP_STRUCTURE_HINT: 'Joint Venture & Equity',
+
+  // Gantt timeline (results)
+  GANTT_YEAR_ZERO: 'Year 0',
+  GANTT_INCEPTION: 'Inception',
+  GANTT_OPERATIONS: 'Operations',
+  GANTT_STABILIZATION: 'Stabilization',
+  GANTT_EXIT: 'Exit',
+  GANTT_YEAR: (n: number) => `Year ${n}`,
+
   SIM_PANEL_SIZE_EYEBROW: 'Project Size / Targets',
   SIM_PANEL_SIZE_TITLE: 'Calibrate the initial scenario',
   // Case setup — page 1 configures assumptions. Results live after Validate.

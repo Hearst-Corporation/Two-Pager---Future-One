@@ -157,6 +157,7 @@ const S = {
   },
   row: {
     display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 200px)',
     alignItems: 'stretch',
     minWidth: 0,
   },

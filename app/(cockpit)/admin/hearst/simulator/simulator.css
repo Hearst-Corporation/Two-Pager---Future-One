@@ -71,6 +71,7 @@ body.oracle-simulator-page [data-sim-mode-stack] {
   flex-direction: column;
   gap: var(--cp-space-2);
   flex-shrink: 0;
+  height: fit-content;
 }
 
 body.oracle-simulator-page [data-sim-input-hero] {
@@ -566,10 +567,14 @@ body.oracle-simulator-page [data-sim-config-footer] .sim-config-cta {
   }
 
   body.oracle-simulator-page [data-sim-setup-col] [data-archetype-grid],
-  body.oracle-simulator-page [data-sim-setup-col] [data-hardware-presets],
-  body.oracle-simulator-page [data-input-mode-grid] {
+  body.oracle-simulator-page [data-sim-setup-col] [data-hardware-presets] {
     min-height: 76px;
     height: 100%;
+  }
+
+  body.oracle-simulator-page [data-input-mode-grid] {
+    min-height: var(--cp-tile-minh);
+    height: auto;
   }
 
   body.oracle-simulator-page [data-brief-bar-row] {
@@ -583,8 +588,8 @@ body.oracle-simulator-page [data-sim-config-footer] .sim-config-cta {
   }
 
   body.oracle-simulator-page [data-input-mode-grid] button {
-    min-height: 76px !important;
-    height: 100% !important;
+    min-height: var(--cp-tile-minh) !important;
+    height: auto !important;
     padding: var(--cp-space-2) var(--cp-space-1) !important;
     font-size: var(--cp-font-nano) !important;
     gap: var(--cp-space-1) !important;
