@@ -73,6 +73,7 @@ export default function TechPresetControl({ hardwareMix, dispatch }) {
             surface={selected ? 2 : 1}
             padding="md"
             hover
+            accent={selected}
             onClick={() => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: p.patch })}
             aria-pressed={selected}
             data-tech-card={p.id}

@@ -38,6 +38,8 @@ body.oracle-simulator-page [data-arch-card] {
   gap: var(--cp-space-2);
   align-items: flex-start;
   text-align: left;
+  min-height: var(--cp-tile-minh);
+  justify-content: space-between;
 }
 
 body.oracle-simulator-page [data-arch-card-head] {
@@ -65,6 +67,8 @@ body.oracle-simulator-page [data-tech-card] {
   gap: var(--cp-space-2);
   align-items: flex-start;
   text-align: left;
+  min-height: var(--cp-tile-minh);
+  justify-content: space-between;
 }
 
 body.oracle-simulator-page [data-tech-name] {

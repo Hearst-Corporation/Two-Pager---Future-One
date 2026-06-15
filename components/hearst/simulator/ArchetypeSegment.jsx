@@ -33,6 +33,7 @@ export default function ArchetypeSegment({ primaryId, dispatch }) {
             surface={selected ? 2 : 1}
             padding="md"
             hover
+            accent={selected}
             onClick={() => select(a.id)}
             aria-pressed={selected}
             data-arch-card={a.id}

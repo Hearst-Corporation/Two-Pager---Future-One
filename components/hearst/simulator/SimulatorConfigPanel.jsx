@@ -10,21 +10,21 @@ export default function SimulatorConfigPanel({ state, dispatch }) {
   return (
     <div data-sim-config-v2>
       <section data-sim-config-section="archetype">
-        <SectionHead title={UI.SIM_THESIS_TITLE} hint={UI.SIM_THESIS_HINT} />
+        <SectionHead title={UI.SIM_THESIS_TITLE} hint={UI.SIM_THESIS_HINT} style={{ borderBottom: 'none' }} />
         <div data-arch-segment>
           <ArchetypeSegment primaryId={state.primary_archetype_id} dispatch={dispatch} />
         </div>
       </section>
 
       <section data-sim-config-section="capacity">
-        <SectionHead title={UI.SIM_SIZE_TITLE} hint={UI.SIM_SIZE_HINT} />
+        <SectionHead title={UI.SIM_SIZE_TITLE} hint={UI.SIM_SIZE_HINT} style={{ borderBottom: 'none' }} />
         <div data-capacity-control>
           <CapacityControl value={state.total_mw} dispatch={dispatch} />
         </div>
       </section>
 
       <section data-sim-config-section="tech">
-        <SectionHead title={UI.SIM_HW_TITLE} hint={UI.SIM_HW_HINT} />
+        <SectionHead title={UI.SIM_HW_TITLE} hint={UI.SIM_HW_HINT} style={{ borderBottom: 'none' }} />
         <div data-tech-preset>
           <TechPresetControl hardwareMix={state.hardware_mix} dispatch={dispatch} />
         </div>

@@ -389,7 +389,6 @@ const S = {
     minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
     minWidth: 0,
   },
 };
