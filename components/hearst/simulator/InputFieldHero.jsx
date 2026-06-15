@@ -81,58 +81,25 @@ export default function InputFieldHero({ mode, value, onChange, projection, scen
       : null);
 
   const body = (
-      <div className="hw-fader-container">
-        <div style={S.fieldHead}>
-          <span style={S.choiceTag} title={`${UI.SIM_YOUR_CHOICE} · ${cfg.label}`}>
-            {cfg.label}
-          </span>
-          <span style={S.desc}>{cfg.description}</span>
+      <div data-brief-bar-row style={S.row}>
+        <div style={S.fieldCol}>
+          <div style={S.fieldHead}>
+            <span style={S.choiceTag} title={`${UI.SIM_YOUR_CHOICE} · ${cfg.label}`}>
+              {cfg.label}
+            </span>
+            <span style={S.desc}>{cfg.description}</span>
+          </div>
+          <div style={S.inputRow}>
+            <input
+              type="text"
+              value={cfg.formatValue(value)}
+              onChange={(e) => onChange?.(cfg.parseValue(e.target.value))}
+              placeholder={cfg.placeholder}
+              style={S.input}
+            />
+            <span style={S.unit}>{cfg.unit}</span>
+          </div>
         </div>
-        
-        <div className="hw-readout">
-          <input
-            type="text"
-            value={cfg.formatValue(value)}
-            onChange={(e) => onChange?.(cfg.parseValue(e.target.value))}
-            placeholder={cfg.placeholder}
-            className="hw-readout-input"
-          />
-          <span className="hw-readout-unit">{cfg.unit}</span>
-        </div>
-
-        {mode === 'mw_first' && (
-          <input
-            type="range"
-            min={10}
-            max={200}
-            step={1}
-            value={value || 50}
-            onChange={(e) => onChange?.(Number(e.target.value))}
-            className="hw-slider"
-          />
-        )}
-        {mode === 'capital_first' && (
-          <input
-            type="range"
-            min={100000000}
-            max={2000000000}
-            step={10000000}
-            value={value || 500000000}
-            onChange={(e) => onChange?.(Number(e.target.value))}
-            className="hw-slider"
-          />
-        )}
-        {mode === 'target_irr_first' && (
-          <input
-            type="range"
-            min={0.05}
-            max={0.35}
-            step={0.005}
-            value={value || 0.15}
-            onChange={(e) => onChange?.(Number(e.target.value))}
-            className="hw-slider"
-          />
-        )}
 
         <div data-brief-results style={S.resultsCol}>
           <div style={S.resultsTag}>{UI.SIM_COMPUTED}</div>

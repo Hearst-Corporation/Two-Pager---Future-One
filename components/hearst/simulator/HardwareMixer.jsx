@@ -133,25 +133,31 @@ export default function HardwareMixer({ totalMw = 50, value, onChange, variant =
   return (
     <div data-hardware-mixer style={S.wrap}>
       {showPresets && (
-      <div className="hw-button-grid">
+      <div data-hardware-presets style={S.presetRail}>
         {HARDWARE_PRESETS.map((p) => {
           const sel = activePreset === p.id;
           return (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => applyPreset(p)}
-              aria-pressed={sel}
-              className="hw-button"
-            >
-              <div className="hw-led-row">
-                <span className="hw-button-title">{p.name}</span>
-                <span className="hw-led"></span>
-              </div>
-              <div className="hw-button-meta">
-                <span>{p.tagline}</span>
-              </div>
-            </button>
+            <div key={p.id} style={S.presetWrap}>
+              <Card
+                as="button"
+                type="button"
+                onClick={() => applyPreset(p)}
+                padding="none"
+                hover
+                aria-pressed={sel}
+                surface={2}
+                style={{ ...S.presetCard, ...(sel ? G.selected : {}) }}
+              >
+                <PresetIcon id={p.id} selected={sel} />
+                <span style={S.presetName}>{p.name}</span>
+                <span style={S.presetTagline}>{p.tagline}</span>
+              </Card>
+              {p.info && (
+                <span style={S.presetHintSlot}>
+                  <InfoHint label={p.name} align="right" content={{ title: p.name, body: p.info }} />
+                </span>
+              )}
+            </div>
           );
         })}
       </div>
@@ -219,7 +225,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange, variant =
                       aria-label={`${TIER_LABELS[key].name} %`}
                       aria-valuetext={`${v[key]} %, ${(totalMw * v[key] / 100).toFixed(1)} MW`}
                       onChange={(e) => setTier(key, Number(e.target.value))}
-                      className="hw-slider"
+                      style={S.range}
                     />
                     <span style={S.pct}>{v[key]}%</span>
                     <span style={S.mw}>{(totalMw * v[key] / 100).toFixed(1)} MW</span>
@@ -268,7 +274,7 @@ export default function HardwareMixer({ totalMw = 50, value, onChange, variant =
                   <input type="range" min={40} max={95} step={1} value={v.utilization_pct}
                     aria-label={UI.HW_GPU_UTIL_ARIA}
                     aria-valuetext={`${v.utilization_pct} %`}
-                    onChange={(e) => onChange?.({ ...v, utilization_pct: Number(e.target.value) })} className="hw-slider" />
+                    onChange={(e) => onChange?.({ ...v, utilization_pct: Number(e.target.value) })} style={S.range} />
                   <span style={S.ctrlValue}>{v.utilization_pct}%</span>
                 </label>
                 <label style={S.ctrlBlock}>

@@ -43,7 +43,7 @@ ModeIcon.propTypes = { id: PropTypes.string, active: PropTypes.bool };
 
 export default function InputModeSwitcher({ mode, onChange }) {
   return (
-    <div className="hw-button-grid" role="radiogroup" aria-label={UI.SIM_INPUT_MODE_ARIA}>
+    <div data-input-mode-grid style={S.segmented} role="radiogroup" aria-label={UI.SIM_INPUT_MODE_ARIA}>
       {MODES.map((m) => {
         const active = mode === m.id;
         return (
@@ -53,15 +53,11 @@ export default function InputModeSwitcher({ mode, onChange }) {
             role="radio"
             aria-checked={active}
             onClick={() => onChange?.(m.id)}
-            className="hw-button"
+            style={{ ...S.segment, ...(active ? { ...G.selected, color: 'var(--cp-text-primary)' } : {}) }}
           >
-            <div className="hw-led-row">
-              <span className="hw-button-title">{m.label}</span>
-              <span className="hw-led"></span>
-            </div>
-            <div className="hw-button-meta">
-              <span>{m.unit}</span>
-            </div>
+            <ModeIcon id={m.id} active={active} />
+            <span style={S.segmentLabel}>{m.label}</span>
+            <span style={{ ...S.segmentUnit, ...(active ? { color: 'var(--cp-text-strong)' } : {}) }}>{m.unit}</span>
           </button>
         );
       })}

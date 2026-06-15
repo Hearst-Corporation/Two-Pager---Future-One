@@ -49,12 +49,12 @@ describe('CapacityControl — design system hygiene', () => {
   });
 });
 
-describe('SimulatorConfigPanel — mounts ScaleControl (replaces CapacityControl)', () => {
-  it('imports ScaleControl', () => {
-    expect(panelSrc).toMatch(/import\s+ScaleControl\s+from\s+['"]\.\/ScaleControl['"]/);
+describe('SimulatorConfigPanel — mounts CapacityControl', () => {
+  it('imports CapacityControl', () => {
+    expect(panelSrc).toMatch(/import\s+CapacityControl\s+from\s+['"]\.\/CapacityControl['"]/);
   });
 
-  it('renders <ScaleControl> with state and dispatch', () => {
-    expect(panelSrc).toMatch(/<ScaleControl[\s\S]*?state=\{state\}[\s\S]*?dispatch=\{dispatch\}/);
+  it('renders <CapacityControl> with value={state.total_mw}', () => {
+    expect(panelSrc).toMatch(/<CapacityControl[\s\S]*?value=\{state\.total_mw\}[\s\S]*?dispatch=\{dispatch\}/);
   });
 });

@@ -19,9 +19,14 @@
   box-sizing: border-box;
 }
 
-/* Simulateur : scroll page autorisé. */
+/* Simulateur : le shell (.ct-page-area) est le seul scrolleur — AC2.
+   On retire le double scoleur sur la page simulateur : overflow visible +
+   pas de max-height contraignant → le contenu grandit naturellement et le
+   shell gère le scroll unique jusqu'à la Decision CTA. */
 .oracle-page.oracle-simulator-page {
-  overflow-y: auto;
+  overflow-y: visible;
+  overflow-x: visible;
+  max-height: none;
   padding-block-end: var(--cp-scroll-clear, var(--cp-space-6));
 }
 

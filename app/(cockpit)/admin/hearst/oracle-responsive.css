@@ -18,7 +18,20 @@ body.oracle-results-wide .ct-page-area {
   overflow-x: hidden !important;
 }
 
-.oracle-page.oracle-simulator-page,
+/* Scroll ownership — /simulator: the shell (.ct-page-area) is the sole scroller.
+   The page element must NOT constrain height or enable its own overflow-y scroll.
+   This block is imported AFTER oracle-layout.css, so it is the authoritative
+   declaration for .oracle-simulator-page. oracle-layout.css also sets these
+   values (defence-in-depth); both must agree — page = visible, no max-height cap.
+   Never touch .oracle-page (naked) here; only the simulator variant. */
+.oracle-page.oracle-simulator-page {
+  overflow-y: visible;
+  overflow-x: visible;
+  max-height: none;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 body.oracle-results-page .oracle-page {
   flex: 1 1 auto;
   min-height: 0;

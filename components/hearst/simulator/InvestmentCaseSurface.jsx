@@ -1,25 +1,9 @@
 'use client';
 
 import PropTypes from 'prop-types';
-import { Button } from '@/components/hearst/ui';
-import { PROJECT_TIMELINE_DEFAULTS } from '@/lib/hearst-config-presets';
 import { UI } from '@/lib/ui-strings';
 import { fmtUSD, fmtMW, fmtPctFromRatio, fmtX, MISSING } from '@/lib/hearst-format';
 import { PRESET_META, LEVEL_LABEL } from './preset-meta';
-
-function MetricTile({ label, value }) {
-  return (
-    <div data-sim-metric-tile>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
-}
-
-MetricTile.propTypes = {
-  label: PropTypes.string,
-  value: PropTypes.string,
-};
 
 export default function InvestmentCaseSurface({
   state,
@@ -36,34 +20,37 @@ export default function InvestmentCaseSurface({
   const meta = PRESET_META[state.primary_archetype_id];
 
   return (
-    <div className="hw-screen">
-      <h1 className="hw-screen-title">
-        {UI.SIM_CASE_VERB} <strong>{fmtUSD(capex)}</strong> {UI.SIM_CASE_INTO}{' '}
-        <strong>{fmtMW(capacity, 0)}</strong> {UI.SIM_CASE_IN_QATAR_WITH}{' '}
-        <strong>{selectedArchetype?.label || state.primary_archetype_id}</strong>
-      </h1>
+    <div className="is-assembling" style={{ marginBottom: '64px' }}>
+      <div className="del-1" style={{ marginBottom: '48px' }}>
+        <h1 style={{ fontSize: '48px', fontWeight: 300, letterSpacing: '-0.02em', lineHeight: 1.1, margin: '0 0 16px 0', color: 'var(--cp-text-strong)' }}>
+          {UI.SIM_CASE_VERB} <strong>{fmtUSD(capex)}</strong> {UI.SIM_CASE_INTO}{' '}
+          <strong>{fmtMW(capacity, 0)}</strong> {UI.SIM_CASE_IN_QATAR_WITH}{' '}
+          <strong>{selectedArchetype?.label || state.primary_archetype_id}</strong>
+        </h1>
+        <p style={{ fontSize: '20px', color: 'var(--cp-text-muted)', margin: 0, maxWidth: '800px', lineHeight: 1.4 }}>
+          {meta?.tagline ? `${meta.tagline}. ` : ''}{UI.SIM_PAGE_SUBTITLE}
+        </p>
+      </div>
 
-      <div className="hw-screen-metrics">
-        <div className="hw-metric">
-          <div className="hw-metric-label">{UI.SIM_RESULT_RETURN}</div>
-          <div className="hw-metric-value">{irr != null ? fmtPctFromRatio(irr) : MISSING}</div>
+      <div className="del-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
+        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--cp-text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>{UI.SIM_RESULT_RETURN}</div>
+          <div style={{ fontSize: '36px', fontWeight: 300, color: 'var(--cp-text-strong)' }}>{irr != null ? fmtPctFromRatio(irr) : MISSING}</div>
         </div>
         
-        <div className="hw-metric">
-          <div className="hw-metric-label">{UI.SIM_METRIC_CAPITAL}</div>
-          <div className="hw-metric-value">{fmtUSD(capex)}</div>
+        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--cp-text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>{UI.SIM_METRIC_CAPITAL}</div>
+          <div style={{ fontSize: '36px', fontWeight: 300, color: 'var(--cp-text-strong)' }}>{fmtUSD(capex)}</div>
         </div>
 
-        <div className="hw-metric">
-          <div className="hw-metric-label">Risk Profile</div>
-          <div className="hw-metric-value" style={{ color: '#00ffcc', textShadow: '0 0 8px rgba(0,255,204,0.4)' }}>
-            {meta ? LEVEL_LABEL[meta.risk] : MISSING}
-          </div>
+        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--cp-text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Risk Profile</div>
+          <div style={{ fontSize: '36px', fontWeight: 300, color: 'var(--cp-text-strong)' }}>{meta ? LEVEL_LABEL[meta.risk] : MISSING}</div>
         </div>
 
-        <div className="hw-metric">
-          <div className="hw-metric-label">NPV</div>
-          <div className="hw-metric-value">{npv != null ? fmtUSD(npv) : (moic != null ? `${fmtX(moic)}x` : MISSING)}</div>
+        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--cp-text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>NPV</div>
+          <div style={{ fontSize: '36px', fontWeight: 300, color: 'var(--cp-text-strong)' }}>{npv != null ? fmtUSD(npv) : (moic != null ? `${fmtX(moic)}x` : MISSING)}</div>
         </div>
       </div>
     </div>

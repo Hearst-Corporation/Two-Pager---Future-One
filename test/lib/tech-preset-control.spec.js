@@ -71,13 +71,12 @@ describe('TechPresetControl — design system hygiene', () => {
   });
 });
 
-describe('SimulatorConfigPanel — mounts TechnologyStackStep (replaces TechPresetControl)', () => {
-  it('imports TechnologyStackStep', () => {
-    expect(panelSrc).toMatch(/import\s+TechnologyStackStep\s+from\s+['"]\.\/sections\/TechnologyStackStep['"]/);
+describe('SimulatorConfigPanel — mounts TechPresetControl', () => {
+  it('imports TechPresetControl', () => {
+    expect(panelSrc).toMatch(/import\s+TechPresetControl\s+from\s+['"]\.\/TechPresetControl['"]/);
   });
 
-  it('renders <TechnologyStackStep> with value={state.hardware_mix}', () => {
-    expect(panelSrc).toMatch(/<TechnologyStackStep[\s\S]*?value=\{state\.hardware_mix\}/);
-    expect(panelSrc).toContain('ACTIONS.SET_HARDWARE_MIX');
+  it('renders <TechPresetControl> with hardwareMix={state.hardware_mix}', () => {
+    expect(panelSrc).toMatch(/<TechPresetControl[\s\S]*?hardwareMix=\{state\.hardware_mix\}[\s\S]*?dispatch=\{dispatch\}/);
   });
 });
