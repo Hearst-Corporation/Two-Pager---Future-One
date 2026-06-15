@@ -272,14 +272,13 @@
   }
 }
 
-/* ── Viewports courts (hauteur) ── */
+/* Viewports courts (hauteur) */
 @media (max-height: 900px) {
   .oracle-page [data-sim-wrap] {
-    gap: var(--cp-space-2);
+    gap: var(--cp-space-4);
   }
 
   .oracle-page [data-sim-case] {
     padding: var(--cp-space-4) !important;
-    gap: var(--cp-space-2) !important;
   }
 }

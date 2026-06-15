@@ -22,7 +22,7 @@
 /* Simulateur : scroll page autorisé. */
 .oracle-page.oracle-simulator-page {
   overflow-y: auto;
-  padding-block-end: var(--cp-scroll-clear, var(--cp-space-6));
+  padding-block-end: calc(var(--cp-scroll-clear, var(--cp-space-6)) + 120px);
 }
 
 /* ── En-tête de page ── */
