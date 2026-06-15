@@ -59,9 +59,13 @@ describe('ArchetypeSegment — accessibility', () => {
     expect(segSrc).toMatch(/aria-pressed/);
   });
 
-  it('shows detail only on the selected archetype', () => {
-    expect(segSrc).toMatch(/\{selected && m &&/);
-    expect(segSrc).not.toMatch(/data-dimmed/);
+  it('keeps cards detail-free so their height stays stable', () => {
+    // Detail (ideal_for / Return / Risk) is rendered by the parent in a
+    // separate [data-archetype-detail] zone, NOT injected into the selected
+    // card — guard against regressing to a per-card detail that reflows the grid.
+    expect(segSrc).not.toMatch(/\{selected && m &&/);
+    expect(segSrc).not.toMatch(/data-focus-detail/);
+    expect(panelSrc).toMatch(/data-archetype-detail/);
   });
 });
 

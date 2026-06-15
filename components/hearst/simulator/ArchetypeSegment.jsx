@@ -3,11 +3,12 @@ import PropTypes from 'prop-types';
 import { PRIMARY_DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { ACTIONS } from '@/lib/hearst-simulator-state';
-import { PRESET_META, LEVEL_LABEL } from './preset-meta';
-import { UI } from '@/lib/ui-strings';
+import { PRESET_META } from './preset-meta';
 import './simulator-config.css';
 
-// ArchetypeSegment — card grid. Detail (ideal_for, Return, Risk) only on selected card.
+// ArchetypeSegment — card grid. Cartes à hauteur stable (titre + tagline) ;
+// le détail de la carte sélectionnée est rendu PAR LE PARENT dans une zone
+// séparée [data-archetype-detail], pour que la grille ne reflow jamais.
 export default function ArchetypeSegment({ primaryId, dispatch }) {
   const select = (id) => {
     if (primaryId === id) return;
@@ -31,26 +32,9 @@ export default function ArchetypeSegment({ primaryId, dispatch }) {
             aria-pressed={selected}
             data-archetype-id={a.id}
             data-focus-item
-            data-focused={selected ? 'true' : undefined}
           >
             <div data-focus-title>{a.label}</div>
             {m && <div data-focus-subtitle>{m.tagline}</div>}
-
-            {selected && m && (
-              <div data-focus-detail>
-                <p className="archetype-ideal-for">{m.ideal_for}</p>
-                <div className="archetype-meta-row">
-                  <div>
-                    <span className="archetype-meta-label">{UI.SIM_META_RETURN}</span>
-                    <span className="archetype-meta-value">{m.return_band}</span>
-                  </div>
-                  <div>
-                    <span className="archetype-meta-label">{UI.SIM_META_RISK}</span>
-                    <span className="archetype-meta-value">{LEVEL_LABEL[m.risk]}</span>
-                  </div>
-                </div>
-              </div>
-            )}
           </button>
         );
       })}

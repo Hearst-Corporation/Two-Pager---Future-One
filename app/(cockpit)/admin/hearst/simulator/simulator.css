@@ -1,11 +1,11 @@
 /* simulator.css — cockpit layout no-scroll */
 
-/* ── Wrap principal — s'étend à sa hauteur naturelle pour permettre le scroll.
-   container-type:inline-size → les enfants réagissent à SA largeur réelle
-   (qui change selon l'ouverture du chat), pas au viewport. C'est ce qui rend
-   le layout correct chat ouvert (≈892px) ET chat fermé (≈1312px). ── */
+/* ── Wrap principal — remplit le panneau centre (container queries sur SA largeur).
+   container-type:inline-size → les enfants réagissent à la largeur réelle
+   (chat ouvert ≈892px / fermé ≈1312px), pas au viewport. ── */
 .oracle-page [data-sim-wrap] {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
   min-width: 0;
   width: 100%;
   display: flex;
@@ -31,41 +31,59 @@
   --sim-caption-size: clamp(var(--cp-font-micro), 1cqi, var(--cp-font-xs));
   --sim-mix-bar-h: clamp(8px, 1.4cqi, 12px);
   --sim-results-min-w: clamp(11rem, 28cqi, 16rem);
-  --sim-sidebar-min: clamp(18rem, 42cqi, 26rem);
+  --sim-sidebar-min: clamp(16rem, 36cqi, 22rem);
 }
 
-/* ── Cockpit — config puis décision ; 2 colonnes quand le conteneur est large ── */
+/* ── Cockpit no-scroll — hauteur fixe à toutes les largeurs ; le scroll vit DANS les zones ──
+   1-col (chat ouvert) : config (1fr, scroll interne) + readout docké en bas.
+   2-col (large)       : config | readout, pleine hauteur. ── */
 .oracle-page [data-sim-cockpit] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--sim-gap-section);
-  align-items: start;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: var(--sim-gap-stack);
   width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.oracle-page [data-sim-cockpit] > [data-sim-config-v2],
+.oracle-page [data-sim-cockpit] > [data-sim-right-panel] {
+  min-height: 0;
 }
 
-@container sim (min-width: 1000px) {
+@container sim (min-width: 860px) {
   .oracle-page [data-sim-cockpit] {
-    grid-template-columns: minmax(0, 1fr) minmax(var(--sim-sidebar-min), 0.42fr);
+    grid-template-columns: minmax(0, 1fr) minmax(var(--sim-sidebar-min), 0.38fr);
+    grid-template-rows: minmax(0, 1fr);
     gap: clamp(var(--cp-space-6), 4cqi, var(--cp-space-9));
+    align-items: stretch;
   }
 }
 
-/* ── Panneau décision — toujours colonne ; sticky en mode 2-col ── */
+/* ── Panneau décision — colonne ; en 2-col KPI scrollent, CTA reste visible ── */
 .oracle-page [data-sim-right-panel] {
   display: flex;
   flex-direction: column;
   gap: var(--sim-gap-section);
   align-items: stretch;
   min-width: 0;
+  min-height: 0;
 }
 
-@container sim (min-width: 1000px) {
+@container sim (min-width: 860px) {
   .oracle-page [data-sim-right-panel] {
-    position: sticky;
-    top: var(--cp-space-6);
-    align-self: start;
-    max-height: calc(100dvh - var(--cp-space-12));
+    overflow: hidden;
+  }
+
+  .oracle-page [data-sim-live-metrics] {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
+  }
+
+  .oracle-page [data-decision-ctrl] {
+    flex: 0 0 auto;
   }
 }
 
@@ -97,7 +115,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--sim-gap-block);
-  padding: var(--cp-space-4) 0;
+  padding: var(--cp-space-3) 0;
   background: transparent;
   border: none;
   border-bottom: var(--cp-border-w) solid var(--cp-border-soft);

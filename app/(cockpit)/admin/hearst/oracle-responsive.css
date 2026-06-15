@@ -19,18 +19,20 @@ body.oracle-results-wide .ct-page-area {
   overflow-x: hidden !important;
 }
 
-/* Scroll ownership — /simulator: la page elle-même est le scrolleur.
-   .ct-page-area a une hauteur fixe (flex child du shell). On borne la page
-   à 100% de cette hauteur et on lui donne overflow-y:auto. flex:0 0 auto
-   empêche la page de se comprimer : son contenu s'étend et scrolle dedans.
-   Ce bloc est importé APRÈS oracle-layout.css → autoritaire ; les deux
-   fichiers doivent s'accorder (defence-in-depth). */
+/* Scroll ownership — /simulator: cockpit no-scroll (pas la page, pas .ct-page-area).
+   Chaîne flex : page-area → .oracle-simulator-page → [data-sim-wrap] → [data-sim-cockpit].
+   Seul [data-sim-config-v2] scrolle (voir simulator-config.css). */
+.ct-page-area:has(.oracle-simulator-page) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .oracle-page.oracle-simulator-page {
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: 100%;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
+  max-height: none;
 }
 
 body.oracle-results-page .oracle-page {

@@ -10,7 +10,9 @@
   }
 }
 
-/* ── Simulator — hérite --sim-* de [data-sim-wrap] (simulator.css, échelle cqi) ── */
+/* ── Simulator — assets empilés ; hérite --sim-* de [data-sim-wrap] (échelle cqi) ──
+   3 sections (Thesis · Scale · Technology). Hauteur fixe du cockpit : si la pile
+   dépasse, le scroll vit ICI (overflow-y:auto), jamais sur la page. */
 [data-sim-config-v2] {
   display: flex;
   flex-direction: column;
@@ -19,6 +21,8 @@
   max-width: none;
   margin: 0;
   padding: 0;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 [data-sim-config-v2] [data-sim-section] + [data-sim-section] {
@@ -68,7 +72,7 @@
 [data-focus-stage] {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--sim-gap-stack);
+  gap: var(--cp-space-3);
   align-items: start;
 }
 
@@ -82,36 +86,22 @@
   all: unset;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   background: transparent;
   border: var(--cp-border-w) solid var(--cp-border-soft);
   border-radius: var(--cp-radius-md);
-  padding: var(--sim-gap-block);
-  min-height: auto;
+  padding: var(--cp-space-3) var(--cp-space-4);
+  /* Hauteur stable : la carte ne grandit jamais quand on la sélectionne
+     (le détail vit dans [data-archetype-detail], hors grille). */
+  min-height: var(--cp-control-lg);
   cursor: pointer;
   transition:
     border-color var(--t-fast) var(--ease-standard),
     background var(--t-fast) var(--ease-standard);
-  position: relative;
   box-sizing: border-box;
-  pointer-events: auto;
-  opacity: 1;
-  overflow: hidden;
 }
 
-[data-focus-item]::before {
-  content: none;
-}
-
-[data-focus-item][data-focused="true"]::before {
-  opacity: 0;
-}
-
-[data-focus-item] > * {
-  position: relative;
-  z-index: 1;
-}
-
-[data-focus-item]:hover:not([data-focused="true"]) {
+[data-focus-item]:hover:not([aria-pressed="true"]) {
   border-color: var(--cp-border);
   background: var(--cp-surface-1);
 }
@@ -119,7 +109,6 @@
 [data-focus-item]:focus-visible {
   outline: 2px solid var(--cp-border-strong);
   outline-offset: 1px;
-  z-index: 1;
 }
 
 [data-focus-item][aria-pressed="true"] {
@@ -145,9 +134,10 @@
   line-height: var(--cp-leading-relaxed);
 }
 
-[data-focus-detail] {
-  margin-top: var(--cp-space-2);
-  padding-top: var(--cp-space-2);
+/* ── Détail de l'archétype sélectionné — zone SÉPARÉE sous la grille ──
+   Rendu une seule fois par le parent ; la grille de cartes ne reflow jamais. */
+[data-archetype-detail] {
+  padding-top: var(--sim-gap-tight);
   border-top: var(--cp-border-w) solid var(--cp-border-soft);
 }
 
@@ -516,7 +506,8 @@
 }
 
 .hardware-mix-bar {
-  height: var(--cp-bar-h);
+  /* Barre lisible : token dédié (8–12px), pas --cp-bar-h (4px, quasi invisible). */
+  height: var(--sim-mix-bar-h);
   display: flex;
   overflow: hidden;
   border-radius: var(--cp-radius-pill);
@@ -524,19 +515,17 @@
   border: var(--cp-border-w) solid var(--cp-border-soft);
 }
 
+/* 3 tiers distincts et visibles sur fond sombre — graduation neutre→accent. */
 .hardware-mix-seg-standard {
-  background: var(--cp-border);
-  opacity: 0.35;
+  background: var(--cp-text-muted);
 }
 
 .hardware-mix-seg-dense {
-  background: var(--cp-text-muted);
-  opacity: 0.25;
+  background: var(--cp-text-primary);
 }
 
 .hardware-mix-seg-ai {
-  background: var(--cp-border-strong);
-  opacity: 0.45;
+  background: var(--cp-accent);
 }
 
 .hardware-mix-seg {

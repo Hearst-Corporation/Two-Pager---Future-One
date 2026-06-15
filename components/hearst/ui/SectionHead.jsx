@@ -2,9 +2,9 @@
 import PropTypes from 'prop-types';
 import Eyebrow from './Eyebrow';
 
-// SectionHead — en-tête de section canonique. Unifie les ~4 variantes inline.
-// Défaut = CANON cockpit : H2 11px (--cp-font-xs) CAPS + filet bas + hint italique.
-// `hero` = titre page --cp-font-2xl/800 (= .oracle-page-header h1). Tokens --cp-* only.
+// SectionHead — en-tête de section canonique.
+// Défaut = H2 `--cp-font-h2` CAPS + filet bas + hint italique.
+// `hero` = titre page `--cp-font-2xl` (= `.oracle-page-header h1`). Tokens `--cp-*` only.
 
 const S = {
   // Canon (défaut)

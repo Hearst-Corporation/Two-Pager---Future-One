@@ -45,7 +45,7 @@ cockpit-shell/                shell UI (éditable localement)
 components/hearst/            widgets Oracle
 components/hearst/simulator/  config (ArchetypeSegment, ScaleControl → InputModeSwitcher + InputFieldHero, TechnologyStackStep → HardwareMixer)
 
-UI note (simulateur): direction « command board » — panneaux larges `--cp-surface-0`, accent réservé CTA/état actif, gaps cqi, Technology/Size calmes.
+UI note (simulateur): direction « command board » — panneaux larges `--cp-surface-0`, accent réservé CTA/état actif, gaps cqi, Technology/Size calmes. Layout no-scroll : hauteur = chaîne flex panneau centre (pas `100dvh`), scroll unique dans `[data-sim-config-v2]`.
 
 Simulateur : `/simulate` debounced 300ms ; projection stale-while-revalidate ; URL sync debounced. Hardware initial = preset `mixed` (`DEFAULT_HARDWARE_MIX`).
 lib/                          moteur financier, validators, LLM

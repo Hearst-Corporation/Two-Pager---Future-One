@@ -4,8 +4,12 @@ import { ACTIONS } from '@/lib/hearst-simulator-state';
 import ArchetypeSegment from './ArchetypeSegment';
 import ScaleControl from './ScaleControl';
 import TechnologyStackStep from './sections/TechnologyStackStep';
+import { PRESET_META, LEVEL_LABEL } from './preset-meta';
 import './simulator-config.css';
 
+// Structure asset-based stable : 3 sections empilées (Thesis · Scale · Technology),
+// pas de stage switcher. Le détail de l'archétype sélectionné vit dans une zone
+// séparée sous la grille de cartes — les cartes gardent une hauteur stable.
 export default function SimulatorConfigPanel({
   state,
   dispatch,
@@ -17,6 +21,7 @@ export default function SimulatorConfigPanel({
   loading,
 }) {
   const totalMw = scenario?.total_mw ?? state.total_mw;
+  const meta = PRESET_META[state.primary_archetype_id];
 
   return (
     <div data-sim-config-v2>
@@ -26,6 +31,21 @@ export default function SimulatorConfigPanel({
           <p className="sim-config-hint">{UI.SIM_THESIS_HINT}</p>
         </header>
         <ArchetypeSegment primaryId={state.primary_archetype_id} dispatch={dispatch} />
+        {meta && (
+          <div data-archetype-detail>
+            <p className="archetype-ideal-for">{meta.ideal_for}</p>
+            <div className="archetype-meta-row">
+              <div>
+                <span className="archetype-meta-label">{UI.SIM_META_RETURN}</span>
+                <span className="archetype-meta-value">{meta.return_band}</span>
+              </div>
+              <div>
+                <span className="archetype-meta-label">{UI.SIM_META_RISK}</span>
+                <span className="archetype-meta-value">{LEVEL_LABEL[meta.risk]}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       <section data-sim-section>

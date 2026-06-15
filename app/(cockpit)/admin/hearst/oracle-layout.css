@@ -19,13 +19,12 @@
   box-sizing: border-box;
 }
 
-/* Simulateur : la page est son propre scrolleur (overflow-y:auto, max-height:100%).
-   Doit s'accorder avec oracle-responsive.css (importé après, autoritaire). */
+/* Simulateur : cockpit no-scroll — remplit le panneau centre ; scroll dans [data-sim-config-v2] uniquement. */
 .oracle-page.oracle-simulator-page {
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: 100%;
-  padding-block-end: var(--cp-scroll-clear, var(--cp-space-6));
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding-block-end: 0;
 }
 
 /* ── En-tête de page ── */
