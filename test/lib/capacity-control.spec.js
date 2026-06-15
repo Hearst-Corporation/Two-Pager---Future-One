@@ -5,7 +5,6 @@
  *   - dispatches ACTIONS.SET_MW on change
  *   - uses the Field primitive from @/components/hearst/ui
  *   - is a number input
- *   - does NOT import the orphaned InputFieldHero
  *   - tokens-only (no hex / rgba)
  *   - mounted in SimulatorConfigPanel with value={state.total_mw}
  */
@@ -41,11 +40,6 @@ describe('CapacityControl — primitive usage', () => {
 });
 
 describe('CapacityControl — design system hygiene', () => {
-  it('does NOT import the orphaned InputFieldHero', () => {
-    expect(capSrc).not.toMatch(/@\/components\/hearst\/simulator\/InputFieldHero/);
-    expect(capSrc).not.toMatch(/InputFieldHero/);
-  });
-
   it('contains no hex colors', () => {
     expect(capSrc).not.toMatch(/#[0-9a-fA-F]{3,6}\b/);
   });

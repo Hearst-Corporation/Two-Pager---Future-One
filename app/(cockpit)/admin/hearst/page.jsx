@@ -33,7 +33,7 @@ const JOURNEY = [
 
 export default function HearstBriefPage() {
   return (
-    <div className="oracle-page">
+    <div className="oracle-page oracle-brief-page">
       <header className="oracle-page-header">
         <SectionHead
           hero

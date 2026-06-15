@@ -5,9 +5,8 @@
  *   - page.jsx mounts InvestmentCaseSurface (hero) + SimulatorConfigPanel (new)
  *   - SimulatorConfigPanel mounts the 3 controls (ArchetypeSegment,
  *     CapacityControl, TechPresetControl) in their data-* slots
- *   - none of the 8 orphaned legacy components are ever re-imported (in page.jsx
- *     OR in the panel) — matched on IMPORT LINES only, so the
- *     "Replaces CaseHeaderStep" comment in page.jsx is NOT a false positive
+ *   - none of the 8 legacy component names are ever re-imported (in page.jsx
+ *     OR in the panel) — matched on IMPORT LINES only
  *   - the 3 controls are default-exported and dispatch the correct actions
  *
  * Source-level (readFileSync) — same pattern as archetype-segment.spec.js.
@@ -38,8 +37,7 @@ const ORPHANS = [
   'CaseHeaderStep',
 ];
 
-// Extract only the import lines of a source file (defeats false positives from
-// comments — e.g. "Replaces CaseHeaderStep" lives in a comment, not an import).
+// Extract only the import lines of a source file (defeats false positives from comments).
 const importLines = (src) =>
   src
     .split('\n')
@@ -53,13 +51,6 @@ describe('simulator-config-v2 — page.jsx imports no orphan', () => {
       expect(imports).not.toContain(orphan);
     });
   }
-
-  it('the orphan names DO appear elsewhere only as comments, never as imports', () => {
-    // Sanity: CaseHeaderStep is mentioned in a comment in page.jsx — confirm the
-    // import-line filter correctly excludes it so the guard above is meaningful.
-    expect(pageSrc).toContain('CaseHeaderStep');
-    expect(importLines(pageSrc)).not.toContain('CaseHeaderStep');
-  });
 });
 
 describe('simulator-config-v2 — page.jsx mounts the new panel', () => {

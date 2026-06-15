@@ -1,5 +1,5 @@
-/* simulator-config.css — shell layout du SimulatorConfigPanel v2.
-   Scopé à body.oracle-simulator-page. Tokens uniquement (var(--cp-*)). */
+/* simulator-config.css — SimulatorConfigPanel v2 (archetype, capacity, tech).
+   Import unique via SimulatorConfigPanel. Tokens uniquement (var(--cp-*)). */
 
 [data-sim-config-v2] {
   display: flex;

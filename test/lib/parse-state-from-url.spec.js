@@ -167,4 +167,9 @@ describe('parseStateFromUrl', () => {
     expect(result).not.toHaveProperty('total_mw');
     expect(result).not.toHaveProperty('primary_archetype_id');
   });
+
+  it('?viz=sankey is ignored on config hydration', () => {
+    const result = parseStateFromUrl(sp('viz=sankey'));
+    expect(result).not.toHaveProperty('viz');
+  });
 });

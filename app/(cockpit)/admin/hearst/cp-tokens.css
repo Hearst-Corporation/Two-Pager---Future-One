@@ -36,7 +36,7 @@
   --cp-chat-rail-width: min(420px, 32vw);
 }
 
-body.oracle-simulator-page {
+.oracle-page.oracle-simulator-page {
   --cp-chat-rail-width: min(360px, 27vw);
 }
 
@@ -298,11 +298,6 @@ body.oracle-simulator-page {
   --cp-icon-md:        20px;
   --cp-icon-lg:        28px;
   --cp-icon-stroke:    1.6;
-  --cp-archetype-card-min-height: 100px;
-  --cp-sim-hero-row-min:       11.5rem;
-  --cp-sim-hero-row-min-stack: 18.5rem;
-  --cp-display-input:  46px;
-  --cp-display-unit:   22px;
   --cp-chart-tick:     11px;
   --cp-section-gap:    var(--cp-space-6);
   --cp-badge-size:     18px;

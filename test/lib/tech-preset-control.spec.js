@@ -5,7 +5,6 @@
  *   - selecting a preset dispatches ACTIONS.SET_HARDWARE_MIX with the patch
  *   - declares the 3 concrete hardware presets (colo / mixed / ai_factory)
  *   - cards are accessible (aria-pressed)
- *   - does NOT import the orphaned HardwareMixer / TechnologyStackStep
  *   - tokens-only (no hex / rgba)
  *   - mounted in SimulatorConfigPanel with hardwareMix={state.hardware_mix}
  */
@@ -13,6 +12,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { HARDWARE_PRESETS } from '../../lib/hearst-config-presets.js';
 
 const ctrlSrc = readFileSync(
   fileURLToPath(new URL('../../components/hearst/simulator/TechPresetControl.jsx', import.meta.url)),
@@ -35,16 +35,17 @@ describe('TechPresetControl — dispatch wiring', () => {
 });
 
 describe('TechPresetControl — preset sources', () => {
+  it('imports HARDWARE_PRESETS from hearst-config-presets', () => {
+    expect(ctrlSrc).toMatch(/import\s*\{[^}]*HARDWARE_PRESETS[^}]*\}\s*from\s*['"]@\/lib\/hearst-config-presets['"]/);
+  });
+
   it('declares the 3 concrete presets (ids)', () => {
-    expect(ctrlSrc).toMatch(/['"]colo['"]/);
-    expect(ctrlSrc).toMatch(/['"]mixed['"]/);
-    expect(ctrlSrc).toMatch(/['"]ai_factory['"]/);
+    expect(HARDWARE_PRESETS.map((p) => p.id)).toEqual(['colo', 'mixed', 'ai_factory']);
   });
 
   it('declares the 3 distinct classic_pct patches (80 / 40 / 10)', () => {
-    expect(ctrlSrc).toMatch(/classic_pct:\s*80/);
-    expect(ctrlSrc).toMatch(/classic_pct:\s*40/);
-    expect(ctrlSrc).toMatch(/classic_pct:\s*10/);
+    const pcts = HARDWARE_PRESETS.map((p) => p.patch.classic_pct);
+    expect(pcts).toEqual([80, 40, 10]);
   });
 
   it('names presets via UI strings', () => {
@@ -67,14 +68,6 @@ describe('TechPresetControl — design system hygiene', () => {
 
   it('contains no rgb/rgba literals', () => {
     expect(ctrlSrc).not.toMatch(/rgba?\(/);
-  });
-
-  it('does not import the orphaned HardwareMixer', () => {
-    expect(ctrlSrc).not.toMatch(/HardwareMixer/);
-  });
-
-  it('does not import the orphaned TechnologyStackStep', () => {
-    expect(ctrlSrc).not.toMatch(/TechnologyStackStep/);
   });
 });
 

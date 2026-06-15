@@ -1,4 +1,4 @@
-/* simulator.css — hero-only layout (config panel removed) */
+/* simulator.css — InvestmentCaseSurface hero (metrics, timeline, CTA) */
 
 .oracle-page [data-sim-wrap] {
   flex: 1 1 auto;
@@ -10,16 +10,9 @@
   gap: var(--cp-section-gap);
 }
 
-.oracle-page [data-sim-case] {
+.oracle-page [data-sim-case-surface] {
   flex: 1 1 auto;
   min-width: 0;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   HERO SURFACE (InvestmentCaseSurface)
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.oracle-page [data-sim-case-surface] {
   position: relative;
   padding: var(--cp-space-6);
   background: var(--cp-surface-glass);
@@ -258,17 +251,9 @@
 }
 
 /* ── Viewport : petits écrans ── */
-@media (max-width: 900px) {
-  .oracle-page [data-sim-case] .sim-case-sentence,
-  .oracle-page [data-sim-case] [style*="clamp(20px"] {
-    font-size: clamp(18px, 4.5vw, 24px) !important;
-    line-height: 1.35 !important;
-  }
-}
-
 @media (max-width: 600px) {
-  .oracle-page [data-sim-case] {
-    padding: var(--cp-space-4) !important;
+  .oracle-page [data-sim-case-surface] {
+    padding: var(--cp-space-4);
   }
 }
 
@@ -278,7 +263,7 @@
     gap: var(--cp-space-4);
   }
 
-  .oracle-page [data-sim-case] {
-    padding: var(--cp-space-4) !important;
+  .oracle-page [data-sim-case-surface] {
+    padding: var(--cp-space-4);
   }
 }

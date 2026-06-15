@@ -4,7 +4,6 @@ import { PRIMARY_DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { ACTIONS } from '@/lib/hearst-simulator-state';
 import { PRESET_META, LEVEL_LABEL } from './preset-meta';
-import './simulator-config.css';
 
 // ArchetypeSegment — Index Typographique (Strategic Storyboard, passe 2).
 // Sélectionner un item applique en UN dispatch APPLY_PRESET :

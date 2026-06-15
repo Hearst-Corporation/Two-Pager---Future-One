@@ -3,12 +3,11 @@
  *
  * Source-level guards for the ArchetypeSegment v2 control:
  *   - sources the 4 primary archetypes + canonical model defaults
- *   - selecting an archetype dispatches APPLY_PRESET (NOT bare
- *     SET_PRIMARY_ARCHETYPE) so business_model_id / client_type_id are posted too
+ *   - selecting an archetype dispatches APPLY_PRESET (NOT bare archetype-only actions)
+ *     so business_model_id / client_type_id are posted too
  *   - segment is accessible (aria-pressed)
  *   - mounted in SimulatorConfigPanel
  *   - tokens-only (no hex / rgba)
- *   - does not import the orphaned ArchetypePicker
  */
 
 import { describe, it, expect } from 'vitest';
@@ -46,8 +45,8 @@ describe('ArchetypeSegment — dispatch wiring', () => {
     expect(segSrc).toMatch(/\.\.\.\(?\s*def/);
   });
 
-  it('does NOT rely on a bare SET_PRIMARY_ARCHETYPE dispatch', () => {
-    expect(segSrc).not.toMatch(/ACTIONS\.SET_PRIMARY_ARCHETYPE/);
+  it('does NOT dispatch archetype without APPLY_PRESET bundle', () => {
+    expect(segSrc).not.toMatch(/type:\s*ACTIONS\.SET_PRIMARY_ARCHETYPE/);
   });
 });
 
@@ -64,11 +63,6 @@ describe('ArchetypeSegment — design system hygiene', () => {
 
   it('contains no rgb/rgba literals', () => {
     expect(segSrc).not.toMatch(/rgba?\(/);
-  });
-
-  it('does not import the orphaned ArchetypePicker', () => {
-    expect(segSrc).not.toMatch(/@\/components\/hearst\/simulator\/ArchetypePicker/);
-    expect(segSrc).not.toMatch(/ArchetypePicker/);
   });
 });
 

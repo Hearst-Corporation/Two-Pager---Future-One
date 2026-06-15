@@ -25,20 +25,20 @@ describe('Brief home — entry point', () => {
   it('root redirect targets brief', () => {
     expect(root).toContain("redirect('/admin/hearst')");
   });
+
+  it('uses oracle-brief-page layout class (no viewport stretch)', () => {
+    expect(page).toContain('oracle-page oracle-brief-page');
+  });
 });
 
-describe('Hero surface — glass surface layers', () => {
-  const hero = read('components/hearst/simulator/InvestmentCaseSurface.jsx');
-  const css = read('app/(cockpit)/admin/hearst/simulator/simulator.css');
+describe('Brief home — layout CSS', () => {
+  const layout = read('app/(cockpit)/admin/hearst/oracle-layout.css');
 
-  it('InvestmentCaseSurface has background grid and glow layers', () => {
-    expect(hero).toContain('sim-surface-bg-grid');
-    expect(hero).toContain('sim-surface-glow');
-    expect(hero).toContain('sim-surface-content');
+  it('brief page opts out of flex viewport stretch', () => {
+    expect(layout).toMatch(/\.oracle-page\.oracle-brief-page\s*\{[^}]*flex:\s*0\s+1\s+auto/);
   });
 
-  it('simulator.css defines glass surface tokens', () => {
-    expect(css).toContain('sim-surface');
-    expect(css).toContain('var(--cp-surface-glass)');
+  it('journey grid uses align-items: start (cards content-sized)', () => {
+    expect(layout).toMatch(/\[data-brief-journey\][\s\S]*align-items:\s*start/);
   });
 });

@@ -20,10 +20,6 @@ import InvestmentCaseSurface from '@/components/hearst/simulator/InvestmentCaseS
 import SimulatorConfigPanel from '@/components/hearst/simulator/SimulatorConfigPanel';
 import { Button } from '@/components/hearst/ui';
 
-// Valid viz tab ids — the chat bridge may set active_viz for the dedicated /results
-// page (single source of truth: VIZ_META). This config page stays results-free.
-const VIZ_TAB_IDS = new Set(['radar', 'network', 'matrix', 'sankey']);
-
 const S = {
   wrap: {
     width: '100%',
@@ -58,14 +54,7 @@ export default function SimulatorPage() {
   }, []);
 
 
-  // Mode 'pro' is now the only mode in Wave 1 (C17).
-
-  // Chat → simulator bridge (SIMULATOR_PARAM_EVENT). NOTE: this is a ready-to-wire
-  // CONTRACT, not a live feature in this repo — no chat currently emits the event
-  // (ChatContainer isn't mounted; the CockpitShell rail hits /api/cockpit-chat, a
-  // text proxy with no tools). The `default: return` guard makes unknown fields
-  // no-ops. Test in isolation via:
-  //   window.dispatchEvent(new CustomEvent('hearst.simulator.set_param', {detail:{field:'total_mw',value:120}}))
+  // Chat → simulator bridge (SIMULATOR_PARAM_EVENT). Ready-to-wire contract;
   useEffect(() => {
     if (typeof window === 'undefined') return;
     function handler(e) {
@@ -82,13 +71,10 @@ export default function SimulatorPage() {
           const def = MODEL_DEFAULTS[String(value)];
           return dispatch({ type: ACTIONS.APPLY_PRESET, value: { primary_archetype_id: String(value), ...(def || {}) } });
         }
-        case 'compare_archetype_id':  return dispatch({ type: ACTIONS.TOGGLE_COMPARE_ARCHETYPE, value: String(value) });
         case 'business_model_id':     return dispatch({ type: ACTIONS.SET_BUSINESS_MODEL, value: String(value) });
         case 'client_type_id':        return dispatch({ type: ACTIONS.SET_CLIENT_TYPE, value: String(value) });
         case 'mode':                  return dispatch({ type: ACTIONS.SET_MODE, value: String(value) });
         case 'geography':             return dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: String(value) } });
-        // Validate against VIZ_TAB_IDS so an out-of-catalogue value can't blank the panel.
-        case 'active_viz':            return VIZ_TAB_IDS.has(value) ? dispatch({ type: ACTIONS.SET_ACTIVE_VIZ, value }) : undefined;
         // Whole-bundle apply (size + model + hardware in one shot) — the safe path
         // for multi-field changes; resolves a QATAR_PRESETS id.
         case 'apply_preset': {
@@ -146,8 +132,7 @@ export default function SimulatorPage() {
   // Any config change marks the scenario dirty and invalidates the previous
   // projection. Without this, a fast preset → validate click can save stale
   // numbers from the prior configuration before the debounced /simulate returns.
-  // Ref-guarded so that active_viz changes (which buildSimulatePayload omits)
-  // are no-ops — preserves the synchronous stale-numbers guard.
+  // Ref-guarded: only simulate-relevant fields mark the scenario dirty.
   const prevSimKeyRef = useRef(null);
   useEffect(() => {
     const next = JSON.stringify(buildSimulatePayload(state)); // state, NOT deferredState
@@ -219,9 +204,8 @@ export default function SimulatorPage() {
   }, []);
 
   // simKey: JSON of the simulate payload derived from deferredState.
-  // buildSimulatePayload omits active_viz, so viz tab clicks leave simKey unchanged
-  // → no redundant POST /simulate. The mark-dirty effect above uses state directly
-  // (NOT simKey) to remain synchronous — two different keys by design (P0).
+  // Fields omitted from buildSimulatePayload do not trigger redundant POST /simulate.
+  // The mark-dirty effect above uses state directly (NOT simKey) to stay synchronous.
   const simKey = useMemo(() => JSON.stringify(buildSimulatePayload(deferredState)), [deferredState]);
 
   useEffect(() => {
@@ -360,8 +344,7 @@ export default function SimulatorPage() {
   return (
     <div className="oracle-page oracle-simulator-page">
       <div data-sim-wrap style={S.wrap}>
-        {/* HERO SURFACE — Replaces CaseHeaderStep and the old footer */}
-        <div data-sim-case>
+        {/* Hero board-ready + config panel v2 */}
         <InvestmentCaseSurface
           state={state}
           scenario={scenario}
@@ -371,7 +354,6 @@ export default function SimulatorPage() {
           validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Generate Board Memo →`}
           onValidate={handleValidateAndReveal}
         />
-        </div>
 
         <SimulatorConfigPanel state={state} dispatch={dispatch} />
 

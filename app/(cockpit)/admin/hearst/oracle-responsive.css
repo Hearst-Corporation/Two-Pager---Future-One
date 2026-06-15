@@ -24,7 +24,6 @@ body.oracle-results-page .oracle-page {
   min-height: 0;
   max-height: 100%;
   overflow-x: hidden;
-  padding-block-end: 0;
 }
 
 /* Padding réduit : avec rail chat, le conteneur queries doit atteindre 640px (ex. viewport 1280). */
