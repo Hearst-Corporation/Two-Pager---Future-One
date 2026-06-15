@@ -46,11 +46,11 @@ export default function TechPresetControl({ hardwareMix, dispatch }) {
               <p className="archetype-ideal-for">{PRESET_INFO[p.id]}</p>
               <div className="archetype-meta-row">
                 <div>
-                  <span className="archetype-meta-label">Standard</span>
+                  <span className="archetype-meta-label">{UI.SIM_HW_STANDARD}</span>
                   <span className="archetype-meta-value">{p.patch.classic_pct}%</span>
                 </div>
                 <div>
-                  <span className="archetype-meta-label">High-Density</span>
+                  <span className="archetype-meta-label">{UI.SIM_HW_HIGH_DENSITY}</span>
                   <span className="archetype-meta-value">{p.patch.ai_pct}%</span>
                 </div>
               </div>

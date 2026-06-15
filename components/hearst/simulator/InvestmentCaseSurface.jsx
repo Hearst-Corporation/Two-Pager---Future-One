@@ -20,37 +20,35 @@ export default function InvestmentCaseSurface({
   const meta = PRESET_META[state.primary_archetype_id];
 
   return (
-    <div className="is-assembling" style={{ marginBottom: '64px' }}>
-      <div className="del-1" style={{ marginBottom: '48px' }}>
-        <h1 style={{ fontSize: '48px', fontWeight: 300, letterSpacing: '-0.02em', lineHeight: 1.1, margin: '0 0 16px 0', color: 'var(--cp-text-strong)' }}>
-          {UI.SIM_CASE_VERB} <strong>{fmtUSD(capex)}</strong> {UI.SIM_CASE_INTO}{' '}
-          <strong>{fmtMW(capacity, 0)}</strong> {UI.SIM_CASE_IN_QATAR_WITH}{' '}
-          <strong>{selectedArchetype?.label || state.primary_archetype_id}</strong>
-        </h1>
-        <p style={{ fontSize: '20px', color: 'var(--cp-text-muted)', margin: 0, maxWidth: '800px', lineHeight: 1.4 }}>
-          {meta?.tagline ? `${meta.tagline}. ` : ''}{UI.SIM_PAGE_SUBTITLE}
-        </p>
-      </div>
-
-      <div className="del-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
-        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--cp-text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>{UI.SIM_RESULT_RETURN}</div>
-          <div style={{ fontSize: '36px', fontWeight: 300, color: 'var(--cp-text-strong)' }}>{irr != null ? fmtPctFromRatio(irr) : MISSING}</div>
-        </div>
-        
-        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--cp-text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>{UI.SIM_METRIC_CAPITAL}</div>
-          <div style={{ fontSize: '36px', fontWeight: 300, color: 'var(--cp-text-strong)' }}>{fmtUSD(capex)}</div>
+    <div data-sim-case-surface className="is-assembling del-1">
+      <div className="sim-surface-bg-grid" />
+      <div className="sim-surface-content">
+        <div data-sim-case-copy>
+          <h1>
+            {UI.SIM_CASE_VERB} <strong>{fmtUSD(capex)}</strong> {UI.SIM_CASE_INTO}{' '}
+            <strong>{fmtMW(capacity, 0)}</strong> {UI.SIM_CASE_IN_QATAR_WITH}{' '}
+            <strong>{selectedArchetype?.label || state.primary_archetype_id}</strong>
+          </h1>
+          <p>{meta?.tagline ? `${meta.tagline}. ` : ''}{UI.SIM_PAGE_SUBTITLE}</p>
         </div>
 
-        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--cp-text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Risk Profile</div>
-          <div style={{ fontSize: '36px', fontWeight: 300, color: 'var(--cp-text-strong)' }}>{meta ? LEVEL_LABEL[meta.risk] : MISSING}</div>
-        </div>
-
-        <div style={{ padding: '24px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-md)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--cp-text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>NPV</div>
-          <div style={{ fontSize: '36px', fontWeight: 300, color: 'var(--cp-text-strong)' }}>{npv != null ? fmtUSD(npv) : (moic != null ? `${fmtX(moic)}x` : MISSING)}</div>
+        <div data-sim-case-metrics>
+          <div data-sim-metric-tile>
+            <span>{UI.SIM_RESULT_RETURN}</span>
+            <strong>{irr != null ? fmtPctFromRatio(irr) : MISSING}</strong>
+          </div>
+          <div data-sim-metric-tile>
+            <span>{UI.SIM_METRIC_CAPITAL}</span>
+            <strong>{fmtUSD(capex)}</strong>
+          </div>
+          <div data-sim-metric-tile>
+            <span>{UI.SIM_METRIC_RISK_PROFILE}</span>
+            <strong>{meta ? LEVEL_LABEL[meta.risk] : MISSING}</strong>
+          </div>
+          <div data-sim-metric-tile>
+            <span>{UI.SIM_METRIC_NPV}</span>
+            <strong>{npv != null ? fmtUSD(npv) : (moic != null ? `${fmtX(moic)}x` : MISSING)}</strong>
+          </div>
         </div>
       </div>
     </div>

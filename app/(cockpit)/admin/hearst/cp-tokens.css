@@ -77,6 +77,7 @@
   --cp-font-family-mono: ui-monospace, "SF Mono", "Cascadia Code", "Menlo", monospace;
   --cp-dur-fast:        100ms;
   --cp-dur-interact:    200ms;
+  --cp-dur-slow:        400ms;
 
   /* Opacité — échelle unique (inline styles, hover, sections secondaires) */
   --cp-opacity-section-quiet: 0.6;
@@ -222,6 +223,7 @@
   /* ── Dimensions de contrôle ── */
   --cp-control-sm:  20px;  /* badge/puce */
   --cp-control-md:  28px;  /* icône-badge, segment */
+  --cp-control-lg:  52px;  /* bouton CTA pleine largeur */
   --cp-tile-minh:      76px;   /* tuile cliquable (archetype, segment, preset) */
   --cp-chart-h:        420px;  /* hauteur standard panneau chart */
   --cp-loading-min-h:  320px;  /* hauteur min panneau loading/skeleton */

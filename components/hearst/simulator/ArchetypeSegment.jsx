@@ -4,6 +4,7 @@ import { PRIMARY_DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { ACTIONS } from '@/lib/hearst-simulator-state';
 import { PRESET_META, LEVEL_LABEL } from './preset-meta';
+import { UI } from '@/lib/ui-strings';
 import './simulator-config.css';
 
 // ArchetypeSegment — Institutional card grid (board-ready).
@@ -45,11 +46,11 @@ export default function ArchetypeSegment({ primaryId, dispatch }) {
                   <p className="archetype-ideal-for">{m.ideal_for}</p>
                   <div className="archetype-meta-row">
                     <div>
-                      <span className="archetype-meta-label">Return</span>
+                      <span className="archetype-meta-label">{UI.SIM_META_RETURN}</span>
                       <span className="archetype-meta-value">{m.return_band}</span>
                     </div>
                     <div>
-                      <span className="archetype-meta-label">Risk</span>
+                      <span className="archetype-meta-label">{UI.SIM_META_RISK}</span>
                       <span className="archetype-meta-value">{LEVEL_LABEL[m.risk]}</span>
                     </div>
                   </div>

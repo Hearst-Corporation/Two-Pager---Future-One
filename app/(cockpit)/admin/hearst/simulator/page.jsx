@@ -326,32 +326,32 @@ export default function SimulatorPage() {
             <div data-sim-live-metrics>
               <div data-sim-live-label>
                 <span className="live-dot" data-loading={loading} />
-                {loading ? 'Computing…' : 'Live projection'}
+                {loading ? UI.SIM_LIVE_COMPUTING : UI.SIM_LIVE_PROJECTION}
               </div>
 
               <div data-sim-live-kpi>
-                <span data-sim-live-kpi-name>IRR</span>
+                <span data-sim-live-kpi-name>{UI.SIM_KPI_IRR}</span>
                 <strong data-sim-live-kpi-value data-accent={irr != null && !loading}>
-                  {loading ? '—' : irr != null ? fmtPctFromRatio(irr) : MISSING}
+                  {loading ? MISSING : irr != null ? fmtPctFromRatio(irr) : MISSING}
                 </strong>
               </div>
 
               <div data-sim-live-kpi>
-                <span data-sim-live-kpi-name>Total CAPEX</span>
+                <span data-sim-live-kpi-name>{UI.SIM_METRIC_TOTAL_CAPEX}</span>
                 <strong data-sim-live-kpi-value>
-                  {loading ? '—' : fmtUSD(capex)}
+                  {loading ? MISSING : fmtUSD(capex)}
                 </strong>
               </div>
 
               <div data-sim-live-kpi>
-                <span data-sim-live-kpi-name>NPV</span>
+                <span data-sim-live-kpi-name>{UI.SIM_METRIC_NPV}</span>
                 <strong data-sim-live-kpi-value>
-                  {loading ? '—' : npv != null ? fmtUSD(npv) : MISSING}
+                  {loading ? MISSING : npv != null ? fmtUSD(npv) : MISSING}
                 </strong>
               </div>
 
               <div data-sim-live-kpi>
-                <span data-sim-live-kpi-name>Risk</span>
+                <span data-sim-live-kpi-name>{UI.SIM_META_RISK}</span>
                 <strong data-sim-live-kpi-value>
                   {meta ? LEVEL_LABEL[meta.risk] : MISSING}
                 </strong>
@@ -360,17 +360,17 @@ export default function SimulatorPage() {
 
             <div data-decision-ctrl>
               <div>
-                <span data-decision-label>Decision Required</span>
-                <div data-decision-title>Approve & Generate Memo</div>
+                <span data-decision-label>{UI.SIM_DECISION_REQUIRED}</span>
+                <div data-decision-title>{UI.SIM_DECISION_TITLE}</div>
               </div>
               <Button
                 variant="primary"
                 size="lg"
                 disabled={validateBlocked}
                 onClick={handleValidateAndReveal}
-                style={{ width: '100%', justifyContent: 'space-between', padding: '0 24px', height: '52px', fontSize: '15px' }}
+                className="sim-cta-btn"
               >
-                {savingState === 'saving' ? UI.SIM_SAVING : 'Generate Board Memo →'}
+                {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_CONFIG_GENERATE_MEMO}
               </Button>
             </div>
 
@@ -386,7 +386,7 @@ export default function SimulatorPage() {
             <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>{UI.ACTION_RETRY}</Button>
           </div>
         )}
-        {simError && <div style={CP.dangerAlert} role="alert">Error: {simError}</div>}
+        {simError && <div style={CP.dangerAlert} role="alert">{UI.SIM_ERROR_PREFIX} {simError}</div>}
       </div>
     </div>
   );
