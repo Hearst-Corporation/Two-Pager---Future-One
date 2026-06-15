@@ -13,6 +13,7 @@ import type { ChatConfig } from "../chat/types";
 export interface CenterPanelProps {
   children: ReactNode;
   renderProduct?: (activeId: string) => ReactNode;
+  fullWidth?: boolean;
 }
 
 /**
@@ -57,4 +58,10 @@ export interface CockpitShellProps {
    * laissent cette prop vide.
    */
   renderActiveProduct?: (activeId: string) => ReactNode;
+  /**
+   * Pose `.ct-fullwidth` sur le centre panel — supprime min-width: 520px et
+   * force width: 100%. Rendu SSR, zéro FOUC. À utiliser pour les pages
+   * pleine-largeur (simulator, results wide).
+   */
+  fullWidth?: boolean;
 }

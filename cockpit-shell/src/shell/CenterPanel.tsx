@@ -23,14 +23,14 @@ import type { CenterPanelProps } from "./types";
  * Le shell reste donc générique : il ne sait pas embedder un produit, il
  * laisse le hub injecter sa logique d'embed.
  */
-export function CenterPanel({ children, renderProduct }: CenterPanelProps) {
+export function CenterPanel({ children, renderProduct, fullWidth }: CenterPanelProps) {
   const active = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const { appId } = useCockpit();
 
   const showProduct = renderProduct && active !== appId;
 
   return (
-    <div className="ct-center-panel">
+    <div className={`ct-center-panel${fullWidth ? " ct-fullwidth" : ""}`}>
       {showProduct ? (
         renderProduct(active)
       ) : (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
+import { usePathname } from 'next/navigation';
 import { CockpitShell } from '@hearst/cockpit-shell';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleRailNav } from '@/components/OracleRailNav';
@@ -23,6 +24,9 @@ const ORACLE_CHAT_CONFIG = {
 };
 
 export default function HearstLayoutClient({ children }) {
+  const pathname = usePathname();
+  const isFullWidth = pathname.includes('/simulator');
+
   useEffect(() => {
     document.documentElement.classList.add('oracle-cockpit-root');
     document.body.classList.add('oracle-cockpit-page');
@@ -39,7 +43,7 @@ export default function HearstLayoutClient({ children }) {
       <Suspense fallback={null}>
         <CockpitChatBridge />
       </Suspense>
-      <CockpitShell products={ORACLE_PRODUCTS} appId="oracle" chatConfig={ORACLE_CHAT_CONFIG}>
+      <CockpitShell products={ORACLE_PRODUCTS} appId="oracle" chatConfig={ORACLE_CHAT_CONFIG} fullWidth={isFullWidth}>
         <OracleRailNav />
         {children}
         <ChatToggleFAB />

@@ -5,7 +5,6 @@
      · 1080px — medium ↔ wide
 */
 
-body.oracle-simulator-page .ct-center-panel,
 body.oracle-results-wide .ct-center-panel {
   flex: 1 1 auto !important;
   width: auto !important;
@@ -13,7 +12,6 @@ body.oracle-results-wide .ct-center-panel {
   max-width: 100% !important;
 }
 
-body.oracle-simulator-page .ct-page-area,
 body.oracle-results-wide .ct-page-area {
   width: 100% !important;
   max-width: 100% !important;

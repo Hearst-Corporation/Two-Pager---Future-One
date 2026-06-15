@@ -29,6 +29,7 @@ export function CockpitShell({
   appId,
   chatConfig,
   renderActiveProduct,
+  fullWidth,
 }: CockpitShellProps) {
   // Fixe le défaut du store actif sur l'appId courante (avant le 1er render).
   useEffect(() => {
@@ -75,7 +76,7 @@ export function CockpitShell({
         <div className="ct-ambient-glow" />
         <div className={`ct-panels-row${inProduct ? " ct-immersif" : ""}`}>
           <RailLeft />
-          <CenterPanel {...(renderActiveProduct !== undefined ? { renderProduct: renderActiveProduct } : {})}>
+          <CenterPanel {...(renderActiveProduct !== undefined ? { renderProduct: renderActiveProduct } : {})} fullWidth={fullWidth}>
             {children}
           </CenterPanel>
           <RailRight />
