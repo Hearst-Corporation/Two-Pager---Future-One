@@ -6,9 +6,7 @@ import {
   CartesianGrid, Tooltip, Legend, ReferenceLine,
 } from 'recharts';
 import { useContainerSize } from './useContainerSize';
-import { RC } from '@/lib/cp-styles';
-
-const CHART_TOOLTIP = { ...RC.tooltip, fontSize: 'var(--cp-font-xs)' };
+import { RC, CHART_TOOLTIP } from '@/lib/cp-styles';
 
 // Axis/tooltip in $M, promoted to $B past a billion so a 10-yr plan never shows "$1200M".
 const fmtAxisM = (v) => Math.abs(v) >= 1000 ? `$${(v / 1000).toFixed(1)}B` : `$${v.toFixed(0)}M`;

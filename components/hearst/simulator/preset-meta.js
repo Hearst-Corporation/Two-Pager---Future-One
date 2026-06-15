@@ -4,12 +4,9 @@
 // (return band, capital intensity) are indicative ranges meant to orient a
 // non-expert BEFORE they run the model — they are deliberately shown as bands
 // ("8–10%"), never as the live computed figure. The real, scenario-specific
-// IRR / capital / MOIC come from the engine and are rendered by the hero KPI
-// strip (InvestmentCaseSurface), which stays the single source of truth for
-// computed values. Keyed by the real archetype id (lib/hearst-deal-structures).
-
-// Levels drive the dot-meter; kept ordinal so they need no hardcoded colors.
-export const LEVEL = { low: 1, medium: 2, high: 3, very_high: 4 };
+// IRR / capital / MOIC come from the engine and are rendered by the live
+// metrics panel / results, the single source of truth for computed values.
+// Keyed by the real archetype id (lib/hearst-deal-structures).
 
 export const PRESET_META = {
   powered_shell: {

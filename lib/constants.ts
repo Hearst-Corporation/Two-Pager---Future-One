@@ -37,6 +37,12 @@ export const MEMO_LLM_SOFT_TIMEOUT_MS = 90_000 as const;
 /** Default OpenAI SDK network timeout (ms). Env override: LLM_MODEL_TIMEOUT_MS. */
 export const LLM_SDK_TIMEOUT_MS = 300_000 as const;
 
+/** Strategic-memo SLA display thresholds (ms) — single source for the elapsed-time
+ *  tone + gauge in StrategicMemoModal and MemoJobBadge. */
+export const SLA_TARGET_MS = 60_000 as const;
+export const SLA_WARNING_MS = 120_000 as const;
+export const SLA_DANGER_MS = 240_000 as const;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CALCULATION — financial engine & projection constants
 // ─────────────────────────────────────────────────────────────────────────────

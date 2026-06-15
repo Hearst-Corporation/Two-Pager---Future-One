@@ -7,9 +7,9 @@ import PropTypes from 'prop-types';
 
 const SIZES = {
   micro: { height: 'var(--cp-control-sm)', padding: '0 var(--cp-space-2)', fontSize: 'var(--cp-font-nano)' },
-  sm: { height: '24px', padding: '0 var(--cp-space-3)', fontSize: 'var(--cp-font-micro)' },
-  md: { height: '32px', padding: '0 var(--cp-space-4)', fontSize: 'var(--cp-font-xs)' },
-  lg: { height: '40px', padding: '0 var(--cp-space-6)', fontSize: 'var(--cp-font-sm)' },
+  sm: { height: 'var(--cp-control-md)', padding: '0 var(--cp-space-3)', fontSize: 'var(--cp-font-micro)' },
+  md: { height: 'calc(var(--cp-control-md) + var(--cp-space-1))', padding: '0 var(--cp-space-4)', fontSize: 'var(--cp-font-xs)' },
+  lg: { height: 'var(--cp-control-lg)', padding: '0 var(--cp-space-6)', fontSize: 'var(--cp-font-sm)' },
 };
 
 const VARIANTS = {

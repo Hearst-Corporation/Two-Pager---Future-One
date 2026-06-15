@@ -10,208 +10,167 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--cp-section-gap);
+  gap: var(--sim-gap-section, var(--cp-space-6));
   container-type: inline-size;
   container-name: sim;
+
+  /* ── Échelle simulateur : fluide sur la largeur du conteneur (chat ouvert/fermé), pas le viewport ── */
+  --sim-gap-section: clamp(var(--cp-space-6), 4.2cqi, var(--cp-space-9));
+  --sim-gap-block: clamp(var(--cp-space-5), 3cqi, var(--cp-space-7));
+  --sim-gap-stack: clamp(var(--cp-space-4), 2.2cqi, var(--cp-space-6));
+  --sim-gap-tight: clamp(var(--cp-space-2), 1.4cqi, var(--cp-space-3));
+  --sim-control-h: clamp(32px, 4.2cqi, 40px);
+  --sim-input-size: clamp(var(--cp-font-2xl), 5.5cqi, 3.25rem);
+  --sim-input-unit-size: clamp(var(--cp-font-lg), 2.2cqi, var(--cp-font-xl));
+  --sim-metric-size: clamp(var(--cp-font-md), 2.6cqi, var(--cp-font-fluid-stat));
+  --sim-live-metric-size: clamp(var(--cp-font-xl), 3.8cqi, var(--cp-font-fluid-metric));
+  --sim-metric-weight: var(--cp-weight-semibold);
+  --sim-label-size: clamp(var(--cp-font-xs), 1.15cqi, var(--cp-font-sm));
+  --sim-body-size: clamp(var(--cp-font-sm), 1.35cqi, var(--cp-font-md));
+  --sim-section-title-size: clamp(var(--cp-font-lg), 2cqi, var(--cp-font-xl));
+  --sim-caption-size: clamp(var(--cp-font-micro), 1cqi, var(--cp-font-xs));
+  --sim-mix-bar-h: clamp(8px, 1.4cqi, 12px);
+  --sim-results-min-w: clamp(11rem, 28cqi, 16rem);
+  --sim-sidebar-min: clamp(18rem, 42cqi, 26rem);
 }
 
-/* ── Hero surface ── */
-.oracle-page [data-sim-case-surface] {
-  flex: 0 0 auto;
-  min-width: 0;
-  position: relative;
-  padding: var(--cp-space-6); /* Restored original padding */
-  background: var(--cp-surface-glass);
-  backdrop-filter: var(--cp-blur-lg);
-  -webkit-backdrop-filter: var(--cp-blur-lg);
-  border-radius: var(--cp-radius-xl);
-  border: 1px solid var(--cp-border);
-  box-shadow: var(--cp-shadow-hero);
-  overflow: hidden;
-  color: var(--cp-text-strong);
-}
-
-
-.oracle-page .sim-surface-bg-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(to right, var(--cp-hairline-faint) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--cp-hairline-faint) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(circle at 50% 0%, black, transparent 80%);
-  -webkit-mask-image: radial-gradient(circle at 50% 0%, black, transparent 80%);
-  pointer-events: none;
-  animation: gridPan 20s linear infinite;
-}
-
-@keyframes gridPan {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(32px); }
-}
-
-.oracle-page .sim-surface-content {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: var(--cp-space-5); /* Restored original gap */
-}
-
-/* ── Copy hero ── */
-.oracle-page [data-sim-case-copy] {
-  display: flex;
-  flex-direction: column;
-  gap: var(--cp-space-2); /* Restored original gap */
-}
-
-.oracle-page [data-sim-case-copy] h1 {
-  font-size: var(--cp-font-2xl); /* Restored original size */
-  font-weight: var(--cp-weight-light);
-  line-height: var(--cp-leading-snug);
-  margin: 0;
-  color: var(--cp-text-primary);
-  letter-spacing: var(--cp-tracking-tight);
-}
-
-.oracle-page [data-sim-case-copy] h1 strong {
-  font-weight: var(--cp-weight-black);
-  color: var(--cp-text-strong);
-  background: var(--cp-gradient-hero-strong);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block; /* Fix clipping */
-}
-
-.oracle-page [data-sim-case-copy] p {
-  font-size: var(--cp-font-sm);
-  color: var(--cp-text-body);
-  max-width: var(--cp-prose-max);
-  margin: 0;
-  line-height: var(--cp-leading-body);
-}
-
-/* ── KPIs hero ── */
-.oracle-page [data-sim-case-metrics] {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Restored original */
-  gap: var(--cp-space-4); /* Restored original gap */
-}
-
-.oracle-page [data-sim-metric-tile] {
-  display: flex;
-  flex-direction: column;
-  gap: var(--cp-space-1);
-  padding: var(--cp-space-4);
-  background: var(--cp-surface-1);
-  border-radius: var(--cp-radius-lg);
-  border: 1px solid var(--cp-border-soft);
-  position: relative;
-  overflow: hidden;
-  transition:
-    transform var(--cp-dur-interact) var(--cp-ease-out),
-    background var(--cp-dur-interact) var(--cp-ease-out),
-    border-color var(--cp-dur-interact) var(--cp-ease-out),
-    box-shadow var(--cp-dur-interact) var(--cp-ease-out);
-}
-
-.oracle-page [data-sim-metric-tile]::after {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%; width: 50%; height: 100%;
-  background: linear-gradient(to right, transparent, var(--cp-hairline-faint), transparent);
-  transform: skewX(-20deg);
-  transition: left var(--cp-dur-slow) var(--cp-ease-out);
-}
-
-.oracle-page [data-sim-metric-tile]:hover {
-  transform: translateY(-2px) scale(1.01);
-  background: var(--cp-surface-2);
-  border-color: var(--cp-accent);
-  box-shadow: var(--cp-shadow-md);
-}
-
-.oracle-page [data-sim-metric-tile]:hover::after {
-  left: 200%;
-}
-
-.oracle-page [data-sim-metric-tile] span {
-  font-size: var(--cp-font-nano);
-  font-weight: var(--cp-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--cp-tracking-wider);
-  color: var(--cp-text-muted);
-}
-
-.oracle-page [data-sim-metric-tile] strong {
-  font-size: var(--cp-font-2xl); /* Restored original */
-  font-weight: var(--cp-weight-black);
-  color: var(--cp-text-strong);
-  font-variant-numeric: tabular-nums;
-  line-height: var(--cp-leading-none);
-  text-shadow: var(--cp-shadow-metric-value);
-}
-
-/* ── Cockpit — 1 colonne par défaut (chat ouvert / espace contraint) ── */
+/* ── Cockpit — config puis décision ; 2 colonnes quand le conteneur est large ── */
 .oracle-page [data-sim-cockpit] {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--cp-space-6);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sim-gap-section);
   align-items: start;
   width: 100%;
 }
 
-/* Conteneur large (≈ chat fermé) → 2 colonnes config | live+CTA */
 @container sim (min-width: 1000px) {
   .oracle-page [data-sim-cockpit] {
-    grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.6fr);
+    grid-template-columns: minmax(0, 1fr) minmax(var(--sim-sidebar-min), 0.42fr);
+    gap: clamp(var(--cp-space-6), 4cqi, var(--cp-space-9));
   }
 }
 
-/* ── Panneau droit — défaut (1-col) : bandeau horizontal, non sticky ── */
+/* ── Panneau décision — toujours colonne ; sticky en mode 2-col ── */
 .oracle-page [data-sim-right-panel] {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: var(--cp-space-4);
+  flex-direction: column;
+  gap: var(--sim-gap-section);
   align-items: stretch;
+  min-width: 0;
 }
 
-.oracle-page [data-sim-right-panel] [data-sim-live-metrics] { flex: 1 1 320px; }
-.oracle-page [data-sim-right-panel] [data-decision-ctrl] { flex: 1 1 320px; }
-
-/* Conteneur large (2-col) : colonne sticky à droite */
 @container sim (min-width: 1000px) {
   .oracle-page [data-sim-right-panel] {
-    flex-direction: column;
-    flex-wrap: nowrap;
     position: sticky;
     top: var(--cp-space-6);
+    align-self: start;
+    max-height: calc(100dvh - var(--cp-space-12));
+    overflow-y: auto;
   }
 }
 
 .oracle-page [data-sim-live-metrics] {
   display: flex;
   flex-direction: column;
-  gap: var(--cp-space-1);
-  padding: var(--cp-space-4);
-  background: var(--cp-surface-glass);
-  border: 1px solid var(--cp-border);
+  gap: 0;
+  padding: var(--cp-space-6);
+  background: var(--cp-surface-0);
+  border: var(--cp-border-w) solid var(--cp-border-soft);
   border-radius: var(--cp-radius-lg);
-  backdrop-filter: var(--cp-blur-lg);
-  -webkit-backdrop-filter: var(--cp-blur-lg);
-  box-shadow: var(--cp-shadow-lg); /* Added shadow */
+  box-shadow: none;
 }
 
 .oracle-page [data-sim-live-label] {
-  font-size: var(--cp-font-nano);
-  font-weight: var(--cp-weight-black);
-  text-transform: uppercase;
-  letter-spacing: var(--cp-tracking-widest);
+  font-size: var(--sim-body-size);
+  font-weight: var(--cp-weight-medium);
   color: var(--cp-text-muted);
-  margin-bottom: var(--cp-space-2);
+  margin: 0 0 var(--cp-space-4);
   display: flex;
   align-items: center;
+  padding-bottom: var(--cp-space-3);
+  border-bottom: var(--cp-border-w) solid var(--cp-border-soft);
+}
+
+.oracle-page [data-sim-live-kpi] {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sim-gap-block);
+  padding: var(--cp-space-4) 0;
+  background: transparent;
+  border: none;
+  border-bottom: var(--cp-border-w) solid var(--cp-border-soft);
+  border-radius: 0;
+  min-height: 0;
+}
+
+.oracle-page [data-sim-live-kpi]:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.oracle-page [data-sim-live-kpi-name] {
+  font-size: var(--sim-body-size);
+  color: var(--cp-text-muted);
+  font-weight: var(--cp-weight-regular);
+  letter-spacing: var(--cp-tracking-snug);
+}
+
+.oracle-page [data-sim-live-kpi-value] {
+  font-size: var(--sim-metric-size);
+  font-weight: var(--cp-weight-semibold);
+  color: var(--cp-text-strong);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--cp-leading-snug);
+}
+
+.oracle-page [data-sim-live-kpi-value][data-accent="true"] {
+  color: var(--cp-text-strong);
+  font-weight: var(--cp-weight-bold);
+}
+
+.oracle-page .sim-cta-btn {
+  appearance: none;
+  border: var(--cp-border-w) solid var(--cp-border);
+  border-radius: var(--cp-radius-md);
+  width: 100%;
+  justify-content: center;
+  padding: var(--cp-space-4) var(--cp-space-5);
+  min-height: var(--cp-control-lg);
+  height: auto;
+  font-size: var(--sim-body-size);
+  font-weight: var(--cp-weight-medium);
+  letter-spacing: var(--cp-tracking-snug);
+  background: var(--cp-surface-0);
+  color: var(--cp-text-strong);
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition:
+    background var(--cp-dur-fast) var(--cp-ease),
+    border-color var(--cp-dur-fast) var(--cp-ease),
+    color var(--cp-dur-fast) var(--cp-ease);
+}
+
+.oracle-page .sim-cta-btn:hover:not(:disabled) {
+  background: var(--cp-surface-1);
+  border-color: var(--cp-border-strong);
+}
+
+.oracle-page .sim-cta-btn:focus-visible {
+  outline: 2px solid var(--cp-border-strong);
+  outline-offset: 2px;
+}
+
+.oracle-page .sim-cta-btn:not(:disabled) {
+  border-left: var(--cp-border-w-accent) solid var(--cp-accent);
+}
+
+.oracle-page .sim-cta-btn:disabled {
+  opacity: var(--cp-opacity-disabled);
+  cursor: not-allowed;
+  border-left-color: var(--cp-border);
 }
 
 .oracle-page .live-dot {
@@ -219,69 +178,42 @@
   width: var(--cp-kicker-dot-size);
   height: var(--cp-kicker-dot-size);
   border-radius: 50%;
-  background: var(--cp-accent);
+  background: var(--cp-border-strong);
   margin-right: var(--cp-space-2);
-  box-shadow: var(--cp-shadow-kicker-glow);
-  animation: pulseLive 2s infinite;
+  box-shadow: none;
+  animation: none;
 }
+
 .oracle-page .live-dot[data-loading="true"] {
   background: var(--cp-text-muted);
-  box-shadow: none;
-  animation: pulseLiveFast 1s infinite;
-}
-@keyframes pulseLive { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-@keyframes pulseLiveFast { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
-
-.oracle-page [data-sim-live-kpi] {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--cp-space-2);
-  padding: var(--cp-space-2) 0;
-  border-bottom: 1px solid var(--cp-border-soft);
 }
 
-.oracle-page [data-sim-live-kpi]:last-of-type {
-  border-bottom: none;
-}
-
-.oracle-page [data-sim-live-kpi-name] {
-  font-size: var(--cp-font-xs);
-  color: var(--cp-text-muted);
+.oracle-page [data-sim-alert] {
+  padding: var(--cp-space-3) var(--cp-space-4);
+  color: var(--cp-status-danger);
+  background: var(--cp-status-danger-soft);
+  border: var(--cp-border-w) solid var(--cp-status-danger-border);
+  border-left: 3px solid var(--cp-status-danger);
+  border-radius: var(--cp-radius-md);
+  font-size: var(--sim-body-size, var(--cp-font-sm));
   font-weight: var(--cp-weight-semibold);
-}
-
-.oracle-page [data-sim-live-kpi-value] {
-  font-size: var(--cp-font-md);
-  font-weight: var(--cp-weight-black);
-  color: var(--cp-text-primary);
-  font-variant-numeric: tabular-nums;
-  transition: transform var(--cp-dur-interact) var(--cp-ease-out);
-}
-
-.oracle-page [data-sim-live-kpi-value][data-accent="true"] {
-  color: var(--cp-accent);
-}
-
-/* CTA Generate Memo — pleine largeur, tokens DS (remplace l'inline) */
-.oracle-page .sim-cta-btn {
   width: 100%;
+}
+
+.oracle-page [data-sim-alert-row] {
+  display: flex;
   justify-content: space-between;
-  padding-inline: var(--cp-space-6);
-  height: var(--cp-control-lg);
-  font-size: var(--cp-font-md);
+  align-items: center;
+  gap: var(--sim-gap-stack, var(--cp-space-3));
 }
 
-/* ── Responsive ── */
-/* Hero KPIs : 4 colonnes si large, 2 si conteneur étroit (chat ouvert) */
-@container sim (max-width: 720px) {
-  .oracle-page [data-sim-case-metrics] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 600px) {
-  .oracle-page [data-sim-case-surface] {
-    padding: var(--cp-space-3) var(--cp-space-4);
-  }
+.oracle-page .sim-alert-retry {
+  appearance: none;
+  border: var(--cp-border-w) solid var(--cp-border);
+  border-radius: var(--cp-radius-sm);
+  padding: var(--cp-space-1) var(--cp-space-2);
+  background: transparent;
+  color: var(--cp-text-primary);
+  font-size: var(--sim-label-size, var(--cp-font-xs));
+  cursor: pointer;
 }

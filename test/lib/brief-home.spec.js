@@ -1,4 +1,4 @@
-// brief-home.spec.js — Brief landing is the cockpit entry (not a simulator redirect).
+// brief-home.spec.js — /admin/hearst forwards directly to simulator.
 
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -11,23 +11,22 @@ describe('Brief home — entry point', () => {
   const page = read('app/(cockpit)/admin/hearst/page.jsx');
   const root = read('app/page.jsx');
 
-  it('does not redirect straight to simulator', () => {
-    expect(page).not.toContain("redirect('/admin/hearst/simulator')");
-    expect(page).toContain('BRIEF_TITLE');
+  it('redirects straight to simulator', () => {
+    expect(page).toContain("redirect('/admin/hearst/simulator')");
+    expect(page).toContain("from 'next/navigation'");
   });
 
-  it('links the primary journey (Model → Evidence → Decision)', () => {
-    expect(page).toContain("href: '/admin/hearst/simulator'");
-    expect(page).toContain("href: '/admin/hearst/sources'");
-    expect(page).toContain("href: '/admin/hearst/dossier'");
+  it('does not render legacy brief cards', () => {
+    expect(page).not.toContain('data-brief-journey');
+    expect(page).not.toContain('BRIEF_TITLE');
   });
 
   it('root redirect targets brief', () => {
     expect(root).toContain("redirect('/admin/hearst')");
   });
 
-  it('uses oracle-brief-page layout class (no viewport stretch)', () => {
-    expect(page).toContain('oracle-page oracle-brief-page');
+  it('uses a dedicated entry component name', () => {
+    expect(page).toContain('HearstEntryPage');
   });
 });
 

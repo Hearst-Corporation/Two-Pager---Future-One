@@ -20,8 +20,9 @@ import {
   formatElapsed,
 } from '@/lib/hearst-memo-job-store';
 import { deriveVerdict, deriveCategory, deriveKpis } from '@/lib/dossier-derive';
-import { Modal } from '@/components/hearst/ui';
+import { Modal, Button } from '@/components/hearst/ui';
 import { UI } from '@/lib/ui-strings';
+import { SLA_TARGET_MS, SLA_WARNING_MS, SLA_DANGER_MS } from '@/lib/constants';
 
 /**
  * Live timeline shown during loading.
@@ -29,10 +30,6 @@ import { UI } from '@/lib/ui-strings';
  * We don't have SSE yet, so this shows real elapsed time and an SLA gauge.
  * The true model is revealed via meta.model_used when the memo arrives.
  */
-const SLA_TARGET_MS = 60_000;
-const SLA_WARNING_MS = 120_000;
-const SLA_DANGER_MS = 240_000;
-
 function MemoTimeline({ elapsedMs, cascade }) {
   const pct = Math.min(100, (elapsedMs / SLA_DANGER_MS) * 100);
   const slaTone =
@@ -157,19 +154,27 @@ function SuccessState({ memo, meta, title, router }) {
       </div>
 
       <div style={S.successActions}>
-        <button type="button" onClick={viewCanvas} disabled={!memoId} style={S.ctaPrimary}>
+        <Button variant="primary" size="md" type="button" onClick={viewCanvas} disabled={!memoId}>
           View Decision Canvas →
-        </button>
+        </Button>
         {memoId ? (
-          <a style={S.ctaSecondary} href={`/api/admin/hearst/strategic-memos/${memoId}/pdf`} target="_blank" rel="noreferrer">
+          <Button
+            variant="secondary"
+            size="md"
+            href={`/api/admin/hearst/strategic-memos/${memoId}/pdf`}
+            target="_blank"
+            rel="noreferrer"
+          >
             Export PDF
-          </a>
+          </Button>
         ) : (
-          <button type="button" onClick={() => {}} disabled style={S.ctaSecondary}>Export PDF</button>
+          <Button variant="secondary" size="md" type="button" disabled>
+            Export PDF
+          </Button>
         )}
-        <button type="button" onClick={viewCanvas} disabled={!memoId} style={S.ctaSecondary}>
+        <Button variant="secondary" size="md" type="button" onClick={viewCanvas} disabled={!memoId}>
           Review / Approve
-        </button>
+        </Button>
       </div>
 
       <div style={S.successNote}>
@@ -294,7 +299,5 @@ const S = {
   successKpiSub: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
   successActions: { display: 'flex', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
-  ctaPrimary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-accent)', color: 'var(--cp-text-strong)', border: 'none', fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', cursor: 'pointer' },
-  ctaSecondary: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', color: 'var(--cp-text-primary)', border: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-semibold)', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' },
   successNote: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', lineHeight: 'var(--cp-leading-body)', paddingTop: 'var(--cp-space-3)', borderTop: '1px dashed var(--cp-border)', fontStyle: 'italic' },
 };

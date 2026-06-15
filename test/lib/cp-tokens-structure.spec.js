@@ -22,11 +22,11 @@ describe('cp-tokens.css structure', () => {
   });
 
   it('defines layout tokens used by refactored components', () => {
-    expect(CSS).toContain('--cp-scroll-anchor-offset');
-    expect(CSS).toContain('--cp-modal-w');
     expect(CSS).toContain('--cp-chart-h');
-    expect(CSS).toContain('--cp-z-raised');
-    expect(CSS).toContain('--cp-btn-height-xs');
+    expect(CSS).toContain('--cp-section-gap');
+    expect(CSS).toContain('--cp-z-modal');
+    // Button.jsx consomme --cp-control-* pour les hauteurs (échelle unique).
+    expect(CSS).toContain('--cp-control-lg');
   });
 
   it('keeps global h1 rules out of tokens file', () => {

@@ -42,4 +42,9 @@ describe('SimulatorPage — resultsNavigationRef reset on back-navigation', () =
     // Regression: the existing guard must still be present
     expect(src).toMatch(/if\s*\(\s*resultsNavigationRef\.current\s*\)\s*return/);
   });
+
+  it('URL sync depends on shareableSearch, not raw state', () => {
+    expect(src).toMatch(/const shareableSearch = useMemo/);
+    expect(src).toMatch(/\},\s*\[shareableSearch,\s*router\]\)/);
+  });
 });

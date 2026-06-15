@@ -7,14 +7,10 @@ import { PRESET_META, LEVEL_LABEL } from './preset-meta';
 import { UI } from '@/lib/ui-strings';
 import './simulator-config.css';
 
-// ArchetypeSegment — Institutional card grid (board-ready).
-// Sélectionner un item applique en UN dispatch APPLY_PRESET :
-// l'archétype + les defaults canoniques business_model_id / client_type_id.
-// Toutes les cartes restent cliquables ET leur détail (ideal_for, Return, Risk)
-// est visible en permanence — le board compare les 4 thèses sans cliquer.
-// La carte sélectionnée est mise en valeur par sa bordure/surface accent uniquement.
+// ArchetypeSegment — card grid. Detail (ideal_for, Return, Risk) only on selected card.
 export default function ArchetypeSegment({ primaryId, dispatch }) {
   const select = (id) => {
+    if (primaryId === id) return;
     const def = MODEL_DEFAULTS[id];
     dispatch({
       type: ACTIONS.APPLY_PRESET,
@@ -33,30 +29,28 @@ export default function ArchetypeSegment({ primaryId, dispatch }) {
             type="button"
             onClick={() => select(a.id)}
             aria-pressed={selected}
+            data-archetype-id={a.id}
             data-focus-item
             data-focused={selected ? 'true' : undefined}
-            data-dimmed={!selected ? 'true' : undefined}
           >
             <div data-focus-title>{a.label}</div>
             {m && <div data-focus-subtitle>{m.tagline}</div>}
 
-            <div data-focus-detail>
-              {m && (
-                <>
-                  <p className="archetype-ideal-for">{m.ideal_for}</p>
-                  <div className="archetype-meta-row">
-                    <div>
-                      <span className="archetype-meta-label">{UI.SIM_META_RETURN}</span>
-                      <span className="archetype-meta-value">{m.return_band}</span>
-                    </div>
-                    <div>
-                      <span className="archetype-meta-label">{UI.SIM_META_RISK}</span>
-                      <span className="archetype-meta-value">{LEVEL_LABEL[m.risk]}</span>
-                    </div>
+            {selected && m && (
+              <div data-focus-detail>
+                <p className="archetype-ideal-for">{m.ideal_for}</p>
+                <div className="archetype-meta-row">
+                  <div>
+                    <span className="archetype-meta-label">{UI.SIM_META_RETURN}</span>
+                    <span className="archetype-meta-value">{m.return_band}</span>
                   </div>
-                </>
-              )}
-            </div>
+                  <div>
+                    <span className="archetype-meta-label">{UI.SIM_META_RISK}</span>
+                    <span className="archetype-meta-value">{LEVEL_LABEL[m.risk]}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </button>
         );
       })}

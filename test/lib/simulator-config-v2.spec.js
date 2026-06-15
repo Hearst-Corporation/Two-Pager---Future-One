@@ -2,9 +2,9 @@
  * simulator-config-v2.spec.js
  *
  * Architecture guardrails for the rebuilt simulator surface. Locks in:
- *   - page.jsx mounts InvestmentCaseSurface (hero) + SimulatorConfigPanel (new)
+ *   - page.jsx mounts SimulatorConfigPanel (hero strip removed)
  *   - SimulatorConfigPanel mounts the 3 controls (ArchetypeSegment,
- *     CapacityControl, TechPresetControl) in their data-* slots
+ *     ScaleControl, TechnologyStackStep) in their data-* slots
  *   - none of the 8 legacy component names are ever re-imported (in page.jsx
  *     OR in the panel) — matched on IMPORT LINES only
  *   - the 3 controls are default-exported and dispatch the correct actions
@@ -22,19 +22,18 @@ const read = (rel) =>
 const pageSrc = read('app/(cockpit)/admin/hearst/simulator/page.jsx');
 const panelSrc = read('components/hearst/simulator/SimulatorConfigPanel.jsx');
 const archSrc = read('components/hearst/simulator/ArchetypeSegment.jsx');
-const capSrc = read('components/hearst/simulator/CapacityControl.jsx');
-const techSrc = read('components/hearst/simulator/TechPresetControl.jsx');
+const scaleSrc = read('components/hearst/simulator/ScaleControl.jsx');
+const stepSrc = read('components/hearst/simulator/sections/TechnologyStackStep.jsx');
 
-// The 8 legacy orphans that must NEVER be re-imported.
+// Panel imports TechnologyStackStep (ScaleControl wraps InputModeSwitcher + InputFieldHero).
 const ORPHANS = [
   'ArchetypePicker',
-  'InputModeSwitcher',
-  'InputFieldHero',
-  'TechnologyStackStep',
   'HardwareMixer',
   'JvStructureVisual',
   'ElectricityPriceInput',
   'CaseHeaderStep',
+  'CapacityControl',
+  'TechPresetControl',
 ];
 
 // Extract only the import lines of a source file (defeats false positives from comments).
@@ -60,31 +59,31 @@ describe('simulator-config-v2 — page.jsx mounts the new panel', () => {
     );
   });
 
-  it('renders <SimulatorConfigPanel> with state and dispatch props', () => {
+  it('renders <SimulatorConfigPanel> with state, dispatch, and sim props', () => {
     expect(pageSrc).toMatch(
-      /<SimulatorConfigPanel[\s\S]*?state=\{state\}[\s\S]*?dispatch=\{dispatch\}/,
+      /<SimulatorConfigPanel[\s\S]*?state=\{state\}[\s\S]*?dispatch=\{dispatch\}[\s\S]*?projection=\{projection\}/,
     );
   });
 
-  it('still renders <InvestmentCaseSurface> (hero preserved)', () => {
-    expect(pageSrc).toMatch(
+  it('does not render <InvestmentCaseSurface> (hero removed)', () => {
+    expect(pageSrc).not.toMatch(
       /import\s+InvestmentCaseSurface\s+from\s+['"]@\/components\/hearst\/simulator\/InvestmentCaseSurface['"]/,
     );
-    expect(pageSrc).toMatch(/<InvestmentCaseSurface/);
+    expect(pageSrc).not.toMatch(/<InvestmentCaseSurface/);
   });
 });
 
 describe('simulator-config-v2 — panel mounts the 3 controls', () => {
-  it('imports ArchetypeSegment, CapacityControl, TechPresetControl', () => {
+  it('imports ArchetypeSegment, ScaleControl, TechnologyStackStep', () => {
     expect(panelSrc).toMatch(/import\s+ArchetypeSegment\s+from\s+['"]\.\/ArchetypeSegment['"]/);
-    expect(panelSrc).toMatch(/import\s+CapacityControl\s+from\s+['"]\.\/CapacityControl['"]/);
-    expect(panelSrc).toMatch(/import\s+TechPresetControl\s+from\s+['"]\.\/TechPresetControl['"]/);
+    expect(panelSrc).toMatch(/import\s+ScaleControl\s+from\s+['"]\.\/ScaleControl['"]/);
+    expect(panelSrc).toMatch(/import\s+TechnologyStackStep\s+from\s+['"]\.\/sections\/TechnologyStackStep['"]/);
   });
 
   it('renders all 3 controls', () => {
     expect(panelSrc).toMatch(/<ArchetypeSegment/);
-    expect(panelSrc).toMatch(/<CapacityControl/);
-    expect(panelSrc).toMatch(/<TechPresetControl/);
+    expect(panelSrc).toMatch(/<ScaleControl/);
+    expect(panelSrc).toMatch(/<TechnologyStackStep/);
   });
 
   it('exposes the 3 data-* mount zones', () => {
@@ -104,11 +103,11 @@ describe('simulator-config-v2 — controls are default-exported', () => {
   it('ArchetypeSegment is a default-exported function', () => {
     expect(archSrc).toMatch(/export default function/);
   });
-  it('CapacityControl is a default-exported function', () => {
-    expect(capSrc).toMatch(/export default function/);
+  it('ScaleControl is a default-exported function', () => {
+    expect(scaleSrc).toMatch(/export default function/);
   });
-  it('TechPresetControl is a default-exported function', () => {
-    expect(techSrc).toMatch(/export default function/);
+  it('TechnologyStackStep is a default-exported function', () => {
+    expect(stepSrc).toMatch(/export default function/);
   });
 });
 
@@ -118,11 +117,21 @@ describe('simulator-config-v2 — dispatch wiring', () => {
     expect(archSrc).toContain('MODEL_DEFAULTS');
   });
 
-  it('CapacityControl dispatches SET_MW', () => {
-    expect(capSrc).toContain('ACTIONS.SET_MW');
+  it('ScaleControl dispatches SET_MODE and mode-specific inputs', () => {
+    expect(scaleSrc).toContain('ACTIONS.SET_MODE');
+    expect(scaleSrc).toContain('ACTIONS.SET_MW');
+    expect(scaleSrc).toContain('ACTIONS.SET_CAPITAL');
+    expect(scaleSrc).toContain('ACTIONS.SET_IRR_TARGET');
   });
 
-  it('TechPresetControl dispatches SET_HARDWARE_MIX', () => {
-    expect(techSrc).toContain('ACTIONS.SET_HARDWARE_MIX');
+  it('TechnologyStackStep wraps HardwareMixer', () => {
+    expect(stepSrc).toContain('HardwareMixer');
+  });
+});
+
+describe('simulator page — advisor context', () => {
+  it('memoizes advisorContext before setAdvisorContext', () => {
+    expect(pageSrc).toMatch(/const advisorContext = useMemo/);
+    expect(pageSrc).toMatch(/\[advisorContext, setAdvisorContext\]/);
   });
 });

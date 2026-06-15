@@ -6,7 +6,16 @@ import { ACTIONS } from '@/lib/hearst-simulator-state';
 import InputModeSwitcher from './InputModeSwitcher';
 import InputFieldHero from './InputFieldHero';
 
-export default function ScaleControl({ state, dispatch, projection, scenario, derived, solver }) {
+export default function ScaleControl({
+  state,
+  dispatch,
+  projection,
+  scenario,
+  derived,
+  solver,
+  projectionStale,
+  loading,
+}) {
   const inputValue =
     state.mode === 'capital_first'
       ? state.capital_usd
@@ -15,8 +24,11 @@ export default function ScaleControl({ state, dispatch, projection, scenario, de
         : state.total_mw;
 
   const onModeChange = useCallback(
-    (id) => dispatch({ type: ACTIONS.SET_MODE, value: id }),
-    [dispatch],
+    (id) => {
+      if (state.mode === id) return;
+      dispatch({ type: ACTIONS.SET_MODE, value: id });
+    },
+    [dispatch, state.mode],
   );
 
   const onInputChange = useCallback(
@@ -32,7 +44,6 @@ export default function ScaleControl({ state, dispatch, projection, scenario, de
     <div data-sim-scale-stack>
       <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
       <InputFieldHero
-        embedded
         mode={state.mode}
         value={inputValue}
         onChange={onInputChange}
@@ -40,6 +51,8 @@ export default function ScaleControl({ state, dispatch, projection, scenario, de
         scenario={scenario}
         derived={derived}
         solver={solver}
+        projectionStale={projectionStale}
+        loading={loading}
       />
     </div>
   );
@@ -52,4 +65,6 @@ ScaleControl.propTypes = {
   scenario: PropTypes.object,
   derived: PropTypes.object,
   solver: PropTypes.object,
+  projectionStale: PropTypes.bool,
+  loading: PropTypes.bool,
 };

@@ -46,7 +46,7 @@ export default function SourceBadge({ source_type, size = 'sm' }) {
 }
 
 function sizeStyle(size) {
-  if (size === 'xs') return { fontSize: 'var(--cp-font-micro)', padding: '1px var(--cp-space-2)' };
+  if (size === 'xs') return { fontSize: 'var(--cp-font-micro)', padding: 'var(--cp-space-px) var(--cp-space-2)' };
   if (size === 'lg') return { fontSize: 'var(--cp-font-sm)', padding: 'var(--cp-space-1) var(--cp-space-3)' };
   return { fontSize: 'var(--cp-font-micro)', padding: 'var(--cp-space-1) var(--cp-space-2)' };
 }

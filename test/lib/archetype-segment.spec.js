@@ -48,11 +48,20 @@ describe('ArchetypeSegment — dispatch wiring', () => {
   it('does NOT dispatch archetype without APPLY_PRESET bundle', () => {
     expect(segSrc).not.toMatch(/type:\s*ACTIONS\.SET_PRIMARY_ARCHETYPE/);
   });
+
+  it('skips dispatch when the archetype is already selected', () => {
+    expect(segSrc).toMatch(/if\s*\(\s*primaryId\s*===\s*id\s*\)\s*return/);
+  });
 });
 
 describe('ArchetypeSegment — accessibility', () => {
   it('exposes aria-pressed on the cards', () => {
     expect(segSrc).toMatch(/aria-pressed/);
+  });
+
+  it('shows detail only on the selected archetype', () => {
+    expect(segSrc).toMatch(/\{selected && m &&/);
+    expect(segSrc).not.toMatch(/data-dimmed/);
   });
 });
 

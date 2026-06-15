@@ -1,16 +1,26 @@
 'use client';
 import { UI } from '@/lib/ui-strings';
+import { ACTIONS } from '@/lib/hearst-simulator-state';
 import ArchetypeSegment from './ArchetypeSegment';
-import CapacityControl from './CapacityControl';
-import TechPresetControl from './TechPresetControl';
+import ScaleControl from './ScaleControl';
+import TechnologyStackStep from './sections/TechnologyStackStep';
 import './simulator-config.css';
 
-// Configuration column only. The Decision Control (Generate Board Memo CTA)
-// lives in the page's right rail (data-sim-right-panel) — single source of truth.
-export default function SimulatorConfigPanel({ state, dispatch }) {
+export default function SimulatorConfigPanel({
+  state,
+  dispatch,
+  projection,
+  scenario,
+  derived,
+  solver,
+  projectionStale,
+  loading,
+}) {
+  const totalMw = scenario?.total_mw ?? state.total_mw;
+
   return (
-    <div data-sim-config-v2 className="is-assembling">
-      <section data-sim-section className="del-1">
+    <div data-sim-config-v2>
+      <section data-sim-section>
         <header data-sim-section-head>
           <h2 className="sim-config-label">{UI.SIM_THESIS_TITLE}</h2>
           <p className="sim-config-hint">{UI.SIM_THESIS_HINT}</p>
@@ -18,20 +28,33 @@ export default function SimulatorConfigPanel({ state, dispatch }) {
         <ArchetypeSegment primaryId={state.primary_archetype_id} dispatch={dispatch} />
       </section>
 
-      <section data-sim-section className="del-2">
+      <section data-sim-section>
         <header data-sim-section-head>
           <h2 className="sim-config-label">{UI.SIM_SIZE_TITLE}</h2>
           <p className="sim-config-hint">{UI.SIM_SIZE_HINT}</p>
         </header>
-        <CapacityControl value={state.total_mw} dispatch={dispatch} />
+        <ScaleControl
+          state={state}
+          dispatch={dispatch}
+          projection={projection}
+          scenario={scenario}
+          derived={derived}
+          solver={solver}
+          projectionStale={projectionStale}
+          loading={loading}
+        />
       </section>
 
-      <section data-sim-section className="del-3">
+      <section data-sim-section>
         <header data-sim-section-head>
           <h2 className="sim-config-label">{UI.SIM_HW_TITLE}</h2>
           <p className="sim-config-hint">{UI.SIM_HW_HINT}</p>
         </header>
-        <TechPresetControl hardwareMix={state.hardware_mix} dispatch={dispatch} />
+        <TechnologyStackStep
+          totalMw={totalMw}
+          value={state.hardware_mix}
+          onChange={(next) => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: next })}
+        />
       </section>
     </div>
   );

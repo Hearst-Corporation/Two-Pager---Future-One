@@ -72,7 +72,7 @@ const S = {
     left: 'var(--cp-space-5)',
     right: 'var(--cp-space-5)',
     height: 'var(--cp-space-hair)',
-    background: 'var(--cp-border-base)', 
+    background: 'var(--cp-border)', 
     transform: 'translateY(-50%)', 
     zIndex: 1 
   },

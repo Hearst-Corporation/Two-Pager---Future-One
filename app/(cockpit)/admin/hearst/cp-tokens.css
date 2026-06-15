@@ -55,7 +55,6 @@
   --cp-border-accent:   var(--ct-border-accent);
   --cp-border-soft:     var(--ct-border-soft);
   --cp-border-strong:   var(--ct-border-strong);
-  --cp-border-base:     var(--cp-border);
   --cp-dur-base:        var(--ct-dur-base);
   --cp-ease:            var(--ct-ease);
   --cp-shadow-depth:    var(--ct-shadow-depth);
@@ -72,72 +71,27 @@
   --cp-text-faint:      rgba(245,245,245,0.28);
   --cp-tooltip-bg:      var(--ct-surface-3);
   --cp-blur-md:         blur(12px);
-  --cp-blur-lg:         blur(24px);
-  --cp-accent-light:    var(--cp-accent-strong);
-  --cp-font-family-mono: ui-monospace, "SF Mono", "Cascadia Code", "Menlo", monospace;
   --cp-dur-fast:        100ms;
-  --cp-dur-interact:    200ms;
   --cp-dur-slow:        400ms;
 
   /* Opacité — échelle unique (inline styles, hover, sections secondaires) */
   --cp-opacity-section-quiet: 0.6;
   --cp-opacity-label:       0.8;
-  --cp-opacity-secondary:   0.8;
   --cp-opacity-tertiary:    0.7;
   --cp-opacity-subtle:      0.55;
-  --cp-opacity-faint:       0.5;
-  --cp-opacity-meta:        0.75;
   --cp-opacity-hover:       0.85;
   --cp-opacity-disabled:    0.5;
   --cp-opacity-prominent:   0.95;
   --cp-opacity-gantt-idle:  0.4;
-  --cp-opacity-glow-min:    0.5;
-  --cp-opacity-glow-max:    0.8;
 
   /* Surfaces glass / hero */
-  --cp-surface-glass:                color-mix(in srgb, var(--cp-bg-deep) 60%, transparent);
-  --cp-surface-glass-highlight:      color-mix(in srgb, white 15%, transparent);
-  --cp-surface-glass-highlight-soft: color-mix(in srgb, white 5%, transparent);
-  --cp-surface-glass-scrim:          color-mix(in srgb, black 60%, transparent);
-  --cp-surface-glass-scrim-soft:     color-mix(in srgb, black 30%, transparent);
-  --cp-surface-glass-scrim-light:    color-mix(in srgb, black 10%, transparent);
-  --cp-surface-glass-scrim-xs:       color-mix(in srgb, black 5%, transparent);
-  --cp-surface-glass-scrim-hover:    color-mix(in srgb, black 8%, transparent);
 
-  --cp-font-fluid-hero-surface: clamp(28px, 3.5vw, 42px);
   --cp-kicker-dot-size:         var(--cp-op-dot-lg);
-  --cp-timeline-dot-size:       10px;
-  --cp-timeline-rail-h:         2px;
 
-  --cp-shadow-hero:
-    0 30px 60px -15px var(--cp-surface-glass-scrim),
-    inset 0 1px 0 var(--cp-surface-glass-highlight);
-  --cp-shadow-inset-soft: inset 0 1px 0 var(--cp-surface-glass-highlight-soft);
-  --cp-shadow-metric-value: 0 2px 10px var(--cp-surface-glass-scrim-soft);
-  --cp-shadow-dot-ring: 0 0 0 3px var(--cp-bg-deep);
-  --cp-shadow-kicker-glow: 0 0 12px var(--cp-accent);
-  --cp-shadow-timeline-accent: 0 0 12px var(--cp-accent);
-  --cp-shadow-accent-glow-sm: 0 10px 25px -5px rgba(var(--cp-accent-rgb), 0.5);
-  --cp-shadow-accent-glow-md: 0 15px 30px -5px rgba(var(--cp-accent-rgb), 0.7);
-  --cp-shadow-accent-tile: 0 4px 15px rgba(var(--cp-accent-rgb), 0.15);
-  --cp-shadow-jv-panel:
-    0 10px 30px -10px var(--cp-surface-glass-scrim-light),
-    var(--cp-shadow-inset-soft);
-  --cp-shadow-jv-tile: 0 4px 12px var(--cp-surface-glass-scrim-xs);
-  --cp-shadow-jv-tile-hover: 0 8px 20px var(--cp-surface-glass-scrim-hover);
-  --cp-gradient-glow-surface:
-    radial-gradient(circle at 50% 0%, rgba(var(--cp-accent-rgb), 0.15) 0%, transparent 60%);
-  --cp-gradient-glow-jv:
-    radial-gradient(circle at 50% 100%, rgba(var(--cp-accent-rgb), 0.05) 0%, transparent 60%);
-  --cp-gradient-hero-strong:
-    linear-gradient(90deg, var(--cp-text-strong), var(--cp-accent-light));
   --cp-ease-out:        cubic-bezier(0, 0, 0.2, 1);
   --cp-grid-line:       1px solid var(--ct-border-soft);
   --cp-highlight:       var(--cp-accent-strong);
   --cp-font-sans:       var(--font-inter), "Inter", system-ui, sans-serif;
-  --cp-max-width:       none;
-
-  /* ── Breakpoints ── */
 
   /* ── Typographie ── */
   --cp-font-nano:   9px;   /* plus petit niveau (métas/légendes denses) */
@@ -151,13 +105,10 @@
   --cp-font-2xl:    24px;
 
   /* Tailles fluides (clamp tokenisés) — chiffres héros & métriques responsives */
-  --cp-font-fluid-hero:    clamp(var(--cp-font-2xl), 4vw, 48px);   /* viz plein écran */
   --cp-font-fluid-metric:  clamp(var(--cp-font-xl), 2.5vw, 32px);  /* KPI / board metric */
   --cp-font-fluid-stat:    clamp(20px, 1.5vw, 28px);               /* stat secondaire */
   --cp-font-fluid-lead:    clamp(18px, 1.8vw, var(--cp-font-2xl)); /* phrase narrative */
-  --cp-font-fluid-input:   clamp(var(--cp-font-2xl), 3vw, 40px);   /* saisie héro */
 
-  --cp-weight-light:    300;   /* hero display headings only */
   --cp-weight-regular:  400;
   --cp-weight-medium:   500;
   --cp-weight-semibold: 600;
@@ -172,7 +123,6 @@
   --cp-tracking-wide:      0.06em;
   --cp-tracking-wider:     0.10em;
   --cp-tracking-eyebrow:   0.14em;
-  --cp-tracking-widest:    0.18em;
 
   --cp-leading-none:    1;
   --cp-leading-display: 1.05;
@@ -204,14 +154,11 @@
   --cp-radius-sm:   6px;
   --cp-radius-md:   10px;
   --cp-radius-lg:   14px;
-  --cp-radius-xl:   20px;   /* hero / large surface cards */
   --cp-radius-pill: 9999px;
 
   /* ── Dimensions fixes (icônes, barres, conteneurs) ── */
   --cp-icon-xs:    12px;  /* dot timeline */
-  --cp-icon-sm:    16px;  /* icône inline (svg badge) */
   --cp-bar-h:       4px;  /* barre de progression / mix */
-  --cp-readout-w:  50px;  /* champ numérique readout compact */
   --cp-kpi-minh:   80px;  /* hauteur mini carte KPI */
   --cp-prose-max: 480px;  /* largeur de lecture max (prose centrée) */
 
@@ -224,7 +171,6 @@
   --cp-control-sm:  20px;  /* badge/puce */
   --cp-control-md:  28px;  /* icône-badge, segment */
   --cp-control-lg:  52px;  /* bouton CTA pleine largeur */
-  --cp-tile-minh:      76px;   /* tuile cliquable (archetype, segment, preset) */
   --cp-chart-h:        420px;  /* hauteur standard panneau chart */
   --cp-loading-min-h:  320px;  /* hauteur min panneau loading/skeleton */
 
@@ -255,7 +201,6 @@
 
   --cp-info:           #3b82f6;
   --cp-info-bg:        rgba(59,130,246,0.08);
-  --cp-info-strong:    #93c5fd;
 
   --cp-violet:         #8b5cf6;
   --cp-violet-bg:      rgba(139,92,246,0.08);
@@ -290,16 +235,9 @@
   --cp-z-fab:      2002;
   --cp-z-toast:    2003;
   --cp-z-modal:    2010;
-  --cp-z-raised:   100;   /* éléments élevés localement (tooltips, overlays inline) */
 
   /* ── Tailles de composants ── */
-  --cp-btn-height-xs:  24px;
-  --cp-btn-height-sm:  32px;
-  --cp-btn-height-md:  36px;
-  --cp-btn-height-lg:  44px;
   --cp-icon-md:        20px;
-  --cp-icon-lg:        28px;
-  --cp-icon-stroke:    1.6;
   --cp-chart-tick:     11px;
   --cp-section-gap:    var(--cp-space-6);
   --cp-badge-size:     18px;
@@ -317,8 +255,6 @@
   --cp-nav-bottom:             0px;   /* mobile section nav height; 0 on desktop */
   --cp-bar-bottom:         var(--cp-nav-bottom); /* FAB sits above this */
   --cp-scroll-clear:         var(--cp-space-6);
-  --cp-scroll-anchor-offset: 80px;  /* distance du haut de l'écran pour scroll-margin-top */
-  --cp-modal-w:              640px; /* largeur modale standard */
   --cp-toast-bottom:         calc(var(--cp-scroll-clear) + var(--cp-space-2));
 
   /* ── Couleurs opérateurs (source de vérité unique — déplacées depuis globals.css) ──

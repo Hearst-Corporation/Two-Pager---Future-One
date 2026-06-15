@@ -166,8 +166,12 @@ export default function FinancialPage() {
     <>
     <div className="oracle-page">
       {/* Scenario toggles */}
-      <div data-financial-top-bar style={S.topBar}>
-        <h1 style={S.pageTitle}>{UI.FIN_PAGE_TITLE}</h1>
+      <header
+        className="oracle-page-header"
+        data-financial-top-bar
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--cp-space-3)' }}
+      >
+        <h1>{UI.FIN_PAGE_TITLE}</h1>
         <div data-financial-scenario-row style={S.scenarioRow}>
           {canonicalScenarios.map((s) => {
             const active = primaryId === s.id;
@@ -233,7 +237,7 @@ export default function FinancialPage() {
             {UI.FIN_BTN_MEMO}
           </Button>
         </div>
-      </div>
+      </header>
 
       {/* Summary KPIs */}
       <KpiGrid cols={4} data-financial-kpi-grid style={{ marginBottom: 'var(--cp-space-6)' }}>
@@ -569,8 +573,6 @@ function formatSensVal(v, unit) {
 }
 
 const S = {
-  topBar: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
-  pageTitle: { margin: 0, fontSize: 'var(--cp-font-2xl)', lineHeight: 'var(--cp-leading-tight)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-primary)' },
   scenarioRow: { display: 'flex', gap: 'var(--cp-space-2)', flexWrap: 'wrap', alignItems: 'center', flex: '1 1 280px', minWidth: 0 },
   scBtn: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-pill)', border: 'var(--cp-border-w-accent) solid', cursor: 'pointer', transition: 'all var(--cp-dur-base) var(--cp-ease)', whiteSpace: 'nowrap' },
   savedPlanWrap: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', minWidth: 0, flex: '1 1 220px' },

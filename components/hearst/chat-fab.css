@@ -3,7 +3,7 @@
    Mobile (<900px) : drawer + FAB. */
 
 /* ── Desktop : chat docké permanent ── */
-@media (min-width: 901px) {
+@media (min-width: 900px) {
   body.oracle-chat-docked .ct-rail-right {
     position: fixed;
     top: 0;

@@ -120,7 +120,7 @@ Ouvre maintenant la phase 1 — Cadrage si la review démarre, sinon poursuis la
  * fail the persistence on parse mismatch — we store contentMd unconditionally
  * and contentJson when JSON.parse succeeds.
  */
-export function buildOracleDocumentInstructions({ domainContext }: OracleDocumentOpts): string {
+function buildOracleDocumentInstructions({ domainContext }: OracleDocumentOpts): string {
   return `Tu es l'analyste senior chargé d'écrire un memo Investment Committee de Hearst Corporation pour Future One Qatar.
 
 On te fournit la transcription d'une session de revue menée avec le deal team. Tu produis un MEMO IC formel, structuré, dense, ANCRE sur les réponses du deal team ET sur le corpus domaine Oracle (data centers, écosystème GCC, business models & finance). Quand le transcript est incomplet, tu complètes avec des fourchettes/benchmarks issus du corpus, MARQUÉS EXPLICITEMENT comme "estimation corpus, à valider".

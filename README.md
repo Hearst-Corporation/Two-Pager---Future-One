@@ -27,7 +27,7 @@ Après un build avec le dev actif : `npm run dev:clean`
 
 | URL | Rôle |
 |-----|------|
-| `/admin/hearst/simulator` | Configuration scénario (hero glass + timeline, archétype, scale 3 modes, hardware avancé, structure JV) |
+| `/admin/hearst/simulator` | Configuration scénario (archétype, scale 3 modes, hardware avancé, panneau live + CTA mémo) |
 | `/admin/hearst/simulator/results` | Résultats |
 | `/admin/hearst/financial` | Modèle financier |
 | `/admin/hearst/workspace` | Scénarios sauvegardés |
@@ -43,7 +43,11 @@ app/api/admin/hearst/         APIs métier
 app/api/cockpit-chat/         chat OpenAI
 cockpit-shell/                shell UI (éditable localement)
 components/hearst/            widgets Oracle
-components/hearst/simulator/  hero (InvestmentCaseSurface) + config (ArchetypeSegment, ScaleControl, TechnologyStackStep, JvStructureVisual)
+components/hearst/simulator/  config (ArchetypeSegment, ScaleControl → InputModeSwitcher + InputFieldHero, TechnologyStackStep → HardwareMixer)
+
+UI note (simulateur): direction « command board » — panneaux larges `--cp-surface-0`, accent réservé CTA/état actif, gaps cqi, Technology/Size calmes.
+
+Simulateur : `/simulate` debounced 300ms ; projection stale-while-revalidate ; URL sync debounced. Hardware initial = preset `mixed` (`DEFAULT_HARDWARE_MIX`).
 lib/                          moteur financier, validators, LLM
 lib/hearst-config-presets.js  defaults modèle + presets hardware (HARDWARE_PRESETS)
 ```
@@ -52,6 +56,8 @@ lib/hearst-config-presets.js  defaults modèle + presets hardware (HARDWARE_PRES
 
 Palette cockpit : `cockpit-shell/tokens.css` (`--ct-*`) → `app/(cockpit)/admin/hearst/cp-tokens.css` (`--cp-*`).
 Surfaces glass, ombres hero, échelle d’opacité et typo fluide : source unique dans `cp-tokens.css` ; pages consomment `var(--cp-*)` (pas de `rgba`/`#` en dur dans les CSS page).
+
+Entrée cockpit : `/admin/hearst` redirige directement vers `/admin/hearst/simulator`.
 
 Prototypes HTML : `design/sources-intelligence/*.html` pour les concepts Sources Intelligence et `report-lab/*.html` pour les concepts mémo/PDF.
 

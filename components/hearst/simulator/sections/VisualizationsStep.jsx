@@ -49,7 +49,7 @@ function VisualizationsStep({
   const activeMeta = VIZ_META[activeViz] || VIZ_META[vizEntries[0][0]];
 
   return (
-      <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', borderBottom: '1px solid var(--cp-border-base)' }}>
+      <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', borderBottom: '1px solid var(--cp-border)' }}>
         <SectionHead
           title={UI.RESULTS_VIZ_TITLE}
           hint={UI.RESULTS_VIZ_HINT}

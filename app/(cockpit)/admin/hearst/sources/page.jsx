@@ -219,8 +219,8 @@ export default function SourcesPage() {
       {/* Header */}
       <header data-sources-topbar className="oracle-page-header" style={S.topBar}>
         <div>
-          <h1>Market Intelligence</h1>
-          <p className="oracle-subtitle">{`${PUBLIC_SOURCES_LIBRARY.length} benchmarks`}</p>
+          <h1>{UI.SOURCES_PAGE_TITLE}</h1>
+          <p className="oracle-subtitle">{UI.SOURCES_PAGE_SUBTITLE(PUBLIC_SOURCES_LIBRARY.length)}</p>
         </div>
         <div style={S.flexRow}>
           <Button variant="ghost" size="sm" onClick={() => setShowMyS(v => !v)}>

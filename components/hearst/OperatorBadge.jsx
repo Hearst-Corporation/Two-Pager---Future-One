@@ -28,7 +28,7 @@ export default function OperatorBadge({ operatorId, size = 'md', showDot = true,
 }
 
 const SIZE_MAP = {
-  sm: { badge: { gap: 'var(--cp-space-1)', padding: '1px var(--cp-space-2)', borderRadius: 'var(--cp-radius-xs)' }, dot: 'var(--cp-op-dot-sm)', font: 'var(--cp-font-micro)' },
+  sm: { badge: { gap: 'var(--cp-space-1)', padding: 'var(--cp-space-px) var(--cp-space-2)', borderRadius: 'var(--cp-radius-xs)' }, dot: 'var(--cp-op-dot-sm)', font: 'var(--cp-font-micro)' },
   md: { badge: { gap: 'var(--cp-space-2)', padding: 'var(--cp-space-1) var(--cp-space-2)', borderRadius: 'var(--cp-radius-xs)' }, dot: 'var(--cp-op-dot-md)', font: 'var(--cp-font-micro)' },
   lg: { badge: { gap: 'var(--cp-space-2)', padding: 'var(--cp-space-1) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)' }, dot: 'var(--cp-op-dot-lg)', font: 'var(--cp-font-sm)' },
 };

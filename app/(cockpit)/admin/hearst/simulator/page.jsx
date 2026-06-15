@@ -7,18 +7,15 @@ import {
   INITIAL_STATE, ACTIONS, simulatorReducer,
   buildSimulatePayload, serializeStateToUrl, parseStateFromUrl, QATAR_PRESETS,
 } from '@/lib/hearst-simulator-state';
-import { SCENARIO_WRITABLE_KEYS, PRIMARY_DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
+import { SCENARIO_WRITABLE_KEYS } from '@/lib/hearst-deal-structures';
 import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 
 import { SIMULATOR_PARAM_EVENT } from '@/lib/hearst-simulator-bridge';
 import { UI } from '@/lib/ui-strings';
-import { S as CP } from '@/lib/cp-styles';
 import './simulator.css';
 
-import InvestmentCaseSurface from '@/components/hearst/simulator/InvestmentCaseSurface';
 import SimulatorConfigPanel from '@/components/hearst/simulator/SimulatorConfigPanel';
-import { Button } from '@/components/hearst/ui';
 import { fmtPctFromRatio, fmtUSD, MISSING } from '@/lib/hearst-format';
 import { PRESET_META, LEVEL_LABEL } from '@/components/hearst/simulator/preset-meta';
 
@@ -90,6 +87,8 @@ export default function SimulatorPage() {
   const [dirtySinceSave, setDirtySinceSave] = useState(true);
   const [saveError, setSaveError] = useState(null);
   const debounceRef = useRef(null);
+  const urlSyncRef = useRef(null);
+  const lastSyncedUrlRef = useRef('');
   const saveTimerRef = useRef(null);
   const savingRef = useRef(false);
   const resultsNavigationRef = useRef(false);
@@ -102,16 +101,17 @@ export default function SimulatorPage() {
 
   useEffect(() => () => clearTimeout(saveTimerRef.current), []);
 
-  const prevSimKeyRef = useRef(null);
+  const configSimKey = useMemo(() => JSON.stringify(buildSimulatePayload(state)), [state]);
+  const prevConfigKeyRef = useRef(null);
   useEffect(() => {
-    const next = JSON.stringify(buildSimulatePayload(state));
-    if (next !== prevSimKeyRef.current) {
-      prevSimKeyRef.current = next;
+    if (prevConfigKeyRef.current !== null && configSimKey !== prevConfigKeyRef.current) {
       setDirtySinceSave(true);
-      setSimResult(null);
-      setSimError(null);
     }
-  }, [state]);
+    prevConfigKeyRef.current = configSimKey;
+  }, [configSimKey]);
+
+  const [resultSimKey, setResultSimKey] = useState(null);
+  const projectionStale = resultSimKey !== configSimKey;
 
   useEffect(() => {
     let cancelled = false;
@@ -187,11 +187,13 @@ export default function SimulatorPage() {
           if (!ignore) {
             setSimError(body.error || `Simulate failed (${r.status})`);
             setSimResult(null);
+            setResultSimKey(null);
           }
         } else {
           const data = await r.json();
           if (!ignore) {
             setSimResult(data);
+            setResultSimKey(simKey);
             setSimError(null);
           }
         }
@@ -207,30 +209,52 @@ export default function SimulatorPage() {
     };
   }, [simKey, projectId]);
 
-  useEffect(() => {
-    if (resultsNavigationRef.current) return;
+  const shareableSearch = useMemo(() => {
     const params = new URLSearchParams(serializeStateToUrl(state));
     if (savedScenarioId) params.set('scenario', savedScenarioId);
-    router.replace(`/admin/hearst/simulator?${params.toString()}`, { scroll: false });
-  }, [state, savedScenarioId, router]);
+    return params.toString();
+  }, [state, savedScenarioId]);
+
+  useEffect(() => {
+    if (resultsNavigationRef.current) return;
+    if (urlSyncRef.current) clearTimeout(urlSyncRef.current);
+    urlSyncRef.current = setTimeout(() => {
+      if (resultsNavigationRef.current) return;
+      if (shareableSearch === lastSyncedUrlRef.current) return;
+      if (typeof window !== 'undefined') {
+        const current = new URLSearchParams(window.location.search).toString();
+        if (current === shareableSearch) {
+          lastSyncedUrlRef.current = shareableSearch;
+          return;
+        }
+      }
+      lastSyncedUrlRef.current = shareableSearch;
+      router.replace(`/admin/hearst/simulator?${shareableSearch}`, { scroll: false });
+    }, 300);
+    return () => clearTimeout(urlSyncRef.current);
+  }, [shareableSearch, router]);
 
   const projection = simResult?.projection;
   const scenario = simResult?.scenario;
   const archetypeOutcome = simResult?.archetype_outcome;
+  const derived = simResult?.derived;
+  const solver = simResult?.solver;
+
+  const advisorContext = useMemo(() => ({
+    surface: 'simulator',
+    state,
+    scenario,
+    projection,
+    simResult,
+    loading,
+    error: simError,
+    savedScenarioId,
+  }), [configSimKey, scenario, projection, simResult, loading, simError, savedScenarioId, state]);
 
   useEffect(() => {
-    setAdvisorContext?.({
-      surface: 'simulator',
-      state,
-      scenario,
-      projection,
-      simResult,
-      loading,
-      error: simError,
-      savedScenarioId,
-    });
+    setAdvisorContext?.(advisorContext);
     return () => setAdvisorContext?.(null);
-  }, [loading, projection, savedScenarioId, scenario, setAdvisorContext, simError, simResult, state]);
+  }, [advisorContext, setAdvisorContext]);
 
   async function handleSave() {
     if (!projectId || !scenario) return null;
@@ -277,7 +301,7 @@ export default function SimulatorPage() {
 
   async function handleValidateAndReveal() {
     if (savingRef.current) return;
-    if (!projection || !projectId || loading || simError) return;
+    if (!projection || projectionStale || !projectId || loading || simError) return;
     savingRef.current = true;
     try {
       let id = savedScenarioId;
@@ -296,7 +320,7 @@ export default function SimulatorPage() {
     }
   }
 
-  const validateBlocked = !projection || !projectId || loading || !!simError || savingState === 'saving';
+  const validateBlocked = !projection || projectionStale || !projectId || loading || !!simError || savingState === 'saving';
   const meta = PRESET_META[state.primary_archetype_id];
   const irr = projection?.irr ?? projection?.return_metrics?.irr;
   const npv = projection?.npv ?? projection?.return_metrics?.npv;
@@ -305,24 +329,22 @@ export default function SimulatorPage() {
   return (
     <div className="oracle-page oracle-simulator-page">
       <div data-sim-wrap>
-        {/* Hero strip — compact, full width */}
-        <InvestmentCaseSurface
-          state={state}
-          scenario={scenario}
-          projection={projection}
-          selectedArchetype={PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)}
-        />
-
         {/* Cockpit 2-col: config left / live panel right */}
         <div data-sim-cockpit>
           {/* LEFT — configuration */}
           <SimulatorConfigPanel
             state={state}
             dispatch={dispatch}
+            projection={projection}
+            scenario={scenario}
+            derived={derived}
+            solver={solver}
+            projectionStale={projectionStale}
+            loading={loading}
           />
 
           {/* RIGHT — live metrics + CTA */}
-          <aside data-sim-right-panel className="is-assembling del-3">
+          <aside data-sim-right-panel>
             <div data-sim-live-metrics>
               <div data-sim-live-label>
                 <span className="live-dot" data-loading={loading} />
@@ -331,22 +353,22 @@ export default function SimulatorPage() {
 
               <div data-sim-live-kpi>
                 <span data-sim-live-kpi-name>{UI.SIM_KPI_IRR}</span>
-                <strong data-sim-live-kpi-value data-accent={irr != null && !loading}>
-                  {loading ? MISSING : irr != null ? fmtPctFromRatio(irr) : MISSING}
+                <strong data-sim-live-kpi-value data-accent={irr != null && !projectionStale}>
+                  {irr != null ? fmtPctFromRatio(irr) : MISSING}
                 </strong>
               </div>
 
               <div data-sim-live-kpi>
                 <span data-sim-live-kpi-name>{UI.SIM_METRIC_TOTAL_CAPEX}</span>
                 <strong data-sim-live-kpi-value>
-                  {loading ? MISSING : fmtUSD(capex)}
+                  {fmtUSD(capex)}
                 </strong>
               </div>
 
               <div data-sim-live-kpi>
                 <span data-sim-live-kpi-name>{UI.SIM_METRIC_NPV}</span>
                 <strong data-sim-live-kpi-value>
-                  {loading ? MISSING : npv != null ? fmtUSD(npv) : MISSING}
+                  {npv != null ? fmtUSD(npv) : MISSING}
                 </strong>
               </div>
 
@@ -363,30 +385,31 @@ export default function SimulatorPage() {
                 <span data-decision-label>{UI.SIM_DECISION_REQUIRED}</span>
                 <div data-decision-title>{UI.SIM_DECISION_TITLE}</div>
               </div>
-              <Button
-                variant="primary"
-                size="lg"
+              <button
+                type="button"
                 disabled={validateBlocked}
                 onClick={handleValidateAndReveal}
                 className="sim-cta-btn"
               >
                 {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_CONFIG_GENERATE_MEMO}
-              </Button>
+              </button>
             </div>
 
             {saveError && (
-              <div style={CP.dangerAlert} role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
+              <div data-sim-alert role="alert">{UI.ERR_SAVE_DETAIL(saveError)}</div>
             )}
           </aside>
         </div>
 
         {projectLoadError && (
-          <div style={{ ...CP.dangerAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
+          <div data-sim-alert data-sim-alert-row role="alert">
             <span>{projectLoadError}</span>
-            <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>{UI.ACTION_RETRY}</Button>
+            <button type="button" className="sim-alert-retry" onClick={() => window.location.reload()}>
+              {UI.ACTION_RETRY}
+            </button>
           </div>
         )}
-        {simError && <div style={CP.dangerAlert} role="alert">{UI.SIM_ERROR_PREFIX} {simError}</div>}
+        {simError && <div data-sim-alert role="alert">{UI.SIM_ERROR_PREFIX} {simError}</div>}
       </div>
     </div>
   );

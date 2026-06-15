@@ -237,6 +237,7 @@ export default function DealsPage() {
         <header className="oracle-page-header" style={{ marginBottom: 'var(--cp-space-4)' }}>
           <SectionHead
             hero
+            level={1}
             eyebrow="HEARST · STRATEGIC REFERENCE · HYPERSCALE / AI INFRA"
             title={<>How the majors structure their deals<br />— JV, equity, build-to-suit, off-take</>}
             hint="Which deal structure Qatar should pursue for a hub like Futur One — and why. The playbook leads; the six models, real deals and equity splits below are the evidence behind it."

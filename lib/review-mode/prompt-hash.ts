@@ -11,15 +11,10 @@
 import { sha256Hex } from "@/lib/review-mode/hash";
 import { DOMAIN_CONTEXT } from "@/lib/oracle-product-context";
 import { buildConversationalPrompt } from "@/lib/review-mode/prompts";
-import {
-  buildOracleFacilitatorPrompt,
-  buildOracleDocumentInstructions,
-} from "@/lib/review-mode/oracle-prompts";
+import { buildOracleFacilitatorPrompt } from "@/lib/review-mode/oracle-prompts";
 
 export const CONVERSATIONAL_PROMPT = buildConversationalPrompt({ domainContext: DOMAIN_CONTEXT });
 export const FACILITATOR_PROMPT = buildOracleFacilitatorPrompt({ domainContext: DOMAIN_CONTEXT });
-export const DOCUMENT_INSTRUCTIONS = buildOracleDocumentInstructions({ domainContext: DOMAIN_CONTEXT });
 
 export const CONVERSATIONAL_PROMPT_HASH = sha256Hex(CONVERSATIONAL_PROMPT);
 export const FACILITATOR_PROMPT_HASH = sha256Hex(FACILITATOR_PROMPT);
-export const DOCUMENT_INSTRUCTIONS_HASH = sha256Hex(DOCUMENT_INSTRUCTIONS);

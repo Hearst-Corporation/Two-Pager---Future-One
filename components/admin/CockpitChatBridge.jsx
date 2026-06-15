@@ -34,9 +34,13 @@ export function CockpitChatBridge() {
   dealRef.current = buildChatDealPayload(advisorContext);
 
   const memoId = searchParams?.get('memo') ?? null;
+  const savedScenarioId = advisorContext?.savedScenarioId ?? advisorContext?.scenarioId ?? null;
+  const simulatorLive =
+    advisorContext?.surface === 'simulator' && Boolean(advisorContext?.projection);
+
   const chatScope = useMemo(
     () => resolveChatScope(advisorContext, pathname, memoId),
-    [advisorContext, pathname, memoId],
+    [memoId, pathname, savedScenarioId, simulatorLive],
   );
 
   useEffect(() => {

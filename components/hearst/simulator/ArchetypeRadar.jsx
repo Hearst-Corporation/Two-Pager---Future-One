@@ -3,9 +3,7 @@
 import { memo } from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip, Legend } from 'recharts';
 import { useContainerSize } from './useContainerSize';
-import { RC } from '@/lib/cp-styles';
-
-const CHART_TOOLTIP = { ...RC.tooltip, fontSize: 'var(--cp-font-xs)' };
+import { RC, CHART_TOOLTIP } from '@/lib/cp-styles';
 
 const AXES = [
   { key: 'brand',       label: 'Brand Visibility' },

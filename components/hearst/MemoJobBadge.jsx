@@ -13,8 +13,7 @@ import {
 } from '@/lib/hearst-memo-job-store';
 import { Z } from '@/lib/z-index';
 import { UI } from '@/lib/ui-strings';
-
-const SLA_WARNING_MS = 120_000;
+import { SLA_WARNING_MS } from '@/lib/constants';
 
 export default function MemoJobBadge() {
   const job = useMemoJob();

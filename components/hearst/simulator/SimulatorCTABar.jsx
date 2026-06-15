@@ -63,7 +63,7 @@ const S = {
     gap: 'var(--cp-space-4)',
     minHeight: 56,
     flexWrap: 'wrap',
-    borderTop: '1px solid var(--cp-border-base)',
+    borderTop: '1px solid var(--cp-border)',
   },
   left: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' },
   statusReady: {

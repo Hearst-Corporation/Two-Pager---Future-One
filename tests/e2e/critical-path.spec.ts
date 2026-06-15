@@ -220,8 +220,7 @@ test('Flow E — failures are loud, never silent, never corrupting', async ({ pa
 //
 // Covers 4 fixes from the June-2026 simulator URL audit (commit 97e1025):
 //   F1 — resultsNavigationRef reset: URL stays live after results → back → config (fix A);
-//        also exercises the rebuilt SimulatorConfigPanel v2 controls (CapacityControl
-//        MW input + ArchetypeSegment cards) driving serializeStateToUrl.
+//        also exercises SimulatorConfigPanel (ScaleControl MW input + ArchetypeSegment cards).
 //   F2 — ?viz= active on results page: deep-link to sankey shows sankey panel (fix E)
 //   F3 — viz absent from config URL: serializeStateToUrl never emits ?viz= (fix F)
 //   F4 — ?scenario= skips URL hydration: DB value wins over URL mw param (fix B)
@@ -235,9 +234,9 @@ test('Flow F1 — URL sync resumes after results → back → config change', as
 
   // Wait for the simulate CTA to be enabled (engine debounced, label is dynamic).
   // The button carries className="sim-hero-cta" and matches /Simulate.*MW/i.
-  const saveCta = page.locator('.sim-hero-cta');
-  await expect(saveCta, 'Simulate CTA visible').toBeVisible({ timeout: 20_000 });
-  await expect(saveCta, 'Simulate CTA enabled').toBeEnabled({ timeout: 30_000 });
+  const saveCta = page.locator('.sim-cta-btn');
+  await expect(saveCta, 'Generate Memo CTA visible').toBeVisible({ timeout: 20_000 });
+  await expect(saveCta, 'Generate Memo CTA enabled').toBeEnabled({ timeout: 30_000 });
   await saveCta.click();
 
   // Navigate to results.
@@ -257,21 +256,18 @@ test('Flow F1 — URL sync resumes after results → back → config change', as
   // Config UI is back (SimulatorConfigPanel v2). Drive the REAL controls and prove
   // resultsNavigationRef was reset — the state→URL sync resumes after back-nav.
   //
-  // 1) CapacityControl: fill the real MW input → dispatch SET_MW → serializeStateToUrl
-  //    must emit ?mw=75. (Field renders a <input type="number"> inside
-  //    [data-capacity-field].) Blur via Tab so onChange settles before we poll.
-  const mwInput = page.locator('[data-capacity-field] input[type="number"]');
-  await expect(mwInput, 'CapacityControl MW input visible after back-nav').toBeVisible({ timeout: 15_000 });
+  // 1) ScaleControl: fill the MW hero input → SET_MW → serializeStateToUrl emits ?mw=75
+  const mwInput = page.locator('[data-sim-input-hero] input');
+  await expect(mwInput, 'ScaleControl MW input visible after back-nav').toBeVisible({ timeout: 15_000 });
   await mwInput.fill('75');
   await mwInput.press('Tab');
   await expect.poll(
     () => new URL(page.url()).searchParams.get('mw'),
-    { timeout: 15_000, message: 'CapacityControl SET_MW syncs URL to ?mw=75' }
+    { timeout: 15_000, message: 'ScaleControl SET_MW syncs URL to ?mw=75' }
   ).toBe('75');
 
-  // 2) ArchetypeSegment: select a different archetype card → APPLY_PRESET →
-  //    serializeStateToUrl must emit ?arch=neocloud_gpu.
-  const archCard = page.locator('[data-arch-card="neocloud_gpu"]');
+  // 2) ArchetypeSegment: select neocloud_gpu → APPLY_PRESET → ?arch=neocloud_gpu
+  const archCard = page.locator('[data-archetype-id="neocloud_gpu"]');
   await expect(archCard, 'neocloud_gpu archetype card visible').toBeVisible({ timeout: 15_000 });
   await archCard.click();
   await expect.poll(
