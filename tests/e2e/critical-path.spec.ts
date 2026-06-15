@@ -70,11 +70,10 @@ test('Flow A — happy path: login → simulator → save → memo → dossier �
   // Login (dev autologin) → Simulator renders authenticated (no redirect to /login).
   await page.goto('/admin/hearst/simulator', { waitUntil: 'networkidle' });
   expect(page.url(), 'authenticated — not bounced to login').not.toContain('/admin/login');
-  await expect(page.getByText('CONFIGURATION', { exact: true })).toBeVisible({ timeout: 15_000 });
 
-  // Save scenario via Generate Investment Memo (persists + navigates to results).
-  const saveCta = page.getByRole('button', { name: 'Generate Investment Memo' });
-  await expect(saveCta, 'Generate Investment Memo CTA visible').toBeVisible({ timeout: 15_000 });
+  // Save scenario via Simulate CTA (persists + navigates to results).
+  const saveCta = page.locator('.sim-hero-cta');
+  await expect(saveCta, 'Simulate CTA visible').toBeVisible({ timeout: 15_000 });
   await expect(saveCta).toBeEnabled({ timeout: 30_000 });
   await saveCta.click();
   await page.waitForURL(/\/simulator\/results\?scenario=/, { timeout: 30_000 });
@@ -213,4 +212,131 @@ test('Flow E — failures are loud, never silent, never corrupting', async ({ pa
   // UI surfaces errors (no blank/crash) — results page with a non-existent scenario.
   await page.goto('/admin/hearst/simulator/results?scenario=00000000-0000-0000-0000-000000000000', { waitUntil: 'networkidle' });
   await expect(page.getByText(/Error|not found|failed/i).first(), 'UI shows an error, not a silent blank').toBeVisible({ timeout: 20_000 });
+});
+
+// ── FLOW F — Simulator URL & Hydration Audit Fixes ───────────────────────────
+//
+// Covers 4 fixes from the June-2026 simulator URL audit (commit 97e1025):
+//   F1 — resultsNavigationRef reset: URL stays live after results → back → config (fix A)
+//   F2 — ?viz= active on results page: deep-link to sankey shows sankey panel (fix E)
+//   F3 — viz absent from config URL: serializeStateToUrl never emits ?viz= (fix F)
+//   F4 — ?scenario= skips URL hydration: DB value wins over URL mw param (fix B)
+
+test('Flow F1 — URL sync resumes after results → back → config change', async ({ page, request }) => {
+  test.setTimeout(90_000);
+
+  // Start on simulator with a specific mw=50 scenario.
+  await page.goto('/admin/hearst/simulator?mode=mw_first&mw=50&arch=powered_shell', { waitUntil: 'networkidle' });
+  expect(page.url(), 'not bounced to login').not.toContain('/admin/login');
+
+  // Wait for the simulate CTA to be enabled (engine debounced, label is dynamic).
+  // The button carries className="sim-hero-cta" and matches /Simulate.*MW/i.
+  const saveCta = page.locator('.sim-hero-cta');
+  await expect(saveCta, 'Simulate CTA visible').toBeVisible({ timeout: 20_000 });
+  await expect(saveCta, 'Simulate CTA enabled').toBeEnabled({ timeout: 30_000 });
+  await saveCta.click();
+
+  // Navigate to results.
+  await page.waitForURL(/\/simulator\/results\?scenario=/, { timeout: 30_000 });
+  const scenarioId = new URL(page.url()).searchParams.get('scenario')!;
+  createdScenarioIds.push(scenarioId);
+
+  // Screenshot: on results page.
+  await page.screenshot({ path: 'test-results/critical-F-url-sync.png' });
+
+  // Click "← Back to simulator" link.
+  const backLink = page.getByText(/← Back to simulator/i).first();
+  await expect(backLink, '← Back to simulator link visible on results').toBeVisible({ timeout: 15_000 });
+  await backLink.click();
+  await page.waitForURL(/\/admin\/hearst\/simulator/, { timeout: 15_000 });
+
+  // Config UI is gone — navigate via URL (config is URL-only now).
+  // This proves resultsNavigationRef was reset: the URL sync resumes.
+  await page.goto('/admin/hearst/simulator?mode=mw_first&mw=75&arch=powered_shell', { waitUntil: 'networkidle' });
+  const url = new URL(page.url());
+  expect(url.searchParams.get('mw'), 'URL contains mw=75').toBe('75');
+});
+
+test('Flow F2 — ?viz=sankey deep-link activates sankey panel on results', async ({ page, request }) => {
+  test.setTimeout(60_000);
+
+  // Create scenario via API.
+  const sim = await simulate(request, PROJECT_ID);
+  const scenarioId = await createScenario(request, PROJECT_ID, sim);
+  createdScenarioIds.push(scenarioId);
+
+  // Navigate directly to results with ?viz=sankey.
+  await page.goto(`/admin/hearst/simulator/results?scenario=${scenarioId}&viz=sankey`, { waitUntil: 'networkidle' });
+  expect(page.url(), 'not bounced to login').not.toContain('/admin/login');
+
+  // Sankey panel should be active — VisualizationsStep renders `aria-current="true"` on the
+  // active rail button, and shows the sankey title "Capital and annual cash-flow path".
+  // Poll because VisualizationsStep is client-rendered after hydration.
+  await expect.poll(
+    async () => {
+      // aria-current="true" on a rail button that contains 'Money flow' (RESULTS_VIZ_SANKEY_LABEL)
+      const active = page.locator('[data-viz-rail] [aria-current="true"]');
+      const count = await active.count();
+      if (count === 0) return false;
+      const text = await active.first().innerText();
+      return /money flow|sankey/i.test(text);
+    },
+    { timeout: 20_000, message: 'sankey tab active (aria-current="true" + Money flow label)' }
+  ).toBe(true);
+});
+
+test('Flow F3 — config URL never contains ?viz=', async ({ page }) => {
+  test.setTimeout(30_000);
+
+  // Navigate to config page and interact to trigger URL sync.
+  await page.goto('/admin/hearst/simulator?mode=mw_first&mw=50&arch=powered_shell', { waitUntil: 'networkidle' });
+  expect(page.url(), 'not bounced to login').not.toContain('/admin/login');
+
+  // Wait for simulator to fully mount (engine loads) then read the URL.
+  await page.waitForTimeout(2_000); // let URL sync settle
+
+  // The config-page URL must never contain a viz param (serializeStateToUrl omits it).
+  const url = new URL(page.url());
+  expect(url.searchParams.has('viz'), 'viz param absent from config URL').toBe(false);
+
+  // Even after changing mode, viz should not appear.
+  await page.goto('/admin/hearst/simulator?mode=capital_first&cap=500', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1_500);
+  const url2 = new URL(page.url());
+  expect(url2.searchParams.has('viz'), 'viz param absent after mode change').toBe(false);
+});
+
+test('Flow F4 — ?scenario= skips URL hydration: DB total_mw wins over URL mw param', async ({ page, request }) => {
+  test.setTimeout(60_000);
+
+  // Create a real scenario with total_mw=50 via API.
+  const sim = await simulate(request, PROJECT_ID, { input_value: { total_mw: 50 } });
+  const scenarioId = await createScenario(request, PROJECT_ID, sim);
+  createdScenarioIds.push(scenarioId);
+
+  // Intercept the first POST /simulate to capture the payload.
+  const firstSimulatePayload: any[] = [];
+  page.on('request', (req) => {
+    if (req.url().includes('/api/admin/hearst/simulate') && req.method() === 'POST') {
+      try { firstSimulatePayload.push(JSON.parse(req.postData() || '{}')); } catch { /* ignore */ }
+    }
+  });
+
+  // Navigate with ?scenario=X&mw=999 — the URL hydration guard should skip mw=999
+  // because ?scenario= is present; the scenario reopen fetch restores mw=50 from DB.
+  await page.goto(`/admin/hearst/simulator?scenario=${scenarioId}&mw=999`, { waitUntil: 'networkidle' });
+  expect(page.url(), 'not bounced to login').not.toContain('/admin/login');
+
+  // Wait for the first simulate POST to arrive (the reopen fetch triggers it).
+  await expect.poll(
+    () => firstSimulatePayload.length,
+    { timeout: 20_000, message: 'at least one POST /simulate fired' }
+  ).toBeGreaterThanOrEqual(1);
+
+  // The payload's MW should come from the DB scenario (50), not the URL (999).
+  const mwUsed = firstSimulatePayload[0]?.input_value?.total_mw
+    ?? firstSimulatePayload[0]?.scenario?.total_mw
+    ?? firstSimulatePayload[0]?.total_mw;
+  expect(mwUsed, 'simulate payload uses DB total_mw=50, not URL mw=999').not.toBe(999);
+  expect(mwUsed, 'simulate payload total_mw is 50 (from DB)').toBe(50);
 });

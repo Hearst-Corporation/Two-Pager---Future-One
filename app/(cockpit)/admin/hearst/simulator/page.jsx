@@ -1,6 +1,6 @@
 'use client';
 
-import { useReducer, useState, useEffect, useCallback, useDeferredValue, useRef, useMemo } from 'react';
+import { useReducer, useState, useEffect, useDeferredValue, useRef, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 import {
@@ -13,16 +13,11 @@ import { useSimulation } from '@/lib/hearst-simulation-context';
 
 import { SIMULATOR_PARAM_EVENT } from '@/lib/hearst-simulator-bridge';
 import { UI } from '@/lib/ui-strings';
-import { S as CP, L } from '@/lib/cp-styles';
+import { S as CP } from '@/lib/cp-styles';
 import './simulator.css';
 
 import InvestmentCaseSurface from '@/components/hearst/simulator/InvestmentCaseSurface';
-import JvStructureVisual from '@/components/hearst/simulator/JvStructureVisual';
-import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
-import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
-import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
-import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
-import { Button, SectionHead } from '@/components/hearst/ui';
+import { Button } from '@/components/hearst/ui';
 
 // Valid viz tab ids — the chat bridge may set active_viz for the dedicated /results
 // page (single source of truth: VIZ_META). This config page stays results-free.
@@ -265,7 +260,6 @@ export default function SimulatorPage() {
   const projection = simResult?.projection;
   const scenario = simResult?.scenario;
   const archetypeOutcome = simResult?.archetype_outcome;
-
   useEffect(() => {
     setAdvisorContext?.({
       surface: 'simulator',
@@ -279,25 +273,6 @@ export default function SimulatorPage() {
     });
     return () => setAdvisorContext?.(null);
   }, [loading, projection, savedScenarioId, scenario, setAdvisorContext, simError, simResult, state]);
-
-  const onSelectPrimary = useCallback((id) => {
-    // Selecting an operating model also sets its canonical buyer/product pair
-    // (MODEL_DEFAULTS) in one dispatch, so the B2B matrix stays on-grid and the
-    // engine never gets an incoherent archetype × business_model combo.
-    const def = MODEL_DEFAULTS[id];
-    dispatch({ type: ACTIONS.APPLY_PRESET, value: { primary_archetype_id: id, ...(def || {}) } });
-  }, []);
-  const onHwChange = useCallback((next) => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: next }), []);
-
-  const inputValue = state.mode === 'capital_first' ? state.capital_usd
-    : state.mode === 'target_irr_first' ? state.target_irr_pct
-    : state.total_mw;
-  const onModeChange = useCallback((id) => dispatch({ type: ACTIONS.SET_MODE, value: id }), []);
-  const onInputChange = useCallback((val) => {
-    if (state.mode === 'capital_first') dispatch({ type: ACTIONS.SET_CAPITAL, value: val });
-    else if (state.mode === 'target_irr_first') dispatch({ type: ACTIONS.SET_IRR_TARGET, value: val });
-    else dispatch({ type: ACTIONS.SET_MW, value: val });
-  }, [state.mode]);
 
   // Returns the saved scenario id (string) on success, null on failure.
   async function handleSave() {
@@ -386,67 +361,6 @@ export default function SimulatorPage() {
         />
         </div>
 
-        {/* CONFIGURATION — naked canvas, no cards */}
-        <div
-          data-sim-config
-          style={S.configCard}
-        >
-          <div data-sim-config-body>
-            <div data-sim-advanced>
-            <div data-sim-setup-row>
-              <div data-sim-setup-col>
-                <SectionHead title={UI.SIM_STEP_WHAT_TITLE} hint={UI.SIM_STEP_WHAT_HINT} style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
-                <div data-sim-advanced-section>
-                  <ArchetypePicker
-                    archetypes={PRIMARY_DEAL_ARCHETYPES}
-                    primaryId={state.primary_archetype_id}
-                    onSelectPrimary={onSelectPrimary}
-                  />
-                  <div data-sim-implies>
-                    Implies: {MODEL_DEFAULTS[state.primary_archetype_id]?.business_model_id?.replace(/_/g, ' ')} / {MODEL_DEFAULTS[state.primary_archetype_id]?.client_type_id?.replace(/_/g, ' ')}
-                  </div>
-                </div>
-              </div>
-
-              <div data-sim-setup-col>
-                <SectionHead title={UI.SIM_STEP_TECH_TITLE} hint={UI.SIM_STEP_TECH_HINT} style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
-                <div data-sim-advanced-section>
-                  <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} presetsOnly />
-                </div>
-              </div>
-            </div>
-
-            <div data-sim-hardware-detail>
-              <TechnologyStackStep totalMw={scenario?.total_mw || state.total_mw} value={state.hardware_mix} onChange={onHwChange} detailOnly />
-            </div>
-
-            <div data-sim-setup-row style={{ marginTop: 'var(--cp-space-4)' }}>
-              <div data-sim-setup-col>
-                <SectionHead title={UI.SIM_STEP_SCALE_TITLE} hint={UI.SIM_STEP_SCALE_HINT} style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
-                <div data-sim-mode-stack>
-                  <InputModeSwitcher mode={state.mode} onChange={onModeChange} />
-
-                  <InputFieldHero
-                    embedded
-                    mode={state.mode}
-                    value={inputValue}
-                    onChange={onInputChange}
-                    projection={projection}
-                    scenario={scenario}
-                    derived={simResult?.derived}
-                    solver={simResult?.solver}
-                  />
-                </div>
-              </div>
-              <div data-sim-setup-col>
-                <SectionHead title={UI.SIM_STEP_STRUCTURE_TITLE} hint={UI.SIM_STEP_STRUCTURE_HINT} style={{ marginBottom: 'var(--cp-space-1)', justifyContent: 'center' }} />
-                <JvStructureVisual />
-              </div>
-            </div>
-            </div>
-          </div>
-        </div>
-
         {projectLoadError && (
           <div style={{ ...CP.dangerAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
             <span>{projectLoadError}</span>
@@ -474,38 +388,5 @@ const S = {
     flexDirection: 'column',
     gap: 'var(--cp-space-3)',
     minWidth: 0,
-  },
-  configCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 'var(--cp-space-3)',
-    minWidth: 0,
-  },
-  configHeader: {
-    ...L.rowBetween,
-    flexShrink: 0,
-  },
-  eyebrow: {
-    color: 'var(--cp-text-muted)',
-    fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-widest)',
-    textTransform: 'uppercase',
-    opacity: 'var(--cp-opacity-label)',
-  },
-  validateHint: {
-    fontSize: 'var(--cp-font-nano)',
-    color: 'var(--cp-text-muted)',
-    fontWeight: 'var(--cp-weight-bold)',
-    textTransform: 'uppercase',
-    letterSpacing: 'var(--cp-tracking-wider)',
-  },
-  configFooter: {
-    ...L.rowBetween,
-    gap: 'var(--cp-space-2)',
-    flexWrap: 'wrap',
-    paddingTop: 'var(--cp-space-1)',
-    borderTop: '1px solid var(--cp-border-base)',
-    alignItems: 'center',
   },
 };
