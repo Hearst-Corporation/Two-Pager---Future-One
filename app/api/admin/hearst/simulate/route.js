@@ -32,6 +32,7 @@ import { solveScenarioForMode } from '@/lib/hearst-solver';
 import { bootstrapScenarioFromSources } from '@/lib/hearst-bootstrap';
 import { calcHardwareBreakdown } from '@/lib/hearst-gpu-catalog';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
+import { buildSimulateResponse } from '@/lib/hearst-simulate-response';
 
 const ARCHETYPE_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
 
@@ -185,31 +186,15 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
     console.warn(`[simulate][actor=${auth.profile.id}] debt/waterfall failed:`, e?.message);
   }
 
-  return NextResponse.json({
-    scenario: archResult.scenario,
+  return NextResponse.json(buildSimulateResponse({
+    archResult,
+    archetype,
     projection,
     waterfall,
     debt_schedule,
-    archetype_outcome: {
-      id: archetype.id,
-      label: archetype.label,
-      code: archetype.code,
-      score: archResult.score,
-      scores: archetype.scores,
-      compute_as: archetype.compute_as || 'recurring_revenue',
-    },
     hardware_breakdown,
-    source_map: boot.source_map,
-    confidence_score: boot.confidence_score,
+    boot,
     derived,
-    solver: solver
-      ? {
-          converged: solver.converged,
-          iterations: solver.iterations,
-          lever_value: solver.lever_value,
-          achieved_irr: solver.achieved_irr,
-          diagnostic: solver.diagnostic,
-        }
-      : null,
-  });
+    solver,
+  }));
 });

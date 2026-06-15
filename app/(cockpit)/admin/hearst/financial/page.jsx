@@ -99,7 +99,7 @@ export default function FinancialPage() {
     || canonicalScenarios.find((s) => s.scenario_type === 'base')
     || scenarios[0]
     || null;
-  const proj = base?.projection || {};
+  const proj = useMemo(() => base?.projection || {}, [base]);
   const savedPlanValue = savedPlans.some((s) => s.id === primaryId) ? primaryId : '';
 
   const debtSchedule = useMemo(() => {
@@ -111,7 +111,7 @@ export default function FinancialPage() {
   const waterfall = useMemo(() => {
     if (!base || !proj.years?.length) return null;
     return generateWaterfall(base, proj);
-  }, [base, proj.years]);
+  }, [base, proj]);
 
   const sensitivity = useMemo(() => {
     if (!base) return null;

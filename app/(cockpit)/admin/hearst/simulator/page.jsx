@@ -24,6 +24,20 @@ import { Button } from '@/components/hearst/ui';
 // page (single source of truth: VIZ_META). This config page stays results-free.
 const VIZ_TAB_IDS = new Set(['radar', 'network', 'matrix', 'sankey']);
 
+const S = {
+  wrap: {
+    width: '100%',
+    maxWidth: 'none',
+    margin: 0,
+    flex: '1 1 auto',
+    minHeight: 0,
+    minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--cp-section-gap)',
+  },
+};
+
 export default function SimulatorPage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -43,10 +57,6 @@ export default function SimulatorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    document.body.classList.add('oracle-simulator-page');
-    return () => document.body.classList.remove('oracle-simulator-page');
-  }, []);
 
   // Mode 'pro' is now the only mode in Wave 1 (C17).
 
@@ -202,6 +212,7 @@ export default function SimulatorPage() {
         dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: patch });
         setSavedScenarioId(sid);
       } catch (e) {
+    // eslint-disable-next-line no-console
         console.warn('[simulator] failed to reopen scenario:', e.message);
       }
     })();
@@ -220,7 +231,7 @@ export default function SimulatorPage() {
       setLoading(true);
       setSimError(null);
       try {
-        const payload = buildSimulatePayload(deferredState);
+        const payload = JSON.parse(simKey);
         const r = await fetch('/api/admin/hearst/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -347,7 +358,7 @@ export default function SimulatorPage() {
   const validateBlocked = !projection || !projectId || loading || !!simError || savingState === 'saving';
 
   return (
-    <div className="oracle-page">
+    <div className="oracle-page oracle-simulator-page">
       <div data-sim-wrap style={S.wrap}>
         {/* HERO SURFACE — Replaces CaseHeaderStep and the old footer */}
         <div data-sim-case>
@@ -380,15 +391,3 @@ export default function SimulatorPage() {
   );
 }
 
-const S = {
-  wrap: {
-    width: '100%',
-    maxWidth: 'none',
-    margin: 0,
-    flex: '1 1 auto',
-    minHeight: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    minWidth: 0,
-  },
-};

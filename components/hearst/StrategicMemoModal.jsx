@@ -10,7 +10,7 @@
 //
 // No hex tokens — everything via var(--cp-*) / var(--ct-*).
 
-import { useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { RotateCw, Copy, Download } from 'lucide-react';
 import {

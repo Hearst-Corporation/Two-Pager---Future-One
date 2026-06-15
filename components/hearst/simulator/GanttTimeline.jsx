@@ -2,7 +2,6 @@
 
 import { memo } from 'react';
 import { SITE_READINESS } from '@/lib/hearst-constants';
-import { UI } from '@/lib/ui-strings';
 
 /**
  * Clean, horizontal investment timeframe.
@@ -14,7 +13,6 @@ function GanttTimeline({ scenario, exit_year = 10 }) {
   
   // Approximate years
   const devYears = Math.max(1, Math.round(readiness.dev_months / 12));
-  const stabYears = Math.max(1, exit - devYears);
   
   return (
     <div style={S.wrap}>

@@ -47,7 +47,7 @@ function layoutNodes() {
   return positions;
 }
 
-export default function EcosystemNetwork({ width = 720, height = 420, activeArchetypeId = null, onNodeClick }) {
+export default function EcosystemNetwork({ width = 720, height = 420, onNodeClick }) {
   const [hover, setHover] = useState(null);
   const positions = useMemo(layoutNodes, []);
 

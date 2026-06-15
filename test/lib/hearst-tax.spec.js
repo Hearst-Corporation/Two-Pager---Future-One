@@ -112,4 +112,46 @@ describe('P0-2 operational tax layer', () => {
     expect(wfTaxed.by_investor.lender.total_repaid)
       .toBeCloseTo(wfUntaxed.by_investor.lender.total_repaid, 0);
   });
+
+  it('waterfall uses the projection equity basis including IDC', () => {
+    const s = scenario({ site_readiness: 'greenfield', price_hyperscale_kw_month: 300 });
+    const p = generateProjection(s);
+    const wf = generateWaterfall(s, p);
+
+    const investorEquity =
+      wf.by_investor.hearst.equity_invested +
+      wf.by_investor.brookfield.equity_invested +
+      wf.by_investor.qatar.equity_invested;
+
+    expect(p.idc).toBeGreaterThan(0);
+    expect(investorEquity).toBeCloseTo(p.equity_invested, 0);
+  });
+
+  it('waterfall distributes terminal value net of remaining debt to equity', () => {
+    const s = scenario({
+      debt_pct: 0,
+      exit_year: 1,
+      equity_hearst_pct: 20,
+      equity_brookfield_pct: 50,
+      equity_qatar_pct: 30,
+    });
+    const wf = generateWaterfall(s, {
+      total_capex: 100,
+      equity_invested: 100,
+      terminal_value: 100,
+      terminal_value_to_equity: 70,
+      remaining_debt_at_exit: 30,
+      years: [{ year: 1, ebitda: 0, cash_taxes: 0 }],
+    });
+
+    const investorExitDistribution =
+      wf.by_investor.hearst.cash_flows[1] +
+      wf.by_investor.brookfield.cash_flows[1] +
+      wf.by_investor.qatar.cash_flows[1];
+
+    expect(investorExitDistribution).toBe(70);
+    expect(wf.by_investor.lender.total_repaid).toBe(30);
+    expect(wf.summary.terminal_value_to_equity).toBe(70);
+    expect(wf.summary.remaining_debt_at_exit).toBe(30);
+  });
 });

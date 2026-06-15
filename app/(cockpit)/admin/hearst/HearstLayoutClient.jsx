@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { CockpitShell } from '@hearst/cockpit-shell';
-import { Suspense } from 'react';
 import { SimulationProvider } from '@/lib/hearst-simulation-context';
 import { OracleRailNav } from '@/components/OracleRailNav';
 import ChatToggleFAB from '@/components/hearst/ChatToggleFAB';

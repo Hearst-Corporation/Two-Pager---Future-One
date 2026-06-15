@@ -20,17 +20,13 @@ body.oracle-results-wide .ct-page-area {
   overflow-x: hidden !important;
 }
 
-body.oracle-simulator-page .oracle-page,
+.oracle-page.oracle-simulator-page,
 body.oracle-results-page .oracle-page {
   flex: 1 1 auto;
   min-height: 0;
   max-height: 100%;
   overflow-x: hidden;
   padding-block-end: 0;
-}
-
-body.oracle-simulator-page .oracle-page {
-  overflow-y: hidden;
 }
 
 /* Padding réduit : avec rail chat, le conteneur queries doit atteindre 640px (ex. viewport 1280). */
@@ -47,7 +43,7 @@ body.oracle-results-page .oracle-page {
 
 /* ── Viewport : padding page sur petits écrans ── */
 @media (max-width: 900px) {
-  body.oracle-simulator-page .oracle-page {
+  .oracle-page.oracle-simulator-page {
     padding-inline: var(--cp-space-4);
   }
 }
