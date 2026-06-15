@@ -350,11 +350,18 @@ export default function SimulatorPage() {
           scenario={scenario}
           projection={projection}
           selectedArchetype={PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)}
+          validateBlocked={validateBlocked}
+          validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Generate Board Memo →`}
+          onValidate={handleValidateAndReveal}
         />
 
-        <SimulatorConfigPanel 
-          state={state} 
-          dispatch={dispatch} 
+        <SimulatorConfigPanel
+          state={state}
+          dispatch={dispatch}
+          scenario={scenario}
+          projection={projection}
+          derived={simResult?.derived}
+          solver={simResult?.solver}
           validateBlocked={validateBlocked}
           validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Generate Board Memo →`}
           onValidate={handleValidateAndReveal}

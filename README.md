@@ -27,7 +27,7 @@ Après un build avec le dev actif : `npm run dev:clean`
 
 | URL | Rôle |
 |-----|------|
-| `/admin/hearst/simulator` | Configuration scénario (hero + panneau v2) |
+| `/admin/hearst/simulator` | Configuration scénario (hero glass + timeline, archétype, scale 3 modes, hardware avancé, structure JV) |
 | `/admin/hearst/simulator/results` | Résultats |
 | `/admin/hearst/financial` | Modèle financier |
 | `/admin/hearst/workspace` | Scénarios sauvegardés |
@@ -43,7 +43,7 @@ app/api/admin/hearst/         APIs métier
 app/api/cockpit-chat/         chat OpenAI
 cockpit-shell/                shell UI (éditable localement)
 components/hearst/            widgets Oracle
-components/hearst/simulator/  hero (InvestmentCaseSurface) + config v2 (ArchetypeSegment, CapacityControl, TechPresetControl)
+components/hearst/simulator/  hero (InvestmentCaseSurface) + config (ArchetypeSegment, ScaleControl, TechnologyStackStep, JvStructureVisual)
 lib/                          moteur financier, validators, LLM
 lib/hearst-config-presets.js  defaults modèle + presets hardware (HARDWARE_PRESETS)
 ```

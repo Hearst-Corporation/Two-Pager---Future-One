@@ -1,55 +1,76 @@
 'use client';
+import PropTypes from 'prop-types';
+import { ACTIONS } from '@/lib/hearst-simulator-state';
 import { UI } from '@/lib/ui-strings';
-import { Button } from '@/components/hearst/ui';
 import ArchetypeSegment from './ArchetypeSegment';
-import CapacityControl from './CapacityControl';
-import TechPresetControl from './TechPresetControl';
+import ScaleControl from './ScaleControl';
+import TechnologyStackStep from './sections/TechnologyStackStep';
+import JvStructureVisual from './JvStructureVisual';
 import './simulator-config.css';
 
-export default function SimulatorConfigPanel({ state, dispatch, validateBlocked, validateLabel, onValidate }) {
+export default function SimulatorConfigPanel({
+  state,
+  dispatch,
+  scenario,
+  projection,
+  derived,
+  solver,
+}) {
+  const totalMw = scenario?.total_mw ?? state.total_mw;
+
   return (
-    <div data-sim-config-v2 className="is-assembling">
-      <section data-sim-section className="del-1">
-        <header data-sim-section-head>
-          <h2 className="sim-config-label">{UI.SIM_THESIS_TITLE}</h2>
-          <p className="sim-config-hint">{UI.SIM_THESIS_HINT}</p>
+    <div data-sim-config-v2 className="hw-rack">
+      <section data-sim-section className="hw-module">
+        <header className="hw-module-header">
+          <h2 className="hw-label">{UI.SIM_THESIS_TITLE}</h2>
+          <p className="hw-hint">{UI.SIM_THESIS_HINT}</p>
         </header>
         <ArchetypeSegment primaryId={state.primary_archetype_id} dispatch={dispatch} />
       </section>
 
-      <section data-sim-section className="del-2">
-        <header data-sim-section-head>
-          <h2 className="sim-config-label">{UI.SIM_SIZE_TITLE}</h2>
-          <p className="sim-config-hint">{UI.SIM_SIZE_HINT}</p>
+      <section data-sim-section className="hw-module">
+        <header className="hw-module-header">
+          <h2 className="hw-label">{UI.SIM_SIZE_TITLE}</h2>
+          <p className="hw-hint">{UI.SIM_SIZE_HINT}</p>
         </header>
-        <CapacityControl value={state.total_mw} dispatch={dispatch} />
+        <ScaleControl
+          state={state}
+          dispatch={dispatch}
+          projection={projection}
+          scenario={scenario}
+          derived={derived}
+          solver={solver}
+        />
       </section>
 
-      <section data-sim-section className="del-3">
-        <header data-sim-section-head>
-          <h2 className="sim-config-label">{UI.SIM_HW_TITLE}</h2>
-          <p className="sim-config-hint">{UI.SIM_HW_HINT}</p>
+      <section data-sim-section className="hw-module">
+        <header className="hw-module-header">
+          <h2 className="hw-label">{UI.SIM_HW_TITLE}</h2>
+          <p className="hw-hint">{UI.SIM_HW_HINT}</p>
         </header>
-        <TechPresetControl hardwareMix={state.hardware_mix} dispatch={dispatch} />
+        <TechnologyStackStep
+          totalMw={totalMw}
+          value={state.hardware_mix}
+          onChange={(next) => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: next })}
+        />
       </section>
 
-      <section data-sim-section className="del-4">
-        <div data-decision-ctrl>
-          <div>
-            <span data-decision-label>Decision Required</span>
-            <div data-decision-title>Approve & Generate Memo</div>
-          </div>
-          <Button
-            variant="primary"
-            size="lg"
-            disabled={validateBlocked}
-            onClick={onValidate}
-            style={{ width: '100%', justifyContent: 'space-between', padding: '0 24px', height: '56px', fontSize: '16px' }}
-          >
-            {validateLabel}
-          </Button>
-        </div>
+      <section data-sim-section className="hw-module">
+        <header className="hw-module-header">
+          <h2 className="hw-label">{UI.SIM_STEP_STRUCTURE_TITLE}</h2>
+          <p className="hw-hint">{UI.SIM_STEP_STRUCTURE_HINT}</p>
+        </header>
+        <JvStructureVisual />
       </section>
     </div>
   );
 }
+
+SimulatorConfigPanel.propTypes = {
+  state: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
+  scenario: PropTypes.object,
+  projection: PropTypes.object,
+  derived: PropTypes.object,
+  solver: PropTypes.object,
+};

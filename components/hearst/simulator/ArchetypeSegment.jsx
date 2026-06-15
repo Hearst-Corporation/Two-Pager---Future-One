@@ -20,7 +20,7 @@ export default function ArchetypeSegment({ primaryId, dispatch }) {
   };
 
   return (
-    <div data-focus-stage>
+    <div className="hw-button-grid">
       {PRIMARY_DEAL_ARCHETYPES.map((a) => {
         const selected = primaryId === a.id;
         const m = PRESET_META[a.id];
@@ -29,32 +29,19 @@ export default function ArchetypeSegment({ primaryId, dispatch }) {
             key={a.id}
             onClick={() => select(a.id)}
             aria-pressed={selected}
-            data-focus-item
-            data-focused={selected}
-            data-dimmed={!selected}
+            className="hw-button"
           >
-            <div data-focus-title>{a.label}</div>
-            {m && <div data-focus-subtitle>{m.tagline}</div>}
-            
-            <div data-focus-detail>
-              {m && (
-                <>
-                  <p style={{ fontSize: '13px', color: 'var(--cp-text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
-                    {m.ideal_for}
-                  </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div>
-                      <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--cp-text-muted)' }}>Return</div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--cp-text-strong)' }}>{m.return_band}</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--cp-text-muted)' }}>Risk</div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--cp-text-strong)' }}>{LEVEL_LABEL[m.risk]}</div>
-                    </div>
-                  </div>
-                </>
-              )}
+            <div className="hw-led-row">
+              <span className="hw-button-title">{a.label}</span>
+              <span className="hw-led"></span>
             </div>
+            
+            {m && (
+              <div className="hw-button-meta">
+                <span>{m.tagline}</span>
+                <span style={{ opacity: 0.6, marginTop: '4px' }}>Risk: {LEVEL_LABEL[m.risk]}</span>
+              </div>
+            )}
           </button>
         );
       })}
