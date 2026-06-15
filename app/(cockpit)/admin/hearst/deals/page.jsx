@@ -472,7 +472,7 @@ const S = {
   // model card
   modelCard: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column' },
   modelTag: { display: 'inline-block', alignSelf: 'flex-start', fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wide)', textTransform: 'uppercase', color: 'var(--cp-accent-strong)', background: 'var(--cp-accent-soft)', border: '1px solid var(--cp-border-accent)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-1) var(--cp-space-2)', marginBottom: 'var(--cp-space-3)' },
-  modelTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', letterSpacing: 'var(--cp-tracking-tight)' },
+  modelTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', letterSpacing: 'var(--cp-tracking-tight)' },
   modelSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)', marginTop: 'var(--cp-space-1)' },
   modelBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   pc: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--cp-space-3)', marginTop: 'var(--cp-space-4)' },
@@ -484,7 +484,7 @@ const S = {
   dealCard: { padding: 'var(--cp-space-5)', display: 'flex', flexDirection: 'column' },
   dealTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-1)' },
   dealWho: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', display: 'flex', alignItems: 'center', minWidth: 0, lineHeight: 'var(--cp-leading-tight)' },
-  dealAmt: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-strong)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
+  dealAmt: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
   dealStruct: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-accent-strong)', fontWeight: 'var(--cp-weight-semibold)', marginBottom: 'var(--cp-space-3)' },
   dealDesc: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
 
@@ -514,7 +514,7 @@ const S = {
 
   // callouts
   callout: { padding: 'var(--cp-space-5)' },
-  calloutTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', marginBottom: 'var(--cp-space-3)', display: 'flex', alignItems: 'center' },
+  calloutTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-strong)', marginBottom: 'var(--cp-space-3)', display: 'flex', alignItems: 'center' },
   calloutBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
 
   // playbook

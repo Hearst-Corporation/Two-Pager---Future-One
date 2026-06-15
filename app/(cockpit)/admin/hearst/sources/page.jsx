@@ -3,7 +3,8 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import SourceBadge from '@/components/hearst/SourceBadge';
 import OperatorBadge from '@/components/hearst/OperatorBadge';
 import { X, ExternalLink } from 'lucide-react';
-import { Table, Row, Cell, Field, Button, Badge, Eyebrow } from '@/components/hearst/ui';
+import { Table, Row, Cell, Field, Button, Badge } from '@/components/hearst/ui';
+import SectionHead from '@/components/hearst/ui/SectionHead';
 import {
   SOURCE_TYPES, OPERATORS, DOC_TYPES,
 } from '@/lib/hearst-constants';
@@ -284,11 +285,12 @@ export default function SourcesPage() {
       {/* My Sources (collapsible) */}
       {showMyS && (
         <div style={S.mySourcesWrap}>
-          <Eyebrow block>{UI.SOURCES_MY_SECTION}</Eyebrow>
+          <SectionHead title={UI.SOURCES_MY_SECTION} />
+
 
           {showAdd && (
             <div style={S.addForm}>
-              <div style={S.addFormTitle}>ADD SOURCE</div>
+              <SectionHead title="Add Source" style={S.addFormTitle} />
               <div data-sources-add-grid style={S.addGrid}>
                 {SOURCE_FIELDS.map(f => (
                   <Field
@@ -397,12 +399,12 @@ const S = {
   tableSpacer: { marginBottom: 'var(--cp-space-6)' },
   link: { color: 'var(--cp-accent)', textDecoration: 'none' },
   addForm: { background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-sm)', padding: 'var(--cp-space-4)', marginBottom: 'var(--cp-space-4)' },
-  addFormTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-muted)', marginBottom: 'var(--cp-space-3)' },
+  addFormTitle: { marginBottom: 'var(--cp-space-3)' },
   addGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--cp-space-3) var(--cp-space-4)' },
   overlay: { position: 'fixed', inset: 0, background: 'var(--cp-overlay)', zIndex: 'var(--cp-z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   modal: { background: 'var(--cp-surface-1)', border: '1px solid var(--cp-border-strong)', borderRadius: 'var(--cp-radius-md)', width: 440, maxWidth: '90vw', boxShadow: 'var(--cp-shadow-lg)' }, // cockpit-lint-allow — dialog overlay dimensionné (width/maxWidth + header/body custom), pas une <Card> de contenu
   modalHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--cp-space-4)', borderBottom: '1px solid var(--cp-border)' },
-  modalTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
+  modalTitle: { fontSize: 'var(--cp-font-h2)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)' },
   modalBody: { padding: 'var(--cp-space-4)' },
   modalRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-3)', background: 'var(--cp-surface-2)', padding: 'var(--cp-space-2) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)' },
   confDots: { display: 'inline-flex', gap: 'calc(var(--cp-space-1) / 2)' },

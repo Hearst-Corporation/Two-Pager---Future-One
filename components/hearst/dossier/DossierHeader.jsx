@@ -9,7 +9,7 @@ export default function DossierHeader({ memo, decision, ident, onStatusChange })
         <div style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'capitalize', marginBottom: 'var(--cp-space-2)' }}>
           {ident.join('  ·  ')}
         </div>
-        <h1 style={{ fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)', lineHeight: 'var(--cp-leading-tight)' }}>
+        <h1 style={{ fontSize: 'var(--cp-font-display)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-tight)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0)', lineHeight: 'var(--cp-leading-tight)' }}>
           {memo.title}
         </h1>
       </div>

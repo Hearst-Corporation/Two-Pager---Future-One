@@ -520,7 +520,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
 function AnalyticsBlock({ title, children }) {
   return (
     <div style={S.analyticsBlock}>
-      <h3 style={S.analyticsTitle}>{title}</h3>
+      <SectionHead title={title} level={3} />
       {children}
     </div>
   );
@@ -830,7 +830,7 @@ const S = {
   sub: { color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', marginTop: 'var(--cp-space-1)' },
   body: { margin: 'var(--cp-space-1) var(--cp-space-0)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   eyebrow: { ...EYEBROW, display: 'block', marginBottom: 'var(--cp-space-1)' },
-  confLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)', whiteSpace: 'nowrap' },
+  confLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)', whiteSpace: 'nowrap' },
 
   // Canvas
   canvas: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-6)' },
@@ -842,7 +842,7 @@ const S = {
   heroActions: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)', alignItems: 'flex-end', flexShrink: 0 },
   heroLead: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', margin: 'var(--cp-space-0)', maxWidth: 'calc(var(--cp-space-9) * 22 + var(--cp-space-5))' },
 
-  verdictBadge:{ fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 'var(--cp-leading-tight)', paddingLeft: 'var(--cp-space-4)', borderLeft: 'var(--cp-border-w-bar) solid var(--cp-accent)' },
+  verdictBadge:{ fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 'var(--cp-leading-tight)', paddingLeft: 'var(--cp-space-4)', borderLeft: 'var(--cp-border-w-bar) solid var(--cp-accent)' },
 
   // Latest-decision preview (landing lead)
   previewCard: { borderLeft: 'var(--cp-border-w-bar) solid var(--cp-accent)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)', marginBottom: 'var(--cp-space-6)' },
@@ -853,7 +853,7 @@ const S = {
   previewKpis: { display: 'flex', gap: 'var(--cp-space-6)', flexWrap: 'wrap', background: 'var(--cp-surface-0)', padding: 'var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)' },
   previewKpi: { display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)', minWidth: 'var(--cp-kpi-min-width)' },
   previewKpiLabel: { ...EYEBROW },
-  previewKpiValue: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)', fontVariantNumeric: 'tabular-nums' },
+  previewKpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)', fontVariantNumeric: 'tabular-nums' },
   previewRisk: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)', flexWrap: 'wrap' },
   previewRiskLabel: { ...EYEBROW, flexShrink: 0 },
   previewRiskText: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
@@ -876,7 +876,7 @@ const S = {
   kpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', fontVariantNumeric: 'tabular-nums' },
   kpiSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
-  categoryName: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
+  categoryName: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
   // ── Decision / conditions ──
   condWrap: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', margin: 'var(--cp-space-3) var(--cp-space-0)' },
   condList: { margin: 'var(--cp-space-0)', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
@@ -933,7 +933,6 @@ const S = {
   // ── Analytics ──
   analytics: { display: 'flex', flexDirection: 'column' },
   analyticsBlock: { padding: 'var(--cp-space-4) var(--cp-space-0)', borderBottom: '1px solid var(--cp-border)' },
-  analyticsTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0) var(--cp-space-0) var(--cp-space-2)' },
   bullets: { margin: 'var(--cp-space-1) var(--cp-space-0)', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)' },
   th: { textAlign: 'left', padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-muted)', borderBottom: '1px solid var(--cp-border)', fontWeight: 'var(--cp-weight-semibold)', textTransform: 'uppercase', fontSize: 'var(--cp-font-xs)' },

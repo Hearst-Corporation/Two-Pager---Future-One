@@ -111,7 +111,7 @@ export default function WorkspacePage() {
 
 const S = {
   section: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' },
-  statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
+  statusText: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', textTransform: 'uppercase' },
   action: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', marginLeft: 'var(--cp-space-3)' },
   dossierLink: { color: 'var(--cp-accent)', textDecoration: 'none', fontWeight: 'var(--cp-weight-semibold)' },
   delActions: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginLeft: 'var(--cp-space-3)', flexWrap: 'wrap', justifyContent: 'flex-end' },

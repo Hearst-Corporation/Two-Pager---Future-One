@@ -11,7 +11,8 @@ import {
 import { detectAlerts } from '@/lib/hearst-alerts';
 import AlertBanner from '@/components/hearst/AlertBanner';
 import { Button, Card, KpiCard, KpiGrid } from '@/components/hearst/ui';
-import { S as CP, T, RC } from '@/lib/cp-styles';
+import SectionHead from '@/components/hearst/ui/SectionHead';
+import { S as CP, RC } from '@/lib/cp-styles';
 import './financial.css';
 
 const FIN_TOOLTIP = {
@@ -302,7 +303,7 @@ export default function FinancialPage() {
         /* Charts */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-7)' }}>
           <Card variant="card" surface={2} padding="md">
-            <div style={T.chartTitle}>{UI.FIN_CHART_REVENUE_EBITDA}</div>
+            <SectionHead title={UI.FIN_CHART_REVENUE_EBITDA} style={{ marginBottom: 'var(--cp-space-3)' }} />
             <ResponsiveContainer width="100%" height={260}>
               <ComposedChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
@@ -316,7 +317,7 @@ export default function FinancialPage() {
             </ResponsiveContainer>
           </Card>
           <Card variant="card" surface={2} padding="md">
-            <div style={T.chartTitle}>{UI.FIN_CHART_CUMULATIVE_FCF}</div>
+            <SectionHead title={UI.FIN_CHART_CUMULATIVE_FCF} style={{ marginBottom: 'var(--cp-space-3)' }} />
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
@@ -355,7 +356,7 @@ export default function FinancialPage() {
               </div>
               <div style={{ marginBottom: 'var(--cp-space-5)' }}>
                 <Card variant="card" surface={2} padding="md">
-                  <div style={T.chartTitle}>{UI.FIN_CHART_DEBT_BALANCE}</div>
+                  <SectionHead title={UI.FIN_CHART_DEBT_BALANCE} style={{ marginBottom: 'var(--cp-space-3)' }} />
                   <ResponsiveContainer width="100%" height={200}>
                     <ComposedChart data={debtSchedule.schedule.map(r => ({ year: 'Y' + r.year, Balance: +(r.closing_balance / 1e6).toFixed(1), 'Debt Service': +(r.total_service / 1e6).toFixed(2), IO: r.is_io }))}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--cp-grid-line)" />
@@ -433,7 +434,7 @@ export default function FinancialPage() {
                 />
               </div>
               <Card variant="card" surface={2} padding="md">
-                <div style={T.chartTitle}>{UI.FIN_CHART_EQUITY_DIST}</div>
+                <SectionHead title={UI.FIN_CHART_EQUITY_DIST} style={{ marginBottom: 'var(--cp-space-3)' }} />
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={(proj.years || []).map((y, i) => ({
                     year: 'Y' + y.year,
@@ -461,7 +462,7 @@ export default function FinancialPage() {
       {hasProjection && tab === 'sensitivity' && (
         <div>
           <div style={{ display: 'flex', gap: 'var(--cp-space-3)', alignItems: 'center', marginBottom: 'var(--cp-space-4)' }}>
-            <div style={T.chartTitle}>{UI.FIN_SENSITIVITY_TITLE}</div>
+            <div style={S.sectionTitle}>{UI.FIN_SENSITIVITY_TITLE}</div>
             <div style={{ display: 'flex', gap: 'var(--cp-space-2)', alignItems: 'center', marginLeft: 'auto' }}>
               <label style={{ fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' }}>{UI.FIN_SENSITIVITY_X_AXIS}</label>
               <select value={sensitivityX} onChange={e => setSensitivityX(e.target.value)} style={S.sensitivitySelect}>
@@ -499,7 +500,7 @@ export default function FinancialPage() {
                             : cell.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 ? 'color-mix(in srgb, var(--cp-status-warning) 50%, black)'
                             : 'color-mix(in srgb, var(--cp-status-success) 30%, black)',
                           color: 'var(--cp-text-primary)',
-                          fontWeight: ri === 2 && ci === 2 ? 'var(--cp-weight-heavy)' : 600,
+                          fontWeight: ri === 2 && ci === 2 ? 'var(--cp-weight-heavy)' : 'var(--cp-weight-semibold)',
                           fontSize: 'var(--cp-font-xs)',
                           textAlign: 'center',
                           border: ri === 2 && ci === 2 ? 'var(--cp-border-w-accent) solid var(--cp-text-primary)' : 'none',
@@ -590,7 +591,8 @@ const S = {
   td: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-sm)' },
   tdLabel: { padding: 'var(--cp-space-2) var(--cp-space-4)', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
   warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4)', marginTop: 'var(--cp-space-5)' },
-  warnTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
+  warnTitle: { fontSize: 'var(--cp-font-h2)', fontWeight: 'var(--cp-weight-semibold)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
+  sectionTitle: { fontSize: 'var(--cp-font-h2)', fontWeight: 'var(--cp-weight-semibold)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-text-primary)' },
   warnRow: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) 0', borderBottom: '1px solid var(--cp-error-bg)' },
   debtSummary: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-5)' },
   sensitivitySelect: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', color: 'var(--cp-text-primary)', cursor: 'pointer' },

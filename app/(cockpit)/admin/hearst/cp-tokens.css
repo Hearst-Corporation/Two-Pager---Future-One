@@ -97,8 +97,10 @@
   --cp-font-base:   13px;
   --cp-font-md:     14px;
   --cp-font-lg:     16px;
+  --cp-font-h2:     18px;  /* cran titre de section (entre lg 16 et xl 20) */
   --cp-font-xl:     20px;
   --cp-font-2xl:    24px;
+  --cp-font-display: clamp(28px, 4vw, 44px);  /* chiffre héros de page (heroTitle/verdictBadge) */
 
   /* Tailles fluides (clamp tokenisés) — chiffres héros & métriques responsives */
   --cp-font-fluid-metric:  clamp(var(--cp-font-xl), 2.5vw, 32px);  /* KPI / board metric */

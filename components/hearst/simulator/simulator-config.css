@@ -46,11 +46,11 @@
 
 .sim-config-label {
   font-size: var(--sim-section-title-size);
-  font-weight: var(--cp-weight-regular);
+  font-weight: var(--cp-weight-semibold);
   color: var(--cp-text-strong);
-  letter-spacing: var(--cp-tracking-tight);
+  letter-spacing: var(--cp-tracking-eyebrow);
   margin: 0;
-  text-transform: none;
+  text-transform: uppercase;
   line-height: var(--cp-leading-snug);
 }
 

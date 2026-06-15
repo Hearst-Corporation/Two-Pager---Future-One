@@ -12,7 +12,7 @@ const S = {
     display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)',
     marginBottom: 'var(--cp-space-1)', borderBottom: '1px solid var(--cp-border)', paddingBottom: 'var(--cp-space-hair)',
   },
-  title: { margin: 0, fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wider)' },
+  title: { margin: 0, fontSize: 'var(--cp-font-h2)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-eyebrow)' },
   hint: { fontSize: 'var(--cp-font-nano)', color: 'var(--cp-text-faint)', fontStyle: 'italic' },
   // Hero
   heroWrap: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },

@@ -21,13 +21,13 @@
   --sim-gap-tight: clamp(var(--cp-space-2), 1.4cqi, var(--cp-space-3));
   --sim-control-h: clamp(32px, 4.2cqi, 40px);
   --sim-input-size: clamp(var(--cp-font-2xl), 5.5cqi, 3.25rem);
-  --sim-input-unit-size: clamp(var(--cp-font-lg), 2.2cqi, var(--cp-font-xl));
-  --sim-metric-size: clamp(var(--cp-font-md), 2.6cqi, var(--cp-font-fluid-stat));
-  --sim-live-metric-size: clamp(var(--cp-font-xl), 3.8cqi, var(--cp-font-fluid-metric));
+  --sim-input-unit-size: var(--cp-font-lg);
+  --sim-metric-size: clamp(var(--cp-font-md), 1.8cqi, 18px);
+  --sim-live-metric-size: clamp(var(--cp-font-h2), 2.6cqi, var(--cp-font-2xl));
   --sim-metric-weight: var(--cp-weight-semibold);
   --sim-label-size: clamp(var(--cp-font-xs), 1.15cqi, var(--cp-font-sm));
   --sim-body-size: clamp(var(--cp-font-sm), 1.35cqi, var(--cp-font-md));
-  --sim-section-title-size: clamp(var(--cp-font-lg), 2cqi, var(--cp-font-xl));
+  --sim-section-title-size: clamp(var(--cp-font-lg), 1.6cqi, 18px);
   --sim-caption-size: clamp(var(--cp-font-micro), 1cqi, var(--cp-font-xs));
   --sim-mix-bar-h: clamp(8px, 1.4cqi, 12px);
   --sim-results-min-w: clamp(11rem, 28cqi, 16rem);
@@ -118,7 +118,7 @@
 }
 
 .oracle-page [data-sim-live-kpi-value] {
-  font-size: var(--sim-metric-size);
+  font-size: var(--sim-live-metric-size);
   font-weight: var(--cp-weight-semibold);
   color: var(--cp-text-strong);
   font-variant-numeric: tabular-nums;
