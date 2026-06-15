@@ -833,7 +833,7 @@ p { margin: 0; }
 
 // ── Route handler (unchanged) ─────────────────────────────────────────────────
 
-export async function GET(_req, { params }) {
+export async function GET(req, { params }) {
   const auth = await requireProfile('viewer');
   if (auth instanceof NextResponse) return auth;
   try {
@@ -852,6 +852,17 @@ export async function GET(_req, { params }) {
   const { data: row, error } = await supa.from('strategic_memos').select('*').eq('id', params.id).maybeSingle();
   if (error) return dbErrorResponse(error, '[strategic-memos/[id]/pdf][GET]');
   if (!row) return notFoundResponse();
+
+  const format = new URL(req.url).searchParams.get('format');
+  if (format === 'html') {
+    return new NextResponse(buildHtml(row), {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store',
+      },
+    });
+  }
 
   let browser;
   try {
