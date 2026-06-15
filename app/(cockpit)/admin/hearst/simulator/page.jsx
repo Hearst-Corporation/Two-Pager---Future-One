@@ -12,7 +12,6 @@ import { MODEL_DEFAULTS } from '@/lib/hearst-config-presets';
 import { useSimulation } from '@/lib/hearst-simulation-context';
 
 import { SIMULATOR_PARAM_EVENT } from '@/lib/hearst-simulator-bridge';
-import { fmtGeo } from '@/lib/hearst-format';
 import { UI } from '@/lib/ui-strings';
 import { S as CP } from '@/lib/cp-styles';
 import './simulator.css';
@@ -369,7 +368,7 @@ export default function SimulatorPage() {
           projection={projection}
           selectedArchetype={PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)}
           validateBlocked={validateBlocked}
-          validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Simulate ${state.total_mw || ''}MW ${PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)?.label || state.primary_archetype_id} in ${fmtGeo(state.geography)} →`}
+          validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Generate Board Memo →`}
           onValidate={handleValidateAndReveal}
         />
         </div>

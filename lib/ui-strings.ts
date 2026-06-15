@@ -46,9 +46,9 @@ export const UI = {
   STATE_ERROR: 'An error occurred',
 
   // Simulator
-  SIM_PAGE_EYEBROW: 'Oracle capital cockpit',
+  SIM_PAGE_EYEBROW: 'Draft Investment Memo',
   SIM_PAGE_TITLE: 'Investment Simulator',
-  SIM_PAGE_SUBTITLE: 'Shape a Qatar data-center investment thesis from capital, operating model and technology mix.',
+  SIM_PAGE_SUBTITLE: 'A 10-year sovereign-backed deployment to capture premium AI compute margins.',
   SIM_BUILD_BRIEF_EYEBROW: 'Build brief',
   SIM_BUILD_BRIEF_TITLE: 'Set the investment constraint, then size the machine.',
   SIM_BUILD_BRIEF_HINT: 'Pick how the IC wants to think first: budget, power capacity, or target return. The simulator keeps the downstream scenario coherent.',
@@ -158,9 +158,9 @@ export const UI = {
   SIM_CONFIG_FINETUNE_HIDE: 'Hide advanced controls',
   SIM_INVESTMENT_STRUCTURE_TITLE: 'Investment structure',
   SIM_INVESTMENT_STRUCTURE_PILL: 'QIA + Hearst → Equinix',
-  SIM_CASE_VERB: 'Deploy',
+  SIM_CASE_VERB: 'Qatar Data Center Investment Thesis:',
   SIM_CASE_INTO: 'into',
-  SIM_CASE_IN_QATAR_WITH: 'in Qatar with',
+  SIM_CASE_IN_QATAR_WITH: 'via',
   SIM_METRIC_CAPITAL: 'Capital',
   SIM_METRIC_CAPACITY: 'Capacity',
   SIM_METRIC_MOIC: 'MOIC',

@@ -5,6 +5,7 @@ import { Button } from '@/components/hearst/ui';
 import { PROJECT_TIMELINE_DEFAULTS } from '@/lib/hearst-config-presets';
 import { UI } from '@/lib/ui-strings';
 import { fmtUSD, fmtMW, fmtPctFromRatio, fmtX, MISSING } from '@/lib/hearst-format';
+import { PRESET_META, LEVEL_LABEL } from './preset-meta';
 
 function MetricTile({ label, value }) {
   return (
@@ -33,10 +34,13 @@ export default function InvestmentCaseSurface({
   const capex = projection?.total_capex ?? scenario?.total_capex_usd ?? state.capital_usd;
   const irr = projection?.irr ?? projection?.return_metrics?.irr;
   const moic = projection?.moic;
+  const npv = projection?.npv ?? projection?.return_metrics?.npv;
   const startYear = scenario?.start_year ?? PROJECT_TIMELINE_DEFAULTS.start_year;
   const codOffsetMonths = scenario?.cod_offset_months ?? 30;
   const codYear = startYear + Math.ceil(codOffsetMonths / 12);
   const exitYear = startYear + (scenario?.exit_year ?? 10) - 1;
+
+  const meta = PRESET_META[state.primary_archetype_id];
 
   return (
     <div data-sim-case-surface>
@@ -50,14 +54,14 @@ export default function InvestmentCaseSurface({
             <strong>{fmtMW(capacity, 0)}</strong> {UI.SIM_CASE_IN_QATAR_WITH}{' '}
             <strong>{selectedArchetype?.label || state.primary_archetype_id}</strong>
           </h1>
-          <p>{UI.SIM_PAGE_SUBTITLE}</p>
+          <p>{meta?.tagline ? `${meta.tagline}. ` : ''}{UI.SIM_PAGE_SUBTITLE}</p>
         </div>
 
         <div data-sim-case-metrics>
           <MetricTile label={UI.SIM_RESULT_RETURN} value={irr != null ? fmtPctFromRatio(irr) : MISSING} />
           <MetricTile label={UI.SIM_METRIC_CAPITAL} value={fmtUSD(capex)} />
-          <MetricTile label={UI.SIM_METRIC_CAPACITY} value={fmtMW(capacity, 0)} />
-          <MetricTile label={UI.SIM_METRIC_MOIC} value={fmtX(moic)} />
+          <MetricTile label="Risk Profile" value={meta ? LEVEL_LABEL[meta.risk] : MISSING} />
+          <MetricTile label="NPV" value={npv != null ? fmtUSD(npv) : (moic != null ? `${fmtX(moic)} MOIC` : MISSING)} />
         </div>
 
         <div className="sim-surface-footer">
