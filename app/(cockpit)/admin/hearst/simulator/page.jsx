@@ -350,12 +350,15 @@ export default function SimulatorPage() {
           scenario={scenario}
           projection={projection}
           selectedArchetype={PRIMARY_DEAL_ARCHETYPES.find(a => a.id === state.primary_archetype_id)}
+        />
+
+        <SimulatorConfigPanel 
+          state={state} 
+          dispatch={dispatch} 
           validateBlocked={validateBlocked}
           validateLabel={savingState === 'saving' ? UI.SIM_SAVING : `Generate Board Memo →`}
           onValidate={handleValidateAndReveal}
         />
-
-        <SimulatorConfigPanel state={state} dispatch={dispatch} />
 
         {projectLoadError && (
           <div style={{ ...CP.dangerAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">

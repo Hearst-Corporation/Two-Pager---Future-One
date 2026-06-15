@@ -19,57 +19,45 @@ export default function ArchetypeSegment({ primaryId, dispatch }) {
     });
   };
 
-  const selectedArch = PRIMARY_DEAL_ARCHETYPES.find((a) => a.id === primaryId) || PRIMARY_DEAL_ARCHETYPES[0];
-  const meta = PRESET_META[selectedArch.id];
-
   return (
-    <div data-master-detail>
-      <div data-md-list role="tablist">
-        {PRIMARY_DEAL_ARCHETYPES.map((a) => {
-          const selected = primaryId === a.id;
-          return (
-            <button
-              key={a.id}
-              role="tab"
-              onClick={() => select(a.id)}
-              aria-selected={selected}
-              data-md-item
-              data-selected={selected}
-            >
-              {a.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {meta && (
-        <div data-md-content role="tabpanel">
-          <p data-md-narrative>
-            The <strong>{selectedArch.label}</strong> model is ideal for <strong>{meta.ideal_for.toLowerCase()}</strong>. 
-            It targets a return of <strong>{meta.return_band}</strong> with a <strong>{LEVEL_LABEL[meta.risk].toLowerCase()}</strong> risk profile. 
-            It requires <strong>{LEVEL_LABEL[meta.capital].toLowerCase()}</strong> capital and typically involves partners like <strong>{meta.partner}</strong>.
-          </p>
-
-          <div data-md-ledger>
-            <div data-md-ledger-item>
-              <span data-md-ledger-k>Target Return</span>
-              <span data-md-ledger-v>{meta.return_band}</span>
+    <div data-focus-stage>
+      {PRIMARY_DEAL_ARCHETYPES.map((a) => {
+        const selected = primaryId === a.id;
+        const m = PRESET_META[a.id];
+        return (
+          <button
+            key={a.id}
+            onClick={() => select(a.id)}
+            aria-pressed={selected}
+            data-focus-item
+            data-focused={selected}
+            data-dimmed={!selected}
+          >
+            <div data-focus-title>{a.label}</div>
+            {m && <div data-focus-subtitle>{m.tagline}</div>}
+            
+            <div data-focus-detail>
+              {m && (
+                <>
+                  <p style={{ fontSize: '13px', color: 'var(--cp-text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
+                    {m.ideal_for}
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--cp-text-muted)' }}>Return</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--cp-text-strong)' }}>{m.return_band}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--cp-text-muted)' }}>Risk</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--cp-text-strong)' }}>{LEVEL_LABEL[m.risk]}</div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-            <div data-md-ledger-item>
-              <span data-md-ledger-k>Risk Profile</span>
-              <span data-md-ledger-v>{LEVEL_LABEL[meta.risk]}</span>
-            </div>
-            <div data-md-ledger-item>
-              <span data-md-ledger-k>Capital Required</span>
-              <span data-md-ledger-v>{LEVEL_LABEL[meta.capital]}</span>
-            </div>
-            <div data-md-ledger-item>
-              <span data-md-ledger-k>Typical Partner</span>
-              <span data-md-ledger-v>{meta.partner}</span>
-            </div>
-          </div>
-        </div>
-      )}
+          </button>
+        );
+      })}
     </div>
   );
 }
