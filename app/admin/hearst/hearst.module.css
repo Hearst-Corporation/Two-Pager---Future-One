@@ -1,0 +1,289 @@
+/* hearst.module.css */
+
+.wrap {
+  --ct-bg: #0A0A0A;
+  --ct-surface: #121212;
+  --ct-border: #2A2A2A;
+  --ct-text: #F5F5F5;
+  --ct-text-muted: #8A8A8A;
+  --ct-accent: #D4AF37; /* Qatar Sand / Gold */
+  
+  --ct-font-serif: var(--font-serif, "Georgia", serif);
+  --ct-font-sans: var(--font-sans, "Inter", sans-serif);
+
+  background: var(--ct-bg);
+  color: var(--ct-text);
+  min-height: 100vh;
+  font-family: var(--ct-font-sans);
+}
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  background: radial-gradient(circle at center, #1a1a1a 0%, var(--ct-bg) 70%);
+}
+
+.eyebrow {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ct-accent);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.title {
+  font-family: var(--ct-font-serif);
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  line-height: 1.1;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  max-width: min(800px, 100%);
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: var(--ct-text-muted);
+  max-width: 600px;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+}
+
+.metricsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(1.5rem, 5vw, 4rem);
+  width: 100%;
+  max-width: min(960px, 100%);
+  margin-bottom: 2rem;
+}
+
+.illustrativeNote {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ct-text-muted);
+  margin-bottom: 2rem;
+  max-width: min(520px, 100%);
+}
+
+.metricItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metricValue {
+  font-size: 2.5rem;
+  font-family: var(--ct-font-serif);
+  color: var(--ct-text);
+}
+
+.metricLabel {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ct-text-muted);
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--ct-text);
+  color: var(--ct-bg);
+  padding: 1rem 2rem;
+  border-radius: 2px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.2s;
+  text-decoration: none;
+}
+
+.ctaButton:hover {
+  opacity: 0.9;
+}
+
+.controlBtn:focus-visible,
+.ctaButton:focus-visible {
+  outline: 2px solid var(--ct-accent);
+  outline-offset: 2px;
+}
+
+/* Simulator Page */
+.simLayout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: 100vh;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 4rem;
+  gap: 4rem;
+}
+
+.simControls {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.simSectionTitle {
+  font-family: var(--ct-font-serif);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+  border-bottom: 1px solid var(--ct-border);
+  padding-bottom: 1rem;
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.controlRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.controlRow .controlBtn {
+  flex: 1 1 3.5rem;
+  text-align: center;
+  min-width: 0;
+}
+
+.controlBtn {
+  background: transparent;
+  border: 1px solid var(--ct-border);
+  color: var(--ct-text-muted);
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.controlBtn[data-active="true"] {
+  border-color: var(--ct-accent);
+  color: var(--ct-text);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.simMain {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  min-width: 0;
+}
+
+.simHeader {
+  margin-bottom: 1rem;
+}
+
+.simTitle {
+  font-family: var(--ct-font-serif);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  margin: 0;
+}
+
+.simSubtitle {
+  color: var(--ct-text-muted);
+  margin-top: 0.5rem;
+}
+
+.simHeader .illustrativeNote {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
+.projectionContainer {
+  aspect-ratio: 21 / 9;
+  width: 100%;
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.projectionState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  background-size: cover;
+  background-position: center;
+}
+
+.projectionState[data-active="true"] {
+  opacity: 1;
+}
+
+.projectionLabel {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  font-family: var(--ct-font-sans);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+}
+
+.simMetrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  padding: 2rem;
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-border);
+}
+
+.simMetrics .metricValue {
+  font-size: 2rem;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 1.5rem 1rem;
+  }
+
+  .metricsGrid {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .metricValue {
+    font-size: 2rem;
+  }
+}
+
+/* Tablet / Smaller Desktop */
+@media (max-width: 1024px) {
+  .simLayout {
+    grid-template-columns: 1fr;
+    padding: 2rem;
+  }
+  .simControls {
+    gap: 2rem;
+  }
+  .simMetrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
