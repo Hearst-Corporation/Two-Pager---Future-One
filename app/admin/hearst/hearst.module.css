@@ -473,6 +473,32 @@
   font-family: ui-monospace, monospace;
 }
 
+/* ── Financial Thesis (base-case readout) ── */
+.finPage {
+  padding: 4rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.finSection {
+  margin-bottom: 3.5rem;
+}
+
+.finSectionTitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ct-accent);
+  font-weight: 500;
+  margin: 0 0 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .finPage {
+    padding: 3rem 2rem;
+  }
+}
+
 /* ── Source Register (read-only evidence table) ── */
 .sourcesPage {
   padding: 4rem;
