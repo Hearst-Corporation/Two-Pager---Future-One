@@ -18,6 +18,133 @@
   font-family: var(--ct-font-sans);
 }
 
+/* ── Horizontal top navigation (no shell / no rail / no sidebar) ── */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navBrand {
+  font-family: var(--ct-font-serif);
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  color: var(--ct-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navLink {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ct-text-muted);
+  text-decoration: none;
+  padding-bottom: 4px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  color: var(--ct-text);
+}
+
+.navLink[data-active="true"] {
+  color: var(--ct-text);
+  border-bottom-color: var(--ct-accent);
+}
+
+.navLink:focus-visible {
+  outline: 2px solid var(--ct-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1024px) {
+  .nav {
+    padding: 1.25rem 2rem;
+  }
+}
+
+/* ── Premium minimal stub for routes not yet wired ── */
+.stub {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  padding: 6rem 4rem;
+  max-width: 900px;
+}
+
+.stubEyebrow {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--ct-accent);
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.stubTitle {
+  font-family: var(--ct-font-serif);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.5rem;
+}
+
+.stubText {
+  font-size: 1.15rem;
+  color: var(--ct-text-muted);
+  line-height: 1.6;
+  font-weight: 300;
+  max-width: 560px;
+  margin: 0 0 2rem;
+}
+
+.stubStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ct-text-muted);
+  margin-bottom: 3rem;
+}
+
+.stubStatus::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ct-accent);
+  opacity: 0.6;
+}
+
+@media (max-width: 1024px) {
+  .stub {
+    padding: 4rem 2rem;
+  }
+}
+
 .hero {
   min-height: 100vh;
   display: flex;

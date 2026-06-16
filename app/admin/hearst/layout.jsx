@@ -1,5 +1,6 @@
 import { Playfair_Display } from 'next/font/google';
 import styles from './hearst.module.css';
+import HearstNav from './components/HearstNav';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -10,6 +11,7 @@ const playfair = Playfair_Display({
 export default function HearstLayout({ children }) {
   return (
     <div className={`${playfair.variable} ${styles.wrap}`}>
+      <HearstNav />
       {children}
     </div>
   );
