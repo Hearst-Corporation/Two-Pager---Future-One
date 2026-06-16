@@ -15,6 +15,7 @@ out/
 
 # misc
 .DS_Store
+public/Archive.zip
 *.pem
 .vercel
 
