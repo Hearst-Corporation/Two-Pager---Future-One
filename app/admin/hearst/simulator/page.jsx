@@ -117,10 +117,8 @@ export default function SimulatorPage() {
             aria-pressed={thesis === 'shell'}
             onClick={() => setThesis('shell')}
           >
-            <strong>Shell + Long Lease</strong>
-            <div style={{ marginTop: '0.5rem', opacity: 0.7, fontSize: '0.8rem' }}>
-              Conservative real-estate play. Hyperscaler takes the fit-out risk.
-            </div>
+            <span>Shell + Long Lease</span>
+            {thesis === 'shell' && <span style={{ opacity: 0.5 }}>✓</span>}
           </button>
           <button
             type="button"
@@ -129,10 +127,8 @@ export default function SimulatorPage() {
             aria-pressed={thesis === 'compute'}
             onClick={() => setThesis('compute')}
           >
-            <strong>Compute Cloud</strong>
-            <div style={{ marginTop: '0.5rem', opacity: 0.7, fontSize: '0.8rem' }}>
-              High-density zones, GPU fabric. Higher risk, superior yields.
-            </div>
+            <span>Compute Cloud</span>
+            {thesis === 'compute' && <span style={{ opacity: 0.5 }}>✓</span>}
           </button>
           <button
             type="button"
@@ -141,10 +137,8 @@ export default function SimulatorPage() {
             aria-pressed={thesis === 'gov'}
             onClick={() => setThesis('gov')}
           >
-            <strong>Government AI Cluster</strong>
-            <div style={{ marginTop: '0.5rem', opacity: 0.7, fontSize: '0.8rem' }}>
-              National sovereign cloud. Focus on perimeter security and resilience.
-            </div>
+            <span>Sovereign AI Cluster</span>
+            {thesis === 'gov' && <span style={{ opacity: 0.5 }}>✓</span>}
           </button>
         </div>
 
@@ -189,9 +183,8 @@ export default function SimulatorPage() {
 
       <section className={styles.simMain}>
         <div style={{ marginBottom: '1rem' }}>
-          <h1 style={{ fontFamily: 'var(--ct-font-serif)', fontSize: '2.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <h1 style={{ fontFamily: 'var(--ct-font-serif)', fontSize: '2.5rem', margin: 0 }}>
             Futur One Projection
-            {loading && <span className={styles.computing}>Computing...</span>}
           </h1>
           <p style={{ color: 'var(--ct-text-muted)', marginTop: '0.5rem' }}>
             Live preview of the asset footprint and financial outcomes. Connected to Oracle engine.

@@ -10,23 +10,19 @@ export default function HearstLanding() {
     <main className={styles.hero}>
       <div className={styles.eyebrow}>Hearst Qatar AI Infrastructure</div>
       <h1 className={styles.title}>FUTUR ONE</h1>
-      <p className={styles.subtitle}>
-        A cinematic projection of the sovereign AI infrastructure investment. 
-        Where state-of-the-art compute meets strategic long-term yields.
-      </p>
-
+      
       <div className={styles.metricsGrid}>
         <div className={styles.metricItem}>
-          <div className={styles.metricValue}>$4.2B</div>
           <div className={styles.metricLabel}>Target CAPEX</div>
+          <div className={styles.metricValue}>$4.2B</div>
         </div>
         <div className={styles.metricItem}>
-          <div className={styles.metricValue}>500MW</div>
           <div className={styles.metricLabel}>Total Scale</div>
+          <div className={styles.metricValue}>500MW</div>
         </div>
         <div className={styles.metricItem}>
-          <div className={styles.metricValue}>12.5%</div>
           <div className={styles.metricLabel}>Projected IRR</div>
+          <div className={styles.metricValue}>12.5%</div>
         </div>
       </div>
 
@@ -34,8 +30,13 @@ export default function HearstLanding() {
         Illustrative model — headline figures for narrative preview only.
       </p>
 
+      <p className={styles.subtitle}>
+        A cinematic projection of the sovereign AI infrastructure investment.<br/>
+        Where state-of-the-art compute meets strategic long-term yields.
+      </p>
+
       <Link href="/admin/hearst/simulator" className={styles.ctaButton}>
-        Enter Simulator
+        Enter the Projection ⟶
       </Link>
     </main>
   );
