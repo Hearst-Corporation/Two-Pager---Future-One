@@ -19,7 +19,7 @@ function PlaceholderSVG({ type }) {
   }
 
   return (
-    <svg width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <pattern id={`grid-${type}`} width="60" height="60" patternUnits="userSpaceOnUse">
           <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5"/>
@@ -61,11 +61,11 @@ function PlaceholderSVG({ type }) {
         <path d="M 20% 50% L 50% 20% L 80% 50% L 50% 80% Z" fill="none" stroke="rgba(255,50,50,0.15)" strokeWidth="0.5" />
       )}
       
-      {/* Crosshairs and tech elements */}
-      <path d="M 10 30 L 10 10 L 30 10" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
-      <path d="M calc(100% - 30px) 10 L calc(100% - 10px) 10 L calc(100% - 10px) 30" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
-      <path d="M 10 calc(100% - 30px) L 10 calc(100% - 10px) L 30 calc(100% - 10px)" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
-      <path d="M calc(100% - 30px) calc(100% - 10px) L calc(100% - 10px) calc(100% - 10px) L calc(100% - 10px) calc(100% - 30px)" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+      {/* Corner crosshairs (viewBox 0–100; no calc() in path d) */}
+      <path d="M 1 3 L 1 1 L 3 1" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.15" vectorEffect="non-scaling-stroke" />
+      <path d="M 97 1 L 99 1 L 99 3" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.15" vectorEffect="non-scaling-stroke" />
+      <path d="M 1 97 L 1 99 L 3 99" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.15" vectorEffect="non-scaling-stroke" />
+      <path d="M 97 99 L 99 99 L 99 97" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.15" vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }

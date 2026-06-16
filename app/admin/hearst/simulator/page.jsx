@@ -182,20 +182,18 @@ export default function SimulatorPage() {
       </aside>
 
       <section className={styles.simMain}>
-        <div style={{ marginBottom: '1rem' }}>
-          <h1 style={{ fontFamily: 'var(--ct-font-serif)', fontSize: '2.5rem', margin: 0 }}>
-            Futur One Projection
-          </h1>
-          <p style={{ color: 'var(--ct-text-muted)', marginTop: '0.5rem' }}>
+        <header className={styles.simHeader}>
+          <h1 className={styles.simTitle}>Futur One Projection</h1>
+          <p className={styles.simSubtitle}>
             Live preview of the asset footprint and financial outcomes. Connected to Oracle engine.
           </p>
-        </div>
+        </header>
 
         <DataCenterProjection thesis={thesis} scale={scale} aiMix={aiMix} />
 
         <div
           className={styles.simMetrics}
-          style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.3s' }}
+          data-loading={loading}
           aria-live="polite"
           aria-busy={loading}
         >
@@ -219,7 +217,7 @@ export default function SimulatorPage() {
               </div>
               <div className={styles.metricItem}>
                 <div className={styles.metricLabel}>Risk Profile</div>
-                <div className={styles.metricValue} style={{ fontSize: '1.25rem', paddingTop: '0.5rem' }}>{metrics.risk}</div>
+                <div className={`${styles.metricValue} ${styles.metricValueRisk}`}>{metrics.risk}</div>
               </div>
             </>
           )}

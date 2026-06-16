@@ -370,7 +370,7 @@
 .simHeader .illustrativeNote {
   margin-top: 1rem;
   font-size: 0.75rem;
-  color: #666;
+  color: var(--ct-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -409,11 +409,19 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .projectionState[data-active="true"] {
   opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projectionState {
+    transition: none;
+  }
 }
 
 .projectionLabel {
@@ -464,6 +472,16 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-weight: 300;
   color: var(--ct-text);
+}
+
+.simMetrics[data-loading="true"] {
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.simMetrics .metricValueRisk {
+  font-size: 1.25rem;
+  padding-top: 0.5rem;
 }
 
 .simError {
@@ -677,8 +695,5 @@
   }
   .simControls {
     gap: 2rem;
-  }
-  .simMetrics {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
