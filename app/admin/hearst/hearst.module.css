@@ -7,7 +7,8 @@
   --ct-text: #F5F5F5;
   --ct-text-muted: #8A8A8A;
   --ct-accent: #D4AF37; /* Qatar Sand / Gold */
-  
+  --ct-danger: #EF4444; /* Error / critical state */
+
   --ct-font-serif: var(--font-serif, "Georgia", serif);
   --ct-font-sans: var(--font-sans, "Inter", sans-serif);
 
@@ -256,6 +257,29 @@
 
 .simMetrics .metricValue {
   font-size: 2rem;
+}
+
+.simError {
+  grid-column: 1 / -1;
+  color: var(--ct-danger);
+  font-size: 0.9rem;
+  padding: 1rem;
+  border: 1px solid var(--ct-danger);
+}
+
+/* "Computing…" inline loading hint next to the projection title. */
+.computing {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ct-accent);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
 }
 
 @media (max-width: 640px) {
