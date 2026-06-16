@@ -13,7 +13,7 @@
 // LLM — model names & latency budgets
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Model used for the cockpit chat rail (streaming). */
+/** Model used for chat (streaming). */
 export const LLM_CHAT_MODEL = "gpt-4o" as const;
 
 /** Model used for strategic memo generation (JSON structured output). */

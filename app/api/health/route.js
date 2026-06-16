@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   return NextResponse.json({
     ok: true,
-    service: 'oracle-cockpit',
+    service: 'oracle',
     checked_at: new Date().toISOString(),
   });
 }

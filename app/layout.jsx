@@ -1,5 +1,4 @@
 import './globals.css';
-import '../cockpit-shell/tokens.css';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({

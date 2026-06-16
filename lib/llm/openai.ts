@@ -13,7 +13,7 @@ export const openai = new OpenAI({
   maxRetries: 0,
 });
 
-/** Rail chat cockpit — streaming */
+/** Chat — streaming */
 export const OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || LLM_CHAT_MODEL;
 
 /** Génération mémo stratégique — JSON structuré */

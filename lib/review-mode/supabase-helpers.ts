@@ -5,7 +5,7 @@
 //   - public.admin_chat_mode
 //   - public.review_documents
 //   - public.llm_runs
-// plus a filtered read of public.cockpit_messages (only review-mode rows).
+// plus a filtered read of public.chat_messages (only review-mode rows).
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 

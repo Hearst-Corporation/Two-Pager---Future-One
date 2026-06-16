@@ -45,8 +45,6 @@ function applyNoStore(response) {
 }
 
 // Sous-domaine dédié admin : oracle.hearst.app (et alias *.vercel.app oracle-…)
-// On rewrite la racine vers /admin/hearst pour que les utilisateurs du
-// sous-domaine landent directement dans le cockpit sans voir l'URL changer.
 const ADMIN_HOSTS = new Set([
   'oracle.hearst.app',
   'oracle.hearst.io',

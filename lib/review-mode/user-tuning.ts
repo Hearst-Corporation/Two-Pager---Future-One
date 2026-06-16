@@ -1,11 +1,11 @@
 // lib/review-mode/user-tuning.ts
 //
-// RAG-style user tuning preferences for the Cockpit chat.
+// RAG-style user tuning preferences for the chat.
 //
 // The chat lets the user say "réponds plus court", "passe en anglais",
 // "cite toujours la source_id"… via `/pref <instruction>` slash commands.
 // Each command writes a row to `oracle_user_tuning`. On every subsequent
-// request the cockpit-chat route loads the user's active rules and prepends
+// request the chat route loads the user's active rules and prepends
 // them to the system prompt (under "## PRÉFÉRENCES UTILISATEUR ACTIVES").
 //
 // This is RETRIEVAL-based: rules are fetched at request time, never baked

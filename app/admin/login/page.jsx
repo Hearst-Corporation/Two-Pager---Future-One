@@ -1,8 +1,5 @@
 'use client';
 
-// Auth legacy layer — hors cockpit (.ct-* / --cp-*).
-// Tokens volontairement = globals.css --color-* (light surface), pas le DS Oracle.
-// Ne pas migrer vers cp-tokens sans refonte UX login dédiée.
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';

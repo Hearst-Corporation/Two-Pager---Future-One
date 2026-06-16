@@ -1,8 +1,8 @@
-// ui-strings.ts — strings UI cockpit (UI.*).
+// ui-strings.ts — UI strings (UI.*).
 
 export const UI = {
   // Navigation
-  NAV_RAIL_ARIA: 'Hearst cockpit sections',
+  NAV_RAIL_ARIA: 'Hearst Oracle sections',
   // Demo-first nav wording (Batch 1 IA polish) — visible labels only; routes unchanged.
   // Primary deal journey:
   NAV_SIMULATOR: 'Model',           // /admin/hearst/simulator
@@ -13,7 +13,7 @@ export const UI = {
   NAV_DEALS: 'Playbook',            // /admin/hearst/deals
   NAV_WORKSPACE: 'Saved scenarios', // /admin/hearst/workspace
 
-  // Brief — cockpit home (/admin/hearst)
+  // Brief — Oracle home
   BRIEF_EYEBROW: 'Hearst Oracle · Qatar infrastructure',
   BRIEF_TITLE: 'Investment brief',
   BRIEF_HINT: 'Model the case, ground it in evidence, then take a decision. Three steps — one deal journey.',
@@ -847,6 +847,6 @@ export const UI = {
     },
   },
 
-  // Login (legacy layer — hors cockpit)
+  // Login
   LOGIN_PASSWORD_PLACEHOLDER: 'Password',
 } as const;

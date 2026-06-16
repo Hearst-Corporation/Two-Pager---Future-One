@@ -20,7 +20,7 @@
   --font-sans: "Inter var", "Inter", -apple-system, BlinkMacSystemFont,
     "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
 
-  /* ── Login light surface (legacy — hors cockpit --cp-*) ── */
+  /* ── Login light surface ── */
   --color-login-bg:           #F5F5F6;
   --color-login-surface:      #FFFFFF;
   --color-login-border:       #E4E6EA;
@@ -31,7 +31,7 @@
   --color-login-text-inverse: #FFFFFF;
   --color-login-success:      #1A7A4A;
 
-  /* ── html/body fallback (routes sans cockpit shell) ── */
+  /* ── html/body fallback ── */
   --color-gray-900:           #1A1D24;
   --color-text-inverse:       #FFFFFF;
   --color-accent-strong:      #6B102B;
@@ -39,9 +39,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* NOTE: background/color ici = fallback pour login (/admin/login/) qui n'a pas accès
-   aux --cp-*. Sur les routes cockpit, tokens.css (html,body) et .ct-root écrasent
-   background via --ct-bg-deep. Ces règles ne "fuient" pas visuellement sur le cockpit. */
+/* Background/color = fallback pour /admin/login/. */
 html, body {
   font-family: var(--font-sans);
   background: var(--color-gray-900);
@@ -56,8 +54,7 @@ html, body {
    pour que SectionMethod puisse pin pendant son scroll horizontal. */
 body { overflow-x: clip; }
 
-/* Fallback ::selection pour /admin/login/ (n'a pas --cp-*).
-   Sur le cockpit, cockpit.css surcharge via .ct-root ::selection (accent courant). */
+/* ::selection fallback for /admin/login/. */
 ::selection {
   background: var(--color-accent-strong);
   color: var(--color-text-inverse);
