@@ -600,7 +600,11 @@ button, a, input, textarea, select, [role="button"], .ct-product-host {
   font-size: 13px; font-family: inherit; line-height: 1.5;
   resize: none;
   outline: none;
-  outline: none;
+  /* Auto-grow : base ~2 lignes, grandit jusqu'au plafond puis scroll interne.
+     La hauteur effective est posée en JS (scrollHeight) ; max-height borne. */
+  min-height: 52px;
+  max-height: 160px;
+  overflow-y: auto;
 }
 .ct-chat-input::placeholder { color: var(--ct-text-muted); }
 .ct-chat-send {

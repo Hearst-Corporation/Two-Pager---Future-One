@@ -84,6 +84,22 @@ export function ChatPanel({ productName, productColor }: ChatPanelProps = {}) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Auto-grow : la zone de saisie grandit ligne par ligne quand on tape
+  // (plafonnée en CSS via max-height, qui prend alors le relais en scroll).
+  // Clé `input` → couvre frappe, collage et reset à vide après envoi.
+  // À vide on rend la main au CSS (min-height) : évite de figer une hauteur
+  // calculée pendant que le rail est replié (scrollHeight faux/0).
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    if (!input) {
+      el.style.height = "";
+      return;
+    }
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [input]);
+
   const activeProduct = useSyncExternalStore(
     subscribe,
     getSnapshot,
