@@ -9,6 +9,43 @@
   --ct-accent: #D4AF37; /* Qatar Sand / Gold */
   --ct-danger: #EF4444; /* Error / critical state */
 
+  /* ── Divider / hairline tokens ── */
+  --ct-divider:        rgba(255, 255, 255, 0.1);
+  --ct-divider-strong: rgba(255, 255, 255, 0.15);
+  --ct-divider-faint:  rgba(255, 255, 255, 0.07);
+  --ct-blueprint-line: rgba(255, 255, 255, 0.3);
+  --ct-blueprint-text: rgba(255, 255, 255, 0.7);
+  --ct-accent-line:    rgba(212, 175, 55, 0.4);
+  --ct-accent-faint:   rgba(212, 175, 55, 0.35);
+  --ct-dot-off:        rgba(255, 255, 255, 0.15);
+
+  /* ── Z-index scale ──
+     nav / drawer : 100
+     future modal : 200
+     future tooltip : 300
+  */
+  --ct-nav-height: 68px; /* desktop nav height — keep in sync with .nav padding */
+
+  /* ── Type scale ── */
+  --text-2xs:   0.65rem;
+  --text-xs:    0.7rem;
+  --text-sm:    0.75rem;
+  --text-md:    0.8rem;
+  --text-base:  0.85rem;
+  --text-lg:    0.9rem;
+  --text-xl:    1rem;
+  --text-2xl:   1.05rem;
+  --text-3xl:   1.1rem;
+  --text-4xl:   1.15rem;
+  --text-5xl:   1.25rem;
+  --text-6xl:   1.5rem;
+  --text-6xl-alt: 2rem;
+  --text-7xl:   3rem;
+  --text-display-sm: clamp(2rem, 5vw, 3.5rem);
+  --text-display-md: clamp(2.5rem, 5vw, 4rem);
+  --text-display-lg: clamp(2.5rem, 6vw, 4.5rem);
+  --text-display-xl: clamp(4rem, 12vw, 10rem);
+
   --ct-font-serif: var(--font-serif, "Georgia", serif);
   --ct-font-sans: var(--font-sans, "Inter", sans-serif);
 
@@ -16,22 +53,31 @@
   color: var(--ct-text);
   min-height: 100vh;
   font-family: var(--ct-font-sans);
+  padding-top: var(--ct-nav-height);
 }
 
-/* ── Horizontal top navigation (no shell / no rail / no sidebar) ── */
+/* ── Horizontal top navigation — fixed cockpit-lite ── */
+/* z-index 100 · future modal 200 · future tooltip 300  */
 .nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
   flex-wrap: wrap;
   padding: 1.5rem 4rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--ct-bg);
+  border-bottom: 1px solid var(--ct-divider);
 }
 
 .navBrand {
   font-family: var(--ct-font-serif);
-  font-size: 1.1rem;
+  font-size: var(--text-3xl);
   letter-spacing: 0.05em;
   color: var(--ct-text);
   text-decoration: none;
@@ -49,7 +95,7 @@
 }
 
 .navLink {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--ct-text-muted);
@@ -74,6 +120,132 @@
   outline-offset: 2px;
 }
 
+/* ── Hamburger button (mobile only) ── */
+.navHamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.navHamburger span {
+  display: block;
+  width: 22px;
+  height: 1px;
+  background: var(--ct-text);
+  transition: opacity 0.2s, transform 0.2s;
+  transform-origin: center;
+}
+
+.navHamburger[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.navHamburger[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+.navHamburger[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* ── Mobile drawer ── */
+.navDrawer {
+  display: none;
+  position: fixed;
+  top: var(--ct-nav-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+  background: var(--ct-bg);
+  border-top: 1px solid var(--ct-divider);
+  overflow-y: auto;
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
+}
+
+.navDrawer[data-open="true"] {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navDrawer {
+    transition: none;
+  }
+}
+
+.navDrawerLinks {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+  list-style: none;
+  margin: 0;
+  gap: 0;
+}
+
+.navDrawerLink {
+  display: block;
+  padding: 1.1rem 0;
+  font-size: var(--text-xl);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ct-text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ct-divider-faint);
+  transition: color 0.15s;
+}
+
+.navDrawerLink:last-child {
+  border-bottom: none;
+}
+
+.navDrawerLink:hover {
+  color: var(--ct-text);
+}
+
+.navDrawerLink[data-active="true"] {
+  color: var(--ct-text);
+  border-bottom-color: var(--ct-accent);
+}
+
+@media (max-width: 768px) {
+  .wrap {
+    --ct-nav-height: 56px;
+  }
+
+  .nav {
+    flex-wrap: nowrap;
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+  }
+
+  .navBrand {
+    font-size: var(--text-xl);
+  }
+
+  .navLinks {
+    display: none;
+  }
+
+  .navHamburger {
+    display: flex;
+  }
+
+  .navDrawer {
+    display: block;
+  }
+}
+
 @media (max-width: 1024px) {
   .nav {
     padding: 1.25rem 2rem;
@@ -93,7 +265,7 @@
 }
 
 .stubEyebrow {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.25em;
   color: var(--ct-accent);
@@ -103,7 +275,7 @@
 
 .stubTitle {
   font-family: var(--ct-font-serif);
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: var(--text-display-lg);
   line-height: 1;
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -111,7 +283,7 @@
 }
 
 .stubText {
-  font-size: 1.15rem;
+  font-size: var(--text-4xl);
   color: var(--ct-text-muted);
   line-height: 1.6;
   font-weight: 300;
@@ -123,7 +295,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   color: var(--ct-text-muted);
@@ -157,7 +329,7 @@
 }
 
 .eyebrow {
-  font-size: 0.85rem;
+  font-size: var(--text-base);
   text-transform: uppercase;
   letter-spacing: 0.25em;
   color: var(--ct-accent);
@@ -167,7 +339,7 @@
 
 .title {
   font-family: var(--ct-font-serif);
-  font-size: clamp(4rem, 12vw, 10rem);
+  font-size: var(--text-display-xl);
   line-height: 0.9;
   font-weight: 400;
   margin-bottom: 2rem;
@@ -177,7 +349,7 @@
 }
 
 .subtitle {
-  font-size: 1.25rem;
+  font-size: var(--text-5xl);
   color: var(--ct-text-muted);
   max-width: 680px;
   line-height: 1.6;
@@ -192,8 +364,8 @@
   width: 100%;
   max-width: 1000px;
   margin-bottom: 4rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--ct-divider);
+  border-bottom: 1px solid var(--ct-divider);
 }
 
 .metricItem {
@@ -203,14 +375,14 @@
   flex-direction: column;
   gap: 0.75rem;
   padding: 2rem 2rem 2rem 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid var(--ct-divider);
 }
 .metricItem:last-child {
   border-right: none;
 }
 
 .metricValue {
-  font-size: 3rem;
+  font-size: var(--text-7xl);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-variant-numeric: tabular-nums;
   color: var(--ct-text);
@@ -219,7 +391,7 @@
 }
 
 .metricLabel {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--ct-text-muted);
@@ -227,7 +399,7 @@
 
 /* Discreet qualifier under the landing's narrative headline metrics. */
 .illustrativeNote {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--ct-text-muted);
@@ -240,7 +412,7 @@
   align-items: center;
   gap: 1rem;
   color: var(--ct-text);
-  font-size: 0.9rem;
+  font-size: var(--text-lg);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.2em;
@@ -276,18 +448,18 @@
   display: flex;
   flex-direction: column;
   gap: 4rem;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid var(--ct-divider);
   padding-right: 3rem;
 }
 
 .simSectionTitle {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   color: var(--ct-accent);
   margin-bottom: 1.5rem;
   font-weight: 500;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--ct-divider);
   padding-bottom: 0.75rem;
 }
 
@@ -303,7 +475,7 @@
   color: var(--ct-text-muted);
   padding: 0.5rem 0;
   text-align: left;
-  font-size: 1rem;
+  font-size: var(--text-xl);
   font-weight: 300;
   transition: all 0.2s;
   cursor: pointer;
@@ -353,14 +525,14 @@
 
 .simTitle {
   font-family: var(--ct-font-serif);
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: var(--text-display-sm);
   margin: 0;
   font-weight: 400;
 }
 
 .simSubtitle {
   color: var(--ct-text-muted);
-  font-size: 1.1rem;
+  font-size: var(--text-3xl);
   margin-top: 1rem;
   font-weight: 300;
   max-width: 600px;
@@ -369,7 +541,7 @@
 
 .simHeader .illustrativeNote {
   margin-top: 1rem;
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   color: var(--ct-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -379,7 +551,7 @@
   aspect-ratio: 21 / 9;
   width: 100%;
   background: #000;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--ct-divider-strong);
   position: relative;
   overflow: hidden;
 }
@@ -389,17 +561,17 @@
 .projectionContainer::after {
   content: "";
   position: absolute;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--ct-blueprint-line);
   z-index: 10;
   pointer-events: none;
 }
 .projectionContainer::before {
   top: 1rem; bottom: 1rem; left: 1rem; width: 1px;
-  box-shadow: calc(100% - 2rem) 0 0 rgba(255, 255, 255, 0.3);
+  box-shadow: calc(100% - 2rem) 0 0 var(--ct-blueprint-line);
 }
 .projectionContainer::after {
   top: 1rem; left: 1rem; right: 1rem; height: 1px;
-  box-shadow: 0 calc(100% - 2rem) 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 calc(100% - 2rem) 0 var(--ct-blueprint-line);
 }
 
 .projectionState {
@@ -429,10 +601,10 @@
   bottom: 1.5rem;
   left: 1.5rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--ct-blueprint-text);
   background: transparent;
   padding: 0;
   border: none;
@@ -446,7 +618,7 @@
   padding: 0;
   background: transparent;
   border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--ct-divider);
   margin-top: 1rem;
 }
 
@@ -456,19 +628,19 @@
   justify-content: space-between;
   align-items: baseline;
   padding: 1.25rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--ct-divider);
   gap: 2rem;
 }
 
 .simMetrics .metricLabel {
-  font-size: 0.85rem;
+  font-size: var(--text-base);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--ct-text-muted);
 }
 
 .simMetrics .metricValue {
-  font-size: 1.5rem;
+  font-size: var(--text-6xl);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-weight: 300;
   color: var(--ct-text);
@@ -480,13 +652,13 @@
 }
 
 .simMetrics .metricValueRisk {
-  font-size: 1.25rem;
+  font-size: var(--text-5xl);
   padding-top: 0.5rem;
 }
 
 .simError {
   color: var(--ct-danger);
-  font-size: 0.9rem;
+  font-size: var(--text-lg);
   padding: 1rem 0;
   font-family: ui-monospace, monospace;
 }
@@ -503,7 +675,7 @@
 }
 
 .finSectionTitle {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   color: var(--ct-accent);
@@ -530,7 +702,7 @@
 
 .sourcesTitle {
   font-family: var(--ct-font-serif);
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: var(--text-display-md);
   line-height: 1;
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -538,7 +710,7 @@
 }
 
 .sourcesMeta {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--ct-text-muted);
@@ -548,37 +720,37 @@
 .sourcesTableWrap {
   width: 100%;
   overflow-x: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--ct-divider);
 }
 
 .sourcesTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: var(--text-lg);
   font-weight: 300;
 }
 
 .sourcesTable th {
   text-align: left;
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ct-text-muted);
   font-weight: 500;
   padding: 1rem 1.5rem 1rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid var(--ct-divider-strong);
   white-space: nowrap;
 }
 
 .sourcesTable td {
   padding: 1.1rem 1.5rem 1.1rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--ct-divider-faint);
   vertical-align: top;
   color: var(--ct-text);
 }
 
 .metaCell {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   color: var(--ct-text-muted);
   margin-top: 0.3rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -593,7 +765,7 @@
 .sourceLink {
   color: var(--ct-text);
   text-decoration: none;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+  border-bottom: 1px solid var(--ct-accent-line);
   transition: color 0.2s, border-color 0.2s;
 }
 
@@ -604,12 +776,12 @@
 
 .confDots {
   letter-spacing: 2px;
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   white-space: nowrap;
 }
 
 .confDots span {
-  color: rgba(255, 255, 255, 0.15);
+  color: var(--ct-dot-off);
 }
 
 .confDots span[data-on="true"] {
@@ -621,11 +793,11 @@
 }
 
 .tagOn {
-  font-size: 0.65rem;
+  font-size: var(--text-2xs);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--ct-accent);
-  border: 1px solid rgba(212, 175, 55, 0.35);
+  border: 1px solid var(--ct-accent-faint);
   padding: 2px 8px;
   white-space: nowrap;
 }
@@ -637,7 +809,7 @@
 .emptyState {
   padding: 3rem 0;
   color: var(--ct-text-muted);
-  font-size: 1.05rem;
+  font-size: var(--text-2xl);
   font-weight: 300;
   max-width: 560px;
   line-height: 1.6;
@@ -650,12 +822,12 @@
   gap: 1.25rem;
   padding: 2.5rem 0;
   color: var(--ct-danger);
-  font-size: 1rem;
+  font-size: var(--text-xl);
 }
 
 .errorBack {
   color: var(--ct-text-muted);
-  font-size: 0.8rem;
+  font-size: var(--text-md);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   text-decoration: none;
@@ -683,7 +855,7 @@
   }
 
   .metricValue {
-    font-size: 2rem;
+    font-size: var(--text-6xl-alt);
   }
 }
 
