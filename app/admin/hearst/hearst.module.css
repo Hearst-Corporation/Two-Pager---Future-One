@@ -24,7 +24,7 @@
      future modal : 200
      future tooltip : 300
   */
-  --ct-nav-height: 68px; /* desktop nav height — keep in sync with .nav padding */
+  --ct-nav-height: 76px; /* measured single-line nav height @≥1025px — keep in sync with .nav padding */
 
   /* ── Type scale ── */
   --text-2xs:   0.65rem;
@@ -178,6 +178,12 @@
   pointer-events: auto;
 }
 
+/* Scroll-lock the page behind the open drawer. Local class applied to
+   <body> by HearstNav (styles.drawerLock) — stays a pure CSS-Modules selector. */
+.drawerLock {
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .navDrawer {
     transition: none;
@@ -218,9 +224,11 @@
   border-bottom-color: var(--ct-accent);
 }
 
-@media (max-width: 768px) {
+/* Drawer mode kicks in at ≤1024px so the desktop link row never wraps to
+   two lines (which would leave content masked under the taller fixed nav). */
+@media (max-width: 1024px) {
   .wrap {
-    --ct-nav-height: 56px;
+    --ct-nav-height: 70px; /* measured single-line drawer-mode nav height */
   }
 
   .nav {
@@ -243,12 +251,6 @@
 
   .navDrawer {
     display: block;
-  }
-}
-
-@media (max-width: 1024px) {
-  .nav {
-    padding: 1.25rem 2rem;
   }
 }
 

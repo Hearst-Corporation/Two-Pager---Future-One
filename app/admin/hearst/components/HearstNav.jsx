@@ -24,12 +24,16 @@ export default function HearstNav() {
     setIsOpen(false);
   }, [pathname]);
 
-  // Close drawer on Escape
+  // Close drawer on Escape + lock background scroll while open
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e) => { if (e.key === 'Escape') setIsOpen(false); };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    document.body.classList.add(styles.drawerLock);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.classList.remove(styles.drawerLock);
+    };
   }, [isOpen]);
 
   return (
