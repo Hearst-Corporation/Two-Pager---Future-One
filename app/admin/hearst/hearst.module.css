@@ -30,9 +30,17 @@
   --ct-content-max:     1600px;  /* shared content max-width (data pages) */
   --ct-layout-max-wide: 1800px;  /* simulator 2-column layout */
   --ct-gutter:          4rem;    /* horizontal page gutter (desktop) */
+  --ct-gutter-sm:       2rem;    /* horizontal page gutter (≤1024px) */
   --ct-section-gap:     3.5rem;  /* vertical rhythm between cockpit sections */
   --ct-panel-radius:    10px;    /* cockpit panel corner */
   /* --ct-surface (#121212) is repurposed as the cockpit panel surface */
+
+  /* ── Micro-spacing + motion tokens (replace ad-hoc px / inline opacity) ── */
+  --ct-space-2xs: 2px;
+  --ct-space-xs:  4px;
+  --ct-space-sm:  5px;
+  --ct-opacity-faint: 0.5;
+  --ct-transition-fast: 0.2s;
 
   /* ── Type scale ── */
   --text-2xs:   0.65rem;
@@ -262,111 +270,169 @@
   }
 }
 
-/* ── Premium minimal stub for routes not yet wired ── */
-.stub {
-  min-height: 70vh;
+/* ──────────────────────────────────────────────────────────────────────────
+   COCKPIT FRAME — hybrid shell
+   The fixed nav already sits above content (body owns the scroll, padded by
+   --ct-nav-height). The frame gives every route a single bounded, centred work
+   surface so pages read as one cockpit rather than independent long documents:
+   a guaranteed viewport-tall stage, a shared max-width, and intentional gutters.
+   ────────────────────────────────────────────────────────────────────────── */
+.cockpitFrame {
+  min-height: calc(100vh - var(--ct-nav-height));
+  width: 100%;
+  max-width: var(--ct-content-max);
+  margin: 0 auto;
+  padding: 3rem var(--ct-gutter) 4rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  text-align: left;
-  padding: 6rem 4rem;
-  max-width: 900px;
 }
 
-.stubEyebrow {
+/* ── Unified page header (replaces per-page .sourcesHeader reuse) ── */
+.pageHead {
+  margin-bottom: var(--ct-section-gap);
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid var(--ct-divider);
+}
+
+.pageEyebrow {
   font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.25em;
   color: var(--ct-accent);
-  margin-bottom: 1.5rem;
+  margin: 0 0 1.25rem;
   font-weight: 500;
 }
 
-.stubTitle {
+.pageTitle {
   font-family: var(--ct-font-serif);
-  font-size: var(--text-display-lg);
+  font-size: var(--text-display-md);
   line-height: 1;
   font-weight: 400;
   letter-spacing: -0.02em;
-  margin: 0 0 1.5rem;
+  margin: 0 0 0.9rem;
 }
 
-.stubText {
-  font-size: var(--text-4xl);
-  color: var(--ct-text-muted);
-  line-height: 1.6;
-  font-weight: 300;
-  max-width: 560px;
-  margin: 0 0 2rem;
-}
-
-.stubStatus {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: var(--text-xs);
+.pageContext {
+  font-size: var(--text-sm);
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
   color: var(--ct-text-muted);
-  margin-bottom: 3rem;
-}
-
-.stubStatus::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ct-accent);
-  opacity: 0.6;
+  margin: 0;
+  max-width: 760px;
+  line-height: 1.5;
 }
 
 @media (max-width: 1024px) {
-  .stub {
-    padding: 4rem 2rem;
+  .cockpitFrame {
+    padding: 2rem var(--ct-gutter-sm) 3rem;
   }
 }
 
-.hero {
-  min-height: 100vh;
+/* ──────────────────────────────────────────────────────────────────────────
+   HOME — cockpit map: hero band + navigation modules
+   ────────────────────────────────────────────────────────────────────────── */
+.homeHero {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   align-items: flex-start;
-  text-align: left;
-  padding: 8rem 4rem 6rem;
-  background: var(--ct-bg);
+  padding-top: 2rem;
+  margin-bottom: var(--ct-section-gap);
 }
 
-.eyebrow {
-  font-size: var(--text-base);
-  text-transform: uppercase;
-  letter-spacing: 0.25em;
-  color: var(--ct-accent);
-  margin-bottom: 2rem;
-  font-weight: 500;
+.homeKpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0;
+  width: 100%;
+  max-width: 900px;
+  margin: 2.5rem 0 1.25rem;
+  border-top: 1px solid var(--ct-divider);
+  border-bottom: 1px solid var(--ct-divider);
 }
 
-.title {
+.homeKpis .metricItem {
+  min-width: 0;
+  padding: 1.75rem 1.75rem 1.75rem 0;
+}
+
+/* Module grid — one card per cockpit section.
+   min(280px, 100%) lets the track collapse below 280px on narrow phones so
+   cards never overflow the page (was +68px horizontal scroll at 320px). */
+.routeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: 1.25rem;
+}
+
+.routeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--ct-surface);
+  border: 1px solid var(--ct-divider);
+  border-radius: var(--ct-panel-radius);
+  padding: 1.5rem 1.6rem 1.6rem;
+  text-decoration: none;
+  color: var(--ct-text);
+  transition: border-color var(--ct-transition-fast), transform var(--ct-transition-fast), background var(--ct-transition-fast);
+}
+
+.routeCard:hover {
+  border-color: var(--ct-accent-line);
+  background: #161616;
+  transform: translateY(-2px);
+}
+
+.routeCard:focus-visible {
+  outline: 2px solid var(--ct-accent);
+  outline-offset: 2px;
+}
+
+.routeCardTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.routeCardName {
   font-family: var(--ct-font-serif);
-  font-size: var(--text-display-xl);
-  line-height: 0.9;
-  font-weight: 400;
-  margin-bottom: 2rem;
-  max-width: 100%;
-  letter-spacing: -0.02em;
-  margin-left: -0.5vw; /* Optical alignment for huge serif */
-}
-
-.subtitle {
   font-size: var(--text-5xl);
-  color: var(--ct-text-muted);
-  max-width: 680px;
-  line-height: 1.6;
-  margin-bottom: 4rem;
-  font-weight: 300;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin: 0;
 }
 
+.routeCardIndex {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  color: var(--ct-text-muted);
+}
+
+.routeCardDesc {
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: var(--ct-text-muted);
+  font-weight: 300;
+  margin: 0;
+}
+
+.routeCardArrow {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ct-text-muted);
+  transition: color var(--ct-transition-fast);
+}
+
+.routeCard:hover .routeCardArrow {
+  color: var(--ct-accent);
+}
+
+/* Shared metric strip — used by the financial returns/capital panels. */
 .metricsGrid {
   display: flex;
   flex-wrap: wrap;
@@ -578,7 +644,7 @@
   aspect-ratio: 21 / 9;
   width: 100%;
   max-height: 440px;
-  background: #000;
+  background: var(--ct-bg);
   border: 1px solid var(--ct-divider-strong);
   position: relative;
   overflow: hidden;
@@ -628,6 +694,8 @@
   position: absolute;
   bottom: 1.5rem;
   left: 1.5rem;
+  right: 1.5rem;
+  max-width: calc(100% - 3rem);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: var(--text-xs);
   text-transform: uppercase;
@@ -637,6 +705,12 @@
   padding: 0;
   border: none;
   z-index: 20;
+  overflow-wrap: anywhere;
+}
+
+/* Faint inline separator (replaces inline opacity:0.5 in JSX) */
+.faintSep {
+  opacity: var(--ct-opacity-faint);
 }
 
 /* Premium Financial Table format for Metrics */
@@ -657,7 +731,8 @@
   align-items: baseline;
   padding: 1.6rem 0;
   border-bottom: 1px solid var(--ct-divider);
-  gap: 3rem;
+  gap: 2rem;
+  min-width: 0; /* allow children to shrink instead of pushing the page wider */
 }
 
 .simMetrics .metricLabel {
@@ -665,8 +740,8 @@
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ct-text-muted);
-  flex: 0 0 auto;
-  min-width: 150px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .simMetrics .metricValue {
@@ -675,11 +750,42 @@
   font-weight: 300;
   color: var(--ct-text);
   text-align: right;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .simMetrics[data-loading="true"] {
-  opacity: 0.5;
+  opacity: 0.55;
   transition: opacity 0.3s;
+}
+
+/* Explicit "computing" cue above the metric strip — the opacity fade alone
+   was too subtle to confirm an input was registered. */
+.simComputing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ct-accent);
+  margin-bottom: 0.5rem;
+  min-height: 1.2em;
+}
+
+.simComputing::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ct-accent);
+  animation: ctPulse 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .simComputing::before { animation: none; }
 }
 
 .simMetrics .metricValueRisk {
@@ -701,17 +807,7 @@
   align-items: flex-start;
 }
 
-/* ── Financial Thesis (base-case readout) ── */
-.finPage {
-  padding: var(--ct-gutter);
-  max-width: var(--ct-content-max);
-  margin: 0 auto;
-}
-
-.finSection {
-  margin-bottom: var(--ct-section-gap);
-}
-
+/* ── Financial section title (returns / capital / projection panels) ── */
 .finSectionTitle {
   font-size: var(--text-sm);
   text-transform: uppercase;
@@ -721,21 +817,11 @@
   margin: 0 0 1.5rem;
 }
 
-@media (max-width: 1024px) {
-  .finPage {
-    padding: 3rem 2rem;
-  }
-}
-
-/* ── Source Register (read-only evidence table) ── */
-.sourcesPage {
-  padding: var(--ct-gutter);
-  max-width: var(--ct-content-max);
-  margin: 0 auto;
-}
-
-.sourcesHeader {
-  margin-bottom: var(--ct-section-gap);
+/* Financial acronyms carry a definition without a noisy default underline */
+.metricLabel abbr {
+  text-decoration: none;
+  border-bottom: 1px dotted var(--ct-text-muted);
+  cursor: help;
 }
 
 /* ── Cockpit panel — premium container for registers / tables / readouts ── */
@@ -799,6 +885,77 @@
   border-radius: 4px;
 }
 
+/* Horizontal-scroll affordance: a right-edge fade cues hidden columns.
+   Sits on the panel (overflow:hidden clips it), the scroller lives inside. */
+.cockpitPanelScrollWrap {
+  position: relative;
+  border-radius: var(--ct-panel-radius);
+}
+
+.cockpitPanelScrollWrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 36px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--ct-surface));
+  opacity: 0;
+  transition: opacity var(--ct-transition-fast);
+}
+
+/* Shown only where a single column-at-a-time read is likely (≤768px) */
+@media (max-width: 768px) {
+  .cockpitPanelScrollWrap::after { opacity: 1; }
+
+  /* Freeze the first column so the row's identity stays in view while
+     the rest of the wide table scrolls horizontally. */
+  .cockpitPanelScroll .sourcesTable th:first-child,
+  .cockpitPanelScroll .sourcesTable td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--ct-surface);
+    z-index: 1;
+  }
+  .cockpitPanelScroll .sourcesTable th:first-child {
+    z-index: 2; /* header corner stays above body sticky cells */
+  }
+}
+
+/* Load-more control under a contained register */
+.loadMoreRow {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.loadMoreButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: 1px solid var(--ct-divider-strong);
+  border-radius: 6px;
+  padding: 0.7rem 1.4rem;
+  color: var(--ct-text);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: border-color var(--ct-transition-fast), color var(--ct-transition-fast);
+}
+
+.loadMoreButton:hover {
+  border-color: var(--ct-accent);
+  color: var(--ct-accent);
+}
+
+.loadMoreButton:focus-visible {
+  outline: 2px solid var(--ct-accent);
+  outline-offset: 2px;
+}
+
 .cockpitNote {
   font-size: var(--text-xs);
   text-transform: uppercase;
@@ -807,29 +964,6 @@
   margin: 1.25rem 0 0;
   max-width: 760px;
   line-height: 1.6;
-}
-
-.sourcesTitle {
-  font-family: var(--ct-font-serif);
-  font-size: var(--text-display-md);
-  line-height: 1;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  margin: 0 0 1rem;
-}
-
-.sourcesMeta {
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ct-text-muted);
-  margin: 0;
-}
-
-.sourcesTableWrap {
-  width: 100%;
-  overflow-x: auto;
-  border-top: 1px solid var(--ct-divider);
 }
 
 .sourcesTable {
@@ -923,6 +1057,7 @@
   color: var(--ct-text-muted);
 }
 
+/* ── UI states: loading / empty / error are visually distinct ── */
 .emptyState {
   padding: 3rem 0;
   color: var(--ct-text-muted);
@@ -930,6 +1065,36 @@
   font-weight: 300;
   max-width: 560px;
   line-height: 1.6;
+}
+
+/* Loading: same calm container as empty, but flagged with an animated dot so
+   it never reads identically to a genuine "no data" message. */
+.loadingState {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 3rem 0;
+  color: var(--ct-text-muted);
+  font-size: var(--text-2xl);
+  font-weight: 300;
+}
+
+.loadingState::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ct-accent);
+  animation: ctPulse 1.1s ease-in-out infinite;
+}
+
+@keyframes ctPulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingState::before { animation: none; opacity: 0.7; }
 }
 
 .errorState {
@@ -942,32 +1107,73 @@
   font-size: var(--text-xl);
 }
 
+/* Error block: bordered, danger-tinted surface so it reads as a state, not prose */
+.errorState > span {
+  border-left: 3px solid var(--ct-danger);
+  padding-left: 1rem;
+  line-height: 1.5;
+}
+
+.errorActions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* A clearly actionable retry — bordered pill, obvious hover/active/focus */
+.retryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--ct-text-muted);
+  border-radius: 6px;
+  padding: 0.55rem 1.1rem;
+  color: var(--ct-text);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: border-color var(--ct-transition-fast), color var(--ct-transition-fast), background var(--ct-transition-fast);
+}
+
+.retryButton:hover {
+  border-color: var(--ct-accent);
+  color: var(--ct-accent);
+}
+
+.retryButton:active {
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.retryButton:focus-visible {
+  outline: 2px solid var(--ct-accent);
+  outline-offset: 2px;
+}
+
+.retryButton:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
 .errorBack {
   color: var(--ct-text-muted);
   font-size: var(--text-md);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   text-decoration: none;
+  transition: color var(--ct-transition-fast);
 }
 
 .errorBack:hover {
   color: var(--ct-text);
 }
 
-@media (max-width: 1024px) {
-  .sourcesPage {
-    padding: 3rem 2rem;
-  }
-}
-
 @media (max-width: 640px) {
-  .hero {
-    padding: 1.5rem 1rem;
-  }
-
   .metricsGrid {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 1.5rem;
   }
 
@@ -992,5 +1198,27 @@
   }
   .projectionContainer {
     max-height: 320px;
+  }
+}
+
+/* Narrow phones — P0 fix: stack each metric label over its value so long
+   readouts ("High (merchant compute)", "-$996.4M") wrap inside the column
+   instead of forcing a horizontal page scroll (documentElement.scrollWidth
+   was exceeding the viewport at ≤390px). */
+@media (max-width: 560px) {
+  .simLayout {
+    padding: 2rem 1.25rem;
+  }
+  .simMetrics .metricItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+  .simMetrics .metricValue {
+    text-align: left;
+    width: 100%;
+  }
+  .controlRow {
+    gap: 1rem;
   }
 }

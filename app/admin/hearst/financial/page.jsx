@@ -84,29 +84,30 @@ export default function FinancialPage() {
   const moic = projection?.moic_post_tax ?? projection?.moic;
 
   return (
-    <main className={styles.finPage}>
-      <header className={styles.sourcesHeader}>
-        <div className={styles.stubEyebrow}>Investment Case</div>
-        <h1 className={styles.sourcesTitle}>Financial Thesis</h1>
-        <p className={styles.sourcesMeta}>{BASE_CASE_LABEL}</p>
+    <main className={styles.cockpitFrame}>
+      <header className={styles.pageHead}>
+        <div className={styles.pageEyebrow}>Investment Case</div>
+        <h1 className={styles.pageTitle}>Financial Model</h1>
+        <p className={styles.pageContext}>{BASE_CASE_LABEL}</p>
       </header>
 
       <div aria-live="polite" aria-busy={loading}>
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
-            <button
-              type="button"
-              onClick={() => setReloadKey((k) => k + 1)}
-              className={styles.errorBack}
-              style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: 'inherit' }}
-            >
-              Retry
-            </button>
-            <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            <div className={styles.errorActions}>
+              <button
+                type="button"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className={styles.retryButton}
+              >
+                Retry
+              </button>
+              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            </div>
           </div>
         ) : loading ? (
-          <div className={styles.emptyState}>Computing the base case…</div>
+          <div className={styles.loadingState}>Computing the base case…</div>
         ) : !projection ? (
           <div className={styles.emptyState}>
             The engine returned no projection for this case.
@@ -116,11 +117,11 @@ export default function FinancialPage() {
             <section className={styles.cockpitPanel}>
               <h2 className={styles.finSectionTitle}>Returns — post-tax</h2>
               <div className={styles.metricsGrid}>
-                <Metric label="IRR" value={fmtPctFromRatio(irr)} />
-                <Metric label="MOIC" value={fmtX(moic)} />
-                <Metric label="NPV" value={fmtUSD(npv)} />
+                <Metric label={<abbr title="Internal Rate of Return">IRR</abbr>} value={fmtPctFromRatio(irr)} />
+                <Metric label={<abbr title="Multiple on Invested Capital">MOIC</abbr>} value={fmtX(moic)} />
+                <Metric label={<abbr title="Net Present Value">NPV</abbr>} value={fmtUSD(npv)} />
                 <Metric label="Payback" value={fmtYears(projection.payback_years)} />
-                <Metric label="DSCR (stab.)" value={fmtX(projection.dscr_stabilized)} />
+                <Metric label={<><abbr title="Debt Service Coverage Ratio">DSCR</abbr> (stab.)</>} value={fmtX(projection.dscr_stabilized)} />
               </div>
             </section>
 
@@ -136,6 +137,7 @@ export default function FinancialPage() {
             {years.length > 0 && (
               <section className={styles.cockpitPanel}>
                 <h2 className={styles.finSectionTitle}>Projection</h2>
+                <div className={styles.cockpitPanelScrollWrap}>
                 <div className={styles.cockpitPanelScroll}>
                   <table className={styles.sourcesTable}>
                     <thead>
@@ -161,6 +163,7 @@ export default function FinancialPage() {
                       ))}
                     </tbody>
                   </table>
+                </div>
                 </div>
               </section>
             )}

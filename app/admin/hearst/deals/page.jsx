@@ -39,11 +39,11 @@ export default function DealsPage() {
   const count = deals?.length ?? 0;
 
   return (
-    <main className={styles.sourcesPage}>
-      <header className={styles.sourcesHeader}>
-        <div className={styles.stubEyebrow}>Structuring</div>
-        <h1 className={styles.sourcesTitle}>Deal Structures</h1>
-        <p className={styles.sourcesMeta}>
+    <main className={styles.cockpitFrame}>
+      <header className={styles.pageHead}>
+        <div className={styles.pageEyebrow}>Structuring</div>
+        <h1 className={styles.pageTitle}>Deal Structures</h1>
+        <p className={styles.pageContext}>
           {loading
             ? 'Loading catalogue…'
             : error
@@ -56,18 +56,19 @@ export default function DealsPage() {
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
-            <button
-              type="button"
-              onClick={() => setReloadKey((k) => k + 1)}
-              className={styles.errorBack}
-              style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: 'inherit' }}
-            >
-              Retry
-            </button>
-            <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            <div className={styles.errorActions}>
+              <button
+                type="button"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className={styles.retryButton}
+              >
+                Retry
+              </button>
+              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            </div>
           </div>
         ) : loading ? (
-          <div className={styles.emptyState}>Loading…</div>
+          <div className={styles.loadingState}>Loading catalogue…</div>
         ) : count === 0 ? (
           <div className={styles.emptyState}>
             No deal archetypes are defined in the engine catalogue.
@@ -81,6 +82,7 @@ export default function DealsPage() {
                   {count} {count === 1 ? 'structure' : 'structures'}
                 </span>
               </div>
+            <div className={styles.cockpitPanelScrollWrap}>
             <div className={styles.cockpitPanelScroll}>
               <table className={styles.sourcesTable}>
                 <thead>
@@ -131,6 +133,7 @@ export default function DealsPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
             </div>
             </section>
             <p className={styles.cockpitNote}>

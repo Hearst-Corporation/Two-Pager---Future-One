@@ -5,39 +5,88 @@ export const metadata = {
   title: 'FUTUR ONE | Investment Memo',
 };
 
+const KPIS = [
+  { label: 'Target CAPEX', value: '$4.2B' },
+  { label: 'Total Scale', value: '500MW' },
+  { label: 'Projected IRR', value: '12.5%' },
+];
+
+// Cockpit map — every section reachable from the entry screen.
+const MODULES = [
+  {
+    href: '/admin/hearst/simulator',
+    index: '01',
+    name: 'Projection',
+    desc: 'Model the asset footprint and financial outcomes live across thesis, scale and AI mix.',
+  },
+  {
+    href: '/admin/hearst/sources',
+    index: '02',
+    name: 'Source Register',
+    desc: 'The evidence library — every datapoint, its provenance and confidence.',
+  },
+  {
+    href: '/admin/hearst/financial',
+    index: '03',
+    name: 'Financial Model',
+    desc: 'The base-case investment readout — returns, capital and multi-year projection.',
+  },
+  {
+    href: '/admin/hearst/deals',
+    index: '04',
+    name: 'Deal Structures',
+    desc: 'Catalogue of deal archetypes with bankability and control scoring.',
+  },
+  {
+    href: '/admin/hearst/workspace',
+    index: '05',
+    name: 'Scenario Workspace',
+    desc: 'Saved scenarios and their recomputed projections, side by side.',
+  },
+  {
+    href: '/admin/hearst/dossier',
+    index: '06',
+    name: 'Decision Dossier',
+    desc: 'The board pack — strategic memos and exportable deliverables.',
+  },
+];
+
 export default function HearstLanding() {
   return (
-    <main className={styles.hero}>
-      <div className={styles.eyebrow}>Hearst Qatar AI Infrastructure</div>
-      <h1 className={styles.title}>FUTUR ONE</h1>
-      
-      <div className={styles.metricsGrid}>
-        <div className={styles.metricItem}>
-          <div className={styles.metricLabel}>Target CAPEX</div>
-          <div className={styles.metricValue}>$4.2B</div>
-        </div>
-        <div className={styles.metricItem}>
-          <div className={styles.metricLabel}>Total Scale</div>
-          <div className={styles.metricValue}>500MW</div>
-        </div>
-        <div className={styles.metricItem}>
-          <div className={styles.metricLabel}>Projected IRR</div>
-          <div className={styles.metricValue}>12.5%</div>
-        </div>
-      </div>
+    <main className={styles.cockpitFrame}>
+      <section className={styles.homeHero}>
+        <div className={styles.pageEyebrow}>Hearst Qatar AI Infrastructure</div>
+        <h1 className={styles.pageTitle}>FUTUR ONE</h1>
+        <p className={styles.pageContext}>
+          The control surface for the sovereign AI infrastructure investment —
+          where state-of-the-art compute meets strategic long-term yield.
+        </p>
 
-      <p className={styles.illustrativeNote}>
-        Illustrative model — headline figures for narrative preview only.
-      </p>
+        <div className={styles.homeKpis}>
+          {KPIS.map(({ label, value }) => (
+            <div key={label} className={styles.metricItem}>
+              <div className={styles.metricLabel}>{label}</div>
+              <div className={styles.metricValue}>{value}</div>
+            </div>
+          ))}
+        </div>
+        <p className={styles.illustrativeNote}>
+          Illustrative model — headline figures for narrative preview only.
+        </p>
+      </section>
 
-      <p className={styles.subtitle}>
-        A cinematic projection of the sovereign AI infrastructure investment.<br/>
-        Where state-of-the-art compute meets strategic long-term yields.
-      </p>
-
-      <Link href="/admin/hearst/simulator" className={styles.ctaButton}>
-        Enter the Projection ⟶
-      </Link>
+      <nav className={styles.routeGrid} aria-label="Cockpit sections">
+        {MODULES.map(({ href, index, name, desc }) => (
+          <Link key={href} href={href} className={styles.routeCard}>
+            <div className={styles.routeCardTop}>
+              <h2 className={styles.routeCardName}>{name}</h2>
+              <span className={styles.routeCardIndex}>{index}</span>
+            </div>
+            <p className={styles.routeCardDesc}>{desc}</p>
+            <span className={styles.routeCardArrow}>Open ⟶</span>
+          </Link>
+        ))}
+      </nav>
     </main>
   );
 }

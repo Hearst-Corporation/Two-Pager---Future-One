@@ -70,7 +70,7 @@ export default function DataCenterProjection({ thesis, scale, aiMix }) {
       >
         <PlaceholderSVG type="shell" />
         <div className={styles.projectionLabel}>
-          LONG LEASE CAMPUS <span style={{ opacity: 0.5 }}>{'//'}</span> {scale}MW
+          LONG LEASE CAMPUS <span className={styles.faintSep}>{'//'}</span> {scale}MW
         </div>
       </div>
       
@@ -80,7 +80,7 @@ export default function DataCenterProjection({ thesis, scale, aiMix }) {
       >
         <PlaceholderSVG type="compute" />
         <div className={styles.projectionLabel}>
-          HIGH-DENSITY COMPUTE <span style={{ opacity: 0.5 }}>{'//'}</span> {scale}MW <span style={{ opacity: 0.5 }}>{'//'}</span> MIX: {aiMix}%
+          HIGH-DENSITY COMPUTE <span className={styles.faintSep}>{'//'}</span> {scale}MW <span className={styles.faintSep}>{'//'}</span> MIX: {aiMix}%
         </div>
       </div>
       
@@ -90,7 +90,7 @@ export default function DataCenterProjection({ thesis, scale, aiMix }) {
       >
         <PlaceholderSVG type="gov" />
         <div className={styles.projectionLabel}>
-          SOVEREIGN AI CLUSTER <span style={{ opacity: 0.5 }}>{'//'}</span> {scale}MW <span style={{ opacity: 0.5 }}>{'//'}</span> PERIMETER SECURED
+          SOVEREIGN AI CLUSTER <span className={styles.faintSep}>{'//'}</span> {scale}MW <span className={styles.faintSep}>{'//'}</span> PERIMETER SECURED
         </div>
       </div>
     </div>

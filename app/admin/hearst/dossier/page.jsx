@@ -56,11 +56,11 @@ export default function DossierPage() {
   const count = memos?.length ?? 0;
 
   return (
-    <main className={styles.sourcesPage}>
-      <header className={styles.sourcesHeader}>
-        <div className={styles.stubEyebrow}>Board Pack</div>
-        <h1 className={styles.sourcesTitle}>Decision Dossier</h1>
-        <p className={styles.sourcesMeta}>
+    <main className={styles.cockpitFrame}>
+      <header className={styles.pageHead}>
+        <div className={styles.pageEyebrow}>Board Pack</div>
+        <h1 className={styles.pageTitle}>Decision Dossier</h1>
+        <p className={styles.pageContext}>
           {loading
             ? 'Loading memos…'
             : error
@@ -73,18 +73,19 @@ export default function DossierPage() {
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
-            <button
-              type="button"
-              onClick={() => setReloadKey((k) => k + 1)}
-              className={styles.errorBack}
-              style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: 'inherit' }}
-            >
-              Retry
-            </button>
-            <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            <div className={styles.errorActions}>
+              <button
+                type="button"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className={styles.retryButton}
+              >
+                Retry
+              </button>
+              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            </div>
           </div>
         ) : loading ? (
-          <div className={styles.emptyState}>Loading…</div>
+          <div className={styles.loadingState}>Loading memos…</div>
         ) : count === 0 ? (
           <div className={styles.emptyState}>
             No board memos are on record yet. Strategic deliverables will appear
@@ -99,6 +100,7 @@ export default function DossierPage() {
                   {count} {count === 1 ? 'deliverable' : 'deliverables'}
                 </span>
               </div>
+            <div className={styles.cockpitPanelScrollWrap}>
             <div className={styles.cockpitPanelScroll}>
               <table className={styles.sourcesTable}>
                 <thead>
@@ -148,6 +150,7 @@ export default function DossierPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
             </div>
             </section>
             <p className={styles.cockpitNote}>

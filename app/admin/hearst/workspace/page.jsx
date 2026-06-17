@@ -12,6 +12,8 @@ import {
   parseApiError,
 } from '../utils/format';
 
+const PAGE_SIZE = 20;
+
 export default function WorkspacePage() {
   const [projectName, setProjectName] = useState(null);
   const [scenarios, setScenarios] = useState(null);
@@ -19,6 +21,9 @@ export default function WorkspacePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
+  // Local pagination over the scenarios already held client-side. No extra
+  // fetch — reveals more of the array the API returned, PAGE_SIZE at a time.
+  const [shown, setShown] = useState(PAGE_SIZE);
 
   useEffect(() => {
     let active = true;
@@ -52,6 +57,7 @@ export default function WorkspacePage() {
         if (!active) return;
         setScenarios(Array.isArray(scenariosData.scenarios) ? scenariosData.scenarios : []);
         setScenarioCount(Number.isFinite(scenariosData.count) ? scenariosData.count : 0);
+        setShown(PAGE_SIZE);
       } catch (err) {
         if (active) setError(err.message);
       } finally {
@@ -63,16 +69,20 @@ export default function WorkspacePage() {
     return () => { active = false; };
   }, [reloadKey]);
 
-  const visibleCount = scenarios?.length ?? 0;
-  const count = scenarioCount || visibleCount;
-  const isTruncated = visibleCount > 0 && count > visibleCount;
+  // What the client actually holds vs. the true total on record server-side.
+  const loadedCount = scenarios?.length ?? 0;
+  const count = scenarioCount || loadedCount;
+  // The API may cap the array below the real total — surfaced honestly below.
+  const serverCapped = loadedCount > 0 && count > loadedCount;
+  const visible = scenarios ? scenarios.slice(0, shown) : [];
+  const hasMoreLocal = loadedCount > shown;
 
   return (
-    <main className={styles.sourcesPage}>
-      <header className={styles.sourcesHeader}>
-        <div className={styles.stubEyebrow}>Working Surface</div>
-        <h1 className={styles.sourcesTitle}>Scenario Workspace</h1>
-        <p className={styles.sourcesMeta}>
+    <main className={styles.cockpitFrame}>
+      <header className={styles.pageHead}>
+        <div className={styles.pageEyebrow}>Working Surface</div>
+        <h1 className={styles.pageTitle}>Scenario Workspace</h1>
+        <p className={styles.pageContext}>
           {loading
             ? 'Loading scenarios…'
             : error
@@ -88,19 +98,20 @@ export default function WorkspacePage() {
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
-            <button
-              type="button"
-              onClick={() => setReloadKey((k) => k + 1)}
-              className={styles.errorBack}
-              style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: 'inherit' }}
-            >
-              Retry
-            </button>
-            <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            <div className={styles.errorActions}>
+              <button
+                type="button"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className={styles.retryButton}
+              >
+                Retry
+              </button>
+              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            </div>
           </div>
         ) : loading ? (
-          <div className={styles.emptyState}>Loading…</div>
-        ) : visibleCount === 0 ? (
+          <div className={styles.loadingState}>Loading scenarios…</div>
+        ) : loadedCount === 0 ? (
           <div className={styles.emptyState}>
             No saved scenarios yet. Explore assumptions live in the Projection —
             persistence will appear here once scenarios are saved through the model.
@@ -111,9 +122,10 @@ export default function WorkspacePage() {
               <div className={styles.cockpitPanelHead}>
                 <h2 className={styles.cockpitPanelTitle}>Saved Scenarios</h2>
                 <span className={styles.cockpitPanelContext}>
-                  {isTruncated ? `${visibleCount} of ${count}` : `${count} on record`}
+                  Showing {visible.length} of {count}
                 </span>
               </div>
+            <div className={styles.cockpitPanelScrollWrap}>
             <div className={styles.cockpitPanelScroll}>
               <table className={styles.sourcesTable}>
                 <thead>
@@ -129,7 +141,7 @@ export default function WorkspacePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {scenarios.map((s) => {
+                  {visible.map((s) => {
                     const proj = s.projection || {};
                     const irr = proj.irr_post_tax ?? proj.irr;
                     const npv = proj.npv_post_tax ?? proj.npv;
@@ -162,15 +174,27 @@ export default function WorkspacePage() {
                 </tbody>
               </table>
             </div>
+            </div>
+            {hasMoreLocal && (
+              <div className={styles.loadMoreRow}>
+                <button
+                  type="button"
+                  className={styles.loadMoreButton}
+                  onClick={() => setShown((n) => Math.min(n + PAGE_SIZE, loadedCount))}
+                >
+                  Load {Math.min(PAGE_SIZE, loadedCount - shown)} more
+                </button>
+              </div>
+            )}
             </section>
             <p className={styles.cockpitNote}>
               Read-only register — projections are recalculated from each saved scenario.
               Adjust assumptions interactively in the Projection.
             </p>
-            {isTruncated && (
+            {serverCapped && !hasMoreLocal && (
               <p className={styles.cockpitNote}>
-                Showing {visibleCount} of {count} scenarios. Narrow or archive older scenarios
-                if you need a smaller working set.
+                Showing the {loadedCount} most recent of {count} scenarios on record. Older
+                scenarios remain in the model; archive or narrow the set to bring them into view.
               </p>
             )}
             <Link href="/admin/hearst/simulator" className={styles.ctaButton}>

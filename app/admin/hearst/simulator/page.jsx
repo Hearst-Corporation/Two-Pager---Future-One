@@ -116,7 +116,7 @@ export default function SimulatorPage() {
             onClick={() => setThesis('shell')}
           >
             <span>Shell + Long Lease</span>
-            {thesis === 'shell' && <span style={{ opacity: 0.5 }}>✓</span>}
+            {thesis === 'shell' && <span className={styles.faintSep}>✓</span>}
           </button>
           <button
             type="button"
@@ -126,7 +126,7 @@ export default function SimulatorPage() {
             onClick={() => setThesis('compute')}
           >
             <span>Compute Cloud</span>
-            {thesis === 'compute' && <span style={{ opacity: 0.5 }}>✓</span>}
+            {thesis === 'compute' && <span className={styles.faintSep}>✓</span>}
           </button>
           <button
             type="button"
@@ -136,7 +136,7 @@ export default function SimulatorPage() {
             onClick={() => setThesis('gov')}
           >
             <span>Sovereign AI Cluster</span>
-            {thesis === 'gov' && <span style={{ opacity: 0.5 }}>✓</span>}
+            {thesis === 'gov' && <span className={styles.faintSep}>✓</span>}
           </button>
         </div>
 
@@ -183,24 +183,26 @@ export default function SimulatorPage() {
         <header className={styles.simHeader}>
           <h1 className={styles.simTitle}>Futur One Projection</h1>
           <p className={styles.simSubtitle}>
-            Live preview of the asset footprint and financial outcomes. Connected to Oracle engine.
+            Live preview of the asset footprint and financial outcomes — recomputed
+            by the Oracle engine as you adjust thesis, scale and mix.
           </p>
         </header>
 
         <DataCenterProjection thesis={thesis} scale={scale} aiMix={aiMix} />
 
-        <div
-          className={styles.simMetrics}
-          data-loading={loading}
-          aria-live="polite"
-          aria-busy={loading}
-        >
+        <div aria-live="polite" aria-busy={loading}>
+          {!error && (
+            <div className={styles.simComputing} aria-hidden={!loading}>
+              {loading ? 'Computing…' : ''}
+            </div>
+          )}
+          <div className={styles.simMetrics} data-loading={loading}>
           {error ? (
             <div className={styles.simError} role="alert">
               <span>{error}</span>
               <button
                 type="button"
-                className={styles.controlBtn}
+                className={styles.retryButton}
                 onClick={() => setAttempt((n) => n + 1)}
                 disabled={loading}
               >
@@ -233,6 +235,7 @@ export default function SimulatorPage() {
               </div>
             </>
           )}
+          </div>
         </div>
       </section>
     </main>

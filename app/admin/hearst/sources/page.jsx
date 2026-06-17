@@ -69,11 +69,11 @@ export default function SourcesPage() {
   const count = sources?.length ?? 0;
 
   return (
-    <main className={styles.sourcesPage}>
-      <header className={styles.sourcesHeader}>
-        <div className={styles.stubEyebrow}>Evidence Library</div>
-        <h1 className={styles.sourcesTitle}>Source Register</h1>
-        <p className={styles.sourcesMeta}>
+    <main className={styles.cockpitFrame}>
+      <header className={styles.pageHead}>
+        <div className={styles.pageEyebrow}>Evidence Library</div>
+        <h1 className={styles.pageTitle}>Source Register</h1>
+        <p className={styles.pageContext}>
           {loading
             ? 'Loading evidence…'
             : error
@@ -89,18 +89,19 @@ export default function SourcesPage() {
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
-            <button
-              type="button"
-              onClick={() => setReloadKey((k) => k + 1)}
-              className={styles.errorBack}
-              style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: 'inherit' }}
-            >
-              Retry
-            </button>
-            <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            <div className={styles.errorActions}>
+              <button
+                type="button"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className={styles.retryButton}
+              >
+                Retry
+              </button>
+              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
+            </div>
           </div>
         ) : loading ? (
-          <div className={styles.emptyState}>Loading…</div>
+          <div className={styles.loadingState}>Loading evidence…</div>
         ) : count === 0 ? (
           <div className={styles.emptyState}>
             No sources are on record yet. Evidence will appear here once it is
@@ -114,6 +115,7 @@ export default function SourcesPage() {
                 {count} {count === 1 ? 'datapoint' : 'datapoints'}
               </span>
             </div>
+            <div className={styles.cockpitPanelScrollWrap}>
             <div className={styles.cockpitPanelScroll}>
             <table className={styles.sourcesTable}>
               <thead>
@@ -165,6 +167,7 @@ export default function SourcesPage() {
                 ))}
               </tbody>
             </table>
+            </div>
             </div>
           </section>
         )}
