@@ -1,4 +1,9 @@
 const { withSentryConfig } = require('@sentry/nextjs');
+const sentryUploadsEnabled = Boolean(
+  process.env.SENTRY_AUTH_TOKEN &&
+  process.env.SENTRY_ORG &&
+  process.env.SENTRY_PROJECT,
+);
 
 // Fail-fast env validation at build / boot time.
 // Skipped during `next lint` / type-only passes where the runtime env is absent.
@@ -113,4 +118,8 @@ module.exports = withSentryConfig(nextConfig, {
   hideSourceMaps: true,
   disableLogger: true,
   automaticVercelMonitors: false,
+  sourcemaps: {
+    disable: !sentryUploadsEnabled,
+    deleteSourcemapsAfterUpload: sentryUploadsEnabled,
+  },
 });

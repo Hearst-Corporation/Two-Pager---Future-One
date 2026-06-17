@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
+import { buildHearstSourceRegister } from '@/lib/hearst-sources-catalog';
 import { withValidation } from '@/lib/validators/withValidation';
 import { SourceCreateSchema } from '@/lib/validators/hearst';
 import { dbErrorResponse } from '@/lib/api-errors';
@@ -21,7 +22,12 @@ export async function GET(req) {
 
   const { data, error } = await q;
   if (error) return dbErrorResponse(error, '[sources][GET]');
-  return NextResponse.json({ sources: data || [] });
+  const sources = buildHearstSourceRegister({
+    projectSources: data || [],
+    metric_id,
+    source_type,
+  });
+  return NextResponse.json({ sources, count: sources.length });
 }
 
 export const POST = withValidation(SourceCreateSchema, async (req, parsed) => {

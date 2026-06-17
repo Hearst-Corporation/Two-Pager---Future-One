@@ -18,6 +18,7 @@ function Confidence({ score }) {
 }
 
 export default function SourcesPage() {
+  const [projectName, setProjectName] = useState(null);
   const [sources, setSources] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +30,22 @@ export default function SourcesPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch('/api/admin/hearst/sources');
+        const projectRes = await fetch('/api/admin/hearst/project');
+        if (!projectRes.ok) {
+          throw new Error(await parseApiError(projectRes, 'Could not load the Hearst project.'));
+        }
+
+        const projectData = await projectRes.json();
+        const project = projectData.project;
+        if (!project?.id) {
+          throw new Error('No Hearst project is configured yet.');
+        }
+        if (!active) return;
+        setProjectName(project.name || null);
+
+        const res = await fetch(
+          `/api/admin/hearst/sources?project_id=${encodeURIComponent(project.id)}`,
+        );
 
         if (!res.ok) {
           throw new Error(await parseApiError(res, 'Could not load the source register.'));
@@ -61,7 +77,10 @@ export default function SourcesPage() {
             ? 'Loading evidence…'
             : error
               ? 'Unavailable'
-              : `${count} ${count === 1 ? 'datapoint' : 'datapoints'} on record`}
+              : [
+                  projectName,
+                  `${count} ${count === 1 ? 'datapoint' : 'datapoints'} on record`,
+                ].filter(Boolean).join(' · ')}
         </p>
       </header>
 
