@@ -3,37 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
+import { fmtDate, prettyType, parseApiError } from '../utils/format';
 
-function prettyType(t) {
-  if (!t) return '—';
-  return t.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function fmtDate(iso) {
-  if (!iso) return '—';
-  try {
-    return new Date(iso).toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return '—';
-  }
-}
-
-async function parseApiError(res, fallback) {
-  let body = null;
-  try { body = await res.json(); } catch { /* non-JSON error body */ }
-  const apiError = body?.error || body?.message;
-  switch (res.status) {
-    case 400: return apiError ? `Invalid request: ${apiError}` : fallback;
-    case 401: return 'Session expired. Please sign in again.';
-    case 403: return 'You do not have access to the decision dossier.';
-    case 429: return 'Too many requests. Please wait a moment and retry.';
-    default:  return apiError || fallback;
-  }
-}
+const PDF_STATUSES = new Set(['reviewed', 'approved', 'archived']);
 
 export default function DossierPage() {
   const [memos, setMemos] = useState(null);
@@ -138,7 +110,7 @@ export default function DossierPage() {
                       <td className={styles.numCell}>{fmtDate(m.data_as_of)}</td>
                       <td className={styles.numCell}>{fmtDate(m.created_at)}</td>
                       <td>
-                        {m.status && m.status !== 'draft' ? (
+                        {PDF_STATUSES.has(m.status) ? (
                           <a
                             href={`/api/admin/hearst/strategic-memos/${m.id}/pdf`}
                             target="_blank"
@@ -148,7 +120,9 @@ export default function DossierPage() {
                             PDF
                           </a>
                         ) : (
-                          <span className={styles.tagOff}>Draft</span>
+                          <span className={styles.tagOff}>
+                            {m.status === 'draft' ? 'Draft' : '—'}
+                          </span>
                         )}
                       </td>
                     </tr>

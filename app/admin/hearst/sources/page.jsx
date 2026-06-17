@@ -3,19 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
-
-function prettyType(t) {
-  if (!t) return '—';
-  return t.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function formatValue(s) {
-  if (s.value != null) {
-    const unit = s.unit ? ` ${s.unit}` : '';
-    return `${s.value}${unit}`;
-  }
-  return s.value_text || '—';
-}
+import { fmtSourceValue, prettyType, parseApiError } from '../utils/format';
 
 function Confidence({ score }) {
   const n = Number(score) || 0;
@@ -44,18 +32,7 @@ export default function SourcesPage() {
         const res = await fetch('/api/admin/hearst/sources');
 
         if (!res.ok) {
-          // Mirror the simulator's structured-error handling.
-          let body = null;
-          try { body = await res.json(); } catch { /* non-JSON error body */ }
-          const apiError = body?.error || body?.message;
-          let message;
-          switch (res.status) {
-            case 401: message = 'Session expired. Please sign in again.'; break;
-            case 403: message = 'You do not have access to the source register.'; break;
-            case 429: message = 'Too many requests. Please wait a moment and retry.'; break;
-            default:  message = apiError || 'Could not load the source register.';
-          }
-          throw new Error(message);
+          throw new Error(await parseApiError(res, 'Could not load the source register.'));
         }
 
         const data = await res.json();
@@ -124,7 +101,7 @@ export default function SourcesPage() {
                         <div className={styles.metaCell}>{s.metric_id}</div>
                       )}
                     </td>
-                    <td className={styles.numCell}>{formatValue(s)}</td>
+                    <td className={styles.numCell}>{fmtSourceValue(s)}</td>
                     <td>
                       {s.source_url ? (
                         <a

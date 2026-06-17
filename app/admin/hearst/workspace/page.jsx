@@ -3,37 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
-
-function prettyType(t) {
-  if (!t) return '—';
-  return t.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-const fmtMoney = (v) => {
-  if (v == null) return '—';
-  const a = Math.abs(v);
-  if (a >= 1e9) return `$${(v / 1e9).toFixed(2)}B`;
-  if (a >= 1e6) return `$${(v / 1e6).toFixed(0)}M`;
-  if (a >= 1e3) return `$${(v / 1e3).toFixed(0)}K`;
-  return `$${v.toFixed(0)}`;
-};
-
-const fmtPctRatio = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`);
-const fmtMW = (v) => (v == null ? '—' : `${v} MW`);
-const fmtPctRaw = (v) => (v == null ? '—' : `${v}%`);
-
-async function parseApiError(res, fallback) {
-  let body = null;
-  try { body = await res.json(); } catch { /* non-JSON error body */ }
-  const apiError = body?.error || body?.message;
-  switch (res.status) {
-    case 400: return apiError ? `Invalid request: ${apiError}` : fallback;
-    case 401: return 'Session expired. Please sign in again.';
-    case 403: return 'You do not have access to the scenario workspace.';
-    case 429: return 'Too many requests. Please wait a moment and retry.';
-    default:  return apiError || fallback;
-  }
-}
+import {
+  fmtUSD,
+  fmtPctFromRatio,
+  fmtPctRaw,
+  fmtMW,
+  prettyType,
+  parseApiError,
+} from '../utils/format';
 
 export default function WorkspacePage() {
   const [projectName, setProjectName] = useState(null);
@@ -122,8 +99,8 @@ export default function WorkspacePage() {
                     <th>Type</th>
                     <th>Scale</th>
                     <th>CAPEX</th>
-                    <th>IRR</th>
-                    <th>NPV</th>
+                    <th>IRR (post-tax)</th>
+                    <th>NPV (post-tax)</th>
                     <th>Evidence</th>
                     <th>Status</th>
                   </tr>
@@ -142,11 +119,11 @@ export default function WorkspacePage() {
                           )}
                         </td>
                         <td>{prettyType(s.scenario_type)}</td>
-                        <td className={styles.numCell}>{fmtMW(s.total_mw)}</td>
-                        <td className={styles.numCell}>{fmtMoney(proj.total_capex)}</td>
-                        <td className={styles.numCell}>{fmtPctRatio(irr)}</td>
-                        <td className={styles.numCell}>{fmtMoney(npv)}</td>
-                        <td className={styles.numCell}>{fmtPctRaw(s.source_score)}</td>
+                        <td className={styles.numCell}>{fmtMW(s.total_mw, 0)}</td>
+                        <td className={styles.numCell}>{fmtUSD(proj.total_capex)}</td>
+                        <td className={styles.numCell}>{fmtPctFromRatio(irr)}</td>
+                        <td className={styles.numCell}>{fmtUSD(npv)}</td>
+                        <td className={styles.numCell}>{fmtPctRaw(s.source_score, 0)}</td>
                         <td>
                           {s.is_active ? (
                             <span className={styles.tagOn}>Active</span>

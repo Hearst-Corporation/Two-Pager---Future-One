@@ -3,29 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
-
-function prettyType(t) {
-  if (!t) return '—';
-  return t.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function fmtScore(n) {
-  if (n == null) return '—';
-  return `${n}/5`;
-}
-
-async function parseApiError(res, fallback) {
-  let body = null;
-  try { body = await res.json(); } catch { /* non-JSON error body */ }
-  const apiError = body?.error || body?.message;
-  switch (res.status) {
-    case 400: return apiError ? `Invalid request: ${apiError}` : fallback;
-    case 401: return 'Session expired. Please sign in again.';
-    case 403: return 'You do not have access to the deal structures catalogue.';
-    case 429: return 'Too many requests. Please wait a moment and retry.';
-    default:  return apiError || fallback;
-  }
-}
+import { fmtScore, prettyType, parseApiError } from '../utils/format';
 
 export default function DealsPage() {
   const [deals, setDeals] = useState(null);

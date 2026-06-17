@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../hearst.module.css';
 import DataCenterProjection from '../components/DataCenterProjection';
+import { fmtUSD, fmtPctFromRatio, MISSING } from '../utils/format';
 
 export default function SimulatorPage() {
   const [thesis, setThesis] = useState('compute'); // shell | compute | gov
@@ -15,7 +16,7 @@ export default function SimulatorPage() {
     capEx: null,
     irr: null,
     npv: null,
-    risk: 'Moderate'
+    risk: 'Moderate',
   });
 
   useEffect(() => {
@@ -24,13 +25,13 @@ export default function SimulatorPage() {
     async function fetchMetrics() {
       setLoading(true);
       setError(null);
-      
-      const archetypeId = thesis === 'shell' 
-        ? 'powered_shell' 
-        : thesis === 'compute' 
-          ? 'neocloud_gpu' 
+
+      const archetypeId = thesis === 'shell'
+        ? 'powered_shell'
+        : thesis === 'compute'
+          ? 'neocloud_gpu'
           : 'sovereign_ai';
-      
+
       try {
         const res = await fetch('/api/admin/hearst/simulate', {
           method: 'POST',
@@ -40,13 +41,11 @@ export default function SimulatorPage() {
             input_value: { total_mw: scale },
             archetype_id: archetypeId,
             hardware_mix: { ai_pct: aiMix },
-            geography: 'qatar'
-          })
+            geography: 'qatar',
+          }),
         });
 
         if (!res.ok) {
-          // Parse the structured JSON error body (api-errors.js) when present,
-          // then map known statuses to actionable messages.
           let body = null;
           try { body = await res.json(); } catch { /* non-JSON error body */ }
           const apiError = body?.error || body?.message;
@@ -65,18 +64,17 @@ export default function SimulatorPage() {
         if (!active) return;
 
         const proj = data.projection || {};
-        
-        // Derive risk placeholder based on thesis if not explicitly defined
+
         let riskLabel = 'Moderate';
-        if (thesis === 'shell') riskLabel = 'Low (Secured Yield)';
-        if (thesis === 'compute') riskLabel = 'High (Merchant GPU)';
-        if (thesis === 'gov') riskLabel = 'Low (Sovereign Backed)';
+        if (thesis === 'shell') riskLabel = 'Low (secured yield)';
+        if (thesis === 'compute') riskLabel = 'High (merchant GPU)';
+        if (thesis === 'gov') riskLabel = 'Low (sovereign backed)';
 
         setMetrics({
           capEx: proj.total_capex ?? null,
           irr: proj.irr_post_tax ?? proj.irr ?? null,
           npv: proj.npv_post_tax ?? proj.npv ?? null,
-          risk: riskLabel
+          risk: riskLabel,
         });
       } catch (err) {
         if (active) setError(err.message);
@@ -85,25 +83,12 @@ export default function SimulatorPage() {
       }
     }
 
-    const t = setTimeout(fetchMetrics, 300); // 300ms debounce
+    const t = setTimeout(fetchMetrics, 300);
     return () => {
       active = false;
       clearTimeout(t);
     };
   }, [thesis, scale, aiMix]);
-
-  // Formatters
-  const formatMoney = (val) => {
-    if (val == null) return '--';
-    if (val >= 1e9) return `$${(val / 1e9).toFixed(2)}B`;
-    if (val >= 1e6) return `$${(val / 1e6).toFixed(0)}M`;
-    return `$${val.toFixed(0)}`;
-  };
-
-  const formatPct = (val) => {
-    if (val == null) return '--';
-    return `${(val * 100).toFixed(1)}%`;
-  };
 
   return (
     <main className={styles.simLayout}>
@@ -145,7 +130,7 @@ export default function SimulatorPage() {
         <div className={styles.controlGroup} role="group" aria-labelledby="scale-label">
           <h2 id="scale-label" className={styles.simSectionTitle}>Scale (MW)</h2>
           <div className={styles.controlRow}>
-            {[50, 150, 300, 500].map(val => (
+            {[50, 150, 300, 500].map((val) => (
               <button
                 key={val}
                 type="button"
@@ -164,7 +149,7 @@ export default function SimulatorPage() {
         <div className={styles.controlGroup} role="group" aria-labelledby="aimix-label">
           <h2 id="aimix-label" className={styles.simSectionTitle}>AI Infrastructure Mix</h2>
           <div className={styles.controlRow}>
-            {[0, 25, 50, 75, 100].map(val => (
+            {[0, 25, 50, 75, 100].map((val) => (
               <button
                 key={val}
                 type="button"
@@ -205,18 +190,24 @@ export default function SimulatorPage() {
             <>
               <div className={styles.metricItem}>
                 <div className={styles.metricLabel}>Total CAPEX</div>
-                <div className={styles.metricValue}>{formatMoney(metrics.capEx)}</div>
+                <div className={styles.metricValue}>
+                  {loading && metrics.capEx == null ? MISSING : fmtUSD(metrics.capEx)}
+                </div>
               </div>
               <div className={styles.metricItem}>
-                <div className={styles.metricLabel}>Target IRR</div>
-                <div className={styles.metricValue}>{formatPct(metrics.irr)}</div>
+                <div className={styles.metricLabel}>IRR (post-tax)</div>
+                <div className={styles.metricValue}>
+                  {loading && metrics.irr == null ? MISSING : fmtPctFromRatio(metrics.irr)}
+                </div>
               </div>
               <div className={styles.metricItem}>
-                <div className={styles.metricLabel}>NPV</div>
-                <div className={styles.metricValue}>{formatMoney(metrics.npv)}</div>
+                <div className={styles.metricLabel}>NPV (post-tax)</div>
+                <div className={styles.metricValue}>
+                  {loading && metrics.npv == null ? MISSING : fmtUSD(metrics.npv)}
+                </div>
               </div>
               <div className={styles.metricItem}>
-                <div className={styles.metricLabel}>Risk Profile</div>
+                <div className={styles.metricLabel}>Thesis risk (indicative)</div>
                 <div className={`${styles.metricValue} ${styles.metricValueRisk}`}>{metrics.risk}</div>
               </div>
             </>

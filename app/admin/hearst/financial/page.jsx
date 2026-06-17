@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
+import {
+  fmtUSD,
+  fmtPctFromRatio,
+  fmtPctRaw,
+  fmtX,
+  fmtYears,
+  fmtMW,
+} from '../utils/format';
 
-// /financial computes a single, clearly-labelled BASE CASE through the live
-// Oracle engine (same endpoint as the simulator) and surfaces the deeper
-// financial breakdown — post-tax returns, capital, and the year-by-year
-// projection — that the interactive Projection page does not show.
-// It invents nothing: every figure is the engine's response for this case.
 const BASE_CASE = {
   input_mode: 'mw_first',
   input_value: { total_mw: 150 },
@@ -17,20 +20,6 @@ const BASE_CASE = {
   geography: 'qatar',
 };
 const BASE_CASE_LABEL = 'Base case · Neocloud GPU · 150 MW · 50% AI mix · Qatar';
-
-const fmtMoney = (v) => {
-  if (v == null) return '—';
-  const a = Math.abs(v);
-  if (a >= 1e9) return `$${(v / 1e9).toFixed(2)}B`;
-  if (a >= 1e6) return `$${(v / 1e6).toFixed(0)}M`;
-  if (a >= 1e3) return `$${(v / 1e3).toFixed(0)}K`;
-  return `$${v.toFixed(0)}`;
-};
-const fmtPctRatio = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`);
-const fmtPctRaw = (v) => (v == null ? '—' : `${v.toFixed(1)}%`);
-const fmtX = (v) => (v == null ? '—' : `${v.toFixed(2)}×`);
-const fmtYears = (v) => (v == null ? '—' : `${v.toFixed(1)} yrs`);
-const fmtMW = (v) => (v == null ? '—' : `${v} MW`);
 
 function Metric({ label, value }) {
   return (
@@ -89,6 +78,9 @@ export default function FinancialPage() {
   }, []);
 
   const years = Array.isArray(projection?.years) ? projection.years : [];
+  const irr = projection?.irr_post_tax ?? projection?.irr;
+  const npv = projection?.npv_post_tax ?? projection?.npv;
+  const moic = projection?.moic_post_tax ?? projection?.moic;
 
   return (
     <main className={styles.finPage}>
@@ -115,9 +107,9 @@ export default function FinancialPage() {
             <section className={styles.finSection}>
               <h2 className={styles.finSectionTitle}>Returns — post-tax</h2>
               <div className={styles.metricsGrid}>
-                <Metric label="IRR" value={fmtPctRatio(projection.irr_post_tax)} />
-                <Metric label="MOIC" value={fmtX(projection.moic_post_tax)} />
-                <Metric label="NPV" value={fmtMoney(projection.npv_post_tax)} />
+                <Metric label="IRR" value={fmtPctFromRatio(irr)} />
+                <Metric label="MOIC" value={fmtX(moic)} />
+                <Metric label="NPV" value={fmtUSD(npv)} />
                 <Metric label="Payback" value={fmtYears(projection.payback_years)} />
                 <Metric label="DSCR (stab.)" value={fmtX(projection.dscr_stabilized)} />
               </div>
@@ -126,9 +118,9 @@ export default function FinancialPage() {
             <section className={styles.finSection}>
               <h2 className={styles.finSectionTitle}>Capital</h2>
               <div className={styles.metricsGrid}>
-                <Metric label="Total CAPEX" value={fmtMoney(projection.total_capex)} />
-                <Metric label="Equity Invested" value={fmtMoney(projection.equity_invested)} />
-                <Metric label="Terminal Value" value={fmtMoney(projection.terminal_value)} />
+                <Metric label="Total CAPEX" value={fmtUSD(projection.total_capex)} />
+                <Metric label="Equity Invested" value={fmtUSD(projection.equity_invested)} />
+                <Metric label="Terminal Value" value={fmtUSD(projection.terminal_value)} />
               </div>
             </section>
 
@@ -151,11 +143,11 @@ export default function FinancialPage() {
                       {years.map((y) => (
                         <tr key={y.year ?? y.calendar_year}>
                           <td className={styles.numCell}>{y.calendar_year ?? y.year}</td>
-                          <td className={styles.numCell}>{fmtMW(y.mw_live)}</td>
-                          <td className={styles.numCell}>{fmtMoney(y.revenue)}</td>
-                          <td className={styles.numCell}>{fmtMoney(y.ebitda)}</td>
+                          <td className={styles.numCell}>{fmtMW(y.mw_live, 1)}</td>
+                          <td className={styles.numCell}>{fmtUSD(y.revenue)}</td>
+                          <td className={styles.numCell}>{fmtUSD(y.ebitda)}</td>
                           <td className={styles.numCell}>{fmtPctRaw(y.ebitda_margin)}</td>
-                          <td className={styles.numCell}>{y.dscr == null ? '—' : fmtX(y.dscr)}</td>
+                          <td className={styles.numCell}>{fmtX(y.dscr)}</td>
                         </tr>
                       ))}
                     </tbody>
