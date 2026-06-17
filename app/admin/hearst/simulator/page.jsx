@@ -3,7 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from '../hearst.module.css';
 import DataCenterProjection from '../components/DataCenterProjection';
+import HearstPageShell from '../components/HearstPageShell';
 import { fmtUSD, fmtPctFromRatio, MISSING } from '../utils/format';
+
+const THESIS_COPY = {
+  shell: { label: 'Shell + Long Lease' },
+  compute: { label: 'Compute Cloud' },
+  gov: { label: 'Sovereign AI Cluster' },
+};
 
 export default function SimulatorPage() {
   const [thesis, setThesis] = useState('compute'); // shell | compute | gov
@@ -103,141 +110,149 @@ export default function SimulatorPage() {
     };
   }, [thesis, scale, aiMix, attempt]);
 
+  const thesisMeta = THESIS_COPY[thesis];
+  const liveRiskLabel = thesis === 'compute'
+    ? 'High (merchant compute)'
+    : thesis === 'gov'
+      ? 'Low (sovereign backed)'
+      : 'Low (secured yield)';
+  const riskTone = liveRiskLabel.startsWith('High') ? 'elevated' : 'stable';
+  const metricTone = (value) => (typeof value === 'number' && value < 0 ? styles.metricValueDanger : '');
+
   return (
-    <main className={styles.simLayout}>
-      <aside className={styles.simControls}>
-        <div className={styles.controlGroup} role="group" aria-labelledby="thesis-label">
-          <h2 id="thesis-label" className={styles.simSectionTitle}>Investment Thesis</h2>
-          <button
-            type="button"
-            className={styles.controlBtn}
-            data-active={thesis === 'shell'}
-            aria-pressed={thesis === 'shell'}
-            onClick={() => setThesis('shell')}
-          >
-            <span>Shell + Long Lease</span>
-            {thesis === 'shell' && <span className={styles.faintSep}>✓</span>}
-          </button>
-          <button
-            type="button"
-            className={styles.controlBtn}
-            data-active={thesis === 'compute'}
-            aria-pressed={thesis === 'compute'}
-            onClick={() => setThesis('compute')}
-          >
-            <span>Compute Cloud</span>
-            {thesis === 'compute' && <span className={styles.faintSep}>✓</span>}
-          </button>
-          <button
-            type="button"
-            className={styles.controlBtn}
-            data-active={thesis === 'gov'}
-            aria-pressed={thesis === 'gov'}
-            onClick={() => setThesis('gov')}
-          >
-            <span>Sovereign AI Cluster</span>
-            {thesis === 'gov' && <span className={styles.faintSep}>✓</span>}
-          </button>
-        </div>
-
-        <div className={styles.controlGroup} role="group" aria-labelledby="scale-label">
-          <h2 id="scale-label" className={styles.simSectionTitle}>Scale (MW)</h2>
-          <div className={styles.controlRow}>
-            {[50, 150, 300, 500].map((val) => (
-              <button
-                key={val}
-                type="button"
-                className={styles.controlBtn}
-                data-active={scale === val}
-                aria-pressed={scale === val}
-                aria-label={`${val} megawatts`}
-                onClick={() => setScale(val)}
-              >
-                {val}
-              </button>
-            ))}
+    <HearstPageShell
+      variant="instrument"
+      eyebrow="Live Model"
+      title="Projection"
+      context={`${thesisMeta.label} · ${scale} MW · ${aiMix}% AI mix`}
+    >
+      <div className={styles.simLayout}>
+        <aside className={styles.simControls}>
+          <div className={styles.controlGroup} role="group" aria-labelledby="thesis-label">
+            <h2 id="thesis-label" className={styles.simSectionTitle}>Investment Thesis</h2>
+            <button
+              type="button"
+              className={styles.controlBtn}
+              data-active={thesis === 'shell'}
+              aria-pressed={thesis === 'shell'}
+              onClick={() => setThesis('shell')}
+            >
+              <span>Shell + Long Lease</span>
+              {thesis === 'shell' && <span className={styles.faintSep}>✓</span>}
+            </button>
+            <button
+              type="button"
+              className={styles.controlBtn}
+              data-active={thesis === 'compute'}
+              aria-pressed={thesis === 'compute'}
+              onClick={() => setThesis('compute')}
+            >
+              <span>Compute Cloud</span>
+              {thesis === 'compute' && <span className={styles.faintSep}>✓</span>}
+            </button>
+            <button
+              type="button"
+              className={styles.controlBtn}
+              data-active={thesis === 'gov'}
+              aria-pressed={thesis === 'gov'}
+              onClick={() => setThesis('gov')}
+            >
+              <span>Sovereign AI Cluster</span>
+              {thesis === 'gov' && <span className={styles.faintSep}>✓</span>}
+            </button>
           </div>
-        </div>
 
-        <div className={styles.controlGroup} role="group" aria-labelledby="aimix-label">
-          <h2 id="aimix-label" className={styles.simSectionTitle}>AI Infrastructure Mix</h2>
-          <div className={styles.controlRow}>
-            {[0, 25, 50, 75, 100].map((val) => (
-              <button
-                key={val}
-                type="button"
-                className={styles.controlBtn}
-                data-active={aiMix === val}
-                aria-pressed={aiMix === val}
-                aria-label={`${val} percent AI infrastructure mix`}
-                onClick={() => setAiMix(val)}
-              >
-                {val}%
-              </button>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      <section className={styles.simMain}>
-        <header className={styles.simHeader}>
-          <h1 className={styles.simTitle}>Futur One Projection</h1>
-          <p className={styles.simSubtitle}>
-            Live preview of the asset footprint and financial outcomes — recomputed
-            by the Oracle engine as you adjust thesis, scale and mix.
-          </p>
-        </header>
-
-        <DataCenterProjection thesis={thesis} scale={scale} aiMix={aiMix} />
-
-        <div aria-live="polite" aria-busy={loading}>
-          {!error && (
-            <div className={styles.simComputing} aria-hidden={!loading}>
-              {loading ? 'Computing…' : ''}
+          <div className={styles.controlGroup} role="group" aria-labelledby="scale-label">
+            <h2 id="scale-label" className={styles.simSectionTitle}>Scale (MW)</h2>
+            <div className={styles.controlRow}>
+              {[50, 150, 300, 500].map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  className={styles.controlBtn}
+                  data-active={scale === val}
+                  aria-pressed={scale === val}
+                  aria-label={`${val} megawatts`}
+                  onClick={() => setScale(val)}
+                >
+                  {val}
+                </button>
+              ))}
             </div>
-          )}
-          <div className={styles.simMetrics} data-loading={loading}>
-          {error ? (
-            <div className={styles.simError} role="alert">
-              <span>{error}</span>
-              <button
-                type="button"
-                className={styles.retryButton}
-                onClick={() => setAttempt((n) => n + 1)}
-                disabled={loading}
-              >
-                Retry
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className={styles.metricItem}>
-                <div className={styles.metricLabel}>Total CAPEX</div>
-                <div className={styles.metricValue}>
-                  {loading && metrics.capEx == null ? MISSING : fmtUSD(metrics.capEx)}
-                </div>
-              </div>
-              <div className={styles.metricItem}>
-                <div className={styles.metricLabel}>IRR (post-tax)</div>
-                <div className={styles.metricValue}>
-                  {loading && metrics.irr == null ? MISSING : fmtPctFromRatio(metrics.irr)}
-                </div>
-              </div>
-              <div className={styles.metricItem}>
-                <div className={styles.metricLabel}>NPV (post-tax)</div>
-                <div className={styles.metricValue}>
-                  {loading && metrics.npv == null ? MISSING : fmtUSD(metrics.npv)}
-                </div>
-              </div>
-              <div className={styles.metricItem}>
-                <div className={styles.metricLabel}>Thesis risk (indicative)</div>
-                <div className={`${styles.metricValue} ${styles.metricValueRisk}`}>{metrics.risk}</div>
-              </div>
-            </>
-          )}
           </div>
-        </div>
-      </section>
-    </main>
+
+          <div className={styles.controlGroup} role="group" aria-labelledby="aimix-label">
+            <h2 id="aimix-label" className={styles.simSectionTitle}>AI Infrastructure Mix</h2>
+            <div className={styles.controlRow}>
+              {[0, 25, 50, 75, 100].map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  className={styles.controlBtn}
+                  data-active={aiMix === val}
+                  aria-pressed={aiMix === val}
+                  aria-label={`${val} percent AI infrastructure mix`}
+                  onClick={() => setAiMix(val)}
+                >
+                  {val}%
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <section className={styles.simMain}>
+          <DataCenterProjection thesis={thesis} scale={scale} aiMix={aiMix} />
+
+          <div aria-live="polite" aria-busy={loading}>
+            {!error && (
+              <div className={styles.simComputing} aria-hidden={!loading}>
+                {loading ? 'Computing…' : ''}
+              </div>
+            )}
+            <div className={styles.simMetrics} data-loading={loading}>
+            {error ? (
+              <div className={styles.simError} role="alert">
+                <span>{error}</span>
+                <button
+                  type="button"
+                  className={styles.retryButton}
+                  onClick={() => setAttempt((n) => n + 1)}
+                  disabled={loading}
+                >
+                  Retry
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className={styles.metricItem}>
+                  <div className={styles.metricLabel}>Total CAPEX</div>
+                  <div className={`${styles.metricValue} ${metricTone(metrics.capEx)}`}>
+                    {loading && metrics.capEx == null ? MISSING : fmtUSD(metrics.capEx)}
+                  </div>
+                </div>
+                <div className={styles.metricItem}>
+                  <div className={styles.metricLabel}>IRR (post-tax)</div>
+                  <div className={`${styles.metricValue} ${metricTone(metrics.irr)}`}>
+                    {loading && metrics.irr == null ? MISSING : fmtPctFromRatio(metrics.irr)}
+                  </div>
+                </div>
+                <div className={styles.metricItem}>
+                  <div className={styles.metricLabel}>NPV (post-tax)</div>
+                  <div className={`${styles.metricValue} ${metricTone(metrics.npv)}`}>
+                    {loading && metrics.npv == null ? MISSING : fmtUSD(metrics.npv)}
+                  </div>
+                </div>
+                <div className={styles.metricItem}>
+                  <div className={styles.metricLabel}>Thesis risk (indicative)</div>
+                  <div className={`${styles.metricValue} ${styles.metricValueRisk}`} data-tone={riskTone}>{liveRiskLabel}</div>
+                </div>
+              </>
+            )}
+            </div>
+          </div>
+        </section>
+      </div>
+    </HearstPageShell>
   );
 }

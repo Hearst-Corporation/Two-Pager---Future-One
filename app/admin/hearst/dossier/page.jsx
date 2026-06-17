@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
+import HearstPageShell from '../components/HearstPageShell';
 import { fmtDate, prettyType, parseApiError } from '../utils/format';
 
 const PDF_STATUSES = new Set(['reviewed', 'approved', 'archived']);
@@ -54,22 +55,24 @@ export default function DossierPage() {
   }, [reloadKey]);
 
   const count = memos?.length ?? 0;
+  const pdfReadyCount = memos?.filter((memo) => PDF_STATUSES.has(memo?.status)).length ?? 0;
+  const draftCount = memos?.filter((memo) => memo?.status === 'draft').length ?? 0;
+  const regionCount = new Set((memos ?? []).map((memo) => memo?.region).filter(Boolean)).size;
+  const context = loading
+    ? 'Loading memos…'
+    : error
+      ? 'Unavailable'
+      : `${count} ${count === 1 ? 'memo' : 'memos'} on record`;
 
   return (
-    <main className={styles.cockpitFrame}>
-      <header className={styles.pageHead}>
-        <div className={styles.pageEyebrow}>Board Pack</div>
-        <h1 className={styles.pageTitle}>Decision Dossier</h1>
-        <p className={styles.pageContext}>
-          {loading
-            ? 'Loading memos…'
-            : error
-              ? 'Unavailable'
-              : `${count} ${count === 1 ? 'memo' : 'memos'} on record`}
-        </p>
-      </header>
-
-      <div aria-live="polite" aria-busy={loading}>
+    <HearstPageShell
+      variant="data"
+      eyebrow="Board Pack"
+      title="Decision Dossier"
+      context={context}
+      bodyAriaLive="polite"
+      bodyAriaBusy={loading}
+    >
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
@@ -93,16 +96,39 @@ export default function DossierPage() {
           </div>
         ) : (
           <>
-            <section className={styles.cockpitPanel}>
+            <div className={styles.summaryGrid}>
+              <article className={styles.summaryCard}>
+                <div className={styles.summaryLabel}>Memos on record</div>
+                <div className={styles.summaryValue}>{count}</div>
+                <p className={styles.summaryText}>Board-facing deliverables currently available in the dossier pipeline.</p>
+              </article>
+              <article className={styles.summaryCard}>
+                <div className={styles.summaryLabel}>PDF-ready</div>
+                <div className={styles.summaryValue}>{pdfReadyCount}</div>
+                <p className={styles.summaryText}>Entries already eligible for direct export from the current route.</p>
+              </article>
+              <article className={styles.summaryCard}>
+                <div className={styles.summaryLabel}>Drafts</div>
+                <div className={styles.summaryValue}>{draftCount}</div>
+                <p className={styles.summaryText}>Items still waiting for review or downstream approval before export.</p>
+              </article>
+              <article className={styles.summaryCard}>
+                <div className={styles.summaryLabel}>Regional coverage</div>
+                <div className={styles.summaryValue}>{regionCount}</div>
+                <p className={styles.summaryText}>Distinct regional framings currently represented in the memo library.</p>
+              </article>
+            </div>
+
+            <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill}`}>
               <div className={styles.cockpitPanelHead}>
                 <h2 className={styles.cockpitPanelTitle}>Strategic Memos</h2>
                 <span className={styles.cockpitPanelContext}>
                   {count} {count === 1 ? 'deliverable' : 'deliverables'}
                 </span>
               </div>
-            <div className={styles.cockpitPanelScrollWrap}>
-            <div className={styles.cockpitPanelScroll}>
-              <table className={styles.sourcesTable}>
+              <div className={styles.cockpitPanelScrollWrap}>
+                <div className={`${styles.cockpitPanelScroll} ${styles.cockpitPanelScrollFill}`}>
+                  <table className={styles.sourcesTable}>
                 <thead>
                   <tr>
                     <th>Title</th>
@@ -149,20 +175,21 @@ export default function DossierPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
-            </div>
+                  </table>
+                </div>
+              </div>
             </section>
-            <p className={styles.cockpitNote}>
-              Read-only library — summary rows only. Full memo content and generation
-              remain on the backend deliverables pipeline.
-            </p>
-            <Link href="/admin/hearst/financial" className={styles.ctaButton}>
-              View Financial Thesis ⟶
-            </Link>
+            <div className={styles.cockpitFooterCluster}>
+              <p className={styles.cockpitNote}>
+                Read-only library — summary rows only. Full memo content and generation
+                remain on the backend deliverables pipeline.
+              </p>
+              <Link href="/admin/hearst/financial" className={styles.ctaButton}>
+                View Financial Thesis ⟶
+              </Link>
+            </div>
           </>
         )}
-      </div>
-    </main>
+    </HearstPageShell>
   );
 }

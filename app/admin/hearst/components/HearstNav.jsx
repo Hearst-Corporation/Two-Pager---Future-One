@@ -18,6 +18,9 @@ const LINKS = [
 export default function HearstNav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const activeLink = LINKS.find(({ href, exact }) => (
+    exact ? pathname === href : pathname.startsWith(href)
+  ));
 
   // Close drawer on route change
   useEffect(() => {
@@ -39,9 +42,12 @@ export default function HearstNav() {
   return (
     <>
       <nav className={styles.nav} aria-label="Hearst Oracle sections">
-        <Link href="/admin/hearst" className={styles.navBrand}>
-          FUTUR ONE
-        </Link>
+        <div className={styles.navBrandBlock}>
+          <Link href="/admin/hearst" className={styles.navBrand}>
+            FUTUR ONE
+          </Link>
+          <span className={styles.navMeta}>Hearst Qatar AI Infrastructure</span>
+        </div>
 
         {/* Desktop links */}
         <ul className={styles.navLinks}>
@@ -76,6 +82,15 @@ export default function HearstNav() {
         </button>
       </nav>
 
+      <button
+        type="button"
+        className={styles.navScrim}
+        data-open={isOpen}
+        aria-hidden={!isOpen}
+        tabIndex={isOpen ? 0 : -1}
+        onClick={() => setIsOpen(false)}
+      />
+
       {/* Mobile drawer */}
       <div
         id="hearst-nav-drawer"
@@ -83,6 +98,10 @@ export default function HearstNav() {
         data-open={isOpen}
         aria-hidden={!isOpen}
       >
+        <div className={styles.navDrawerHead}>
+          <div className={styles.navDrawerMeta}>Hearst Qatar AI Infrastructure</div>
+          <div className={styles.navDrawerCurrent}>{activeLink?.label || 'Overview'}</div>
+        </div>
         <ul className={styles.navDrawerLinks}>
           {LINKS.map(({ href, label, exact }) => {
             const active = exact ? pathname === href : pathname.startsWith(href);

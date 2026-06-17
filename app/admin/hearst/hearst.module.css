@@ -1,13 +1,64 @@
-/* hearst.module.css */
+/* ══════════════════════════════════════════════════════════════════════════
+   hearst.module.css — FUTUR ONE cockpit foundation (single source of layout truth)
+
+   ── COCKPIT LAYOUT CONTRACT ──
+   The cockpit is a strict ownership hierarchy. Each level owns ONE thing and a
+   child NEVER reinvents an ancestor's responsibility (no child re-declares the
+   global width or the global gutter).
+
+     .wrap            → cockpit root. Owns the viewport lock (100dvh, overflow
+                        hidden), the design tokens (--ct-*), the nav-height
+                        reservation (padding-top). Flex column.
+     .nav / .navDrawer→ fixed top bar + mobile drawer. Owns navigation only.
+     .pageStage       → fills below the nav. Owns the flex region routes live in.
+     main.cockpitFrame→ THE page frame (rendered only by HearstPageShell). Owns
+                        width (max-width:--ct-content-max), the horizontal gutter
+                        (--ct-frame-inline) and vertical padding (--ct-frame-*),
+                        and the page's vertical scroll. No page sets its own
+                        <main>, width, or gutter.
+     .pageHead        → the one page <header> (eyebrow / <h1> / context). Rendered
+                        by the shell. Pages never declare their own page <h1>.
+     .cockpitBody*    → body wrapper the shell puts children in. Owns body rhythm.
+     panels / grids   → content layout (.cockpitPanel, .summaryGrid, .simLayout…).
+                        Own their internal layout, NOT the global width/gutter.
+
+   ── RESPONSIVE INVARIANTS (enforced everywhere) ──
+     • No horizontal page scroll on any route (tables scroll LOCALLY only).
+     • Every critical flex/grid container carries min-width: 0.
+     • Every vertical fill/scroll chain carries min-height: 0.
+     • Grids that must shrink use minmax(0, 1fr).
+     • The projection is aspect-bounded + height-clamped (clamp/dvh), never full viewport width.
+     • overflow:hidden never clips content that has no local scroll.
+
+   ── CANONICAL BREAKPOINTS (closed set — do NOT add ad-hoc thresholds) ──
+     @media (max-width: 1280px)                         desktop → tablet:
+                                                         nav→drawer, simulator
+                                                         stacks, grids 4→2 col.
+     @media (max-width: 1024px)                         tablet refinement
+                                                         (registerLayout → 1 col).
+     @media (max-width: 768px)                          mobile: single column,
+                                                         metric/sim grids stack,
+                                                         table scroll affordance.
+     @media (max-width: 430px)                          small phone: type/element
+                                                         density, summary 1 col.
+     @media (max-height: 720px)                          low-height density tier.
+     @media (max-height: 520px) and (orientation: landscape)
+                                                         mobile-landscape rescue
+                                                         (re-establishes 2-col sim).
+     ( @media (prefers-reduced-motion: reduce) — motion only, orthogonal. )
+   ══════════════════════════════════════════════════════════════════════════ */
 
 .wrap {
   --ct-bg: #0A0A0A;
   --ct-surface: #121212;
+  --ct-surface-elevated: #151515;
   --ct-border: #2A2A2A;
   --ct-text: #F5F5F5;
   --ct-text-muted: #8A8A8A;
   --ct-accent: #D4AF37; /* Qatar Sand / Gold */
   --ct-danger: #EF4444; /* Error / critical state */
+  --ct-compute: #7AB8FF;
+  --ct-gov: #FF8A8A;
 
   /* ── Divider / hairline tokens ── */
   --ct-divider:        rgba(255, 255, 255, 0.1);
@@ -26,14 +77,23 @@
   */
   --ct-nav-height: 76px; /* measured single-line nav height @≥1025px — keep in sync with .nav padding */
 
-  /* ── Cockpit frame tokens ── */
+  /* ── Page shell tokens ── */
   --ct-content-max:     1600px;  /* shared content max-width (data pages) */
   --ct-layout-max-wide: 1800px;  /* simulator 2-column layout */
   --ct-gutter:          4rem;    /* horizontal page gutter (desktop) */
   --ct-gutter-sm:       2rem;    /* horizontal page gutter (≤1024px) */
-  --ct-section-gap:     3.5rem;  /* vertical rhythm between cockpit sections */
-  --ct-panel-radius:    10px;    /* cockpit panel corner */
-  /* --ct-surface (#121212) is repurposed as the cockpit panel surface */
+  --ct-section-gap:     3.5rem;  /* vertical rhythm between sections */
+  --ct-panel-radius:    10px;    /* panel corner radius */
+  --ct-frame-inline:    clamp(1rem, 3vw, 4rem);
+  --ct-frame-top:       clamp(1rem, 3vw, 3rem);
+  --ct-frame-bottom:    clamp(1.25rem, 4vw, 4rem);
+
+  /* ── Content-measure tokens (cap line length / metric strips) ──
+     Replaces ad-hoc max-width: 760/900/1000px literals scattered in the file. */
+  --ct-measure:         760px;   /* prose / caption measure (pageContext, notes) */
+  --ct-measure-wide:    900px;   /* wide prose / callouts (modelCallout, KPIs) */
+  --ct-strip-max:       1000px;  /* metric strip max-width (returns/capital) */
+  --ct-sim-min:         360px;   /* simulator instrument usable-height floor */
 
   /* ── Micro-spacing + motion tokens (replace ad-hoc px / inline opacity) ── */
   --ct-space-2xs: 2px;
@@ -67,12 +127,27 @@
 
   background: var(--ct-bg);
   color: var(--ct-text);
-  min-height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   font-family: var(--ct-font-sans);
   padding-top: var(--ct-nav-height);
+  box-sizing: border-box;
 }
 
-/* ── Horizontal top navigation — fixed cockpit-lite ── */
+/* Fills the viewport below the fixed nav — routes scroll inside, never the document. */
+.pageStage {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Horizontal top navigation — fixed bar ── */
 /* z-index 100 · future modal 200 · future tooltip 300  */
 .nav {
   position: fixed;
@@ -98,6 +173,20 @@
   color: var(--ct-text);
   text-decoration: none;
   white-space: nowrap;
+}
+
+.navBrandBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.navMeta {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ct-text-muted);
 }
 
 .navLinks {
@@ -160,6 +249,11 @@
   transform-origin: center;
 }
 
+.navHamburger:focus-visible {
+  outline: 2px solid var(--ct-accent);
+  outline-offset: 4px;
+}
+
 .navHamburger[aria-expanded="true"] span:nth-child(1) {
   transform: translateY(6px) rotate(45deg);
 }
@@ -175,21 +269,43 @@
   display: none;
   position: fixed;
   top: var(--ct-nav-height);
+  /* Side-panel: max 280px wide so the scrim is visible and clickable
+     in the remaining viewport area. On very narrow phones (<320px) it
+     fills the viewport. */
   left: 0;
-  right: 0;
+  right: auto;
+  width: min(280px, 100vw);
   bottom: 0;
   z-index: 99;
   background: var(--ct-bg);
   border-top: 1px solid var(--ct-divider);
+  border-right: 1px solid var(--ct-divider);
   overflow-y: auto;
-  transform: translateY(-100%);
+  transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
 }
 
+.navScrim {
+  display: none;
+  position: fixed;
+  inset: var(--ct-nav-height) 0 0;
+  z-index: 98;
+  border: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.navScrim[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .navDrawer[data-open="true"] {
-  transform: translateY(0);
+  transform: translateX(0);
   opacity: 1;
   pointer-events: auto;
 }
@@ -213,6 +329,26 @@
   list-style: none;
   margin: 0;
   gap: 0;
+}
+
+.navDrawerHead {
+  padding: 1.25rem 1.5rem 0;
+  border-bottom: 1px solid var(--ct-divider-faint);
+}
+
+.navDrawerMeta {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ct-accent);
+  margin-bottom: 0.45rem;
+}
+
+.navDrawerCurrent {
+  font-family: var(--ct-font-serif);
+  font-size: var(--text-5xl);
+  color: var(--ct-text);
+  margin-bottom: 1rem;
 }
 
 .navDrawerLink {
@@ -240,21 +376,27 @@
   border-bottom-color: var(--ct-accent);
 }
 
-/* Drawer mode kicks in at ≤1024px so the desktop link row never wraps to
-   two lines (which would leave content masked under the taller fixed nav). */
-@media (max-width: 1024px) {
+/* ── 1280px · nav collapses to hamburger + drawer; shell gutter tightens.
+   Same canonical threshold as the layout block below (kept here next to the
+   nav rules it governs). ── */
+@media (max-width: 1280px) {
   .wrap {
-    --ct-nav-height: 70px; /* measured single-line drawer-mode nav height */
+    --ct-nav-height: 64px;
+    --ct-section-gap: 2rem;
   }
 
   .nav {
     flex-wrap: nowrap;
-    padding: 1rem 1.5rem;
+    padding: 0.9rem 1.5rem;
     gap: 1rem;
   }
 
   .navBrand {
     font-size: var(--text-xl);
+  }
+
+  .navMeta {
+    display: none;
   }
 
   .navLinks {
@@ -268,30 +410,106 @@
   .navDrawer {
     display: block;
   }
+
+  .navScrim {
+    display: block;
+  }
+
+  /* Tighten the frame via the tokens (NOT a literal padding) so the low-height
+     density tier can still override --ct-frame-top/bottom on laptops (≤1280). */
+  .cockpitFrame {
+    --ct-frame-inline: var(--ct-gutter-sm);
+    --ct-frame-top: 1.5rem;
+    --ct-frame-bottom: 2rem;
+  }
+
+  .pageHead {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+  }
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   COCKPIT FRAME — hybrid shell
-   The fixed nav already sits above content (body owns the scroll, padded by
-   --ct-nav-height). The frame gives every route a single bounded, centred work
-   surface so pages read as one cockpit rather than independent long documents:
-   a guaranteed viewport-tall stage, a shared max-width, and intentional gutters.
-   ────────────────────────────────────────────────────────────────────────── */
+/* Page shell — viewport-locked stage; vertical scroll stays inside the frame. */
 .cockpitFrame {
-  min-height: calc(100vh - var(--ct-nav-height));
+  flex: 1;
+  min-height: 0;
   width: 100%;
   max-width: var(--ct-content-max);
   margin: 0 auto;
-  padding: 3rem var(--ct-gutter) 4rem;
+  padding: var(--ct-frame-top) var(--ct-frame-inline) var(--ct-frame-bottom);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ct-divider-strong) transparent;
+}
+
+/* Instrument pages: frame scroll is breakpoint-governed (see responsive set).
+   Desktop → hidden on frame, zones scroll. Stacked ≤1024px → frame scrolls. */
+.cockpitFrameLocked {
+  min-height: 0;
+}
+
+.cockpitBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.cockpitBodyFlow {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.cockpitBodyContent {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
 }
 
 /* ── Unified page header (replaces per-page .sourcesHeader reuse) ── */
 .pageHead {
+  flex-shrink: 0;
   margin-bottom: var(--ct-section-gap);
   padding-bottom: 1.75rem;
   border-bottom: 1px solid var(--ct-divider);
+}
+
+.pageHeadHome {
+  margin-bottom: 2rem;
+}
+
+/* Instrument pages — compact head: instrument is action-first, not editorial */
+.pageHeadInstrument {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.65rem;
+}
+
+.pageHeadInstrument .pageEyebrow {
+  margin-bottom: 0.45rem;
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+}
+
+.pageHeadInstrument .pageTitle {
+  font-size: clamp(1.6rem, 2.8vw, 2.25rem);
+  margin-bottom: 0.35rem;
+}
+
+.pageHeadInstrument .pageContext {
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  max-width: none;
 }
 
 .pageEyebrow {
@@ -318,33 +536,87 @@
   letter-spacing: 0.15em;
   color: var(--ct-text-muted);
   margin: 0;
-  max-width: 760px;
+  max-width: var(--ct-measure);
   line-height: 1.5;
 }
 
-@media (max-width: 1024px) {
-  .cockpitFrame {
-    padding: 2rem var(--ct-gutter-sm) 3rem;
-  }
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.summaryCard {
+  min-width: 0;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 1px solid var(--ct-divider-faint);
+  border-radius: var(--ct-panel-radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 55%),
+    var(--ct-surface);
+}
+
+.summaryLabel {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ct-accent);
+  margin-bottom: 0.85rem;
+}
+
+.summaryValue {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1;
+  color: var(--ct-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.75rem;
+}
+
+.summaryValue[data-tone="negative"],
+.metricValueDanger {
+  color: #F5B5B5;
+}
+
+.summaryValue[data-tone="elevated"],
+.metricValueRisk[data-tone="elevated"] {
+  color: #F2C1C1;
+}
+
+.summaryText {
+  margin: 0;
+  color: var(--ct-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   HOME — cockpit map: hero band + navigation modules
+   HOME — entry map: hero band + navigation modules
    ────────────────────────────────────────────────────────────────────────── */
 .homeHero {
+  padding-top: 1.25rem;
+}
+
+.homeBody {
+  gap: 0;
+}
+
+.homeMetrics {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding-top: 2rem;
   margin-bottom: var(--ct-section-gap);
 }
 
 .homeKpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 0;
   width: 100%;
-  max-width: 900px;
+  max-width: var(--ct-measure-wide);
+  min-width: 0;
   margin: 2.5rem 0 1.25rem;
   border-top: 1px solid var(--ct-divider);
   border-bottom: 1px solid var(--ct-divider);
@@ -355,7 +627,7 @@
   padding: 1.75rem 1.75rem 1.75rem 0;
 }
 
-/* Module grid — one card per cockpit section.
+/* Module grid — one card per section.
    min(280px, 100%) lets the track collapse below 280px on narrow phones so
    cards never overflow the page (was +68px horizontal scroll at 320px). */
 .routeGrid {
@@ -368,8 +640,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  background: var(--ct-surface);
-  border: 1px solid var(--ct-divider);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 60%),
+    var(--ct-surface);
+  border: 1px solid var(--ct-divider-faint);
   border-radius: var(--ct-panel-radius);
   padding: 1.5rem 1.6rem 1.6rem;
   text-decoration: none;
@@ -379,7 +653,9 @@
 
 .routeCard:hover {
   border-color: var(--ct-accent-line);
-  background: #161616;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 60%),
+    var(--ct-surface-elevated);
   transform: translateY(-2px);
 }
 
@@ -432,28 +708,29 @@
   color: var(--ct-accent);
 }
 
-/* Shared metric strip — used by the financial returns/capital panels. */
+/* Shared metric strip — used by the financial returns/capital panels.
+   auto-fit + a real min track width keeps the large (3rem) figures from
+   colliding: when too many metrics share a row they wrap instead of
+   overlapping. The floor is sized to the widest expected value (e.g. -$996.4M). */
 .metricsGrid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0;
   width: 100%;
-  max-width: 1000px;
+  max-width: var(--ct-strip-max);
   margin-bottom: 4rem;
   border-top: 1px solid var(--ct-divider);
   border-bottom: 1px solid var(--ct-divider);
+  min-width: 0;
 }
 
-/* Inside a cockpit panel the surround border replaces the strip's own rules.
-   Use a responsive grid so 5 metrics wrap cleanly instead of overflowing. */
+/* Inside a panel the surround border replaces the strip's own rules. */
 .cockpitPanel .metricsGrid {
   margin-bottom: 0;
   border-top: none;
   border-bottom: none;
   max-width: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
 .cockpitPanel .metricItem {
@@ -462,8 +739,7 @@
 }
 
 .metricItem {
-  flex: 1;
-  min-width: 200px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -481,6 +757,15 @@
   color: var(--ct-text);
   font-weight: 300;
   letter-spacing: -0.05em;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Financial panels pack up to 5 metrics per row — scale the figure down from
+   the hero 3rem so long values ("-$996.4M") fit their column without colliding.
+   The landing hero KPIs keep the full 3rem impact. */
+.cockpitPanel .metricValue {
+  font-size: clamp(1.7rem, 2.4vw, 2.4rem);
 }
 
 .metricLabel {
@@ -497,7 +782,7 @@
   letter-spacing: 0.15em;
   color: var(--ct-text-muted);
   margin-bottom: 3rem;
-  max-width: 1000px;
+  max-width: var(--ct-strip-max);
 }
 
 .ctaButton {
@@ -526,23 +811,40 @@
   outline-offset: 2px;
 }
 
-/* Simulator Page */
+/* Simulator — viewport-filling instrument layout (scroll only inside controls on narrow stacks) */
 .simLayout {
   display: grid;
-  grid-template-columns: 360px 1fr;
-  min-height: 100vh;
-  max-width: var(--ct-layout-max-wide);
-  margin: 0 auto;
-  padding: var(--ct-gutter);
-  gap: 4.5rem;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  /* flex-basis 0 + grow makes the grid fill all remaining flex space in the
+     column shell; the resolved height lets the minmax(0,1fr) row resolve.
+     No explicit height:0 — that would collapse the grid in the stacked
+     (flex:none) responsive modes where flex no longer drives the height. */
+  flex: 1 1 0%;
+  /* Usable-height floor — on short viewports where the summary grid eats most
+     of the shell, keep the instrument tall enough; the frame scrolls to fit. */
+  min-height: var(--ct-sim-min);
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  gap: 3.5rem;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .simControls {
   display: flex;
   flex-direction: column;
-  gap: 4rem;
-  border-right: 1px solid var(--ct-divider);
+  gap: 2rem;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--ct-divider-faint);
   padding-right: 3rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ct-divider-strong) transparent;
 }
 
 .simSectionTitle {
@@ -560,6 +862,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .controlBtn {
@@ -576,10 +879,17 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid transparent;
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .controlBtn:hover {
   color: var(--ct-text);
+}
+
+.controlBtn span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .controlBtn[data-active="true"] {
@@ -593,6 +903,7 @@
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .controlRow .controlBtn {
@@ -608,46 +919,98 @@
 .simMain {
   display: flex;
   flex-direction: column;
-  gap: 4rem;
+  gap: 1.5rem;
   min-width: 0;
+  min-height: 0;
 }
 
-.simHeader {
-  margin-bottom: 1.5rem;
+.simMain > [aria-live] {
+  flex-shrink: 0;
+  min-width: 0;
+  margin-top: auto;
 }
 
-.simTitle {
-  font-family: var(--ct-font-serif);
-  font-size: var(--text-display-sm);
-  margin: 0;
-  font-weight: 400;
-}
-
-.simSubtitle {
-  color: var(--ct-text-muted);
-  font-size: var(--text-3xl);
-  margin-top: 1rem;
-  font-weight: 300;
-  max-width: 600px;
-  line-height: 1.5;
-}
-
-.simHeader .illustrativeNote {
-  margin-top: 1rem;
-  font-size: var(--text-sm);
-  color: var(--ct-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
+/* Blueprint viewport — layout sizing lives on the simMain child selector. */
 .projectionContainer {
-  aspect-ratio: 21 / 9;
   width: 100%;
-  max-height: 440px;
-  background: var(--ct-bg);
-  border: 1px solid var(--ct-divider-strong);
+  min-width: 0;
   position: relative;
   overflow: hidden;
+  background: var(--ct-bg);
+  border: 1px solid var(--ct-divider-strong);
+}
+
+.simMain > .projectionContainer {
+  flex: 1 1 auto;
+  align-self: stretch;
+  width: 100%;
+  min-height: clamp(160px, 22dvh, 260px);
+  max-height: min(42dvh, 400px);
+  aspect-ratio: 21 / 9;
+  border-color: var(--ct-divider-faint);
+  border-radius: 4px;
+}
+
+.projectionSvg {
+  --ct-projection-grid-major: rgba(255, 255, 255, 0.03);
+  --ct-projection-grid-micro: rgba(255, 255, 255, 0.01);
+  --ct-projection-halo: rgba(212, 175, 55, 0.03);
+  --ct-projection-structure-primary: rgba(255, 255, 255, 0.15);
+  --ct-projection-structure-secondary: rgba(255, 255, 255, 0.05);
+  --ct-projection-corner: rgba(255, 255, 255, 0.4);
+}
+
+.projectionSvgShell {
+  --ct-projection-halo: rgba(212, 175, 55, 0.03);
+  --ct-projection-structure-primary: rgba(255, 255, 255, 0.15);
+}
+
+.projectionSvgCompute {
+  --ct-projection-halo: rgba(122, 184, 255, 0.045);
+  --ct-projection-structure-primary: rgba(122, 184, 255, 0.18);
+  --ct-projection-structure-secondary: rgba(122, 184, 255, 0.07);
+}
+
+.projectionSvgGov {
+  --ct-projection-halo: rgba(255, 138, 138, 0.04);
+  --ct-projection-structure-primary: rgba(255, 138, 138, 0.18);
+}
+
+.projectionBackdrop {
+  fill: var(--ct-bg);
+}
+
+.projectionGridMajor,
+.projectionGridMicro,
+.projectionStructurePrimary,
+.projectionStructureSecondary,
+.projectionCornerMark {
+  fill: none;
+}
+
+.projectionGridMajor {
+  stroke: var(--ct-projection-grid-major);
+}
+
+.projectionGridMicro {
+  stroke: var(--ct-projection-grid-micro);
+}
+
+.projectionHalo {
+  fill: var(--ct-projection-halo);
+  filter: blur(40px);
+}
+
+.projectionStructurePrimary {
+  stroke: var(--ct-projection-structure-primary);
+}
+
+.projectionStructureSecondary {
+  stroke: var(--ct-projection-structure-secondary);
+}
+
+.projectionCornerMark {
+  stroke: var(--ct-projection-corner);
 }
 
 /* Crosshairs for Blueprint aesthetic */
@@ -715,42 +1078,44 @@
 
 /* Premium Financial Table format for Metrics */
 .simMetrics {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
   padding: 0;
   background: transparent;
   border: none;
   border-top: 1px solid var(--ct-divider);
-  margin-top: 2rem;
+  margin-top: 0;
+  min-width: 0;
 }
 
 .simMetrics .metricItem {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 1.6rem 0;
-  border-bottom: 1px solid var(--ct-divider);
-  gap: 2rem;
-  min-width: 0; /* allow children to shrink instead of pushing the page wider */
-}
-
-.simMetrics .metricLabel {
-  font-size: var(--text-lg);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--ct-text-muted);
-  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 1.25rem 0.2rem 0;
+  border-top: 1px solid var(--ct-divider);
+  border-bottom: none;
+  gap: 0.55rem;
   min-width: 0;
 }
 
+.simMetrics .metricLabel {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ct-text-muted);
+  min-width: 0;
+  line-height: 1.45;
+}
+
 .simMetrics .metricValue {
-  font-size: clamp(1.4rem, 3.5vw, 1.8rem);
+  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-weight: 300;
   color: var(--ct-text);
-  text-align: right;
-  flex: 0 1 auto;
+  text-align: left;
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -789,8 +1154,8 @@
 }
 
 .simMetrics .metricValueRisk {
-  font-size: clamp(1.1rem, 3vw, 1.4rem);
-  padding-top: 0.5rem;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  padding-top: 0;
 }
 
 .simError {
@@ -805,6 +1170,8 @@
   flex-direction: column;
   gap: 1rem;
   align-items: flex-start;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* ── Financial section title (returns / capital / projection panels) ── */
@@ -824,13 +1191,25 @@
   cursor: help;
 }
 
-/* ── Cockpit panel — premium container for registers / tables / readouts ── */
+/* ── Panel — container for registers / tables / readouts ── */
 .cockpitPanel {
-  background: var(--ct-surface);
-  border: 1px solid var(--ct-divider);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 60%),
+    var(--ct-surface);
+  border: 1px solid var(--ct-divider-faint);
   border-radius: var(--ct-panel-radius);
   padding: 1.75rem 1.75rem 1.5rem;
   margin-bottom: var(--ct-section-gap);
+}
+
+.cockpitPanelFill {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .cockpitPanel:last-child {
@@ -863,14 +1242,27 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Contained scroll region so long registers never run the page forever */
+.panelHint {
+  margin: 0.45rem 0 0;
+  color: var(--ct-text-muted);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* Horizontal + vertical scroll for wide registers inside the locked page frame */
 .cockpitPanelScroll {
   width: 100%;
-  max-height: clamp(320px, 60vh, 560px);
   overflow: auto;
   border-top: 1px solid var(--ct-divider);
   scrollbar-width: thin;
   scrollbar-color: var(--ct-divider-strong) transparent;
+}
+
+.cockpitPanelScrollFill {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
 }
 
 .cockpitPanelScroll::-webkit-scrollbar {
@@ -890,6 +1282,7 @@
 .cockpitPanelScrollWrap {
   position: relative;
   border-radius: var(--ct-panel-radius);
+  min-width: 0;
 }
 
 .cockpitPanelScrollWrap::after {
@@ -962,7 +1355,120 @@
   letter-spacing: 0.12em;
   color: var(--ct-text-muted);
   margin: 1.25rem 0 0;
-  max-width: 760px;
+  max-width: var(--ct-measure);
+  line-height: 1.6;
+}
+
+.cockpitFooterCluster {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.cockpitFooterCluster .cockpitNote {
+  margin: 0;
+}
+
+.cockpitFooterCluster .ctaButton {
+  align-self: flex-start;
+}
+
+.registerLayout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.sourceDocList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sourceDocsPanel {
+  align-self: start;
+}
+
+.sourceDocItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--ct-divider-faint);
+  min-width: 0;
+}
+
+/* The unclassed text column (link + meta) must shrink so long document names
+   wrap instead of widening the space-between row. */
+.sourceDocItem > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sourceDocItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.finOverviewGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.finOverviewGrid .cockpitPanel {
+  margin-bottom: 0;
+}
+
+.finProjectionPanel {
+  flex: 1;
+  min-height: 0;
+}
+
+.finProjectionPanel .cockpitPanelScrollWrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.finProjectionPanel .cockpitPanelScroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.modelCallout {
+  max-width: var(--ct-measure-wide);
+  padding-left: 1rem;
+  border-left: 1px solid var(--ct-accent-faint);
+}
+
+.modelCallout[data-tone="warning"] {
+  border-left-color: rgba(239, 68, 68, 0.5);
+}
+
+.modelCalloutLabel {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ct-accent);
+  margin-bottom: 0.55rem;
+}
+
+.modelCallout[data-tone="warning"] .modelCalloutLabel {
+  color: #F0A6A6;
+}
+
+.modelCalloutText {
+  margin: 0;
+  max-width: var(--ct-measure);
+  color: var(--ct-text-muted);
+  font-size: var(--text-base);
   line-height: 1.6;
 }
 
@@ -998,6 +1504,8 @@
   border-bottom: 1px solid var(--ct-divider-faint);
   vertical-align: top;
   color: var(--ct-text);
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .metaCell {
@@ -1170,55 +1678,586 @@
   color: var(--ct-text);
 }
 
-@media (max-width: 640px) {
-  .metricsGrid {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.5rem;
+/* ── Desktop-only / mobile-only visibility guards ──
+   desktopTableWrap: the full-width table container. Visible on tablet/desktop,
+   replaced by mobileCardList on phones.
+   mobileCardList: card stack for ≤768px. Hidden above that. */
+.desktopTableWrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.mobileCardList {
+  display: none;
+  flex-direction: column;
+  gap: 0.85rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-top: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ct-divider-strong) transparent;
+}
+
+.desktopOnly {
+  /* inline hint visible only on desktop; hidden on mobile where no table scrolls */
+}
+
+/* ── Source evidence card (mobile) ── */
+.sourceCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem 1rem 0.85rem;
+  border: 1px solid var(--ct-divider-faint);
+  border-radius: var(--ct-panel-radius);
+  background: var(--ct-bg);
+  min-width: 0;
+}
+
+.sourceCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.sourceCardMetric {
+  font-size: var(--text-base);
+  font-weight: 400;
+  color: var(--ct-text);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sourceCardValue {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-base);
+  color: var(--ct-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sourceCardMeta {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sourceCardSource {
+  font-size: var(--text-sm);
+  color: var(--ct-text-muted);
+}
+
+.sourceCardLink {
+  font-size: var(--text-sm);
+}
+
+.sourceCardFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sourceCardTag {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ct-text-muted);
+  border: 1px solid var(--ct-divider);
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+/* ── Deal archetype card (mobile) ── */
+.dealCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1rem 1rem 0.9rem;
+  border: 1px solid var(--ct-divider-faint);
+  border-radius: var(--ct-panel-radius);
+  background: var(--ct-bg);
+  min-width: 0;
+}
+
+.dealCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.dealCardName {
+  font-family: var(--ct-font-serif);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  color: var(--ct-text);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dealCardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.dealCardShort {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ct-text-muted);
+  line-height: 1.5;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dealCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.dealCardRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: var(--text-sm);
+  min-width: 0;
+}
+
+.dealCardRowLabel {
+  color: var(--ct-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dealCardScores {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 0.2rem;
+}
+
+.dealCardScore {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dealCardScoreLabel {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ct-text-muted);
+}
+
+.dealCardScoreValue {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--text-base);
+  color: var(--ct-text);
+}
+
+.dealCardTerms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CANONICAL RESPONSIVE SET — ordered widest→narrowest then height, so the
+   narrower / more-specific rule always wins the cascade (equal specificity →
+   source order decides). Do NOT insert ad-hoc thresholds; see file header.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1280px · desktop → small laptop: nav→drawer, tighter grids, but
+   keep the simulator 2-col cockpit. ── */
+@media (max-width: 1280px) {
+  .summaryGrid,
+  .registerLayout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .simLayout {
+    gap: 1.25rem;
   }
 
+  .simControls {
+    padding-right: 1.25rem;
+    gap: 1.25rem;
+  }
+}
+
+/* ── 769px+ · desktop/tablet instrument: 2-col cockpit, internal zone scroll. ── */
+@media (min-width: 769px) {
+  .cockpitFrameLocked {
+    overflow-y: hidden;
+  }
+
+  .simMain {
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ct-divider-strong) transparent;
+  }
+}
+
+/* ── 1024px · tablet: data registers stack; simulator KEEPS 2-col cockpit. ── */
+@media (max-width: 1024px) {
+  .registerLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .finOverviewGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cockpitBodyContent,
+  .cockpitPanelFill,
+  .cockpitPanelScrollFill,
+  .finProjectionPanel {
+    min-height: 0;
+  }
+
+  .simLayout {
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+
+  .simControls {
+    padding-right: 1.25rem;
+    gap: 1.25rem;
+  }
+}
+
+/* ── 768px · mobile: everything single column; metric/sim strips stack.
+   Absorbs the former 640 (hero metric shrink) and 560 (mobile single col). ── */
+@media (max-width: 768px) {
+  /* Switch table → cards for data-heavy registers */
+  .desktopTableWrap {
+    display: none;
+  }
+
+  .mobileCardList {
+    display: flex;
+    /* On mobile, the frame scrolls vertically — let the list size to content
+       rather than filling a height-constrained flex column. */
+    flex: none;
+    overflow-y: visible;
+    max-height: none;
+  }
+
+  .desktopOnly {
+    display: none;
+  }
+
+  /* On mobile the panel no longer needs to fill a fixed height — it should
+     size to its content so the outer frame scroll drives navigation. */
+  .cockpitPanelFill {
+    flex: none;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  /* registerLayout on mobile: let each panel size to content */
+  .registerLayout {
+    flex: none;
+    min-height: 0;
+  }
+
+  .summaryGrid,
+  .registerLayout {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hero metric strip (home KPIs) shrinks so long figures never collide. */
   .metricValue {
     font-size: var(--text-6xl-alt);
   }
-}
 
-/* Tablet / Smaller Desktop */
-@media (max-width: 1024px) {
   .simLayout {
     grid-template-columns: 1fr;
-    padding: 2.5rem 2rem;
-    gap: 2.5rem;
+    grid-template-rows: auto auto;
+    padding: 0;
+    gap: 1rem;
+    flex: none;
+    overflow: visible;
+    min-height: 0;
   }
+
   .simControls {
-    gap: 2.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.85rem 1rem;
+    align-items: start;
+    max-height: none;
+    overflow-y: visible;
     border-right: none;
     border-bottom: 1px solid var(--ct-divider);
     padding-right: 0;
-    padding-bottom: 2rem;
+    padding-bottom: 1rem;
   }
-  .projectionContainer {
-    max-height: 320px;
-  }
-}
 
-/* Narrow phones — P0 fix: stack each metric label over its value so long
-   readouts ("High (merchant compute)", "-$996.4M") wrap inside the column
-   instead of forcing a horizontal page scroll (documentElement.scrollWidth
-   was exceeding the viewport at ≤390px). */
-@media (max-width: 560px) {
-  .simLayout {
-    padding: 2rem 1.25rem;
+  .simControls > :first-child {
+    grid-column: 1 / -1;
   }
+
+  .simMain {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  .simMain > .projectionContainer {
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: clamp(150px, 22dvh, 220px);
+    max-height: clamp(150px, 25dvh, 240px);
+    aspect-ratio: 21 / 9;
+  }
+
+  /* Stacked simulator: frame scrolls to reveal controls + readout. */
+  .cockpitFrameLocked {
+    overflow-y: auto;
+  }
+
+  .simMetrics {
+    grid-template-columns: 1fr;
+    flex-shrink: 0;
+  }
+  /* Stack each metric label over its value so long readouts wrap inside the
+     column instead of forcing horizontal page scroll. */
   .simMetrics .metricItem {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.4rem;
+    gap: 0.35rem;
+    padding: 0.65rem 0;
   }
   .simMetrics .metricValue {
     text-align: left;
     width: 100%;
   }
   .controlRow {
+    gap: 0.8rem;
+  }
+}
+
+/* ── 430px · small phone: type/element density; summary grid single column. ── */
+@media (max-width: 430px) {
+  /* Source/deal cards: tighter padding on small phones */
+  .sourceCard,
+  .dealCard {
+    padding: 0.85rem 0.85rem 0.75rem;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryCard {
+    padding: 0.78rem 0.85rem;
+  }
+
+  .summaryText {
+    display: none;
+  }
+
+  .summaryValue {
+    font-size: clamp(1.05rem, 5vw, 1.55rem);
+  }
+
+  .pageTitle {
+    font-size: clamp(2.6rem, 13vw, 3.6rem);
+  }
+
+  .pageContext {
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+  }
+
+  .pageHead {
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.85rem;
+  }
+
+  .simControls {
+    gap: 0.85rem;
+  }
+
+  .controlBtn {
+    font-size: var(--text-lg);
+    padding: 0.4rem 0;
+  }
+
+  .simSectionTitle {
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* ── max-height 720px · single low-height density tier (laptops / short
+   viewports with browser chrome). Merges the former 820 + 680 tiers; takes the
+   tighter (680) value wherever they differed. ── */
+@media (max-height: 720px) {
+  .wrap {
+    --ct-nav-height: 56px;
+  }
+
+  .nav {
+    padding: 0.75rem 4rem;
+  }
+
+  .cockpitFrame {
+    --ct-frame-top: 0.65rem;
+    --ct-frame-bottom: 0.75rem;
+  }
+
+  .pageHead {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .pageEyebrow {
+    margin-bottom: 0.6rem;
+    font-size: var(--text-xs);
+  }
+
+  .pageTitle {
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .pageContext {
+    font-size: var(--text-xs);
+  }
+
+  .summaryCard {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .summaryText {
+    display: none;
+  }
+
+  .summaryValue {
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  }
+
+  .cockpitPanel {
+    padding: 1.1rem 1.25rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .simLayout {
     gap: 1rem;
+  }
+
+  .simSectionTitle {
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .simMain {
+    gap: 1rem;
+  }
+
+  .simMain > .projectionContainer {
+    min-height: clamp(160px, 28vh, 240px);
+  }
+
+  .simMetrics {
+    gap: 0.5rem;
+  }
+
+  .simMetrics .metricItem {
+    padding: 0.65rem 0.1rem 0;
+    gap: 0.3rem;
+  }
+
+  .simMetrics .metricValue {
+    font-size: clamp(1rem, 2vw, 1.4rem);
+  }
+
+  .homeKpis {
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  .metricsGrid {
+    margin-bottom: 2rem;
+  }
+}
+
+/* Low-height + wide (laptop) only: collapse the 4 summary cards into one row to
+   free vertical space. Guarded by min-width so narrow short phones keep their
+   single-column summary and never overflow. */
+@media (max-height: 720px) and (min-width: 769px) {
+  .summaryGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ── Mobile landscape · re-establishes the 2-col simulator the width stack
+   flattens. Must stay LAST so it overrides the low-height density tier. ── */
+@media (max-height: 520px) and (orientation: landscape) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cockpitFrameLocked {
+    overflow-y: hidden;
+  }
+
+  .simLayout {
+    display: grid;
+    grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .simControls {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    border-right: 1px solid var(--ct-divider-faint);
+    border-bottom: none;
+    padding-right: 1rem;
+    padding-bottom: 0;
+    gap: 0.75rem;
+    min-height: 0;
+  }
+
+  .simControls > :first-child {
+    grid-column: auto;
+  }
+
+  .simMain {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .simMain > .projectionContainer {
+    flex: 0 0 auto;
+    min-height: 150px;
+    aspect-ratio: 21 / 9;
+  }
+
+  .simMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-shrink: 0;
   }
 }

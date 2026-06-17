@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
+import HearstPageShell from '../components/HearstPageShell';
 import {
   fmtUSD,
   fmtPctFromRatio,
@@ -76,25 +77,32 @@ export default function WorkspacePage() {
   const serverCapped = loadedCount > 0 && count > loadedCount;
   const visible = scenarios ? scenarios.slice(0, shown) : [];
   const hasMoreLocal = loadedCount > shown;
+  const activeCount = scenarios?.filter((scenario) => scenario?.is_active).length ?? 0;
+  const lockedCount = scenarios?.filter((scenario) => scenario?.is_locked).length ?? 0;
+  const avgIrrValues = (scenarios ?? [])
+    .map((scenario) => scenario?.projection?.irr_post_tax ?? scenario?.projection?.irr)
+    .filter((value) => typeof value === 'number');
+  const avgIrr = avgIrrValues.length
+    ? fmtPctFromRatio(avgIrrValues.reduce((sum, value) => sum + value, 0) / avgIrrValues.length)
+    : '—';
+  const context = loading
+    ? 'Loading scenarios…'
+    : error
+      ? 'Unavailable'
+      : [
+          projectName,
+          `${count} ${count === 1 ? 'scenario' : 'scenarios'} on record`,
+        ].filter(Boolean).join(' · ');
 
   return (
-    <main className={styles.cockpitFrame}>
-      <header className={styles.pageHead}>
-        <div className={styles.pageEyebrow}>Working Surface</div>
-        <h1 className={styles.pageTitle}>Scenario Workspace</h1>
-        <p className={styles.pageContext}>
-          {loading
-            ? 'Loading scenarios…'
-            : error
-              ? 'Unavailable'
-              : [
-                  projectName,
-                  `${count} ${count === 1 ? 'scenario' : 'scenarios'} on record`,
-                ].filter(Boolean).join(' · ')}
-        </p>
-      </header>
-
-      <div aria-live="polite" aria-busy={loading}>
+    <HearstPageShell
+      variant="data"
+      eyebrow="Working Surface"
+      title="Scenario Workspace"
+      context={context}
+      bodyAriaLive="polite"
+      bodyAriaBusy={loading}
+    >
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
@@ -118,16 +126,39 @@ export default function WorkspacePage() {
           </div>
         ) : (
           <>
-            <section className={styles.cockpitPanel}>
+            <div className={styles.summaryGrid}>
+              <article className={styles.summaryCard}>
+                <div className={styles.summaryLabel}>Scenarios on record</div>
+                <div className={styles.summaryValue}>{count}</div>
+                <p className={styles.summaryText}>Saved scenario count reported by the live workspace endpoints.</p>
+              </article>
+              <article className={styles.summaryCard}>
+                <div className={styles.summaryLabel}>Active scenarios</div>
+                <div className={styles.summaryValue}>{activeCount}</div>
+                <p className={styles.summaryText}>Entries still marked live inside the current scenario catalogue.</p>
+              </article>
+              <article className={styles.summaryCard}>
+                <div className={styles.summaryLabel}>Locked scenarios</div>
+                <div className={styles.summaryValue}>{lockedCount}</div>
+                <p className={styles.summaryText}>Saved views currently preserved from direct editing.</p>
+              </article>
+              <article className={styles.summaryCard}>
+                <div className={styles.summaryLabel}>Average IRR</div>
+                <div className={styles.summaryValue}>{avgIrr}</div>
+                <p className={styles.summaryText}>Average post-tax return across the scenarios loaded into this session.</p>
+              </article>
+            </div>
+
+            <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill}`}>
               <div className={styles.cockpitPanelHead}>
                 <h2 className={styles.cockpitPanelTitle}>Saved Scenarios</h2>
                 <span className={styles.cockpitPanelContext}>
                   Showing {visible.length} of {count}
                 </span>
               </div>
-            <div className={styles.cockpitPanelScrollWrap}>
-            <div className={styles.cockpitPanelScroll}>
-              <table className={styles.sourcesTable}>
+              <div className={styles.cockpitPanelScrollWrap}>
+                <div className={`${styles.cockpitPanelScroll} ${styles.cockpitPanelScrollFill}`}>
+                  <table className={styles.sourcesTable}>
                 <thead>
                   <tr>
                     <th>Scenario</th>
@@ -172,37 +203,38 @@ export default function WorkspacePage() {
                     );
                   })}
                 </tbody>
-              </table>
-            </div>
-            </div>
-            {hasMoreLocal && (
-              <div className={styles.loadMoreRow}>
-                <button
-                  type="button"
-                  className={styles.loadMoreButton}
-                  onClick={() => setShown((n) => Math.min(n + PAGE_SIZE, loadedCount))}
-                >
-                  Load {Math.min(PAGE_SIZE, loadedCount - shown)} more
-                </button>
+                  </table>
+                </div>
               </div>
-            )}
+              {hasMoreLocal && (
+                <div className={styles.loadMoreRow}>
+                  <button
+                    type="button"
+                    className={styles.loadMoreButton}
+                    onClick={() => setShown((n) => Math.min(n + PAGE_SIZE, loadedCount))}
+                  >
+                    Load {Math.min(PAGE_SIZE, loadedCount - shown)} more
+                  </button>
+                </div>
+              )}
             </section>
-            <p className={styles.cockpitNote}>
-              Read-only register — projections are recalculated from each saved scenario.
-              Adjust assumptions interactively in the Projection.
-            </p>
-            {serverCapped && !hasMoreLocal && (
+            <div className={styles.cockpitFooterCluster}>
               <p className={styles.cockpitNote}>
-                Showing the {loadedCount} most recent of {count} scenarios on record. Older
-                scenarios remain in the model; archive or narrow the set to bring them into view.
+                Read-only register — projections are recalculated from each saved scenario.
+                Adjust assumptions interactively in the Projection.
               </p>
-            )}
-            <Link href="/admin/hearst/simulator" className={styles.ctaButton}>
-              Open the Projection ⟶
-            </Link>
+              {serverCapped && !hasMoreLocal && (
+                <p className={styles.cockpitNote}>
+                  Showing the {loadedCount} most recent of {count} scenarios on record. Older
+                  scenarios remain in the model; archive or narrow the set to bring them into view.
+                </p>
+              )}
+              <Link href="/admin/hearst/simulator" className={styles.ctaButton}>
+                Open the Projection ⟶
+              </Link>
+            </div>
           </>
         )}
-      </div>
-    </main>
+    </HearstPageShell>
   );
 }

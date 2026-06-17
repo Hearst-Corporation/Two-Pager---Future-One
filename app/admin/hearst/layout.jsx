@@ -12,7 +12,7 @@ export default function HearstLayout({ children }) {
   return (
     <div className={`${playfair.variable} ${styles.wrap}`}>
       <HearstNav />
-      {children}
+      <div className={styles.pageStage}>{children}</div>
     </div>
   );
 }

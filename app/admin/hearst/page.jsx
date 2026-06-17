@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import styles from './hearst.module.css';
+import HearstPageShell from './components/HearstPageShell';
 
 export const metadata = {
   title: 'FUTUR ONE | Investment Memo',
@@ -11,7 +12,7 @@ const KPIS = [
   { label: 'Projected IRR', value: '12.5%' },
 ];
 
-// Cockpit map — every section reachable from the entry screen.
+// Entry map — every section reachable from the overview.
 const MODULES = [
   {
     href: '/admin/hearst/simulator',
@@ -53,15 +54,15 @@ const MODULES = [
 
 export default function HearstLanding() {
   return (
-    <main className={styles.cockpitFrame}>
-      <section className={styles.homeHero}>
-        <div className={styles.pageEyebrow}>Hearst Qatar AI Infrastructure</div>
-        <h1 className={styles.pageTitle}>FUTUR ONE</h1>
-        <p className={styles.pageContext}>
-          The control surface for the sovereign AI infrastructure investment —
-          where state-of-the-art compute meets strategic long-term yield.
-        </p>
-
+    <HearstPageShell
+      variant="home"
+      eyebrow="Hearst Qatar AI Infrastructure"
+      title="FUTUR ONE"
+      context="The control surface for the sovereign AI infrastructure investment — where state-of-the-art compute meets strategic long-term yield."
+      bodyClassName={styles.homeBody}
+      headerClassName={styles.homeHero}
+    >
+      <section className={styles.homeMetrics}>
         <div className={styles.homeKpis}>
           {KPIS.map(({ label, value }) => (
             <div key={label} className={styles.metricItem}>
@@ -75,7 +76,7 @@ export default function HearstLanding() {
         </p>
       </section>
 
-      <nav className={styles.routeGrid} aria-label="Cockpit sections">
+      <nav className={styles.routeGrid} aria-label="Hearst sections">
         {MODULES.map(({ href, index, name, desc }) => (
           <Link key={href} href={href} className={styles.routeCard}>
             <div className={styles.routeCardTop}>
@@ -87,6 +88,6 @@ export default function HearstLanding() {
           </Link>
         ))}
       </nav>
-    </main>
+    </HearstPageShell>
   );
 }

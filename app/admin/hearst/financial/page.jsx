@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
+import HearstPageShell from '../components/HearstPageShell';
 import {
   fmtUSD,
   fmtPctFromRatio,
@@ -82,16 +83,19 @@ export default function FinancialPage() {
   const irr = projection?.irr_post_tax ?? projection?.irr;
   const npv = projection?.npv_post_tax ?? projection?.npv;
   const moic = projection?.moic_post_tax ?? projection?.moic;
+  const stressedCase =
+    (typeof irr === 'number' && irr < 0) ||
+    (typeof npv === 'number' && npv < 0);
 
   return (
-    <main className={styles.cockpitFrame}>
-      <header className={styles.pageHead}>
-        <div className={styles.pageEyebrow}>Investment Case</div>
-        <h1 className={styles.pageTitle}>Financial Model</h1>
-        <p className={styles.pageContext}>{BASE_CASE_LABEL}</p>
-      </header>
-
-      <div aria-live="polite" aria-busy={loading}>
+    <HearstPageShell
+      variant="editorial"
+      eyebrow="Investment Case"
+      title="Financial Model"
+      context={BASE_CASE_LABEL}
+      bodyAriaLive="polite"
+      bodyAriaBusy={loading}
+    >
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
@@ -114,32 +118,43 @@ export default function FinancialPage() {
           </div>
         ) : (
           <>
-            <section className={styles.cockpitPanel}>
-              <h2 className={styles.finSectionTitle}>Returns — post-tax</h2>
-              <div className={styles.metricsGrid}>
-                <Metric label={<abbr title="Internal Rate of Return">IRR</abbr>} value={fmtPctFromRatio(irr)} />
-                <Metric label={<abbr title="Multiple on Invested Capital">MOIC</abbr>} value={fmtX(moic)} />
-                <Metric label={<abbr title="Net Present Value">NPV</abbr>} value={fmtUSD(npv)} />
-                <Metric label="Payback" value={fmtYears(projection.payback_years)} />
-                <Metric label={<><abbr title="Debt Service Coverage Ratio">DSCR</abbr> (stab.)</>} value={fmtX(projection.dscr_stabilized)} />
-              </div>
+            <section className={styles.modelCallout} data-tone={stressedCase ? 'warning' : 'stable'}>
+              <div className={styles.modelCalloutLabel}>Current Read</div>
+              <p className={styles.modelCalloutText}>
+                {stressedCase
+                  ? 'The live base case is screening below target returns under current assumptions. The UI keeps this downside read visible rather than softening it.'
+                  : 'The live base case is generating a constructive return profile under the current assumptions.'}
+              </p>
             </section>
 
-            <section className={styles.cockpitPanel}>
-              <h2 className={styles.finSectionTitle}>Capital</h2>
-              <div className={styles.metricsGrid}>
-                <Metric label="Total CAPEX" value={fmtUSD(projection.total_capex)} />
-                <Metric label="Equity Invested" value={fmtUSD(projection.equity_invested)} />
-                <Metric label="Terminal Value" value={fmtUSD(projection.terminal_value)} />
-              </div>
-            </section>
+            <div className={styles.finOverviewGrid}>
+              <section className={styles.cockpitPanel}>
+                <h2 className={styles.finSectionTitle}>Returns — post-tax</h2>
+                <div className={styles.metricsGrid}>
+                  <Metric label={<abbr title="Internal Rate of Return">IRR</abbr>} value={fmtPctFromRatio(irr)} />
+                  <Metric label={<abbr title="Multiple on Invested Capital">MOIC</abbr>} value={fmtX(moic)} />
+                  <Metric label={<abbr title="Net Present Value">NPV</abbr>} value={fmtUSD(npv)} />
+                  <Metric label="Payback" value={fmtYears(projection.payback_years)} />
+                  <Metric label={<><abbr title="Debt Service Coverage Ratio">DSCR</abbr> (stab.)</>} value={fmtX(projection.dscr_stabilized)} />
+                </div>
+              </section>
+
+              <section className={styles.cockpitPanel}>
+                <h2 className={styles.finSectionTitle}>Capital</h2>
+                <div className={styles.metricsGrid}>
+                  <Metric label="Total CAPEX" value={fmtUSD(projection.total_capex)} />
+                  <Metric label="Equity Invested" value={fmtUSD(projection.equity_invested)} />
+                  <Metric label="Terminal Value" value={fmtUSD(projection.terminal_value)} />
+                </div>
+              </section>
+            </div>
 
             {years.length > 0 && (
-              <section className={styles.cockpitPanel}>
+              <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill} ${styles.finProjectionPanel}`}>
                 <h2 className={styles.finSectionTitle}>Projection</h2>
                 <div className={styles.cockpitPanelScrollWrap}>
-                <div className={styles.cockpitPanelScroll}>
-                  <table className={styles.sourcesTable}>
+                  <div className={`${styles.cockpitPanelScroll} ${styles.cockpitPanelScrollFill}`}>
+                    <table className={styles.sourcesTable}>
                     <thead>
                       <tr>
                         <th>Year</th>
@@ -162,22 +177,23 @@ export default function FinancialPage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
-                </div>
+                    </table>
+                  </div>
                 </div>
               </section>
             )}
 
-            <p className={styles.cockpitNote}>
-              Illustrative model — a single base case computed live by the Oracle
-              engine. Explore other theses, scales, and mixes in the Projection.
-            </p>
-            <Link href="/admin/hearst/simulator" className={styles.ctaButton}>
-              Open the Projection ⟶
-            </Link>
+            <div className={styles.cockpitFooterCluster}>
+              <p className={styles.cockpitNote}>
+                Illustrative model — a single base case computed live by the Oracle
+                engine. Explore other theses, scales, and mixes in the Projection.
+              </p>
+              <Link href="/admin/hearst/simulator" className={styles.ctaButton}>
+                Open the Projection ⟶
+              </Link>
+            </div>
           </>
         )}
-      </div>
-    </main>
+    </HearstPageShell>
   );
 }
