@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { DATA_ROOM_REQUIRED } from '@/lib/hearst-constants';
+import { bootstrapScenarioFromSources } from '@/lib/hearst-bootstrap';
 import { PUBLIC_SOURCES_LIBRARY } from '@/lib/oracle-intelligence/source-library.js';
 import { withValidation } from '@/lib/validators/withValidation';
 import { ProjectUpdateSchema } from '@/lib/validators/hearst';
@@ -15,6 +16,110 @@ async function fetchProject(supa) {
   return data?.[0] ?? null;
 }
 
+const SCENARIO_SEED_META = [
+  { name: 'Base Case', scenario_type: 'base', is_active: true },
+  { name: 'Downside Case', scenario_type: 'downside', is_active: false },
+  { name: 'Upside Case', scenario_type: 'upside', is_active: false },
+];
+
+const REQUIRED_SCENARIO_FIELDS = [
+  'total_mw',
+  'pue',
+  'target_occupancy_pct',
+  'electricity_price_mwh',
+  'capex_shell_per_mw',
+  'capex_mep_per_mw',
+  'capex_substation_per_mw',
+  'capex_cooling_per_mw',
+  'price_retail_colo_kw_month',
+  'commercial_split',
+  'debt_pct',
+  'debt_interest_rate',
+  'exit_multiple',
+];
+
+function buildSeedScenario(meta, actorId) {
+  const boot = bootstrapScenarioFromSources({
+    geography: 'qatar',
+    business_model_id: 'retail_colo',
+    mw_target: 50,
+  });
+
+  return {
+    ...boot.scenario,
+    project_id: null,
+    name: meta.name,
+    scenario_type: meta.scenario_type,
+    is_active: meta.is_active,
+    created_by: actorId,
+  };
+}
+
+function isIncompleteAutoSeedScenario(row) {
+  if (!row) return false;
+  if (!SCENARIO_SEED_META.some((meta) => meta.scenario_type === row.scenario_type && meta.name === row.name)) {
+    return false;
+  }
+
+  const missingCount = REQUIRED_SCENARIO_FIELDS.filter((field) => {
+    const value = row[field];
+    if (field === 'commercial_split') {
+      return !value || typeof value !== 'object' || Object.keys(value).length === 0;
+    }
+    return value == null;
+  }).length;
+
+  return missingCount >= 4;
+}
+
+async function repairIncompleteSeedScenarios(supa, projectId, actorId) {
+  const { data, error } = await supa
+    .from('hearst_scenarios')
+    .select('*')
+    .eq('project_id', projectId)
+    .in('scenario_type', ['base', 'downside', 'upside']);
+
+  if (error || !Array.isArray(data) || data.length === 0) return;
+
+  const seedDefaults = Object.fromEntries(
+    SCENARIO_SEED_META.map((meta) => [meta.scenario_type, buildSeedScenario(meta, actorId)]),
+  );
+  const baseScenario = data.find((row) => row.scenario_type === 'base' && !isIncompleteAutoSeedScenario(row));
+
+  let repairedCount = 0;
+  for (const row of data) {
+    if (!isIncompleteAutoSeedScenario(row)) continue;
+
+    const fallback = row.scenario_type === 'base'
+      ? seedDefaults.base
+      : { ...seedDefaults[row.scenario_type], ...(baseScenario || {}) };
+
+    const patch = {};
+    for (const field of REQUIRED_SCENARIO_FIELDS) {
+      if (row[field] == null && fallback[field] != null) {
+        patch[field] = fallback[field];
+      }
+    }
+
+    if (Object.keys(patch).length === 0) continue;
+
+    const { error: updateError } = await supa
+      .from('hearst_scenarios')
+      .update({ ...patch, updated_at: new Date().toISOString() })
+      .eq('id', row.id);
+
+    if (!updateError) repairedCount += 1;
+  }
+
+  if (repairedCount > 0) {
+    // eslint-disable-next-line no-console
+    console.info('[project][GET] repaired_seed_scenarios', {
+      projectId,
+      repairedCount,
+    });
+  }
+}
+
 /** GET — fetch or auto-create the single HEARST project */
 export async function GET() {
   const r = await requireProfile('viewer');
@@ -22,6 +127,11 @@ export async function GET() {
   const supa = getAdminClient();
 
   let project = await fetchProject(supa);
+
+  if (project?.id) {
+    await repairIncompleteSeedScenarios(supa, project.id, r.profile.id);
+    project = await fetchProject(supa);
+  }
 
   if (!project) {
     // Re-check existence immediately before insert to narrow the race window when no unique
@@ -48,19 +158,19 @@ export async function GET() {
 
     const { data: baseScenario } = await supa
       .from('hearst_scenarios')
-      .insert({ project_id: newProject.id, name: 'Base Case', scenario_type: 'base', is_active: true })
+      .insert({ ...buildSeedScenario(SCENARIO_SEED_META[0], r.profile.id), project_id: newProject.id })
       .select()
       .single();
 
     const { data: downScenario } = await supa
       .from('hearst_scenarios')
-      .insert({ project_id: newProject.id, name: 'Downside Case', scenario_type: 'downside', is_active: false })
+      .insert({ ...buildSeedScenario(SCENARIO_SEED_META[1], r.profile.id), project_id: newProject.id })
       .select()
       .single();
 
     const { data: upScenario } = await supa
       .from('hearst_scenarios')
-      .insert({ project_id: newProject.id, name: 'Upside Case', scenario_type: 'upside', is_active: false })
+      .insert({ ...buildSeedScenario(SCENARIO_SEED_META[2], r.profile.id), project_id: newProject.id })
       .select()
       .single();
 

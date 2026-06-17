@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { requireRowOwnership } from '@/lib/auth-guards';
 import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
+import { normalizeScenarioForRead } from '@/lib/hearst-scenario-normalize';
 import { withValidationPartial } from '@/lib/validators/withValidation';
 import { ScenarioUpdateSchema } from '@/lib/validators/hearst';
 import { dbErrorResponse, notFoundResponse } from '@/lib/api-errors';
@@ -23,8 +24,9 @@ export async function GET(req, { params }) {
   const supa = getAdminClient();
   const { data, error } = await supa.from('hearst_scenarios').select('*').eq('id', params.id).single();
   if (error) return notFoundResponse();
-  const projection = generateProjection(data);
-  return NextResponse.json({ scenario: data, projection, source_score: calcSourceScore(data) });
+  const scenario = normalizeScenarioForRead(data);
+  const projection = generateProjection(scenario);
+  return NextResponse.json({ scenario, projection, source_score: calcSourceScore(scenario) });
 }
 
 export const PATCH = withValidationPartial(ScenarioUpdateSchema, async (req, parsed, { params }) => {
@@ -71,8 +73,9 @@ export const PATCH = withValidationPartial(ScenarioUpdateSchema, async (req, par
     await auth.supa.from('hearst_audit_log').insert(auditRows);
   }
 
-  const projection = generateProjection(data);
-  return NextResponse.json({ scenario: data, projection, source_score: calcSourceScore(data) });
+  const scenario = normalizeScenarioForRead(data);
+  const projection = generateProjection(scenario);
+  return NextResponse.json({ scenario, projection, source_score: calcSourceScore(scenario) });
 });
 
 export async function DELETE(req, { params }) {

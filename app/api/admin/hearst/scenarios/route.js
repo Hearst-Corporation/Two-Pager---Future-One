@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { generateProjection, calcSourceScore } from '@/lib/hearst-calculations';
+import { normalizeScenarioForRead } from '@/lib/hearst-scenario-normalize';
 import { withValidation } from '@/lib/validators/withValidation';
 import { ScenarioCreateSchema } from '@/lib/validators/hearst';
 import { dbErrorResponse } from '@/lib/api-errors';
@@ -13,21 +14,22 @@ export async function GET(req) {
   const project_id = searchParams.get('project_id');
   if (!project_id) return NextResponse.json({ error: 'project_id required' }, { status: 400 });
 
-  const { data, error } = await supa
+  const { data, error, count } = await supa
     .from('hearst_scenarios')
-    .select('*')
+    .select('*', { count: 'exact' })
     .eq('project_id', project_id)
     .order('created_at')
     .limit(100);
   if (error) return dbErrorResponse(error, '[scenarios][GET]');
 
   // Attach calculated projections and source scores
-  const enriched = (data || []).map((s) => {
+  const enriched = (data || []).map((row) => {
+    const s = normalizeScenarioForRead(row);
     const proj = generateProjection(s);
     return { ...s, projection: proj, source_score: calcSourceScore(s) };
   });
 
-  return NextResponse.json({ scenarios: enriched });
+  return NextResponse.json({ scenarios: enriched, count: count ?? enriched.length });
 }
 
 export const POST = withValidation(ScenarioCreateSchema, async (req, parsed) => {

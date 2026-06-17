@@ -15,6 +15,7 @@ import {
 export default function WorkspacePage() {
   const [projectName, setProjectName] = useState(null);
   const [scenarios, setScenarios] = useState(null);
+  const [scenarioCount, setScenarioCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -46,6 +47,7 @@ export default function WorkspacePage() {
         const scenariosData = await scenariosRes.json();
         if (!active) return;
         setScenarios(Array.isArray(scenariosData.scenarios) ? scenariosData.scenarios : []);
+        setScenarioCount(Number.isFinite(scenariosData.count) ? scenariosData.count : 0);
       } catch (err) {
         if (active) setError(err.message);
       } finally {
@@ -57,7 +59,9 @@ export default function WorkspacePage() {
     return () => { active = false; };
   }, []);
 
-  const count = scenarios?.length ?? 0;
+  const visibleCount = scenarios?.length ?? 0;
+  const count = scenarioCount || visibleCount;
+  const isTruncated = visibleCount > 0 && count > visibleCount;
 
   return (
     <main className={styles.sourcesPage}>
@@ -84,7 +88,7 @@ export default function WorkspacePage() {
           </div>
         ) : loading ? (
           <div className={styles.emptyState}>Loading…</div>
-        ) : count === 0 ? (
+        ) : visibleCount === 0 ? (
           <div className={styles.emptyState}>
             No saved scenarios yet. Explore assumptions live in the Projection —
             persistence will appear here once scenarios are saved through the model.
@@ -143,6 +147,12 @@ export default function WorkspacePage() {
               Read-only register — projections are recalculated from each saved scenario.
               Adjust assumptions interactively in the Projection.
             </p>
+            {isTruncated && (
+              <p className={styles.illustrativeNote}>
+                Showing {visibleCount} of {count} scenarios. Narrow or archive older scenarios
+                if you need a smaller working set.
+              </p>
+            )}
             <Link href="/admin/hearst/simulator" className={styles.ctaButton}>
               Open the Projection ⟶
             </Link>

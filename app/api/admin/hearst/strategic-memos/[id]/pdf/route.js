@@ -16,6 +16,7 @@ import { resolveCitationsInText, resolveCitation } from '@/lib/citation-resolver
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
+const EXPORTABLE_MEMO_STATUSES = new Set(['reviewed', 'approved', 'archived']);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -852,6 +853,18 @@ export async function GET(req, { params }) {
   const { data: row, error } = await supa.from('strategic_memos').select('*').eq('id', params.id).maybeSingle();
   if (error) return dbErrorResponse(error, '[strategic-memos/[id]/pdf][GET]');
   if (!row) return notFoundResponse();
+  if (!EXPORTABLE_MEMO_STATUSES.has(row.status)) {
+    return NextResponse.json(
+      {
+        error: 'memo_not_exportable',
+        detail: 'Only reviewed, approved, or archived memos can be exported.',
+      },
+      {
+        status: 409,
+        headers: { 'Cache-Control': 'no-store' },
+      },
+    );
+  }
 
   const format = new URL(req.url).searchParams.get('format');
   if (format === 'html') {
