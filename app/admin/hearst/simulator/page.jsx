@@ -78,7 +78,7 @@ export default function SimulatorPage() {
 
         let riskLabel = 'Moderate';
         if (thesis === 'shell') riskLabel = 'Low (secured yield)';
-        if (thesis === 'compute') riskLabel = 'High (merchant GPU)';
+        if (thesis === 'compute') riskLabel = 'High (merchant compute)';
         if (thesis === 'gov') riskLabel = 'Low (sovereign backed)';
 
         setMetrics({

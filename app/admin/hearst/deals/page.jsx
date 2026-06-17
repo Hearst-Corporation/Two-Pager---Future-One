@@ -74,7 +74,14 @@ export default function DealsPage() {
           </div>
         ) : (
           <>
-            <div className={styles.sourcesTableWrap}>
+            <section className={styles.cockpitPanel}>
+              <div className={styles.cockpitPanelHead}>
+                <h2 className={styles.cockpitPanelTitle}>Deal Archetypes</h2>
+                <span className={styles.cockpitPanelContext}>
+                  {count} {count === 1 ? 'structure' : 'structures'}
+                </span>
+              </div>
+            <div className={styles.cockpitPanelScroll}>
               <table className={styles.sourcesTable}>
                 <thead>
                   <tr>
@@ -125,7 +132,8 @@ export default function DealsPage() {
                 </tbody>
               </table>
             </div>
-            <p className={styles.illustrativeNote}>
+            </section>
+            <p className={styles.cockpitNote}>
               Read-only catalogue — strategic scores (1–5) from the engine archetype
               definitions. Explore live economics for selected structures in the Projection.
             </p>

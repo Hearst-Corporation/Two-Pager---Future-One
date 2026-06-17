@@ -113,7 +113,7 @@ export default function FinancialPage() {
           </div>
         ) : (
           <>
-            <section className={styles.finSection}>
+            <section className={styles.cockpitPanel}>
               <h2 className={styles.finSectionTitle}>Returns — post-tax</h2>
               <div className={styles.metricsGrid}>
                 <Metric label="IRR" value={fmtPctFromRatio(irr)} />
@@ -124,7 +124,7 @@ export default function FinancialPage() {
               </div>
             </section>
 
-            <section className={styles.finSection}>
+            <section className={styles.cockpitPanel}>
               <h2 className={styles.finSectionTitle}>Capital</h2>
               <div className={styles.metricsGrid}>
                 <Metric label="Total CAPEX" value={fmtUSD(projection.total_capex)} />
@@ -134,9 +134,9 @@ export default function FinancialPage() {
             </section>
 
             {years.length > 0 && (
-              <section className={styles.finSection}>
+              <section className={styles.cockpitPanel}>
                 <h2 className={styles.finSectionTitle}>Projection</h2>
-                <div className={styles.sourcesTableWrap}>
+                <div className={styles.cockpitPanelScroll}>
                   <table className={styles.sourcesTable}>
                     <thead>
                       <tr>
@@ -165,7 +165,7 @@ export default function FinancialPage() {
               </section>
             )}
 
-            <p className={styles.illustrativeNote}>
+            <p className={styles.cockpitNote}>
               Illustrative model — a single base case computed live by the Oracle
               engine. Explore other theses, scales, and mixes in the Projection.
             </p>

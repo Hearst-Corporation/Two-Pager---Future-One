@@ -92,7 +92,14 @@ export default function DossierPage() {
           </div>
         ) : (
           <>
-            <div className={styles.sourcesTableWrap}>
+            <section className={styles.cockpitPanel}>
+              <div className={styles.cockpitPanelHead}>
+                <h2 className={styles.cockpitPanelTitle}>Strategic Memos</h2>
+                <span className={styles.cockpitPanelContext}>
+                  {count} {count === 1 ? 'deliverable' : 'deliverables'}
+                </span>
+              </div>
+            <div className={styles.cockpitPanelScroll}>
               <table className={styles.sourcesTable}>
                 <thead>
                   <tr>
@@ -142,7 +149,8 @@ export default function DossierPage() {
                 </tbody>
               </table>
             </div>
-            <p className={styles.illustrativeNote}>
+            </section>
+            <p className={styles.cockpitNote}>
               Read-only library — summary rows only. Full memo content and generation
               remain on the backend deliverables pipeline.
             </p>

@@ -107,7 +107,14 @@ export default function SourcesPage() {
             added through the model.
           </div>
         ) : (
-          <div className={styles.sourcesTableWrap}>
+          <section className={styles.cockpitPanel}>
+            <div className={styles.cockpitPanelHead}>
+              <h2 className={styles.cockpitPanelTitle}>Evidence Register</h2>
+              <span className={styles.cockpitPanelContext}>
+                {count} {count === 1 ? 'datapoint' : 'datapoints'}
+              </span>
+            </div>
+            <div className={styles.cockpitPanelScroll}>
             <table className={styles.sourcesTable}>
               <thead>
                 <tr>
@@ -158,7 +165,8 @@ export default function SourcesPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </section>
         )}
       </div>
     </main>

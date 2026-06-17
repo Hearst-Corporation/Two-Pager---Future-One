@@ -107,7 +107,14 @@ export default function WorkspacePage() {
           </div>
         ) : (
           <>
-            <div className={styles.sourcesTableWrap}>
+            <section className={styles.cockpitPanel}>
+              <div className={styles.cockpitPanelHead}>
+                <h2 className={styles.cockpitPanelTitle}>Saved Scenarios</h2>
+                <span className={styles.cockpitPanelContext}>
+                  {isTruncated ? `${visibleCount} of ${count}` : `${count} on record`}
+                </span>
+              </div>
+            <div className={styles.cockpitPanelScroll}>
               <table className={styles.sourcesTable}>
                 <thead>
                   <tr>
@@ -155,12 +162,13 @@ export default function WorkspacePage() {
                 </tbody>
               </table>
             </div>
-            <p className={styles.illustrativeNote}>
+            </section>
+            <p className={styles.cockpitNote}>
               Read-only register — projections are recalculated from each saved scenario.
               Adjust assumptions interactively in the Projection.
             </p>
             {isTruncated && (
-              <p className={styles.illustrativeNote}>
+              <p className={styles.cockpitNote}>
                 Showing {visibleCount} of {count} scenarios. Narrow or archive older scenarios
                 if you need a smaller working set.
               </p>
