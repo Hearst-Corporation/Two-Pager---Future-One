@@ -74,6 +74,7 @@ export async function insertLlmRun(args: InsertLlmRunArgs): Promise<void> {
   });
   if (error) {
     // Never fail the request because observability insert failed — log and move on.
+    // eslint-disable-next-line no-console
     console.warn("[llm_runs insert failed]", error.message);
   }
 }

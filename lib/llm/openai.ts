@@ -32,6 +32,7 @@ export async function openaiChatCompletion(params: ChatParams) {
     model,
     stream: false,
   });
+  // eslint-disable-next-line no-console
   console.log(`[openai] ${model} succeeded in ${Date.now() - start}ms`);
   return { response, model_used: model };
 }

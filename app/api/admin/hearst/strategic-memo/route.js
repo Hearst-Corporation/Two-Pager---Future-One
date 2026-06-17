@@ -475,6 +475,7 @@ export async function POST(req) {
         });
       }
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] server-side projection recompute failed:`, e?.message);
       serverProjection = null;
     }
@@ -623,6 +624,7 @@ export async function POST(req) {
       llmDurationMs = Date.now() - llmStart;
 
       if (llmResult?.__timeout) {
+        // eslint-disable-next-line no-console
         console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM soft timeout after ${llmDurationMs}ms; using deterministic fallback`);
         memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
         model_used = 'deterministic-fallback';
@@ -641,7 +643,9 @@ export async function POST(req) {
             catch { /* fall through to error */ }
           }
           if (!memo) {
+            // eslint-disable-next-line no-console
             console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] JSON parse failed; using deterministic fallback`);
+            // eslint-disable-next-line no-console
             console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] raw tail:`, rawContent.slice(-300));
             memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
             model_used = 'deterministic-fallback';
@@ -650,6 +654,7 @@ export async function POST(req) {
       }
     } catch (e) {
       llmDurationMs = Date.now() - llmStart;
+      // eslint-disable-next-line no-console
       console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM failed; using deterministic fallback:`, e?.message);
       memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
       model_used = 'deterministic-fallback';
@@ -713,6 +718,7 @@ export async function POST(req) {
     const overall_grade = gradeScore === 4 ? 'A' : gradeScore === 3 ? 'B' : gradeScore === 2 ? 'C' : 'D';
 
     if (bannedFound.length > 0) {
+      // eslint-disable-next-line no-console
       console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] quality: banned phrases detected:`, bannedFound);
     }
 

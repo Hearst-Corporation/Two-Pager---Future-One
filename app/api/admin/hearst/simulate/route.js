@@ -103,6 +103,7 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
         .eq('used_in_model', true);
       if (Array.isArray(data)) extraSources = data;
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.warn(`[simulate][actor=${auth.profile.id}] hearst_sources fetch failed:`, e?.message);
     }
   }
@@ -183,6 +184,7 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
     }
   } catch (e) {
     // Les calculs auxiliaires ne doivent pas faire échouer la route
+    // eslint-disable-next-line no-console
     console.warn(`[simulate][actor=${auth.profile.id}] debt/waterfall failed:`, e?.message);
   }
 

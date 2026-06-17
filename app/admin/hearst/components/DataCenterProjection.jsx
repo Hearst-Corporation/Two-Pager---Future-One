@@ -4,20 +4,6 @@ import styles from '../hearst.module.css';
 
 // SVG placeholders for different visual states, simulating the cinematic crossfade
 function PlaceholderSVG({ type }) {
-  let color1 = "#1a1a1a";
-  let color2 = "#0a0a0a";
-  
-  if (type === 'shell') {
-    color1 = "#121A20";
-    color2 = "#0A0D10";
-  } else if (type === 'compute') {
-    color1 = "#101D2A";
-    color2 = "#050B12";
-  } else if (type === 'gov') {
-    color1 = "#201815";
-    color2 = "#100A08";
-  }
-
   return (
     <svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <defs>

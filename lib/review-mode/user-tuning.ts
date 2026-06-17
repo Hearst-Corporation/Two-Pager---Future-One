@@ -36,6 +36,7 @@ export async function listActiveTunings(userId: string): Promise<TuningRow[]> {
     .eq("active", true)
     .order("created_at", { ascending: true });
   if (error) {
+    // eslint-disable-next-line no-console
     console.warn("[tuning list]", error.message);
     return [];
   }
@@ -52,6 +53,7 @@ export async function addTuning(userId: string, instruction: string): Promise<Tu
     .select("id, instruction, created_at")
     .single();
   if (error) {
+    // eslint-disable-next-line no-console
     console.warn("[tuning add]", error.message);
     return null;
   }
@@ -71,6 +73,7 @@ export async function removeTuningByShortId(
     .eq("user_id", userId)
     .ilike("id", `${trimmed}%`);
   if (error) {
+    // eslint-disable-next-line no-console
     console.warn("[tuning remove]", error.message);
     return false;
   }
@@ -83,6 +86,7 @@ export async function clearTunings(userId: string): Promise<number> {
     .delete({ count: "exact" })
     .eq("user_id", userId);
   if (error) {
+    // eslint-disable-next-line no-console
     console.warn("[tuning clear]", error.message);
     return 0;
   }
