@@ -15,7 +15,9 @@
 // échoue/timeout, on retombe sur un mémo déterministe local (sans LLM).
 // Rate-limit : 5 req/min/actor en prod, skip en dev.
 
+import crypto from 'crypto';
 import { NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { authedWrite } from '@/lib/supabase-admin';
 import { MemoGenerateSchema } from '@/lib/validators/hearst';
 import { openaiChatCompletion, OPENAI_MEMO_MODEL } from '@/lib/llm/openai';
@@ -35,28 +37,21 @@ import {
   RATE_LIMIT_MAX_REQUESTS as RL_MAX,
   MEMO_LLM_SOFT_TIMEOUT_MS,
 } from '@/lib/constants';
+import { rateLimit } from '@/lib/rate-limit';
 
 // OpenAI GPT-4.1 can run several minutes in the worst case. Without this
 // the route inherits the Vercel default (~10-15s) and 504s mid-generation. 300s =
 // plan max, matched by the client timeout (MEMO_CLIENT_TIMEOUT_MS).
 export const maxDuration = 300;
 
-const rlBuckets = new Map();
-
-function checkRl(actorId) {
+// Rate limit : RL_MAX (5) req / RL_WINDOW (60s) par actor en prod, skip en dev.
+// Backed by lib/rate-limit (Upstash Redis distribué + fallback in-memory) — un
+// compteur in-memory pur se réinitialisait à chaque cold start Vercel, laissant un
+// attaquant bypasser le cap et déclencher des appels GPT-4.1 illimités (coût OpenAI).
+async function checkRl(actorId) {
   if (process.env.NODE_ENV !== 'production') return { allowed: true };
-  const now = Date.now();
-  const b = rlBuckets.get(actorId);
-  if (!b || now - b.startedAt >= RL_WINDOW) {
-    rlBuckets.set(actorId, { count: 1, startedAt: now });
-    return { allowed: true };
-  }
-  if (b.count >= RL_MAX) {
-    const retryAfter = Math.ceil((RL_WINDOW - (now - b.startedAt)) / 1000);
-    return { allowed: false, retryAfter };
-  }
-  b.count++;
-  return { allowed: true };
+  const rl = await rateLimit(actorId, { limit: RL_MAX, windowSec: Math.round(RL_WINDOW / 1000) });
+  return { allowed: rl.ok, retryAfter: rl.resetSec };
 }
 
 const MEMO_SCHEMA_INSTRUCTIONS = `Return a JSON object with the following exact keys (no markdown, no prose outside JSON) :
@@ -439,7 +434,7 @@ export async function POST(req) {
   const auth = await authedWrite('editor');
   if (auth instanceof NextResponse) return auth;
 
-  const rl = checkRl(auth.profile.id);
+  const rl = await checkRl(auth.profile.id);
   if (!rl.allowed) {
     return NextResponse.json({ error: 'Too many requests' }, {
       status: 429,
@@ -475,8 +470,11 @@ export async function POST(req) {
         });
       }
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] server-side projection recompute failed:`, e?.message);
+      Sentry.captureException(e, {
+        level: 'warning',
+        tags: { route: 'strategic-memo', stage: 'projection_recompute' },
+        extra: { actor_id: auth.profile?.id ?? 'anon' },
+      });
       serverProjection = null;
     }
   }
@@ -624,8 +622,11 @@ export async function POST(req) {
       llmDurationMs = Date.now() - llmStart;
 
       if (llmResult?.__timeout) {
-        // eslint-disable-next-line no-console
-        console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM soft timeout after ${llmDurationMs}ms; using deterministic fallback`);
+        Sentry.captureMessage('[strategic-memo] LLM soft timeout; using deterministic fallback', {
+          level: 'warning',
+          tags: { route: 'strategic-memo', stage: 'llm_timeout' },
+          extra: { actor_id: auth.profile?.id ?? 'anon', llm_duration_ms: llmDurationMs },
+        });
         memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
         model_used = 'deterministic-fallback';
       } else {
@@ -643,10 +644,18 @@ export async function POST(req) {
             catch { /* fall through to error */ }
           }
           if (!memo) {
-            // eslint-disable-next-line no-console
-            console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] JSON parse failed; using deterministic fallback`);
-            // eslint-disable-next-line no-console
-            console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] raw tail:`, rawContent.slice(-300));
+            // Do NOT log the raw LLM output: it may carry sensitive/confidential
+            // memo content and Langfuse already traces the full LLM call. Emit only
+            // non-reversible metadata (length + sha256 hash) to correlate without leaking.
+            Sentry.captureMessage('[strategic-memo] LLM JSON parse failed; using deterministic fallback', {
+              level: 'warning',
+              tags: { route: 'strategic-memo', stage: 'llm_parse_failed' },
+              extra: {
+                actor_id: auth.profile?.id ?? 'anon',
+                raw_length: rawContent.length,
+                raw_sha256: crypto.createHash('sha256').update(rawContent).digest('hex'),
+              },
+            });
             memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
             model_used = 'deterministic-fallback';
           }
@@ -654,8 +663,11 @@ export async function POST(req) {
       }
     } catch (e) {
       llmDurationMs = Date.now() - llmStart;
-      // eslint-disable-next-line no-console
-      console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] LLM failed; using deterministic fallback:`, e?.message);
+      Sentry.captureException(e, {
+        level: 'warning',
+        tags: { route: 'strategic-memo', stage: 'llm_failed' },
+        extra: { actor_id: auth.profile?.id ?? 'anon', llm_duration_ms: llmDurationMs },
+      });
       memo = buildDeterministicMemo({ payload, intelligenceBrief, computedConfidence, dataFreshness, audience });
       model_used = 'deterministic-fallback';
     }
@@ -718,8 +730,11 @@ export async function POST(req) {
     const overall_grade = gradeScore === 4 ? 'A' : gradeScore === 3 ? 'B' : gradeScore === 2 ? 'C' : 'D';
 
     if (bannedFound.length > 0) {
-      // eslint-disable-next-line no-console
-      console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] quality: banned phrases detected:`, bannedFound);
+      Sentry.captureMessage('[strategic-memo] quality: banned phrases detected', {
+        level: 'warning',
+        tags: { route: 'strategic-memo', stage: 'quality_banned_phrases' },
+        extra: { actor_id: auth.profile?.id ?? 'anon', banned_found: bannedFound },
+      });
     }
 
     const memo_quality = {
@@ -748,7 +763,10 @@ export async function POST(req) {
         actor_id: auth.profile?.id || null,
       });
     } catch (e) {
-      console.error(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] persist error:`, e?.message);
+      Sentry.captureException(e, {
+        tags: { route: 'strategic-memo', stage: 'persist' },
+        extra: { actor_id: auth.profile?.id ?? 'anon' },
+      });
       persisted = { error: 'persist_failed' };
     }
 
@@ -792,7 +810,10 @@ export async function POST(req) {
       memo_quality,
     }, persistFailed ? { status: 207 } : undefined);
   } catch (e) {
-    console.error(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] error:`, e?.message);
+    Sentry.captureException(e, {
+      tags: { route: 'strategic-memo', stage: 'top_level' },
+      extra: { actor_id: auth.profile?.id ?? 'anon' },
+    });
     return NextResponse.json({ error: 'memo_generation_failed' }, { status: 500 });
   }
 }

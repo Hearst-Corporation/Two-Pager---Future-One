@@ -1,20 +1,18 @@
-// lib/llm/openai.ts — client OpenAI officiel (GPT-4o chat · GPT-4.1 mémo).
+// lib/llm/openai.ts — client OpenAI officiel (GPT-4.1 mémo).
 //
 // Clés env : OPENAI_API_KEY (requis), OPENAI_BASE_URL (optionnel),
-// OPENAI_CHAT_MODEL (défaut gpt-4o), OPENAI_MEMO_MODEL (défaut gpt-4.1).
+// OPENAI_MEMO_MODEL (défaut gpt-4.1).
 
+import * as Sentry from "@sentry/nextjs";
 import OpenAI from "openai";
-import { LLM_CHAT_MODEL, LLM_MEMO_MODEL, LLM_SDK_TIMEOUT_MS } from "../constants";
+import { LLM_MEMO_MODEL, LLM_SDK_TIMEOUT_MS } from "../constants";
 
-export const openai = new OpenAI({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "build-placeholder",
   baseURL: process.env.OPENAI_BASE_URL || undefined,
   timeout: Number(process.env.LLM_MODEL_TIMEOUT_MS ?? LLM_SDK_TIMEOUT_MS),
   maxRetries: 0,
 });
-
-/** Chat — streaming */
-export const OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || LLM_CHAT_MODEL;
 
 /** Génération mémo stratégique — JSON structuré */
 export const OPENAI_MEMO_MODEL = process.env.OPENAI_MEMO_MODEL || LLM_MEMO_MODEL;
@@ -32,19 +30,11 @@ export async function openaiChatCompletion(params: ChatParams) {
     model,
     stream: false,
   });
-  // eslint-disable-next-line no-console
-  console.log(`[openai] ${model} succeeded in ${Date.now() - start}ms`);
-  return { response, model_used: model };
-}
-
-export async function openaiChatStream(
-  params: Omit<Parameters<typeof openai.chat.completions.create>[0], "stream">,
-) {
-  const model = (params.model as string) || OPENAI_CHAT_MODEL;
-  const stream = await openai.chat.completions.create({
-    ...params,
-    model,
-    stream: true,
+  Sentry.addBreadcrumb({
+    category: "llm.openai",
+    level: "info",
+    message: `${model} succeeded`,
+    data: { model, duration_ms: Date.now() - start },
   });
-  return { stream, model_used: model };
+  return { response, model_used: model };
 }

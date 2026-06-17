@@ -69,7 +69,9 @@ function LoginForm() {
         <h1 style={S.title}>Sign in</h1>
         <p style={S.sub}>Restricted area — invite only.</p>
 
+        <label htmlFor="login-email" style={S.srOnly}>Email address</label>
         <input
+          id="login-email"
           type="email"
           autoFocus
           required
@@ -81,21 +83,31 @@ function LoginForm() {
         />
 
         {mode === 'password' && (
-          <input
-            type="password"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={UI.LOGIN_PASSWORD_PLACEHOLDER}
-            style={S.input}
-          />
+          <>
+            <label htmlFor="login-password" style={S.srOnly}>Password</label>
+            <input
+              id="login-password"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={UI.LOGIN_PASSWORD_PLACEHOLDER}
+              style={S.input}
+            />
+          </>
         )}
 
         {err && <div style={S.err}>{err}</div>}
         {msg && <div style={S.msg}>{msg}</div>}
 
-        <button type="submit" disabled={busy} style={S.btn}>
+        <button
+          type="submit"
+          disabled={busy}
+          aria-busy={busy}
+          aria-label={mode === 'magic' ? 'Send magic link' : 'Sign in'}
+          style={S.btn}
+        >
           {busy ? '…' : mode === 'magic' ? 'Send magic link' : 'Sign in'}
         </button>
 
@@ -166,4 +178,15 @@ const S = {
   },
   err: { fontSize: 12, color: 'var(--color-login-accent)', fontWeight: 600 },
   msg: { fontSize: 12, color: 'var(--color-login-success)', fontWeight: 600 },
+  srOnly: {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap',
+    border: 0,
+  },
 };

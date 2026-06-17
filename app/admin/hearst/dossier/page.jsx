@@ -11,14 +11,18 @@ export default function DossierPage() {
   const [memos, setMemos] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let active = true;
 
-    async function load() {
+    async function loadData() {
       setLoading(true);
       setError(null);
       try {
+        // The project must resolve first: the strategic-memos call is filtered by
+        // its id, so the two requests have a hard data dependency and cannot be
+        // fired concurrently.
         const projectRes = await fetch('/api/admin/hearst/project');
         if (!projectRes.ok) {
           throw new Error(await parseApiError(projectRes, 'Could not load the Hearst project.'));
@@ -45,9 +49,9 @@ export default function DossierPage() {
       }
     }
 
-    load();
+    loadData();
     return () => { active = false; };
-  }, []);
+  }, [reloadKey]);
 
   const count = memos?.length ?? 0;
 
@@ -69,6 +73,14 @@ export default function DossierPage() {
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
+            <button
+              type="button"
+              onClick={() => setReloadKey((k) => k + 1)}
+              className={styles.errorBack}
+              style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: 'inherit' }}
+            >
+              Retry
+            </button>
             <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
           </div>
         ) : loading ? (

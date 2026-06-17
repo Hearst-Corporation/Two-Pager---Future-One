@@ -25,20 +25,15 @@
     "check:deploy-env": "node scripts/check-deploy-env.mjs"
   },
   "dependencies": {
-    "@sentry/nextjs": "^8",
+    "@sentry/nextjs": "^10",
     "@sparticuz/chromium": "^149.0.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.3",
-    "dompurify": "^3.2.0",
-    "lucide-react": "0.456.0",
     "next": "^14.2.35",
     "openai": "^6.38.0",
-    "prop-types": "^15.8.1",
     "puppeteer-core": "^25.1.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-is": "^19.2.7",
-    "recharts": "^3.8.1",
     "server-only": "^0.0.1",
     "zod": "^3.25.76"
   },

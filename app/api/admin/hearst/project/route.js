@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { DATA_ROOM_REQUIRED } from '@/lib/hearst-constants';
 import { bootstrapScenarioFromSources } from '@/lib/hearst-bootstrap';
@@ -112,10 +113,12 @@ async function repairIncompleteSeedScenarios(supa, projectId, actorId) {
   }
 
   if (repairedCount > 0) {
-    // eslint-disable-next-line no-console
-    console.info('[project][GET] repaired_seed_scenarios', {
-      projectId,
-      repairedCount,
+    // Operational signal: the auto-seed self-heal patched incomplete scenario rows.
+    // Emit as a low-severity Sentry message (not a per-GET console line) so it is
+    // observable when it matters without spamming logs on every read.
+    Sentry.captureMessage('[project][GET] repaired_seed_scenarios', {
+      level: 'info',
+      extra: { projectId, repairedCount },
     });
   }
 }

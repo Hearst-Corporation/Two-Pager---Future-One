@@ -33,6 +33,7 @@ import { bootstrapScenarioFromSources } from '@/lib/hearst-bootstrap';
 import { calcHardwareBreakdown } from '@/lib/hearst-gpu-catalog';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import { buildSimulateResponse } from '@/lib/hearst-simulate-response';
+import { rateLimit } from '@/lib/rate-limit';
 
 const ARCHETYPE_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
 
@@ -40,38 +41,25 @@ const ARCHETYPE_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
 // always define equity_share, but this guards against future archetypes that forget it).
 const DEFAULT_MINORITY_EQUITY_SHARE = 0.20;
 
-// In-memory rate limit pour /simulate : 120 req/min par actorId.
+// Rate limit pour /simulate : 120 req/min par actorId.
 // /simulate est un calcul interactif live (chaque slider/sélection POST, debounce
 // 300ms côté UI) — read-only, pur CPU, pas d'effet de bord ni d'appel coûteux. La
 // limite protège d'une boucle folle, PAS de l'usage humain normal : 10/min bridait
 // le simulateur après ~2 ajustements. 120/min = 1 toutes les 500ms en continu.
-const _simRl = new Map();
-const SIM_RL_WINDOW = 60_000;
+// Backed by lib/rate-limit (Upstash Redis distribué + fallback in-memory) — un
+// compteur in-memory pur se réinitialisait à chaque cold start Vercel (bypass).
+const SIM_RL_WINDOW_SEC = 60;
 const SIM_RL_MAX = 120;
-function checkSimRl(actorId) {
-  const now = Date.now();
-  const b = _simRl.get(actorId);
-  if (!b || now > b.resetAt) {
-    _simRl.set(actorId, { count: 1, resetAt: now + SIM_RL_WINDOW });
-    return { allowed: true };
-  }
-  if (b.count >= SIM_RL_MAX) {
-    const retryAfter = Math.ceil((b.resetAt - now) / 1000);
-    return { allowed: false, retryAfter };
-  }
-  b.count += 1;
-  return { allowed: true };
-}
 
 export const POST = withValidation(SimulateRequestSchema, async (req, parsed) => {
   const auth = await requireProfile('viewer');
   if (auth instanceof NextResponse) return auth;
 
-  const rl = checkSimRl(auth.profile.id);
-  if (!rl.allowed) {
-    return NextResponse.json({ error: 'Too many requests', retryAfter: rl.retryAfter }, {
+  const rl = await rateLimit(auth.profile.id, { limit: SIM_RL_MAX, windowSec: SIM_RL_WINDOW_SEC });
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'Too many requests', retryAfter: rl.resetSec }, {
       status: 429,
-      headers: { 'Retry-After': String(rl.retryAfter) },
+      headers: { 'Retry-After': String(rl.resetSec) },
     });
   }
 

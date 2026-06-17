@@ -52,9 +52,13 @@ const nextConfig = {
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
       : "script-src 'self'";
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zrvlmhuymhyrzonnihce.supabase.co';
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    // Origin (scheme + host) for connect-src, and wss:// variant for realtime.
     const supabaseHost = supabaseUrl;
-    const supabaseWs  = supabaseUrl.replace('https://', 'wss://').replace('http://', 'ws://');
+    const supabaseWs  = supabaseUrl.replace(/^https:\/\//, 'wss://').replace(/^http:\/\//, 'ws://');
+    const connectSrc = ["'self'", supabaseHost, supabaseWs, 'https://maps.googleapis.com', 'https://api.openai.com']
+      .filter(Boolean)
+      .join(' ');
     return [
       {
         source: '/(.*)',
@@ -81,7 +85,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self'",
-              `connect-src 'self' ${supabaseHost} ${supabaseWs} https://maps.googleapis.com https://api.openai.com`,
+              `connect-src ${connectSrc}`,
               "frame-ancestors 'self' http://localhost:4200 http://localhost:4201 https://oracle.hearst.app",
               "base-uri 'self'",
               "form-action 'self'",
@@ -95,11 +99,16 @@ const nextConfig = {
   // Image optimization — allow external Supabase storage & Google Maps
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'zrvlmhuymhyrzonnihce.supabase.co',
-        pathname: '/storage/v1/object/public/**',
-      },
+      // Supabase storage host derived from env (no hardcoded subdomain).
+      ...((process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/^https?:\/\//, '')
+        ? [
+            {
+              protocol: 'https',
+              hostname: (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/^https?:\/\//, ''),
+              pathname: '/storage/v1/object/public/**',
+            },
+          ]
+        : []),
       {
         protocol: 'https',
         hostname: 'maps.googleapis.com',
@@ -116,8 +125,10 @@ module.exports = withSentryConfig(nextConfig, {
   // Don't upload source maps unless we explicitly want to
   widenClientFileUpload: false,
   hideSourceMaps: true,
-  disableLogger: true,
-  automaticVercelMonitors: false,
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+    automaticVercelMonitors: false,
+  },
   sourcemaps: {
     disable: !sentryUploadsEnabled,
     deleteSourcemapsAfterUpload: sentryUploadsEnabled,

@@ -23,6 +23,15 @@ const EXPORTABLE_MEMO_STATUSES = new Set(['reviewed', 'approved', 'archived']);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+// Secure numeric coercion for raw snap.* fields interpolated into HTML.
+// snap comes from memo_json._exec_projection (JSONB) — a non-numeric string
+// (e.g. "<script>") would be stored XSS otherwise. Returns a formatted finite
+// number or '—'. `dp` controls fractional digits (default 0).
+const num = (v, dp = 0) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n.toFixed(dp).replace(/\.0+$/, '') : '—';
+};
+
 // Helper: render null from dossier-derive formatters as 'N/A'
 const orNA = (x) => x == null ? 'N/A' : x;
 
@@ -557,7 +566,7 @@ p { margin: 0; }
       <div class="fig">
         <div class="fk">Investment Size</div>
         <div class="fv accent tnum">${fmtUsd(snap.total_capex)}</div>
-        <div class="fsub">${snap.total_mw ? `${snap.total_mw} MW IT load` : 'Phase 1'}</div>
+        <div class="fsub">${snap.total_mw ? `${num(snap.total_mw)} MW IT load` : 'Phase 1'}</div>
       </div>
       <div class="fig">
         <div class="fk">IRR (Post-tax · Levered equity)</div>
@@ -571,7 +580,7 @@ p { margin: 0; }
       </div>
       <div class="fig">
         <div class="fk">Payback</div>
-        <div class="fv tnum">${snap.payback_years ? snap.payback_years.toFixed(1) + ' yrs' : 'N/A'}</div>
+        <div class="fv tnum">${snap.payback_years ? num(snap.payback_years, 1) + ' yrs' : 'N/A'}</div>
         <div class="fsub">Stabilized from Yr 2–3</div>
       </div>
     </div>
@@ -636,7 +645,7 @@ p { margin: 0; }
     </div>
     <div class="fin-body">
       <div class="break-avoid">
-        <div class="cap-title">CAPEX — ${fmtUsd(snap.total_capex)}${snap.total_mw ? ` · ${snap.total_mw} MW` : ''}</div>
+        <div class="cap-title">CAPEX — ${fmtUsd(snap.total_capex)}${snap.total_mw ? ` · ${num(snap.total_mw)} MW` : ''}</div>
         ${capexRows(snap)}
       </div>
       <div class="sens-wrap">
@@ -701,7 +710,7 @@ p { margin: 0; }
       </div>
       <div class="scen base">
         <div class="sc-name">Base</div>
-        <div class="sc-tag">${snap.total_mw ? snap.total_mw + ' MW' : 'Base'} at ${(snap.irr_post_tax ?? snap.irr) != null ? fmtPct(snap.irr_post_tax ?? snap.irr) : '—'} post-tax IRR — the underwriting case for FID.</div>
+        <div class="sc-tag">${snap.total_mw ? num(snap.total_mw) + ' MW' : 'Base'} at ${(snap.irr_post_tax ?? snap.irr) != null ? fmtPct(snap.irr_post_tax ?? snap.irr) : '—'} post-tax IRR — the underwriting case for FID.</div>
         <div class="sc-irr-k">IRR (Post-tax)</div>
         <div class="sc-irr tnum">${fmtPct(snap.irr_post_tax ?? snap.irr)}</div>
         <div class="sc-rows">

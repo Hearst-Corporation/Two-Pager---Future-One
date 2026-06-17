@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from '../hearst.module.css';
 import DataCenterProjection from '../components/DataCenterProjection';
 import { fmtUSD, fmtPctFromRatio, MISSING } from '../utils/format';
@@ -18,6 +18,11 @@ export default function SimulatorPage() {
     npv: null,
     risk: 'Moderate',
   });
+  // Bumped by the Retry button to re-run the current simulation.
+  const [attempt, setAttempt] = useState(0);
+
+  // Tracks the in-flight request so a new run can abort the previous one.
+  const abortRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -25,6 +30,11 @@ export default function SimulatorPage() {
     async function fetchMetrics() {
       setLoading(true);
       setError(null);
+
+      // Abort any still-pending request before firing a new one.
+      if (abortRef.current) abortRef.current.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
 
       const archetypeId = thesis === 'shell'
         ? 'powered_shell'
@@ -36,6 +46,7 @@ export default function SimulatorPage() {
         const res = await fetch('/api/admin/hearst/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             input_mode: 'mw_first',
             input_value: { total_mw: scale },
@@ -77,18 +88,20 @@ export default function SimulatorPage() {
           risk: riskLabel,
         });
       } catch (err) {
+        // A superseded/cancelled request is not a user-facing error.
+        if (err.name === 'AbortError') return;
         if (active) setError(err.message);
       } finally {
         if (active) setLoading(false);
       }
     }
 
-    const t = setTimeout(fetchMetrics, 300);
+    const t = setTimeout(fetchMetrics, 600);
     return () => {
       active = false;
       clearTimeout(t);
     };
-  }, [thesis, scale, aiMix]);
+  }, [thesis, scale, aiMix, attempt]);
 
   return (
     <main className={styles.simLayout}>
@@ -184,7 +197,15 @@ export default function SimulatorPage() {
         >
           {error ? (
             <div className={styles.simError} role="alert">
-              {error}
+              <span>{error}</span>
+              <button
+                type="button"
+                className={styles.controlBtn}
+                onClick={() => setAttempt((n) => n + 1)}
+                disabled={loading}
+              >
+                Retry
+              </button>
             </div>
           ) : (
             <>

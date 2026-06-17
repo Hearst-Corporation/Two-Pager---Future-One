@@ -9,11 +9,12 @@ export default function DealsPage() {
   const [deals, setDeals] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let active = true;
 
-    async function load() {
+    async function loadData() {
       setLoading(true);
       setError(null);
       try {
@@ -31,9 +32,9 @@ export default function DealsPage() {
       }
     }
 
-    load();
+    loadData();
     return () => { active = false; };
-  }, []);
+  }, [reloadKey]);
 
   const count = deals?.length ?? 0;
 
@@ -55,6 +56,14 @@ export default function DealsPage() {
         {error ? (
           <div className={styles.errorState} role="alert">
             <span>{error}</span>
+            <button
+              type="button"
+              onClick={() => setReloadKey((k) => k + 1)}
+              className={styles.errorBack}
+              style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: 'inherit' }}
+            >
+              Retry
+            </button>
             <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
           </div>
         ) : loading ? (

@@ -1,9 +1,12 @@
 'use client';
 
+import { memo } from 'react';
 import styles from '../hearst.module.css';
 
-// SVG placeholders for different visual states, simulating the cinematic crossfade
-function PlaceholderSVG({ type }) {
+// SVG placeholders for different visual states, simulating the cinematic crossfade.
+// Memoized: depends only on `type` (fixed per panel), so changing scale/aiMix/thesis
+// no longer re-renders any of the 3 SVGs — only the text labels update.
+const PlaceholderSVG = memo(function PlaceholderSVG({ type }) {
   return (
     <svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -40,11 +43,11 @@ function PlaceholderSVG({ type }) {
       {type === 'compute' && (
         <>
           <rect x="25%" y="25%" width="50%" height="50%" fill="none" stroke="rgba(0,200,255,0.15)" strokeWidth="0.5" />
-          <path d="M 25% 25% L 75% 75% M 25% 75% L 75% 25%" stroke="rgba(0,200,255,0.05)" strokeWidth="0.5" />
+          <path d="M 25 25 L 75 75 M 25 75 L 75 25" stroke="rgba(0,200,255,0.05)" strokeWidth="0.5" />
         </>
       )}
       {type === 'gov' && (
-        <path d="M 20% 50% L 50% 20% L 80% 50% L 50% 80% Z" fill="none" stroke="rgba(255,50,50,0.15)" strokeWidth="0.5" />
+        <path d="M 20 50 L 50 20 L 80 50 L 50 80 Z" fill="none" stroke="rgba(255,50,50,0.15)" strokeWidth="0.5" />
       )}
       
       {/* Corner crosshairs (viewBox 0–100; no calc() in path d) */}
@@ -54,7 +57,7 @@ function PlaceholderSVG({ type }) {
       <path d="M 97 99 L 99 99 L 99 97" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.15" vectorEffect="non-scaling-stroke" />
     </svg>
   );
-}
+});
 
 export default function DataCenterProjection({ thesis, scale, aiMix }) {
   // Determine state from inputs (mocking up logic for visual)
