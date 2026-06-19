@@ -38,6 +38,7 @@ import {
   MEMO_LLM_SOFT_TIMEOUT_MS,
 } from '@/lib/constants';
 import { rateLimit } from '@/lib/rate-limit';
+import { DEFAULT_GEOGRAPHY } from '@/app/admin/hearst/utils/constants';
 
 // OpenAI GPT-4.1 can run several minutes in the worst case. Without this
 // the route inherits the Vercel default (~10-15s) and 504s mid-generation. 300s =
@@ -508,7 +509,7 @@ export async function POST(req) {
     : 24;
 
   const intelligenceBrief = buildIntelligenceBrief({
-    region: oracle.region || 'qatar',
+    region: oracle.region || DEFAULT_GEOGRAPHY,
     archetype_id: archetypeId,
     gpu_focus: aiPct > 30 || archetypeId === 'neocloud_gpu',
     sovereign_focus: oracle.stakeholder === 'sovereign' || (oracle.overlays || []).some(o => /VISION_|SOVEREIGN|NEOM|QATAR_NATIONAL/.test(o)),
@@ -522,9 +523,9 @@ export async function POST(req) {
   // were assigned unresolved, so JSON.stringify produced {} and every "live"
   // figure was hallucinated. Await all three, then assert none stayed a Promise.
   const [gpuPricing, energyBrief, signalBrief] = await Promise.all([
-    getGpuPricingBrief({ region: oracleCtx.region || 'qatar' }),
-    getEnergyBrief({ region: oracleCtx.region || 'qatar', archetype_id: archetypeId }),
-    getInfrastructureSignals({ region: oracleCtx.region || 'qatar', archetype_id: archetypeId, min_severity: 'medium' }),
+    getGpuPricingBrief({ region: oracleCtx.region || DEFAULT_GEOGRAPHY }),
+    getEnergyBrief({ region: oracleCtx.region || DEFAULT_GEOGRAPHY, archetype_id: archetypeId }),
+    getInfrastructureSignals({ region: oracleCtx.region || DEFAULT_GEOGRAPHY, archetype_id: archetypeId, min_severity: 'medium' }),
   ]);
   const liveBrief = { gpu_pricing: gpuPricing, energy: energyBrief, signals: signalBrief };
   assertNoPromises(liveBrief, 'liveBrief');
@@ -757,7 +758,7 @@ export async function POST(req) {
         memo,
         meta: {
           generated_at, provider_used: model_used, generation_time_ms: llmDurationMs,
-          stakeholder: oracleCtx.stakeholder || 'operator', region: oracleCtx.region || 'qatar', audience,
+          stakeholder: oracleCtx.stakeholder || 'operator', region: oracleCtx.region || DEFAULT_GEOGRAPHY, audience,
         },
         project_id, scenario_id, title,
         actor_id: auth.profile?.id || null,
@@ -782,7 +783,7 @@ export async function POST(req) {
       },
       oracle_ctx: {
         stakeholder: oracleCtx.stakeholder || 'operator',
-        region: oracleCtx.region || 'qatar',
+        region: oracleCtx.region || DEFAULT_GEOGRAPHY,
         overlays: oracleCtx.overlays || [],
       },
       intelligence_brief: {

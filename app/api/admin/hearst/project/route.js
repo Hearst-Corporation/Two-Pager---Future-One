@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { authedWrite, requireProfile, getAdminClient } from '@/lib/supabase-admin';
 import { DATA_ROOM_REQUIRED } from '@/lib/hearst-constants';
+import { DEFAULT_GEOGRAPHY } from '@/app/admin/hearst/utils/constants';
 import { bootstrapScenarioFromSources } from '@/lib/hearst-bootstrap';
 import { PUBLIC_SOURCES_LIBRARY } from '@/lib/oracle-intelligence/source-library.js';
 import { withValidation } from '@/lib/validators/withValidation';
@@ -41,7 +42,7 @@ const REQUIRED_SCENARIO_FIELDS = [
 
 function buildSeedScenario(meta, actorId) {
   const boot = bootstrapScenarioFromSources({
-    geography: 'qatar',
+    geography: DEFAULT_GEOGRAPHY,
     business_model_id: 'retail_colo',
     mw_target: 50,
   });
