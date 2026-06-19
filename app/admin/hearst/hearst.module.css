@@ -439,11 +439,15 @@
   padding: var(--ct-frame-top) var(--ct-frame-inline) var(--ct-frame-bottom);
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow-x: clip;  /* clip avoids creating a scroll container, preserves position:sticky inside panels */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--ct-divider-strong) transparent;
+  /* Container query anchor — unnamed, so @container rules in this file can target
+     child elements based on the actual rendered frame width (not viewport).
+     Safe in CSS Modules: no named container references, so no hashing issues. */
+  container-type: inline-size;
 }
 
 /* Instrument pages: frame scroll is breakpoint-governed (see responsive set).
@@ -489,27 +493,31 @@
   margin-bottom: 2rem;
 }
 
-/* Instrument pages — compact head: instrument is action-first, not editorial */
+/* Instrument — single scene bar, no editorial hero */
 .pageHeadInstrument {
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.65rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
-.pageHeadInstrument .pageEyebrow {
-  margin-bottom: 0.45rem;
-  font-size: var(--text-xs);
-  letter-spacing: 0.2em;
+.simSceneBar {
+  margin: 0;
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ct-accent);
+  line-height: 1.4;
 }
 
-.pageHeadInstrument .pageTitle {
-  font-size: clamp(1.6rem, 2.8vw, 2.25rem);
-  margin-bottom: 0.35rem;
-}
-
-.pageHeadInstrument .pageContext {
-  font-size: var(--text-xs);
-  letter-spacing: 0.12em;
-  max-width: none;
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .pageEyebrow {
@@ -924,7 +932,7 @@
   min-height: 0;
 }
 
-.simMain > [aria-live] {
+.simReadout {
   flex-shrink: 0;
   min-width: 0;
   margin-top: auto;
@@ -1882,8 +1890,7 @@
 /* ── 1280px · desktop → small laptop: nav→drawer, tighter grids, but
    keep the simulator 2-col cockpit. ── */
 @media (max-width: 1280px) {
-  .summaryGrid,
-  .registerLayout {
+  .summaryGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .simLayout {
@@ -1935,6 +1942,10 @@
   .simControls {
     padding-right: 1.25rem;
     gap: 1.25rem;
+  }
+
+  .simMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2092,6 +2103,13 @@
 
   .simControls {
     gap: 0.85rem;
+    /* Collapse to 1-col on small phones — 2-col at ~113px clips long section
+       titles like "AI Infrastructure Mix" at this tracking/font-size. */
+    grid-template-columns: 1fr;
+  }
+
+  .simControls > :first-child {
+    grid-column: auto;
   }
 
   .controlBtn {
@@ -2105,17 +2123,23 @@
   }
 }
 
-/* ── max-height 720px · single low-height density tier (laptops / short
-   viewports with browser chrome). Merges the former 820 + 680 tiers; takes the
-   tighter (680) value wherever they differed. ── */
+/* ── max-height 720px · low-height density tier (laptops / short viewports
+   with browser chrome). Nav padding guarded by min-width:769px so landscape
+   phones (≤768px width) keep the 1.5rem horizontal padding from the 1280px
+   block instead of reverting to the wide 4rem desktop padding. ── */
 @media (max-height: 720px) {
   .wrap {
     --ct-nav-height: 56px;
   }
+}
 
+@media (max-height: 720px) and (min-width: 769px) {
   .nav {
     padding: 0.75rem 4rem;
   }
+}
+
+@media (max-height: 720px) {
 
   .cockpitFrame {
     --ct-frame-top: 0.65rem;
