@@ -1385,8 +1385,13 @@
 .registerLayout {
   flex: 1;
   min-height: 0;
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  /* The single row must stretch to the resolved flex height — without an
+     explicit track it defaults to auto/content height, so the fill panel's
+     evidence table (overflow:auto + min-height:0) collapses to height:0. */
+  grid-template-rows: minmax(0, 1fr);
   gap: 1.25rem;
 }
 
@@ -1921,6 +1926,11 @@
 @media (max-width: 1024px) {
   .registerLayout {
     grid-template-columns: 1fr;
+    /* Stacked: two panels in one column flow to content height and the frame
+       scrolls — drop the desktop single-row fill so the evidence panel isn't
+       locked to a viewport-fraction track that clips the second stacked item. */
+    grid-template-rows: auto;
+    flex: none;
   }
 
   .finOverviewGrid {
@@ -1928,9 +1938,16 @@
   }
 
   .cockpitBodyContent,
-  .cockpitPanelFill,
   .cockpitPanelScrollFill,
   .finProjectionPanel {
+    min-height: 0;
+  }
+
+  /* Stacked register: the evidence panel sizes to content and the frame
+     scrolls — release the desktop fill/clip so the table isn't cut off. */
+  .registerLayout .cockpitPanelFill {
+    flex: none;
+    overflow: visible;
     min-height: 0;
   }
 
@@ -2196,7 +2213,7 @@
   }
 
   .simMain > .projectionContainer {
-    min-height: clamp(160px, 28vh, 240px);
+    min-height: clamp(160px, 28dvh, 240px);
   }
 
   .simMetrics {
@@ -2277,7 +2294,6 @@
   .simMain > .projectionContainer {
     flex: 0 0 auto;
     min-height: 150px;
-    aspect-ratio: 21 / 9;
   }
 
   .simMetrics {
