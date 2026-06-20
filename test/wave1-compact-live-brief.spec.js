@@ -374,6 +374,51 @@ describe('compactLiveBriefForModel — AC-D2: missing blocks omitted cleanly', (
     expect(result).toBeUndefined();
   });
 
+  it('sparse signal {id only} → no undefined value, no "undefined" string in output', () => {
+    const result = compactLiveBriefForModel({ gpu_pricing: null, energy: null, signals: [{ id: 's1' }] });
+    expect(result).toHaveProperty('signals');
+    const undefinedPaths = findUndefinedPaths(result);
+    expect(undefinedPaths).toEqual([]);
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain('"undefined"');
+    // id preserved, missing fields coerced to null
+    expect(result.signals[0].id).toBe('s1');
+    expect(result.signals[0].title).toBeNull();
+    expect(result.signals[0].severity).toBeNull();
+    expect(result.signals[0].implication).toBeNull();
+  });
+
+  it('sparse gpu price row {sku, status:undefined} → no undefined value, no "undefined" string', () => {
+    const sparseGpu = [{
+      sku: 'X',
+      median_price_usd_hour: null,
+      status: undefined,
+      prices: [{ sku: 'X', median_price_usd_hour: null, status: undefined, prices: null }],
+    }];
+    const result = compactLiveBriefForModel({ gpu_pricing: sparseGpu, energy: null, signals: [] });
+    const undefinedPaths = findUndefinedPaths(result);
+    expect(undefinedPaths).toEqual([]);
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain('"undefined"');
+    // confidence: undefined in summary must not appear
+    expect(serialized).not.toContain('confidence: undefined');
+  });
+
+  it('gpu SKU with missing confidence_band → summary contains "confidence: ?" not "confidence: undefined"', () => {
+    const gpuNoBand = [{
+      sku: 'A100',
+      median_price_usd_hour: 1.5,
+      status: 'live',
+      prices: [],
+      // confidence_band absent
+    }];
+    const result = compactLiveBriefForModel({ gpu_pricing: gpuNoBand, energy: null, signals: [] });
+    expect(result.gpu_pricing[0].summary).toContain('confidence: ?');
+    expect(result.gpu_pricing[0].summary).not.toContain('confidence: undefined');
+    const undefinedPaths = findUndefinedPaths(result);
+    expect(undefinedPaths).toEqual([]);
+  });
+
   it('zero undefined values when only signals are present', () => {
     const result = compactLiveBriefForModel({ gpu_pricing: null, energy: null, signals: FIXTURE_SIGNALS });
     expect(result).not.toHaveProperty('gpu_pricing');

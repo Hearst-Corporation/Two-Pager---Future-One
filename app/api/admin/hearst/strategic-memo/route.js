@@ -319,21 +319,21 @@ export function compactLiveBriefForModel(brief) {
         p => p.status === 'live' || p.status === 'partial_live'
       ).length;
       const summary = median_observed
-        ? `${skuBrief.sku} median $${medianRaw}/hr across ${livePriceCount} live provider(s); confidence: ${skuBrief.confidence_band}`
-        : `${skuBrief.sku} — no live pricing data; confidence: ${skuBrief.confidence_band}`;
+        ? `${skuBrief.sku} median $${medianRaw}/hr across ${livePriceCount} live provider(s); confidence: ${skuBrief.confidence_band ?? '?'}`
+        : `${skuBrief.sku} — no live pricing data; confidence: ${skuBrief.confidence_band ?? '?'}`;
 
       return {
         sku: skuBrief.sku,
         summary,
         freshness_tag,
         median_observed,
-        confidence_band: skuBrief.confidence_band,
+        confidence_band: skuBrief.confidence_band ?? null,
         range_low: skuBrief.range_low ?? null,
         range_high: skuBrief.range_high ?? null,
         // Top-4 provider price rows — real fields only
         prices: (skuBrief.prices || []).slice(0, 4).map(p => ({
-          provider: p.provider,
-          status: p.status,
+          provider: p.provider ?? null,
+          status: p.status ?? null,
           price_usd_hour: p.price_usd_hour ?? null,
           freshness_tag: _derivePriceFreshnessTag(p),
         })),
@@ -384,10 +384,10 @@ export function compactLiveBriefForModel(brief) {
   const signalArray = Array.isArray(brief.signals) ? brief.signals : [];
   if (signalArray.length > 0) {
     out.signals = signalArray.slice(0, 5).map(s => ({
-      id: s.id,
-      title: s.title,
-      severity: s.severity,
-      implication: s.implication,
+      id: s.id ?? null,
+      title: s.title ?? null,
+      severity: s.severity ?? null,
+      implication: s.implication ?? null,
     }));
   }
 
