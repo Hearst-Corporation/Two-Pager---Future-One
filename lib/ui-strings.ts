@@ -45,7 +45,7 @@ export const UI = {
   SIM_PANEL_SIZE_EYEBROW: 'Project Size / Targets',
   SIM_PANEL_SIZE_TITLE: 'Calibrate the initial scenario',
   // Case setup — page 1 configures assumptions. Results live after Validate.
-  SIM_CASE_EYEBROW: 'Scenario setup',
+  // Note: SIM_CASE_EYEBROW is defined once below (Investment case selector block).
   SIM_CASE_TITLE: 'Configure scenario',
   SIM_CASE_SUBTITLE: 'Choose model, size and technology mix.',
   SIM_CASE_MODEL_LABEL: 'Model',
