@@ -34,6 +34,12 @@
   --ct-rail-right: 0px;
   --cp-chat-rail-width: min(420px, 32vw);
   --cp-chat-rail-collapsed-width: 40px;
+  /* Seuil unique de dock du chat. Viewport ≥ cette valeur : chat docké (réserve sa colonne).
+     En-dessous : drawer overlay (ne vole pas l'espace). CSS ne lit pas var() dans une @media :
+     la valeur est donc MIROIR-hardcodée dans chat-fab.css (1280/1279) et cp-tokens.css (clearance FAB).
+     Choisi pour qu'au dock le slot centre reste largement ≥ tier MEDIUM (≈700px) — jamais d'effondrement
+     1-col, avec marge contre les variations scrollbar/résolution du chat. */
+  --cp-chat-dock-min: 1280px;
 }
 
 body.oracle-simulator-page {
@@ -357,19 +363,16 @@ body.oracle-simulator-page {
   }
 }
 
-@media (max-width: 900px) and (min-width: 601px) {
+/* FAB chat visible jusqu'à <1280px (cf. --cp-chat-dock-min) → réserver son clearance bas
+   sur les pages qui scrollent, tant qu'on n'est pas en mobile (<601px, géré plus haut). */
+@media (max-width: 1279px) and (min-width: 601px) {
   :root {
     --cp-scroll-clear: calc(var(--cp-fab-size) + var(--cp-fab-gap) + var(--cp-space-6));
     --cp-toast-bottom: calc(var(--cp-scroll-clear) + var(--cp-space-2));
   }
 }
 
-@media (max-width: 900px) {
-  /* Shell hardcodes min-width: 520px — override so center column collapses on sub-900px */
-  .ct-center-panel {
-    min-width: 0 !important;
-    width: 100% !important;
-    flex: 1 1 0% !important;
-    overflow-x: hidden !important;
-  }
-}
+/* NB : l'ancien override .ct-center-panel @max-width:900px (min-width:0 !important) a été retiré —
+   il était redondant avec cockpit.css (.ct-center-panel { min-width:0 !important } global et
+   inconditionnel) et entretenait une fausse source de vérité (le min-width:520 du shell est déjà
+   neutralisé partout, pas seulement <900px). */

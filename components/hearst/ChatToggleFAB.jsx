@@ -1,6 +1,6 @@
 'use client';
 
-// ChatToggleFAB — mobile uniquement (<900px). Desktop : chat docké permanent (chat-fab.css).
+// ChatToggleFAB — drawer overlay sous --cp-chat-dock-min (<1280px). Desktop large : chat docké (chat-fab.css).
 //
 // Mécanique : toggle la classe `cp-chat-drawer-open` sur <body>. cockpit.css
 // applique alors `transform: translateX(0)` au .ct-rail-right du shell + révèle

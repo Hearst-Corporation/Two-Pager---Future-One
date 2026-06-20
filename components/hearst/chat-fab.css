@@ -1,9 +1,13 @@
-/* chat-fab.css — Rail chat/IC fixe à droite (toujours visible desktop).
-   Hors grid (--ct-rail-right: 0) : le centre utilise padding-right pour ne pas passer sous le chat.
-   Mobile (<900px) : drawer + FAB (économie d’espace). */
+/* chat-fab.css — Rail chat/IC à droite.
+   Hors grid (--ct-rail-right: 0) : quand il est docké, le centre réserve sa colonne via padding-right.
+   Seuil de dock = --cp-chat-dock-min (1280px, cf. cp-tokens.css). SOUS ce seuil le chat reste un
+   drawer overlay : il NE consomme PAS l'espace du centre. Raison : le chat docké vole min(360px,27vw) ;
+   à 901px (ancien seuil) le slot centre tombait ~520px (< seuil container-query 640px) et la grille
+   s'effondrait en 1 colonne — donc « élargir le viewport rétrécit le contenu ». Le seuil 1280 garantit
+   qu'au dock le slot reste largement ≥ MEDIUM (≈700px, avec marge) : jamais d'effondrement 1-col. */
 
-/* ── Desktop : chat docké permanent ── */
-@media (min-width: 901px) {
+/* ── Desktop large (≥ --cp-chat-dock-min) : chat docké, réserve sa colonne ── */
+@media (min-width: 1280px) {
   .ct-rail-right {
     position: fixed !important;
     top: 0;
@@ -30,8 +34,9 @@
   }
 }
 
-/* ── Mobile / tablet : drawer + FAB ── */
-@media (max-width: 900px) {
+/* ── Mobile → desktop étroit (< --cp-chat-dock-min) : drawer overlay + FAB ──
+   Le centre garde toute sa largeur ; la grille dashboard réagit à son slot réel. */
+@media (max-width: 1279px) {
   .cp-chat-drawer-backdrop {
     display: block;
     position: fixed;
