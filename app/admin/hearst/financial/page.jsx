@@ -4,34 +4,42 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
 import HearstPageShell from '../components/HearstPageShell';
-import { HearstErrorState, HearstLoadingState, HearstEmptyState } from '../components/HearstRegisterStates';
+import { fmtUSD, fmtPctFromRatio, fmtX, parseApiError, MISSING } from '../utils/format';
 import {
-  fmtUSD,
-  fmtPctFromRatio,
-  fmtPctRaw,
-  fmtX,
-  fmtYears,
-  fmtMW,
-  parseApiError,
-} from '../utils/format';
-import { ARCHETYPES, DEFAULT_GEOGRAPHY, DEFAULT_SIM_SCALE_MW, DEFAULT_SIM_AI_MIX_PCT, DEFAULT_SIM_ARCHETYPE } from '../utils/constants';
+  ARCHETYPES,
+  DEFAULT_GEOGRAPHY,
+  DEFAULT_SIM_SCALE_MW,
+  DEFAULT_SIM_AI_MIX_PCT,
+  DEFAULT_SIM_ARCHETYPE,
+  DEFAULT_GPU_SKU,
+  DEFAULT_GPU_HOUR_PRICE,
+  DEFAULT_GPU_UTIL_PCT,
+} from '../utils/constants';
+
+const AI_PCT = DEFAULT_SIM_AI_MIX_PCT;
 
 const BASE_CASE = {
   input_mode: 'mw_first',
   input_value: { total_mw: DEFAULT_SIM_SCALE_MW },
   archetype_id: DEFAULT_SIM_ARCHETYPE ?? ARCHETYPES.compute,
-  hardware_mix: { ai_pct: DEFAULT_SIM_AI_MIX_PCT },
+  // Aligned with the Projection page: provide a GPU profile whenever the base
+  // case carries an AI mix, otherwise the engine books no AI revenue.
+  hardware_mix:
+    AI_PCT > 0
+      ? {
+          ai_pct: AI_PCT,
+          gpu_sku_id: DEFAULT_GPU_SKU,
+          gpu_hour_price: DEFAULT_GPU_HOUR_PRICE,
+          utilization_pct: DEFAULT_GPU_UTIL_PCT,
+        }
+      : { ai_pct: AI_PCT },
   geography: DEFAULT_GEOGRAPHY,
 };
-const BASE_CASE_LABEL = `BASE CASE · NEOCLOUD GPU · ${DEFAULT_SIM_SCALE_MW} MW · ${DEFAULT_SIM_AI_MIX_PCT}% AI MIX · ${DEFAULT_GEOGRAPHY.toUpperCase()}`;
 
-function Metric({ label, value }) {
-  return (
-    <div className={styles.metricItem}>
-      <div className={styles.metricLabel}>{label}</div>
-      <div className={styles.metricValue}>{value}</div>
-    </div>
-  );
+const BASE_CASE_CONTEXT = `Base case · ${DEFAULT_GEOGRAPHY.charAt(0).toUpperCase()}${DEFAULT_GEOGRAPHY.slice(1)}`;
+
+function negClass(n) {
+  return typeof n === 'number' && n < 0 ? styles.negative : '';
 }
 
 export default function FinancialPage() {
@@ -78,143 +86,104 @@ export default function FinancialPage() {
   const irr = projection?.irr_post_tax ?? projection?.irr;
   const npv = projection?.npv_post_tax ?? projection?.npv;
   const moic = projection?.moic_post_tax ?? projection?.moic;
-  const stressedCase =
-    (typeof irr === 'number' && irr < 0) ||
-    (typeof npv === 'number' && npv < 0);
+  const dscr = projection?.dscr_stabilized;
 
   return (
     <HearstPageShell
-      variant="editorial"
       eyebrow="Investment Case"
       title="Financial Model"
-      context={BASE_CASE_LABEL}
-      bodyAriaLive="polite"
-      bodyAriaBusy={loading}
+      context={BASE_CASE_CONTEXT}
     >
-        {error ? (
-          <HearstErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />
-        ) : loading ? (
-          <HearstLoadingState>Computing the base case…</HearstLoadingState>
-        ) : !projection ? (
-          <HearstEmptyState>
-            The engine returned no projection for this case.
-          </HearstEmptyState>
-        ) : (
-          <>
-            <section className={styles.modelCallout} data-tone={stressedCase ? 'warning' : 'stable'}>
-              <div className={styles.modelCalloutLabel}>Current Read</div>
-              <p className={styles.modelCalloutText}>
-                {stressedCase
-                  ? 'The live base case is screening below target returns under current assumptions. The UI keeps this downside read visible rather than softening it.'
-                  : 'The live base case is generating a constructive return profile under the current assumptions.'}
-              </p>
-            </section>
+      {error ? (
+        <div className={styles.state}>
+          <div className={styles.stateError}>{error}</div>
+          <button type="button" className={styles.cta} onClick={() => setReloadKey((k) => k + 1)}>
+            Retry
+          </button>
+        </div>
+      ) : loading ? (
+        <div className={styles.state}>Computing the base case…</div>
+      ) : !projection ? (
+        <div className={styles.state}>The engine returned no projection for this case.</div>
+      ) : (
+        <div className={styles.coreGrid}>
+          {/* Returns — post-tax */}
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>IRR</div>
+            <div className={`${styles.valueLarge} ${negClass(irr)}`}>{fmtPctFromRatio(irr)}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>MOIC</div>
+            <div className={styles.valueLarge}>{fmtX(moic)}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>NPV</div>
+            <div className={`${styles.valueLarge} ${negClass(npv)}`}>{fmtUSD(npv)}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>DSCR</div>
+            <div className={styles.valueLarge}>{fmtX(dscr)}</div>
+          </div>
 
-            <div className={styles.finOverviewGrid}>
-              <section className={styles.cockpitPanel}>
-                <h2 className={styles.finSectionTitle}>Returns — post-tax</h2>
-                <div className={styles.metricsGrid}>
-                  <Metric label={<abbr title="Internal Rate of Return">IRR</abbr>} value={fmtPctFromRatio(irr)} />
-                  <Metric label={<abbr title="Multiple on Invested Capital">MOIC</abbr>} value={fmtX(moic)} />
-                  <Metric label={<abbr title="Net Present Value">NPV</abbr>} value={fmtUSD(npv)} />
-                  <Metric label="Payback" value={fmtYears(projection.payback_years)} />
-                  <Metric label={<><abbr title="Debt Service Coverage Ratio">DSCR</abbr> (stab.)</>} value={fmtX(projection.dscr_stabilized)} />
-                </div>
-              </section>
-
-              <section className={styles.cockpitPanel}>
-                <h2 className={styles.finSectionTitle}>Capital</h2>
-                <div className={styles.metricsGrid}>
-                  <Metric label="Total CAPEX" value={fmtUSD(projection.total_capex)} />
-                  <Metric label="Equity Invested" value={fmtUSD(projection.equity_invested)} />
-                  <Metric label="Terminal Value" value={fmtUSD(projection.terminal_value)} />
-                </div>
-              </section>
+          {/* Capital */}
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>Total CAPEX</div>
+            <div className={styles.value}>{fmtUSD(projection.total_capex)}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>Equity Invested</div>
+            <div className={styles.value}>{fmtUSD(projection.equity_invested)}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>Terminal Value</div>
+            <div className={styles.value}>{fmtUSD(projection.terminal_value)}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>Payback</div>
+            <div className={styles.value}>
+              {typeof projection.payback_years === 'number'
+                ? `${projection.payback_years.toFixed(1)} yr`
+                : MISSING}
             </div>
+          </div>
 
-            {years.length > 0 && (
-              <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill} ${styles.finProjectionPanel}`}>
-                <div className={styles.cockpitPanelHead}>
-                  <div>
-                    <h2 className={styles.finSectionTitle}>Projection</h2>
-                    <p className={`${styles.panelHint} ${styles.desktopOnly}`}>Swipe or scroll horizontally for the full projection.</p>
-                  </div>
-                </div>
-                <div className={`${styles.cockpitPanelScrollWrap} ${styles.desktopTableWrap}`}>
-                  <div className={`${styles.cockpitPanelScroll} ${styles.cockpitPanelScrollFill}`}>
-                    <table className={styles.sourcesTable}>
-                    <thead>
-                      <tr>
-                        <th>Year</th>
-                        <th>MW Live</th>
-                        <th>Revenue</th>
-                        <th>EBITDA</th>
-                        <th>Margin</th>
-                        <th>DSCR</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {years.map((y) => (
-                        <tr key={y.year ?? y.calendar_year}>
-                          <td className={styles.numCell}>{y.calendar_year ?? y.year}</td>
-                          <td className={styles.numCell}>{fmtMW(y.mw_live, 1)}</td>
-                          <td className={styles.numCell}>{fmtUSD(y.revenue)}</td>
-                          <td className={styles.numCell}>{fmtUSD(y.ebitda)}</td>
-                          <td className={styles.numCell}>{fmtPctRaw(y.ebitda_margin)}</td>
-                          <td className={styles.numCell}>{fmtX(y.dscr)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className={styles.mobileCardList}>
+          {/* Projection table */}
+          <div className={`${styles.cell} ${styles.span12}`}>
+            <div className={styles.label}>Projection</div>
+            {years.length > 0 ? (
+              <table className={styles.rawTable}>
+                <thead>
+                  <tr>
+                    <th>Year</th>
+                    <th className={styles.num}>Revenue</th>
+                    <th className={styles.num}>OPEX</th>
+                    <th className={styles.num}>EBITDA</th>
+                    <th className={styles.num}>FCF</th>
+                    <th className={styles.num}>DSCR</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {years.map((y) => (
-                    <article key={y.year ?? y.calendar_year} className={styles.dealCard}>
-                      <div className={styles.dealCardHeader}>
-                        <div className={styles.dealCardName}>Year {y.calendar_year ?? y.year}</div>
-                        <div className={styles.dealCardTags}>
-                          <span className={styles.sourceCardTag}>{fmtMW(y.mw_live, 1)}</span>
-                        </div>
-                      </div>
-                      <div className={styles.dealCardBody}>
-                        <div className={styles.dealCardRow}>
-                          <span className={styles.dealCardRowLabel}>Revenue</span>
-                          <span>{fmtUSD(y.revenue)}</span>
-                        </div>
-                        <div className={styles.dealCardRow}>
-                          <span className={styles.dealCardRowLabel}>EBITDA</span>
-                          <span>{fmtUSD(y.ebitda)}</span>
-                        </div>
-                        <div className={styles.dealCardScores}>
-                          <div className={styles.dealCardScore}>
-                            <span className={styles.dealCardScoreLabel}>Margin</span>
-                            <span className={styles.dealCardScoreValue}>{fmtPctRaw(y.ebitda_margin)}</span>
-                          </div>
-                          <div className={styles.dealCardScore}>
-                            <span className={styles.dealCardScoreLabel}>DSCR</span>
-                            <span className={styles.dealCardScoreValue}>{fmtX(y.dscr)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </article>
+                    <tr key={y.year ?? y.calendar_year}>
+                      <td className={styles.num}>{y.year ?? y.calendar_year}</td>
+                      <td className={`${styles.num} ${negClass(y.revenue)}`}>{fmtUSD(y.revenue)}</td>
+                      <td className={`${styles.num} ${negClass(y.opex)}`}>{fmtUSD(y.opex)}</td>
+                      <td className={`${styles.num} ${negClass(y.ebitda)}`}>{fmtUSD(y.ebitda)}</td>
+                      <td className={`${styles.num} ${negClass(y.free_cash_flow)}`}>{fmtUSD(y.free_cash_flow)}</td>
+                      <td className={`${styles.num} ${negClass(y.dscr)}`}>{fmtX(y.dscr)}</td>
+                    </tr>
                   ))}
-                </div>
-              </section>
+                </tbody>
+              </table>
+            ) : (
+              <div className={styles.muted}>No annual projection returned.</div>
             )}
-
-            <div className={styles.cockpitFooterCluster}>
-              <p className={styles.cockpitNote}>
-                Illustrative model — a single base case computed live by the Oracle
-                engine. Explore other theses, scales, and mixes in the Projection.
-              </p>
-              <Link href="/admin/hearst/simulator" className={styles.ctaButton}>
-                Open the Projection ⟶
-              </Link>
-            </div>
-          </>
-        )}
+            <Link href="/admin/hearst/simulator" className={styles.link}>
+              Open the Projection ⟶
+            </Link>
+          </div>
+        </div>
+      )}
     </HearstPageShell>
   );
 }

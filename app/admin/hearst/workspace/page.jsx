@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import styles from '../hearst.module.css';
 import HearstPageShell from '../components/HearstPageShell';
-import { HearstErrorState, HearstLoadingState, HearstEmptyState } from '../components/HearstRegisterStates';
 import {
   fmtUSD,
   fmtPctFromRatio,
-  fmtPctRaw,
+  fmtX,
   fmtMW,
   prettyType,
   parseApiError,
@@ -80,12 +78,10 @@ export default function WorkspacePage() {
   const hasMoreLocal = loadedCount > shown;
   const activeCount = scenarios?.filter((scenario) => scenario?.is_active).length ?? 0;
   const lockedCount = scenarios?.filter((scenario) => scenario?.is_locked).length ?? 0;
-  const avgIrrValues = (scenarios ?? [])
-    .map((scenario) => scenario?.projection?.irr_post_tax ?? scenario?.projection?.irr)
-    .filter((value) => typeof value === 'number');
-  const avgIrr = avgIrrValues.length
-    ? fmtPctFromRatio(avgIrrValues.reduce((sum, value) => sum + value, 0) / avgIrrValues.length)
-    : MISSING;
+  const archetypeCount = (scenarios ?? []).filter((scenario) =>
+    ['base', 'downside', 'upside'].includes(scenario?.scenario_type),
+  ).length;
+
   const context = loading
     ? 'Loading scenarios…'
     : error
@@ -104,173 +100,134 @@ export default function WorkspacePage() {
       bodyAriaLive="polite"
       bodyAriaBusy={loading}
     >
-        {error ? (
-          <HearstErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />
-        ) : loading ? (
-          <HearstLoadingState>Loading scenarios…</HearstLoadingState>
-        ) : loadedCount === 0 ? (
-          <HearstEmptyState>
-            No saved scenarios yet. Explore assumptions live in the Projection —
-            persistence will appear here once scenarios are saved through the model.
-          </HearstEmptyState>
-        ) : (
-          <>
-            <div className={styles.summaryGrid}>
-              <article className={styles.summaryCard}>
-                <div className={styles.summaryLabel}>Scenarios on record</div>
-                <div className={styles.summaryValue}>{count}</div>
-                <p className={styles.summaryText}>Saved scenario count reported by the live workspace endpoints.</p>
-              </article>
-              <article className={styles.summaryCard}>
-                <div className={styles.summaryLabel}>Active scenarios</div>
-                <div className={styles.summaryValue}>{activeCount}</div>
-                <p className={styles.summaryText}>Entries still marked live inside the current scenario catalogue.</p>
-              </article>
-              <article className={styles.summaryCard}>
-                <div className={styles.summaryLabel}>Locked scenarios</div>
-                <div className={styles.summaryValue}>{lockedCount}</div>
-                <p className={styles.summaryText}>Saved views currently preserved from direct editing.</p>
-              </article>
-              <article className={styles.summaryCard}>
-                <div className={styles.summaryLabel}>Average IRR</div>
-                <div className={styles.summaryValue}>{avgIrr}</div>
-                <p className={styles.summaryText}>Average post-tax return across the scenarios loaded into this session.</p>
-              </article>
+      {error ? (
+        <div className={styles.coreGrid}>
+          <div className={`${styles.cell} ${styles.span12}`}>
+            <div className={`${styles.state} ${styles.stateError}`}>
+              <span className={styles.value}>{error}</span>
+              <button
+                type="button"
+                className={styles.cta}
+                onClick={() => setReloadKey((k) => k + 1)}
+              >
+                Retry
+              </button>
             </div>
+          </div>
+        </div>
+      ) : loading ? (
+        <div className={styles.coreGrid}>
+          <div className={`${styles.cell} ${styles.span12}`}>
+            <div className={styles.state}>Loading scenarios…</div>
+          </div>
+        </div>
+      ) : loadedCount === 0 ? (
+        <div className={styles.coreGrid}>
+          <div className={`${styles.cell} ${styles.span12}`}>
+            <div className={styles.state}>
+              No saved scenarios yet. Explore assumptions live in the Projection —
+              persistence will appear here once scenarios are saved through the model.
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className={styles.coreGrid}>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>Total Scenarios</div>
+            <div className={styles.valueLarge}>{count}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>Active</div>
+            <div className={styles.valueLarge}>{activeCount}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>Locked</div>
+            <div className={styles.valueLarge}>{lockedCount}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span3}`}>
+            <div className={styles.label}>Base · Down · Up</div>
+            <div className={styles.valueLarge}>{archetypeCount}</div>
+          </div>
 
-            <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill}`}>
-              <div className={styles.cockpitPanelHead}>
-                <div>
-                  <h2 className={styles.cockpitPanelTitle}>Saved Scenarios</h2>
-                  <p className={`${styles.panelHint} ${styles.desktopOnly}`}>Swipe or scroll horizontally for the full register.</p>
-                </div>
-                <span className={styles.cockpitPanelContext}>
-                  Showing {visible.length} of {count}
-                </span>
-              </div>
-              <div className={`${styles.cockpitPanelScrollWrap} ${styles.desktopTableWrap}`}>
-                <div className={`${styles.cockpitPanelScroll} ${styles.cockpitPanelScrollFill}`}>
-                  <table className={styles.sourcesTable}>
-                <thead>
-                  <tr>
-                    <th>Scenario</th>
-                    <th>Type</th>
-                    <th>Scale</th>
-                    <th>CAPEX</th>
-                    <th>IRR (post-tax)</th>
-                    <th>NPV (post-tax)</th>
-                    <th>Evidence</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visible.map((s) => {
-                    const proj = s.projection || {};
-                    const irr = proj.irr_post_tax ?? proj.irr;
-                    const npv = proj.npv_post_tax ?? proj.npv;
-                    return (
-                      <tr key={s.id}>
-                        <td>
-                          <div>{s.name || MISSING}</div>
-                          {s.description && (
-                            <div className={styles.metaCell}>{s.description}</div>
-                          )}
-                        </td>
-                        <td>{prettyType(s.scenario_type)}</td>
-                        <td className={styles.numCell}>{fmtMW(s.total_mw, 0)}</td>
-                        <td className={styles.numCell}>{fmtUSD(proj.total_capex)}</td>
-                        <td className={styles.numCell}>{fmtPctFromRatio(irr)}</td>
-                        <td className={styles.numCell}>{fmtUSD(npv)}</td>
-                        <td className={styles.numCell}>{fmtPctRaw(s.source_score, 0)}</td>
-                        <td>
-                          {s.is_active ? (
-                            <span className={styles.tagOn}>Active</span>
-                          ) : s.is_locked ? (
-                            <span className={styles.tagOff}>Locked</span>
-                          ) : (
-                            <span className={styles.tagOff}>{MISSING}</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className={styles.mobileCardList}>
+          <div className={`${styles.cell} ${styles.span12}`}>
+            <table className={styles.rawTable}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th className={styles.num}>MW</th>
+                  <th className={styles.num}>CAPEX</th>
+                  <th className={styles.num}>IRR</th>
+                  <th className={styles.num}>NPV</th>
+                  <th className={styles.num}>MOIC</th>
+                </tr>
+              </thead>
+              <tbody>
                 {visible.map((s) => {
-                  const proj = s.projection || {};
-                  const irr = proj.irr_post_tax ?? proj.irr;
-                  const npv = proj.npv_post_tax ?? proj.npv;
+                  const proj = s.projection;
+                  const capex = proj?.total_capex;
+                  const irr = proj?.irr_post_tax;
+                  const npv = proj?.npv_post_tax;
+                  const moic = proj?.moic_post_tax;
+                  const irrNegative = typeof irr === 'number' && irr < 0;
                   return (
-                    <article key={s.id} className={styles.dealCard}>
-                      <div className={styles.dealCardHeader}>
-                        <div className={styles.dealCardName}>{s.name || MISSING}</div>
-                        <div className={styles.dealCardTags}>
-                          {s.is_active && <span className={styles.tagOn}>Active</span>}
-                          {s.is_locked && <span className={styles.tagOff}>Locked</span>}
-                        </div>
-                      </div>
-                      {s.description && <p className={styles.dealCardShort}>{s.description}</p>}
-                      <div className={styles.dealCardBody}>
-                        <div className={styles.dealCardRow}>
-                          <span className={styles.dealCardRowLabel}>Type</span>
-                          <span>{prettyType(s.scenario_type)}</span>
-                        </div>
-                        <div className={styles.dealCardRow}>
-                          <span className={styles.dealCardRowLabel}>Scale</span>
-                          <span>{fmtMW(s.total_mw, 0)}</span>
-                        </div>
-                        <div className={styles.dealCardScores}>
-                          <div className={styles.dealCardScore}>
-                            <span className={styles.dealCardScoreLabel}>IRR</span>
-                            <span className={styles.dealCardScoreValue}>{fmtPctFromRatio(irr)}</span>
-                          </div>
-                          <div className={styles.dealCardScore}>
-                            <span className={styles.dealCardScoreLabel}>NPV</span>
-                            <span className={styles.dealCardScoreValue}>{fmtUSD(npv)}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles.dealCardTerms}>
-                        <span className={styles.sourceCardTag}>CAPEX {fmtUSD(proj.total_capex)}</span>
-                        <span className={styles.sourceCardTag}>Evidence {fmtPctRaw(s.source_score, 0)}</span>
-                      </div>
-                    </article>
+                    <tr key={s.id}>
+                      <td>
+                        {s.name || MISSING}
+                        {s.is_active && <span className={styles.tagOn}>Active</span>}
+                        {s.is_locked && <span className={styles.tag}>Locked</span>}
+                      </td>
+                      <td>
+                        <span className={styles.tag}>{prettyType(s.scenario_type)}</span>
+                      </td>
+                      <td className={`${styles.num} ${styles.valueMono}`}>
+                        {s.total_mw != null ? fmtMW(s.total_mw, 0) : MISSING}
+                      </td>
+                      <td className={`${styles.num} ${styles.valueMono}`}>
+                        {proj ? fmtUSD(capex) : MISSING}
+                      </td>
+                      <td
+                        className={`${styles.num} ${styles.valueMono} ${
+                          irrNegative ? styles.negative : ''
+                        }`}
+                      >
+                        {proj ? fmtPctFromRatio(irr) : MISSING}
+                      </td>
+                      <td className={`${styles.num} ${styles.valueMono}`}>
+                        {proj ? fmtUSD(npv) : MISSING}
+                      </td>
+                      <td className={`${styles.num} ${styles.valueMono}`}>
+                        {proj ? fmtX(moic) : MISSING}
+                      </td>
+                    </tr>
                   );
                 })}
+              </tbody>
+            </table>
+
+            {hasMoreLocal && (
+              <div className={styles.controlRow}>
+                <button
+                  type="button"
+                  className={styles.btn}
+                  onClick={() =>
+                    setShown((n) => Math.min(n + WORKSPACE_PAGE_SIZE, loadedCount))
+                  }
+                >
+                  Load {Math.min(WORKSPACE_PAGE_SIZE, loadedCount - shown)} more
+                </button>
               </div>
-              {hasMoreLocal && (
-                <div className={styles.loadMoreRow}>
-                  <button
-                    type="button"
-                    className={styles.loadMoreButton}
-                    onClick={() => setShown((n) => Math.min(n + WORKSPACE_PAGE_SIZE, loadedCount))}
-                  >
-                    Load {Math.min(WORKSPACE_PAGE_SIZE, loadedCount - shown)} more
-                  </button>
-                </div>
-              )}
-            </section>
-            <div className={styles.cockpitFooterCluster}>
-              <p className={styles.cockpitNote}>
-                Read-only register — projections are recalculated from each saved scenario.
-                Adjust assumptions interactively in the Projection.
-              </p>
-              {serverCapped && !hasMoreLocal && (
-                <p className={styles.cockpitNote}>
-                  Showing the {loadedCount} most recent of {count} scenarios on record. Older
-                  scenarios remain in the model; archive or narrow the set to bring them into view.
-                </p>
-              )}
-              <Link href="/admin/hearst/simulator" className={styles.ctaButton}>
-                Open the Projection ⟶
-              </Link>
-            </div>
-          </>
-        )}
+            )}
+
+            {serverCapped && !hasMoreLocal && (
+              <div className={styles.muted}>
+                Showing the {loadedCount} most recent of {count} scenarios on record.
+                Older scenarios remain in the model.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </HearstPageShell>
   );
 }

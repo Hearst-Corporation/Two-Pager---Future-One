@@ -5,7 +5,7 @@ export default function HearstLayout({ children }) {
   return (
     <div className={styles.wrap}>
       <HearstNav />
-      <div className={styles.pageStage}>{children}</div>
+      {children}
     </div>
   );
 }

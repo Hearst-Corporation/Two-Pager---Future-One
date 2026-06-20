@@ -1,2610 +1,326 @@
 /* ══════════════════════════════════════════════════════════════════════════
-   hearst.module.css — FUTUR ONE cockpit foundation (single source of layout truth)
-
-   ── COCKPIT LAYOUT CONTRACT ──
-   The cockpit is a strict ownership hierarchy. Each level owns ONE thing and a
-   child NEVER reinvents an ancestor's responsibility (no child re-declares the
-   global width or the global gutter).
-
-     .wrap            → cockpit root. Owns the viewport lock (100dvh, overflow
-                        hidden), the design tokens (--ct-*), the nav-height
-                        reservation (padding-top). Flex column.
-     .nav / .navDrawer→ fixed top bar + mobile drawer. Owns navigation only.
-     .pageStage       → fills below the nav. Owns the flex region routes live in.
-     main.cockpitFrame→ THE page frame (rendered only by HearstPageShell). Owns
-                        width (max-width:--ct-content-max), the horizontal gutter
-                        (--ct-frame-inline) and vertical padding (--ct-frame-*),
-                        and the page's vertical scroll. No page sets its own
-                        <main>, width, or gutter.
-     .pageHead        → the one page <header> (eyebrow / <h1> / context). Rendered
-                        by the shell. Pages never declare their own page <h1>.
-     .cockpitBody*    → body wrapper the shell puts children in. Owns body rhythm.
-     panels / grids   → content layout (.cockpitPanel, .summaryGrid, .simLayout…).
-                        Own their internal layout, NOT the global width/gutter.
-
-   ── RESPONSIVE INVARIANTS (enforced everywhere) ──
-     • No horizontal page scroll on any route (tables scroll LOCALLY only).
-     • Every critical flex/grid container carries min-width: 0.
-     • Every vertical fill/scroll chain carries min-height: 0.
-     • Grids that must shrink use minmax(0, 1fr).
-     • The projection is aspect-bounded + height-clamped (clamp/dvh), never full viewport width.
-     • overflow:hidden never clips content that has no local scroll.
-
-   ── CANONICAL BREAKPOINTS (closed set — do NOT add ad-hoc thresholds) ──
-     @media (max-width: 1280px)                         desktop → tablet:
-                                                         nav→drawer, simulator
-                                                         stacks, grids 4→2 col.
-     @media (max-width: 1024px)                         tablet refinement
-                                                         (registerLayout → 1 col).
-     @media (max-width: 768px)                          mobile: single column,
-                                                         metric/sim grids stack,
-                                                         table scroll affordance.
-     @media (max-width: 430px)                          small phone: type/element
-                                                         density, summary 1 col.
-     @media (max-height: 720px)                          low-height density tier.
-     @media (max-height: 520px) and (orientation: landscape)
-                                                         mobile-landscape rescue
-                                                         (re-establishes 2-col sim).
-     ( @media (prefers-reduced-motion: reduce) — motion only, orthogonal. )
+   hearst.module.css — PURE DATA GRID
+   NO RULES. NO LAYOUT CONTRACT. NO BOXES.
    ══════════════════════════════════════════════════════════════════════════ */
 
 .wrap {
-  --ct-bg: #000000;
-  --ct-surface: #121212;
-  --ct-surface-elevated: #151515;
-  --ct-border: #2A2A2A;
-  --ct-text: #F5F5F5;
-  --ct-text-muted: #8A8A8A;
-  --ct-accent: #A3FF8D; /* HEARST green — Figma neon */
-  --ct-accent-soft: rgba(168, 248, 144, 0.12); /* green tint — pills / soft fills */
-  --ct-accent-ink: #000000; /* text on green buttons (Figma) */
-  --ct-danger: #EF4444; /* Error / critical state */
-  --ct-danger-soft: #F2C1C1; /* muted red — negative/elevated metric values */
-  --ct-compute: #7AB8FF;
-  --ct-gov: #FF8A8A;
+  --bg: #000000;
+  --fg: #F5F5F5;
+  --fg-muted: #666666;
+  --accent: #A3FF8D;
+  --line: rgba(255, 255, 255, 0.15);
+  --line-faint: rgba(255, 255, 255, 0.05);
 
-  /* ── Divider / hairline tokens ── */
-  --ct-divider:        rgba(255, 255, 255, 0.1);
-  --ct-divider-strong: rgba(255, 255, 255, 0.15);
-  --ct-divider-faint:  rgba(255, 255, 255, 0.07);
-  --ct-blueprint-line: rgba(255, 255, 255, 0.3);
-  --ct-blueprint-text: rgba(255, 255, 255, 0.7);
-  --ct-accent-line:    rgba(168, 248, 144, 0.4);
-  --ct-accent-faint:   rgba(168, 248, 144, 0.35);
-  --ct-dot-off:        rgba(255, 255, 255, 0.15);
-  --ct-scrim:          rgba(0, 0, 0, 0.45);        /* nav drawer overlay */
-  --ct-danger-line:    rgba(239, 68, 68, 0.5);     /* warning callout border */
-  --ct-accent-ghost:   rgba(168, 248, 144, 0.08);  /* accent pressed/active state */
+  --font-sans: "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* ── Z-index scale ──
-     nav / drawer : 100
-     future modal : 200
-     future tooltip : 300
-  */
-  --ct-nav-height: 76px; /* measured single-line nav height @≥1025px — keep in sync with .nav padding */
-  --ct-rail-w: 240px;    /* left sidebar width @≥1281px (desktop). Mobile uses drawer, not rail. */
-
-  /* ── Page shell tokens ── */
-  --ct-content-max:     1500px;  /* shared content max-width (data pages) */
-  --ct-gutter-sm:       1.25rem; /* horizontal page gutter (≤1024px) */
-  --ct-section-gap:     1.4rem;  /* vertical rhythm between sections (compact) */
-  --ct-panel-radius:    10px;    /* panel corner radius */
-  --ct-frame-inline:    clamp(1rem, 1.8vw, 2rem);
-  --ct-frame-top:       clamp(1rem, 1.6vw, 1.5rem);
-  --ct-frame-bottom:    clamp(0.85rem, 1.6vw, 1.5rem);
-
-  /* ── Content-measure tokens (cap line length / metric strips) ──
-     Replaces ad-hoc max-width: 760/900/1000px literals scattered in the file. */
-  --ct-measure:         760px;   /* prose / caption measure (pageContext, notes) */
-  --ct-measure-wide:    900px;   /* wide prose / callouts (modelCallout, KPIs) */
-  --ct-strip-max:       1000px;  /* metric strip max-width (returns/capital) */
-  --ct-sim-min:         360px;   /* simulator instrument usable-height floor */
-  --ct-drawer-w:        280px;   /* nav drawer + card grid floor */
-  --ct-card-min:        280px;   /* route/summary card min track */
-  --ct-card-min-sm:     220px;   /* sim controls column @1024 */
-  --ct-sim-controls-min: 300px;
-  --ct-sim-controls-max: 380px;
-  --ct-table-min:       880px;   /* wide register tables — horizontal scroll */
-  --ct-col-min:         180px;   /* sticky first column floor */
-  --ct-empty-max:       560px;   /* empty/error state measure */
-  --ct-table-radius:    12px;    /* register table header corners */
-  --ct-tag-padding:     2px 6px; /* compact metadata chips */
-  --ct-register-side-min: 240px;
-  --ct-register-side-max: 300px;
-
-  /* ── Micro-spacing + motion tokens (replace ad-hoc px / inline opacity) ── */
-  --ct-opacity-faint: 0.5;
-  --ct-transition-fast: 0.2s;
-  --ct-pill-padding: 3px 10px;
-
-  /* ── Font weights ── */
-  --ct-fw-light:  300;
-  --ct-fw-normal: 400;
-  --ct-fw-medium: 500;
-  --ct-fw-bold:   600;
-
-  /* ── Border radius ── */
-  --ct-radius-sm:   4px;
-  --ct-radius-md:   8px;
-  --ct-radius-pill: 999px;
-  --ct-radius-full: 50%;
-
-  /* ── Z-index scale ── */
-  --ct-z-base:    1;
-  --ct-z-sticky:  2;
-  --ct-z-float:   10;
-  --ct-z-overlay: 20;
-  --ct-z-scrim:   98;
-  --ct-z-drawer:  99;
-  --ct-z-nav:     100;
-
-  /* ── Transitions additionnelles ── */
-  --ct-transition-slow:  0.3s;
-  --ct-transition-xslow: 1s;
-  --ct-transition-xfast: 0.15s;
-  --ct-transition-drawer: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --ct-text-subdued: rgba(255, 255, 255, 0.45);
-  --ct-text-label: rgba(255, 255, 255, 0.55);
-  --ct-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* ── Opacity additionnelles ── */
-  --ct-opacity-loading:  0.55;
-  --ct-opacity-disabled: 0.5;
-
-  /* ── Type scale — compact cockpit (~20% denser than the original).
-     Reduced at the token source so every consumer shrinks in one place. ── */
-  --text-2xs:   0.6rem;
-  --text-xs:    0.65rem;
-  --text-sm:    0.7rem;
-  --text-md:    0.74rem;
-  --text-base:  0.78rem;
-  --text-lg:    0.82rem;
-  --text-xl:    0.88rem;
-  --text-2xl:   0.92rem;
-  --text-5xl:   1.05rem;
-  --text-6xl-alt: 1.2rem;
-  --text-7xl:   1.5rem;
-
-  /* Single typeface: Satoshi UI; serif display for brand lockup. */
-  --ct-font-sans: var(--font-sans, "Satoshi", sans-serif);
-  --ct-font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
-  --ct-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-
-  background: var(--ct-bg);
-  color: var(--ct-text);
-  height: 100dvh;
-  max-height: 100dvh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--ct-font-sans);
-  padding-top: var(--ct-nav-height);
-  box-sizing: border-box;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 4rem;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Fills the viewport below the fixed nav — routes scroll inside, never the document. */
-.pageStage {
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
+/* ── PURE GRID LAYOUT ── */
+.coreGrid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1px;
+  background-color: var(--line);
+  border: 1px solid var(--line);
+}
+
+.cell {
+  background-color: var(--bg);
+  padding: 2rem;
   display: flex;
   flex-direction: column;
 }
 
-/* ── Horizontal top navigation — fixed bar ── */
-/* z-index 100 · future modal 200 · future tooltip 300  */
-.nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: var(--ct-z-nav);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
-  padding: 1.5rem 4rem;
-  background: var(--ct-bg);
-  border-bottom: 1px solid var(--ct-divider);
-}
+/* Span helpers */
+.span12 { grid-column: span 12; }
+.span8 { grid-column: span 8; }
+.span6 { grid-column: span 6; }
+.span4 { grid-column: span 4; }
+.span3 { grid-column: span 3; }
 
-.navBrand {
-  font-family: var(--ct-font-display);
-  font-size: var(--text-2xl);
-  letter-spacing: 0.04em;
-  color: var(--ct-text);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.navBrandBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-}
-
-.navMeta {
-  font-size: var(--text-2xs);
+/* ── TYPOGRAPHY ── */
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ct-text-muted);
+  letter-spacing: 0.15em;
+  color: var(--fg-muted);
+  margin-bottom: 2rem;
 }
 
+.valueMassive {
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-top: auto;
+}
+
+.valueLarge {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-top: auto;
+}
+
+.valueMono {
+  font-family: var(--font-mono);
+}
+
+/* ── SURGICAL TABLE ── */
+.rawTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: auto;
+}
+
+.rawTable th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--fg-muted);
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+  font-weight: 400;
+}
+
+.rawTable td {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line-faint);
+  font-size: 0.85rem;
+}
+
+.rawTable tr:last-child td {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.num {
+  font-family: var(--font-mono);
+  text-align: right;
+}
+.rawTable th.num { text-align: right; }
+
+.accent { color: var(--accent); }
+.muted { color: var(--fg-muted); }
+.negative { color: #FF6B6B; }
+
+/* ── NAV — horizontal bar, monospace, no boxes ── */
+.nav {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  margin-bottom: 4rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.navBrand {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: var(--fg);
+  text-decoration: none;
+}
+.navMeta {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--fg-muted);
+  margin-top: 0.35rem;
+}
 .navLinks {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 1.75rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
-
 .navLink {
-  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: var(--ct-text-muted);
+  color: var(--fg-muted);
   text-decoration: none;
-  padding-bottom: 4px;
+  padding-bottom: 0.25rem;
   border-bottom: 1px solid transparent;
-  transition: color var(--ct-transition-fast), border-color var(--ct-transition-fast);
-  white-space: nowrap;
 }
-
-.navLink:hover {
-  color: var(--ct-text);
-}
-
+.navLink:hover { color: var(--fg); }
 .navLink[data-active="true"] {
-  color: var(--ct-text);
-  border-bottom-color: var(--ct-accent);
+  color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
-.navLink:focus-visible {
-  outline: 2px solid var(--ct-accent);
-  outline-offset: 2px;
-}
-
-/* ── Hamburger button (mobile only) ── */
-.navHamburger {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-}
-
-.navHamburger span {
-  display: block;
-  width: 22px;
-  height: 1px;
-  background: var(--ct-text);
-  transition: opacity var(--ct-transition-fast), transform var(--ct-transition-fast);
-  transform-origin: center;
-}
-
-.navHamburger:focus-visible {
-  outline: 2px solid var(--ct-accent);
-  outline-offset: 4px;
-}
-
-.navHamburger[aria-expanded="true"] span:nth-child(1) {
-  transform: translateY(6px) rotate(45deg);
-}
-.navHamburger[aria-expanded="true"] span:nth-child(2) {
-  opacity: 0;
-}
-.navHamburger[aria-expanded="true"] span:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
-}
-
-/* ── Mobile drawer ── */
-.navDrawer {
-  display: none;
-  position: fixed;
-  top: var(--ct-nav-height);
-  /* Side-panel: max 280px wide so the scrim is visible and clickable
-     in the remaining viewport area. On very narrow phones (<320px) it
-     fills the viewport. */
-  left: 0;
-  right: auto;
-  width: min(var(--ct-drawer-w), 100vw);
-  bottom: 0;
-  z-index: var(--ct-z-drawer);
-  background: var(--ct-bg);
-  border-top: 1px solid var(--ct-divider);
-  border-right: 1px solid var(--ct-divider);
-  overflow-y: auto;
-  transform: translateX(-100%);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform var(--ct-transition-drawer), opacity var(--ct-transition-fast);
-}
-
-.navScrim {
-  display: none;
-  position: fixed;
-  inset: var(--ct-nav-height) 0 0;
-  z-index: var(--ct-z-scrim);
-  border: 0;
-  background: var(--ct-scrim);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--ct-transition-fast);
-}
-
-.navScrim[data-open="true"] {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.navDrawer[data-open="true"] {
-  transform: translateX(0);
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Scroll-lock the page behind the open drawer. Local class applied to
-   <body> by HearstNav (styles.drawerLock) — stays a pure CSS-Modules selector. */
-.drawerLock {
-  overflow: hidden;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .navDrawer {
-    transition: none;
-  }
-}
-
-.navDrawerLinks {
-  display: flex;
-  flex-direction: column;
-  padding: 2rem 1.5rem;
-  list-style: none;
-  margin: 0;
-  gap: 0;
-}
-
-.navDrawerHead {
-  padding: 1.25rem 1.5rem 0;
-  border-bottom: 1px solid var(--ct-divider-faint);
-}
-
-.navDrawerMeta {
-  font-size: var(--text-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ct-accent);
-  margin-bottom: 0.45rem;
-}
-
-.navDrawerCurrent {
-  font-family: var(--ct-font-sans);
-  font-size: var(--text-5xl);
-  color: var(--ct-text);
-  margin-bottom: 1rem;
-}
-
-.navDrawerLink {
-  display: block;
-  padding: 1.1rem 0;
-  font-size: var(--text-xl);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ct-text-muted);
-  text-decoration: none;
-  border-bottom: 1px solid var(--ct-divider-faint);
-  transition: color var(--ct-transition-xfast);
-}
-
-.navDrawerLink:last-child {
-  border-bottom: none;
-}
-
-.navDrawerLink:hover {
-  color: var(--ct-text);
-}
-
-.navDrawerLink[data-active="true"] {
-  color: var(--ct-text);
-}
-
-/* ── 1280px · nav collapses to hamburger + drawer; shell gutter tightens.
-   Same canonical threshold as the layout block below (kept here next to the
-   nav rules it governs). ── */
-@media (max-width: 1280px) {
-  .wrap {
-    --ct-nav-height: 64px;
-    --ct-section-gap: 2rem;
-  }
-
-  .nav {
-    flex-wrap: nowrap;
-    padding: 0.9rem 1.5rem;
-    gap: 1rem;
-  }
-
-  .navBrand {
-    font-size: var(--text-xl);
-  }
-
-  .navMeta {
-    display: none;
-  }
-
-  .navLinks {
-    display: none;
-  }
-
-  .navHamburger {
-    display: flex;
-  }
-
-  .navDrawer {
-    display: block;
-  }
-
-  .navScrim {
-    display: block;
-  }
-
-  /* Tighten the frame via the tokens (NOT a literal padding) so the low-height
-     density tier can still override --ct-frame-top/bottom on laptops (≤1280). */
-  .cockpitFrame {
-    --ct-frame-inline: var(--ct-gutter-sm);
-    --ct-frame-top: 1.5rem;
-    --ct-frame-bottom: 2rem;
-  }
-
-  .pageHead {
-    margin-bottom: 1.75rem;
-    padding-bottom: 1.25rem;
-  }
-}
-
-/* ── Desktop: left vertical sidebar (Figma cockpit shell). ──
-   ≥1281px only. At ≤1280px the layout falls back to the top-bar + drawer
-   defined above (mobile contract untouched). */
-@media (min-width: 1281px) {
-  .wrap {
-    flex-direction: row;
-    padding-top: 0;
-    padding-left: var(--ct-rail-w);
-  }
-
-  .nav {
-    top: 0;
-    left: 0;
-    right: auto;
-    bottom: 0;
-    width: var(--ct-rail-w);
-    height: 100dvh;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    justify-content: flex-start;
-    gap: 1.75rem;
-    padding: 1.5rem 0.85rem;
-    border-bottom: none;
-    border-right: 1px solid var(--ct-divider);
-    overflow-y: auto;
-  }
-
-  .navBrandBlock {
-    gap: 0.3rem;
-    padding: 0 0.35rem;
-  }
-
-  .navLinks {
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .navLinks li {
-    width: 100%;
-  }
-
-  .navLink {
-    display: block;
-    width: 100%;
-    padding: 0.55rem 0.85rem;
-    font-size: var(--text-sm);
-    border-bottom: none;
-    border-radius: var(--ct-radius-pill);
-    letter-spacing: 0.12em;
-    transition: color var(--ct-transition-fast), background-color var(--ct-transition-fast);
-  }
-
-  .navLink:hover {
-    background: var(--ct-surface);
-  }
-
-  .navLink[data-active="true"] {
-    color: var(--ct-bg);
-    background: var(--ct-accent);
-    border-bottom-color: transparent;
-  }
-}
-
-/* Page shell — viewport-locked stage; vertical scroll stays inside the frame. */
-.cockpitFrame {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  max-width: var(--ct-content-max);
-  margin: 0 auto;
-  padding: var(--ct-frame-top) var(--ct-frame-inline) var(--ct-frame-bottom);
-  display: flex;
-  flex-direction: column;
-  overflow-x: clip;  /* clip avoids creating a scroll container, preserves position:sticky inside panels */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: var(--ct-divider-strong) transparent;
-  /* Container query anchor — unnamed, so @container rules in this file can target
-     child elements based on the actual rendered frame width (not viewport).
-     Safe in CSS Modules: no named container references, so no hashing issues. */
-  container-type: inline-size;
-}
-
-/* Instrument pages: frame scroll is breakpoint-governed (see responsive set).
-   Desktop → hidden on frame, zones scroll. Stacked ≤1024px → frame scrolls. */
-.cockpitFrameLocked {
-  min-height: 0;
-}
-
-.cockpitBody {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  min-width: 0;
-}
-
-.cockpitBodyFlow {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  min-width: 0;
-  min-height: 0;
-}
-
-/* ── Unified page header (replaces per-page .sourcesHeader reuse) ── */
+/* ── PAGE HEAD (inside the grid, above coreGrid) ── */
 .pageHead {
-  flex-shrink: 0;
-  margin-bottom: var(--ct-section-gap);
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--ct-divider);
+  margin-bottom: 2.5rem;
 }
-
-.pageHeadHome {
-  margin-bottom: 2rem;
-}
-
-/* Instrument — single scene bar, no editorial hero */
-.pageHeadInstrument {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.simSceneBar {
-  margin: 0;
-  font-size: var(--text-md);
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--ct-accent);
-  line-height: 1.4;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
 }
-
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.pageEyebrow {
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--ct-accent);
-  margin: 0 0 0.5rem;
-  font-weight: var(--ct-fw-medium);
-}
-
-.pageHeadData .pageEyebrow {
-  color: var(--ct-text-muted);
-}
-
-.pageTitle {
-  font-family: var(--ct-font-sans);
-  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
-  line-height: 1.1;
-  font-weight: var(--ct-fw-bold);
-  letter-spacing: -0.01em;
-  color: var(--ct-accent);
-  margin: 0 0 0.5rem;
-}
-
-.pageHeadHome .pageTitle {
-  font-family: var(--ct-font-display);
-  font-size: clamp(1.7rem, 3vw, 2.3rem);
-}
-
-.pageContext {
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ct-text-muted);
-  margin: 0;
-  max-width: var(--ct-measure);
-  line-height: 1.5;
-}
-
-.summaryGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  flex-shrink: 0;
-  min-width: 0;
-}
-
-.summaryCard {
-  min-width: 0;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--ct-border);
-  border-radius: var(--ct-panel-radius);
-  background: var(--ct-surface);
-  transition: border-color var(--ct-transition-fast), background-color var(--ct-transition-fast);
-}
-
-.summaryCard:hover {
-  border-color: var(--ct-divider-strong);
-  background: var(--ct-surface-elevated);
-}
-
-.summaryLabel {
-  font-size: var(--text-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--ct-text-muted);
-  margin-bottom: 0.6rem;
-}
-
-.summaryValue {
-  font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+.title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
   line-height: 1;
-  color: var(--ct-text);
-  font-family: var(--ct-font-sans);
-  font-weight: var(--ct-fw-bold);
-  font-variant-numeric: tabular-nums;
-  margin-bottom: 0.55rem;
+  margin: 0 0 0.75rem;
 }
-
-.summaryValue[data-tone="negative"],
-.metricValueDanger {
-  color: var(--ct-danger-soft);
-}
-
-.summaryValue[data-tone="elevated"],
-.metricValueRisk[data-tone="elevated"] {
-  color: var(--ct-danger-soft);
-}
-
-.summaryText {
-  margin: 0;
-  color: var(--ct-text-muted);
-  font-size: var(--text-sm);
-  line-height: 1.55;
-  overflow-wrap: anywhere;
-}
-
-/* ──────────────────────────────────────────────────────────────────────────
-   HOME — entry map: hero band + navigation modules
-   ────────────────────────────────────────────────────────────────────────── */
-.pageHeadHome .pageContext {
-  max-width: var(--ct-measure-wide);
-}
-
-.homeHero {
-  padding-top: 0;
-}
-
-.homeBody {
-  gap: 0;
-}
-
-/* ── Cockpit overview — operational state surface (replaces the route portal) ── */
-.cockpitOverview {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ct-section-gap);
-  min-width: 0;
-}
-
-.cockpitOverview .cockpitPanel {
-  margin-bottom: 0;
-}
-
-/* State band — live snapshot of the active scenario */
-.overviewStateGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.6rem 1.25rem;
-  min-width: 0;
-}
-
-.overviewStateGrid .metricItem {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 0;
-  border: none;
-  min-width: 0;
-}
-
-/* Read row — risk · evidence · board pack */
-.overviewReadRow {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  min-width: 0;
-}
-
-.overviewReadCard {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.overviewReadLine {
-  margin: 0;
-  font-size: var(--text-base);
-  line-height: 1.5;
-  color: var(--ct-text);
-  font-weight: var(--ct-fw-light);
-}
-
-.overviewReadLine[data-tone="negative"] {
-  color: var(--ct-danger-soft);
-}
-
-.overviewReadSub {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: var(--ct-text-muted);
-  line-height: 1.5;
-}
-
-.overviewReadSub[data-tone="negative"] {
-  color: var(--ct-danger-soft);
-}
-
-.overviewStat {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  min-width: 0;
-}
-
-.overviewStatValue {
-  font-family: var(--ct-font-mono);
-  font-size: clamp(1.4rem, 1.9vw, 1.75rem);
-  font-weight: var(--ct-fw-light);
-  color: var(--ct-text);
-  line-height: 1;
-}
-
-.overviewStatOf {
-  color: var(--ct-text-muted);
-}
-
-.overviewStatLabel {
-  font-size: var(--text-xs);
+.context {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--ct-text-muted);
+  color: var(--fg-muted);
 }
 
-.overviewLink {
+/* ── VALUE TIERS (medium + small) ── */
+.value {
+  font-size: clamp(1.25rem, 2.5vw, 1.85rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1;
   margin-top: auto;
-  padding-top: 0.5rem;
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ct-text-muted);
-  transition: color var(--ct-transition-fast);
+}
+.valueSmall {
+  font-size: 1rem;
+  font-weight: 400;
+  margin-top: auto;
 }
 
-.overviewLink:hover {
-  color: var(--ct-accent);
-}
-
-/* Next action — single decisive CTA */
-.overviewNextAction {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.overviewNextLabel {
-  margin: 0.55rem 0 0;
-  font-size: var(--text-xl);
-  color: var(--ct-text);
-  font-weight: var(--ct-fw-light);
-  line-height: 1.4;
-}
-
-/* Shared metric strip — used by the financial returns/capital panels.
-   auto-fit + a real min track width keeps the large (3rem) figures from
-   colliding: when too many metrics share a row they wrap instead of
-   overlapping. The floor is sized to the widest expected value (e.g. -$996.4M). */
-.metricsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0;
-  width: 100%;
-  max-width: var(--ct-strip-max);
-  margin-bottom: 4rem;
-  border-top: 1px solid var(--ct-divider);
-  border-bottom: 1px solid var(--ct-divider);
-  min-width: 0;
-}
-
-/* Inside a panel the surround border replaces the strip's own rules. */
-.cockpitPanel .metricsGrid {
-  margin-bottom: 0;
-  border-top: none;
-  border-bottom: none;
-  max-width: none;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.finOverviewGrid .metricItem {
-  border-right: 1px solid var(--ct-divider);
-  border-bottom: 1px solid var(--ct-divider);
-  padding: 1.5rem;
-}
-
-.finOverviewGrid .metricItem:nth-child(2n) {
-  border-right: none;
-}
-
-.finOverviewGrid .metricItem:last-child {
-  border-bottom: none;
-}
-
-.cockpitPanel .metricValue {
-  font-family: var(--ct-font-sans);
-  font-weight: var(--ct-fw-bold);
-  font-size: clamp(1.5rem, 2.2vw, 2rem);
-}
-
-.cockpitPanel .metricItem {
-  min-width: 0;
-  padding: 1.5rem 1.5rem 1.5rem 0;
-}
-
-.metricItem {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 2rem 2rem 2rem 0;
-  border-right: 1px solid var(--ct-divider);
-}
-
-.metricItem:last-child {
-  border-right: none;
-}
-
-.metricValue {
-  font-size: var(--text-7xl);
-  font-family: var(--ct-font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--ct-text);
-  font-weight: var(--ct-fw-light);
-  letter-spacing: -0.05em;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.metricLabel {
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ct-text-muted);
-}
-
-.ctaButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  align-self: flex-start;
-  color: var(--ct-accent-ink);
-  background: var(--ct-accent);
-  font-size: var(--text-sm);
-  font-weight: var(--ct-fw-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  transition: filter var(--ct-transition-fast), transform 0.1s;
-  text-decoration: none;
-  border: none;
-  border-radius: var(--ct-radius-pill);
-  padding: 0.7rem 1.4rem;
-}
-
-.ctaButton:hover {
-  filter: brightness(1.08);
-}
-
-.ctaButton:active {
-  transform: translateY(1px);
-}
-
-.controlBtn:focus-visible,
-.ctaButton:focus-visible {
-  outline: 2px solid var(--ct-accent);
-  outline-offset: 2px;
-}
-
-/* Simulator — viewport-filling instrument layout (scroll only inside controls on narrow stacks) */
-.simLayout {
-  display: grid;
-  grid-template-columns: minmax(var(--ct-sim-controls-min), var(--ct-sim-controls-max)) minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
-  align-items: stretch;
-  /* flex-basis 0 + grow makes the grid fill all remaining flex space in the
-     column shell; the resolved height lets the minmax(0,1fr) row resolve.
-     No explicit height:0 — that would collapse the grid in the stacked
-     (flex:none) responsive modes where flex no longer drives the height. */
-  flex: 1 1 0%;
-  /* Usable-height floor — on short viewports where the summary grid eats most
-     of the shell, keep the instrument tall enough; the frame scrolls to fit. */
-  min-height: var(--ct-sim-min);
-  max-width: none;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  gap: 2rem;
-  overflow: hidden;
-  min-width: 0;
-}
-
-.simControls {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  min-height: 0;
-  min-width: 0;
-  overflow-y: auto;
-  border-right: 1px solid var(--ct-divider);
-  padding-right: 2rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--ct-divider-strong) transparent;
-}
-
-.simSectionTitle {
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--ct-accent);
-  margin-bottom: 1.5rem;
-  font-weight: var(--ct-fw-medium);
-  border-bottom: 1px solid var(--ct-accent-line);
-  padding-bottom: 0.75rem;
-}
-
-.controlGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.controlBtn {
-  background: transparent;
-  border: none;
-  color: var(--ct-text-muted);
-  padding: 0.5rem 0;
-  text-align: left;
-  font-size: var(--text-xl);
-  font-weight: var(--ct-fw-light);
-  transition: color var(--ct-transition-fast), background-color var(--ct-transition-fast), border-color var(--ct-transition-fast);
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid transparent;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-.controlBtn:hover {
-  color: var(--ct-text);
-}
-
-.controlBtn span {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.controlBtn[data-active="true"] {
-  color: var(--ct-text);
-  border-bottom: 1px solid var(--ct-accent);
-  font-weight: var(--ct-fw-medium);
-}
-
-.simControls .controlBtn[data-active="true"] .faintSep {
-  opacity: 1;
-}
-
-/* Inline rows (Scale, Mix) — segmented pills (Figma) */
+/* ── CONTROLS (buttons / segmented pills, monospace) ── */
 .controlRow {
   display: flex;
-  gap: 0.6rem;
   flex-wrap: wrap;
-  min-width: 0;
-}
-
-.controlRow .controlBtn {
-  flex: none;
-  font-size: var(--text-base);
-  padding: 0.35rem 1.05rem;
-  border: 1px solid var(--ct-divider-strong);
-  border-radius: var(--ct-radius-pill);
-  border-bottom: 1px solid var(--ct-divider-strong);
-  color: var(--ct-text-subdued);
-}
-
-.controlRow .controlBtn:hover {
-  border-color: var(--ct-divider-strong);
-}
-
-.controlRow .controlBtn[data-active="true"] {
-  color: var(--ct-accent-ink);
-  background: var(--ct-accent);
-  border-color: var(--ct-accent);
-  border-bottom: 1px solid var(--ct-accent);
-  font-weight: var(--ct-fw-bold);
-}
-
-.simMain {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  min-width: 0;
-  min-height: 0;
-}
-
-/* Readout sits directly under the blueprint — no margin-top:auto bottom-pin,
-   which on a tall locked instrument frame opened a dead gap between the capped
-   projection and the metric strip. Content now flows top-down; simMain scrolls. */
-.simReadout {
-  flex-shrink: 0;
-  min-width: 0;
-}
-
-/* Blueprint viewport — layout sizing lives on the simMain child selector. */
-.projectionContainer {
-  width: 100%;
-  min-width: 0;
-  position: relative;
-  overflow: hidden;
-  background: var(--ct-bg);
-  border: 1px solid var(--ct-divider-strong);
-}
-
-.simMain > .projectionContainer {
-  flex: 0 0 auto;
-  align-self: stretch;
-  width: 100%;
-  min-height: clamp(160px, 22dvh, 260px);
-  max-height: min(52dvh, 480px);
-  aspect-ratio: 16 / 9;
-  border-color: var(--ct-border);
-  border-radius: 0;
-}
-
-.projectionSvg {
-  --ct-projection-grid-major: rgba(255, 255, 255, 0.06);
-  --ct-projection-grid-micro: rgba(255, 255, 255, 0.025);
-  --ct-projection-halo: color-mix(in srgb, var(--ct-accent) 3%, transparent);
-  --ct-projection-structure-primary: rgba(255, 255, 255, 0.15);
-  --ct-projection-structure-secondary: rgba(255, 255, 255, 0.05);
-  --ct-projection-corner: rgba(255, 255, 255, 0.4);
-}
-
-.projectionSvgCompute {
-  --ct-projection-halo: color-mix(in srgb, var(--ct-compute) 4.5%, transparent);
-  --ct-projection-structure-primary: color-mix(in srgb, var(--ct-compute) 55%, transparent);
-  --ct-projection-structure-secondary: color-mix(in srgb, var(--ct-compute) 35%, transparent);
-}
-
-.projectionSvgGov {
-  --ct-projection-halo: color-mix(in srgb, var(--ct-gov) 4%, transparent);
-  --ct-projection-structure-primary: color-mix(in srgb, var(--ct-gov) 18%, transparent);
-}
-
-.projectionBackdrop {
-  fill: var(--ct-bg);
-}
-
-.projectionGridMajor,
-.projectionGridMicro,
-.projectionStructurePrimary,
-.projectionStructureSecondary,
-.projectionCornerMark {
-  fill: none;
-}
-
-.projectionGridMajor {
-  stroke: var(--ct-projection-grid-major);
-}
-
-.projectionGridMicro {
-  stroke: var(--ct-projection-grid-micro);
-}
-
-.projectionStructurePrimary {
-  stroke: var(--ct-projection-structure-primary);
-}
-
-.projectionStructureSecondary {
-  stroke: var(--ct-projection-structure-secondary);
-}
-
-.projectionCornerMark {
-  stroke: var(--ct-projection-corner);
-}
-
-.projectionHalo {
-  fill: var(--ct-projection-halo);
-  filter: blur(40px);
-  display: none;
-}
-
-/* Crosshairs removed — Figma wireframe uses grid only */
-.projectionContainer::before,
-.projectionContainer::after {
-  display: none;
-}
-
-.projectionState {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--ct-transition-xslow) var(--ct-ease-smooth);
-}
-
-.projectionState[data-active="true"] {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .projectionState {
-    transition: none;
-  }
-}
-
-.projectionLabel {
-  position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  right: 1rem;
-  max-width: calc(100% - 2rem);
-  font-family: var(--ct-font-mono);
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ct-text-label);
-  background: transparent;
-  padding: 0;
-  border: none;
-  z-index: var(--ct-z-overlay);
-  overflow-wrap: anywhere;
-}
-
-/* Faint inline separator (replaces inline opacity:0.5 in JSX) */
-.faintSep {
-  opacity: var(--ct-opacity-faint);
-}
-
-/* Premium Financial Table format for Metrics */
-.simMetrics {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-top: 1px solid var(--ct-divider);
-  margin-top: 0;
-  min-width: 0;
-}
-
-.simMetrics .metricItem {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  padding: 1.5rem 1.5rem 1.5rem 0;
-  border-top: none;
-  border-bottom: none;
-  border-right: 1px solid var(--ct-divider);
-  gap: 0.55rem;
-  min-width: 0;
-}
-
-.simMetrics .metricItem:last-child {
-  border-right: none;
-}
-
-.simMetrics .metricLabel {
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ct-text-muted);
-  min-width: 0;
-  line-height: 1.45;
-}
-
-.simMetrics .metricValue {
-  font-size: clamp(1.4rem, 2.2vw, 2rem);
-  font-family: var(--ct-font-sans);
-  font-weight: var(--ct-fw-medium);
-  letter-spacing: -0.02em;
-  color: var(--ct-text);
-  text-align: left;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.simMetrics .metricValueDanger,
-.simMetrics .metricValueRisk[data-tone="elevated"] {
-  color: var(--ct-text);
-}
-
-.simMetrics .metricValueRisk {
-  font-family: var(--ct-font-sans);
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  padding-top: 0;
-}
-
-.simMetrics[data-loading="true"] {
-  opacity: var(--ct-opacity-loading);
-  transition: opacity var(--ct-transition-slow);
-}
-
-/* Pulsing dot used by the computing cue and the loading state below. Declared
-   before its first use (.simComputing::before) so the animation resolves in
-   source order. */
-@keyframes ctPulse {
-  0%, 100% { opacity: 0.25; transform: scale(0.85); }
-  50%      { opacity: 1;    transform: scale(1.1); }
-}
-
-/* Explicit "computing" cue above the metric strip — the opacity fade alone
-   was too subtle to confirm an input was registered. */
-.simComputing {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ct-accent);
-  margin-bottom: 0.5rem;
-  min-height: 1.2em;
-}
-
-.simComputing::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: var(--ct-radius-full);
-  background: var(--ct-accent);
-  animation: ctPulse 1.1s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .simComputing::before { animation: none; }
-}
-
-.simError {
-  color: var(--ct-danger);
-  font-size: var(--text-lg);
-  padding: 1.25rem 1.5rem;
-  background: var(--ct-surface);
-  border-left: 3px solid var(--ct-danger);
-  border-radius: 0 var(--ct-panel-radius) var(--ct-panel-radius) 0;
-  font-family: var(--ct-font-mono);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: flex-start;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-/* ── Simulator result panel (below the metrics strip) ── */
-.simResultPanel {
-  flex-shrink: 0;
-  margin-bottom: 0;
-}
-
-.simResultGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.simResultSection {
-  min-width: 0;
-}
-
-.simResultSectionTitle {
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ct-accent);
-  font-weight: var(--ct-fw-medium);
-  margin-bottom: 0.85rem;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--ct-divider-faint);
-}
-
-.simKvGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.5rem 1.5rem;
-  min-width: 0;
-}
-
-.simKvRow {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.simKvRowFull {
-  grid-column: 1 / -1;
-}
-
-.simKvKey {
-  font-size: var(--text-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--ct-text-muted);
-  line-height: 1.3;
-}
-
-.simKvVal {
-  font-size: var(--text-xl);
-  font-family: var(--ct-font-mono);
-  color: var(--ct-text);
-  font-weight: var(--ct-fw-normal);
-  overflow-wrap: anywhere;
-}
-
-.negative {
-  color: var(--ct-danger-soft);
-}
-
-.simYearCardHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.85rem;
-  min-width: 0;
-}
-
-.simYearCardYear {
-  font-size: var(--text-base);
-  font-weight: var(--ct-fw-medium);
-  color: var(--ct-text);
-  letter-spacing: 0.04em;
-}
-
-/* ── Financial section title (returns / capital / projection panels) ── */
-.finSectionTitle {
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ct-accent);
-  font-weight: var(--ct-fw-medium);
-  margin: 0 0 1.5rem;
-}
-
-/* Financial acronyms carry a definition without a noisy default underline */
-.metricLabel abbr {
-  text-decoration: none;
-  border-bottom: 1px dotted var(--ct-text-muted);
-  cursor: help;
-}
-
-/* ── Panel — container for registers / tables / readouts ── */
-.cockpitPanel {
-  background: var(--ct-surface);
-  border: 1px solid var(--ct-border);
-  border-radius: var(--ct-panel-radius);
-  padding: 0.9rem 1rem 0.85rem;
-  margin-bottom: var(--ct-section-gap);
-}
-
-.cockpitPanelFill {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 0;
-  overflow: hidden;
-  min-width: 0;
-}
-
-.cockpitPanel:last-child {
-  margin-bottom: 0;
-}
-
-.cockpitPanelHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  margin-bottom: 0.85rem;
-  flex-wrap: wrap;
-}
-
-.cockpitPanelTitle {
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--ct-accent);
-  font-weight: var(--ct-fw-medium);
-  margin: 0;
-}
-
-.cockpitPanelContext {
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--ct-text-muted);
-  font-family: var(--ct-font-mono);
-}
-
-.panelHint {
-  margin: 0.45rem 0 0;
-  color: var(--ct-text-muted);
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-
-/* Horizontal + vertical scroll for wide registers inside the locked page frame */
-.cockpitPanelScroll {
-  width: 100%;
-  overflow: auto;
-  border-top: 1px solid var(--ct-divider);
-  scrollbar-width: thin;
-  scrollbar-color: var(--ct-divider-strong) transparent;
-}
-
-.cockpitPanelScrollFill {
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-}
-
-.cockpitPanelScroll::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.cockpitPanelScroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-.cockpitPanelScroll::-webkit-scrollbar-thumb {
-  background: var(--ct-divider-strong);
-  border-radius: var(--ct-radius-sm);
-}
-
-/* Horizontal-scroll affordance: a right-edge fade cues hidden columns.
-   Sits on the panel (overflow:hidden clips it), the scroller lives inside. */
-.cockpitPanelScrollWrap {
-  position: relative;
-  border-radius: var(--ct-panel-radius);
-  min-width: 0;
-}
-
-.cockpitPanelScrollWrap::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 36px;
-  pointer-events: none;
-  background: linear-gradient(to right, transparent, var(--ct-surface));
-  opacity: 0;
-  transition: opacity var(--ct-transition-fast);
-}
-
-/* Shown only where a single column-at-a-time read is likely (≤768px) */
-@media (max-width: 768px) {
-  .cockpitPanelScrollWrap::after { opacity: 1; }
-
-  /* Freeze the first column so the row's identity stays in view while
-     the rest of the wide table scrolls horizontally. */
-  .cockpitPanelScroll .sourcesTable th:first-child,
-  .cockpitPanelScroll .sourcesTable td:first-child {
-    position: sticky;
-    left: 0;
-    background: var(--ct-surface);
-    z-index: var(--ct-z-base);
-  }
-  .cockpitPanelScroll .sourcesTable th:first-child {
-    z-index: var(--ct-z-sticky); /* header corner stays above body sticky cells */
-  }
-}
-
-/* Load-more control under a contained register */
-.loadMoreRow {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-.loadMoreButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: transparent;
-  border: 1px solid var(--ct-divider-strong);
-  border-radius: var(--ct-radius-pill);
-  padding: 0.65rem 1.5rem;
-  color: var(--ct-text);
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  cursor: pointer;
-  transition: border-color var(--ct-transition-fast), color var(--ct-transition-fast);
-}
-
-.loadMoreButton:hover {
-  border-color: var(--ct-accent);
-  color: var(--ct-accent);
-}
-
-.loadMoreButton:focus-visible {
-  outline: 2px solid var(--ct-accent);
-  outline-offset: 2px;
-}
-
-.cockpitNote {
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--ct-text-muted);
-  margin: 1.25rem 0 0;
-  max-width: var(--ct-measure);
-  line-height: 1.6;
-}
-
-.cockpitFooterCluster {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-}
-
-.cockpitFooterCluster .cockpitNote {
-  margin: 0;
-}
-
-.cockpitFooterCluster .ctaButton {
-  align-self: flex-start;
-}
-
-.registerLayout {
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(var(--ct-register-side-min), var(--ct-register-side-max)) minmax(0, 1fr);
-  /* The single row must stretch to the resolved flex height — without an
-     explicit track it defaults to auto/content height, so the fill panel's
-     evidence table (overflow:auto + min-height:0) collapses to height:0. */
-  grid-template-rows: minmax(0, 1fr);
-  gap: 1.5rem;
-  align-items: start;
-}
-
-.registerLayout > .cockpitPanel:first-child {
-  align-self: start;
-}
-
-.sourceDocList {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-
-.sourceDocItem {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: flex-start;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--ct-divider-faint);
-  min-width: 0;
-}
-
-/* The unclassed text column (link + meta) must shrink so long document names
-   wrap instead of widening the space-between row. */
-.sourceDocItem > div {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.sourceDocItem:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.finOverviewGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  gap: 1.25rem;
-  flex-shrink: 0;
-  min-width: 0;
-}
-
-.finOverviewGrid .cockpitPanel {
-  margin-bottom: 0;
-  padding: 1.75rem 2rem;
-}
-
-.finProjectionPanel {
-  flex: 1;
-  min-height: 0;
-}
-
-.finProjectionPanel .cockpitPanelScrollWrap {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-}
-
-.finProjectionPanel .cockpitPanelScroll {
-  flex: 1;
-  min-height: 0;
-}
-
-.modelCallout {
-  max-width: none;
-  padding-left: 1rem;
-  border-left: 2px solid var(--ct-accent-faint);
-}
-
-.modelCallout[data-tone="warning"] {
-  border-left-color: var(--ct-danger);
-}
-
-.modelCalloutLabel {
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ct-accent);
-  margin-bottom: 0.55rem;
-}
-
-.modelCallout[data-tone="warning"] .modelCalloutLabel {
-  color: var(--ct-danger);
-}
-
-.modelCalloutText {
-  margin: 0;
-  max-width: var(--ct-measure);
-  color: var(--ct-text-muted);
-  font-size: var(--text-base);
-  line-height: 1.6;
-}
-
-.sourcesTable {
-  width: 100%;
-  min-width: var(--ct-table-min); /* keep columns legible; overflow scrolls horizontally, not wraps vertically */
-  border-collapse: collapse;
-  font-size: var(--text-lg);
-  font-weight: var(--ct-fw-normal);
-}
-
-/* Cells: non-first columns stay on one line (the horizontal scroller handles
-   overflow). The first column (label) and meta sub-cells wrap freely. */
-.sourcesTable td {
-  padding: 0.95rem 1.5rem;
-  border-bottom: 1px solid var(--ct-divider-faint);
-  vertical-align: top;
-  color: var(--ct-text);
-  overflow-wrap: anywhere;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-.sourcesTable td:first-child {
-  white-space: normal;
-  min-width: var(--ct-col-min);
-}
-
-.sourcesTable td .metaCell {
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
-.sourcesTable th {
-  text-align: left;
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--ct-text-muted);
-  font-weight: var(--ct-fw-medium);
-  padding: 0.85rem 1.5rem;
-  background: var(--ct-surface-elevated);
-  border-bottom: 1px solid var(--ct-border);
-  white-space: nowrap;
-}
-
-.sourcesTable th:first-child { border-top-left-radius: var(--ct-table-radius); }
-.sourcesTable th:last-child { border-top-right-radius: var(--ct-table-radius); }
-
-/* Inside a contained panel, keep the header visible while the body scrolls */
-.cockpitPanelScroll .sourcesTable th {
-  position: sticky;
-  top: 0;
-  z-index: var(--ct-z-base);
-  background: var(--ct-surface-elevated);
-}
-
-.sourcesTable tbody tr {
-  transition: background-color var(--ct-transition-xfast);
-}
-
-.sourcesTable tbody tr:hover {
-  background: var(--ct-surface-elevated);
-}
-
-.metaCell {
-  font-size: var(--text-xs);
-  color: var(--ct-text-muted);
-  margin-top: 0.3rem;
-  font-family: var(--ct-font-mono);
-}
-
-.numCell {
-  font-family: var(--ct-font-mono);
-  font-variant-numeric: tabular-nums;
-  font-weight: var(--ct-fw-medium);
-  font-size: var(--text-xl);
-  white-space: nowrap;
-}
-
-.sourceDocItem .sourceLink {
-  font-size: var(--text-base);
-  font-weight: var(--ct-fw-medium);
-}
-
-.sourceLink {
-  color: var(--ct-text);
-  text-decoration: none;
-  border-bottom: 1px solid var(--ct-divider-strong);
-  transition: color var(--ct-transition-fast), border-color var(--ct-transition-fast);
-}
-
-.sourceLink:hover {
-  color: var(--ct-accent);
-  border-bottom-color: var(--ct-accent);
-}
-
-.confDots {
-  letter-spacing: 2px;
-  font-size: var(--text-xs);
-  white-space: nowrap;
-}
-
-.confDots span {
-  color: var(--ct-dot-off);
-}
-
-.confDots span[data-on="true"] {
-  color: var(--ct-accent);
-}
-
-.confEmpty {
-  color: var(--ct-text-muted);
-}
-
-.tagOn {
-  display: inline-block;
-  font-size: var(--text-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ct-accent);
-  background: transparent;
-  border: 1px solid var(--ct-accent);
-  border-radius: var(--ct-radius-pill);
-  padding: var(--ct-tag-padding);
-  white-space: nowrap;
-}
-
-.tagOff {
-  display: inline-block;
-  font-size: var(--text-2xs);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ct-text-muted);
-  border: 1px solid var(--ct-divider);
-  border-radius: var(--ct-radius-pill);
-  padding: var(--ct-pill-padding);
-  white-space: nowrap;
-}
-
-/* ── UI states: loading / empty / error are visually distinct ── */
-.emptyState {
-  padding: 3rem 0;
-  color: var(--ct-text-muted);
-  font-size: var(--text-2xl);
-  font-weight: var(--ct-fw-light);
-  max-width: var(--ct-empty-max);
-  line-height: 1.6;
-}
-
-/* Loading: same calm container as empty, but flagged with an animated dot so
-   it never reads identically to a genuine "no data" message. */
-.loadingState {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 2.5rem 0 1.5rem;
-  color: var(--ct-text-muted);
-  font-size: var(--text-base);
-  font-weight: var(--ct-fw-normal);
-}
-
-.loadingState::before {
-  content: "";
-  width: 9px;
-  height: 9px;
-  border-radius: var(--ct-radius-full);
-  background: var(--ct-accent);
-  animation: ctPulse 1.1s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .loadingState::before { animation: none; opacity: 0.7; }
-}
-
-.errorState {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.25rem;
-  padding: 2.5rem 0;
-  color: var(--ct-danger);
-  font-size: var(--text-xl);
-}
-
-/* Error block: bordered, danger-tinted surface so it reads as a state, not prose */
-.errorState > span {
-  border-left: 3px solid var(--ct-danger);
-  padding-left: 1rem;
-  line-height: 1.5;
-}
-
-.errorActions {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-/* A clearly actionable retry — bordered pill, obvious hover/active/focus */
-.retryButton {
-  display: inline-flex;
-  align-items: center;
   gap: 0.5rem;
+  margin-top: 1rem;
+}
+.btn {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fg-muted);
   background: transparent;
-  border: 1px solid var(--ct-text-muted);
-  border-radius: var(--ct-radius-pill);
-  padding: 0.55rem 1.2rem;
-  color: var(--ct-text);
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  border: 1px solid var(--line);
+  padding: 0.5rem 0.85rem;
   cursor: pointer;
-  transition: border-color var(--ct-transition-fast), color var(--ct-transition-fast), background var(--ct-transition-fast);
+}
+.btn:hover { color: var(--fg); border-color: var(--fg-muted); }
+.btn[data-active="true"] {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.btnBlock {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--line-faint);
+  padding: 0.65rem 0;
+}
+.btnBlock[data-active="true"] {
+  color: var(--accent);
+  background: transparent;
+  border-bottom-color: var(--accent);
 }
 
-.retryButton:hover {
-  border-color: var(--ct-accent);
-  color: var(--ct-accent);
-}
-
-.retryButton:active {
-  background: var(--ct-accent-ghost);
-}
-
-.retryButton:focus-visible {
-  outline: 2px solid var(--ct-accent);
-  outline-offset: 2px;
-}
-
-.retryButton:disabled {
-  opacity: var(--ct-opacity-disabled);
-  cursor: progress;
-}
-
-.errorBack {
-  color: var(--ct-text-muted);
-  font-size: var(--text-md);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  text-decoration: none;
-  transition: color var(--ct-transition-fast);
-}
-
-.errorBack:hover {
-  color: var(--ct-text);
-}
-
-/* ── Desktop-only / mobile-only visibility guards ──
-   desktopTableWrap: the full-width table container. Visible on tablet/desktop,
-   replaced by mobileCardList on phones.
-   mobileCardList: card stack for ≤768px. Hidden above that. */
-.desktopTableWrap {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-.mobileCardList {
-  display: none;
-  flex-direction: column;
-  gap: 0.85rem;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-  padding-top: 0.25rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--ct-divider-strong) transparent;
-}
-
-.desktopOnly {
-  /* inline hint visible only on desktop; hidden on mobile where no table scrolls */
-}
-
-/* ── Source evidence card (mobile) ── */
-.sourceCard {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 1.1rem 1.15rem 1rem;
-  border: 1px solid var(--ct-border);
-  border-radius: var(--ct-panel-radius);
-  background: var(--ct-surface);
-  min-width: 0;
-}
-
-.sourceCardHeader {
+/* ── KEY/VALUE rows (inside a cell) ── */
+.kv {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 0.75rem;
-  min-width: 0;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line-faint);
+  font-size: 0.8rem;
 }
-
-.sourceCardMetric {
-  font-size: var(--text-base);
-  font-weight: var(--ct-fw-normal);
-  color: var(--ct-text);
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.sourceCardValue {
-  font-family: var(--ct-font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--text-base);
-  color: var(--ct-text);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.sourceCardMeta {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.sourceCardSource {
-  font-size: var(--text-sm);
-  color: var(--ct-text-muted);
-}
-
-.sourceCardLink {
-  font-size: var(--text-sm);
-}
-
-.sourceCardFooter {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sourceCardTag {
-  font-size: var(--text-2xs);
+.kv:last-child { border-bottom: none; }
+.kvKey {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--ct-text-muted);
-  border: 1px solid var(--ct-divider);
-  padding: var(--ct-tag-padding);
-  white-space: nowrap;
+  color: var(--fg-muted);
 }
+.kvVal { font-family: var(--font-mono); }
 
-/* ── Deal archetype card (mobile) ── */
-.dealCard {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  padding: 1.1rem 1.15rem 1rem;
-  border: 1px solid var(--ct-border);
-  border-radius: var(--ct-panel-radius);
-  background: var(--ct-surface);
-  min-width: 0;
-}
-
-.dealCardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-.dealCardName {
-  font-family: var(--ct-font-sans);
-  font-size: var(--text-xl);
-  font-weight: var(--ct-fw-bold);
-  color: var(--ct-text);
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.dealCardTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  flex-shrink: 0;
-}
-
-.dealCardShort {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: var(--ct-text-muted);
-  line-height: 1.5;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.dealCardBody {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  min-width: 0;
-}
-
-.dealCardRow {
-  display: flex;
-  gap: 0.75rem;
-  align-items: baseline;
-  font-size: var(--text-sm);
-  min-width: 0;
-}
-
-.dealCardRowLabel {
-  color: var(--ct-text-muted);
+/* ── STATES ── */
+.state {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: var(--text-xs);
-  white-space: nowrap;
-  flex-shrink: 0;
+  letter-spacing: 0.15em;
+  color: var(--fg-muted);
+  padding: 2rem;
 }
-
-.dealCardScores {
-  display: flex;
-  gap: 1.25rem;
-  margin-top: 0.2rem;
-}
-
-.dealCardScore {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.dealCardScoreLabel {
-  font-size: var(--text-2xs);
+.stateError { color: #FF6B6B; }
+.link {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--ct-text-muted);
+  color: var(--fg-muted);
+  text-decoration: none;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+.link:hover { color: var(--accent); }
+
+/* ── CTA (link styled as primary action) ── */
+.cta {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--bg);
+  background: var(--accent);
+  padding: 0.6rem 1.1rem;
+  text-decoration: none;
 }
 
-.dealCardScoreValue {
-  font-family: var(--ct-font-mono);
-  font-size: var(--text-base);
-  color: var(--ct-text);
+/* ── TAGS ── */
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--line);
+  color: var(--fg-muted);
 }
+.tagOn { color: var(--accent); border-color: var(--accent); }
 
-.dealCardTerms {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   CANONICAL RESPONSIVE SET — ordered widest→narrowest then height, so the
-   narrower / more-specific rule always wins the cascade (equal specificity →
-   source order decides). Do NOT insert ad-hoc thresholds; see file header.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ── 1280px · desktop → small laptop: nav→drawer, tighter grids, but
-   keep the simulator 2-col cockpit. ── */
-@media (max-width: 1280px) {
-  .summaryGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .simLayout {
-    gap: 1.25rem;
-  }
-
-  .simControls {
-    padding-right: 1.25rem;
-    gap: 1.25rem;
-  }
-}
-
-/* ── 769px+ · desktop/tablet instrument: 2-col cockpit, internal zone scroll. ── */
-@media (min-width: 769px) {
-  .cockpitFrameLocked {
-    overflow-y: hidden;
-  }
-
-  .simMain {
-    overflow-x: hidden;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ct-divider-strong) transparent;
-  }
-}
-
-/* ── 1024px · tablet: data registers stack; simulator KEEPS 2-col cockpit. ── */
+/* Responsive minimal */
 @media (max-width: 1024px) {
-  /* Overview: read row goes 3→1 col so the risk/evidence/dossier cards don't crush. */
-  .overviewReadRow {
-    grid-template-columns: 1fr;
-  }
-  .overviewStateGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .registerLayout {
-    grid-template-columns: 1fr;
-    /* Stacked: two panels in one column flow to content height and the frame
-       scrolls — drop the desktop single-row fill so the evidence panel isn't
-       locked to a viewport-fraction track that clips the second stacked item. */
-    grid-template-rows: auto;
-    flex: none;
-  }
-
-  .finOverviewGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .cockpitPanelScrollFill,
-  .finProjectionPanel {
-    min-height: 0;
-  }
-
-  /* Stacked register: the evidence panel sizes to content and the frame
-     scrolls — release the desktop fill/clip so the table isn't cut off. */
-  .registerLayout .cockpitPanelFill {
-    flex: none;
-    overflow: visible;
-    min-height: 0;
-  }
-
-  .simLayout {
-    grid-template-columns: minmax(var(--ct-card-min-sm), var(--ct-sim-controls-min)) minmax(0, 1fr);
-    gap: 1.25rem;
-  }
-
-  .simControls {
-    padding-right: 1.25rem;
-    gap: 1.25rem;
-  }
-
-  .simMetrics {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  .span3, .span4, .span6, .span8 { grid-column: span 12; }
+  .wrap { padding: 2rem; }
+  .nav { margin-bottom: 2.5rem; }
 }
-
-/* ── 768px · mobile: everything single column; metric/sim strips stack.
-   Absorbs the former 640 (hero metric shrink) and 560 (mobile single col). ── */
 @media (max-width: 768px) {
-  /* Overview state band → single column on mobile */
-  .overviewStateGrid {
-    grid-template-columns: 1fr;
-  }
-  .overviewNextAction {
-    align-items: flex-start;
-  }
-
-  /* Switch table → cards for data-heavy registers */
-  .desktopTableWrap {
-    display: none;
-  }
-
-  .mobileCardList {
-    display: flex;
-    /* On mobile, the frame scrolls vertically — let the list size to content
-       rather than filling a height-constrained flex column. */
-    flex: none;
-    overflow-y: visible;
-    max-height: none;
-  }
-
-  .desktopOnly {
-    display: none;
-  }
-
-  /* On mobile the panel no longer needs to fill a fixed height — it should
-     size to its content so the outer frame scroll drives navigation. */
-  .cockpitPanelFill {
-    flex: none;
-    overflow: visible;
-    min-height: 0;
-  }
-
-  /* registerLayout on mobile: let each panel size to content */
-  .registerLayout {
-    flex: none;
-    min-height: 0;
-  }
-
-  .summaryGrid,
-  .registerLayout {
-    grid-template-columns: 1fr;
-  }
-
-  /* Hero metric strip (home KPIs) shrinks so long figures never collide. */
-  .metricValue {
-    font-size: var(--text-6xl-alt);
-  }
-
-  .simLayout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    padding: 0;
-    gap: 1rem;
-    flex: none;
-    overflow: visible;
-    min-height: 0;
-  }
-
-  .simControls {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0.85rem 1rem;
-    align-items: start;
-    max-height: none;
-    overflow-y: visible;
-    border-right: none;
-    border-bottom: 1px solid var(--ct-divider);
-    padding-right: 0;
-    padding-bottom: 1rem;
-  }
-
-  .simControls > :first-child {
-    grid-column: 1 / -1;
-  }
-
-  .simMain {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    overflow: visible;
-    min-height: 0;
-  }
-
-  .simMain > .projectionContainer {
-    flex: 0 0 auto;
-    width: 100%;
-    min-height: clamp(150px, 22dvh, 220px);
-    max-height: clamp(150px, 25dvh, 240px);
-    aspect-ratio: 21 / 9;
-  }
-
-  /* Stacked simulator: frame scrolls to reveal controls + readout. */
-  .cockpitFrameLocked {
-    overflow-y: auto;
-  }
-
-  .simMetrics {
-    grid-template-columns: 1fr;
-    flex-shrink: 0;
-  }
-  /* Stack each metric label over its value so long readouts wrap inside the
-     column instead of forcing horizontal page scroll. */
-  .simMetrics .metricItem {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.35rem;
-    padding: 0.65rem 0;
-  }
-  .simMetrics .metricValue {
-    text-align: left;
-    width: 100%;
-  }
-  .controlRow {
-    gap: 0.8rem;
-  }
-}
-
-/* ── 430px · small phone: type/element density; summary grid single column. ── */
-@media (max-width: 430px) {
-  /* Source/deal cards: tighter padding on small phones */
-  .sourceCard,
-  .dealCard {
-    padding: 0.85rem 0.85rem 0.75rem;
-  }
-
-  .summaryGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .summaryCard {
-    padding: 0.78rem 0.85rem;
-  }
-
-  .summaryText {
-    display: none;
-  }
-
-  .summaryValue {
-    font-size: clamp(1.05rem, 5vw, 1.55rem);
-  }
-
-  .pageTitle {
-    font-size: clamp(1.4rem, 6vw, 1.8rem);
-  }
-
-  .pageContext {
-    font-size: var(--text-xs);
-    letter-spacing: 0.12em;
-  }
-
-  .pageHead {
-    margin-bottom: 1.2rem;
-    padding-bottom: 0.85rem;
-  }
-
-  .simControls {
-    gap: 0.85rem;
-    /* Collapse to 1-col on small phones — 2-col at ~113px clips long section
-       titles like "AI Infrastructure Mix" at this tracking/font-size. */
-    grid-template-columns: 1fr;
-  }
-
-  .simControls > :first-child {
-    grid-column: auto;
-  }
-
-  .controlBtn {
-    font-size: var(--text-lg);
-    padding: 0.4rem 0;
-  }
-
-  .simSectionTitle {
-    margin-bottom: 0.7rem;
-    padding-bottom: 0.5rem;
-  }
-}
-
-/* ── max-height 720px · low-height density tier (laptops / short viewports
-   with browser chrome). Nav padding guarded by min-width:769px so landscape
-   phones (≤768px width) keep the 1.5rem horizontal padding from the 1280px
-   block instead of reverting to the wide 4rem desktop padding. ── */
-@media (max-height: 720px) {
-  .wrap {
-    --ct-nav-height: 56px;
-  }
-}
-
-@media (max-height: 720px) and (min-width: 769px) {
-  .nav {
-    padding: 0.75rem 4rem;
-  }
-}
-
-@media (max-height: 720px) {
-
-  .cockpitFrame {
-    --ct-frame-top: 0.65rem;
-    --ct-frame-bottom: 0.75rem;
-  }
-
-  .pageHead {
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-  }
-
-  .pageEyebrow {
-    margin-bottom: 0.35rem;
-    font-size: var(--text-xs);
-  }
-
-  .pageTitle {
-    font-size: clamp(1.3rem, 3vw, 1.6rem);
-    margin-bottom: 0.5rem;
-  }
-
-  .pageContext {
-    font-size: var(--text-xs);
-  }
-
-  .summaryCard {
-    padding: 0.75rem 0.85rem;
-  }
-
-  .summaryText {
-    display: none;
-  }
-
-  .summaryValue {
-    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
-  }
-
-  .cockpitPanel {
-    padding: 1.1rem 1.25rem 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .simLayout {
-    gap: 1rem;
-  }
-
-  .simSectionTitle {
-    margin-bottom: 0.65rem;
-    padding-bottom: 0.4rem;
-  }
-
-  .simMain {
-    gap: 1rem;
-  }
-
-  .simMain > .projectionContainer {
-    min-height: clamp(160px, 28dvh, 240px);
-  }
-
-  .simMetrics {
-    gap: 0.5rem;
-  }
-
-  .simMetrics .metricItem {
-    padding: 0.65rem 0.1rem 0;
-    gap: 0.3rem;
-  }
-
-  .simMetrics .metricValue {
-    font-size: clamp(1rem, 2vw, 1.4rem);
-  }
-
-  .metricsGrid {
-    margin-bottom: 2rem;
-  }
-}
-
-/* Low-height + wide (laptop) only: collapse the 4 summary cards into one row to
-   free vertical space. Guarded by min-width so narrow short phones keep their
-   single-column summary and never overflow. */
-@media (max-height: 720px) and (min-width: 769px) {
-  .summaryGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* ── Mobile landscape · re-establishes the 2-col simulator the width stack
-   flattens. Must stay LAST so it overrides the low-height density tier. ── */
-@media (max-height: 520px) and (orientation: landscape) {
-  .summaryGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .cockpitFrameLocked {
-    overflow-y: hidden;
-  }
-
-  .simLayout {
-    display: grid;
-    grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr);
-    overflow: hidden;
-    flex: 1;
-    min-height: 0;
-  }
-
-  .simControls {
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    border-right: 1px solid var(--ct-divider-faint);
-    border-bottom: none;
-    padding-right: 1rem;
-    padding-bottom: 0;
-    gap: 0.75rem;
-    min-height: 0;
-  }
-
-  .simControls > :first-child {
-    grid-column: auto;
-  }
-
-  .simMain {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    overflow: hidden;
-    min-height: 0;
-  }
-
-  .simMain > .projectionContainer {
-    flex: 0 0 auto;
-    min-height: 150px;
-  }
-
-  .simMetrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    flex-shrink: 0;
-  }
+  .wrap { padding: 1rem; }
+  .cell { padding: 1.5rem; }
+  .rawTable { display: block; overflow-x: auto; }
 }

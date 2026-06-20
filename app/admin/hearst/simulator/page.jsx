@@ -1,29 +1,20 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import styles from '../hearst.module.css';
-import DataCenterProjection from '../components/DataCenterProjection';
-import HearstPageShell from '../components/HearstPageShell';
+import { useState, useRef } from 'react';
+import styles from './simulator.module.css';
 import {
   fmtUSD,
   fmtPctFromRatio,
   fmtX,
-  fmtMW,
   MISSING,
   parseApiError,
 } from '../utils/format';
-import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import {
   ARCHETYPES,
   DEFAULT_GEOGRAPHY,
   DEFAULT_SIM_SCALE_MW,
   DEFAULT_SIM_AI_MIX_PCT,
-  RISK_LABELS,
-  SIM_DEBOUNCE_MS,
-  SCALE_PRESETS_MW,
-  AI_MIX_PRESETS_PCT,
   GPU_SKU_PRESETS,
-  GPU_HOUR_PRICE_PRESETS,
   DEFAULT_GPU_SKU,
   DEFAULT_GPU_HOUR_PRICE,
   DEFAULT_GPU_UTIL_PCT,
@@ -36,62 +27,26 @@ const THESIS_META = {
   gov:     { label: 'Sovereign AI Cluster',  short: 'Sovereign' },
 };
 
-const INPUT_MODES = [
-  { id: 'mw_first',          label: 'MW First',       hint: 'Set capacity → derive CAPEX & returns' },
-  { id: 'capital_first',     label: 'Capital First',  hint: 'Set budget → derive max MW' },
-  { id: 'target_irr_first',  label: 'Target IRR',     hint: 'Set return target → solve lever' },
-];
-
-const SOLVER_LEVERS = [
-  { id: 'capex_per_mw', label: 'CAPEX/MW' },
-  { id: 'pricing',      label: 'Pricing' },
-  { id: 'leverage',     label: 'Leverage' },
-  { id: 'mw',          label: 'Scale (MW)' },
-];
-
 const GEOGRAPHIES = [
-  { id: 'qatar', label: 'Qatar' },
-  { id: 'uae',   label: 'UAE' },
-  { id: 'ksa',   label: 'KSA' },
-  { id: 'gcc',   label: 'GCC' },
+  { id: 'qatar', label: 'QATAR (QA-01)' },
+  { id: 'uae',   label: 'UAE (AE-02)' },
+  { id: 'ksa',   label: 'KSA (SA-01)' },
+  { id: 'gcc',   label: 'GCC (GC-00)' },
 ];
 
-const CAPEX_USD_PRESETS = [500_000_000, 1_000_000_000, 2_000_000_000, 5_000_000_000];
-const IRR_PRESETS_PCT   = [10, 12, 15, 18, 20];
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function buildPayload({ mode, thesis, scale, aiMix, capitalBudget, targetIrr, lever, geography, gpuSku, gpuHourPrice }) {
+function buildPayload({ thesis, scale, aiMix, geography, gpuSku, gpuHourPrice }) {
   const archetype_id = ARCHETYPES[thesis] ?? ARCHETYPES.compute;
-  // Only attach a GPU profile when there's an AI slice — the engine computes AI
-  // revenue ONLY when both a SKU and a $/GPU-hour are present (else AI factory
-  // carries GPU CAPEX with zero compute revenue → returns collapse).
   const hardware_mix = aiMix > 0
     ? { ai_pct: aiMix, gpu_sku_id: gpuSku, gpu_hour_price: gpuHourPrice, utilization_pct: DEFAULT_GPU_UTIL_PCT }
     : { ai_pct: aiMix };
 
-  let input_value;
-  if (mode === 'mw_first') {
-    input_value = { total_mw: scale };
-  } else if (mode === 'capital_first') {
-    input_value = { total_capex_usd: capitalBudget };
-  } else {
-    input_value = { target_irr_pct: targetIrr, lever, total_mw: scale };
-  }
-
   return {
-    input_mode: mode,
-    input_value,
+    input_mode: 'mw_first',
+    input_value: { total_mw: scale },
     archetype_id,
     hardware_mix,
     geography,
   };
-}
-
-function toneForIrr(irr, threshold = FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100) {
-  if (irr == null) return '';
-  if (irr < 0) return styles.metricValueDanger;
-  if (irr < threshold) return styles.metricValueElevated ?? '';
-  return '';
 }
 
 function numFmt(n, digits = 0) {
@@ -99,645 +54,404 @@ function numFmt(n, digits = 0) {
   return Number(n).toLocaleString('en-US', { maximumFractionDigits: digits });
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export default function SimulatorPage() {
   // ── Inputs ──────────────────────────────────────────────────────────────────
-  const [mode, setMode]               = useState('mw_first');
   const [thesis, setThesis]           = useState('compute');
   const [scale, setScale]             = useState(DEFAULT_SIM_SCALE_MW);
   const [aiMix, setAiMix]             = useState(DEFAULT_SIM_AI_MIX_PCT);
   const [gpuSku, setGpuSku]           = useState(DEFAULT_GPU_SKU);
-  const [gpuHourPrice, setGpuHourPrice] = useState(DEFAULT_GPU_HOUR_PRICE);
-  const [capitalBudget, setCapital]   = useState(1_000_000_000);
-  const [targetIrr, setTargetIrr]     = useState(15);
-  const [lever, setLever]             = useState('mw');
+  const [gpuHourPrice] = useState(DEFAULT_GPU_HOUR_PRICE);
   const [geography, setGeography]     = useState(DEFAULT_GEOGRAPHY);
-  const [attempt, setAttempt]         = useState(0);
-
-  // ── Results ──────────────────────────────────────────────────────────────────
+  
+  // ── UI State ─────────────────────────────────────────────────────────────────
+  const [isResultsMode, setIsResultsMode] = useState(false);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState(null);
   const [result, setResult]     = useState(null);
 
   const abortRef = useRef(null);
 
-  // ── Fetch ────────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    let active = true;
+  // ── Actions ──────────────────────────────────────────────────────────────────
+  const handleRunSimulation = async () => {
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    async function run() {
-      setLoading(true);
-      setError(null);
-      try {
-        const payload = buildPayload({ mode, thesis, scale, aiMix, capitalBudget, targetIrr, lever, geography, gpuSku, gpuHourPrice });
-        const res = await fetch('/api/admin/hearst/simulate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) {
-          throw new Error(await parseApiError(res, 'Simulation failed. Please try again.', {
-            badRequestLabel: 'Invalid input',
-            forbiddenLabel: 'You do not have access to run simulations.',
-          }));
-        }
-        const data = await res.json();
-        if (!active) return;
-        setResult(data);
-      } catch (err) {
-        if (err.name === 'AbortError') return;
-        if (active) setError(err.message);
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
+    setLoading(true);
+    setError(null);
+    setIsResultsMode(true); // Switch to results mode immediately for loading state
 
-    const t = setTimeout(run, SIM_DEBOUNCE_MS);
-    return () => { active = false; clearTimeout(t); };
-  }, [mode, thesis, scale, aiMix, gpuSku, gpuHourPrice, capitalBudget, targetIrr, lever, geography, attempt]);
+    try {
+      const payload = buildPayload({ thesis, scale, aiMix, geography, gpuSku, gpuHourPrice });
+      const res = await fetch('/api/admin/hearst/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        throw new Error(await parseApiError(res, 'Simulation failed. Please try again.', {
+          badRequestLabel: 'Invalid input',
+          forbiddenLabel: 'You do not have access to run simulations.',
+        }));
+      }
+      const data = await res.json();
+      setResult(data);
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setIsResultsMode(false);
+    setResult(null);
+    setError(null);
+  };
 
   // ── Derived display values ────────────────────────────────────────────────
-  const proj    = result?.projection    ?? {};
+  const proj    = result?.projection ?? {};
   const hw      = result?.hardware_breakdown ?? null;
-  const solver  = result?.solver        ?? null;
-  const archOut = result?.archetype_outcome ?? null;
-  const scenario = result?.scenario     ?? null;
 
-  const capEx   = proj.total_capex       ?? null;
-  const irr     = proj.irr_post_tax      ?? proj.irr ?? null;
-  const npv     = proj.npv_post_tax      ?? proj.npv ?? null;
+  const capEx   = proj.total_capex ?? null;
+  const irr     = proj.irr_post_tax ?? proj.irr ?? null;
+  const npv     = proj.npv_post_tax ?? proj.npv ?? null;
   const ebitda  = proj.stabilized_ebitda ?? null;
-  const dscr    = proj.dscr_stabilized   ?? null;
-  const derivedMw = solver?.lever_value  ?? scenario?.total_mw ?? scale;
-  const riskLabel = RISK_LABELS[thesis]  ?? RISK_LABELS.default;
-  const riskTone  = thesis === 'compute' ? 'elevated' : 'stable';
-  const thesisMeta = THESIS_META[thesis];
+  const dscr    = proj.dscr_stabilized ?? null;
+  const moic    = proj.moic_post_tax ?? null;
 
-  const contextLine = mode === 'mw_first'
-    ? `${thesisMeta.label} · ${scale} MW · ${aiMix}% AI mix · ${geography.toUpperCase()}`
-    : mode === 'capital_first'
-    ? `${thesisMeta.label} · ${fmtUSD(capitalBudget)} budget · ${aiMix}% AI mix · ${geography.toUpperCase()}`
-    : `${thesisMeta.label} · ${targetIrr}% target IRR · ${geography.toUpperCase()}`;
+  // Render helpers
+  const renderHardwareRows = () => {
+    if (!hw) return null;
+    const rows = [];
+    if (hw.mw_classic > 0) {
+      rows.push({ name: 'Classic Compute', qty: '-', capex: hw.capex_classic });
+    }
+    if (hw.mw_liquid > 0) {
+      rows.push({ name: 'Liquid Cooled', qty: '-', capex: hw.capex_liquid });
+    }
+    if (hw.mw_ai > 0) {
+      const skuName = GPU_SKU_PRESETS.find(s => s.id === gpuSku)?.label || gpuSku;
+      rows.push({ name: skuName, qty: numFmt(hw.total_gpus), capex: hw.capex_hardware });
+    }
+    return rows.map((r, i) => (
+      <tr key={i} className={styles.tableRow}>
+        <td className={styles.textSm}>{r.name}</td>
+        <td className={`${styles.textSm} ${styles.textRight}`}>{r.qty}</td>
+        <td className={`${styles.textSm} ${styles.textRight}`}>{fmtUSD(r.capex)}</td>
+      </tr>
+    ));
+  };
 
   return (
-    <HearstPageShell
-      variant="instrument"
-      title="Projection"
-      context={contextLine}
-    >
-      <div className={styles.simLayout}>
+    <div className={styles.container}>
+      {/* TOP BAR */}
+      <div className={styles.topBar}>
+        <div className={styles.item}><span className={`${styles.lbl} ${styles.textWhite}`} style={{letterSpacing: '0.2em', fontWeight: 700}}>HEARST</span></div>
+        <div className={styles.item}><span className={`${styles.lbl} ${styles.textPrimary}`}>ORACLE SIMULATOR</span></div>
+        <div className={styles.item}>
+          <span className={styles.lbl}>
+            <span className={styles.liveDot} style={{ background: loading ? 'var(--primary)' : 'var(--accent-green)', boxShadow: `0 0 8px ${loading ? 'var(--primary)' : 'var(--accent-green)'}`}}></span>
+            {loading ? 'COMPUTING...' : isResultsMode ? 'SYS_ANALYSIS' : 'SYS_READY'}
+          </span>
+        </div>
+        <div className={styles.item} style={{flex: 1}}></div>
+        <div className={styles.item}>
+          <span className={`${styles.lbl} ${styles.textMuted}`}>
+            {isResultsMode ? 'STEP 02 // PROJECTION' : 'STEP 01 // CONFIGURATION'}
+          </span>
+        </div>
+      </div>
 
-        {/* ── LEFT CONTROLS ──────────────────────────────────────────────── */}
-        <aside className={styles.simControls}>
-
-          {/* Input Mode */}
-          <div className={styles.controlGroup} role="group" aria-labelledby="mode-label">
-            <h2 id="mode-label" className={styles.simSectionTitle}>Simulation Mode</h2>
-            {INPUT_MODES.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                className={styles.controlBtn}
-                data-active={mode === m.id}
-                aria-pressed={mode === m.id}
-                onClick={() => setMode(m.id)}
-              >
-                <span>{m.label}</span>
-                {mode === m.id && <span className={styles.faintSep}>✓</span>}
-              </button>
-            ))}
-          </div>
-
-          {/* Investment Thesis */}
-          <div className={styles.controlGroup} role="group" aria-labelledby="thesis-label">
-            <h2 id="thesis-label" className={styles.simSectionTitle}>Investment Thesis</h2>
-            {Object.entries(THESIS_META).map(([key, meta]) => (
-              <button
-                key={key}
-                type="button"
-                className={styles.controlBtn}
-                data-active={thesis === key}
-                aria-pressed={thesis === key}
-                onClick={() => setThesis(key)}
-              >
-                <span>{meta.label}</span>
-                {thesis === key && <span className={styles.faintSep}>✓</span>}
-              </button>
-            ))}
-          </div>
-
-          {/* Geography */}
-          <div className={styles.controlGroup} role="group" aria-labelledby="geo-label">
-            <h2 id="geo-label" className={styles.simSectionTitle}>Geography</h2>
-            <div className={styles.controlRow}>
-              {GEOGRAPHIES.map((g) => (
-                <button
-                  key={g.id}
-                  type="button"
-                  className={styles.controlBtn}
-                  data-active={geography === g.id}
-                  aria-pressed={geography === g.id}
-                  aria-label={g.label}
-                  onClick={() => setGeography(g.id)}
-                >
-                  {g.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* MW / Capital / IRR — conditional on mode */}
-          {mode === 'mw_first' && (
-            <div className={styles.controlGroup} role="group" aria-labelledby="scale-label">
-              <h2 id="scale-label" className={styles.simSectionTitle}>Scale (MW)</h2>
-              <div className={styles.controlRow}>
-                {SCALE_PRESETS_MW.map((val) => (
-                  <button
-                    key={val}
-                    type="button"
-                    className={styles.controlBtn}
-                    data-active={scale === val}
-                    aria-pressed={scale === val}
-                    aria-label={`${val} megawatts`}
-                    onClick={() => setScale(val)}
+      <div className={styles.gridMain}>
+        {/* LEFT COLUMN */}
+        <div className={styles.col}>
+          {!isResultsMode ? (
+            <div className={styles.fadeEnterActive}>
+              <div className={styles.row}>
+                <div className={styles.lbl} style={{marginBottom: '2rem'}}>INFRASTRUCTURE & POWER</div>
+                
+                <div className={`${styles.lbl} ${styles.textWhite}`} style={{marginBottom: '1rem'}}>SITE LOCATION</div>
+                {GEOGRAPHIES.map((g) => (
+                  <div 
+                    key={g.id} 
+                    className={geography === g.id ? styles.selectorItemActive : styles.selectorItem}
+                    onClick={() => setGeography(g.id)}
                   >
-                    {val}
-                  </button>
+                    <div className={styles.textSm}>{g.label}</div>
+                    <div className={styles.lbl}>{geography === g.id ? 'SELECTED' : ''}</div>
+                  </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {mode === 'capital_first' && (
-            <div className={styles.controlGroup} role="group" aria-labelledby="capital-label">
-              <h2 id="capital-label" className={styles.simSectionTitle}>Capital Budget</h2>
-              <div className={styles.controlRow}>
-                {CAPEX_USD_PRESETS.map((val) => (
-                  <button
-                    key={val}
-                    type="button"
-                    className={styles.controlBtn}
-                    data-active={capitalBudget === val}
-                    aria-pressed={capitalBudget === val}
-                    aria-label={fmtUSD(val)}
-                    onClick={() => setCapital(val)}
-                  >
-                    {fmtUSD(val)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {mode === 'target_irr_first' && (
-            <>
-              <div className={styles.controlGroup} role="group" aria-labelledby="irr-label">
-                <h2 id="irr-label" className={styles.simSectionTitle}>Target IRR</h2>
-                <div className={styles.controlRow}>
-                  {IRR_PRESETS_PCT.map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      className={styles.controlBtn}
-                      data-active={targetIrr === val}
-                      aria-pressed={targetIrr === val}
-                      aria-label={`${val} percent IRR`}
-                      onClick={() => setTargetIrr(val)}
-                    >
-                      {val}%
-                    </button>
-                  ))}
+              
+              <div className={styles.rowStretch}>
+                <div className={styles.flexBetween}>
+                  <div className={`${styles.lbl} ${styles.textWhite}`}>TARGET CAPACITY</div>
+                  <div className={`${styles.textLg} ${styles.textPrimary}`}>{scale} MW</div>
+                </div>
+                
+                <div className={styles.sliderContainer}>
+                  <input 
+                    type="range" 
+                    min="10" 
+                    max="1000" 
+                    step="10"
+                    value={scale} 
+                    className={styles.slider}
+                    onChange={(e) => setScale(Number(e.target.value))}
+                  />
+                  <div className={styles.flexBetween} style={{marginTop: '0.75rem'}}>
+                    <div className={styles.lbl}>10 MW</div>
+                    <div className={styles.lbl}>1 GW</div>
+                  </div>
+                </div>
+                
+                <div className={styles.flexBetween} style={{marginTop: '3rem'}}>
+                  <div className={styles.lbl}>EST. PUE</div>
+                  <div className={styles.textMd}>1.12</div>
+                </div>
+                <div className={styles.flexBetween} style={{marginTop: '1.5rem'}}>
+                  <div className={styles.lbl}>GRID CONNECTION</div>
+                  <div className={styles.textMd}>2027 Q3</div>
                 </div>
               </div>
-              <div className={styles.controlGroup} role="group" aria-labelledby="lever-label">
-                <h2 id="lever-label" className={styles.simSectionTitle}>Solver Lever</h2>
-                {SOLVER_LEVERS.map((l) => (
-                  <button
-                    key={l.id}
-                    type="button"
-                    className={styles.controlBtn}
-                    data-active={lever === l.id}
-                    aria-pressed={lever === l.id}
-                    onClick={() => setLever(l.id)}
+            </div>
+          ) : (
+            <div className={styles.fadeEnterActive}>
+              <div className={styles.row}>
+                <div className={styles.lbl} style={{marginBottom: '2rem'}}>FINANCIAL PROJECTION</div>
+                {loading ? (
+                  <div className={styles.textMuted}>Running Monte Carlo simulations...</div>
+                ) : error ? (
+                  <div className={styles.textAccent} style={{color: '#ff4444'}}>{error}</div>
+                ) : (
+                  <>
+                    <div className={styles.resultWidget}>
+                      <div className={styles.resultLabel}>IRR (POST-TAX)</div>
+                      <div className={`${styles.resultValue} ${styles.textPrimary}`}>{fmtPctFromRatio(irr)}</div>
+                      <div className={styles.resultSub}>Target: 15.0%</div>
+                    </div>
+                    <div className={styles.resultWidget}>
+                      <div className={styles.resultLabel}>NPV (POST-TAX)</div>
+                      <div className={styles.resultValue}>{fmtUSD(npv)}</div>
+                    </div>
+                    <div className={styles.resultWidget}>
+                      <div className={styles.resultLabel}>MOIC</div>
+                      <div className={styles.resultValue}>{moic != null ? fmtX(moic) : MISSING}</div>
+                    </div>
+                    <div className={styles.resultWidget}>
+                      <div className={styles.resultLabel}>STABILIZED EBITDA</div>
+                      <div className={styles.resultValue}>{fmtUSD(ebitda)}</div>
+                    </div>
+                    <div className={styles.resultWidget}>
+                      <div className={styles.resultLabel}>MIN DSCR</div>
+                      <div className={styles.resultValue}>{dscr != null ? `${Number(dscr).toFixed(2)}×` : MISSING}</div>
+                      <div className={styles.resultSub}>Covenant: 1.20×</div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* CENTER COLUMN: 3D DATACENTER & LAUNCH */}
+        <div className={styles.col}>
+          <div className={styles.rowStretch} style={{borderBottom: 'none', padding: 0}}>
+            
+            <div style={{padding: '1.5rem', borderBottom: `1px solid var(--hl)`, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}>
+              <div className={styles.lbl}>SITE TOPOLOGY</div>
+              <div className={styles.lbl} style={{color: loading ? 'var(--primary)' : 'var(--accent-green)'}}>
+                <span className={styles.liveDot} style={{background: loading ? 'var(--primary)' : 'var(--accent-green)', boxShadow: `0 0 8px ${loading ? 'var(--primary)' : 'var(--accent-green)'}`}}></span>
+                {loading ? 'ANALYZING' : 'TIER IV READY'}
+              </div>
+            </div>
+            
+            {/* 3D SVG DATACENTER */}
+            <div className={`${styles.dcViz} ${loading ? styles.loading : ''}`}>
+              <svg viewBox="0 0 400 300">
+                <g transform="translate(200, 150)">
+                  {/* Base platform */}
+                  <polygon points="0,-80 120,-20 0,40 -120,-20" strokeWidth="0.5" stroke="var(--primary)" className={styles.svgGlowStrong} />
+                  {/* Grid lines on platform */}
+                  <line x1="-60" y1="-50" x2="60" y2="10" strokeDasharray="4,4" strokeWidth="1" stroke="var(--primary)"/>
+                  <line x1="60" y1="-50" x2="-60" y2="10" strokeDasharray="4,4" strokeWidth="1" stroke="var(--primary)"/>
+
+                  {/* Server Rack 1 */}
+                  <g transform="translate(-40, -20)">
+                    <polygon points="0,-40 30,-25 0,-10 -30,-25" className={styles.svgGlowStrong} />
+                    <polygon points="-30,-25 0,-10 0,30 -30,15" className={styles.svgGlow} />
+                    <polygon points="0,-10 30,-25 30,15 0,30" className={styles.svgGlow} />
+                    <line x1="-30" y1="-15" x2="0" y2="0" />
+                    <line x1="-30" y1="-5" x2="0" y2="10" />
+                    <line x1="-30" y1="5" x2="0" y2="20" />
+                    <line x1="0" y1="0" x2="30" y2="-15" />
+                    <line x1="0" y1="10" x2="30" y2="-5" />
+                    <line x1="0" y1="20" x2="30" y2="5" />
+                  </g>
+
+                  {/* Server Rack 2 */}
+                  <g transform="translate(40, 20)">
+                    <polygon points="0,-40 30,-25 0,-10 -30,-25" className={styles.svgGlowStrong} />
+                    <polygon points="-30,-25 0,-10 0,30 -30,15" className={styles.svgGlow} />
+                    <polygon points="0,-10 30,-25 30,15 0,30" className={styles.svgGlow} />
+                    <line x1="-30" y1="-15" x2="0" y2="0" />
+                    <line x1="-30" y1="-5" x2="0" y2="10" />
+                    <line x1="-30" y1="5" x2="0" y2="20" />
+                    <line x1="0" y1="0" x2="30" y2="-15" />
+                    <line x1="0" y1="10" x2="30" y2="-5" />
+                    <line x1="0" y1="20" x2="30" y2="5" />
+                  </g>
+                  
+                  {/* Floating Connection Node */}
+                  <circle cx="0" cy="-110" r="4" fill="var(--primary)" stroke="none" />
+                  <line x1="0" y1="-110" x2="0" y2="-70" stroke="var(--primary)" strokeDasharray="3,3" />
+                </g>
+              </svg>
+            </div>
+
+          </div>
+          
+          {/* LAUNCH BUTTON */}
+          <div className={styles.row} style={{padding: '1.5rem'}}>
+            {!isResultsMode ? (
+              <button className={styles.btnLaunch} onClick={handleRunSimulation} disabled={loading}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                RUN SIMULATION
+              </button>
+            ) : (
+              <button className={styles.btnReset} onClick={handleReset}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                RESET CONFIG
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN */}
+        <div className={styles.col}>
+          {!isResultsMode ? (
+            <div className={styles.fadeEnterActive} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+              <div className={styles.row}>
+                <div className={`${styles.lbl} ${styles.textWhite}`} style={{marginBottom: '1rem'}}>INVESTMENT THESIS</div>
+                {Object.entries(THESIS_META).map(([key, meta]) => (
+                  <div 
+                    key={key} 
+                    className={thesis === key ? styles.selectorItemActive : styles.selectorItem}
+                    onClick={() => setThesis(key)}
                   >
-                    <span>{l.label}</span>
-                    {lever === l.id && <span className={styles.faintSep}>✓</span>}
-                  </button>
+                    <div className={styles.textSm}>{meta.label}</div>
+                    <div className={styles.lbl}>{thesis === key ? 'SELECTED' : ''}</div>
+                  </div>
                 ))}
               </div>
-              <div className={styles.controlGroup} role="group" aria-labelledby="scale-irr-label">
-                <h2 id="scale-irr-label" className={styles.simSectionTitle}>Base Scale (MW)</h2>
-                <div className={styles.controlRow}>
-                  {SCALE_PRESETS_MW.map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      className={styles.controlBtn}
-                      data-active={scale === val}
-                      aria-pressed={scale === val}
-                      aria-label={`${val} megawatts`}
-                      onClick={() => setScale(val)}
-                    >
-                      {val}
-                    </button>
-                  ))}
+
+              <div className={styles.row}>
+                <div className={styles.flexBetween}>
+                  <div className={`${styles.lbl} ${styles.textWhite}`}>AI INFRASTRUCTURE MIX</div>
+                  <div className={`${styles.textLg} ${styles.textPrimary}`}>{aiMix}%</div>
+                </div>
+                <div className={styles.sliderContainer}>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100" 
+                    step="10"
+                    value={aiMix} 
+                    className={styles.slider}
+                    onChange={(e) => setAiMix(Number(e.target.value))}
+                  />
+                  <div className={styles.flexBetween} style={{marginTop: '0.75rem'}}>
+                    <div className={styles.lbl}>0%</div>
+                    <div className={styles.lbl}>100%</div>
+                  </div>
                 </div>
               </div>
-            </>
-          )}
 
-          {/* AI Mix — always visible */}
-          <div className={styles.controlGroup} role="group" aria-labelledby="aimix-label">
-            <h2 id="aimix-label" className={styles.simSectionTitle}>AI Infrastructure Mix</h2>
-            <div className={styles.controlRow}>
-              {AI_MIX_PRESETS_PCT.map((val) => (
-                <button
-                  key={val}
-                  type="button"
-                  className={styles.controlBtn}
-                  data-active={aiMix === val}
-                  aria-pressed={aiMix === val}
-                  aria-label={`${val} percent AI mix`}
-                  onClick={() => setAiMix(val)}
-                >
-                  {val}%
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* GPU Profile — only when an AI slice exists; drives compute revenue */}
-          {aiMix > 0 && (
-            <>
-              <div className={styles.controlGroup} role="group" aria-labelledby="gpu-sku-label">
-                <h2 id="gpu-sku-label" className={styles.simSectionTitle}>GPU Profile</h2>
-                <div className={styles.controlRow}>
+              {aiMix > 0 && (
+                <div className={styles.row}>
+                  <div className={`${styles.lbl} ${styles.textWhite}`} style={{marginBottom: '1rem'}}>GPU PROFILE</div>
                   {GPU_SKU_PRESETS.map((g) => (
-                    <button
-                      key={g.id}
-                      type="button"
-                      className={styles.controlBtn}
-                      data-active={gpuSku === g.id}
-                      aria-pressed={gpuSku === g.id}
-                      aria-label={`${g.label} accelerator`}
+                    <div 
+                      key={g.id} 
+                      className={gpuSku === g.id ? styles.selectorItemActive : styles.selectorItem}
                       onClick={() => setGpuSku(g.id)}
                     >
-                      {g.label}
-                    </button>
+                      <div className={styles.textSm}>{g.label}</div>
+                      <div className={styles.lbl}>{gpuSku === g.id ? 'SELECTED' : ''}</div>
+                    </div>
                   ))}
                 </div>
-              </div>
-
-              <div className={styles.controlGroup} role="group" aria-labelledby="gpu-price-label">
-                <h2 id="gpu-price-label" className={styles.simSectionTitle}>GPU Rate ($/hr)</h2>
-                <div className={styles.controlRow}>
-                  {GPU_HOUR_PRICE_PRESETS.map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      className={styles.controlBtn}
-                      data-active={gpuHourPrice === p}
-                      aria-pressed={gpuHourPrice === p}
-                      aria-label={`${p} dollars per GPU hour`}
-                      onClick={() => setGpuHourPrice(p)}
-                    >
-                      ${p.toFixed(1)}
-                    </button>
-                  ))}
+              )}
+              
+              <div className={styles.row} style={{background: 'var(--surface)', marginTop: 'auto'}}>
+                <div className={styles.lbl}>EST. HARDWARE CAPEX</div>
+                <div className={`${styles.textHuge} ${styles.textPrimary}`} style={{marginTop: '0.75rem'}}>
+                  {/* Rough client-side estimate for input mode */}
+                  {fmtUSD(scale * 1_000_000 * (1 + aiMix/100 * 2))}
+                </div>
+                <div className={`${styles.lbl} ${styles.textMuted}`} style={{marginTop: '0.5rem', textTransform: 'none'}}>
+                  Dynamic estimate based on scale & mix
                 </div>
               </div>
-            </>
-          )}
+            </div>
+          ) : (
+            <div className={styles.fadeEnterActive} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+              <div className={styles.rowNoPad} style={{flex: 1}}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th className={styles.lbl} colSpan="3" style={{paddingTop: '1.5rem', color: 'var(--fg)'}}>COMPUTE CLUSTER SELECTION</th>
+                    </tr>
+                    <tr>
+                      <th className={styles.lbl}>HARDWARE</th>
+                      <th className={`${styles.lbl} ${styles.textRight}`}>QTY</th>
+                      <th className={`${styles.lbl} ${styles.textRight}`}>CAPEX EST.</th>
+                    </tr>
+                  </thead>
+                  <tbody className={styles.tableBody}>
+                    {!loading && hw ? renderHardwareRows() : (
+                      <tr className={styles.tableRow}>
+                        <td colSpan="3" className={`${styles.textSm} ${styles.textMuted}`}>Loading...</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
 
-          {/* Retry */}
-          {error && (
-            <button
-              type="button"
-              className={styles.retryButton}
-              onClick={() => setAttempt((n) => n + 1)}
-              disabled={loading}
-            >
-              Retry
-            </button>
-          )}
-        </aside>
-
-        {/* ── RIGHT — PROJECTION + RESULTS ───────────────────────────────── */}
-        <section className={styles.simMain}>
-
-          {/* Blueprint canvas */}
-          <DataCenterProjection thesis={thesis} scale={mode === 'mw_first' ? scale : (derivedMw ?? scale)} aiMix={aiMix} />
-
-          {/* Results area */}
-          <div className={styles.simReadout} aria-live="polite" aria-busy={loading}>
-            {!error && loading && (
-              <div className={styles.simComputing}>Computing…</div>
-            )}
-
-            {error ? (
-              <div className={styles.simError} role="alert">
-                <span>{error}</span>
-                <button
-                  type="button"
-                  className={styles.retryButton}
-                  onClick={() => setAttempt((n) => n + 1)}
-                  disabled={loading}
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              <div className={styles.simMetrics} data-loading={loading}>
-
-                {/* CAPEX */}
-                <div className={styles.metricItem}>
-                  <div className={styles.metricLabel}>Total CAPEX</div>
-                  <div className={styles.metricValue}>
-                    {loading && capEx == null ? MISSING : fmtUSD(capEx)}
-                  </div>
-                </div>
-
-                {/* Derived MW — only show when not mw_first */}
-                {mode !== 'mw_first' && (
-                  <div className={styles.metricItem}>
-                    <div className={styles.metricLabel}>
-                      {mode === 'capital_first' ? 'Derived MW' : 'Solved MW'}
+                {!loading && result?.waterfall?.summary && (
+                  <div style={{padding: '1.5rem', borderTop: '1px solid var(--hl)'}}>
+                    <div className={styles.lbl} style={{marginBottom: '1rem', color: 'var(--fg)'}}>CAPITAL STRUCTURE</div>
+                    <div className={styles.flexBetween} style={{marginBottom: '0.5rem'}}>
+                      <div className={styles.textSm}>Total Equity</div>
+                      <div className={styles.textSm}>{fmtUSD(result.waterfall.summary.total_equity)}</div>
                     </div>
-                    <div className={styles.metricValue}>
-                      {loading && derivedMw == null ? MISSING : fmtMW(derivedMw)}
+                    <div className={styles.flexBetween} style={{marginBottom: '0.5rem'}}>
+                      <div className={styles.textSm}>Total Debt</div>
+                      <div className={styles.textSm}>{fmtUSD(result.waterfall.summary.total_debt)}</div>
+                    </div>
+                    <div className={styles.flexBetween}>
+                      <div className={styles.textSm}>Terminal Value</div>
+                      <div className={styles.textSm}>{fmtUSD(result.waterfall.summary.terminal_value)}</div>
                     </div>
                   </div>
-                )}
-
-                {/* IRR */}
-                <div className={styles.metricItem}>
-                  <div className={styles.metricLabel}>IRR (post-tax)</div>
-                  <div className={`${styles.metricValue} ${toneForIrr(irr)}`}>
-                    {loading && irr == null ? MISSING : fmtPctFromRatio(irr)}
-                  </div>
-                </div>
-
-                {/* NPV */}
-                <div className={styles.metricItem}>
-                  <div className={styles.metricLabel}>NPV (post-tax)</div>
-                  <div className={`${styles.metricValue} ${irr != null && irr < 0 ? styles.metricValueDanger : ''}`}>
-                    {loading && npv == null ? MISSING : fmtUSD(npv)}
-                  </div>
-                </div>
-
-                {/* EBITDA stabilised */}
-                <div className={styles.metricItem}>
-                  <div className={styles.metricLabel}>EBITDA (stabilised)</div>
-                  <div className={styles.metricValue}>
-                    {loading && ebitda == null ? MISSING : fmtUSD(ebitda)}
-                  </div>
-                </div>
-
-                {/* DSCR min */}
-                <div className={styles.metricItem}>
-                  <div className={styles.metricLabel}>DSCR (min)</div>
-                  <div className={`${styles.metricValue} ${dscr != null && dscr < FINANCIAL_THRESHOLDS.dscr_breach_threshold ? styles.metricValueDanger : ''}`}>
-                    {loading && dscr == null ? MISSING : dscr != null ? `${Number(dscr).toFixed(2)}×` : MISSING}
-                  </div>
-                </div>
-
-                {/* GPU Revenue (if hw breakdown present) */}
-                {hw && (
-                  <div className={styles.metricItem}>
-                    <div className={styles.metricLabel}>GPU Rev. (annual)</div>
-                    <div className={styles.metricValue}>
-                      {loading ? MISSING : fmtUSD(hw.revenue_ai_annual)}
-                    </div>
-                  </div>
-                )}
-
-                {/* Solver convergence — only for target_irr_first */}
-                {mode === 'target_irr_first' && solver && (
-                  <div className={styles.metricItem}>
-                    <div className={styles.metricLabel}>Solver</div>
-                    <div className={`${styles.metricValue} ${styles.metricValueRisk}`} data-tone={solver.converged ? 'stable' : 'elevated'}>
-                      {solver.converged ? 'Converged' : 'No solution'}
-                    </div>
-                  </div>
-                )}
-
-                {/* Thesis risk */}
-                <div className={styles.metricItem}>
-                  <div className={styles.metricLabel}>Thesis risk</div>
-                  <div className={`${styles.metricValue} ${styles.metricValueRisk}`} data-tone={riskTone}>
-                    {riskLabel}
-                  </div>
-                </div>
-
-              </div>
-            )}
-          </div>
-
-          {/* ── RESULTS DETAIL PANEL ──────────────────────────────────────── */}
-          {result && !error && (
-            <div className={`${styles.cockpitPanel} ${styles.simResultPanel}`}>
-              <div className={styles.cockpitPanelHead}>
-                <h2 className={styles.cockpitPanelTitle}>
-                  {archOut?.label ?? thesisMeta.label} — Results
-                </h2>
-                {solver?.converged === false && (
-                  <span className={styles.tagOff}>No solution</span>
-                )}
-                {solver?.converged === true && (
-                  <span className={styles.tagOn}>Converged</span>
                 )}
               </div>
-
-              <div className={styles.simResultGrid}>
-
-                {/* Projection table — year-by-year if available */}
-                {Array.isArray(proj.years) && proj.years.length > 0 && (
-                  <div className={styles.simResultSection}>
-                    <div className={styles.simResultSectionTitle}>Year-by-Year Projection</div>
-                    <div className={styles.desktopTableWrap}>
-                      <table className={styles.sourcesTable}>
-                        <thead>
-                          <tr>
-                            <th>Year</th>
-                            <th>Revenue</th>
-                            <th>OPEX</th>
-                            <th>EBITDA</th>
-                            <th>FCF</th>
-                            {proj.years[0]?.dscr != null && <th>DSCR</th>}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {proj.years.map((y) => (
-                            <tr key={y.year}>
-                              <td>{y.year}</td>
-                              <td>{fmtUSD(y.revenue)}</td>
-                              <td>{fmtUSD(y.opex)}</td>
-                              <td className={y.ebitda < 0 ? styles.negative : ''}>{fmtUSD(y.ebitda)}</td>
-                              <td className={y.free_cash_flow < 0 ? styles.negative : ''}>{fmtUSD(y.free_cash_flow)}</td>
-                              {y.dscr != null && (
-                                <td className={y.dscr < FINANCIAL_THRESHOLDS.dscr_breach_threshold ? styles.negative : ''}>{Number(y.dscr).toFixed(2)}×</td>
-                              )}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Mobile card list — year-by-year, shown only ≤768px */}
-                    <div className={styles.mobileCardList}>
-                      {proj.years.map((y) => (
-                        <article key={y.year} className={styles.sourceCard}>
-                          <div className={styles.simYearCardHead}>
-                            <span className={styles.simYearCardYear}>Year {y.year}</span>
-                            {y.dscr != null && (
-                              <span className={y.dscr < FINANCIAL_THRESHOLDS.dscr_breach_threshold ? styles.tagOff : styles.tagOn}>
-                                DSCR {Number(y.dscr).toFixed(2)}×
-                              </span>
-                            )}
-                          </div>
-                          <div className={styles.simKvGrid}>
-                            <div className={styles.simKvRow}>
-                              <span className={styles.simKvKey}>Revenue</span>
-                              <span className={styles.simKvVal}>{fmtUSD(y.revenue)}</span>
-                            </div>
-                            <div className={styles.simKvRow}>
-                              <span className={styles.simKvKey}>OPEX</span>
-                              <span className={styles.simKvVal}>{fmtUSD(y.opex)}</span>
-                            </div>
-                            <div className={styles.simKvRow}>
-                              <span className={styles.simKvKey}>EBITDA</span>
-                              <span className={`${styles.simKvVal} ${y.ebitda < 0 ? styles.negative : ''}`}>{fmtUSD(y.ebitda)}</span>
-                            </div>
-                            <div className={styles.simKvRow}>
-                              <span className={styles.simKvKey}>FCF</span>
-                              <span className={`${styles.simKvVal} ${y.free_cash_flow < 0 ? styles.negative : ''}`}>{fmtUSD(y.free_cash_flow)}</span>
-                            </div>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Waterfall — capital structure + exit (waterfall.summary) */}
-                {result.waterfall?.summary && (
-                  <div className={styles.simResultSection}>
-                    <div className={styles.simResultSectionTitle}>Capital & Exit</div>
-                    <div className={styles.simKvGrid}>
-                      {[
-                        ['Total Equity',        fmtUSD(result.waterfall.summary.total_equity)],
-                        ['Total Debt',          fmtUSD(result.waterfall.summary.total_debt)],
-                        ['Preferred Rate',      fmtPctFromRatio(result.waterfall.summary.pref_rate)],
-                        ['Terminal Value',      fmtUSD(result.waterfall.summary.terminal_value)],
-                        ['TV to Equity',        fmtUSD(result.waterfall.summary.terminal_value_to_equity)],
-                        ['Debt at Exit',        fmtUSD(result.waterfall.summary.remaining_debt_at_exit)],
-                        ['MOIC (post-tax)',     proj.moic_post_tax != null ? fmtX(proj.moic_post_tax) : MISSING],
-                        ['Payback',             proj.payback_years != null ? `${Number(proj.payback_years).toFixed(1)} yrs` : 'Not reached'],
-                      ].map(([k, v]) => (
-                        <div key={k} className={styles.simKvRow}>
-                          <span className={styles.simKvKey}>{k}</span>
-                          <span className={styles.simKvVal}>{v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Debt schedule summary (debt_schedule.summary) */}
-                {result.debt_schedule?.summary && (
-                  <div className={styles.simResultSection}>
-                    <div className={styles.simResultSectionTitle}>Debt Structure</div>
-                    <div className={styles.simKvGrid}>
-                      {[
-                        ['Principal',       fmtUSD(result.debt_schedule.summary.principal)],
-                        ['Total Interest',  fmtUSD(result.debt_schedule.summary.total_interest)],
-                        ['Debt Term',       result.debt_schedule.summary.debt_term_years != null ? `${result.debt_schedule.summary.debt_term_years} yrs` : MISSING],
-                        ['Min DSCR',        result.debt_schedule.summary.min_dscr != null ? `${Number(result.debt_schedule.summary.min_dscr).toFixed(2)}×` : MISSING],
-                        ['Avg DSCR',        result.debt_schedule.summary.avg_dscr != null ? `${Number(result.debt_schedule.summary.avg_dscr).toFixed(2)}×` : MISSING],
-                        ['Covenant Breaches', Array.isArray(result.debt_schedule.summary.breach_years) ? `${result.debt_schedule.summary.breach_years.length} yr(s)` : MISSING],
-                      ].map(([k, v]) => (
-                        <div key={k} className={styles.simKvRow}>
-                          <span className={styles.simKvKey}>{k}</span>
-                          <span className={styles.simKvVal}>{v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Hardware breakdown — MW allocation + GPU economics */}
-                {hw && (
-                  <div className={styles.simResultSection}>
-                    <div className={styles.simResultSectionTitle}>Capacity & Hardware</div>
-                    <div className={styles.simKvGrid}>
-                      {[
-                        ['Classic MW',         hw.mw_classic != null ? fmtMW(hw.mw_classic) : MISSING],
-                        ['Liquid-cooled MW',   hw.mw_liquid != null ? fmtMW(hw.mw_liquid) : MISSING],
-                        ['AI MW',              hw.mw_ai != null ? fmtMW(hw.mw_ai) : MISSING],
-                        ['GPU CAPEX',          hw.capex_hardware ? fmtUSD(hw.capex_hardware) : MISSING],
-                        ['AI Rev. (annual)',   hw.revenue_ai_annual ? fmtUSD(hw.revenue_ai_annual) : MISSING],
-                        ...(hw.total_gpus ? [['Total GPUs', numFmt(hw.total_gpus)]] : []),
-                      ].map(([k, v]) => (
-                        <div key={k} className={styles.simKvRow}>
-                          <span className={styles.simKvKey}>{k}</span>
-                          <span className={styles.simKvVal}>{v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Solver diagnostic — target_irr_first only */}
-                {mode === 'target_irr_first' && solver && (
-                  <div className={styles.simResultSection}>
-                    <div className={styles.simResultSectionTitle}>Solver Diagnostic</div>
-                    <div className={styles.simKvGrid}>
-                      {[
-                        ['Status',        solver.converged ? 'Converged' : 'Not converged'],
-                        ['Iterations',    solver.iterations != null ? String(solver.iterations) : MISSING],
-                        ['Lever value',   solver.lever_value != null ? numFmt(solver.lever_value, 2) : MISSING],
-                        ['Achieved IRR',  solver.achieved_irr != null ? fmtPctFromRatio(solver.achieved_irr) : MISSING],
-                      ].map(([k, v]) => (
-                        <div key={k} className={styles.simKvRow}>
-                          <span className={styles.simKvKey}>{k}</span>
-                          <span className={styles.simKvVal}>{v}</span>
-                        </div>
-                      ))}
-                      {solver.diagnostic && (
-                        <div className={`${styles.simKvRow} ${styles.simKvRowFull}`}>
-                          <span className={styles.simKvKey}>Note</span>
-                          <span className={styles.simKvVal}>{solver.diagnostic}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Archetype scores */}
-                {archOut?.scores && (
-                  <div className={styles.simResultSection}>
-                    <div className={styles.simResultSectionTitle}>Archetype Scores</div>
-                    <div className={styles.simKvGrid}>
-                      {Object.entries(archOut.scores).map(([dim, score]) => (
-                        <div key={dim} className={styles.simKvRow}>
-                          <span className={styles.simKvKey}>{dim.charAt(0).toUpperCase() + dim.slice(1)}</span>
-                          <span className={styles.simKvVal}>{score}/5</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
+              
+              <div className={styles.row} style={{background: 'var(--surface)', marginTop: 'auto'}}>
+                <div className={styles.lbl}>TOTAL PROJECT CAPEX</div>
+                <div className={`${styles.textHuge} ${styles.textPrimary}`} style={{marginTop: '0.75rem'}}>
+                  {loading || capEx == null ? MISSING : fmtUSD(capEx)}
+                </div>
+                <div className={`${styles.lbl} ${styles.textMuted}`} style={{marginTop: '0.5rem', textTransform: 'none'}}>
+                  Includes land, core & shell, MEP, and IT
+                </div>
               </div>
             </div>
           )}
-
-        </section>
+        </div>
       </div>
-    </HearstPageShell>
+    </div>
   );
 }

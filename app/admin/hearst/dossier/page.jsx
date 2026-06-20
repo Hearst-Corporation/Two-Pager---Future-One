@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import styles from '../hearst.module.css';
 import HearstPageShell from '../components/HearstPageShell';
-import { HearstErrorState, HearstLoadingState, HearstEmptyState } from '../components/HearstRegisterStates';
 import { fmtDate, prettyType, parseApiError, MISSING } from '../utils/format';
 
 const PDF_STATUSES = new Set(['reviewed', 'approved', 'archived']);
@@ -58,175 +56,95 @@ export default function DossierPage() {
   const count = memos?.length ?? 0;
   const pdfReadyCount = memos?.filter((memo) => PDF_STATUSES.has(memo?.status)).length ?? 0;
   const draftCount = memos?.filter((memo) => memo?.status === 'draft').length ?? 0;
-  const regionCount = new Set((memos ?? []).map((memo) => memo?.region).filter(Boolean)).size;
   const context = loading
     ? 'Loading memos…'
     : error
       ? 'Unavailable'
-      : `${count} ${count === 1 ? 'memo' : 'memos'} on record`;
+      : `${count} ${count === 1 ? 'memo' : 'memos'}`;
 
   return (
     <HearstPageShell
-      variant="data"
       eyebrow="Board Pack"
       title="Decision Dossier"
       context={context}
       bodyAriaLive="polite"
       bodyAriaBusy={loading}
     >
-        {error ? (
-          <HearstErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />
-        ) : loading ? (
-          <HearstLoadingState>Loading memos…</HearstLoadingState>
-        ) : count === 0 ? (
-          <HearstEmptyState>
-            No board memos are on record yet. Strategic deliverables will appear
-            here once generated through the model.
-          </HearstEmptyState>
-        ) : (
-          <>
-            <div className={styles.summaryGrid}>
-              <article className={styles.summaryCard}>
-                <div className={styles.summaryLabel}>Memos on record</div>
-                <div className={styles.summaryValue}>{count}</div>
-                <p className={styles.summaryText}>Board-facing deliverables currently available in the dossier pipeline.</p>
-              </article>
-              <article className={styles.summaryCard}>
-                <div className={styles.summaryLabel}>PDF-ready</div>
-                <div className={styles.summaryValue}>{pdfReadyCount}</div>
-                <p className={styles.summaryText}>Entries already eligible for direct export from the current route.</p>
-              </article>
-              <article className={styles.summaryCard}>
-                <div className={styles.summaryLabel}>Drafts</div>
-                <div className={styles.summaryValue}>{draftCount}</div>
-                <p className={styles.summaryText}>Items still waiting for review or downstream approval before export.</p>
-              </article>
-              <article className={styles.summaryCard}>
-                <div className={styles.summaryLabel}>Regional coverage</div>
-                <div className={styles.summaryValue}>{regionCount}</div>
-                <p className={styles.summaryText}>Distinct regional framings currently represented in the memo library.</p>
-              </article>
-            </div>
+      {error ? (
+        <div className={styles.state}>
+          <span className={styles.stateError}>{error}</span>{' '}
+          <button type="button" className={styles.link} onClick={() => setReloadKey((k) => k + 1)}>
+            Retry
+          </button>
+        </div>
+      ) : loading ? (
+        <div className={styles.state}>Loading memos…</div>
+      ) : count === 0 ? (
+        <div className={styles.state}>
+          No board memos are on record yet. Strategic deliverables will appear here
+          once generated through the model.
+        </div>
+      ) : (
+        <div className={styles.coreGrid}>
+          <div className={`${styles.cell} ${styles.span4}`}>
+            <div className={styles.label}>Total Memos</div>
+            <div className={styles.valueLarge}>{count}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span4}`}>
+            <div className={styles.label}>Board-Ready</div>
+            <div className={styles.valueLarge}>{pdfReadyCount}</div>
+          </div>
+          <div className={`${styles.cell} ${styles.span4}`}>
+            <div className={styles.label}>Drafts</div>
+            <div className={styles.valueLarge}>{draftCount}</div>
+          </div>
 
-            <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill}`}>
-              <div className={styles.cockpitPanelHead}>
-                <div>
-                  <h2 className={styles.cockpitPanelTitle}>Strategic Memos</h2>
-                  <p className={`${styles.panelHint} ${styles.desktopOnly}`}>Swipe or scroll horizontally for the full register.</p>
-                </div>
-                <span className={styles.cockpitPanelContext}>
-                  {count} {count === 1 ? 'deliverable' : 'deliverables'}
-                </span>
-              </div>
-              <div className={`${styles.cockpitPanelScrollWrap} ${styles.desktopTableWrap}`}>
-                <div className={`${styles.cockpitPanelScroll} ${styles.cockpitPanelScrollFill}`}>
-                  <table className={styles.sourcesTable}>
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Stakeholder</th>
-                    <th>Region</th>
-                    <th>Status</th>
-                    <th>Confidence</th>
-                    <th>Data as of</th>
-                    <th>Created</th>
-                    <th>Export</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {memos.map((m) => (
+          <div className={`${styles.cell} ${styles.span12}`}>
+            <table className={styles.rawTable}>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Audience</th>
+                  <th>Status</th>
+                  <th className={styles.num}>Date</th>
+                  <th>Export</th>
+                </tr>
+              </thead>
+              <tbody>
+                {memos.map((m) => {
+                  const boardReady = PDF_STATUSES.has(m.status);
+                  return (
                     <tr key={m.id}>
+                      <td>{m.title || MISSING}</td>
+                      <td>{m.audience ? prettyType(m.audience) : MISSING}</td>
                       <td>
-                        <div>{m.title || MISSING}</div>
-                        {m.audience && (
-                          <div className={styles.metaCell}>{prettyType(m.audience)}</div>
-                        )}
+                        <span className={boardReady ? styles.tagOn : styles.tag}>
+                          {prettyType(m.status)}
+                        </span>
                       </td>
-                      <td>{prettyType(m.stakeholder)}</td>
-                      <td>{m.region ? prettyType(m.region) : MISSING}</td>
-                      <td>{prettyType(m.status)}</td>
-                      <td>{m.confidence_level ? prettyType(m.confidence_level) : MISSING}</td>
-                      <td className={styles.numCell}>{fmtDate(m.data_as_of)}</td>
-                      <td className={styles.numCell}>{fmtDate(m.created_at)}</td>
+                      <td className={styles.num}>{fmtDate(m.created_at)}</td>
                       <td>
-                        {PDF_STATUSES.has(m.status) ? (
+                        {boardReady ? (
                           <a
                             href={`/api/admin/hearst/strategic-memos/${m.id}/pdf`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={styles.sourceLink}
+                            className={styles.link}
                           >
                             PDF
                           </a>
                         ) : (
-                          <span className={styles.tagOff}>
-                            {m.status === 'draft' ? 'Draft' : MISSING}
-                          </span>
+                          <span className={styles.muted}>{MISSING}</span>
                         )}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className={styles.mobileCardList}>
-                {memos.map((m) => (
-                  <article key={m.id} className={styles.dealCard}>
-                    <div className={styles.dealCardHeader}>
-                      <div className={styles.dealCardName}>{m.title || MISSING}</div>
-                      <div className={styles.dealCardTags}>
-                        {PDF_STATUSES.has(m.status) && <span className={styles.tagOn}>PDF-ready</span>}
-                        {m.status === 'draft' && <span className={styles.tagOff}>Draft</span>}
-                      </div>
-                    </div>
-                    {m.audience && (
-                      <p className={styles.dealCardShort}>{prettyType(m.audience)}</p>
-                    )}
-                    <div className={styles.dealCardBody}>
-                      <div className={styles.dealCardRow}>
-                        <span className={styles.dealCardRowLabel}>Stakeholder</span>
-                        <span>{prettyType(m.stakeholder)}</span>
-                      </div>
-                      <div className={styles.dealCardRow}>
-                        <span className={styles.dealCardRowLabel}>Region</span>
-                        <span>{m.region ? prettyType(m.region) : MISSING}</span>
-                      </div>
-                      <div className={styles.dealCardRow}>
-                        <span className={styles.dealCardRowLabel}>Confidence</span>
-                        <span>{m.confidence_level ? prettyType(m.confidence_level) : MISSING}</span>
-                      </div>
-                    </div>
-                    <div className={styles.dealCardTerms}>
-                      <span className={styles.sourceCardTag}>{prettyType(m.status)}</span>
-                      <span className={styles.sourceCardTag}>As of {fmtDate(m.data_as_of)}</span>
-                      {PDF_STATUSES.has(m.status) ? (
-                        <a
-                          href={`/api/admin/hearst/strategic-memos/${m.id}/pdf`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.sourceLink}
-                        >
-                          PDF
-                        </a>
-                      ) : null}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-            <div className={styles.cockpitFooterCluster}>
-              <p className={styles.cockpitNote}>
-                Read-only library — summary rows only. Full memo content and generation
-                remain on the backend deliverables pipeline.
-              </p>
-              <Link href="/admin/hearst/financial" className={styles.ctaButton}>
-                View Financial Thesis ⟶
-              </Link>
-            </div>
-          </>
-        )}
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </HearstPageShell>
   );
 }
