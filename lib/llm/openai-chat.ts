@@ -26,6 +26,9 @@ export type ChatModel = (typeof CHAT_MODELS)[number];
 export const DEFAULT_CHAT_MODEL: ChatModel =
   (process.env.OPENAI_CHAT_MODEL as ChatModel) || "gpt-4.1";
 
+/** Constante nommée pour max_tokens du chat — évite les magic numbers dispersés. */
+export const CHAT_MAX_TOKENS = 4096;
+
 /** Résout le modèle demandé contre la whitelist ; sinon retombe sur le défaut. */
 export function resolveChatModel(requested?: string | null): ChatModel {
   if (requested && (CHAT_MODELS as readonly string[]).includes(requested)) {

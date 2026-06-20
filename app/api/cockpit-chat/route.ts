@@ -2,8 +2,8 @@
 //
 // Cockpit chat handler — mode-aware (normal | review).
 //
-// Body schema (unchanged from previous handler):
-//   { chatId?, message, messages?, productId?, system? }
+// Body schema:
+//   { chatId?, message, messages?, productId?, model?, deal?, oracle? }
 //
 // On each request:
 //   1. Resolve session via getSessionProfile() — anonymous users get the
@@ -20,9 +20,10 @@
 
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
-import { estimateTokens } from "@hearst/review-mode";
+import { estimateTokens, sha256Hex } from "@hearst/review-mode";
 import {
   DEFAULT_CHAT_MODEL,
+  CHAT_MAX_TOKENS,
   resolveChatModel,
   openaiChatStream,
   estimateGptCostUsd,
@@ -57,9 +58,7 @@ function getServiceClient() {
 }
 import {
   CONVERSATIONAL_PROMPT,
-  CONVERSATIONAL_PROMPT_HASH,
   FACILITATOR_PROMPT,
-  FACILITATOR_PROMPT_HASH,
 } from "@/lib/review-mode/prompt-hash";
 
 export const runtime = "nodejs";
@@ -72,18 +71,19 @@ const BodySchema = z.object({
   messages: z
     .array(
       z.object({
-        role: z.enum(["user", "assistant", "system"]),
+        // "system" retiré : le client ne peut pas injecter de message role:system.
+        role: z.enum(["user", "assistant"]),
         content: z.string(),
       }),
     )
     .optional(),
   productId: z.string().nullish(),
   model: z.string().optional(), // override modèle (whitelisté côté serveur : gpt-4.1 | gpt-4o)
-  system: z.string().optional(), // ignored when authenticated (we control the prompt)
+  // `system` retiré : jamais lu, inerte — un client ne doit pas pouvoir injecter un system prompt.
   deal: z.object({
     scenario: z.record(z.string(), z.unknown()).optional(),
     projection: z.record(z.string(), z.unknown()).optional(),
-    warnings: z.array(z.string().max(2000)).max(20).optional(),
+    warnings: z.array(z.string().max(200)).max(5).optional(),
   }).passthrough().nullish(),
   oracle: z.object({
     pathname: z.string().max(256).optional(),
@@ -221,7 +221,7 @@ export async function POST(req: Request) {
   // ── Load / create chat + history ────────────────────────────────────────
   const supa = getServiceClient();
   let chatId = body.chatId ?? null;
-  const history: Array<{ role: "user" | "assistant" | "system"; content: string }> = [];
+  const history: Array<{ role: "user" | "assistant"; content: string }> = [];
 
   if (userId) {
     try {
@@ -249,13 +249,19 @@ export async function POST(req: Request) {
       console.warn("[cockpit-chat] persistence load/create failed", err);
       if (body.messages?.length) {
         for (const m of body.messages) {
-          if (m.role && m.content) history.push({ role: m.role, content: m.content });
+          // Garde défensive : n'accepter que user/assistant même après validation Zod.
+          if ((m.role === "user" || m.role === "assistant") && m.content) {
+            history.push({ role: m.role, content: m.content });
+          }
         }
       }
     }
   } else if (body.messages?.length) {
     for (const m of body.messages) {
-      if (m.role && m.content) history.push({ role: m.role, content: m.content });
+      // Garde défensive : n'accepter que user/assistant même après validation Zod.
+      if ((m.role === "user" || m.role === "assistant") && m.content) {
+        history.push({ role: m.role, content: m.content });
+      }
     }
   }
 
@@ -349,10 +355,9 @@ export async function POST(req: Request) {
     }
   }
 
-  // ── ORACLE constitutional reasoning layer (Sprint 0) ─────────────────
-  // Prefixe le system prompt pour aligner le raisonnement sur les 11 sections,
-  // 6 perspectives, stakeholder mode, region + overlays. Heuristique par
-  // pathname : /admin/hearst* → sovereign / qatar / Vision 2030 + Qatar AI.
+  // ── ORACLE constitutional reasoning layer ────────────────────────────────
+  // Heuristique par pathname : /admin/hearst* → lens investor (audience IC)
+  // / qatar / pas d'overlay government par défaut (opt-in via body.oracle).
   const ctxPath = body.oracle?.pathname ?? "/admin/hearst";
   const oracleCtxBase = body.productId ? {} : inferOracleContextFromPath(ctxPath);
   const oracleCtx = {
@@ -360,8 +365,11 @@ export async function POST(req: Request) {
     stakeholder: body.oracle?.stakeholder ?? oracleCtxBase.stakeholder,
     region: body.oracle?.region ?? oracleCtxBase.region,
     overlays: body.oracle?.overlays ?? oracleCtxBase.overlays,
+    // output_required: true only in review/memo mode — Q&A chat skips the
+    // 11-section framework + confidence layer to save ~1 200 chars of context.
+    output_required: mode === "review",
     brevity: mode === "review" ? "deep" as const : "standard" as const,
-    surface: "cockpit-chat" as const,
+    surface: "chat" as const,
     product_context: body.productId ? `product=${body.productId}` : "oracle cockpit",
   };
   const oraclePrefix = buildOracleSystemPrompt(oracleCtx);
@@ -371,7 +379,10 @@ export async function POST(req: Request) {
   // ── Grounding: voie a (front sends deal) OR voie b (server fetches active scenario) ──
   // Voie a has priority. Voie b fires only when body.deal is absent and the user is
   // authenticated (so we have a workspace). Any failure in voie b is non-breaking.
-  const dealBlock = buildDealGroundingBlock(body.deal); // voie a
+  // Voie a : body.deal n'est accepté QUE pour les utilisateurs authentifiés.
+  // Un appelant anonyme ne peut pas piloter le bloc "ENGINE TRUTH authoritative" —
+  // il n'a pas de workspace vérifié et pourrait injecter de fausses projections.
+  const dealBlock = userId ? buildDealGroundingBlock(body.deal) : '';
   let groundingBlock = dealBlock;
   if (!groundingBlock && userId && !isSafeDemoMode()) {
     try {
@@ -383,7 +394,9 @@ export async function POST(req: Request) {
     }
   }
   const finalSystemPrompt = groundingBlock ? systemPrompt + "\n\n" + groundingBlock : systemPrompt;
-  const promptHash = mode === "review" ? FACILITATOR_PROMPT_HASH : CONVERSATIONAL_PROMPT_HASH;
+
+  // B4 — hash covers the full assembled prompt (oraclePrefix + base + tuning + grounding)
+  const promptHash = sha256Hex(finalSystemPrompt);
   const agentName = mode === "review" ? "cockpit-chat-review" : "cockpit-chat-normal";
 
   const messages = [
@@ -403,7 +416,7 @@ export async function POST(req: Request) {
   let modelUsed: string = chatModel || DEFAULT_CHAT_MODEL;
   let completion: any;
   try {
-    const out = await openaiChatStream({ model: chatModel, messages, max_tokens: 4096 } as any);
+    const out = await openaiChatStream({ model: chatModel, messages, max_tokens: CHAT_MAX_TOKENS, temperature: 0.2, top_p: 1 } as any);
     completion = out.stream;
     modelUsed = out.model_used;
   } catch (err) {
