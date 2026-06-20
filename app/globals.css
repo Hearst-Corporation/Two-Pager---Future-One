@@ -1,40 +1,47 @@
-/* ============================================================
-   PRINT SPECIFICATION — Futur One brochure
-   Format    : A3 plié 2 = A4 portrait fermé (210×297 mm)
-   Papier    : 350 g/m² couché demi-mat
-   Finition  : pelliculage (mat ou brillant à confirmer)
-   Bleed     : 3 mm sur les 4 côtés (à appliquer via PrintSheet)
-   Profil    : Fogra39 ou Fogra51 selon imprimeur
-   ------------------------------------------------------------
-   ACCENT     : Pantone 199 C en ton direct (5e couleur).
-                NE PAS convertir en quadri.
-                Fallback CMYK si refus : C0 M100 Y65 K0
-   NOIRS      : --color-dark-surface / dark-contrast = rich black.
-                Recette imprimeur : C60 M40 Y40 K100
-                NE PAS imprimer en K100 seul (rendu délavé).
-   POLICE     : à embarquer dans le PDF (étape ultérieure).
-   ============================================================ */
-
 :root {
   /* ── Typography ── */
-  --font-sans: "Inter var", "Inter", -apple-system, BlinkMacSystemFont,
-    "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  --font-sans: var(--font-satoshi), "Satoshi",
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    system-ui, sans-serif;
 
-  /* ── Login light surface ── */
+  /* ── html/body fallback ── */
+  --color-gray-900:           #1A1D24;
+  --color-text-inverse:       #FFFFFF;
+  --color-accent-strong:      #145C2C;
+
+  /* ── Login page theme (app/admin/login/page.jsx) ── */
   --color-login-bg:           #F5F5F6;
   --color-login-surface:      #FFFFFF;
   --color-login-border:       #E4E6EA;
   --color-login-border-input: #C9CDD2;
-  --color-login-accent:       #8A1538;
+  --color-login-accent:       #1F7A3D;
   --color-login-text:         #1A1D24;
   --color-login-text-muted:   #8A9099;
   --color-login-text-inverse: #FFFFFF;
   --color-login-success:      #1A7A4A;
 
-  /* ── html/body fallback ── */
-  --color-gray-900:           #1A1D24;
-  --color-text-inverse:       #FFFFFF;
-  --color-accent-strong:      #6B102B;
+  /* Login typography scale (mirrors cockpit density, light theme) */
+  --login-text-2xs:           0.6875rem;
+  --login-text-sm:            0.8125rem;
+  --login-text-base:          0.875rem;
+  --login-text-title:         1.75rem;
+  --login-fw-bold:            700;
+  --login-fw-heavy:           800;
+  --login-tracking-eyebrow:     0.1875rem;
+  --login-tracking-btn:         0.125rem;
+  --login-tracking-switch:    0.0625rem;
+  --login-tracking-title:    -0.0625rem;
+  --login-input-padding:      12px 14px;
+  --login-btn-padding:        12px 14px;
+  --login-switch-padding:     4px;
+
+  /* global-error.js — outside Hearst .wrap */
+  --color-error-bg:           #0A0A0A;
+  --color-error-text:         #F5F5F5;
+  --color-error-text-muted:   rgba(245, 245, 245, 0.6);
+  --color-error-accent:       #A3FF8D;
+  --color-error-accent-ink:   #000000;
+  --color-error-radius:       4px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -49,9 +56,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* `overflow-x: hidden` sur html/body neutralise position:sticky.
-   On le contient au niveau body uniquement — html doit rester en scroll natif
-   pour que SectionMethod puisse pin pendant son scroll horizontal. */
+/* Contain horizontal overflow at document level (Hearst scrolls inside .wrap). */
 body { overflow-x: clip; }
 
 /* ::selection fallback for /admin/login/. */
