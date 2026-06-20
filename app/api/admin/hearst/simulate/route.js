@@ -156,12 +156,16 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
     buildArchetypeProjection({ ...defaults, total_mw: mw }).archResult.projection?.total_capex ?? null;
 
   // 3. Résoudre le mode (mw_first / capital_first / target_irr_first). capital_first
-  // is archetype-aware via totalCapexForMw (P0-3); mw_first/target_irr ignore it.
+  // is archetype-aware via totalCapexForMw (P0-3); target_irr_first uses projectionFn
+  // so the bissection evaluates the FULL pipeline (archetype+GPU) — same IRR the UI shows.
   const { scenario: solvedScenario, derived, solver } = solveScenarioForMode(
     input_mode,
     input_value,
     defaults,
-    { totalCapexForMw },
+    {
+      totalCapexForMw,
+      projectionFn: (s) => buildArchetypeProjection(s).archResult.projection,
+    },
   );
 
   // 4-6. Build the final projection through the same pipeline the solver evaluated,
