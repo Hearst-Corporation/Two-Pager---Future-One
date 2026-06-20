@@ -21,7 +21,7 @@ const FIN_TOOLTIP = {
 import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
-import { fmtUSD, fmtPctRaw, fmtX } from '@/lib/hearst-format';
+import { fmtUSD, fmtPctRaw, fmtPctFromRatio, fmtX } from '@/lib/hearst-format';
 import { boardValue } from '@/lib/hearst-board-metrics';
 import { UI } from '@/lib/ui-strings';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
@@ -274,7 +274,7 @@ export default function FinancialPage() {
       {/* Summary KPIs */}
       <KpiGrid cols={4} data-financial-kpi-grid style={{ marginBottom: 'var(--cp-space-6)' }}>
         <KpiCard label={UI.FIN_KPI_TOTAL_CAPEX} value={proj.total_capex} format="currency" />
-        <KpiCard label={UI.FIN_KPI_PROJECT_IRR} value={boardValue(proj, 'irr')} format="pct" sublabel={base?.source_score != null ? UI.FIN_KPI_SOURCE_SCORE(base.source_score) : undefined} highlight={boardValue(proj, 'irr') != null} />
+        <KpiCard label={UI.FIN_KPI_PROJECT_IRR} value={boardValue(proj, 'irr')} format="pct" sublabel={proj.irr != null && proj.irr_post_tax != null ? `${UI.FIN_PRETAX_PREFIX}: ${fmtPctFromRatio(proj.irr)}` : undefined} highlight={boardValue(proj, 'irr') != null} />
         <KpiCard label={UI.FIN_KPI_NPV} value={boardValue(proj, 'npv')} format="currency" />
         <KpiCard label={UI.FIN_KPI_MOIC} value={boardValue(proj, 'moic')} format="x" />
         <KpiCard label={UI.FIN_KPI_DSCR} value={proj.dscr_stabilized} format="x" />
@@ -327,8 +327,28 @@ export default function FinancialPage() {
                   ))}
                 </tr>
               ))}
+              {/* Exit Value row — explains the Cumulative FCF jump at exit: the terminal
+                  value (net of remaining debt) only lands in the exit year, not annually. */}
+              {proj.terminal_value_to_equity != null && (
+                <tr>
+                  <td style={S.tdLabel}>{UI.FIN_ROW_EXIT_VALUE}</td>
+                  {(proj.years || []).map(y => {
+                    const isExit = y.year === (base?.exit_year || 10);
+                    return (
+                      <td key={y.year} style={{ ...S.td, color: isExit ? 'var(--cp-accent)' : 'var(--cp-text-muted)' }}>
+                        {isExit ? fmtM(proj.terminal_value_to_equity) : '—'}
+                      </td>
+                    );
+                  })}
+                </tr>
+              )}
             </tbody>
           </table>
+          {/* NNN pass-through disclosure: when OpEx AND power are $0 across every year,
+              that is the triple-net signature (tenant-paid), not a missing calculation. */}
+          {(proj.years || []).length > 0 && (proj.years || []).every(y => (y.opex ?? 0) === 0 && (y.power_cost ?? 0) === 0) && (
+            <p style={S.tableFootnote}>{UI.FIN_OPEX_NNN_NOTE}</p>
+          )}
         </div>
       ) : tab === 'charts' ? (
         /* Charts */
@@ -623,6 +643,7 @@ const S = {
   th: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-muted)', background: 'var(--cp-surface-0)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap' },
   td: { padding: 'var(--cp-space-2) var(--cp-space-3)', textAlign: 'right', borderBottom: '1px solid var(--cp-border)', fontSize: 'var(--cp-font-sm)' },
   tdLabel: { padding: 'var(--cp-space-2) var(--cp-space-4)', fontWeight: 'var(--cp-weight-semibold)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-primary)', background: 'var(--cp-surface-2)', borderBottom: '1px solid var(--cp-border)', whiteSpace: 'nowrap', minWidth: 160 },
+  tableFootnote: { marginTop: 'var(--cp-space-3)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', lineHeight: 'var(--cp-leading-normal)', fontStyle: 'italic' },
   warnBox: { background: 'var(--cp-error-bg)', border: '1px solid var(--cp-error)', borderRadius: 'var(--cp-radius-md)', padding: 'var(--cp-space-4)', marginTop: 'var(--cp-space-5)' },
   warnTitle: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-bold)', letterSpacing: 'var(--cp-tracking-eyebrow)', color: 'var(--cp-error)', marginBottom: 'var(--cp-space-2)' },
   warnRow: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) 0', borderBottom: '1px solid var(--cp-error-bg)' },

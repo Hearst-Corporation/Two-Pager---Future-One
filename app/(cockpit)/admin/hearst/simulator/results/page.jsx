@@ -145,7 +145,7 @@ export default function SimulatorResultsPage() {
       Deploy <strong style={{ color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' }}>{fmtUSD(projection.total_capex)}</strong> into a{' '}
       <strong style={{ color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' }}>{archetype?.label || state?.primary_archetype_id}</strong> in{' '}
       <strong style={{ color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' }}>{state?.geography}</strong> targeting{' '}
-      <strong style={{ color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' }}>{fmtPctFromRatio(projection.irr)} IRR</strong>.
+      <strong style={{ color: 'var(--cp-text-strong)', fontWeight: 'var(--cp-weight-bold)' }}>{fmtPctFromRatio(projection.irr_post_tax ?? projection.irr)} IRR</strong>.
     </>
   ) : null, [projection, archetype, state]);
 
@@ -275,7 +275,9 @@ export default function SimulatorResultsPage() {
           <BoardMetric label={UI.RESULTS_BM_EBITDA} value={fmtUSD(projection?.stabilized_ebitda)} note={UI.RESULTS_BM_EBITDA_NOTE} hint="ebitda" />
           <BoardMetric label={UI.RESULTS_BM_TERMINAL} value={fmtUSD(projection?.terminal_value)} note={UI.RESULTS_BM_TERMINAL_NOTE} hint="terminal_value" />
           <BoardMetric label={UI.RESULTS_BM_PAYBACK} value={projection?.payback_years != null ? `${projection.payback_years} yr` : MISSING} note={UI.RESULTS_BM_PAYBACK_NOTE} hint="payback" />
-          <BoardMetric label={UI.RESULTS_BM_SOURCE} value={simResult?.confidence_score != null ? `${simResult.confidence_score}/100` : MISSING} note={UI.RESULTS_BM_SOURCE_NOTE} hint="confidence_score" />
+          <Link href="/admin/hearst/sources" style={{ textDecoration: 'none', display: 'block', height: '100%' }} title={UI.RESULTS_BM_SOURCE_NOTE}>
+            <BoardMetric label={UI.RESULTS_BM_SOURCE} value={simResult?.confidence_score != null ? `${simResult.confidence_score}/100` : MISSING} note={UI.RESULTS_BM_SOURCE_NOTE} hint="confidence_score" />
+          </Link>
         </KpiGrid>
       </Card>
 

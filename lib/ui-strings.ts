@@ -281,8 +281,8 @@ export const UI = {
   RESULTS_BM_PAYBACK_NOTE: 'Capital recovery',
   RESULTS_BM_REVENUE: 'Stabilized revenue',
   RESULTS_BM_REVENUE_NOTE: 'Annual run-rate',
-  RESULTS_BM_SOURCE: 'Source score',
-  RESULTS_BM_SOURCE_NOTE: 'Evidence depth',
+  RESULTS_BM_SOURCE: 'Data Quality',
+  RESULTS_BM_SOURCE_NOTE: 'Inputs backed by sourced benchmarks',
   RESULTS_BM_TERMINAL: 'Terminal value',
   RESULTS_BM_TERMINAL_NOTE: 'Exit valuation',
   RESULTS_CHIP_AI_SUFFIX: 'AI allocation',
@@ -587,7 +587,12 @@ export const UI = {
   FIN_ROW_DEBT_SERVICE: 'Debt Service',
   FIN_ROW_FREE_CASH_FLOW: 'Free Cash Flow',
   FIN_ROW_CUMULATIVE_FCF: 'Cumulative FCF',
+  FIN_ROW_EXIT_VALUE: 'Exit Value (to equity)',
   FIN_ROW_OCCUPANCY: 'Occupancy',
+  // Footnote shown when OpEx and power are both zero across all years (NNN pass-through):
+  // HEARST is the landlord, the tenant bears operating costs — $0 is correct, not missing.
+  FIN_OPEX_NNN_NOTE: 'OpEx and power read $0 because this is a triple-net (NNN) lease — the tenant bears all operating costs. HEARST is the landlord, not the operator.',
+  FIN_PRETAX_PREFIX: 'Pre-tax',
 
   // Financial — no-data states
   FIN_NODATA_PROJECTION: 'Projection Cannot Run',

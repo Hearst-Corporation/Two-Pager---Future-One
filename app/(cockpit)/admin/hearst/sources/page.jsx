@@ -42,6 +42,9 @@ function fmtVal(src) {
   if (src.value == null) return src.value_text || '—';
   const v = src.value;
   const u = src.unit || '';
+  // PUE is a ratio (1.0–5.0), NOT a percentage — never ×100 (would render 1.45 as 145%).
+  // Matches the simulator/financial convention where PUE shows as 1.45.
+  if (src.metric_id === 'pue') return v.toFixed(2);
   if (u === 'ratio' || u === 'ratio/year') return (v * 100).toFixed(1) + '%';
   if (u.includes('$/MW') || u.includes('$/kW') || u.includes('$M')) {
     if (v >= 1_000_000) return '$' + (v / 1_000_000).toFixed(1) + 'M/' + u.split('/').slice(1).join('/');
