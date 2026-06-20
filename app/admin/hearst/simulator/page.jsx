@@ -22,6 +22,11 @@ import {
   SIM_DEBOUNCE_MS,
   SCALE_PRESETS_MW,
   AI_MIX_PRESETS_PCT,
+  GPU_SKU_PRESETS,
+  GPU_HOUR_PRICE_PRESETS,
+  DEFAULT_GPU_SKU,
+  DEFAULT_GPU_HOUR_PRICE,
+  DEFAULT_GPU_UTIL_PCT,
 } from '../utils/constants';
 
 // ── Labels ────────────────────────────────────────────────────────────────────
@@ -55,9 +60,14 @@ const CAPEX_USD_PRESETS = [500_000_000, 1_000_000_000, 2_000_000_000, 5_000_000_
 const IRR_PRESETS_PCT   = [10, 12, 15, 18, 20];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function buildPayload({ mode, thesis, scale, aiMix, capitalBudget, targetIrr, lever, geography }) {
+function buildPayload({ mode, thesis, scale, aiMix, capitalBudget, targetIrr, lever, geography, gpuSku, gpuHourPrice }) {
   const archetype_id = ARCHETYPES[thesis] ?? ARCHETYPES.compute;
-  const hardware_mix = { ai_pct: aiMix };
+  // Only attach a GPU profile when there's an AI slice — the engine computes AI
+  // revenue ONLY when both a SKU and a $/GPU-hour are present (else AI factory
+  // carries GPU CAPEX with zero compute revenue → returns collapse).
+  const hardware_mix = aiMix > 0
+    ? { ai_pct: aiMix, gpu_sku_id: gpuSku, gpu_hour_price: gpuHourPrice, utilization_pct: DEFAULT_GPU_UTIL_PCT }
+    : { ai_pct: aiMix };
 
   let input_value;
   if (mode === 'mw_first') {
@@ -96,6 +106,8 @@ export default function SimulatorPage() {
   const [thesis, setThesis]           = useState('compute');
   const [scale, setScale]             = useState(DEFAULT_SIM_SCALE_MW);
   const [aiMix, setAiMix]             = useState(DEFAULT_SIM_AI_MIX_PCT);
+  const [gpuSku, setGpuSku]           = useState(DEFAULT_GPU_SKU);
+  const [gpuHourPrice, setGpuHourPrice] = useState(DEFAULT_GPU_HOUR_PRICE);
   const [capitalBudget, setCapital]   = useState(1_000_000_000);
   const [targetIrr, setTargetIrr]     = useState(15);
   const [lever, setLever]             = useState('mw');
@@ -120,7 +132,7 @@ export default function SimulatorPage() {
       setLoading(true);
       setError(null);
       try {
-        const payload = buildPayload({ mode, thesis, scale, aiMix, capitalBudget, targetIrr, lever, geography });
+        const payload = buildPayload({ mode, thesis, scale, aiMix, capitalBudget, targetIrr, lever, geography, gpuSku, gpuHourPrice });
         const res = await fetch('/api/admin/hearst/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -146,7 +158,7 @@ export default function SimulatorPage() {
 
     const t = setTimeout(run, SIM_DEBOUNCE_MS);
     return () => { active = false; clearTimeout(t); };
-  }, [mode, thesis, scale, aiMix, capitalBudget, targetIrr, lever, geography, attempt]);
+  }, [mode, thesis, scale, aiMix, gpuSku, gpuHourPrice, capitalBudget, targetIrr, lever, geography, attempt]);
 
   // ── Derived display values ────────────────────────────────────────────────
   const proj    = result?.projection    ?? {};
@@ -357,6 +369,49 @@ export default function SimulatorPage() {
               ))}
             </div>
           </div>
+
+          {/* GPU Profile — only when an AI slice exists; drives compute revenue */}
+          {aiMix > 0 && (
+            <>
+              <div className={styles.controlGroup} role="group" aria-labelledby="gpu-sku-label">
+                <h2 id="gpu-sku-label" className={styles.simSectionTitle}>GPU Profile</h2>
+                <div className={styles.controlRow}>
+                  {GPU_SKU_PRESETS.map((g) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      className={styles.controlBtn}
+                      data-active={gpuSku === g.id}
+                      aria-pressed={gpuSku === g.id}
+                      aria-label={`${g.label} accelerator`}
+                      onClick={() => setGpuSku(g.id)}
+                    >
+                      {g.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.controlGroup} role="group" aria-labelledby="gpu-price-label">
+                <h2 id="gpu-price-label" className={styles.simSectionTitle}>GPU Rate ($/hr)</h2>
+                <div className={styles.controlRow}>
+                  {GPU_HOUR_PRICE_PRESETS.map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      className={styles.controlBtn}
+                      data-active={gpuHourPrice === p}
+                      aria-pressed={gpuHourPrice === p}
+                      aria-label={`${p} dollars per GPU hour`}
+                      onClick={() => setGpuHourPrice(p)}
+                    >
+                      ${p.toFixed(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Retry */}
           {error && (
