@@ -86,12 +86,12 @@
 
   /* ── Page shell tokens ── */
   --ct-content-max:     1500px;  /* shared content max-width (data pages) */
-  --ct-gutter-sm:       1.5rem;  /* horizontal page gutter (≤1024px) */
-  --ct-section-gap:     2.25rem; /* vertical rhythm between sections */
-  --ct-panel-radius:    14px;    /* panel corner radius */
-  --ct-frame-inline:    clamp(1.25rem, 2.5vw, 3.25rem);
-  --ct-frame-top:       clamp(1.5rem, 2.5vw, 2.5rem);
-  --ct-frame-bottom:    clamp(1rem, 2.5vw, 2.5rem);
+  --ct-gutter-sm:       1.25rem; /* horizontal page gutter (≤1024px) */
+  --ct-section-gap:     1.4rem;  /* vertical rhythm between sections (compact) */
+  --ct-panel-radius:    10px;    /* panel corner radius */
+  --ct-frame-inline:    clamp(1rem, 1.8vw, 2rem);
+  --ct-frame-top:       clamp(1rem, 1.6vw, 1.5rem);
+  --ct-frame-bottom:    clamp(0.85rem, 1.6vw, 1.5rem);
 
   /* ── Content-measure tokens (cap line length / metric strips) ──
      Replaces ad-hoc max-width: 760/900/1000px literals scattered in the file. */
@@ -151,18 +151,19 @@
   --ct-opacity-loading:  0.55;
   --ct-opacity-disabled: 0.5;
 
-  /* ── Type scale ── */
-  --text-2xs:   0.65rem;
-  --text-xs:    0.7rem;
-  --text-sm:    0.75rem;
-  --text-md:    0.8rem;
-  --text-base:  0.85rem;
-  --text-lg:    0.9rem;
-  --text-xl:    1rem;
-  --text-2xl:   1.05rem;
-  --text-5xl:   1.2rem;
-  --text-6xl-alt: 1.5rem;
-  --text-7xl:   2rem;
+  /* ── Type scale — compact cockpit (~20% denser than the original).
+     Reduced at the token source so every consumer shrinks in one place. ── */
+  --text-2xs:   0.6rem;
+  --text-xs:    0.65rem;
+  --text-sm:    0.7rem;
+  --text-md:    0.74rem;
+  --text-base:  0.78rem;
+  --text-lg:    0.82rem;
+  --text-xl:    0.88rem;
+  --text-2xl:   0.92rem;
+  --text-5xl:   1.05rem;
+  --text-6xl-alt: 1.2rem;
+  --text-7xl:   1.5rem;
 
   /* Single typeface: Satoshi UI; serif display for brand lockup. */
   --ct-font-sans: var(--font-sans, "Satoshi", sans-serif);
@@ -588,7 +589,7 @@
 .pageHead {
   flex-shrink: 0;
   margin-bottom: var(--ct-section-gap);
-  padding-bottom: 1.75rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid var(--ct-divider);
 }
 
@@ -638,17 +639,17 @@
 
 .pageTitle {
   font-family: var(--ct-font-sans);
-  font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
   line-height: 1.1;
   font-weight: var(--ct-fw-bold);
   letter-spacing: -0.01em;
   color: var(--ct-accent);
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.5rem;
 }
 
 .pageHeadHome .pageTitle {
   font-family: var(--ct-font-display);
-  font-size: clamp(2.25rem, 4.5vw, 3.25rem);
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
 }
 
 .pageContext {
@@ -671,7 +672,7 @@
 
 .summaryCard {
   min-width: 0;
-  padding: 1.5rem;
+  padding: 1rem 1.1rem;
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-panel-radius);
   background: var(--ct-surface);
@@ -692,7 +693,7 @@
 }
 
 .summaryValue {
-  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  font-size: clamp(1.05rem, 1.7vw, 1.35rem);
   line-height: 1;
   color: var(--ct-text);
   font-family: var(--ct-font-sans);
@@ -750,14 +751,14 @@
 .overviewStateGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem 1.5rem;
+  gap: 0.6rem 1.25rem;
   min-width: 0;
 }
 
 .overviewStateGrid .metricItem {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.3rem;
   padding: 0;
   border: none;
   min-width: 0;
@@ -767,14 +768,14 @@
 .overviewReadRow {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.25rem;
+  gap: 1rem;
   min-width: 0;
 }
 
 .overviewReadCard {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   min-width: 0;
 }
 
@@ -810,7 +811,7 @@
 
 .overviewStatValue {
   font-family: var(--ct-font-mono);
-  font-size: clamp(1.7rem, 2.4vw, 2.2rem);
+  font-size: clamp(1.4rem, 1.9vw, 1.75rem);
   font-weight: var(--ct-fw-light);
   color: var(--ct-text);
   line-height: 1;
@@ -900,7 +901,7 @@
 .cockpitPanel .metricValue {
   font-family: var(--ct-font-sans);
   font-weight: var(--ct-fw-bold);
-  font-size: clamp(2rem, 2.8vw, 2.75rem);
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
 }
 
 .cockpitPanel .metricItem {
@@ -1278,7 +1279,7 @@
 }
 
 .simMetrics .metricValue {
-  font-size: clamp(1.75rem, 2.8vw, 2.75rem);
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
   font-family: var(--ct-font-sans);
   font-weight: var(--ct-fw-medium);
   letter-spacing: -0.02em;
@@ -1459,7 +1460,7 @@
   background: var(--ct-surface);
   border: 1px solid var(--ct-border);
   border-radius: var(--ct-panel-radius);
-  padding: 1.25rem 1.35rem 1.1rem;
+  padding: 0.9rem 1rem 0.85rem;
   margin-bottom: var(--ct-section-gap);
 }
 
@@ -1482,7 +1483,7 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.85rem;
   flex-wrap: wrap;
 }
 
