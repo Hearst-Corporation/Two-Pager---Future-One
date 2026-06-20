@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * ChatKimi.tsx — Couche de rendu pure du chat Kimi 2.6.
+ * ChatAssistant.tsx — Couche de rendu pure du chat (Assistant ORACLE, OpenAI GPT).
  *
  * Toute la logique d'état et de streaming est dans useChat.ts.
  * Ce composant gère : JSX, textarea, focus, scroll, retry, reset.
@@ -83,7 +83,7 @@ function sanitizeHtml(html: string): string {
 // Props
 // ---------------------------------------------------------------------------
 
-export interface ChatKimiProps {
+export interface ChatAssistantProps {
   /** Nom du produit en cours, pour le placeholder/contexte. */
   productName?: string;
   /** Accent du produit, pour la pastille + bouton envoyer. */
@@ -94,7 +94,7 @@ export interface ChatKimiProps {
 // Component
 // ---------------------------------------------------------------------------
 
-export function ChatKimi({ productName, productColor }: ChatKimiProps = {}) {
+export function ChatAssistant({ productName, productColor }: ChatAssistantProps = {}) {
   const [input, setInput] = useState<string>("");
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -179,7 +179,7 @@ export function ChatKimi({ productName, productColor }: ChatKimiProps = {}) {
       <div className="ct-chat-list">
         {messages.length === 0 && !streaming && (
           <p className="ct-placeholder">
-            Assistant Kimi K2.6
+            Assistant ORACLE
             {productName ? ` — contexte ${productName}.` : "."}
             <br />
             Pose ta question pour démarrer.
@@ -239,7 +239,7 @@ export function ChatKimi({ productName, productColor }: ChatKimiProps = {}) {
           ref={textareaRef}
           className="ct-chat-input"
           rows={2}
-          placeholder="Message à Kimi…"
+          placeholder="Message à l'assistant…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}

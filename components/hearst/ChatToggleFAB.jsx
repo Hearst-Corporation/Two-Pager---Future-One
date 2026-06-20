@@ -4,7 +4,7 @@
 //
 // Mécanique : toggle la classe `cp-chat-drawer-open` sur <body>. cockpit.css
 // applique alors `transform: translateX(0)` au .ct-rail-right du shell + révèle
-// le backdrop. Le shell garde son ChatKimi monté en permanence (aucune perte
+// le backdrop. Le shell garde son ChatAssistant monté en permanence (aucune perte
 // de conversation au open/close).
 
 import { useEffect, useState, useCallback } from 'react';

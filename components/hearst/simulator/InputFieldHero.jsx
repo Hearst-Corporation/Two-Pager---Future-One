@@ -259,7 +259,7 @@ const S = {
     fontSize: 'var(--cp-font-micro)',
     lineHeight: 'var(--cp-leading-tight)',
     color: 'var(--cp-text-muted)',
-    opacity: 0.85,
+    opacity: 'var(--cp-opacity-dim)',
   },
   resultValue: {
     fontSize: 'var(--cp-font-lg)',

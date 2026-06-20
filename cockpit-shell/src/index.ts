@@ -22,7 +22,7 @@ export type {
 } from "./shell/types";
 
 // Chat
-export { ChatKimi } from "./chat/ChatKimi";
+export { ChatAssistant } from "./chat/ChatAssistant";
 export { ChatSettings } from "./chat/ChatSettings";
 export { ChatHistory } from "./chat/ChatHistory";
 export { useChat } from "./chat/useChat";

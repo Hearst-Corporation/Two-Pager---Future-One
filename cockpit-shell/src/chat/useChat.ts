@@ -3,7 +3,7 @@
 /**
  * useChat.ts — Hook encapsulant toute la logique d'état et de streaming.
  *
- * Extrait de ChatKimi.tsx pour séparer la logique du rendu.
+ * Extrait de ChatAssistant.tsx pour séparer la logique du rendu.
  * Gère : état messages/streaming/error, AbortController, pendingRef
  * (race-condition guard), signal d'erreur stream (\x00ERROR:), chatId.
  */
@@ -40,7 +40,7 @@ export interface UseChatReturn {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers locaux (repris de ChatKimi)
+// Helpers locaux (repris de ChatAssistant)
 // ---------------------------------------------------------------------------
 
 function generateId(): string {
@@ -51,7 +51,7 @@ function generateId(): string {
 }
 
 /**
- * Filtre stream-safe des blocs `<think>...</think>` (raisonnement interne Kimi).
+ * Filtre stream-safe des blocs `<think>...</think>` (raisonnement interne LLM).
  */
 function makeThinkStripper() {
   let buffer = "";
@@ -110,7 +110,7 @@ function makeThinkStripper() {
 const WELCOME_MSG: DisplayMessage = {
   id: "welcome",
   role: "assistant",
-  content: "Bonjour ! Je suis Kimi K2.6, votre assistant Hearst. Comment puis-je vous aider aujourd'hui ?",
+  content: "Bonjour ! Je suis l'assistant ORACLE. Comment puis-je vous aider aujourd'hui ?",
   createdAt: 0,
 };
 

@@ -60,7 +60,7 @@ const S = {
     boxShadow: 'var(--cp-shadow-md)',
     cursor: 'pointer',
     fontFamily: 'var(--cp-font-sans, sans-serif)',
-    minWidth: 200,
+    minWidth: 'var(--cp-memo-badge-min-w)',
     transition: 'transform var(--cp-dur-base) var(--cp-ease), box-shadow var(--cp-dur-base) var(--cp-ease)',
   },
   spinner: {

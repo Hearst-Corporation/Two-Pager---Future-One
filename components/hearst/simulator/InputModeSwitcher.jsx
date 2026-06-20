@@ -92,6 +92,6 @@ const S = {
   },
   segmentUnitActive: {
     color: 'var(--cp-text-strong)',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-subtle)',
   },
 };

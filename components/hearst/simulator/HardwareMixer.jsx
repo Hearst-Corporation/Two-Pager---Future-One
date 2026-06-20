@@ -270,61 +270,6 @@ HardwareMixer.propTypes = {
   onChange: PropTypes.func,
 };
 
-// Compact rack-topology illustration (ambience, smaller than before).
-function HardwareTopology({ classicPct, liquidPct, totalMw, aiMw }) {
-  const rackCount = 18;
-  const classicCount = Math.round(rackCount * classicPct / 100);
-  const liquidCount = Math.round(rackCount * liquidPct / 100);
-  return (
-    <svg viewBox="0 0 760 180" role="img" aria-label={UI.HW_TOPOLOGY_ARIA} style={S.topology}>
-      <defs>
-        <linearGradient id="rackGlow" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="var(--cp-accent-maroon)" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="var(--cp-accent)" stopOpacity="0.25" />
-        </linearGradient>
-        <radialGradient id="coreGlow" cx="50%" cy="50%" r="60%">
-          <stop offset="0%" stopColor="var(--cp-accent-maroon)" stopOpacity="0.45" />
-          <stop offset="100%" stopColor="var(--cp-accent-maroon)" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect x="1" y="1" width="758" height="178" rx="18" fill="var(--cp-surface-0)" stroke="var(--cp-border)" />
-      <circle cx="600" cy="70" r="92" fill="url(#coreGlow)" />
-      {Array.from({ length: rackCount }).map((_, i) => {
-        const col = i % 9;
-        const row = Math.floor(i / 9);
-        const x = 44 + col * 50;
-        const y = 56 + row * 56;
-        const fill = i < classicCount
-          ? 'var(--cp-text-muted)'
-          : i < classicCount + liquidCount
-            ? 'var(--cp-accent)'
-            : 'url(#rackGlow)';
-        return (
-          <g key={i}>
-            <rect x={x} y={y} width="30" height="44" rx="6" fill={fill} opacity={i < classicCount ? 0.34 : 0.82} />
-            <rect x={x + 6} y={y + 8} width="18" height="3" rx="2" fill="var(--cp-text-strong)" opacity="0.44" />
-            <rect x={x + 6} y={y + 18} width="18" height="3" rx="2" fill="var(--cp-text-strong)" opacity="0.3" />
-          </g>
-        );
-      })}
-      <text x="44" y="34" fill="var(--cp-text-muted)" fontSize="var(--cp-font-xs)" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_POWER_HALL.toUpperCase()}</text>
-      <text x="556" y="34" fill="var(--cp-text-primary)" fontSize="var(--cp-font-lg)" fontWeight="var(--cp-weight-black)">{totalMw} MW</text>
-      <g>
-        <rect x="556" y="96" width="150" height="58" rx="12" fill="var(--cp-surface-2)" stroke="var(--cp-border)" />
-        <text x="572" y="118" fill="var(--cp-text-muted)" fontSize="var(--cp-font-micro)" fontWeight="var(--cp-weight-black)" letterSpacing="var(--cp-tracking-wider)">{UI.HW_AI_FABRIC.toUpperCase()}</text>
-        <text x="572" y="142" fill="var(--cp-text-primary)" fontSize="var(--cp-font-2xl)" fontWeight="var(--cp-weight-black)">{aiMw.toFixed(1)} MW</text>
-      </g>
-    </svg>
-  );
-}
-
-HardwareTopology.propTypes = {
-  classicPct: PropTypes.number,
-  liquidPct: PropTypes.number,
-  totalMw: PropTypes.number,
-  aiMw: PropTypes.number,
-};
-
 function MixBar({ classicPct, liquidPct, aiPct }) {
   return (
     <div style={S.mixWrap}>
@@ -399,12 +344,12 @@ const S = {
     background: 'transparent',
     border: 'none',
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-bold)',
+    fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-muted)',
     textTransform: 'uppercase',
-    letterSpacing: 'var(--cp-tracking-widest)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
     cursor: 'pointer',
-    opacity: 0.85,
+    opacity: 'var(--cp-opacity-dim)',
     transition: 'opacity 0.2s',
   },
   advanced: {
@@ -435,7 +380,7 @@ const S = {
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
     textAlign: 'left',
-    minHeight: 64,
+    minHeight: 'var(--cp-preset-card-min-h)',
   },
   presetName: {
     fontSize: 'var(--cp-font-sm)',
@@ -490,11 +435,6 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
     whiteSpace: 'nowrap',
   },
-  topology: {
-    width: '100%',
-    height: 'auto',
-    display: 'block',
-  },
   mixWrap: {
     display: 'flex',
     flexDirection: 'column',
@@ -508,7 +448,7 @@ const S = {
     background: 'var(--cp-surface-0)',
     border: '1px solid var(--cp-border)',
   },
-  mixSegStandard: { display: 'block', background: 'var(--cp-text-muted)', opacity: 0.5 },
+  mixSegStandard: { display: 'block', background: 'var(--cp-text-muted)', opacity: 'var(--cp-opacity-disabled)' },
   mixSegDense: { display: 'block', background: 'var(--cp-accent)' },
   mixSegAi: { display: 'block', background: 'var(--cp-accent-maroon)' },
   mixLegend: {
@@ -584,7 +524,7 @@ const S = {
   },
   colTitleMeta: {
     fontWeight: 'var(--cp-weight-medium)',
-    opacity: 0.7,
+    opacity: 'var(--cp-opacity-muted)',
     textTransform: 'none',
   },
   sliders: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-3)' },
@@ -610,14 +550,14 @@ const S = {
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 'var(--cp-weight-black)',
     color: 'var(--cp-text-primary)',
-    minWidth: 36,
+    minWidth: 'var(--cp-num-col-sm)',
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
   },
   mw: {
     fontSize: 'var(--cp-font-xs)',
     color: 'var(--cp-text-muted)',
-    minWidth: 60,
+    minWidth: 'var(--cp-num-col-md)',
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
   },
@@ -630,7 +570,7 @@ const S = {
     textAlign: 'left',
   },
   gpuSku: { fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wide)' },
-  gpuMeta: { fontSize: 'var(--cp-font-xs)', opacity: 0.75, marginTop: 'var(--cp-space-1)', lineHeight: 'var(--cp-leading-tight)' },
+  gpuMeta: { fontSize: 'var(--cp-font-xs)', opacity: 'var(--cp-opacity-muted)', marginTop: 'var(--cp-space-1)', lineHeight: 'var(--cp-leading-tight)' },
   gpuPrice: { fontSize: 'var(--cp-font-xs)', fontWeight: 'var(--cp-weight-bold)', marginTop: 'var(--cp-space-1)' },
   aiControls: {
     display: 'flex',
@@ -643,12 +583,12 @@ const S = {
     fontSize: 'var(--cp-font-xs)',
     color: 'var(--cp-text-muted)',
     fontWeight: 'var(--cp-weight-bold)',
-    minWidth: 60,
+    minWidth: 'var(--cp-num-col-md)',
   },
   ctrlValue: {
     fontSize: 'var(--cp-font-sm)',
     fontWeight: 'var(--cp-weight-bold)',
-    minWidth: 36,
+    minWidth: 'var(--cp-num-col-sm)',
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
   },

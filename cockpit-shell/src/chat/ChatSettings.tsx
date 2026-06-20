@@ -2,19 +2,21 @@
 
 /**
  * ChatSettings — panneau réglages du chat (vue settings du RailRight).
- * Inspiré du SettingsPanel devhub : clé API Hypercli, affichage, contexte.
+ * Clé API OpenAI, choix du modèle GPT, affichage, contexte produit.
  */
 
 import { useEffect, useState } from "react";
 
-const LS_API_KEY = "cockpit:hypercli-key";
+const LS_API_KEY = "cockpit:openai-key";
 const LS_MARKDOWN = "cockpit:chat-markdown";
 const LS_SHOW_THINK = "cockpit:chat-show-think";
 const LS_MODEL = "cockpit:chat-model";
 
+const DEFAULT_MODEL = "gpt-4.1";
+
 const MODELS = [
-  { value: "kimi-k2.6", label: "Kimi K2.6 (défaut)" },
-  { value: "kimi-k2.6-anthropic", label: "Kimi K2.6 (Anthropic-compatible)" },
+  { value: "gpt-4.1", label: "GPT-4.1 (défaut)" },
+  { value: "gpt-4o", label: "GPT-4o" },
 ];
 
 export interface ChatSettingsProps {
@@ -27,7 +29,7 @@ export function ChatSettings({ productName, productColor }: ChatSettingsProps = 
   const [apiKeyDraft, setApiKeyDraft] = useState<string>("");
   const [markdown, setMarkdown] = useState<boolean>(true);
   const [showThink, setShowThink] = useState<boolean>(false);
-  const [model, setModel] = useState<string>("kimi-k2.6");
+  const [model, setModel] = useState<string>(DEFAULT_MODEL);
   const [savedFlash, setSavedFlash] = useState<boolean>(false);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export function ChatSettings({ productName, productColor }: ChatSettingsProps = 
     setApiKeyDraft(k);
     setMarkdown(window.localStorage.getItem(LS_MARKDOWN) !== "0");
     setShowThink(window.localStorage.getItem(LS_SHOW_THINK) === "1");
-    setModel(window.localStorage.getItem(LS_MODEL) ?? "kimi-k2.6");
+    setModel(window.localStorage.getItem(LS_MODEL) ?? DEFAULT_MODEL);
   }, []);
 
   function saveApiKey() {
@@ -54,14 +56,14 @@ export function ChatSettings({ productName, productColor }: ChatSettingsProps = 
   return (
     <div className="ct-chat-settings">
       <section className="ct-chat-settings-section">
-        <div className="ct-chat-settings-label">Clé API Hypercli</div>
+        <div className="ct-chat-settings-label">Clé API OpenAI</div>
         <div className="ct-chat-settings-row">
           <input
             type="password"
             className="ct-chat-settings-input"
             value={apiKeyDraft}
             onChange={(e) => setApiKeyDraft(e.target.value)}
-            placeholder="hcp-••••••••"
+            placeholder="sk-••••••••"
             autoComplete="off"
             spellCheck={false}
           />
@@ -98,7 +100,7 @@ export function ChatSettings({ productName, productColor }: ChatSettingsProps = 
           ))}
         </select>
         <div className="ct-chat-settings-hint">
-          Contexte 256k tokens · drop-in OpenAI/Anthropic
+          OpenAI GPT · API officielle
         </div>
       </section>
 

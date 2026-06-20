@@ -62,7 +62,7 @@ const S = {
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 'var(--cp-space-4)',
-    minHeight: 56,
+    minHeight: 'var(--cp-cta-bar-height)',
     flexWrap: 'wrap',
   },
   left: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)' },

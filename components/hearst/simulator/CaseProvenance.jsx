@@ -183,7 +183,7 @@ const S = {
     gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
     gap: 'var(--cp-space-2) var(--cp-space-4)',
   },
-  contextItem: { display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 },
+  contextItem: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-gap-xs)', minWidth: 0 },
   contextLabel: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-faint)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' },
   contextValue: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-primary)', fontWeight: 'var(--cp-weight-semibold)' },
 };

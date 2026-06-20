@@ -491,8 +491,8 @@ const S = {
   eyebrow: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-widest)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
     opacity: 0.8,
   },

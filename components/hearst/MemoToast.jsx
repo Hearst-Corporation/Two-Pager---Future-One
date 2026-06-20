@@ -81,8 +81,8 @@ const S = {
     borderRadius: 'var(--cp-radius-md)',
     boxShadow: 'var(--cp-shadow-md)',
     fontFamily: 'var(--cp-font-sans, sans-serif)',
-    minWidth: 280,
-    maxWidth: 360,
+    minWidth: 'var(--cp-toast-min-w)',
+    maxWidth: 'var(--cp-toast-max-w)',
     animation: 'memo-toast-in 240ms cubic-bezier(0.32, 0.72, 0, 1)',
   },
   toastDone: {
@@ -142,7 +142,7 @@ const S = {
   },
   sub: {
     fontSize: 'var(--cp-font-xs)',
-    opacity: 0.85,
+    opacity: 'var(--cp-opacity-dim)',
     lineHeight: 1.4,
   },
   dismiss: {
@@ -152,7 +152,7 @@ const S = {
     background: 'transparent',
     border: 'none',
     color: 'inherit',
-    opacity: 0.7,
+    opacity: 'var(--cp-opacity-muted)',
     cursor: 'pointer',
     fontSize: 'var(--cp-font-lg)',
     lineHeight: 1,

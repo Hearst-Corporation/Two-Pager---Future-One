@@ -73,7 +73,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self'",
-              `connect-src 'self' ${supabaseHost} ${supabaseWs} https://maps.googleapis.com https://api.hypercli.com`,
+              `connect-src 'self' ${supabaseHost} ${supabaseWs} https://maps.googleapis.com`,
               "frame-ancestors 'self' http://localhost:4200 http://localhost:4201 https://oracle.hearst.app",
               "base-uri 'self'",
               "form-action 'self'",

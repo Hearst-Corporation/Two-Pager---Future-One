@@ -391,7 +391,7 @@ const S = {
     top: '20%',
     bottom: '20%',
     borderRadius: 'var(--cp-radius-xs)',
-    opacity: 0.85,
+    opacity: 'var(--cp-opacity-dim)',
   },
   tornadoSwing: {
     fontSize: 'var(--cp-font-xs)',

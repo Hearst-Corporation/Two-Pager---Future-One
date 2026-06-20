@@ -18,7 +18,7 @@ import type { ProductContext } from "@hearst/review-mode";
 
 const PAGES_CONTEXT_TEXT = `# Carte des pages Oracle / Future One Qatar
 
-Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (2 pages actives). Stack Next.js 14 (App Router) + Supabase + Kimi K2.6 via Moonshot AI.
+Projet : présentation A3 plié (4 pages publiques) + Cockpit admin HEARST (2 pages actives). Stack Next.js 14 (App Router) + Supabase + OpenAI GPT (gpt-4.1 / gpt-4o) pour le chat.
 
 ## Routes publiques (présentation A3 + pitches)
 

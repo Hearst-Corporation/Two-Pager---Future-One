@@ -13,18 +13,20 @@
 //      (CONVERSATIONAL_PROMPT vs FACILITATOR_PROMPT).
 //   4. Load / create chat via getServerClient (RLS-bound, user-owned).
 //   5. Insert user message with mode column stamped.
-//   6. Stream Kimi, strip <think> blocks, accumulate full response.
+//   6. Stream OpenAI GPT, strip <think> blocks, accumulate full response.
 //   7. Persist assistant message with mode column stamped + llm_runs row.
 //
 // Returns: raw text stream with header `x-chat-id`.
 
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
+import { estimateTokens } from "@hearst/review-mode";
 import {
-  estimateTokens,
-  estimateKimiCostUsd,
-} from "@hearst/review-mode";
-import { KIMI_MODEL, kimiChatStream } from "@/lib/llm/kimi";
+  DEFAULT_CHAT_MODEL,
+  resolveChatModel,
+  openaiChatStream,
+  estimateGptCostUsd,
+} from "@/lib/llm/openai-chat";
 import { buildOracleSystemPrompt, inferOracleContextFromPath } from "@/lib/oracle-system-prompt";
 import { buildDealGroundingBlock } from "@/lib/oracle-deal-grounding";
 import { resolveActiveDeal } from "@/lib/oracle-active-deal";
@@ -76,6 +78,7 @@ const BodySchema = z.object({
     )
     .optional(),
   productId: z.string().nullish(),
+  model: z.string().optional(), // override modèle (whitelisté côté serveur : gpt-4.1 | gpt-4o)
   system: z.string().optional(), // ignored when authenticated (we control the prompt)
   deal: z.object({
     scenario: z.record(z.string(), z.unknown()).optional(),
@@ -274,7 +277,7 @@ export async function POST(req: Request) {
   // ── Tuning slash commands (intercept BEFORE the LLM) ────────────────────
   // Lets the user say "/pref réponds plus court" / "/règles" / "/oublie tout".
   // We answer synthetically, stream the answer (so the UI sees it), persist
-  // it as an assistant message, and skip Kimi entirely.
+  // it as an assistant message, and skip the LLM entirely.
   const tuningCmd = userId ? parseTuningCommand(message) : null;
   if (tuningCmd && userId) {
     let reply = "";
@@ -388,19 +391,19 @@ export async function POST(req: Request) {
     ...history,
   ];
 
-  // ── Stream LLM — Kimi K2.6 via Moonshot AI (direct, éditeur officiel) ──────
-  // Do not route cockpit chat through Anthropic: billing/quota failures there
-  // should not break ORACLE's right rail when Moonshot is the configured provider.
-  // max_tokens ≥ 4096 obligatoire : kimi-k2.6 est un modèle à raisonnement —
-  // sans max_tokens large, delta.content peut rester vide (tout part en reasoning).
+  // ── Stream LLM — OpenAI GPT (SDK officiel, sans fallback) ─────────────────
+  // Le chat ORACLE tourne sur GPT-4.1 par défaut (gpt-4o sélectionnable dans les
+  // réglages). Pas de routage Anthropic/Moonshot ici : un échec billing/quota
+  // ailleurs ne doit pas casser le rail droit.
+  const chatModel = resolveChatModel(body.model);
   const inputTokens = estimateTokens(finalSystemPrompt + history.map((h) => h.content).join("\n"));
   const startedAt = Date.now();
   const stripThink = makeThinkStripper();
   let full = "";
-  let modelUsed = KIMI_MODEL;
+  let modelUsed: string = chatModel || DEFAULT_CHAT_MODEL;
   let completion: any;
   try {
-    const out = await kimiChatStream({ model: KIMI_MODEL, messages, max_tokens: 8192 } as any);
+    const out = await openaiChatStream({ model: chatModel, messages, max_tokens: 4096 } as any);
     completion = out.stream;
     modelUsed = out.model_used;
   } catch (err) {
@@ -475,10 +478,7 @@ export async function POST(req: Request) {
         }
       }
       const outputTokens = estimateTokens(full);
-      const costUsd = estimateKimiCostUsd({
-        prompt_tokens: inputTokens,
-        completion_tokens: outputTokens,
-      });
+      const costUsd = estimateGptCostUsd(modelUsed, inputTokens, outputTokens);
       await insertLlmRun({
         agentName,
         model: modelUsed,

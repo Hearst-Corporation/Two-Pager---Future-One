@@ -10,7 +10,7 @@ import { join } from 'path';
 const ROOT = process.cwd();
 
 // Doit refléter lib/env-validation.js (REQUIRED_*). Tenu volontairement court.
-const REQUIRED_SERVER = ['SUPABASE_SERVICE_ROLE_KEY', 'MOONSHOT_API_KEY'];
+const REQUIRED_SERVER = ['SUPABASE_SERVICE_ROLE_KEY', 'OPENAI_API_KEY', 'MOONSHOT_API_KEY'];
 const REQUIRED_PUBLIC = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
 // Charge .env.local (Next le charge au runtime ; ce script standalone ne l'a pas).

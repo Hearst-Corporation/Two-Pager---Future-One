@@ -197,6 +197,24 @@ body.oracle-simulator-page {
   --cp-sim-hero-row-min-stack: 18.5rem;
   --cp-display-input:  46px;
   --cp-display-unit:   22px;
+  /* Tailles composants dédiés */
+  --cp-cta-bar-height:     56px;   /* SimulatorCTABar min-height */
+  --cp-viz-rail-min-h:    118px;   /* VisualizationsStep rail min-height */
+  --cp-preset-card-min-h:  64px;   /* HardwareMixer preset card */
+  --cp-memo-badge-min-w:  200px;   /* MemoJobBadge min-width */
+  --cp-toast-min-w:       280px;   /* MemoToast min-width */
+  --cp-toast-max-w:       360px;   /* MemoToast max-width */
+  --cp-num-col-sm:         36px;   /* Colonnes chiffres tabulaires étroites */
+  --cp-num-col-md:         60px;   /* Colonnes chiffres tabulaires larges */
+  --cp-gap-xs:              2px;   /* Micro-gap sub-espace-1 */
+  /* Opacités sémantiques */
+  --cp-opacity-dim:        0.85;   /* élément secondaire légèrement atténué */
+  --cp-opacity-strong:     0.90;   /* quasi-plein, texte légèrement assoupli */
+  --cp-opacity-muted:       0.7;   /* élément tertiaire, méta info */
+  --cp-opacity-soft:       0.75;   /* méta / valeur subdued */
+  --cp-opacity-subtle:      0.8;   /* label eyebrow atténué */
+  --cp-opacity-ghost:       0.4;   /* séparateur / dot décoratif */
+  --cp-opacity-disabled:    0.5;   /* état désactivé / segment non-actif */
   --cp-chart-tick:     11px;
   --cp-section-gap:    var(--cp-space-6);
   --cp-badge-size:     18px;

@@ -295,7 +295,7 @@ const S = {
     marginLeft: -1,
     borderRadius: 1,
     background: 'var(--cp-accent-maroon)',
-    opacity: 0.5,
+    opacity: 'var(--cp-opacity-disabled)',
     pointerEvents: 'none',
     zIndex: 1,
   },
@@ -313,7 +313,7 @@ const S = {
   labelCol: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
+    gap: 'var(--cp-gap-xs)',
     minWidth: 0,
   },
   phaseLabel: {
@@ -358,11 +358,11 @@ const S = {
   },
   phase_ramp: {
     background: 'var(--cp-accent)',
-    opacity: 0.75,
+    opacity: 'var(--cp-opacity-soft)',
   },
   phase_operate: {
     background: 'var(--cp-accent-maroon)',
-    opacity: 0.9,
+    opacity: 'var(--cp-opacity-strong)',
   },
   phase_exit: {
     background: 'var(--cp-accent)',

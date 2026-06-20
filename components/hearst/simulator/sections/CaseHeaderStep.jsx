@@ -64,10 +64,10 @@ const S = {
   eyebrow: {
     color: 'var(--cp-text-muted)',
     fontSize: 'var(--cp-font-micro)',
-    fontWeight: 'var(--cp-weight-bold)',
-    letterSpacing: 'var(--cp-tracking-widest)',
+    fontWeight: 'var(--cp-weight-black)',
+    letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
-    opacity: 0.8,
+    opacity: 'var(--cp-opacity-subtle)',
   },
   narrative: {
     display: 'flex',
@@ -77,7 +77,7 @@ const S = {
   sentence: {
     margin: 0,
     color: 'var(--cp-text-strong)',
-    fontSize: 'clamp(20px, 2vw, 28px)',
+    fontSize: 'var(--cp-font-hero-h1)',
     lineHeight: 'var(--cp-leading-tight)',
     fontWeight: 'var(--cp-weight-medium)',
     letterSpacing: 'var(--cp-tracking-tight)',
@@ -91,6 +91,6 @@ const S = {
     fontWeight: 'var(--cp-weight-medium)',
   },
   dot: {
-    opacity: 0.4,
+    opacity: 'var(--cp-opacity-ghost)',
   },
 };

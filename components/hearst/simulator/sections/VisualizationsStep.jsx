@@ -139,7 +139,7 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--cp-space-1)',
-    minHeight: 118,
+    minHeight: 'var(--cp-viz-rail-min-h)',
   },
   vizRailBtnActive: {
     borderColor: 'var(--cp-accent-maroon)',

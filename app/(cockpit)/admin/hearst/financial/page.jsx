@@ -531,7 +531,7 @@ export default function FinancialPage() {
                             : cell.irr < FINANCIAL_THRESHOLDS.ic_hurdle_pct / 100 ? 'color-mix(in srgb, var(--cp-status-warning) 50%, black)'
                             : 'color-mix(in srgb, var(--cp-status-success) 30%, black)',
                           color: 'var(--cp-text-primary)',
-                          fontWeight: ri === 2 && ci === 2 ? 900 : 600,
+                          fontWeight: ri === 2 && ci === 2 ? 'var(--cp-weight-black)' : 'var(--cp-weight-semibold)',
                           fontSize: 'var(--cp-font-xs)',
                           textAlign: 'center',
                           border: ri === 2 && ci === 2 ? '2px solid var(--cp-text-primary)' : 'none',
@@ -568,7 +568,7 @@ export default function FinancialPage() {
           <div style={S.warnTitle}>{UI.FIN_WARNINGS_TITLE}</div>
           {proj.warnings.map((w, i) => (
             <div key={i} style={{ ...S.warnRow, display: 'flex', alignItems: 'flex-start', gap: 'var(--cp-space-2)' }}>
-              <TriangleAlert size={15} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <TriangleAlert size={15} aria-hidden="true" style={{ flexShrink: 0, marginTop: 'var(--cp-gap-xs)' }} />
               <span>{w}</span>
             </div>
           ))}
