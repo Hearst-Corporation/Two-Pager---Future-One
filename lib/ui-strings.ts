@@ -497,6 +497,13 @@ export const UI = {
   // Dossier — placeholders
   DOSSIER_PLACEHOLDER_DEFAULT: 'Not available for this memo version',
   DOSSIER_CASHFLOW_PLACEHOLDER: 'Year-by-year cashflow not available for this memo version',
+  DOSSIER_PLACEHOLDER_TIMELINE_FLAT: 'No phased roadmap in this memo.',
+  DOSSIER_PLACEHOLDER_BENCHMARKS_NO_DATA: 'Comparables referenced — no quantified position available.',
+  DOSSIER_BENCH_REF_TAG: 'reference',
+  DOSSIER_CASHFLOW_LEGEND_REV: 'Revenue',
+  DOSSIER_CASHFLOW_LEGEND_EBITDA: 'EBITDA',
+  DOSSIER_CASHFLOW_LEGEND_FCF: 'FCF',
+  DOSSIER_CASHFLOW_ZERO_LABEL: '0',
   DOSSIER_MITIGATION_PREFIX: 'Mitigation · ',
   // Dossier — table headers
   DOSSIER_TH_METRIC: 'Metric',

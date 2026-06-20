@@ -105,9 +105,11 @@ function CapitalStack({ stack }) {
   if (!stack) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_STACK}</Placeholder>;
   return (
     <div>
+      {/* Debt / Equity bar with a 1px separator gap between segments */}
       <div style={S.stackBar}>
         <div style={{ ...S.stackSeg, width: `${stack.debtPct}%`, background: 'var(--cp-text-muted)' }} title={`Debt ${stack.debtPct}%`} />
-        <div style={{ ...S.stackSeg, width: `${stack.equityPct}%`, background: 'var(--cp-accent)' }} title={`Equity ${stack.equityPct}%`} />
+        <div style={S.stackBarGap} />
+        <div style={{ ...S.stackSeg, width: `${stack.equityPct}%`, background: 'var(--cp-accent)', borderRadius: '0 var(--cp-radius-xs) var(--cp-radius-xs) 0' }} title={`Equity ${stack.equityPct}%`} />
       </div>
       <div style={S.stackLegend}>
         <span><span style={{ ...S.dot, background: 'var(--cp-text-muted)' }} /> Debt {stack.debtPct}%</span>
@@ -142,6 +144,7 @@ function DeploymentTimeline({ phases }) {
   if (!phases?.length) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_TIMELINE}</Placeholder>;
   const ranges = phases.map(p => parseMonths(p.months_from_t0));
   const maxMonth = Math.max(...ranges.map(r => r?.end || 0), 1);
+  if (maxMonth <= 1) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_TIMELINE_FLAT}</Placeholder>;
   return (
     <div style={S.timeline}>
       {phases.map((p, i) => {
@@ -164,6 +167,22 @@ function DeploymentTimeline({ phases }) {
 
 function BenchmarkPosition({ comparables }) {
   if (!comparables?.length) return <Placeholder>{UI.DOSSIER_PLACEHOLDER_COMPARABLES}</Placeholder>;
+  const hasRealValue = comparables.some(c => c.value && /\d/.test(String(c.value)));
+  if (!hasRealValue) {
+    return (
+      <div>
+        <ul style={S.benchListCompact}>
+          {comparables.map((c, i) => (
+            <li key={i} style={S.benchRowCompact}>
+              <span style={S.benchName}>{c.name}</span>
+              <span style={S.benchRefTag}>{UI.DOSSIER_BENCH_REF_TAG}</span>
+            </li>
+          ))}
+        </ul>
+        <div style={{ ...S.placeholder, marginTop: 'var(--cp-space-3)' }}>{UI.DOSSIER_PLACEHOLDER_BENCHMARKS_NO_DATA}</div>
+      </div>
+    );
+  }
   return (
     <ul style={S.benchList}>
       {comparables.map((c, i) => (
@@ -178,25 +197,81 @@ function BenchmarkPosition({ comparables }) {
   );
 }
 
+/** Format a dollar magnitude for Y-axis tick labels (e.g. 38000000 → "$38M") */
+function fmtAxisTick(v) {
+  if (v == null) return '';
+  const abs = Math.abs(v);
+  const sign = v < 0 ? '-' : '';
+  if (abs >= 1e9) return `${sign}$${Math.round(abs / 1e8) / 10}B`;
+  if (abs >= 1e6) return `${sign}$${Math.round(abs / 1e6)}M`;
+  if (abs >= 1e3) return `${sign}$${Math.round(abs / 1e3)}K`;
+  return `${sign}$${Math.round(abs)}`;
+}
+
 function Cashflow({ years }) {
   if (!years?.length) return <Placeholder>{UI.DOSSIER_CASHFLOW_PLACEHOLDER}</Placeholder>;
-  const vals = years.flatMap(y => [y.rev, y.ebitda, y.fcf].filter(v => v != null));
-  const max = Math.max(...vals.map(Math.abs), 1);
+  const allVals = years.flatMap(y => [y.rev, y.ebitda, y.fcf].filter(v => v != null));
+  // ── Proportional scale: pos zone gets its own max, neg zone gets its own max ──
+  const posMax = Math.max(0, ...allVals.filter(v => v > 0), 1);
+  const negMax = Math.max(0, ...allVals.filter(v => v < 0).map(Math.abs), 0);
+  const total = posMax + negMax;
+  // posShare = fraction of chart height dedicated to positive zone (0–1)
+  const posShare = total > 0 ? posMax / total : 0.5;
+  const negShare = 1 - posShare;
+  // barH normalised within its own zone — returns a % of that zone's height
+  const posBarH = (v) => v > 0 ? `${Math.max(0.5, (v / posMax) * 96)}%` : '0%';
+  const negBarH = (v) => v < 0 ? `${Math.max(0.5, (Math.abs(v) / (negMax || 1)) * 96)}%` : '0%';
   return (
-    <div style={S.cashWrap}>
-      {years.map((y, i) => {
-        const h = (v) => `${Math.max(2, (Math.abs(v || 0) / max) * 100)}%`;
-        return (
-          <div key={i} style={S.cashCol}>
-            <div style={S.cashBars}>
-              <div style={{ ...S.cashBar, height: h(y.rev), background: 'var(--cp-accent)' }} title={`Revenue ${fmtUsd(y.rev) || '—'}`} />
-              <div style={{ ...S.cashBar, height: h(y.ebitda), background: 'var(--cp-text-muted)' }} title={`EBITDA ${fmtUsd(y.ebitda) || '—'}`} />
-              <div style={{ ...S.cashBar, height: h(y.fcf), background: 'var(--cp-text-faint)' }} title={`FCF ${fmtUsd(y.fcf) || '—'}`} />
-            </div>
-            <div style={S.cashYr}>Y{y.y}</div>
+    <div>
+      {/* Legend */}
+      <div style={S.stackLegend}>
+        <span><span style={{ ...S.dot, background: 'var(--cp-accent)' }} />{UI.DOSSIER_CASHFLOW_LEGEND_REV}</span>
+        <span><span style={{ ...S.dot, background: 'var(--cp-text-muted)' }} />{UI.DOSSIER_CASHFLOW_LEGEND_EBITDA}</span>
+        <span><span style={{ ...S.dot, background: 'var(--cp-status-warning)' }} />{UI.DOSSIER_CASHFLOW_LEGEND_FCF}</span>
+      </div>
+      {/* Chart + Y-axis side by side */}
+      <div style={S.cashOuter}>
+        {/* Y-axis column */}
+        <div style={S.cashYAxis}>
+          {/* Top tick = posMax */}
+          <div style={{ ...S.cashTick, alignSelf: 'flex-start' }}>{fmtAxisTick(posMax)}</div>
+          {/* Middle tick = 0 — positioned at the zero boundary */}
+          <div style={{ ...S.cashTick, position: 'absolute', top: `${posShare * 100}%`, transform: 'translateY(-50%)', right: 0 }}>
+            {UI.DOSSIER_CASHFLOW_ZERO_LABEL}
           </div>
-        );
-      })}
+          {/* Bottom tick = negMax (shown negative) */}
+          {negMax > 0 && <div style={{ ...S.cashTick, alignSelf: 'flex-end' }}>{fmtAxisTick(-negMax)}</div>}
+        </div>
+        {/* Chart with proportional zero axis */}
+        <div style={S.cashWrap}>
+          {years.map((y, i) => (
+            <div key={i} style={S.cashCol}>
+              {/* Chart area: flex:1 so year label sits below */}
+              <div style={S.cashArea}>
+                {/* Positive zone — proportional height */}
+                <div style={{ ...S.cashHalf, height: `${posShare * 100}%`, flex: 'none' }}>
+                  <div style={{ ...S.cashHalfInner, justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+                    {(y.rev || 0) >= 0 && <div style={{ ...S.cashBar, height: posBarH(y.rev), background: 'var(--cp-accent)' }} title={`Revenue ${fmtUsd(y.rev) || '—'}`} />}
+                    {(y.ebitda || 0) >= 0 && <div style={{ ...S.cashBar, height: posBarH(y.ebitda), background: 'var(--cp-text-muted)' }} title={`EBITDA ${fmtUsd(y.ebitda) || '—'}`} />}
+                    {(y.fcf || 0) > 0 && <div style={{ ...S.cashBar, height: posBarH(y.fcf), background: 'var(--cp-status-warning)' }} title={`FCF ${fmtUsd(y.fcf) || '—'}`} />}
+                  </div>
+                </div>
+                {/* Zero line — labeled via Y-axis, line itself just a strong rule */}
+                <div style={S.cashZeroLine} />
+                {/* Negative zone — proportional height */}
+                {negShare > 0 && (
+                  <div style={{ ...S.cashHalf, height: `${negShare * 100}%`, flex: 'none' }}>
+                    <div style={{ ...S.cashHalfInner, justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+                      {(y.fcf || 0) < 0 && <div style={{ ...S.cashBar, height: negBarH(y.fcf), background: 'var(--cp-status-danger)', borderRadius: '0 0 var(--cp-radius-xs) var(--cp-radius-xs)', alignSelf: 'flex-start' }} title={`FCF ${fmtUsd(y.fcf) || '—'}`} />}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div style={S.cashYr}>Y{y.y}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -379,22 +454,28 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
       {/* ── VISUAL STORY ──────────────────────────────────────────── */}
       <section>
         <SectionHead title={UI.DOSSIER_SECTION_VISUAL_STORY} hint={UI.DOSSIER_SECTION_VISUAL_STORY_HINT} />
-        <div style={S.vizGrid}>
+        {/* Row 1 — rich data cards: Capital Stack + Cashflow, equal columns */}
+        <div style={S.vizGridRich}>
           <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
             <div style={S.vizTitle}>{UI.DOSSIER_VIZ_CAPITAL_STACK}</div>
             <CapitalStack stack={capStack} />
           </Card>
           <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
+            <div style={S.vizTitle}>{UI.DOSSIER_VIZ_CASHFLOW_TRAJECTORY}</div>
+            <Cashflow years={m._exec_projection?.years} />
+          </Card>
+        </div>
+        {/* Row 2 — condensed band: Deployment + Benchmark.
+            If a card has real data it renders as a normal card (natural height).
+            If both are placeholders the row stays compact (vizGridSparse). */}
+        <div style={S.vizGridSparse}>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-3) var(--cp-space-4)' }}>
             <div style={S.vizTitle}>{UI.DOSSIER_VIZ_DEPLOYMENT_TIMELINE}</div>
             <DeploymentTimeline phases={phases} />
           </Card>
-          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
+          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-3) var(--cp-space-4)' }}>
             <div style={S.vizTitle}>{UI.DOSSIER_VIZ_BENCHMARK_POSITION}</div>
             <BenchmarkPosition comparables={comparables} />
-          </Card>
-          <Card variant="card" surface={1} style={{ padding: 'var(--cp-space-4)' }}>
-            <div style={S.vizTitle}>{UI.DOSSIER_VIZ_CASHFLOW_TRAJECTORY}</div>
-            <Cashflow years={m._exec_projection?.years} />
           </Card>
         </div>
       </section>
@@ -863,21 +944,28 @@ const S = {
   // ── Section headings (canon H2 13/700) ──
 
   // ── Visual story ──
-  vizGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 7)), 1fr))', gap: 'var(--cp-space-3)' },
+  // Row 1: rich data cards (Capital Stack + Cashflow) — equal 2-col, responsive
+  vizGridRich: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 10)), 1fr))', gap: 'var(--cp-space-6)', marginBottom: 'var(--cp-space-6)', alignItems: 'start' },
+  // Row 2: condensed band for sparse/placeholder cards (Deployment + Benchmark)
+  vizGridSparse: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 7)), 1fr))', gap: 'var(--cp-space-4)', alignItems: 'start' },
   vizTitle: { ...EYEBROW, marginBottom: 'var(--cp-space-3)' },
-  placeholder: { padding: 'var(--cp-space-4) var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', fontStyle: 'italic', textAlign: 'center' },
+  placeholder: { padding: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-sm)', background: 'var(--cp-surface-0)', border: '1px dashed var(--cp-border)', color: 'var(--cp-text-muted)', fontSize: 'var(--cp-font-sm)', fontStyle: 'italic', textAlign: 'center' },
 
   // Capital stack
-  stackBar: { display: 'flex', height: 'calc(var(--cp-space-5) + var(--cp-space-1) / 2)', borderRadius: 'var(--cp-radius-sm)', overflow: 'hidden', border: '1px solid var(--cp-border)' },
+  // Bar: overflow hidden on outer, gap rendered as a 1px inline element so the border-radius is preserved
+  stackBar: { display: 'flex', height: 'var(--cp-space-6)', borderRadius: 'var(--cp-radius-sm)', overflow: 'hidden', border: '1px solid var(--cp-border)', alignItems: 'stretch' },
   stackSeg: { height: '100%' },
+  // 1px gap between debt and equity segments (uses the border colour so it reads as a separator)
+  stackBarGap: { width: '1px', flexShrink: 0, background: 'var(--cp-border)', zIndex: 1 },
   stackLegend: { display: 'flex', gap: 'var(--cp-space-4)', marginTop: 'var(--cp-space-2)', fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', flexWrap: 'wrap' },
   dot: { display: 'inline-block', width: 'var(--cp-font-micro)', height: 'var(--cp-font-micro)', borderRadius: 'var(--cp-radius-xs)', marginRight: 'var(--cp-space-1)', verticalAlign: 'middle' },
-  splitWrap: { marginTop: 'var(--cp-space-3)' },
-  splitRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', marginBottom: 'var(--cp-space-1)' },
+  splitWrap: { marginTop: 'var(--cp-space-4)' },
+  splitRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-2)' },
   splitName: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-body)', width: 'calc(var(--cp-space-9) * 2 + var(--cp-space-1))', flexShrink: 0 },
   splitTrack: { flex: 1, height: 'var(--cp-space-2)', borderRadius: 'var(--cp-radius-pill)', background: 'var(--cp-surface-0)', overflow: 'hidden' },
   splitFill: { height: '100%', background: 'var(--cp-accent)', borderRadius: 'var(--cp-radius-pill)' },
-  splitPct: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', width: 'calc(var(--cp-space-9) - var(--cp-space-1))', textAlign: 'right', fontFamily: 'ui-monospace, monospace' },
+  // tabular-nums + right-align keeps percentages in a stable column
+  splitPct: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)', width: 'calc(var(--cp-space-9) - var(--cp-space-1))', textAlign: 'right', fontFamily: 'ui-monospace, monospace', fontVariantNumeric: 'tabular-nums' },
 
   // Timeline
   timeline: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
@@ -894,13 +982,27 @@ const S = {
   benchValue: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   benchMetric: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)' },
   benchSrc: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-faint)', fontFamily: 'ui-monospace, monospace', gridColumn: '1 / -1' },
+  benchListCompact: { margin: 'var(--cp-space-0)', padding: 'var(--cp-space-0)', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)' },
+  benchRowCompact: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-2)', paddingBottom: 'var(--cp-space-1)', borderBottom: '1px solid var(--cp-border)' },
+  benchRefTag: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-faint)', fontStyle: 'italic', marginLeft: 'auto' },
 
   // Cashflow
-  cashWrap: { display: 'flex', alignItems: 'flex-end', gap: 'var(--cp-space-1)', height: 'calc(var(--cp-space-6) * 5)' },
-  cashCol: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--cp-space-1)', height: '100%' },
-  cashBars: { display: 'flex', alignItems: 'flex-end', gap: 'calc(var(--cp-space-1) / 2)', flex: 1, width: '100%', justifyContent: 'center' },
-  cashBar: { width: 'calc(var(--cp-space-2) - var(--cp-space-1) / 4)', borderRadius: 'var(--cp-radius-xs) var(--cp-radius-xs) 0 0', minHeight: 'calc(var(--cp-space-1) / 2)' },
-  cashYr: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace' },
+  // Outer = Y-axis column + chart area side by side
+  cashOuter: { display: 'flex', alignItems: 'stretch', gap: 'var(--cp-space-2)', marginTop: 'var(--cp-space-3)' },
+  // Y-axis: narrow column, relative so the zero tick can be absolutely positioned
+  cashYAxis: { display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', width: 'calc(var(--cp-space-9) + var(--cp-space-1))', flexShrink: 0, paddingRight: 'var(--cp-space-2)' },
+  cashTick: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', textAlign: 'right', lineHeight: 'var(--cp-leading-tight)' },
+  // Taller chart: 5 × space-12 (5 × 48px = 240px) — readable at full card width
+  cashWrap: { display: 'flex', alignItems: 'stretch', gap: 'var(--cp-space-1)', flex: 1, height: 'calc(var(--cp-space-12) * 5)' },
+  cashCol: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--cp-space-0)', minWidth: 0 },
+  cashArea: { flex: 1, width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' },
+  cashHalf: { width: '100%', display: 'flex', alignItems: 'stretch', overflow: 'hidden' },
+  // Bars tightly grouped with a small gap; each bar is space-3 (12px) wide — easily readable
+  cashHalfInner: { display: 'flex', gap: 'calc(var(--cp-space-1) / 2)', flex: 1, width: '100%', justifyContent: 'center' },
+  cashZeroLine: { width: '100%', height: 'var(--cp-space-0)', borderTop: '2px solid var(--cp-border-strong)', flexShrink: 0 },
+  // Width: var(--cp-space-3) = 12px per bar — 3× the previous ~4px
+  cashBar: { width: 'var(--cp-space-3)', borderRadius: 'var(--cp-radius-xs) var(--cp-radius-xs) 0 0', minHeight: 'calc(var(--cp-space-1) / 2)', alignSelf: 'flex-end' },
+  cashYr: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', marginTop: 'var(--cp-space-1)' },
 
   // ── Analytics ──
   analytics: { display: 'flex', flexDirection: 'column' },
