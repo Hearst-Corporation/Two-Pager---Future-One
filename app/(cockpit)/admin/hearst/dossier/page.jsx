@@ -845,7 +845,7 @@ const S = {
   kpiStrip: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 4)), 1fr))', gap: 'var(--cp-space-3)' },
   kpiLabel: { ...EYEBROW, marginBottom: 'var(--cp-space-2)' },
   kpiLabelRow: { display: 'inline-flex', alignItems: 'center', gap: 'var(--cp-space-1)', minWidth: 0 },
-  kpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', fontVariantNumeric: 'tabular-nums' },
+  kpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 'var(--cp-leading-tight)', fontVariantNumeric: 'tabular-nums' },
   kpiSub: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
   categoryName: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)' },
@@ -905,7 +905,7 @@ const S = {
   // ── Analytics ──
   analytics: { display: 'flex', flexDirection: 'column' },
   analyticsBlock: { padding: 'var(--cp-space-4) var(--cp-space-0)', borderBottom: '1px solid var(--cp-border)' },
-  analyticsTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0) var(--cp-space-0) var(--cp-space-2)' },
+  analyticsTitle: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', margin: 'var(--cp-space-0) var(--cp-space-0) var(--cp-space-2)' },
   bullets: { margin: 'var(--cp-space-1) var(--cp-space-0)', paddingLeft: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-1)', fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-body)', lineHeight: 'var(--cp-leading-normal)' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: 'var(--cp-font-sm)' },
   th: { textAlign: 'left', padding: 'var(--cp-space-2) var(--cp-space-3)', color: 'var(--cp-text-muted)', borderBottom: '1px solid var(--cp-border)', fontWeight: 'var(--cp-weight-semibold)', textTransform: 'uppercase', fontSize: 'var(--cp-font-xs)' },

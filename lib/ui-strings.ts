@@ -742,6 +742,39 @@ export const UI = {
     },
   },
 
+  // Investment case selector (Conservative / Base / Upside) — simulator config page
+  SIM_CASE_EYEBROW: 'Investment Case',
+  SIM_CASE_ARIA: 'Select investment case',
+  SIM_CASE_CONSERVATIVE: 'Conservative',
+  SIM_CASE_BASE: 'Base',
+  SIM_CASE_UPSIDE: 'Upside',
+  SIM_CASE_SUB_CONSERVATIVE: 'Prudent — downside-protected assumptions',
+  SIM_CASE_SUB_BASE: 'Recommended — live sourced medians',
+  SIM_CASE_SUB_UPSIDE: 'Optimistic — credible best case',
+  SIM_CASE_BASE_NOTE: 'Base runs on the live sourced bootstrap (PUBLIC_SOURCES_LIBRARY medians + DB sources). The figures below are the reference medians.',
+  SIM_CASE_ASSUMPTIONS_TITLE: 'Sourced assumptions',
+  SIM_CASE_ASSUMPTIONS_HINT: 'Each driver is mapped to a real engine field and carries its source & confidence.',
+  SIM_CASE_COL_DRIVER: 'Driver',
+  SIM_CASE_COL_VALUE: 'Value',
+  SIM_CASE_COL_CONF: 'Confidence',
+  SIM_CASE_COL_CLASS: 'Class',
+  SIM_CASE_COL_SOURCE: 'Source',
+  SIM_CASE_CONTEXT_TITLE: 'Context (not injected — display only)',
+  SIM_CASE_CONTEXT_DSCR: 'DSCR target',
+  SIM_CASE_CONTEXT_RISK: 'Risk premium',
+  SIM_CASE_CONTEXT_TENANT: 'Tenant mix',
+  SIM_CASE_CONTEXT_RAMP: 'Ramp',
+
+  // Sensitivity tornado — results page
+  RESULTS_TORNADO_TITLE: 'Sensitivity — tornado',
+  RESULTS_TORNADO_HINT: 'Which driver moves IRR most, one variable at a time (±range) on the base case.',
+  RESULTS_TORNADO_BASE_IRR: 'Base IRR',
+  RESULTS_TORNADO_DOWN: 'Downside',
+  RESULTS_TORNADO_UP: 'Upside',
+  RESULTS_TORNADO_SWING: 'IRR swing',
+  RESULTS_TORNADO_NODATA: 'Not enough projection data to compute sensitivity.',
+  RESULTS_TORNADO_NOTE: 'Core-engine projection (excludes GPU fold / archetype factors) — read as relative driver sensitivity, not the headline IRR.',
+
   // Login (legacy layer — hors cockpit)
   LOGIN_PASSWORD_PLACEHOLDER: 'Password',
 } as const;

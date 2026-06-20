@@ -24,7 +24,9 @@ import {
   DecisionHeader,
   ReturnsComposition,
   LayerCard,
+  Tornado,
 } from '@/components/hearst/simulator/results';
+import { generateTornado } from '@/lib/hearst-calculations';
 
 import VisualizationsStep from '@/components/hearst/simulator/sections/VisualizationsStep';
 
@@ -50,6 +52,9 @@ function buildStateFromScenario(row, searchParams) {
     business_model_id: searchParams.get('biz') || row.business_model_id || modelDefaults.business_model_id || INITIAL_STATE.business_model_id,
     client_type_id: searchParams.get('client') || row.client_type_id || modelDefaults.client_type_id || INITIAL_STATE.client_type_id,
     geography: row.geography || INITIAL_STATE.geography,
+    // Investment case carried via URL so /simulate re-applies the same scenario_overrides
+    // the config page used — otherwise results would silently fall back to Base.
+    scenario_case: searchParams.get('case') || INITIAL_STATE.scenario_case,
     hardware_mix: { ...INITIAL_STATE.hardware_mix, ...(row.hardware_mix || {}) },
   };
   if (mode === 'capital_first' && inputValue.total_capex_usd != null) state.capital_usd = inputValue.total_capex_usd;
@@ -191,6 +196,10 @@ export default function SimulatorResultsPage() {
 
   const donutSegments = useMemo(() => capitalStackSegments(scenario, projection), [scenario, projection]);
 
+  // One-variable-at-a-time IRR sensitivity on the active (post-override) scenario.
+  // Runs the core engine client-side; relative driver ranking, not the headline IRR.
+  const tornado = useMemo(() => (scenario ? generateTornado(scenario) : null), [scenario]);
+
   const layer1Rows = useMemo(() => [
     [UI.RESULTS_ROW_MODE, state?.mode],
     [UI.RESULTS_ROW_POWER, scenario?.total_mw != null ? fmtMW(scenario.total_mw, 0) : null],
@@ -295,6 +304,11 @@ export default function SimulatorResultsPage() {
             </div>
           </Card>
         </div>
+      </Card>
+
+      <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
+        <SectionHead title={UI.RESULTS_TORNADO_TITLE} hint={UI.RESULTS_TORNADO_HINT} style={{ marginBottom: 0 }} />
+        <Tornado tornado={tornado} />
       </Card>
 
       <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>

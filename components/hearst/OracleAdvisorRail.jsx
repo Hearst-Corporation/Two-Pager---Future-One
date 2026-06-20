@@ -280,6 +280,7 @@ const S = {
   },
   verdict: {
     fontSize: 'var(--cp-font-2xl)',
+    fontWeight: 'var(--cp-weight-black)',
     lineHeight: 1,
     letterSpacing: 'var(--cp-tracking-tight)',
     color: 'var(--cp-text-strong)',

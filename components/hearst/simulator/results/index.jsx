@@ -262,8 +262,150 @@ LayerCard.propTypes = {
   rows: PropTypes.array.isRequired,
 };
 
+// ── Tornado ──────────────────────────────────────────────────────────────────
+/**
+ * Horizontal tornado: one bar per driver, sorted by IRR swing. Each bar is a
+ * 0-centred track; the segment spans from the downside delta to the upside delta
+ * (in percentage points of IRR).
+ * @param {{ tornado: { base_irr: number, bars: Array }|null }} props
+ */
+export const Tornado = memo(function Tornado({ tornado }) {
+  if (!tornado || !tornado.bars?.length) {
+    return <div style={S.tornadoEmpty}>{UI.RESULTS_TORNADO_NODATA}</div>;
+  }
+  const pp = (d) => `${d >= 0 ? '+' : ''}${(d * 100).toFixed(1)}`;
+  // Axis half-width = largest single-sided IRR move across all bars.
+  const halfMax = Math.max(
+    ...tornado.bars.map((b) => Math.max(Math.abs(b.delta_low), Math.abs(b.delta_high))),
+    0.0001,
+  );
+  const toPct = (d) => 50 + (d / halfMax) * 50;
+
+  return (
+    <div style={S.tornadoWrap}>
+      <div style={S.tornadoTopRow}>
+        <span style={S.tornadoBaseLabel}>{UI.RESULTS_TORNADO_BASE_IRR}</span>
+        <strong style={S.tornadoBaseValue}>{fmtPctFromRatio(tornado.base_irr)}</strong>
+      </div>
+      <div style={S.tornadoRows}>
+        {tornado.bars.map((b) => {
+          const left = Math.min(b.delta_low, b.delta_high);
+          const right = Math.max(b.delta_low, b.delta_high);
+          const leftPct = Math.max(0, Math.min(100, toPct(left)));
+          const rightPct = Math.max(0, Math.min(100, toPct(right)));
+          const mid = (b.delta_low + b.delta_high) / 2;
+          const barColor = mid >= 0 ? 'var(--cp-status-success)' : 'var(--cp-status-danger)';
+          return (
+            <div key={b.param} style={S.tornadoRow}>
+              <span style={S.tornadoLabel} title={`±${Math.round(b.range_pct * 100)}%`}>{b.label}</span>
+              <span style={{ ...S.tornadoDelta, color: 'var(--cp-status-danger)' }}>{pp(b.delta_low)}</span>
+              <div style={S.tornadoTrack}>
+                <span style={S.tornadoCenter} />
+                <span
+                  style={{
+                    ...S.tornadoBar,
+                    left: `${leftPct}%`,
+                    width: `${Math.max(rightPct - leftPct, 0.6)}%`,
+                    background: barColor,
+                  }}
+                />
+              </div>
+              <span style={{ ...S.tornadoDelta, color: 'var(--cp-status-success)' }}>{pp(b.delta_high)}</span>
+              <span style={S.tornadoSwing}>{(b.swing * 100).toFixed(1)} pp</span>
+            </div>
+          );
+        })}
+      </div>
+      <p style={S.tornadoNote}>{UI.RESULTS_TORNADO_NOTE}</p>
+    </div>
+  );
+});
+Tornado.propTypes = {
+  tornado: PropTypes.shape({
+    base_irr: PropTypes.number,
+    bars: PropTypes.array,
+  }),
+};
+
 // ── Styles ───────────────────────────────────────────────────────────────────
 const S = {
+  tornadoEmpty: {
+    fontSize: 'var(--cp-font-sm)',
+    color: 'var(--cp-text-muted)',
+    padding: 'var(--cp-space-4)',
+  },
+  tornadoWrap: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-3)', minWidth: 0 },
+  tornadoTopRow: { display: 'flex', alignItems: 'baseline', gap: 'var(--cp-space-2)' },
+  tornadoBaseLabel: {
+    fontSize: 'var(--cp-font-micro)',
+    fontWeight: 'var(--cp-weight-bold)',
+    textTransform: 'uppercase',
+    letterSpacing: 'var(--cp-tracking-wide)',
+    color: 'var(--cp-text-faint)',
+  },
+  tornadoBaseValue: {
+    fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-black)',
+    color: 'var(--cp-text-strong)',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  tornadoRows: { display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-2)' },
+  tornadoRow: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(120px, 1.4fr) 48px minmax(0, 4fr) 48px 64px',
+    alignItems: 'center',
+    gap: 'var(--cp-space-2)',
+    minWidth: 0,
+  },
+  tornadoLabel: {
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-semibold)',
+    color: 'var(--cp-text-primary)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  tornadoDelta: {
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-bold)',
+    fontVariantNumeric: 'tabular-nums',
+    textAlign: 'center',
+  },
+  tornadoTrack: {
+    position: 'relative',
+    height: 'var(--cp-space-4)',
+    background: 'var(--cp-surface-2)',
+    borderRadius: 'var(--cp-radius-xs)',
+    minWidth: 0,
+  },
+  tornadoCenter: {
+    position: 'absolute',
+    left: '50%',
+    top: 0,
+    bottom: 0,
+    width: '1px',
+    background: 'var(--cp-border-strong)',
+  },
+  tornadoBar: {
+    position: 'absolute',
+    top: '20%',
+    bottom: '20%',
+    borderRadius: 'var(--cp-radius-xs)',
+    opacity: 0.85,
+  },
+  tornadoSwing: {
+    fontSize: 'var(--cp-font-xs)',
+    fontWeight: 'var(--cp-weight-bold)',
+    color: 'var(--cp-text-strong)',
+    textAlign: 'right',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  tornadoNote: {
+    margin: 0,
+    fontSize: 'var(--cp-font-micro)',
+    color: 'var(--cp-text-faint)',
+    lineHeight: 'var(--cp-leading-snug)',
+  },
   // Label + (i) hint on one baseline. The icon never grows the row height.
   labelRow: {
     display: 'inline-flex',
@@ -306,7 +448,7 @@ const S = {
   kpiValue: {
     color: 'var(--cp-text-strong)',
     lineHeight: 1.05,
-    fontWeight: 'var(--cp-weight-black)',
+    fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-tight)',
     fontVariantNumeric: 'tabular-nums',
     whiteSpace: 'nowrap',
@@ -351,7 +493,7 @@ const S = {
   rcValue: {
     color: 'var(--cp-text-strong)',
     fontSize: 'var(--cp-font-lg)',
-    fontWeight: 'var(--cp-weight-black)',
+    fontWeight: 'var(--cp-weight-bold)',
     fontVariantNumeric: 'tabular-nums',
   },
   rcBar: {
@@ -408,7 +550,7 @@ const S = {
   donutValue: {
     color: 'var(--cp-text-strong)',
     fontSize: 'var(--cp-font-lg)',
-    fontWeight: 'var(--cp-weight-black)',
+    fontWeight: 'var(--cp-weight-bold)',
     lineHeight: 1.1,
   },
   structureGrid: {
@@ -478,7 +620,7 @@ const S = {
     color: 'var(--cp-text-strong)',
     fontSize: 'var(--cp-font-xl)',
     lineHeight: 'var(--cp-leading-tight)',
-    fontWeight: 'var(--cp-weight-black)',
+    fontWeight: 'var(--cp-weight-bold)',
     fontVariantNumeric: 'tabular-nums',
   },
   boardMetricNote: {
@@ -515,7 +657,7 @@ const S = {
     margin: 0,
     color: 'var(--cp-text-primary)',
     fontSize: 'var(--cp-font-base)',
-    fontWeight: 'var(--cp-weight-black)',
+    fontWeight: 'var(--cp-weight-bold)',
     letterSpacing: 'var(--cp-tracking-wide)',
     textTransform: 'uppercase',
   },

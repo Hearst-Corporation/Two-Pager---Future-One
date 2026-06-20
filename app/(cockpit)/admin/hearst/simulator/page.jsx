@@ -21,6 +21,8 @@ import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
 import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
+import CaseSwitcher from '@/components/hearst/simulator/CaseSwitcher';
+import CaseProvenance from '@/components/hearst/simulator/CaseProvenance';
 import { Button, Card, Eyebrow } from '@/components/hearst/ui';
 
 // Valid viz tab ids — the chat bridge may set active_viz for the dedicated /results
@@ -74,6 +76,7 @@ export default function SimulatorPage() {
         case 'compare_archetype_id':  return dispatch({ type: ACTIONS.TOGGLE_COMPARE_ARCHETYPE, value: String(value) });
         case 'business_model_id':     return dispatch({ type: ACTIONS.SET_BUSINESS_MODEL, value: String(value) });
         case 'client_type_id':        return dispatch({ type: ACTIONS.SET_CLIENT_TYPE, value: String(value) });
+        case 'scenario_case':         return dispatch({ type: ACTIONS.SET_CASE, value: String(value) });
         case 'mode':                  return dispatch({ type: ACTIONS.SET_MODE, value: String(value) });
         case 'geography':             return dispatch({ type: ACTIONS.HYDRATE_FROM_URL, value: { geography: String(value) } });
         // Validate against VIZ_TAB_IDS so an out-of-catalogue value can't blank the panel.
@@ -274,6 +277,7 @@ export default function SimulatorPage() {
     dispatch({ type: ACTIONS.APPLY_PRESET, value: { primary_archetype_id: id, ...(def || {}) } });
   }, []);
   const onHwChange = useCallback((next) => dispatch({ type: ACTIONS.SET_HARDWARE_MIX, value: next }), []);
+  const onCaseChange = useCallback((id) => dispatch({ type: ACTIONS.SET_CASE, value: id }), []);
 
   const inputValue = state.mode === 'capital_first' ? state.capital_usd
     : state.mode === 'target_irr_first' ? state.target_irr_pct
@@ -347,6 +351,7 @@ export default function SimulatorPage() {
         arch: state.primary_archetype_id,
         biz: state.business_model_id,
         client: state.client_type_id,
+        case: state.scenario_case,
       });
       router.push(`/admin/hearst/simulator/results?${params.toString()}`);
     } finally {
@@ -398,6 +403,13 @@ export default function SimulatorPage() {
             </div>
 
             <div data-sim-advanced>
+              <div data-sim-advanced-section>
+                <Eyebrow block>{UI.SIM_CASE_EYEBROW}</Eyebrow>
+                <CaseSwitcher value={state.scenario_case} onChange={onCaseChange} />
+                <div style={S.caseProvenance}>
+                  <CaseProvenance caseId={state.scenario_case} />
+                </div>
+              </div>
               <div data-sim-advanced-section>
                 <Eyebrow block>{UI.SIM_CONFIG_MODEL_LABEL}</Eyebrow>
                 <ArchetypePicker
@@ -495,5 +507,8 @@ const S = {
     flexWrap: 'wrap',
     paddingTop: 'var(--cp-space-4)',
     borderTop: '1px solid var(--cp-border-base)',
+  },
+  caseProvenance: {
+    marginTop: 'var(--cp-space-3)',
   },
 };

@@ -4,7 +4,7 @@ import Eyebrow from './Eyebrow';
 
 // SectionHead — en-tête de section canonique. Unifie les ~4 variantes inline.
 // Défaut = CANON cockpit : H2 13px/700 + filet bas + hint italique
-// (tel que dossier/workspace). `hero` = titre page/section 20px/800 (+num/eyebrow optionnels)
+// (tel que dossier/workspace). `hero` = titre page/section 24px/800 (+num/eyebrow optionnels)
 // — aligné sur .oracle-page-header h1 (oracle-layout.css). Tokens --cp-* only.
 
 const S = {
@@ -23,7 +23,7 @@ const S = {
     padding: 'var(--cp-space-1) var(--cp-space-2)', letterSpacing: 'var(--cp-tracking-wide)', flex: 'none',
   },
   heroBody: { display: 'flex', flexDirection: 'column', gap: 'calc(var(--cp-space-1) / 2)', minWidth: 0 },
-  heroTitle: { margin: 0, fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)', lineHeight: 'var(--cp-leading-tight)' },
+  heroTitle: { margin: 0, fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', letterSpacing: 'var(--cp-tracking-tight)', lineHeight: 'var(--cp-leading-tight)' },
   heroHint: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)' },
 };
 

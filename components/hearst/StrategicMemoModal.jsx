@@ -338,14 +338,14 @@ const S = {
   successTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 1.35, margin: 0 },
 
   successVerdictRow: { display: 'flex', alignItems: 'center', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
-  verdictBadge: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 1.2, paddingLeft: 'var(--cp-space-3)', borderLeft: '3px solid var(--cp-accent)' },
+  verdictBadge: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-black)', letterSpacing: 'var(--cp-tracking-wider)', color: 'var(--cp-text-primary)', textTransform: 'uppercase', lineHeight: 1.2, paddingLeft: 'var(--cp-space-3)', borderLeft: '3px solid var(--cp-accent)' },
   categoryText: { fontSize: 'var(--cp-font-base)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)' },
   driversText: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-text-muted)' },
 
   successKpis: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--cp-space-3)' },
   successKpi: { padding: 'var(--cp-space-3) var(--cp-space-4)', borderRadius: 'var(--cp-radius-md)', background: 'var(--cp-surface-0)', border: '1px solid var(--cp-border)' },
   successKpiLabel: { fontSize: 'var(--cp-font-micro)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-eyebrow)' },
-  successKpiValue: { fontSize: 'var(--cp-font-xl)', fontWeight: 'var(--cp-weight-black)', color: 'var(--cp-text-primary)', lineHeight: 1.1, marginTop: 'var(--cp-space-1)', fontVariantNumeric: 'tabular-nums' },
+  successKpiValue: { fontSize: 'var(--cp-font-2xl)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', lineHeight: 1.1, marginTop: 'var(--cp-space-1)', fontVariantNumeric: 'tabular-nums' },
   successKpiSub: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', marginTop: 'var(--cp-space-1)' },
 
   successActions: { display: 'flex', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
