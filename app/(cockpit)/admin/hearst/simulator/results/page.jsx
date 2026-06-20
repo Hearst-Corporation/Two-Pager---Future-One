@@ -275,7 +275,7 @@ export default function SimulatorResultsPage() {
           <BoardMetric label={UI.RESULTS_BM_EBITDA} value={fmtUSD(projection?.stabilized_ebitda)} note={UI.RESULTS_BM_EBITDA_NOTE} hint="ebitda" />
           <BoardMetric label={UI.RESULTS_BM_TERMINAL} value={fmtUSD(projection?.terminal_value)} note={UI.RESULTS_BM_TERMINAL_NOTE} hint="terminal_value" />
           <BoardMetric label={UI.RESULTS_BM_PAYBACK} value={projection?.payback_years != null ? `${projection.payback_years} yr` : MISSING} note={UI.RESULTS_BM_PAYBACK_NOTE} hint="payback" />
-          <BoardMetric label={UI.RESULTS_BM_SOURCE} value={simResult?.source_score != null ? `${simResult.source_score}/100` : MISSING} note={UI.RESULTS_BM_SOURCE_NOTE} hint="source_score" />
+          <BoardMetric label={UI.RESULTS_BM_SOURCE} value={simResult?.confidence_score != null ? `${simResult.confidence_score}/100` : MISSING} note={UI.RESULTS_BM_SOURCE_NOTE} hint="confidence_score" />
         </KpiGrid>
       </Card>
 
