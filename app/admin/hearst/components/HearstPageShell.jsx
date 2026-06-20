@@ -10,7 +10,7 @@ function resolveBodyClass(variant) {
       return styles.cockpitBody;
     case 'data':
     case 'editorial':
-      return joinClasses(styles.cockpitBodyFlow, styles.cockpitBodyContent);
+      return styles.cockpitBodyFlow;
     case 'home':
     default:
       return styles.cockpitBodyFlow;
@@ -41,13 +41,23 @@ export default function HearstPageShell({
         className={joinClasses(
           styles.pageHead,
           variant === 'home' && styles.pageHeadHome,
+          variant === 'data' && styles.pageHeadData,
           isInstrument && styles.pageHeadInstrument,
           headerClassName,
         )}
       >
-        {eyebrow ? <div className={styles.pageEyebrow}>{eyebrow}</div> : null}
-        <h1 className={styles.pageTitle}>{title}</h1>
-        {context ? <p className={styles.pageContext}>{context}</p> : null}
+        {isInstrument ? (
+          <>
+            <h1 className={styles.visuallyHidden}>{title}</h1>
+            {context ? <p className={styles.simSceneBar}>{context}</p> : null}
+          </>
+        ) : (
+          <>
+            {eyebrow ? <div className={styles.pageEyebrow}>{eyebrow}</div> : null}
+            <h1 className={styles.pageTitle}>{title}</h1>
+            {context ? <p className={styles.pageContext}>{context}</p> : null}
+          </>
+        )}
       </header>
 
       <div

@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
 import HearstPageShell from '../components/HearstPageShell';
-import { fmtScore, prettyType, parseApiError } from '../utils/format';
+import { HearstErrorState, HearstLoadingState, HearstEmptyState } from '../components/HearstRegisterStates';
+import { fmtScore, prettyType, parseApiError, MISSING } from '../utils/format';
 
 export default function DealsPage() {
   const [deals, setDeals] = useState(null);
@@ -44,7 +45,7 @@ export default function DealsPage() {
     const values = (deals ?? [])
       .map((deal) => Number(deal?.scores?.[key]))
       .filter((value) => Number.isFinite(value));
-    if (!values.length) return '—';
+    if (!values.length) return MISSING;
     return `${(values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1)}/5`;
   };
   const context = loading
@@ -63,25 +64,13 @@ export default function DealsPage() {
       bodyAriaBusy={loading}
     >
         {error ? (
-          <div className={styles.errorState} role="alert">
-            <span>{error}</span>
-            <div className={styles.errorActions}>
-              <button
-                type="button"
-                onClick={() => setReloadKey((k) => k + 1)}
-                className={styles.retryButton}
-              >
-                Retry
-              </button>
-              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
-            </div>
-          </div>
+          <HearstErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : loading ? (
-          <div className={styles.loadingState}>Loading catalogue…</div>
+          <HearstLoadingState>Loading catalogue…</HearstLoadingState>
         ) : count === 0 ? (
-          <div className={styles.emptyState}>
+          <HearstEmptyState>
             No deal archetypes are defined in the engine catalogue.
-          </div>
+          </HearstEmptyState>
         ) : (
           <>
             <div className={styles.summaryGrid}>
@@ -134,7 +123,7 @@ export default function DealsPage() {
                   {deals.map((d) => (
                     <tr key={d.id}>
                       <td>
-                        <div>{d.label || '—'}</div>
+                        <div>{d.label || MISSING}</div>
                         <div className={styles.metaCell}>
                           {[d.code, d.id].filter(Boolean).join(' · ')}
                         </div>
@@ -145,22 +134,22 @@ export default function DealsPage() {
                           <div className={styles.metaCell}>{d.deal_terms.join(' · ')}</div>
                         )}
                       </td>
-                      <td>{d.operator_role || '—'}</td>
-                      <td>{d.compute_as ? prettyType(d.compute_as) : '—'}</td>
+                      <td>{d.operator_role || MISSING}</td>
+                      <td>{d.compute_as ? prettyType(d.compute_as) : MISSING}</td>
                       <td className={styles.numCell}>{fmtScore(d.scores?.bankability)}</td>
                       <td className={styles.numCell}>{fmtScore(d.scores?.control)}</td>
                       <td>
                         {d.in_projection ? (
                           <span className={styles.tagOn}>In Projection</span>
                         ) : (
-                          <span className={styles.tagOff}>—</span>
+                          <span className={styles.tagOff}>{MISSING}</span>
                         )}
                       </td>
                       <td>
                         {d.recommended ? (
                           <span className={styles.tagOn}>Recommended</span>
                         ) : (
-                          <span className={styles.tagOff}>—</span>
+                          <span className={styles.tagOff}>{MISSING}</span>
                         )}
                       </td>
                     </tr>
@@ -175,7 +164,7 @@ export default function DealsPage() {
                 {deals.map((d) => (
                   <article key={d.id} className={styles.dealCard}>
                     <div className={styles.dealCardHeader}>
-                      <div className={styles.dealCardName}>{d.label || '—'}</div>
+                      <div className={styles.dealCardName}>{d.label || MISSING}</div>
                       <div className={styles.dealCardTags}>
                         {d.recommended && <span className={styles.tagOn}>Recommended</span>}
                         {d.in_projection && <span className={styles.tagOn}>In Projection</span>}

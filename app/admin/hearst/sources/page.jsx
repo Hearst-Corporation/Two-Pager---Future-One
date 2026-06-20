@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
 import HearstPageShell from '../components/HearstPageShell';
-import { fmtSourceValue, prettyType, parseApiError } from '../utils/format';
+import { HearstErrorState, HearstLoadingState, HearstEmptyState } from '../components/HearstRegisterStates';
+import { fmtSourceValue, prettyType, parseApiError, MISSING } from '../utils/format';
+import { FEATURED_DOCS_LIMIT } from '../utils/constants';
 
 function Confidence({ score }) {
   const n = Number(score) || 0;
-  if (!n) return <span className={styles.confEmpty}>—</span>;
+  if (!n) return <span className={styles.confEmpty}>{MISSING}</span>;
   return (
     <span className={styles.confDots} aria-label={`Confidence ${n} of 5`}>
       {[1, 2, 3, 4, 5].map((i) => (
@@ -82,11 +84,11 @@ export default function SourcesPage() {
       name: source.source_name || source.metric_name || 'Reference document',
       url: source.source_url || null,
       type: prettyType(source.source_type),
-      geography: source.geography || '—',
+      geography: source.geography || MISSING,
       inModel: Boolean(source.used_in_model),
     });
   }
-  const featuredDocuments = documents.slice(0, 6);
+  const featuredDocuments = documents.slice(0, FEATURED_DOCS_LIMIT);
   const context = loading
     ? 'Loading evidence…'
     : error
@@ -94,7 +96,7 @@ export default function SourcesPage() {
       : [
           projectName,
           `${count} ${count === 1 ? 'datapoint' : 'datapoints'} on record`,
-        ].filter(Boolean).join(' · ');
+        ].filter(Boolean).join(' - ');
 
   return (
     <HearstPageShell
@@ -106,26 +108,14 @@ export default function SourcesPage() {
       bodyAriaBusy={loading}
     >
         {error ? (
-          <div className={styles.errorState} role="alert">
-            <span>{error}</span>
-            <div className={styles.errorActions}>
-              <button
-                type="button"
-                onClick={() => setReloadKey((k) => k + 1)}
-                className={styles.retryButton}
-              >
-                Retry
-              </button>
-              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
-            </div>
-          </div>
+          <HearstErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : loading ? (
-          <div className={styles.loadingState}>Loading evidence…</div>
+          <HearstLoadingState>Loading evidence…</HearstLoadingState>
         ) : count === 0 ? (
-          <div className={styles.emptyState}>
+          <HearstEmptyState>
             No sources are on record yet. Evidence will appear here once it is
             added through the model.
-          </div>
+          </HearstEmptyState>
         ) : (
           <>
             <div className={styles.summaryGrid}>
@@ -152,7 +142,7 @@ export default function SourcesPage() {
             </div>
 
             <div className={styles.registerLayout}>
-              <section className={`${styles.cockpitPanel} ${styles.sourceDocsPanel}`}>
+              <section className={styles.cockpitPanel}>
                 <div className={styles.cockpitPanelHead}>
                   <h2 className={styles.cockpitPanelTitle}>Reference Documents</h2>
                   <span className={styles.cockpitPanelContext}>
@@ -189,9 +179,6 @@ export default function SourcesPage() {
                     </p>
                   )}
                 </div>
-                <p className={styles.cockpitNote}>
-                  Primary evidence links are surfaced here directly from the live register. No synthetic sources are added in UI.
-                </p>
               </section>
 
               <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill}`}>
@@ -224,7 +211,7 @@ export default function SourcesPage() {
                     {sources.map((s) => (
                       <tr key={s.id}>
                         <td>
-                          <div>{s.metric_name || s.metric_id || '—'}</div>
+                          <div>{s.metric_name || s.metric_id || MISSING}</div>
                           {s.metric_id && s.metric_name && (
                             <div className={styles.metaCell}>{s.metric_id}</div>
                           )}
@@ -238,20 +225,20 @@ export default function SourcesPage() {
                               rel="noopener noreferrer"
                               className={styles.sourceLink}
                             >
-                              {s.source_name || '—'}
+                              {s.source_name || MISSING}
                             </a>
                           ) : (
-                            s.source_name || '—'
+                            s.source_name || MISSING
                           )}
                         </td>
                         <td>{prettyType(s.source_type)}</td>
-                        <td>{s.geography || '—'}</td>
+                        <td>{s.geography || MISSING}</td>
                         <td><Confidence score={s.confidence_score} /></td>
                         <td>
                           {s.used_in_model ? (
                             <span className={styles.tagOn}>In model</span>
                           ) : (
-                            <span className={styles.tagOff}>—</span>
+                            <span className={styles.tagOff}>{MISSING}</span>
                           )}
                         </td>
                       </tr>
@@ -267,7 +254,7 @@ export default function SourcesPage() {
                     <article key={s.id} className={styles.sourceCard}>
                       <div className={styles.sourceCardHeader}>
                         <div className={styles.sourceCardMetric}>
-                          {s.metric_name || s.metric_id || '—'}
+                          {s.metric_name || s.metric_id || MISSING}
                         </div>
                         <div className={styles.sourceCardValue}>{fmtSourceValue(s)}</div>
                       </div>
@@ -279,10 +266,10 @@ export default function SourcesPage() {
                             rel="noopener noreferrer"
                             className={`${styles.sourceLink} ${styles.sourceCardLink}`}
                           >
-                            {s.source_name || '—'}
+                            {s.source_name || MISSING}
                           </a>
                         ) : (
-                          <span className={styles.sourceCardSource}>{s.source_name || '—'}</span>
+                          <span className={styles.sourceCardSource}>{s.source_name || MISSING}</span>
                         )}
                       </div>
                       <div className={styles.sourceCardFooter}>
@@ -295,6 +282,16 @@ export default function SourcesPage() {
                   ))}
                 </div>
               </section>
+            </div>
+
+            <div className={styles.cockpitFooterCluster}>
+              <p className={styles.cockpitNote}>
+                Read-only register — every datapoint traces to a live source record.
+                Explore assumptions interactively in the Projection.
+              </p>
+              <Link href="/admin/hearst/financial" className={styles.ctaButton}>
+                View Financial Thesis ⟶
+              </Link>
             </div>
           </>
         )}

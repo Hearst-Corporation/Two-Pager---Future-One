@@ -31,15 +31,16 @@ import {
 import { solveScenarioForMode } from '@/lib/hearst-solver';
 import { bootstrapScenarioFromSources } from '@/lib/hearst-bootstrap';
 import { calcHardwareBreakdown } from '@/lib/hearst-gpu-catalog';
-import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
+import { FINANCIAL_THRESHOLDS, MINORITY_EQUITY_SHARE_DEFAULT } from '@/lib/hearst-constants';
 import { buildSimulateResponse } from '@/lib/hearst-simulate-response';
 import { rateLimit } from '@/lib/rate-limit';
+import { DEFAULT_GEOGRAPHY } from '@/app/admin/hearst/utils/constants';
 
 const ARCHETYPE_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
 
 // Fallback equity share when archetype.equity_share is not set (minority_equity archetypes
 // always define equity_share, but this guards against future archetypes that forget it).
-const DEFAULT_MINORITY_EQUITY_SHARE = 0.20;
+const DEFAULT_MINORITY_EQUITY_SHARE = MINORITY_EQUITY_SHARE_DEFAULT;
 
 // Rate limit pour /simulate : 120 req/min par actorId.
 // /simulate est un calcul interactif live (chaque slider/sélection POST, debounce
@@ -68,7 +69,7 @@ export const POST = withValidation(SimulateRequestSchema, async (req, parsed) =>
     input_value,
     archetype_id,
     business_model_id,
-    geography = 'qatar',
+    geography = DEFAULT_GEOGRAPHY,
     hardware_mix,
     scenario_overrides,
     project_id,

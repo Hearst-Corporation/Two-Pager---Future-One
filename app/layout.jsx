@@ -1,11 +1,14 @@
 import './globals.css';
-import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
+// Satoshi Variable — primary UI typeface (local, variable weight 300–900).
+const satoshi = localFont({
+  src: [
+    { path: '../public/fonts/Satoshi-Variable.woff2', weight: '300 900', style: 'normal' },
+    { path: '../public/fonts/Satoshi-VariableItalic.woff2', weight: '300 900', style: 'italic' },
+  ],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-satoshi',
 });
 
 export const metadata = {
@@ -17,7 +20,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="fr" className={inter.variable}>
+    <html lang="fr" className={satoshi.variable}>
       <body>{children}</body>
     </html>
   );

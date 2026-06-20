@@ -8,7 +8,6 @@ import styles from '../hearst.module.css';
 // no longer re-renders any of the 3 SVGs — only the text labels update.
 const PlaceholderSVG = memo(function PlaceholderSVG({ type }) {
   const toneClass = {
-    shell: styles.projectionSvgShell,
     compute: styles.projectionSvgCompute,
     gov: styles.projectionSvgGov,
   }[type];
@@ -18,9 +17,9 @@ const PlaceholderSVG = memo(function PlaceholderSVG({ type }) {
       viewBox="0 0 100 100"
       width="100%"
       height="100%"
-      preserveAspectRatio="none"
+      preserveAspectRatio="xMidYMid meet"
       xmlns="http://www.w3.org/2000/svg"
-      className={`${styles.projectionSvg} ${toneClass}`}
+      className={`${styles.projectionSvg}${toneClass ? ` ${toneClass}` : ''}`}
     >
       <defs>
         <pattern id={`grid-${type}`} width="60" height="60" patternUnits="userSpaceOnUse">

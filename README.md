@@ -52,3 +52,19 @@ Scaffold: `npm run new:feature -- <resource>` → `HearstPageShell` page + API r
 | `npm run doctor` | Env preflight |
 
 Stack: Next.js 14 · React 18 · Supabase · OpenAI · CSS Modules (`hearst.module.css`).
+
+## Design system
+
+Single source of truth for the Hearst cockpit:
+
+| Layer | File | Tokens |
+|---|---|---|
+| Fonts | `app/layout.jsx` | `--font-satoshi` via `next/font/local` |
+| Global shell | `app/globals.css` | `--font-sans`, `--color-login-*`, `--color-error-*` |
+| Hearst cockpit | `app/admin/hearst/hearst.module.css` | `--ct-*`, `--text-*` scoped on `.wrap` |
+
+- **No Tailwind.** All Hearst UI consumes tokens through CSS module classes — never inline `var(--ct-*)` in JSX.
+- **Legacy `--cp-*` removed** (`admin-tokens.js`, `cp-tokens.css`, `cockpit-shell/tokens.css`).
+- **Login** (`/admin/login`) uses `--color-login-*` (light theme). **Hearst** uses dark `--ct-*` under `.wrap`.
+- **Guards:** `npm run lint:responsive` enforces shell contract, canonical breakpoints, route variants, mobile card parity, and no inline styles on Hearst pages.
+- **Shared UI:** `HearstPageShell`, `HearstRegisterStates` (error/loading/empty), `HearstNav`, `DataCenterProjection`.

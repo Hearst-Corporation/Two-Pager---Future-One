@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
 import HearstPageShell from '../components/HearstPageShell';
+import { HearstErrorState, HearstLoadingState, HearstEmptyState } from '../components/HearstRegisterStates';
 import {
   fmtUSD,
   fmtPctFromRatio,
@@ -11,9 +12,9 @@ import {
   fmtMW,
   prettyType,
   parseApiError,
+  MISSING,
 } from '../utils/format';
-
-const PAGE_SIZE = 20;
+import { WORKSPACE_PAGE_SIZE } from '../utils/constants';
 
 export default function WorkspacePage() {
   const [projectName, setProjectName] = useState(null);
@@ -23,8 +24,8 @@ export default function WorkspacePage() {
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
   // Local pagination over the scenarios already held client-side. No extra
-  // fetch — reveals more of the array the API returned, PAGE_SIZE at a time.
-  const [shown, setShown] = useState(PAGE_SIZE);
+  // fetch — reveals more of the array the API returned, WORKSPACE_PAGE_SIZE at a time.
+  const [shown, setShown] = useState(WORKSPACE_PAGE_SIZE);
 
   useEffect(() => {
     let active = true;
@@ -58,7 +59,7 @@ export default function WorkspacePage() {
         if (!active) return;
         setScenarios(Array.isArray(scenariosData.scenarios) ? scenariosData.scenarios : []);
         setScenarioCount(Number.isFinite(scenariosData.count) ? scenariosData.count : 0);
-        setShown(PAGE_SIZE);
+        setShown(WORKSPACE_PAGE_SIZE);
       } catch (err) {
         if (active) setError(err.message);
       } finally {
@@ -84,7 +85,7 @@ export default function WorkspacePage() {
     .filter((value) => typeof value === 'number');
   const avgIrr = avgIrrValues.length
     ? fmtPctFromRatio(avgIrrValues.reduce((sum, value) => sum + value, 0) / avgIrrValues.length)
-    : '—';
+    : MISSING;
   const context = loading
     ? 'Loading scenarios…'
     : error
@@ -104,26 +105,14 @@ export default function WorkspacePage() {
       bodyAriaBusy={loading}
     >
         {error ? (
-          <div className={styles.errorState} role="alert">
-            <span>{error}</span>
-            <div className={styles.errorActions}>
-              <button
-                type="button"
-                onClick={() => setReloadKey((k) => k + 1)}
-                className={styles.retryButton}
-              >
-                Retry
-              </button>
-              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
-            </div>
-          </div>
+          <HearstErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : loading ? (
-          <div className={styles.loadingState}>Loading scenarios…</div>
+          <HearstLoadingState>Loading scenarios…</HearstLoadingState>
         ) : loadedCount === 0 ? (
-          <div className={styles.emptyState}>
+          <HearstEmptyState>
             No saved scenarios yet. Explore assumptions live in the Projection —
             persistence will appear here once scenarios are saved through the model.
-          </div>
+          </HearstEmptyState>
         ) : (
           <>
             <div className={styles.summaryGrid}>
@@ -151,12 +140,15 @@ export default function WorkspacePage() {
 
             <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill}`}>
               <div className={styles.cockpitPanelHead}>
-                <h2 className={styles.cockpitPanelTitle}>Saved Scenarios</h2>
+                <div>
+                  <h2 className={styles.cockpitPanelTitle}>Saved Scenarios</h2>
+                  <p className={`${styles.panelHint} ${styles.desktopOnly}`}>Swipe or scroll horizontally for the full register.</p>
+                </div>
                 <span className={styles.cockpitPanelContext}>
                   Showing {visible.length} of {count}
                 </span>
               </div>
-              <div className={styles.cockpitPanelScrollWrap}>
+              <div className={`${styles.cockpitPanelScrollWrap} ${styles.desktopTableWrap}`}>
                 <div className={`${styles.cockpitPanelScroll} ${styles.cockpitPanelScrollFill}`}>
                   <table className={styles.sourcesTable}>
                 <thead>
@@ -179,7 +171,7 @@ export default function WorkspacePage() {
                     return (
                       <tr key={s.id}>
                         <td>
-                          <div>{s.name || '—'}</div>
+                          <div>{s.name || MISSING}</div>
                           {s.description && (
                             <div className={styles.metaCell}>{s.description}</div>
                           )}
@@ -196,7 +188,7 @@ export default function WorkspacePage() {
                           ) : s.is_locked ? (
                             <span className={styles.tagOff}>Locked</span>
                           ) : (
-                            <span className={styles.tagOff}>—</span>
+                            <span className={styles.tagOff}>{MISSING}</span>
                           )}
                         </td>
                       </tr>
@@ -206,14 +198,58 @@ export default function WorkspacePage() {
                   </table>
                 </div>
               </div>
+
+              <div className={styles.mobileCardList}>
+                {visible.map((s) => {
+                  const proj = s.projection || {};
+                  const irr = proj.irr_post_tax ?? proj.irr;
+                  const npv = proj.npv_post_tax ?? proj.npv;
+                  return (
+                    <article key={s.id} className={styles.dealCard}>
+                      <div className={styles.dealCardHeader}>
+                        <div className={styles.dealCardName}>{s.name || MISSING}</div>
+                        <div className={styles.dealCardTags}>
+                          {s.is_active && <span className={styles.tagOn}>Active</span>}
+                          {s.is_locked && <span className={styles.tagOff}>Locked</span>}
+                        </div>
+                      </div>
+                      {s.description && <p className={styles.dealCardShort}>{s.description}</p>}
+                      <div className={styles.dealCardBody}>
+                        <div className={styles.dealCardRow}>
+                          <span className={styles.dealCardRowLabel}>Type</span>
+                          <span>{prettyType(s.scenario_type)}</span>
+                        </div>
+                        <div className={styles.dealCardRow}>
+                          <span className={styles.dealCardRowLabel}>Scale</span>
+                          <span>{fmtMW(s.total_mw, 0)}</span>
+                        </div>
+                        <div className={styles.dealCardScores}>
+                          <div className={styles.dealCardScore}>
+                            <span className={styles.dealCardScoreLabel}>IRR</span>
+                            <span className={styles.dealCardScoreValue}>{fmtPctFromRatio(irr)}</span>
+                          </div>
+                          <div className={styles.dealCardScore}>
+                            <span className={styles.dealCardScoreLabel}>NPV</span>
+                            <span className={styles.dealCardScoreValue}>{fmtUSD(npv)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className={styles.dealCardTerms}>
+                        <span className={styles.sourceCardTag}>CAPEX {fmtUSD(proj.total_capex)}</span>
+                        <span className={styles.sourceCardTag}>Evidence {fmtPctRaw(s.source_score, 0)}</span>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
               {hasMoreLocal && (
                 <div className={styles.loadMoreRow}>
                   <button
                     type="button"
                     className={styles.loadMoreButton}
-                    onClick={() => setShown((n) => Math.min(n + PAGE_SIZE, loadedCount))}
+                    onClick={() => setShown((n) => Math.min(n + WORKSPACE_PAGE_SIZE, loadedCount))}
                   >
-                    Load {Math.min(PAGE_SIZE, loadedCount - shown)} more
+                    Load {Math.min(WORKSPACE_PAGE_SIZE, loadedCount - shown)} more
                   </button>
                 </div>
               )}

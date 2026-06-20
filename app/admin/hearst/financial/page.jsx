@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
 import HearstPageShell from '../components/HearstPageShell';
+import { HearstErrorState, HearstLoadingState, HearstEmptyState } from '../components/HearstRegisterStates';
 import {
   fmtUSD,
   fmtPctFromRatio,
@@ -11,16 +12,18 @@ import {
   fmtX,
   fmtYears,
   fmtMW,
+  parseApiError,
 } from '../utils/format';
+import { ARCHETYPES, DEFAULT_GEOGRAPHY, DEFAULT_SIM_SCALE_MW, DEFAULT_SIM_AI_MIX_PCT, DEFAULT_SIM_ARCHETYPE } from '../utils/constants';
 
 const BASE_CASE = {
   input_mode: 'mw_first',
-  input_value: { total_mw: 150 },
-  archetype_id: 'neocloud_gpu',
-  hardware_mix: { ai_pct: 50 },
-  geography: 'qatar',
+  input_value: { total_mw: DEFAULT_SIM_SCALE_MW },
+  archetype_id: DEFAULT_SIM_ARCHETYPE ?? ARCHETYPES.compute,
+  hardware_mix: { ai_pct: DEFAULT_SIM_AI_MIX_PCT },
+  geography: DEFAULT_GEOGRAPHY,
 };
-const BASE_CASE_LABEL = 'Base case · Neocloud GPU · 150 MW · 50% AI mix · Qatar';
+const BASE_CASE_LABEL = `BASE CASE · NEOCLOUD GPU · ${DEFAULT_SIM_SCALE_MW} MW · ${DEFAULT_SIM_AI_MIX_PCT}% AI MIX · ${DEFAULT_GEOGRAPHY.toUpperCase()}`;
 
 function Metric({ label, value }) {
   return (
@@ -51,18 +54,10 @@ export default function FinancialPage() {
         });
 
         if (!res.ok) {
-          let body = null;
-          try { body = await res.json(); } catch { /* non-JSON error body */ }
-          const apiError = body?.error || body?.message;
-          let message;
-          switch (res.status) {
-            case 400: message = apiError ? `Invalid base case: ${apiError}` : 'Could not compute the base case.'; break;
-            case 401: message = 'Session expired. Please sign in again.'; break;
-            case 403: message = 'You do not have access to the financial model.'; break;
-            case 429: message = 'Too many requests. Please wait a moment and retry.'; break;
-            default:  message = apiError || 'Could not load the financial thesis.';
-          }
-          throw new Error(message);
+          throw new Error(await parseApiError(res, 'Could not load the financial thesis.', {
+            badRequestLabel: 'Invalid base case',
+            forbiddenLabel: 'You do not have access to the financial model.',
+          }));
         }
 
         const data = await res.json();
@@ -97,25 +92,13 @@ export default function FinancialPage() {
       bodyAriaBusy={loading}
     >
         {error ? (
-          <div className={styles.errorState} role="alert">
-            <span>{error}</span>
-            <div className={styles.errorActions}>
-              <button
-                type="button"
-                onClick={() => setReloadKey((k) => k + 1)}
-                className={styles.retryButton}
-              >
-                Retry
-              </button>
-              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
-            </div>
-          </div>
+          <HearstErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : loading ? (
-          <div className={styles.loadingState}>Computing the base case…</div>
+          <HearstLoadingState>Computing the base case…</HearstLoadingState>
         ) : !projection ? (
-          <div className={styles.emptyState}>
+          <HearstEmptyState>
             The engine returned no projection for this case.
-          </div>
+          </HearstEmptyState>
         ) : (
           <>
             <section className={styles.modelCallout} data-tone={stressedCase ? 'warning' : 'stable'}>
@@ -151,8 +134,13 @@ export default function FinancialPage() {
 
             {years.length > 0 && (
               <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill} ${styles.finProjectionPanel}`}>
-                <h2 className={styles.finSectionTitle}>Projection</h2>
-                <div className={styles.cockpitPanelScrollWrap}>
+                <div className={styles.cockpitPanelHead}>
+                  <div>
+                    <h2 className={styles.finSectionTitle}>Projection</h2>
+                    <p className={`${styles.panelHint} ${styles.desktopOnly}`}>Swipe or scroll horizontally for the full projection.</p>
+                  </div>
+                </div>
+                <div className={`${styles.cockpitPanelScrollWrap} ${styles.desktopTableWrap}`}>
                   <div className={`${styles.cockpitPanelScroll} ${styles.cockpitPanelScrollFill}`}>
                     <table className={styles.sourcesTable}>
                     <thead>
@@ -179,6 +167,39 @@ export default function FinancialPage() {
                     </tbody>
                     </table>
                   </div>
+                </div>
+
+                <div className={styles.mobileCardList}>
+                  {years.map((y) => (
+                    <article key={y.year ?? y.calendar_year} className={styles.dealCard}>
+                      <div className={styles.dealCardHeader}>
+                        <div className={styles.dealCardName}>Year {y.calendar_year ?? y.year}</div>
+                        <div className={styles.dealCardTags}>
+                          <span className={styles.sourceCardTag}>{fmtMW(y.mw_live, 1)}</span>
+                        </div>
+                      </div>
+                      <div className={styles.dealCardBody}>
+                        <div className={styles.dealCardRow}>
+                          <span className={styles.dealCardRowLabel}>Revenue</span>
+                          <span>{fmtUSD(y.revenue)}</span>
+                        </div>
+                        <div className={styles.dealCardRow}>
+                          <span className={styles.dealCardRowLabel}>EBITDA</span>
+                          <span>{fmtUSD(y.ebitda)}</span>
+                        </div>
+                        <div className={styles.dealCardScores}>
+                          <div className={styles.dealCardScore}>
+                            <span className={styles.dealCardScoreLabel}>Margin</span>
+                            <span className={styles.dealCardScoreValue}>{fmtPctRaw(y.ebitda_margin)}</span>
+                          </div>
+                          <div className={styles.dealCardScore}>
+                            <span className={styles.dealCardScoreLabel}>DSCR</span>
+                            <span className={styles.dealCardScoreValue}>{fmtX(y.dscr)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
                 </div>
               </section>
             )}

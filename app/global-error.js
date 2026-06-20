@@ -1,5 +1,6 @@
 'use client';
 
+import './globals.css';
 import * as Sentry from '@sentry/nextjs';
 import { useEffect } from 'react';
 
@@ -9,15 +10,15 @@ export default function GlobalError({ error, reset }) {
   }, [error]);
 
   return (
-    <html lang="en">
+    <html lang="fr">
       <body
         style={{
-          fontFamily: 'system-ui, sans-serif',
+          fontFamily: 'var(--font-sans)',
           padding: '2rem',
           textAlign: 'center',
-          background: '#0A0A0A',
-          color: '#F5F5F5',
-          minHeight: '100vh',
+          background: 'var(--color-error-bg)',
+          color: 'var(--color-error-text)',
+          minHeight: '100dvh',
           margin: 0,
           display: 'flex',
           flexDirection: 'column',
@@ -25,21 +26,21 @@ export default function GlobalError({ error, reset }) {
           justifyContent: 'center',
         }}
       >
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: '#F5F5F5' }}>
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-error-text)' }}>
           Something went wrong
         </h1>
-        <p style={{ color: 'rgba(245, 245, 245, 0.6)', marginBottom: '1.5rem' }}>
+        <p style={{ color: 'var(--color-error-text-muted)', marginBottom: '1.5rem' }}>
           An unexpected error occurred. The team has been notified.
         </p>
         <button
           onClick={() => reset()}
           style={{
             padding: '0.5rem 1.25rem',
-            background: '#D4AF37',
-            color: '#0A0A0A',
+            background: 'var(--color-error-accent)',
+            color: 'var(--color-error-accent-ink)',
             fontWeight: 600,
             border: 'none',
-            borderRadius: '4px',
+            borderRadius: 'var(--color-error-radius)',
             cursor: 'pointer',
           }}
         >

@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '../hearst.module.css';
 import HearstPageShell from '../components/HearstPageShell';
-import { fmtDate, prettyType, parseApiError } from '../utils/format';
+import { HearstErrorState, HearstLoadingState, HearstEmptyState } from '../components/HearstRegisterStates';
+import { fmtDate, prettyType, parseApiError, MISSING } from '../utils/format';
 
 const PDF_STATUSES = new Set(['reviewed', 'approved', 'archived']);
 
@@ -74,26 +75,14 @@ export default function DossierPage() {
       bodyAriaBusy={loading}
     >
         {error ? (
-          <div className={styles.errorState} role="alert">
-            <span>{error}</span>
-            <div className={styles.errorActions}>
-              <button
-                type="button"
-                onClick={() => setReloadKey((k) => k + 1)}
-                className={styles.retryButton}
-              >
-                Retry
-              </button>
-              <Link href="/admin/hearst" className={styles.errorBack}>← Back to Overview</Link>
-            </div>
-          </div>
+          <HearstErrorState message={error} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : loading ? (
-          <div className={styles.loadingState}>Loading memos…</div>
+          <HearstLoadingState>Loading memos…</HearstLoadingState>
         ) : count === 0 ? (
-          <div className={styles.emptyState}>
+          <HearstEmptyState>
             No board memos are on record yet. Strategic deliverables will appear
             here once generated through the model.
-          </div>
+          </HearstEmptyState>
         ) : (
           <>
             <div className={styles.summaryGrid}>
@@ -121,12 +110,15 @@ export default function DossierPage() {
 
             <section className={`${styles.cockpitPanel} ${styles.cockpitPanelFill}`}>
               <div className={styles.cockpitPanelHead}>
-                <h2 className={styles.cockpitPanelTitle}>Strategic Memos</h2>
+                <div>
+                  <h2 className={styles.cockpitPanelTitle}>Strategic Memos</h2>
+                  <p className={`${styles.panelHint} ${styles.desktopOnly}`}>Swipe or scroll horizontally for the full register.</p>
+                </div>
                 <span className={styles.cockpitPanelContext}>
                   {count} {count === 1 ? 'deliverable' : 'deliverables'}
                 </span>
               </div>
-              <div className={styles.cockpitPanelScrollWrap}>
+              <div className={`${styles.cockpitPanelScrollWrap} ${styles.desktopTableWrap}`}>
                 <div className={`${styles.cockpitPanelScroll} ${styles.cockpitPanelScrollFill}`}>
                   <table className={styles.sourcesTable}>
                 <thead>
@@ -145,15 +137,15 @@ export default function DossierPage() {
                   {memos.map((m) => (
                     <tr key={m.id}>
                       <td>
-                        <div>{m.title || '—'}</div>
+                        <div>{m.title || MISSING}</div>
                         {m.audience && (
                           <div className={styles.metaCell}>{prettyType(m.audience)}</div>
                         )}
                       </td>
                       <td>{prettyType(m.stakeholder)}</td>
-                      <td>{m.region ? prettyType(m.region) : '—'}</td>
+                      <td>{m.region ? prettyType(m.region) : MISSING}</td>
                       <td>{prettyType(m.status)}</td>
-                      <td>{m.confidence_level ? prettyType(m.confidence_level) : '—'}</td>
+                      <td>{m.confidence_level ? prettyType(m.confidence_level) : MISSING}</td>
                       <td className={styles.numCell}>{fmtDate(m.data_as_of)}</td>
                       <td className={styles.numCell}>{fmtDate(m.created_at)}</td>
                       <td>
@@ -168,7 +160,7 @@ export default function DossierPage() {
                           </a>
                         ) : (
                           <span className={styles.tagOff}>
-                            {m.status === 'draft' ? 'Draft' : '—'}
+                            {m.status === 'draft' ? 'Draft' : MISSING}
                           </span>
                         )}
                       </td>
@@ -177,6 +169,51 @@ export default function DossierPage() {
                 </tbody>
                   </table>
                 </div>
+              </div>
+
+              <div className={styles.mobileCardList}>
+                {memos.map((m) => (
+                  <article key={m.id} className={styles.dealCard}>
+                    <div className={styles.dealCardHeader}>
+                      <div className={styles.dealCardName}>{m.title || MISSING}</div>
+                      <div className={styles.dealCardTags}>
+                        {PDF_STATUSES.has(m.status) && <span className={styles.tagOn}>PDF-ready</span>}
+                        {m.status === 'draft' && <span className={styles.tagOff}>Draft</span>}
+                      </div>
+                    </div>
+                    {m.audience && (
+                      <p className={styles.dealCardShort}>{prettyType(m.audience)}</p>
+                    )}
+                    <div className={styles.dealCardBody}>
+                      <div className={styles.dealCardRow}>
+                        <span className={styles.dealCardRowLabel}>Stakeholder</span>
+                        <span>{prettyType(m.stakeholder)}</span>
+                      </div>
+                      <div className={styles.dealCardRow}>
+                        <span className={styles.dealCardRowLabel}>Region</span>
+                        <span>{m.region ? prettyType(m.region) : MISSING}</span>
+                      </div>
+                      <div className={styles.dealCardRow}>
+                        <span className={styles.dealCardRowLabel}>Confidence</span>
+                        <span>{m.confidence_level ? prettyType(m.confidence_level) : MISSING}</span>
+                      </div>
+                    </div>
+                    <div className={styles.dealCardTerms}>
+                      <span className={styles.sourceCardTag}>{prettyType(m.status)}</span>
+                      <span className={styles.sourceCardTag}>As of {fmtDate(m.data_as_of)}</span>
+                      {PDF_STATUSES.has(m.status) ? (
+                        <a
+                          href={`/api/admin/hearst/strategic-memos/${m.id}/pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.sourceLink}
+                        >
+                          PDF
+                        </a>
+                      ) : null}
+                    </div>
+                  </article>
+                ))}
               </div>
             </section>
             <div className={styles.cockpitFooterCluster}>
