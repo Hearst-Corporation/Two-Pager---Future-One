@@ -1,0 +1,38 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   hearst-tokens.css — DESIGN SYSTEM · single source of truth for colors
+   Institutional Premium Palette (COCKPIT V6 / Qatar sand gold).
+
+   The signature gold token --accent-gold lives HERE, once. Both the Overview
+   (hearst.module.css) and the Projection (simulator.module.css) consume it
+   instead of re-declaring the palette. Imported globally from
+   app/admin/hearst/layout.jsx (not via CSS modules @import).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Base ── */
+  --hearst-bg: #0A0A0C;                          /* Deep carbon / night blue */
+  --hearst-surface: rgba(255, 255, 255, 0.02);
+  --hearst-surface-hover: rgba(255, 255, 255, 0.04);
+
+  --hearst-fg: #F5F5F0;                          /* Ivory / off-white */
+  --hearst-fg-muted: #8A8A8E;                    /* Warm grey */
+  --hearst-fg-dim: rgba(255, 255, 255, 0.25);
+
+  /* ── Brand greens ── */
+  --hearst-primary: #2E5C41;                     /* Muted institutional green */
+  --hearst-primary-glow: rgba(46, 92, 65, 0.4);
+  --hearst-primary-hover: #3A7352;
+
+  /* ── Signature accent (THE shared color of Projection) ── */
+  --hearst-accent-gold: #C2A878;                 /* Pale gold / Qatar sand */
+  --hearst-accent-glow: rgba(194, 168, 120, 0.4);
+  --hearst-danger: #A63D40;                       /* Brick red / amber */
+
+  /* ── Hairlines ── */
+  --hearst-hl: rgba(255, 255, 255, 0.08);
+  --hearst-hl-dim: rgba(255, 255, 255, 0.04);
+
+  /* ── Type families ── */
+  --hearst-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --hearst-font-brand: 'Montserrat', sans-serif;
+}

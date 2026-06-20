@@ -25,7 +25,7 @@ export default function HearstNav() {
       </Link>
 
       <ul className={styles.navLinks}>
-        {LINKS.map(({ href, label, exact }) => {
+        {LINKS.map(({ href, label, exact }, idx) => {
           const active = exact ? pathname === href : pathname.startsWith(href);
           return (
             <li key={href}>
@@ -35,12 +35,23 @@ export default function HearstNav() {
                 data-active={active}
                 aria-current={active ? 'page' : undefined}
               >
+                <span className={styles.navLinkIndex}>0{idx + 1}</span>
                 {label}
               </Link>
             </li>
           );
         })}
       </ul>
+
+      <div className={styles.navStatus}>
+        <div className={styles.navStatusItem}>
+          <span className={styles.liveDotActive}></span>
+          LIVE
+        </div>
+        <div className={styles.navStatusItem}>
+          QATAR_DC_01
+        </div>
+      </div>
     </nav>
   );
 }

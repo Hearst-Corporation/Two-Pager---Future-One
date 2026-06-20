@@ -1,0 +1,485 @@
+{
+  "memo": {
+    "id": "4b8b43aa-f674-4ceb-b210-22f4f2377104",
+    "project_id": "f36225e9-6c67-4c41-b836-943680c9f865",
+    "scenario_id": "556df066-6637-4d3c-b26d-589715a62695",
+    "title": "Qatar 100MW AI Factory Liquid",
+    "executive_summary": "Qatar GPU Rental Cloud Project: High Returns with Strategic Partnerships",
+    "memo_json": {
+      "visualization": {
+        "summary": "The diagram illustrates the phased deployment timeline from permitting to commissioning.",
+        "diagram_type": "gantt",
+        "topology_summary": "Sequential project phases with critical path dependencies highlighted."
+      },
+      "data_freshness": {
+        "data_as_of": "2025-04-30",
+        "datapoints": [
+          {
+            "id": "crwv_leverage",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "eqx_ebitda_margin_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "dlr_leverage_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "brookfield_aum_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "eqx_pue_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-30"
+          },
+          {
+            "id": "dlr_ebitda_margin_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "crwv_capex_intensity",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "qfza_tax_regime",
+            "status": "EXPIRED",
+            "timestamp": "2024-01-01"
+          },
+          {
+            "id": "crwv_utilization_post_ramp",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "mena_permit_timeline_free_zone",
+            "status": "EXPIRED",
+            "timestamp": "2024-01-01"
+          },
+          {
+            "id": "eqx_retail_price_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "dlr_wholesale_price_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "tt_shell_mena_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-01"
+          },
+          {
+            "id": "tt_mep_mena_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-01"
+          }
+        ],
+        "computed_by": "server",
+        "status_counts": {
+          "EXPIRED": 14
+        },
+        "overall_status": "EXPIRED"
+      },
+      "explainability": {
+        "audience": "investor",
+        "jargon_translations": {
+          "IRR": "Internal Rate of Return, a measure of investment profitability.",
+          "PUE": "Power Usage Effectiveness, a measure of data center energy efficiency.",
+          "DSCR": "Debt Service Coverage Ratio, a measure of cash flow available to pay current debt obligations.",
+          "payback": "The time it takes for an investment to repay its initial cost."
+        },
+        "simplified_takeaways": [
+          "The project offers high returns with a strong sovereign partnership.",
+          "Liquid cooling is necessary for high-density GPU racks, increasing costs.",
+          "Transformer procurement is a critical path item due to long lead times."
+        ],
+        "why_this_recommendation": "We recommend pursuing the Qatar GPU Rental Cloud project because it offers high returns and strategic alignment with sovereign partners, supported by datapoint_id crwv_leverage. The project leverages Qatar's favorable tax regime and power surplus, with risks mitigated through strategic partnerships and advanced cooling technologies."
+      },
+      "confidence_block": {
+        "computed_by": "server",
+        "known_unknowns": [
+          "Future GPU pricing volatility",
+          "Potential regulatory changes in Qatar"
+        ],
+        "source_density": "14 sourced / 14 total",
+        "confidence_level": "HIGH",
+        "mean_trust_score": 89,
+        "estimation_quality": "The analysis is robust with comprehensive sourcing and alignment with regional benchmarks.",
+        "mean_freshness_score": 0.54
+      },
+      "decision_tensions": [
+        {
+          "id": "speed_vs_resiliency",
+          "verdict": "Tilts towards operational resiliency with Tier IV, accepting longer COD timeline."
+        },
+        {
+          "id": "commercialization_speed_vs_occupancy_risk",
+          "verdict": "Balanced approach with sovereign anchor pre-COD, reducing occupancy risk."
+        },
+        {
+          "id": "liquid_density_vs_complexity",
+          "verdict": "High-density liquid cooling chosen for GB200, accepting complexity."
+        },
+        {
+          "id": "gpu_capex_vs_obsolescence",
+          "verdict": "Commit GPU capex upfront to capture demand, accepting obsolescence risk."
+        }
+      ],
+      "executive_summary": {
+        "bullets": [
+          "Projected IRR of 34.4% and MOIC of 13.64x over 10 years.",
+          "Total CAPEX of $2,847.8M with a payback period of 6 years.",
+          "Strategic partnership with Brookfield and QIA ensures strong sovereign backing."
+        ],
+        "headline": "Qatar GPU Rental Cloud Project: High Returns with Strategic Partnerships",
+        "overall_confidence": "HIGH"
+      },
+      "live_intelligence": {
+        "energy": {
+          "summary": "Qatar's electricity tariff for data centers is estimated at $45/MWh.",
+          "tariff_used": "$45/MWh",
+          "freshness_tag": "EXPIRED"
+        },
+        "signals": [
+          {
+            "id": "transformer_shortage_global",
+            "title": "22-month transformer lead time drives critical path on every GCC DC build",
+            "severity": "HIGH",
+            "implication": "Delays in transformer procurement could lead to significant project timeline overruns."
+          },
+          {
+            "id": "gb200_allocation_scarcity",
+            "title": "GB200 NVL72: 12-month allocation wait, hyperscalers first — GCC greenfield at risk",
+            "severity": "HIGH",
+            "implication": "Potential delays in GPU deployment due to allocation scarcity."
+          }
+        ],
+        "gpu_pricing": {
+          "summary": "H100 and H200 pricing shows medium volatility with live data from Vast.ai and RunPod.",
+          "freshness_tag": "LIVE",
+          "median_observed": "2.3289"
+        },
+        "freshness_summary": "Data as of 2025-04-30, overall status EXPIRED.",
+        "volatility_summary": "Medium volatility in GPU pricing, low in energy tariffs."
+      },
+      "risks_constraints": {
+        "items": [
+          {
+            "label": "Transformer lead time",
+            "category": "supply_chain",
+            "severity": "HIGH",
+            "dependency": null,
+            "mitigation": "Issue transformer LoI before land/permit finalization."
+          },
+          {
+            "label": "High sovereign anchor reliance",
+            "category": "tenant_concentration",
+            "severity": "MEDIUM",
+            "dependency": null,
+            "mitigation": "Diversify customer base post-launch."
+          },
+          {
+            "label": "Water stress for cooling",
+            "category": "climate",
+            "severity": "MEDIUM",
+            "dependency": null,
+            "mitigation": "Adopt closed-loop dry cooling systems."
+          }
+        ]
+      },
+      "strategic_context": {
+        "body": "The project aligns with Qatar's Vision 2030, leveraging the QFZA's tax advantages and KAHRAMAA's power surplus. The partnership with Brookfield and QIA provides a strong sovereign anchor, reducing geopolitical and financial risks.",
+        "skip": false
+      },
+      "deployment_roadmap": {
+        "phases": [
+          {
+            "label": "Permitting",
+            "gating_events": [
+              "QFZA permit approval"
+            ],
+            "months_from_t0": "6"
+          },
+          {
+            "label": "Construction",
+            "gating_events": [
+              "EPC contract lock",
+              "Transformer order"
+            ],
+            "months_from_t0": "24"
+          },
+          {
+            "label": "Commissioning",
+            "gating_events": [
+              "Grid connection",
+              "Cooling system installation"
+            ],
+            "months_from_t0": "36"
+          }
+        ],
+        "reality_check_flags": [
+          "GB200 allocation scarcity may delay deployment by 6–10 months.",
+          "Transformer lead time is critical; order must be placed early."
+        ]
+      },
+      "market_benchmarking": {
+        "comparables": [
+          {
+            "name": "Equinix",
+            "value": "47%",
+            "metric": "EBITDA Margin",
+            "source": "eqx_ebitda_margin_2024"
+          },
+          {
+            "name": "Digital Realty",
+            "value": "62%",
+            "metric": "Leverage",
+            "source": "dlr_leverage_2024"
+          },
+          {
+            "name": "CoreWeave",
+            "value": "78%",
+            "metric": "Utilization",
+            "source": "crwv_utilization_post_ramp"
+          }
+        ],
+        "structural_differences": [
+          "Equinix's EBITDA margin reflects a diversified customer base, unlike the concentrated sovereign anchor in Qatar.",
+          "Digital Realty's leverage is typical for REITs, whereas this project benefits from sovereign-backed financing.",
+          "CoreWeave's utilization is driven by hyperscaler contracts, whereas Qatar's project leverages sovereign demand."
+        ]
+      },
+      "intelligence_sources": [
+        {
+          "trust": "HIGH",
+          "used_for": "key_financial_metrics",
+          "datapoint_id": "crwv_leverage"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "market_benchmarking",
+          "datapoint_id": "eqx_ebitda_margin_2024"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "key_financial_metrics",
+          "datapoint_id": "dlr_leverage_2024"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "key_financial_metrics",
+          "datapoint_id": "crwv_utilization_post_ramp"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "key_financial_metrics",
+          "datapoint_id": "tt_shell_mena_2024"
+        }
+      ],
+      "key_financial_metrics": {
+        "metrics": [
+          {
+            "unit": "USD",
+            "label": "CAPEX",
+            "value": "$2,847.8M",
+            "source": "tt_shell_mena_2024",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "percentage",
+            "label": "IRR",
+            "value": "34.4%",
+            "source": "crwv_leverage",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "multiple",
+            "label": "MOIC",
+            "value": "13.64x",
+            "source": "crwv_utilization_post_ramp",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "years",
+            "label": "Payback",
+            "value": "6 years",
+            "source": "crwv_capex_intensity",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "multiple",
+            "label": "DSCR",
+            "value": "18.32x",
+            "source": "dlr_leverage_2024",
+            "confidence": "HIGH"
+          }
+        ],
+        "narrative": "The financial metrics indicate a highly profitable investment with strong returns and a robust debt service coverage ratio."
+      },
+      "infrastructure_analysis": {
+        "body": "The project will deploy 100 MW with a PUE of 1.45, utilizing a mix of classic, liquid, and AI-specific cooling systems. The infrastructure will support 32,688 GPUs, primarily GB200 NVL72, requiring high-density liquid cooling.",
+        "tradeoffs": [
+          "Choosing liquid cooling over air-cooled simplicity due to GB200 NVL72 requirements, accepting higher capex.",
+          "Prioritizing operational resiliency over speed-to-power, extending COD timeline to ensure Tier IV redundancy."
+        ]
+      },
+      "strategic_opportunities": {
+        "items": [
+          {
+            "label": "Leverage QFZA tax regime",
+            "confidence": "HIGH",
+            "execution_path": "Utilize QFZA's tax exemptions to enhance profitability."
+          },
+          {
+            "label": "Expand sovereign partnerships",
+            "confidence": "MEDIUM",
+            "execution_path": "Engage additional sovereign entities to reduce concentration risk."
+          }
+        ]
+      },
+      "recommended_architecture": {
+        "config": {
+          "mw": "100",
+          "tier": "IV",
+          "cooling": "Liquid",
+          "gpu_sku": "GB200 NVL72",
+          "phasing": "Staggered",
+          "rack_mix": "High-density",
+          "networking": "Carrier-neutral"
+        },
+        "rationale": "We recommend a Tier IV architecture with liquid cooling to support high-density GPU racks, accepting higher capex for operational resilience. Alternatives like air cooling were considered but rejected due to density constraints. Success will be measured by achieving a DSCR > 1.4 after Year 2 stabilization."
+      },
+      "long_term_strategic_value": {
+        "ten_year_arc": "Position Qatar as a regional AI compute hub with sovereign-backed infrastructure.",
+        "speculative_branches": [
+          "Potential expansion into neighboring GCC markets",
+          "IPO or strategic sale post-stabilization"
+        ]
+      },
+      "commercialization_strategy": {
+        "pricing": "$110/kW/mo",
+        "ramp_profile": "80% occupancy at COD, 90% by year 2",
+        "anchor_tenant": "QIA",
+        "contract_structure": "Take-or-pay"
+      }
+    },
+    "memo_markdown": "# Qatar 100MW AI Factory Liquid — AI-generated draft\n\n_Generated 2026-05-29T05:00:41.242Z · model gpt-4o · v2 · stakeholder investor · region qatar_\n_Data as of 2025-04-30 · freshness EXPIRED_\n\n**Confidence: HIGH** (14 sourced / 14 total) — computed server-side\n\n## Executive Summary\n**Qatar GPU Rental Cloud Project: High Returns with Strategic Partnerships**\n- Projected IRR of 34.4% and MOIC of 13.64x over 10 years.\n- Total CAPEX of $2,847.8M with a payback period of 6 years.\n- Strategic partnership with Brookfield and QIA ensures strong sovereign backing.\n\n## Strategic Context\nThe project aligns with Qatar's Vision 2030, leveraging the QFZA's tax advantages and KAHRAMAA's power surplus. The partnership with Brookfield and QIA provides a strong sovereign anchor, reducing geopolitical and financial risks.\n\n## Key Financial Metrics\nThe financial metrics indicate a highly profitable investment with strong returns and a robust debt service coverage ratio.\n- **CAPEX**: $2,847.8M USD (HIGH) · tt_shell_mena_2024\n- **IRR**: 34.4% percentage (HIGH) · crwv_leverage\n- **MOIC**: 13.64x multiple (HIGH) · crwv_utilization_post_ramp\n- **Payback**: 6 years years (HIGH) · crwv_capex_intensity\n- **DSCR**: 18.32x multiple (HIGH) · dlr_leverage_2024\n\n## Infrastructure Analysis\nThe project will deploy 100 MW with a PUE of 1.45, utilizing a mix of classic, liquid, and AI-specific cooling systems. The infrastructure will support 32,688 GPUs, primarily GB200 NVL72, requiring high-density liquid cooling.\n- Choosing liquid cooling over air-cooled simplicity due to GB200 NVL72 requirements, accepting higher capex.\n- Prioritizing operational resiliency over speed-to-power, extending COD timeline to ensure Tier IV redundancy.\n\n## Market Benchmarking\n- Equinix: EBITDA Margin = 47% (eqx_ebitda_margin_2024)\n- Digital Realty: Leverage = 62% (dlr_leverage_2024)\n- CoreWeave: Utilization = 78% (crwv_utilization_post_ramp)\n\n## Risks & Constraints\n- Transformer lead time [HIGH] — Issue transformer LoI before land/permit finalization.\n- High sovereign anchor reliance [MEDIUM] — Diversify customer base post-launch.\n- Water stress for cooling [MEDIUM] — Adopt closed-loop dry cooling systems.\n\n## Strategic Opportunities\n- Leverage QFZA tax regime — Utilize QFZA's tax exemptions to enhance profitability.\n- Expand sovereign partnerships — Engage additional sovereign entities to reduce concentration risk.\n\n## Recommended Architecture\nWe recommend a Tier IV architecture with liquid cooling to support high-density GPU racks, accepting higher capex for operational resilience. Alternatives like air cooling were considered but rejected due to density constraints. Success will be measured by achieving a DSCR > 1.4 after Year 2 stabilization.\n\n## Commercialization Strategy\n\n## Deployment Roadmap\n- Permitting (6): QFZA permit approval\n- Construction (24): EPC contract lock, Transformer order\n- Commissioning (36): Grid connection, Cooling system installation\n- ⚠ GB200 allocation scarcity may delay deployment by 6–10 months.\n- ⚠ Transformer lead time is critical; order must be placed early.\n\n## Long-Term Strategic Value\nPosition Qatar as a regional AI compute hub with sovereign-backed infrastructure.\n\n## Sources\n- `crwv_leverage` — key_financial_metrics (HIGH)\n- `eqx_ebitda_margin_2024` — market_benchmarking (HIGH)\n- `dlr_leverage_2024` — key_financial_metrics (HIGH)\n- `crwv_utilization_post_ramp` — key_financial_metrics (HIGH)\n- `tt_shell_mena_2024` — key_financial_metrics (HIGH)\n\n---\n_AI-assisted · Indicative · Human review required._",
+    "stakeholder": "investor",
+    "region": "qatar",
+    "audience": "investor",
+    "provider_used": "gpt-4o",
+    "generation_time_ms": 42194,
+    "confidence_level": "HIGH",
+    "data_as_of": "2025-04-30",
+    "status": "draft",
+    "version": 2,
+    "created_by": "38f94ae3-51a6-47a2-8cd2-705353b7e385",
+    "created_at": "2026-05-29T05:00:41.726+00:00",
+    "updated_at": "2026-05-29T05:00:41.726+00:00",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "approved_by": null,
+    "approved_at": null
+  },
+  "scenario": {
+    "id": "556df066-6637-4d3c-b26d-589715a62695",
+    "project_id": "f36225e9-6c67-4c41-b836-943680c9f865",
+    "name": "Qatar 100MW AI Factory Liquid",
+    "scenario_type": "custom",
+    "version": 1,
+    "description": null,
+    "is_active": false,
+    "is_locked": false,
+    "total_mw": null,
+    "total_mw_source_id": null,
+    "phase1_mw": null,
+    "phase1_complete_year": 2,
+    "phase2_mw": null,
+    "phase2_complete_year": 4,
+    "phase3_mw": null,
+    "phase3_complete_year": 6,
+    "pue": null,
+    "pue_source_id": null,
+    "target_occupancy_pct": null,
+    "start_year": 2026,
+    "capex_shell_per_mw": null,
+    "capex_shell_source_id": null,
+    "capex_mep_per_mw": null,
+    "capex_mep_source_id": null,
+    "capex_substation_per_mw": null,
+    "capex_substation_source_id": null,
+    "capex_cooling_per_mw": null,
+    "capex_cooling_source_id": null,
+    "capex_grid_per_mw": null,
+    "capex_grid_source_id": null,
+    "capex_contingency_pct": 0.1,
+    "capex_liquid_cooling_premium_per_mw": null,
+    "capex_land_per_mw": null,
+    "capex_land_source_id": null,
+    "electricity_price_mwh": null,
+    "electricity_price_source_id": null,
+    "opex_maintenance_pct": null,
+    "opex_staff_annual_musd": null,
+    "opex_insurance_pct": null,
+    "opex_ga_pct": null,
+    "opex_operator_mgmt_fee_pct": null,
+    "price_retail_colo_kw_month": null,
+    "price_retail_source_id": null,
+    "price_wholesale_kw_month": null,
+    "price_wholesale_source_id": null,
+    "price_hyperscale_kw_month": null,
+    "price_hyperscale_source_id": null,
+    "annual_escalation_pct": 0.02,
+    "equity_hearst_pct": null,
+    "equity_brookfield_pct": null,
+    "equity_qatar_pct": null,
+    "debt_pct": null,
+    "debt_interest_rate": null,
+    "debt_interest_source_id": null,
+    "exit_multiple": null,
+    "exit_multiple_source_id": null,
+    "exit_year": 10,
+    "commercial_split": {
+      "retail_colo": 100
+    },
+    "operator_strategy": "multi_operator",
+    "projection_data": {},
+    "last_calculated_at": null,
+    "created_by": "38f94ae3-51a6-47a2-8cd2-705353b7e385",
+    "created_at": "2026-05-29T04:50:39.59589+00:00",
+    "updated_at": "2026-05-29T04:50:39.59589+00:00",
+    "input_mode": "mw_first",
+    "input_value": {},
+    "hardware_mix": {},
+    "debt_term_years": null
+  },
+  "versions": [
+    {
+      "id": "80384743-292d-4a82-b95b-a428d5f1c5dd",
+      "version": 1,
+      "status": "draft",
+      "provider_used": "gpt-4o",
+      "confidence_level": "HIGH",
+      "created_at": "2026-05-29T04:51:20.706961+00:00"
+    },
+    {
+      "id": "4b8b43aa-f674-4ceb-b210-22f4f2377104",
+      "version": 2,
+      "status": "draft",
+      "provider_used": "gpt-4o",
+      "confidence_level": "HIGH",
+      "created_at": "2026-05-29T05:00:41.726+00:00"
+    }
+  ]
+}

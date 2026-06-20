@@ -1,0 +1,15 @@
+{
+  "exported_at": "2026-06-20T19:12:07.053Z",
+  "base": "http://localhost:5005/api/admin/hearst",
+  "counts": {
+    "scenarios": 155,
+    "memos": 31,
+    "memos_with_detail": 31,
+    "sources": 48,
+    "deals": 8
+  },
+  "project": {
+    "id": "f36225e9-6c67-4c41-b836-943680c9f865",
+    "name": "HEARST Qatar AI & Data Center Hub"
+  }
+}

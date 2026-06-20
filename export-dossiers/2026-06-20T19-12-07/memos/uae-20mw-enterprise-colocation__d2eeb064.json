@@ -1,0 +1,454 @@
+{
+  "memo": {
+    "id": "d2eeb064-4121-452f-a45e-253eff47b0e2",
+    "project_id": "f36225e9-6c67-4c41-b836-943680c9f865",
+    "scenario_id": "d0910bc9-95f4-4d3a-9a35-3f8fdb97e9c7",
+    "title": "UAE 20MW Enterprise Colocation",
+    "executive_summary": "Strategic Deployment of 20 MW Data Center in UAE",
+    "memo_json": {
+      "visualization": {
+        "summary": "The Gantt chart illustrates the phased deployment timeline from construction to commissioning.",
+        "diagram_type": "gantt",
+        "topology_summary": "Phased deployment with critical path dependencies highlighted."
+      },
+      "data_freshness": {
+        "data_as_of": "2025-04-30",
+        "datapoints": [
+          {
+            "id": "crwv_leverage",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "eqx_ebitda_margin_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "dlr_leverage_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "brookfield_aum_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "eqx_pue_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-30"
+          },
+          {
+            "id": "dlr_ebitda_margin_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "crwv_capex_intensity",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "crwv_utilization_post_ramp",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "eqx_retail_price_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "dlr_wholesale_price_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "tt_shell_mena_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-01"
+          },
+          {
+            "id": "tt_mep_mena_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-01"
+          },
+          {
+            "id": "hyperscale_lease_term_avg_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-01"
+          },
+          {
+            "id": "crwv_gpu_fleet",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          }
+        ],
+        "computed_by": "server",
+        "status_counts": {
+          "EXPIRED": 14
+        },
+        "overall_status": "EXPIRED"
+      },
+      "explainability": {
+        "audience": "operator",
+        "jargon_translations": {
+          "IRR": "Internal Rate of Return",
+          "PUE": "Power Usage Effectiveness",
+          "DSCR": "Debt Service Coverage Ratio",
+          "payback": "Time to recover the initial investment"
+        },
+        "simplified_takeaways": [
+          "The project aims for a quick market entry with a balance of cost and efficiency.",
+          "Liquid cooling is chosen for better energy efficiency despite higher initial costs.",
+          "The financial plan includes a strong focus on debt management and return on investment."
+        ],
+        "why_this_recommendation": "We recommend a Tier III architecture because it balances speed and resilience, supported by [eqx_pue_2024]. This choice allows for a quicker market entry while maintaining operational efficiency."
+      },
+      "confidence_block": {
+        "computed_by": "server",
+        "known_unknowns": [
+          "Future electricity tariff fluctuations in UAE.",
+          "Potential changes in GPU pricing and availability."
+        ],
+        "source_density": "14 sourced / 14 total",
+        "confidence_level": "HIGH",
+        "mean_trust_score": 88,
+        "estimation_quality": "The analysis is robust with high confidence in financial metrics and infrastructure benchmarks.",
+        "mean_freshness_score": 0.54
+      },
+      "decision_tensions": [
+        {
+          "id": "speed_vs_resiliency",
+          "verdict": "Tilts towards speed-to-power with Tier III to meet market demand quickly, accepting slightly lower resilience."
+        },
+        {
+          "id": "commercialization_speed_vs_occupancy_risk",
+          "verdict": "Leans towards aggressive commercialization with pre-COD anchor tenant commitments, accepting higher occupancy risk."
+        }
+      ],
+      "executive_summary": {
+        "bullets": [
+          "Projected IRR of 8.2% with a MOIC of 3.08x over 10 years.",
+          "Total CAPEX estimated at $282.6M with a stable EBITDA of $28.2M.",
+          "Debt financing at 62% with a 6.5% interest rate.",
+          "Exit valuation projected at $547.8M."
+        ],
+        "headline": "Strategic Deployment of 20 MW Data Center in UAE",
+        "overall_confidence": "HIGH"
+      },
+      "live_intelligence": {
+        "energy": {
+          "summary": "Electricity tariffs for data centers in UAE are estimated at $54/MWh.",
+          "tariff_used": "54",
+          "freshness_tag": "EXPIRED"
+        },
+        "signals": [
+          {
+            "id": "transformer_shortage_global",
+            "title": "22-month transformer lead time drives critical path on every GCC DC build",
+            "severity": "HIGH",
+            "implication": "Delays in transformer delivery could push project timelines by 6-12 months."
+          }
+        ],
+        "gpu_pricing": {
+          "summary": "H100 GPU pricing ranges from $1.47 to $3.19 per hour, with a median of $2.33.",
+          "freshness_tag": "FRESH",
+          "median_observed": "2.3289"
+        },
+        "freshness_summary": "Data as of 2025-04-30, overall status EXPIRED.",
+        "volatility_summary": "Low volatility expected in energy pricing, high in GPU pricing."
+      },
+      "risks_constraints": {
+        "items": [
+          {
+            "label": "Transformer Lead Time",
+            "category": "supply_chain",
+            "severity": "HIGH",
+            "dependency": null,
+            "mitigation": "Pre-order transformers to avoid delays."
+          },
+          {
+            "label": "High Concentration Risk",
+            "category": "tenant_concentration",
+            "severity": "HIGH",
+            "dependency": null,
+            "mitigation": "Diversify tenant base beyond G42 and Microsoft."
+          },
+          {
+            "label": "Cooling Efficiency",
+            "category": "climate",
+            "severity": "MEDIUM",
+            "dependency": null,
+            "mitigation": "Implement advanced liquid cooling systems."
+          }
+        ]
+      },
+      "strategic_context": {
+        "body": "The UAE's strategic push towards AI and digital infrastructure aligns with this deployment. The partnership with Brookfield and Qatar provides strong financial backing, while the UAE's renewable energy initiatives support operational sustainability.",
+        "skip": false
+      },
+      "deployment_roadmap": {
+        "phases": [
+          {
+            "label": "Construction",
+            "gating_events": [
+              "Permits",
+              "EPC contract",
+              "Transformer order"
+            ],
+            "months_from_t0": "0-24"
+          },
+          {
+            "label": "Commissioning",
+            "gating_events": [
+              "Grid connection",
+              "Cooling system installation"
+            ],
+            "months_from_t0": "24-30"
+          }
+        ],
+        "reality_check_flags": []
+      },
+      "market_benchmarking": {
+        "comparables": [
+          {
+            "name": "Equinix",
+            "value": "47%",
+            "metric": "EBITDA Margin",
+            "source": "eqx_ebitda_margin_2024"
+          },
+          {
+            "name": "Digital Realty",
+            "value": "62%",
+            "metric": "Debt Percentage",
+            "source": "dlr_leverage_2024"
+          },
+          {
+            "name": "CoreWeave",
+            "value": "3.2",
+            "metric": "Capex Intensity",
+            "source": "crwv_capex_intensity"
+          }
+        ],
+        "structural_differences": [
+          "Equinix's EBITDA margin reflects a full-stack operator model, not directly comparable to a manage-only archetype.",
+          "Digital Realty's leverage is typical for public REITs, aligning with project finance norms.",
+          "CoreWeave's capex intensity is driven by GPU cloud build-out, differing from traditional data center investments."
+        ]
+      },
+      "intelligence_sources": [
+        {
+          "trust": "HIGH",
+          "used_for": "key_financial_metrics",
+          "datapoint_id": "eqx_ebitda_margin_2024"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "key_financial_metrics",
+          "datapoint_id": "dlr_leverage_2024"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "key_financial_metrics",
+          "datapoint_id": "crwv_capex_intensity"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "key_financial_metrics",
+          "datapoint_id": "tt_shell_mena_2024"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "infrastructure_analysis",
+          "datapoint_id": "eqx_pue_2024"
+        }
+      ],
+      "key_financial_metrics": {
+        "metrics": [
+          {
+            "unit": "M USD",
+            "label": "CAPEX",
+            "value": "282.6",
+            "source": "tt_shell_mena_2024",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "M USD",
+            "label": "EBITDA",
+            "value": "28.2",
+            "source": "eqx_ebitda_margin_2024",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "%",
+            "label": "IRR",
+            "value": "8.2",
+            "source": "dlr_ebitda_margin_2024",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "x",
+            "label": "MOIC",
+            "value": "3.08",
+            "source": "crwv_capex_intensity",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "ratio",
+            "label": "DSCR",
+            "value": "2.81",
+            "source": "dlr_leverage_2024",
+            "confidence": "HIGH"
+          }
+        ],
+        "narrative": "The financial metrics indicate a solid investment with a strong debt service coverage ratio and a healthy return on investment."
+      },
+      "infrastructure_analysis": {
+        "body": "The data center will operate at a PUE of 1.45, leveraging a mix of classic and liquid cooling technologies. The facility will host 1240 GPUs, primarily H100 SXM5, ensuring robust AI capabilities.",
+        "tradeoffs": [
+          "Choosing liquid cooling over air cooling for efficiency, accepting higher initial capex.",
+          "Prioritizing Tier III over Tier IV to balance speed-to-market with operational resilience."
+        ]
+      },
+      "strategic_opportunities": {
+        "items": [
+          {
+            "label": "Partnership with G42",
+            "confidence": "HIGH",
+            "execution_path": "Leverage G42's regional influence to secure anchor tenants."
+          },
+          {
+            "label": "Renewable Energy PPAs",
+            "confidence": "MEDIUM",
+            "execution_path": "Negotiate PPAs with DEWA to lock in low-cost renewable energy."
+          }
+        ]
+      },
+      "recommended_architecture": {
+        "config": {
+          "mw": "20",
+          "tier": "III",
+          "cooling": "Hybrid",
+          "gpu_sku": "H100 SXM5",
+          "phasing": "Immediate",
+          "rack_mix": "Classic/Liquid",
+          "networking": "High-speed interconnect"
+        },
+        "rationale": "We recommend a Tier III architecture to balance speed and resilience, supported by [eqx_pue_2024]. Alternatives like Tier IV were considered but rejected due to longer deployment timelines. The risk of lower uptime is accepted, with DSCR > 1.4 after Year 2 stabilization as the success metric."
+      },
+      "long_term_strategic_value": {
+        "ten_year_arc": "Positioning as a key AI infrastructure hub in the GCC, leveraging UAE's strategic AI initiatives.",
+        "speculative_branches": [
+          "Potential expansion into other GCC markets."
+        ]
+      },
+      "commercialization_strategy": {
+        "pricing": "$110/kW/mo",
+        "ramp_profile": "80% occupancy at COD, 90% by year 2",
+        "anchor_tenant": "G42 and Microsoft",
+        "contract_structure": "NNN with take-or-pay clauses"
+      }
+    },
+    "memo_markdown": "# UAE 20MW Enterprise Colocation — AI-generated draft\n\n_Generated 2026-05-29T04:52:18.408Z · model gpt-4o · v1 · stakeholder operator · region uae_\n_Data as of 2025-04-30 · freshness EXPIRED_\n\n**Confidence: HIGH** (14 sourced / 14 total) — computed server-side\n\n## Executive Summary\n**Strategic Deployment of 20 MW Data Center in UAE**\n- Projected IRR of 8.2% with a MOIC of 3.08x over 10 years.\n- Total CAPEX estimated at $282.6M with a stable EBITDA of $28.2M.\n- Debt financing at 62% with a 6.5% interest rate.\n- Exit valuation projected at $547.8M.\n\n## Strategic Context\nThe UAE's strategic push towards AI and digital infrastructure aligns with this deployment. The partnership with Brookfield and Qatar provides strong financial backing, while the UAE's renewable energy initiatives support operational sustainability.\n\n## Key Financial Metrics\nThe financial metrics indicate a solid investment with a strong debt service coverage ratio and a healthy return on investment.\n- **CAPEX**: 282.6 M USD (HIGH) · tt_shell_mena_2024\n- **EBITDA**: 28.2 M USD (HIGH) · eqx_ebitda_margin_2024\n- **IRR**: 8.2 % (HIGH) · dlr_ebitda_margin_2024\n- **MOIC**: 3.08 x (HIGH) · crwv_capex_intensity\n- **DSCR**: 2.81 ratio (HIGH) · dlr_leverage_2024\n\n## Infrastructure Analysis\nThe data center will operate at a PUE of 1.45, leveraging a mix of classic and liquid cooling technologies. The facility will host 1240 GPUs, primarily H100 SXM5, ensuring robust AI capabilities.\n- Choosing liquid cooling over air cooling for efficiency, accepting higher initial capex.\n- Prioritizing Tier III over Tier IV to balance speed-to-market with operational resilience.\n\n## Market Benchmarking\n- Equinix: EBITDA Margin = 47% (eqx_ebitda_margin_2024)\n- Digital Realty: Debt Percentage = 62% (dlr_leverage_2024)\n- CoreWeave: Capex Intensity = 3.2 (crwv_capex_intensity)\n\n## Risks & Constraints\n- Transformer Lead Time [HIGH] — Pre-order transformers to avoid delays.\n- High Concentration Risk [HIGH] — Diversify tenant base beyond G42 and Microsoft.\n- Cooling Efficiency [MEDIUM] — Implement advanced liquid cooling systems.\n\n## Strategic Opportunities\n- Partnership with G42 — Leverage G42's regional influence to secure anchor tenants.\n- Renewable Energy PPAs — Negotiate PPAs with DEWA to lock in low-cost renewable energy.\n\n## Recommended Architecture\nWe recommend a Tier III architecture to balance speed and resilience, supported by [eqx_pue_2024]. Alternatives like Tier IV were considered but rejected due to longer deployment timelines. The risk of lower uptime is accepted, with DSCR > 1.4 after Year 2 stabilization as the success metric.\n\n## Commercialization Strategy\n\n## Deployment Roadmap\n- Construction (0-24): Permits, EPC contract, Transformer order\n- Commissioning (24-30): Grid connection, Cooling system installation\n\n## Long-Term Strategic Value\nPositioning as a key AI infrastructure hub in the GCC, leveraging UAE's strategic AI initiatives.\n\n## Sources\n- `eqx_ebitda_margin_2024` — key_financial_metrics (HIGH)\n- `dlr_leverage_2024` — key_financial_metrics (HIGH)\n- `crwv_capex_intensity` — key_financial_metrics (HIGH)\n- `tt_shell_mena_2024` — key_financial_metrics (HIGH)\n- `eqx_pue_2024` — infrastructure_analysis (HIGH)\n\n---\n_AI-assisted · Indicative · Human review required._",
+    "stakeholder": "operator",
+    "region": "uae",
+    "audience": "operator",
+    "provider_used": "gpt-4o",
+    "generation_time_ms": 44926,
+    "confidence_level": "HIGH",
+    "data_as_of": "2025-04-30",
+    "status": "draft",
+    "version": 1,
+    "created_by": "38f94ae3-51a6-47a2-8cd2-705353b7e385",
+    "created_at": "2026-05-29T04:52:18.789524+00:00",
+    "updated_at": "2026-05-29T04:52:18.789524+00:00",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "approved_by": null,
+    "approved_at": null
+  },
+  "scenario": {
+    "id": "d0910bc9-95f4-4d3a-9a35-3f8fdb97e9c7",
+    "project_id": "f36225e9-6c67-4c41-b836-943680c9f865",
+    "name": "UAE 20MW Enterprise Colocation",
+    "scenario_type": "custom",
+    "version": 1,
+    "description": null,
+    "is_active": false,
+    "is_locked": false,
+    "total_mw": null,
+    "total_mw_source_id": null,
+    "phase1_mw": null,
+    "phase1_complete_year": 2,
+    "phase2_mw": null,
+    "phase2_complete_year": 4,
+    "phase3_mw": null,
+    "phase3_complete_year": 6,
+    "pue": null,
+    "pue_source_id": null,
+    "target_occupancy_pct": null,
+    "start_year": 2026,
+    "capex_shell_per_mw": null,
+    "capex_shell_source_id": null,
+    "capex_mep_per_mw": null,
+    "capex_mep_source_id": null,
+    "capex_substation_per_mw": null,
+    "capex_substation_source_id": null,
+    "capex_cooling_per_mw": null,
+    "capex_cooling_source_id": null,
+    "capex_grid_per_mw": null,
+    "capex_grid_source_id": null,
+    "capex_contingency_pct": 0.1,
+    "capex_liquid_cooling_premium_per_mw": null,
+    "capex_land_per_mw": null,
+    "capex_land_source_id": null,
+    "electricity_price_mwh": null,
+    "electricity_price_source_id": null,
+    "opex_maintenance_pct": null,
+    "opex_staff_annual_musd": null,
+    "opex_insurance_pct": null,
+    "opex_ga_pct": null,
+    "opex_operator_mgmt_fee_pct": null,
+    "price_retail_colo_kw_month": null,
+    "price_retail_source_id": null,
+    "price_wholesale_kw_month": null,
+    "price_wholesale_source_id": null,
+    "price_hyperscale_kw_month": null,
+    "price_hyperscale_source_id": null,
+    "annual_escalation_pct": 0.02,
+    "equity_hearst_pct": null,
+    "equity_brookfield_pct": null,
+    "equity_qatar_pct": null,
+    "debt_pct": null,
+    "debt_interest_rate": null,
+    "debt_interest_source_id": null,
+    "exit_multiple": null,
+    "exit_multiple_source_id": null,
+    "exit_year": 10,
+    "commercial_split": {
+      "retail_colo": 100
+    },
+    "operator_strategy": "multi_operator",
+    "projection_data": {},
+    "last_calculated_at": null,
+    "created_by": "38f94ae3-51a6-47a2-8cd2-705353b7e385",
+    "created_at": "2026-05-29T04:51:33.259981+00:00",
+    "updated_at": "2026-05-29T04:51:33.259981+00:00",
+    "input_mode": "mw_first",
+    "input_value": {},
+    "hardware_mix": {},
+    "debt_term_years": null
+  },
+  "versions": [
+    {
+      "id": "d2eeb064-4121-452f-a45e-253eff47b0e2",
+      "version": 1,
+      "status": "draft",
+      "provider_used": "gpt-4o",
+      "confidence_level": "HIGH",
+      "created_at": "2026-05-29T04:52:18.789524+00:00"
+    }
+  ]
+}

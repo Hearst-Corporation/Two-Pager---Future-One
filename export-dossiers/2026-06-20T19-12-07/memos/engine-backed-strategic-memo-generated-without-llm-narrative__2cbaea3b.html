@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Engine-backed strategic memo generated without LLM narrative — ORACLE Board Memo</title>
+<style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--preview-bg); color: var(--ink);
+  font-family: "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+:root {
+  --preview-bg: #57534e;
+  --ink: #111111; --ink-soft: #2A2A2A; --gray-1: #585858; --gray-2: #8C8C8C;
+  --hair: #D7D3CD; --hair-soft: #E7E3DD; --paper: #FFFFFF; --whisper: #F6F4F1;
+  --oxblood: #6E1423;
+  --sans: "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
+  --serif: Georgia, "Times New Roman", Times, serif;
+  --mx: 22mm; --mtop: 22mm; --mbot: 20mm;
+}
+.page { position: relative; width: 210mm; height: 297mm; background: var(--paper);
+  margin: 0 auto; overflow: hidden; page-break-after: always; break-after: page; }
+.page:last-child { page-break-after: auto; break-after: auto; }
+.frame { position: absolute; top: var(--mtop); left: var(--mx); right: var(--mx); bottom: var(--mbot); }
+@media screen { body { padding: 28px 0; }
+  .page { box-shadow: 0 1px 2px rgba(0,0,0,.18), 0 18px 44px rgba(0,0,0,.30); margin-bottom: 28px; } }
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.runhead { position: absolute; top: 13mm; left: var(--mx); right: var(--mx);
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 7.4pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-2); }
+.runhead .rh-name { color: var(--gray-1); font-weight: 600; }
+.runfoot { position: absolute; bottom: 12mm; left: var(--mx); right: var(--mx);
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 7.4pt; letter-spacing: .14em; text-transform: uppercase; color: var(--gray-2); }
+.runfoot .rf-pg { color: var(--gray-1); font-weight: 600; }
+.eyebrow { font-size: 8pt; letter-spacing: .28em; text-transform: uppercase; color: var(--gray-2);
+  font-weight: 600; margin: 0 0 8mm 0; }
+.eyebrow .num { color: var(--oxblood); margin-right: 1.2em; font-weight: 700; }
+.headline { font-family: var(--sans); font-weight: 700; font-size: 23pt; line-height: 1.06;
+  letter-spacing: -0.014em; margin: 0; color: var(--ink); }
+.headline.smaller { font-size: 19.5pt; }
+.accentline { height: 1.5px; background: var(--oxblood); border: 0; width: 24mm; margin: 7mm 0 0 0; }
+p { margin: 0; }
+.label { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; }
+.break-avoid { break-inside: avoid; page-break-inside: avoid; }
+.muted-note { color: var(--gray-2); font-size: 9pt; font-style: italic; }
+
+/* COVER */
+.cover .frame { display: flex; flex-direction: column; }
+.cover-top { display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 7.8pt; letter-spacing: .22em; text-transform: uppercase; color: var(--gray-2);
+  padding-bottom: 6mm; border-bottom: 1px solid var(--hair); }
+.cover-top .org { color: var(--ink); font-weight: 700; letter-spacing: .2em; }
+.cover-kicker { margin-top: auto; font-size: 8.4pt; letter-spacing: .34em; text-transform: uppercase;
+  color: var(--gray-2); font-weight: 600; margin-bottom: 11mm; }
+.wordmark { font-family: var(--sans); font-weight: 700; font-size: 56pt; line-height: 1.0;
+  letter-spacing: -0.025em; margin: 0; padding-top: 2mm; color: var(--ink); }
+.wordmark .two { display: block; color: var(--ink); }
+.cover-sub { font-size: 14pt; color: var(--gray-1); letter-spacing: -.01em; margin: 5mm 0 0 0; font-weight: 400; }
+.cover-accent { height: 2px; background: var(--oxblood); border: 0; width: 30mm; margin: 7mm 0 0 0; }
+.cover-thesis { font-size: 11.5pt; line-height: 1.55; color: var(--ink-soft); margin: 8mm 0 0 0;
+  max-width: 148mm; font-style: italic; }
+.cover-thesis .q { font-style: normal; font-weight: 700; }
+.cover-foot { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.cf-k { font-size: 7.2pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3mm; }
+.cf-v { font-size: 10pt; color: var(--ink); line-height: 1.4; }
+
+/* DECISION PAGE */
+.dec-head { display: flex; flex-direction: column; gap: 1mm; }
+.dec-meta { display: flex; justify-content: space-between; align-items: center; }
+.dm-k { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; }
+.dec-risk { display: flex; align-items: center; gap: 6mm; }
+.rk { font-size: 9pt; font-weight: 700; color: var(--ink); }
+.verdict-block { margin-top: 11mm; flex-shrink: 0; padding: 14mm 0 10mm; }
+.verdict-eyebrow { font-size: 8pt; letter-spacing: .24em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 5mm; }
+.verdict { font-family: var(--sans); font-weight: 700; font-size: 44pt; line-height: 1.0;
+  letter-spacing: -0.02em; color: var(--ink); margin: 0; white-space: normal; }
+.recommendation { font-size: 11.5pt; line-height: 1.5; color: var(--ink-soft); margin-top: 6mm; max-width: 140mm; }
+.figs { margin-top: 10mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; }
+.fig .fk { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3mm; }
+.fig .fv { font-size: 28pt; font-weight: 700; line-height: 1.0; letter-spacing: -0.02em; color: var(--ink); }
+.fig .fv.accent { color: var(--oxblood); }
+.fig .fsub { font-size: 8.5pt; color: var(--gray-1); margin-top: 2mm; }
+.decision-required { margin-top: 9mm; padding-top: 7mm; border-top: 1px solid var(--ink); }
+.dr-k { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3mm; }
+.dr-v { font-size: 10pt; line-height: 1.5; color: var(--ink); max-width: 148mm; }
+
+/* OPPORTUNITY */
+.opp-grid { margin-top: 10mm; display: grid; grid-template-columns: 1fr 1fr; gap: 7mm 12mm; }
+.opp-cell .oc-k { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2);
+  font-weight: 600; margin-bottom: 3.5mm; }
+.opp-cell .oc-v { font-size: 10pt; line-height: 1.55; color: var(--ink); }
+.opp-cell.is-thesis { background: var(--whisper); padding: 7mm 8mm; }
+.drivers { margin-top: 9mm; padding-top: 7mm; border-top: 1px solid var(--hair); }
+.dr-title { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 6mm; }
+.driver-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; }
+.driver { break-inside: avoid; }
+.di { font-family: var(--serif); font-size: 12pt; color: var(--oxblood); margin-bottom: 3mm; }
+.dv { font-size: 10pt; line-height: 1.4; color: var(--ink); }
+.dfig { font-weight: 700; }
+
+/* FINANCIAL */
+.fin-hero { margin-top: 9mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; border-bottom: 1px solid var(--hair); padding-bottom: 8mm; }
+.fin-kpi .fk { font-size: 7.6pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 3mm; }
+.fin-kpi .fv { font-size: 26pt; font-weight: 700; line-height: 1.0; letter-spacing: -0.02em; color: var(--ink); }
+.fin-kpi .fv.accent { color: var(--oxblood); }
+.fin-kpi .fs { font-size: 8.5pt; color: var(--gray-1); margin-top: 2mm; }
+.fin-body { margin-top: 8mm; display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; }
+.cap-title { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 4mm; }
+.cap-row { display: grid; grid-template-columns: 1fr auto auto; gap: 4mm; align-items: baseline;
+  padding: 3mm 0; border-bottom: 1px solid var(--hair-soft); }
+.cr-name { font-size: 9.5pt; color: var(--ink); }
+.cr-share { font-size: 9pt; color: var(--gray-1); }
+.cr-val { font-size: 9.5pt; font-weight: 700; color: var(--ink); min-width: 26mm; text-align: right; }
+.cap-total { display: grid; grid-template-columns: 1fr auto auto; gap: 4mm; align-items: baseline;
+  padding: 3mm 0 0 0; border-top: 1.5px solid var(--ink); }
+.ct-name { font-size: 9.5pt; font-weight: 700; color: var(--ink); }
+.ct-share { font-size: 9pt; color: var(--gray-1); }
+.ct-val { font-size: 9.5pt; font-weight: 700; color: var(--oxblood); min-width: 26mm; text-align: right; }
+.sens-wrap { }
+.sens-title { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 5mm; }
+.sens-line { position: relative; height: 6px; background: var(--hair-soft); border-radius: 3px; margin-bottom: 3mm; }
+.sens-base { position: absolute; top: -8px; transform: translateX(-50%); }
+.sb-lbl { font-size: 7.5pt; font-weight: 700; color: var(--oxblood); white-space: nowrap; }
+.sens-note { font-size: 8.5pt; color: var(--gray-1); line-height: 1.5; margin-top: 4mm; }
+
+/* RISKS */
+.risk-table { margin-top: 9mm; }
+.risk-headrow { display: grid; grid-template-columns: 24px 1fr 80px 80px; gap: 4mm;
+  padding: 0 0 3mm 0; border-bottom: 1px solid var(--ink); }
+.rh { font-size: 7.2pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; }
+.risk-row { display: grid; grid-template-columns: 24px 1fr 80px 80px; gap: 4mm;
+  padding: 5mm 0; border-bottom: 1px solid var(--hair-soft); align-items: start; }
+.r-no { font-family: var(--serif); font-size: 10pt; color: var(--oxblood); font-weight: 700; }
+.r-name { font-size: 9.5pt; font-weight: 700; color: var(--ink); margin-bottom: 2mm; }
+.r-mit { font-size: 8.5pt; color: var(--gray-1); line-height: 1.4; }
+.risk-meta { }
+.rm-lab { font-size: 7.2pt; letter-spacing: .14em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 2mm; }
+.rm-val { font-size: 8.5pt; color: var(--ink); display: flex; align-items: center; gap: 4px; }
+.ticks { display: inline-flex; gap: 2px; }
+.ticks i { width: 3px; height: 10px; background: var(--hair); display: inline-block; }
+.ticks.lv1 i:nth-child(1) { background: var(--ink); }
+.ticks.lv2 i:nth-child(1), .ticks.lv2 i:nth-child(2) { background: var(--ink); }
+.ticks.lv3 i { background: var(--ink); }
+
+/* SCENARIO */
+.scen-grid { margin-top: 9mm; display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 10mm; }
+.scen { break-inside: avoid; border-top: 2px solid var(--hair); padding-top: 6mm; }
+.scen.base { border-top-color: var(--oxblood); }
+.scen .sc-name { font-size: 10pt; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); margin-bottom: 2mm; }
+.scen.base .sc-name { color: var(--oxblood); }
+.scen .sc-tag { font-size: 9pt; color: var(--gray-1); line-height: 1.5; min-height: 20mm; margin-bottom: 5mm; border-bottom: 1px solid var(--hair-soft); padding-bottom: 5mm; }
+.scen .sc-irr-k { font-size: 7.2pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 2mm; }
+.scen .sc-irr { font-size: 34pt; font-weight: 700; line-height: 0.92; letter-spacing: -0.02em; color: var(--ink); }
+.scen.base .sc-irr { color: var(--oxblood); }
+.scen .sc-rows { margin-top: 6mm; }
+.scen .sc-line { display: flex; justify-content: space-between; align-items: baseline; padding: 3mm 0; border-top: 1px solid var(--hair-soft); }
+.scen .sc-line:first-child { border-top: 0; }
+.scen .sc-lk { font-size: 9pt; color: var(--gray-1); }
+.scen .sc-lv { font-size: 10pt; font-weight: 700; color: var(--ink); }
+.scen-note { margin-top: 10mm; border-top: 1px solid var(--ink); padding-top: 6mm; font-size: 9pt; color: var(--gray-1); line-height: 1.6; max-width: 152mm; }
+.scen-note b { color: var(--ink); }
+
+/* RECOMMENDATION */
+.rec-two { margin-top: 9mm; display: grid; grid-template-columns: 1fr 1fr; column-gap: 14mm; }
+.rec-card { break-inside: avoid; padding-top: 5mm; border-top: 2px solid var(--oxblood); }
+.rec-card.hold { border-top-color: var(--ink); }
+.rec-card .rc-k { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; font-weight: 700; margin-bottom: 4mm; }
+.rec-card.go .rc-k { color: var(--oxblood); }
+.rec-card.hold .rc-k { color: var(--ink); }
+.rec-card .rc-v { font-size: 10pt; line-height: 1.6; color: var(--ink); }
+.conditions { margin-top: 10mm; border-top: 1px solid var(--ink); padding-top: 7mm; }
+.cd-title { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 7mm; }
+.cond-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8mm; }
+.cond .ci { font-family: var(--serif); font-size: 12pt; color: var(--oxblood); margin-bottom: 3mm; }
+.cond .cv { font-size: 9.5pt; line-height: 1.5; color: var(--ink); }
+.timeline { margin-top: 10mm; border-top: 1px solid var(--ink); padding-top: 7mm; }
+.tl-title { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2); font-weight: 600; margin-bottom: 8mm; }
+.tl-track { display: grid; grid-template-columns: repeat(5, 1fr); position: relative; }
+.tl-track::before { content: ""; position: absolute; left: 0; right: 0; top: 3.5px; height: 1px; background: var(--hair); }
+.tl-stop { position: relative; padding-top: 9mm; padding-right: 4mm; break-inside: avoid; }
+.tl-stop::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--gray-1); }
+.tl-stop.first::before { background: var(--oxblood); border-color: var(--oxblood); }
+.tl-when { font-size: 7.8pt; letter-spacing: .12em; text-transform: uppercase; color: var(--gray-1); font-weight: 700; margin-bottom: 2mm; }
+.tl-stop.first .tl-when { color: var(--oxblood); }
+.tl-what { font-size: 8.5pt; line-height: 1.4; color: var(--ink); }
+.rec-quote { margin-top: 7mm; font-family: var(--serif); font-size: 11.5pt; line-height: 1.52; color: var(--ink); max-width: 148mm; }
+.rec-quote b { font-weight: 700; }
+
+/* APPENDIX */
+.apx-grid { margin-top: 9mm; display: grid; grid-template-columns: 1fr 1fr; column-gap: 16mm; row-gap: 10mm; }
+.apx-block .ab-k { font-size: 8pt; letter-spacing: .2em; text-transform: uppercase; color: var(--gray-2);
+  font-weight: 600; margin-bottom: 4mm; padding-bottom: 3mm; border-bottom: 1px solid var(--ink); }
+.apx-list { list-style: none; margin: 0; padding: 0; }
+.apx-list li { font-size: 9.5pt; line-height: 1.5; color: var(--ink); padding: 3mm 0;
+  border-bottom: 1px solid var(--hair-soft); display: flex; justify-content: space-between; gap: 6mm; align-items: baseline; }
+.apx-list li:last-child { border-bottom: 0; }
+.apx-list li .al-k { color: var(--gray-1); }
+.apx-list li .al-v { font-weight: 700; color: var(--ink); text-align: right; white-space: nowrap; }
+.apx-list.plain li { display: block; padding: 3.5mm 0; }
+.apx-list.plain li .src { color: var(--ink); font-size: 9pt; }
+.apx-table { width: 100%; border-collapse: collapse; }
+.apx-table th { text-align: left; font-size: 7.2pt; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gray-2); font-weight: 600; padding: 0 0 3mm 0; border-bottom: 1px solid var(--ink); }
+.apx-table th.r, .apx-table td.r { text-align: right; }
+.apx-table td { font-size: 9.5pt; color: var(--ink); padding: 3mm 0; border-bottom: 1px solid var(--hair-soft); }
+.apx-table tr:last-child td { border-bottom: 0; }
+.apx-disc { position: absolute; left: var(--mx); right: var(--mx); bottom: 20mm;
+  font-size: 7.5pt; line-height: 1.55; color: var(--gray-2); border-top: 1px solid var(--hair); padding-top: 4mm; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 0 — COVER -->
+<section class="page cover">
+  <div class="frame">
+    <div class="cover-top">
+      <span class="org">ORACLE STRATEGY GROUP</span>
+      <span>Investment Committee Memorandum</span>
+    </div>
+    <div class="cover-kicker">State of Qatar · Ras Laffan Industrial City</div>
+    <h1 class="wordmark">Engine-backed strategic memo generated without LLM narrative</h1>
+    <div class="cover-sub">Strategic Investment Memorandum</div>
+    <div class="cover-accent"></div>
+    <p class="cover-thesis">
+      <span class="q">Engine-backed strategic memo generated without LLM narrative</span>
+    </p>
+    <div class="cover-foot">
+      <div>
+        <div class="cf-k">Prepared For</div>
+        <div class="cf-v">Investment Committee<br/>&amp; Board of Directors</div>
+      </div>
+      <div>
+        <div class="cf-k">Prepared By</div>
+        <div class="cf-v">ORACLE<br/>Strategy Group</div>
+      </div>
+      <div>
+        <div class="cf-k">Location</div>
+        <div class="cf-v">State of Qatar&lt;br/&gt;Ras Laffan Industrial City</div>
+      </div>
+      <div>
+        <div class="cf-k">Date · Classification</div>
+        <div class="cf-v">09 June 2026<br/>Strictly Private &amp; Confidential</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 1 — EXECUTIVE SUMMARY -->
+<section class="page decision">
+  <div class="runhead">
+    <span class="rh-name">Engine-backed strategic memo generated without LLM narrative</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <div class="dec-head">
+      <p class="eyebrow"><span class="num">01</span>Executive Summary</p>
+      <div class="dec-meta">
+        <span class="dm-k">For the Investment Committee — 09 June 2026</span>
+        <span class="dec-risk">
+          <span class="dm-k">Risk Level</span>
+          <span class="rk">Moderate</span>
+        </span>
+      </div>
+    </div>
+    <div class="verdict-block">
+      <p class="verdict-eyebrow">Recommendation of the Strategy Group</p>
+      <h2 class="verdict">PROCEED WITH CONDITIONS</h2>
+      <p class="recommendation">
+        We recommend IC review because the engine shows 24.0% IRR supported by ENGINE metrics, while CAPEX RECONCILIATION WARNING — bottom-up $6.16M/MW vs benchmark $8.85M/MW (delta -30%). Reconcile before re
+      </p>
+    </div>
+    
+    <div class="opp-grid" style="margin-top: 5mm; margin-bottom: 5mm;">
+      <div class="opp-cell">
+        <div class="oc-k">Why This Matters</div>
+        <p class="oc-v">This memo preserves engine-owned numbers and marks the narrative as deterministic fallback. Use it as a decision canvas seed, not a final board memo.</p>
+      </div>
+      <div class="opp-cell is-thesis">
+        <div class="oc-k">The Thesis</div>
+        <p class="oc-v">Engine-backed strategic memo generated without LLM narrative</p>
+      </div>
+    </div>
+
+    <div class="figs">
+      <div class="fig">
+        <div class="fk">Investment Size</div>
+        <div class="fv accent tnum">$371.8M</div>
+        <div class="fsub">50 MW IT load</div>
+      </div>
+      <div class="fig">
+        <div class="fk">IRR (Post-tax · Levered equity)</div>
+        <div class="fv tnum">23.8%</div>
+        <div class="fsub">Base case · Pre-tax 24.0%</div>
+      </div>
+      <div class="fig">
+        <div class="fk">NPV (Post-tax)</div>
+        <div class="fv tnum">$364.7M</div>
+        <div class="fsub">Base case · Pre-tax $371.7M</div>
+      </div>
+      <div class="fig">
+        <div class="fk">Payback</div>
+        <div class="fv tnum">10 yrs</div>
+        <div class="fsub">Stabilized from Yr 2–3</div>
+      </div>
+    </div>
+    <div class="decision-required">
+      <div class="dr-k">Decision Required</div>
+      <div class="dr-v">
+        Approve the $371.8M Phase 1 FID SUBJECT TO the conditions precedent below.
+         Condition: Validate engine assumptions.
+      </div>
+    </div>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">01</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>09 June 2026</span>
+  </div>
+</section>
+
+<!-- PAGE 2 — FINANCIAL SUMMARY -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">Engine-backed strategic memo generated without LLM narrative</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">02</span>Financial Summary</p>
+    <h2 class="headline smaller">Financial summary — built on the lowest marginal cost of power.</h2>
+    <div class="fin-hero">
+      <div class="fin-kpi">
+        <div class="fk">Revenue (stabilized)</div>
+        <div class="fv tnum">$63.9M</div>
+        <div class="fs">Engine · per year at stabilization</div>
+      </div>
+      <div class="fin-kpi">
+        <div class="fk">EBITDA Margin</div>
+        <div class="fv tnum">100.0%</div>
+        <div class="fs">Engine · $63.9M stabilized</div>
+      </div>
+      <div class="fin-kpi">
+        <div class="fk">IRR (Post-tax)</div>
+        <div class="fv accent tnum">23.8%</div>
+        <div class="fs">MOIC (Post-tax) 6.58× · Levered equity · Pre-tax 24.0%</div>
+      </div>
+      <div class="fin-kpi">
+        <div class="fk">NPV (Post-tax) · Payback</div>
+        <div class="fv tnum">$364.7M</div>
+        <div class="fs">10 yrs</div>
+      </div>
+    </div>
+    <div class="returns-comp" style="margin-top:6mm; padding:4mm 5mm; border:0.3mm solid var(--hair); border-radius:1.5mm;">
+      <div style="font-size:7.2pt; letter-spacing:.18em; text-transform:uppercase; color:var(--gray-1); font-weight:700; margin-bottom:2.5mm;">Returns Composition</div>
+      
+      <div style="display:flex; justify-content:space-between; font-size:9.5pt; margin-bottom:2mm;">
+        <span><b class="tnum">17%</b> Operations</span>
+        <span><b class="tnum">83%</b> Terminal value</span>
+      </div>
+      <div style="display:flex; height:2mm; border-radius:1mm; overflow:hidden; background:var(--whisper);">
+        <div style="width:17.417494747755327%; background:var(--gray-1);"></div>
+        <div style="width:82.58250525224467%; background:var(--oxblood);"></div>
+      </div>
+      <div style="font-size:8.4pt; color:var(--ink-soft); margin-top:2.5mm;">Returns depend primarily on terminal value: 83% of equity value depends on the exit multiple.</div>
+    </div>
+    <div class="fin-body">
+      <div class="break-avoid">
+        <div class="cap-title">CAPEX — $371.8M · 50 MW</div>
+        
+    <div class="cap-total">
+      <span class="ct-name">Total CAPEX</span>
+      <span class="ct-share tnum"></span>
+      <span class="ct-val tnum">$371.8M</span>
+    </div>
+    <div class="muted-note" style="margin-top:4mm;">Component breakdown not modeled.</div>
+      </div>
+      <div class="sens-wrap">
+        <div class="sens-title">IRR Sensitivity — Power Price &amp; Utilization</div>
+        
+  <div class="sens-line">
+    <div class="sens-base" style="left:60.6%;">
+      <span class="sb-lbl">Base 0.2%</span>
+    </div>
+  </div>
+  <div class="muted-note" style="margin-top:6mm;">Base case IRR 23.8%. Sensitivity analysis pending stress engine.</div>
+      </div>
+    </div>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">02</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>09 June 2026</span>
+  </div>
+</section>
+
+<!-- PAGE 3 — RISKS -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">Engine-backed strategic memo generated without LLM narrative</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">03</span>Risk Assessment</p>
+    <h2 class="headline smaller">1 principal risks — each mitigated to the boundary of acceptance.</h2>
+    <hr class="accentline" />
+    <div class="risk-table">
+      <div class="risk-headrow">
+        <span class="rh">№</span>
+        <span class="rh">Risk &amp; Mitigation</span>
+        <span class="rh">Severity</span>
+        <span class="rh">Category</span>
+      </div>
+      
+    <div class="risk-row">
+      <div class="r-no">1</div>
+      <div>
+        <div class="r-name">CAPEX RECONCILIATION WARNING — bottom-up $6.16M/MW vs benchmark $8.85M/MW (delta -30%). Reconcile before relying on IRR/MOIC.</div>
+        <div class="r-mit">Review engine assumptions and rerun sensitivity before approval.</div>
+      </div>
+      <div class="risk-meta">
+        <div class="rm-lab">Severity</div>
+        <div class="rm-val">
+          <span class="ticks lv2"><i></i><i></i><i></i></span>
+          MEDIUM
+        </div>
+      </div>
+      <div class="risk-meta">
+        <div class="rm-lab">Category</div>
+        <div class="rm-val">other</div>
+      </div>
+    </div>
+    </div>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">03</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>09 June 2026</span>
+  </div>
+</section>
+
+<!-- PAGE 4 — SCENARIO ANALYSIS -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">Engine-backed strategic memo generated without LLM narrative</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">04</span>Scenario Analysis</p>
+    <h2 class="headline smaller">Base case — the underwriting case for FID. Stress scenarios pending.</h2>
+    <div class="scen-grid">
+      <div class="scen">
+        <div class="sc-name">Downside</div>
+        <div class="sc-tag">Not modeled — pending stress engine.</div>
+        <div class="sc-irr-k">IRR</div>
+        <div class="sc-irr tnum muted-note" style="font-size:14pt;">Not modeled</div>
+        <div class="sc-rows">
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum muted-note">not specified</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum muted-note">not modeled</span></div>
+        </div>
+      </div>
+      <div class="scen base">
+        <div class="sc-name">Base</div>
+        <div class="sc-tag">50 MW at 23.8% post-tax IRR — the underwriting case for FID.</div>
+        <div class="sc-irr-k">IRR (Post-tax)</div>
+        <div class="sc-irr tnum">23.8%</div>
+        <div class="sc-rows">
+          <div class="sc-line"><span class="sc-lk">Pre-tax IRR</span><span class="sc-lv tnum">24.0%</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV (Post-tax)</span><span class="sc-lv tnum">$364.7M</span></div>
+          <div class="sc-line"><span class="sc-lk">Payback</span><span class="sc-lv tnum">10 yrs</span></div>
+        </div>
+      </div>
+      <div class="scen">
+        <div class="sc-name">Upside</div>
+        <div class="sc-tag">Not modeled — pending stress engine.</div>
+        <div class="sc-irr-k">IRR</div>
+        <div class="sc-irr tnum muted-note" style="font-size:14pt;">Not modeled</div>
+        <div class="sc-rows">
+          <div class="sc-line"><span class="sc-lk">Utilization</span><span class="sc-lv tnum muted-note">not specified</span></div>
+          <div class="sc-line"><span class="sc-lk">NPV</span><span class="sc-lv tnum muted-note">not modeled</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="scen-note">
+      <b>Base case is model-derived.</b> Downside and upside scenarios are not yet modeled —
+      a full three-scenario stress engine (separate utilization + power price runs) is pending.
+      Only the base case figures are presented here; no estimated IRR or NPV is shown for Downside or Upside.
+    </p>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">04</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>09 June 2026</span>
+  </div>
+</section>
+
+<!-- PAGE 5 — RECOMMENDATION -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">Engine-backed strategic memo generated without LLM narrative</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">05</span>Recommendation</p>
+    <h2 class="headline smaller">Commit Phase 1 only once conditions precedent are met; gate Phase 2 on commissioning and 80% contracted demand.</h2>
+    <hr class="accentline" />
+    <div class="rec-two">
+      <div class="rec-card go">
+        <div class="rc-k">Approve — With Conditions</div>
+        <div class="rc-v">We recommend IC review because the engine shows 24.0% IRR supported by ENGINE metrics, while CAPEX RECONCILIATION WARNING — bottom-up $6.16M/MW vs benchmark $8.85M/MW (delta -30%). Reconcile before relying on IRR/MOIC.…</div>
+      </div>
+      <div class="rec-card hold">
+        <div class="rc-k">Do Not Approve Yet</div>
+        <div class="rc-v">Phase 2 capital gated on Phase 1 occupancy ≥80%. 80% target occupancy…</div>
+      </div>
+    </div>
+    
+    <div class="conditions">
+      <div class="cd-title">Conditions Precedent</div>
+      <div class="cond-row">
+    
+    <div class="cond">
+      <div class="ci">i.</div>
+      <div class="cv">Validate engine assumptions</div>
+    </div>
+    <div class="cond">
+      <div class="ci">ii.</div>
+      <div class="cv">Review risks</div>
+    </div>
+    <div class="cond">
+      <div class="ci">iii.</div>
+      <div class="cv">Rerun memo when LLM provider is healthy</div>
+    </div>
+  </div>
+    </div>
+    
+    <div class="timeline">
+      <div class="tl-title">Next Steps</div>
+      <div class="tl-track">
+        
+    <div class="tl-stop first">
+      <div class="tl-when">T+0</div>
+      <div class="tl-what">IC review</div>
+    </div>
+      </div>
+    </div>
+    <p class="rec-quote">Engine-backed strategic memo generated without LLM narrative</p>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">05</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>09 June 2026</span>
+  </div>
+</section>
+
+<!-- PAGE 6 — APPENDIX -->
+<section class="page">
+  <div class="runhead">
+    <span class="rh-name">Engine-backed strategic memo generated without LLM narrative</span>
+    <span class="rh-class">Strictly Private &amp; Confidential</span>
+  </div>
+  <div class="frame">
+    <p class="eyebrow"><span class="num">06</span>Appendix</p>
+    <h2 class="headline smaller">Sources, assumptions &amp; supporting data.</h2>
+    <div class="apx-grid">
+      <div class="apx-block">
+        <div class="ab-k">Model Assumptions</div>
+        <ul class="apx-list">
+          
+    <li><span class="al-k">WACC</span><span class="al-v tnum">Not specified</span></li>
+    <li><span class="al-k">Hold period</span><span class="al-v tnum">Not modeled</span></li>
+    <li><span class="al-k">Total CAPEX</span><span class="al-v tnum">$371.8M</span></li>
+    <li><span class="al-k">Debt</span><span class="al-v tnum">not specified</span></li>
+    <li><span class="al-k">IRR (Pre-tax, base)</span><span class="al-v tnum">24.0%</span></li>
+    <li><span class="al-k">IRR (Post-tax)</span><span class="al-v tnum">23.8%</span></li>
+    <li><span class="al-k">NPV (Post-tax)</span><span class="al-v tnum">$364.7M</span></li>
+    <li><span class="al-k">Terminal Value</span><span class="al-v tnum">$1.18B</span></li>
+    <li><span class="al-k">Payback</span><span class="al-v tnum">10 yrs</span></li>
+    <li><span class="al-k">Tax</span><span class="al-v tnum">10% Qatar · straight-line 10y</span></li>
+    <li><span class="al-k">Utilization</span><span class="al-v tnum">not specified</span></li>
+        </ul>
+      </div>
+      <div class="apx-block">
+        <div class="ab-k">Sources</div>
+        <ul class="apx-list plain">
+          <li><span class="src">N/A — Source Required</span></li><li><span class="src">Note: Narrative synthesis was not produced by Kimi.</span></li><li><span class="src">Note: Human review is required before IC circulation.</span></li>
+        </ul>
+      </div>
+      <div class="apx-block">
+        <div class="ab-k">Supporting Data — CAPEX</div>
+        <table class="apx-table">
+          <thead><tr><th>Component</th><th class="r">Amount</th></tr></thead>
+          <tbody>
+            <tr style="font-weight:700"><td>Total CAPEX</td><td class="r tnum">$371.8M</td></tr>
+          </tbody>
+        </table>
+        <div class="muted-note" style="margin-top:4mm;">Component breakdown not modeled.</div>
+      </div>
+      <div class="apx-block">
+        <div class="ab-k">Supporting Data — Contract &amp; Structure</div>
+        <table class="apx-table">
+          <thead><tr><th>Item</th><th class="r">Terms</th></tr></thead>
+          <tbody><tr><td>Anchor offtake</td><td class="r">not specified</td></tr><tr><td>Contracted before FID</td><td class="r">not specified</td></tr><tr><td>Rental rate</td><td class="r">N/A</td></tr><tr><td>Debt structure</td><td class="r">not specified</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="apx-disc">
+      This memorandum has been prepared by the ORACLE Strategy Group for the Investment Committee and Board of Directors on a strictly private and
+      confidential basis. Figures are derived from ORACLE internal model v1 and the sources listed; forward-looking estimates are
+      subject to execution, market and macroeconomic conditions. AI-assisted — human review required. Not for distribution.
+      Memo ID: 2cbaea3b-3fe6-4263-a5f0-89a98c02a54a · Generated 2026-06-08T23:28:31.271Z · Model: deterministic-fallback.
+    </div>
+  </div>
+  <div class="runfoot">
+    <span class="rf-pg">06</span>
+    <span class="rf-conf">Strictly Private &amp; Confidential</span>
+    <span>09 June 2026</span>
+  </div>
+</section>
+
+</body></html>

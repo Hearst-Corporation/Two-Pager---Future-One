@@ -1,0 +1,552 @@
+{
+  "memo": {
+    "id": "532ce6a3-1161-42dc-8b39-5983e661926b",
+    "project_id": "f36225e9-6c67-4c41-b836-943680c9f865",
+    "scenario_id": "3d867953-3085-4e50-bd64-93e6ff0db2b4",
+    "title": "Engine-backed strategic memo generated without LLM narrative",
+    "executive_summary": "Engine-backed strategic memo generated without LLM narrative",
+    "memo_json": {
+      "data_freshness": {
+        "data_as_of": "2025-04-30",
+        "datapoints": [
+          {
+            "id": "crwv_leverage",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "eqx_ebitda_margin_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "dlr_leverage_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "brookfield_aum_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "eqx_pue_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-30"
+          },
+          {
+            "id": "dlr_ebitda_margin_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "crwv_capex_intensity",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "qfza_tax_regime",
+            "status": "EXPIRED",
+            "timestamp": "2024-01-01"
+          },
+          {
+            "id": "crwv_utilization_post_ramp",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "mena_permit_timeline_free_zone",
+            "status": "EXPIRED",
+            "timestamp": "2024-01-01"
+          },
+          {
+            "id": "eqx_retail_price_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "dlr_wholesale_price_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "tt_shell_mena_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-01"
+          },
+          {
+            "id": "tt_mep_mena_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-01"
+          }
+        ],
+        "computed_by": "server",
+        "status_counts": {
+          "EXPIRED": 14
+        },
+        "overall_status": "EXPIRED"
+      },
+      "explainability": {
+        "audience": "investor",
+        "jargon_translations": {
+          "IRR": "Internal rate of return — annualized yield that makes the project NPV equal zero",
+          "PUE": "Total facility power / IT equipment power; critical OPEX and sustainability metric",
+          "DSCR": "EBITDA / total debt service; primary lender covenant metric",
+          "payback": "Years to recover invested capital; simple and discounted versions both relevant"
+        },
+        "simplified_takeaways": [
+          "The simulator produced usable numbers.",
+          "The AI memo writer timed out.",
+          "This fallback keeps the numbers and avoids inventing narrative."
+        ],
+        "why_this_recommendation": "We recommend IC review because simulator metrics show 58.2% IRR supported by [datapoint_id crwv_leverage]."
+      },
+      "_exec_projection": {
+        "irr": 0.5816962517296785,
+        "npv": 6579009536.221358,
+        "pue": 1.45,
+        "moic": 21.38,
+        "years": [
+          {
+            "y": 1,
+            "cum": -343337500,
+            "fcf": 0,
+            "rev": 2640000,
+            "ebitda": -9527000
+          },
+          {
+            "y": 2,
+            "cum": -343337500,
+            "fcf": 0,
+            "rev": 9694080,
+            "ebitda": -7235820.800000001
+          },
+          {
+            "y": 3,
+            "cum": -509632865.56799996,
+            "fcf": 286258384.43200004,
+            "rev": 401716065.6,
+            "ebitda": 329005246.744
+          },
+          {
+            "y": 4,
+            "cum": 105781402.77472007,
+            "fcf": 615414268.34272,
+            "rev": 794631845.376,
+            "ebitda": 666019446.2502401
+          },
+          {
+            "y": 5,
+            "cum": 727156546.5398414,
+            "fcf": 621375143.7651213,
+            "rev": 805068325.165824,
+            "ebitda": 672189051.2684379
+          },
+          {
+            "y": 6,
+            "cum": 1355033077.4369211,
+            "fcf": 627876530.8970798,
+            "rev": 816144463.7835264,
+            "ebitda": 678911961.1727504
+          },
+          {
+            "y": 7,
+            "cum": 1985746965.2750578,
+            "fcf": 630713887.8381367,
+            "rev": 819502282.6486825,
+            "ebitda": 681816474.4911103
+          },
+          {
+            "y": 8,
+            "cum": 2618882655.4855924,
+            "fcf": 633135690.2105347,
+            "rev": 822368320.9592127,
+            "ebitda": 684295597.6297189
+          },
+          {
+            "y": 9,
+            "cum": 3253996586.422394,
+            "fcf": 635113930.9368013,
+            "rev": 824709434.2447352,
+            "ebitda": 686320660.621696
+          },
+          {
+            "y": 10,
+            "cum": 16218396118.141384,
+            "fcf": 637152646.3795704,
+            "rev": 827122115.2420951,
+            "ebitda": 688407629.6844122
+          }
+        ],
+        "total_mw": 50,
+        "total_capex": 1447075000,
+        "capex_per_mw": 28941500,
+        "payback_years": 4,
+        "terminal_value": 12391337334.31942,
+        "dscr_stabilized": 19.24,
+        "cod_offset_months": 0,
+        "stabilized_ebitda": 684295597.6297189,
+        "stabilized_revenue": 822368320.9592127,
+        "capex_reconciliation": {
+          "delta_pct": 41.1,
+          "within_tolerance": false,
+          "model_capex_per_mw": 12485000,
+          "benchmark_capex_per_mw": 8850000
+        }
+      },
+      "_generation_mode": "deterministic_fallback",
+      "confidence_block": {
+        "computed_by": "server",
+        "known_unknowns": [
+          "Narrative synthesis was not produced by Kimi.",
+          "Human review is required before IC circulation."
+        ],
+        "source_density": "14 sourced / 14 total",
+        "confidence_level": "HIGH",
+        "mean_trust_score": 89,
+        "estimation_quality": "Generated from the simulator output and curated intelligence because the LLM provider exceeded the response window.",
+        "mean_freshness_score": 0.54
+      },
+      "decision_tensions": [
+        {
+          "id": "speed_vs_resiliency",
+          "verdict": "Requires human IC synthesis between [object Object] and [object Object]."
+        },
+        {
+          "id": "commercialization_speed_vs_occupancy_risk",
+          "verdict": "Requires human IC synthesis between [object Object] and [object Object]."
+        },
+        {
+          "id": "sovereign_vs_partnership",
+          "verdict": "Requires human IC synthesis between [object Object] and [object Object]."
+        },
+        {
+          "id": "compute_ownership_vs_capital_efficiency",
+          "verdict": "Requires human IC synthesis between [object Object] and [object Object]."
+        }
+      ],
+      "executive_summary": {
+        "bullets": [
+          "IRR 58.2% · MOIC 21.38x · Payback 4 years.",
+          "Total CAPEX $1.45B for 50 MW.",
+          "CAPEX RECONCILIATION WARNING — bottom-up $12.48M/MW vs benchmark $8.85M/MW (delta 41%). Reconcile before relying on IRR/MOIC."
+        ],
+        "headline": "Engine-backed strategic memo generated without LLM narrative",
+        "overall_confidence": "HIGH"
+      },
+      "risks_constraints": {
+        "items": [
+          {
+            "label": "CAPEX RECONCILIATION WARNING — bottom-up $12.48M/MW vs benchmark $8.85M/MW (delta 41%). Reconcile before relying on IRR/MOIC.",
+            "category": "other",
+            "severity": "MEDIUM",
+            "dependency": "IC assumption review",
+            "mitigation": "Review engine assumptions and rerun sensitivity before approval."
+          }
+        ]
+      },
+      "strategic_context": {
+        "body": "This memo preserves engine-owned numbers and marks the narrative as deterministic fallback. Use it as a decision canvas seed, not a final board memo.",
+        "skip": false
+      },
+      "deployment_roadmap": {
+        "phases": [
+          {
+            "label": "IC review",
+            "gating_events": [
+              "Validate engine assumptions",
+              "Review risks",
+              "Rerun memo when LLM provider is healthy"
+            ],
+            "months_from_t0": "0"
+          }
+        ],
+        "reality_check_flags": []
+      },
+      "market_benchmarking": {
+        "comparables": [
+          {
+            "name": "equinix",
+            "value": "Referenced",
+            "metric": "Comparable profile",
+            "source": "ORACLE intelligence layer"
+          },
+          {
+            "name": "digital_realty",
+            "value": "Referenced",
+            "metric": "Comparable profile",
+            "source": "ORACLE intelligence layer"
+          },
+          {
+            "name": "khazna",
+            "value": "Referenced",
+            "metric": "Comparable profile",
+            "source": "ORACLE intelligence layer"
+          },
+          {
+            "name": "g42",
+            "value": "Referenced",
+            "metric": "Comparable profile",
+            "source": "ORACLE intelligence layer"
+          },
+          {
+            "name": "neom",
+            "value": "Referenced",
+            "metric": "Comparable profile",
+            "source": "ORACLE intelligence layer"
+          }
+        ],
+        "structural_differences": [
+          "equinix: profile is structurally comparable but not automatically interchangeable with this scenario.",
+          "digital_realty: profile is structurally comparable but not automatically interchangeable with this scenario.",
+          "khazna: profile is structurally comparable but not automatically interchangeable with this scenario."
+        ]
+      },
+      "intelligence_sources": [
+        {
+          "trust": "HIGH",
+          "used_for": "fallback memo grounding",
+          "datapoint_id": "crwv_leverage"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "fallback memo grounding",
+          "datapoint_id": "eqx_ebitda_margin_2024"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "fallback memo grounding",
+          "datapoint_id": "dlr_leverage_2024"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "fallback memo grounding",
+          "datapoint_id": "brookfield_aum_2024"
+        },
+        {
+          "trust": "HIGH",
+          "used_for": "fallback memo grounding",
+          "datapoint_id": "eqx_pue_2024"
+        }
+      ],
+      "key_financial_metrics": {
+        "metrics": [
+          {
+            "unit": "",
+            "label": "IRR",
+            "value": "58.2%",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "MOIC",
+            "value": "21.38×",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "NPV",
+            "value": "$6.58B",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "CAPEX",
+            "value": "$1.45B",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "yr",
+            "label": "Payback",
+            "value": "4",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "DSCR",
+            "value": "19.24×",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "Stabilized EBITDA",
+            "value": "$684M",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "Stabilized Revenue",
+            "value": "$822M",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "Terminal Value",
+            "value": "$12.39B",
+            "source": "engine",
+            "confidence": "HIGH"
+          }
+        ],
+        "narrative": "Financial rows are pinned to the simulator engine; no LLM-authored figures are included."
+      },
+      "infrastructure_analysis": {
+        "body": "Scenario scale: 50 MW · PUE 1.45 · AI allocation 0%.",
+        "tradeoffs": [
+          "Choosing [object Object] over [object Object] requires IC review; accepting quantified tradeoff pending human synthesis.",
+          "Choosing [object Object] over [object Object] requires IC review; accepting quantified tradeoff pending human synthesis.",
+          "Choosing [object Object] over [object Object] requires IC review; accepting quantified tradeoff pending human synthesis."
+        ]
+      },
+      "strategic_opportunities": {
+        "items": [
+          {
+            "label": "Use engine-backed memo as decision seed",
+            "confidence": "HIGH",
+            "execution_path": "Why: simulator returned usable KPIs. Alternative: wait for LLM narrative. Accepted risk: less prose nuance. Metric: IC can review IRR/MOIC/CAPEX without provider delay."
+          }
+        ]
+      },
+      "recommended_architecture": {
+        "config": {
+          "mw": "50 MW",
+          "tier": "Not modeled",
+          "cooling": "Standard / not modeled",
+          "gpu_sku": "Not modeled",
+          "phasing": "Not modeled",
+          "rack_mix": "Not modeled",
+          "networking": "Not modeled"
+        },
+        "rationale": "We recommend IC review because the engine shows 58.2% IRR supported by ENGINE metrics, while CAPEX RECONCILIATION WARNING — bottom-up $12.48M/MW vs benchmark $8.85M/MW (delta 41%). Reconcile before relying on IRR/MOIC."
+      },
+      "long_term_strategic_value": {
+        "ten_year_arc": "Long-term value depends on occupancy, capital intensity, power availability and contract structure.",
+        "speculative_branches": []
+      },
+      "commercialization_strategy": {
+        "pricing": "$99/kW/mo hyperscale",
+        "ramp_profile": "80% target occupancy",
+        "anchor_tenant": "Not modeled",
+        "contract_structure": "Requires IC structuring review"
+      }
+    },
+    "memo_markdown": "# Strategic Memo — AI-generated draft\n\n_Generated 2026-06-03T13:23:56.292Z · model deterministic-fallback · v1 · stakeholder operator · region qatar_\n_Data as of 2025-04-30 · freshness EXPIRED_\n\n**Confidence: HIGH** (14 sourced / 14 total) — computed server-side\n\n## Executive Summary\n**Engine-backed strategic memo generated without LLM narrative**\n- IRR 58.2% · MOIC 21.38x · Payback 4 years.\n- Total CAPEX $1.45B for 50 MW.\n- CAPEX RECONCILIATION WARNING — bottom-up $12.48M/MW vs benchmark $8.85M/MW (delta 41%). Reconcile before relying on IRR/MOIC.\n\n## Strategic Context\nThis memo preserves engine-owned numbers and marks the narrative as deterministic fallback. Use it as a decision canvas seed, not a final board memo.\n\n## Key Financial Metrics\nFinancial rows are pinned to the simulator engine; no LLM-authored figures are included.\n- **IRR**: 58.2%  (HIGH) · engine\n- **MOIC**: 21.38×  (HIGH) · engine\n- **NPV**: $6.58B  (HIGH) · engine\n- **CAPEX**: $1.45B  (HIGH) · engine\n- **Payback**: 4 yr (HIGH) · engine\n- **DSCR**: 19.24×  (HIGH) · engine\n- **Stabilized EBITDA**: $684M  (HIGH) · engine\n- **Stabilized Revenue**: $822M  (HIGH) · engine\n- **Terminal Value**: $12.39B  (HIGH) · engine\n\n## Infrastructure Analysis\nScenario scale: 50 MW · PUE 1.45 · AI allocation 0%.\n- Choosing [object Object] over [object Object] requires IC review; accepting quantified tradeoff pending human synthesis.\n- Choosing [object Object] over [object Object] requires IC review; accepting quantified tradeoff pending human synthesis.\n- Choosing [object Object] over [object Object] requires IC review; accepting quantified tradeoff pending human synthesis.\n\n## Market Benchmarking\n- equinix: Comparable profile = Referenced (ORACLE intelligence layer)\n- digital_realty: Comparable profile = Referenced (ORACLE intelligence layer)\n- khazna: Comparable profile = Referenced (ORACLE intelligence layer)\n- g42: Comparable profile = Referenced (ORACLE intelligence layer)\n- neom: Comparable profile = Referenced (ORACLE intelligence layer)\n\n## Key Concerns\n- CAPEX RECONCILIATION WARNING — bottom-up $12.48M/MW vs benchmark $8.85M/MW (delta 41%). Reconcile before relying on IRR/MOIC. [MEDIUM] — Review engine assumptions and rerun sensitivity before approval.\n\n## Strategic Opportunities\n- Use engine-backed memo as decision seed — Why: simulator returned usable KPIs. Alternative: wait for LLM narrative. Accepted risk: less prose nuance. Metric: IC can review IRR/MOIC/CAPEX without provider delay.\n\n## Recommended Architecture\nWe recommend IC review because the engine shows 58.2% IRR supported by ENGINE metrics, while CAPEX RECONCILIATION WARNING — bottom-up $12.48M/MW vs benchmark $8.85M/MW (delta 41%). Reconcile before relying on IRR/MOIC.\n\n## Revenue Model\n\n## What Happens Next\n- IC review (0): Validate engine assumptions, Review risks, Rerun memo when LLM provider is healthy\n\n## Long-Term Strategic Value\nLong-term value depends on occupancy, capital intensity, power availability and contract structure.\n\n## Sources\n- `crwv_leverage` — fallback memo grounding (HIGH)\n- `eqx_ebitda_margin_2024` — fallback memo grounding (HIGH)\n- `dlr_leverage_2024` — fallback memo grounding (HIGH)\n- `brookfield_aum_2024` — fallback memo grounding (HIGH)\n- `eqx_pue_2024` — fallback memo grounding (HIGH)\n\n---\n_AI-assisted · Indicative · Human review required._",
+    "stakeholder": "operator",
+    "region": "qatar",
+    "audience": "investor",
+    "provider_used": "deterministic-fallback",
+    "generation_time_ms": 45002,
+    "confidence_level": "HIGH",
+    "data_as_of": "2025-04-30",
+    "status": "draft",
+    "version": 1,
+    "created_by": "38f94ae3-51a6-47a2-8cd2-705353b7e385",
+    "created_at": "2026-06-03T13:23:56.589318+00:00",
+    "updated_at": "2026-06-03T13:23:56.589318+00:00",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "approved_by": null,
+    "approved_at": null
+  },
+  "scenario": {
+    "id": "3d867953-3085-4e50-bd64-93e6ff0db2b4",
+    "project_id": "f36225e9-6c67-4c41-b836-943680c9f865",
+    "name": "Plan — Government AI Cluster 50MW (2026-06-03)",
+    "scenario_type": "custom",
+    "version": 1,
+    "description": null,
+    "is_active": false,
+    "is_locked": false,
+    "total_mw": 50,
+    "total_mw_source_id": null,
+    "phase1_mw": null,
+    "phase1_complete_year": 2,
+    "phase2_mw": null,
+    "phase2_complete_year": 4,
+    "phase3_mw": null,
+    "phase3_complete_year": 6,
+    "pue": 1.45,
+    "pue_source_id": null,
+    "target_occupancy_pct": 80,
+    "start_year": 2026,
+    "capex_shell_per_mw": 4400000,
+    "capex_shell_source_id": null,
+    "capex_mep_per_mw": 3800000,
+    "capex_mep_source_id": null,
+    "capex_substation_per_mw": 1200000,
+    "capex_substation_source_id": null,
+    "capex_cooling_per_mw": 1950000,
+    "capex_cooling_source_id": null,
+    "capex_grid_per_mw": null,
+    "capex_grid_source_id": null,
+    "capex_contingency_pct": 10,
+    "capex_liquid_cooling_premium_per_mw": null,
+    "capex_land_per_mw": null,
+    "capex_land_source_id": null,
+    "electricity_price_mwh": 30,
+    "electricity_price_source_id": null,
+    "opex_maintenance_pct": 4,
+    "opex_staff_annual_musd": 8,
+    "opex_insurance_pct": 1.5,
+    "opex_ga_pct": 3,
+    "opex_operator_mgmt_fee_pct": 5,
+    "price_retail_colo_kw_month": 139.5,
+    "price_retail_source_id": null,
+    "price_wholesale_kw_month": 85.5,
+    "price_wholesale_source_id": null,
+    "price_hyperscale_kw_month": 99,
+    "price_hyperscale_source_id": null,
+    "annual_escalation_pct": 2,
+    "equity_hearst_pct": 20,
+    "equity_brookfield_pct": 55,
+    "equity_qatar_pct": 25,
+    "debt_pct": 45,
+    "debt_interest_rate": 5.5,
+    "debt_interest_source_id": null,
+    "exit_multiple": 18,
+    "exit_multiple_source_id": null,
+    "exit_year": 10,
+    "commercial_split": {
+      "sovereign_ai": 100
+    },
+    "operator_strategy": "multi_operator",
+    "projection_data": {},
+    "last_calculated_at": null,
+    "created_by": "38f94ae3-51a6-47a2-8cd2-705353b7e385",
+    "created_at": "2026-06-03T13:22:05.265046+00:00",
+    "updated_at": "2026-06-03T13:22:05.265046+00:00",
+    "input_mode": "target_irr_first",
+    "input_value": {
+      "lever": "pricing",
+      "total_mw": 50,
+      "target_irr_pct": 18
+    },
+    "hardware_mix": {
+      "ai_pct": 70,
+      "num_racks": null,
+      "gpu_sku_id": "gb200_nvl72",
+      "liquid_pct": 20,
+      "classic_pct": 10,
+      "gpu_hour_price": 6,
+      "utilization_pct": 85
+    },
+    "debt_term_years": 12
+  },
+  "versions": [
+    {
+      "id": "532ce6a3-1161-42dc-8b39-5983e661926b",
+      "version": 1,
+      "status": "draft",
+      "provider_used": "deterministic-fallback",
+      "confidence_level": "HIGH",
+      "created_at": "2026-06-03T13:23:56.589318+00:00"
+    }
+  ]
+}

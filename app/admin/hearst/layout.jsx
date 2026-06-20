@@ -1,3 +1,4 @@
+import './hearst-tokens.css';
 import styles from './hearst.module.css';
 import HearstNav from './components/HearstNav';
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Qatar 50MW Opus Test</title>
+<style>
+:root{--ink:#1a1a1a;--soft:#555;--hair:#e4e0d8;--ox:#6b1b22;--bg:#faf8f4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:48px 32px 96px;background:#fff;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,.05)}
+.back{display:inline-block;margin-bottom:24px;color:var(--ox);text-decoration:none;font-size:13px}
+.meta{color:var(--soft);font-size:13px;border-left:3px solid var(--ox);padding-left:12px;margin:0 0 28px}
+h1{font-size:26px;line-height:1.25;margin:0 0 8px}
+h2{font-size:19px;margin:32px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--hair)}
+h3{font-size:16px;margin:22px 0 8px}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px}
+th,td{border:1px solid var(--hair);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#f3efe8}
+code{background:#f3efe8;padding:1px 5px;border-radius:3px;font-size:13px}
+pre.json{background:#1e1e1e;color:#dcdcdc;padding:14px;border-radius:6px;overflow:auto;font-size:12px}
+ul,ol{padding-left:22px}
+hr{border:none;border-top:1px solid var(--hair);margin:24px 0}
+a{color:var(--ox)}
+@media print{body{background:#fff}.wrap{box-shadow:none;max-width:none}.back{display:none}}
+</style></head><body><div class="wrap">
+<a class="back" href="index.html">← Tous les reports</a>
+<h1>Qatar 50MW Opus Test</h1>
+<div class="meta">Statut: <strong>approved</strong> · Confiance: HIGH · Région: qatar · Stakeholder: investor · Modèle: claude-opus-4-8 · Data as of: 2025-04-30 · Créé: 2026-05-29</div>
+<h1>Qatar 50MW Opus Test — AI-generated draft</h1>
+<p>_Generated 2026-05-29T08:48:32.389Z · model claude-opus-4-8 · v1 · stakeholder investor · region qatar_ _Data as of 2025-04-30 · freshness EXPIRED_</p>
+<p><strong>Confidence: HIGH</strong> (14 sourced / 14 total) — computed server-side</p>
+<h2>Executive Summary</h2>
+<p><strong>50 MW Qatar powered-shell: underwriteable at 18.2% levered IRR / 5.85x MOIC if anchor LOI + KAHRAMAA MOU + transformer LoI precede financing close</strong></p>
+<ul>
+<li>Base case returns hold: IRR 18.2%, MOIC 5.85x, NPV $607M, DSCR 9.10x [ASSUMED projection inputs] — DSCR is implausibly high for 60% leverage and signals the model may be under-counting debt service or over-counting NNN rent; re-test before IC.</li>
+<li>CAPEX $440M = $8.8M/MW, consistent with T&amp;T MENA shell $4.4M + MEP $3.8M + ~$1.2M substation (tt_shell_mena_2024, tt_mep_mena_2024) before the $1.5M/MW Qatar dry-cooling premium — confirm cooling premium is inside the $440M, not on top.</li>
+<li>Pricing of $120/kW/mo sits between DLR wholesale $95 (dlr_wholesale_price_2024) and Equinix retail $165 (eqx_retail_price_2024); defensible with Qatar +10-15% scarcity premium but only with a signed anchor.</li>
+<li>Critical path is electrical + grid, not construction: 22-mo transformer + 24-mo KAHRAMAA connection must run in parallel from T0 or energisation slips to 2029 (transformer_shortage_global, qatar_grid_connection_timeline).</li>
+<li>Lowest-friction capital is the QIA-Brookfield $20B AI vehicle (brookfield_qia_partnership_unlock); equity split Hearst 40 / Brookfield 30 / Qatar 30 already aligns the financing channel.</li>
+</ul>
+<h2>Strategic Context</h2>
+<p>Qatar is an emerging DC market (absorption ~80 MW/yr, 600 MW realistic pipeline to 2030) where supply is gated by power and permits, not demand — keeping 2027 oversupply risk low and the +10-15% scarcity premium intact. The structural unlock is the QIA-Brookfield $20B AI partnership (May 2024), which makes a QFZA-domiciled, anchor-backed powered shell financeable at 60-65% LTV without a 6-12 month general capital raise. QFZA delivers a 0% corporate tax / 100% foreign ownership / 6-month permit regime (qfza_tax_regime, mena_permit_timeline_free_zone) versus 18-24 months elsewhere. The binding constraint is electrical procurement: 22-month transformers and a 24-month KAHRAMAA connection define the timeline, not the building. For an investor, the thesis is a power-and-permit-arbitrage NNN asset with sovereign-anchored absorption — attractive returns conditional on disciplined sequencing.</p>
+<h2>Key Financial Metrics</h2>
+<p>Capex per MW is well-anchored to T&amp;T MENA tier-2 data. The return stack (IRR/MOIC/NPV/TV) is from the scenario projection and should be treated as MEDIUM-LOW until stabilized EBITDA is restored and DSCR re-derived — 9.10x DSCR is not consistent with 60% leverage at 6.5% and almost certainly overstates coverage. Pricing at $120/kW/mo is defensible inside the DLR-to-Equinix band with the Qatar scarcity premium.</p>
+<ul>
+<li><strong>Total CAPEX</strong>: 440 $M ($8.8M/MW) (HIGH) · tt_shell_mena_2024 + tt_mep_mena_2024</li>
+<li><strong>Levered IRR</strong>: 18.2 % (MEDIUM) · ASSUMED projection — sensitive to anchor LOI + rent escalation</li>
+<li><strong>MOIC</strong>: 5.85 x (LOW) · ASSUMED projection — 5.85x at 18.2% IRR over 7yr implies aggressive TV; re-test</li>
+<li><strong>Payback</strong>: 6.2 years (MEDIUM) · ASSUMED projection</li>
+<li><strong>DSCR</strong>: 9.10 x (LOW) · ASSUMED projection — implausibly high for 60% debt @6.5%; likely model error</li>
+<li><strong>NPV</strong>: 607 $M (LOW) · ASSUMED projection — discount rate undisclosed</li>
+<li><strong>Terminal Value (Yr7)</strong>: 1180 $M (LOW) · ASSUMED projection — exit cap not disclosed; benchmark DLR ~6% (dlr_leverage_2024 entity)</li>
+<li><strong>Hyperscale rent</strong>: 120 $/kW/mo (MEDIUM) · dlr_wholesale_price_2024 ($95) + eqx_retail_price_2024 ($165)</li>
+<li><strong>Target EBITDA margin (landlord)</strong>: 55-65 % (MEDIUM) · eqx_ebitda_margin_2024 (47% full-stack; landlord higher)</li>
+<li><strong>Debt / leverage</strong>: 60 % @ 6.5% (HIGH) · dlr_leverage_2024 (62% public REIT comp)</li>
+</ul>
+<h2>Infrastructure Analysis</h2>
+<p>50 MW IT load at PUE 1.4 (air-cooled floor for Qatar; no year-round free-cooling window). Water stress at 4.7/5 forces closed-loop adiabatic + DLC hybrid from day one — wet-cooling will not clear KAHRAMAA environmental review post-2025, adding ~$1.5M/MW cooling premium (qatar_water_stress_premium). Powered-shell archetype means Hearst delivers shell + MEP + substation under NNN; tenant funds fit-out and owns GPUs, so this is a landlord/real-estate return, not a GPU-cloud return. Tier III (N+1) is the commercial sweet spot vs Tier IV given anchor SLAs. KAHRAMAA grid headroom (~8 GW) exists but a new 50 MW connection is a fixed 24-month process. PUE floor improves to ~1.2 only on liquid-cooled GPU halls.</p>
+<ul>
+<li>Choosing Tier III (N+1) over Tier IV (N+N) because anchor hyperscale/sovereign SLAs are met at 99.982% and COD lands 4-8 months sooner, accepting ~13 bps higher annual SLA-credit exposure if uptime dips.</li>
+<li>Choosing powered-shell NNN over neocloud GPU ownership because it removes GPU obsolescence and utilization risk (CoreWeave post-ramp 78% util, crwv_utilization_post_ramp), accepting lower revenue/MW (~$120/kW/mo vs GPU-hour upside).</li>
+<li>Choosing closed-loop adiabatic + DLC over wet-tower cooling because wet-cooling fails KAHRAMAA review, accepting +$1.5M/MW (~$75M on 50 MW) capex.</li>
+<li>Choosing air-cooled PUE 1.4 base over full-liquid PUE 1.2 because anchor may not be GPU-dense at COD, accepting higher opex/MWh until liquid retrofit ($750K/MW) is triggered by tenant demand.</li>
+</ul>
+<h2>Market Benchmarking</h2>
+<ul>
+<li>Digital Realty: Wholesale price = $95/kW/mo; 62% debt; 43% EBITDA margin (dlr_wholesale_price_2024, dlr_leverage_2024, dlr_ebitda_margin_2024)</li>
+<li>Equinix: Retail colo price / PUE / margin = $165/kW/mo; PUE 1.45; 47% EBITDA margin (eqx_retail_price_2024, eqx_pue_2024, eqx_ebitda_margin_2024)</li>
+<li>Khazna (GCC peer): Steady-state occupancy / anchor model = ~80% on hyperscale leases, sovereign backstop (G42/Microsoft) (comparables.khazna.profile)</li>
+<li>Brookfield (Hyperion JV): Mega-vehicle template / LTV = 80/20 JV, $27B; QIA $20B AI vehicle reference (brookfield_aum_2024, comparables.brookfield.profile)</li>
+<li>CoreWeave: GPU-cloud utilization / leverage = 78% post-ramp util; 4.5x net debt/EBITDA (crwv_utilization_post_ramp, crwv_leverage)</li>
+</ul>
+<h2>Risks &amp; Constraints</h2>
+<ul>
+<li>22-month transformer + 15-month MV switchgear lead times on critical path [HIGH] — Issue transformer LoI (Schneider/Siemens) + dual-source ABB/Hitachi before land/permit close; over-spec switchgear 20%. Adds ~3% capex, halves slip exposure.</li>
+<li>KAHRAMAA 50 MW connection fixed 24-month process; serial sequencing slips to 2029 [HIGH] — Submit KAHRAMAA application same day as QFZA permit; pre-application substation proximity study before site short-listing.</li>
+<li>Sovereign anchor likely &gt;70% of Phase 1 revenue [HIGH] — Sign anchor LOI covering &gt;=60% capacity before construction start; pre-agree Brookfield/Blackstone sale-leaseback exit to cap downside.</li>
+<li>Water stress 4.7/5 forces dry-cooling; wet designs fail KAHRAMAA review post-2025 [MEDIUM] — Default to closed-loop adiabatic + DLC; file water-use budget in permit application upfront. Budget +$1.5M/MW.</li>
+<li>KAHRAMAA monopoly tariff — no PPA arbitrage, 3-5%/yr administrative creep [MEDIUM] — Pass-through power via NNN structure so escalation is tenant-borne; model 4%/yr tariff creep in opex.</li>
+</ul>
+<h2>Strategic Opportunities</h2>
+<ul>
+<li>Finance via QIA-Brookfield $20B AI vehicle at 60-65% LTV — WHY: brookfield_qia_partnership_unlock — capital is explicitly designated for GCC AI DC and seeking deployment assets. ALTERNATIVE considered: general infra fund raise (adds 6-12 mo friction). RISK accepted: Brookfield re-underwrites complexity, so first pass must be plain-vanilla NNN. METRIC: IC approval within 3-6 months of data-room (QFZA entity + KAHRAMAA MOU + anchor LOI).</li>
+<li>Position as 18-month time-to-power advantage to hyperscaler procurement — WHY: hyperscaler_capex_acceleration ($210B/yr top-4 capex, 3% wholesale vacancy) + QFZA 6-mo permit. ALTERNATIVE: sovereign-only anchor (narrower demand). RISK accepted: hyperscaler may demand 15yr NNN with penalty clauses on COD slip. METRIC: signed LOI on &gt;=60% capacity at &gt;=$120/kW/mo before ground-break.</li>
+<li>Build 3% annual rent escalation into lease heads of terms — WHY: wholesale_rent_growth_momentum (12% YoY rent growth) — static rent leaves $1.5-2M/MW on table over 10yr. ALTERNATIVE: flat rent for anchor concession (simpler but value-leaking). RISK accepted: anchor may resist escalator, trading slight rent for term. METRIC: blended escalator &gt;=3% in executed lease.</li>
+<li>Conditional build-to-suit with anchor funding 30-40% of build — WHY: gcc_oversupply_risk_2027 (25% oversupply probability without anchor) — BTS caps developer vacancy to residual speculative tranche. ALTERNATIVE: fully speculative shell (400-600bps IRR risk). RISK accepted: BTS narrows tenant flexibility and ties asset to one credit. METRIC: anchor capital contribution &gt;=30% + 20yr NNN lock.</li>
+</ul>
+<h2>Recommended Architecture</h2>
+<p>WHY: Powered-shell NNN at Tier III matches the financeable archetype for the QIA-Brookfield vehicle and the hyperscaler third-party relief-valve demand (hyperscaler_capex_acceleration), while closed-loop dry cooling is mandatory under Qatar water stress (qatar_water_stress_premium). ALTERNATIVE considered: neocloud GPU-ownership — rejected because it imports utilization risk (78% post-ramp, crwv_utilization_post_ramp) and GPU obsolescence onto a real-estate investor balance sheet. RISK accepted: Tier III (not IV) carries ~13 bps higher SLA-credit exposure and sovereign anchor &gt;70% concentration. METRIC of success: DSCR &gt; 1.4x sustained after Year 2 stabilization (NOT the reported 9.10x, which must be re-derived) and Phase 1 occupancy &gt;=80% at COD.</p>
+<h2>Commercialization Strategy</h2>
+<h2>Deployment Roadmap</h2>
+<ul>
+<li>Pre-development: site, QFZA + KAHRAMAA filings, transformer LoI (0-6): QFZA permit filing (6-mo fast-track), KAHRAMAA grid application SAME DAY as QFZA, Transformer LoI issued (front-run 22-mo lead), MV switchgear LoI (15-mo lead), Anchor LOI &gt;=60% capacity</li>
+<li>Financing close + EPC pre-award (6-12): QIA-Brookfield IC approval, KAHRAMAA utility MOU, EPC contract lock (3-6mo after anchor LOI), Data room complete</li>
+<li>Construction: shell + MEP + private substation (12-30): Civil works, Substation build 12-18mo, Transformer delivery (~22mo from LoI), DLC cooling plant install</li>
+<li>Grid energisation + commissioning (24-30): KAHRAMAA connection complete (~24mo from application), Switchgear energisation, Tier III validation</li>
+<li>COD + Phase 1 ramp (30-42): Anchor fit-out, 80% occupancy at COD, 90% by Yr2, Phase 2 gate: Phase 1 &gt;=80%</li>
+<li>⚠ Electrical procurement is the binding critical path: without transformer LoI in hand at T0, energisation slips to late 2027-2029 (transformer_shortage_global + qatar_grid_connection_timeline). Theoretically sound, but operationally unrealistic before 2028 COD if KAHRAMAA and QFZA are sequenced in series rather than parallel.</li>
+<li>⚠ MV switchgear (15-mo) must be ordered alongside transformers or electrical energisation slips 3-6 months.</li>
+<li>⚠ Reported DSCR of 9.10x is internally inconsistent with 60% leverage @6.5% and stabilized EBITDA reported N/A — underwriteable as a base case only once EBITDA is restored and coverage re-derived; financing close before that is not advisable.</li>
+<li>⚠ Wet-cooling design will not clear KAHRAMAA environmental review post-2025 — closed-loop adiabatic + DLC mandatory, +$1.5M/MW; confirm this premium is inside the $440M CAPEX.</li>
+</ul>
+<h2>Long-Term Strategic Value</h2>
+<p>Phase 1 (25-50 MW) establishes a QFZA-domiciled, sovereign-anchored NNN asset financeable through the QIA-Brookfield channel. Over a 7-year hold the asset compounds on 3% rent escalation and 12% market rent momentum into a Yr7 exit (TV ~$1180M [LOW confidence, exit cap undisclosed]) via sale-leaseback to Brookfield/Blackstone or roll-up into a regional platform. Beyond 7 years, expansion to the ~600 MW Qatar 2030 pipeline positions Hearst as a multi-asset GCC platform alongside Khazna, with Qatar's $42/MWh tariff (lowest in GCC) as the durable cost moat.</p>
+<h2>Sources</h2>
+<ul>
+<li><code>tt_shell_mena_2024</code> — key_financial_metrics CAPEX, infrastructure_analysis (HIGH)</li>
+<li><code>tt_mep_mena_2024</code> — key_financial_metrics CAPEX (HIGH)</li>
+<li><code>dlr_wholesale_price_2024</code> — key_financial_metrics pricing, market_benchmarking (HIGH)</li>
+<li><code>eqx_retail_price_2024</code> — market_benchmarking pricing band (HIGH)</li>
+<li><code>qfza_tax_regime</code> — strategic_context, commercialization_strategy (HIGH)</li>
+<li><code>mena_permit_timeline_free_zone</code> — strategic_context, deployment_roadmap (HIGH)</li>
+<li><code>crwv_utilization_post_ramp</code> — infrastructure_analysis tradeoff, recommended_architecture (HIGH)</li>
+<li><code>dlr_leverage_2024</code> — key_financial_metrics leverage benchmark (HIGH)</li>
+<li><code>eqx_ebitda_margin_2024</code> — key_financial_metrics margin target (HIGH)</li>
+<li><code>brookfield_aum_2024</code> — strategic_opportunities financing, market_benchmarking (HIGH)</li>
+</ul>
+<hr>
+<p>_AI-assisted · Indicative · Human review required._</p>
+</div></body></html>

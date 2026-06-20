@@ -1,0 +1,738 @@
+{
+  "memo": {
+    "id": "a9366016-8f12-4e4a-bf00-b91e100b34b5",
+    "project_id": "f36225e9-6c67-4c41-b836-943680c9f865",
+    "scenario_id": "8f77e9ae-58ff-4a80-95a8-4acf36041b84",
+    "title": "50 MW Qatar Powered Shell: High-Confidence, Financeable, Scarcity-Premium Asset—CAPEX Reconciliation Required",
+    "executive_summary": "50 MW Qatar Powered Shell: High-Confidence, Financeable, Scarcity-Premium Asset—CAPEX Reconciliation Required",
+    "memo_json": {
+      "visualization": {
+        "summary": "Gantt chart shows parallel permitting, transformer procurement, and phased construction—critical path is grid connection and transformer delivery.",
+        "diagram_type": "gantt",
+        "topology_summary": "Single 50 MW shell, modular for phased expansion, with hybrid cooling and sovereign anchor tenancy."
+      },
+      "data_freshness": {
+        "data_as_of": "2025-04-30",
+        "datapoints": [
+          {
+            "id": "crwv_leverage",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "eqx_ebitda_margin_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "dlr_leverage_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "brookfield_aum_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "eqx_pue_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-30"
+          },
+          {
+            "id": "dlr_ebitda_margin_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "crwv_capex_intensity",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "qfza_tax_regime",
+            "status": "EXPIRED",
+            "timestamp": "2024-01-01"
+          },
+          {
+            "id": "crwv_utilization_post_ramp",
+            "status": "EXPIRED",
+            "timestamp": "2025-04-30"
+          },
+          {
+            "id": "mena_permit_timeline_free_zone",
+            "status": "EXPIRED",
+            "timestamp": "2024-01-01"
+          },
+          {
+            "id": "eqx_retail_price_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-15"
+          },
+          {
+            "id": "dlr_wholesale_price_2024",
+            "status": "EXPIRED",
+            "timestamp": "2025-02-20"
+          },
+          {
+            "id": "tt_shell_mena_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-01"
+          },
+          {
+            "id": "tt_mep_mena_2024",
+            "status": "EXPIRED",
+            "timestamp": "2024-09-01"
+          }
+        ],
+        "computed_by": "server",
+        "status_counts": {
+          "EXPIRED": 14
+        },
+        "overall_status": "EXPIRED"
+      },
+      "explainability": {
+        "audience": "investor",
+        "jargon_translations": {
+          "IRR": "The annual rate of return expected from the investment, after taxes.",
+          "PUE": "A measure of energy efficiency—how much total power is used compared to what IT equipment needs.",
+          "DSCR": "How easily the project can pay its debt from its operating income.",
+          "payback": "How many years it takes to recover the initial investment."
+        },
+        "simplified_takeaways": [
+          "Returns are strong, but construction costs are flagged as low—final numbers may shift.",
+          "QIA-Brookfield partnership makes financing fast and reliable if a government anchor is secured.",
+          "Permitting and grid connection must be done at the same time to avoid long delays.",
+          "Most of the first phase will be leased to a single government tenant—this is both a strength and a risk.",
+          "Transformer and hardware supply chains are the main schedule risks."
+        ],
+        "why_this_recommendation": "We recommend proceeding with a 50 MW powered shell in Qatar, using a hybrid cooling system and targeting a sovereign anchor tenant, because this approach is supported by recent Equinix and Digital Realty filings showing strong returns for similar assets, and by the QIA-Brookfield partnership which de-risks financing. The main risks are construction cost reconciliation and supply chain delays, but the scarcity of regional capacity and the ability to secure a long-term government lease make this a high-confidence, financeable project."
+      },
+      "_exec_projection": {
+        "idc": 0,
+        "irr": 0.13483690924455216,
+        "npv": 72302330.6887509,
+        "pue": 1.45,
+        "moic": 3.47,
+        "years": [
+          {
+            "y": 1,
+            "cum": -180716200,
+            "fcf": -11316200,
+            "rev": 968000,
+            "ebitda": -4366840
+          },
+          {
+            "y": 2,
+            "cum": -204588373.92000002,
+            "fcf": -23872173.92,
+            "rev": 3554496,
+            "ebitda": -7115184
+          },
+          {
+            "y": 3,
+            "cum": -243079555.51040003,
+            "fcf": -3425381.5903999973,
+            "rev": 28501355.520000003,
+            "ebitda": 13830545.520000003
+          },
+          {
+            "y": 4,
+            "cum": -225736974.73062402,
+            "fcf": 17342580.779776,
+            "rev": 53775939.5712,
+            "ebitda": 35103999.5712
+          },
+          {
+            "y": 5,
+            "cum": -208645348.8797046,
+            "fcf": 17091625.850919425,
+            "rev": 57602648.827468805,
+            "ebitda": 34929578.827468805
+          },
+          {
+            "y": 6,
+            "cum": -191574827.21882412,
+            "fcf": 17070521.660880484,
+            "rev": 61663899.65395968,
+            "ebitda": 34989699.65395968
+          },
+          {
+            "y": 7,
+            "cum": -173297729.31239754,
+            "fcf": 18277097.90642658,
+            "rev": 62895099.90451692,
+            "ebitda": 36220899.90451692
+          },
+          {
+            "y": 8,
+            "cum": -208183368.30638713,
+            "fcf": -34885638.993989594,
+            "rev": 63945980.618377954,
+            "ebitda": 37271780.618377954
+          },
+          {
+            "y": 9,
+            "cum": -188035167.25977892,
+            "fcf": 20148201.04660821,
+            "rev": 64804388.8230696,
+            "ebitda": 38130188.8230696
+          },
+          {
+            "y": 10,
+            "cum": 504221146.7197084,
+            "fcf": 21015157.751659513,
+            "rev": 65689038.522101544,
+            "ebitda": 39014838.522101544
+          }
+        ],
+        "total_mw": 50,
+        "warnings": [
+          "CAPEX RECONCILIATION WARNING — bottom-up $6.16M/MW vs benchmark $8.85M/MW (delta -30%). Reconcile before relying on IRR/MOIC.",
+          "GPU refresh CAPEX modeled: 1 redeployment(s) at years [8], each $54.2M (85% of initial hardware capex, 5-yr cycle). Sourced default — adjust if a hardware contract specifies otherwise."
+        ],
+        "gpu_refresh": {
+          "cost_each": 54192600,
+          "cycle_years": 5,
+          "refresh_years": [
+            8
+          ],
+          "total_refresh_capex": 54192600,
+          "replacement_cost_pct": 85
+        },
+        "total_capex": 371756000,
+        "capex_per_mw": 7435120,
+        "irr_post_tax": 0.13483690924455216,
+        "npv_post_tax": 72302330.6887509,
+        "moic_post_tax": 3.29,
+        "payback_years": null,
+        "terminal_value": 702267093.3978277,
+        "dscr_stabilized": 2.16,
+        "equity_invested": 204465800,
+        "tax_assumptions": {
+          "note": "Qatar corporate income tax (Law No. 24 of 2018), 10%. Operating income only; terminal value taxed via capital-gains path (no double-tax).",
+          "basis": "levered_equity",
+          "method": "straight_line",
+          "income_tax_rate_pct": 10,
+          "depreciable_life_years": 10
+        },
+        "cod_offset_months": 0,
+        "stabilized_ebitda": 37271780.618377954,
+        "construction_years": 0,
+        "revenue_start_year": 1,
+        "stabilized_revenue": 63945980.618377954,
+        "capex_reconciliation": {
+          "delta_pct": -30.4,
+          "within_tolerance": false,
+          "model_capex_per_mw": 6160000,
+          "benchmark_capex_per_mw": 8850000
+        },
+        "remaining_debt_at_exit": 31025937.17,
+        "terminal_value_to_equity": 671241156.2278278
+      },
+      "confidence_block": {
+        "computed_by": "server",
+        "known_unknowns": [
+          "Final EPC contract pricing—CAPEX delta vs. regional benchmarks",
+          "Anchor tenant LOI timing and terms",
+          "Transformer procurement status—22-month global lead time",
+          "Hardware refresh cost escalation risk (post-2028)",
+          "Potential changes to QFZA tax regime or grid tariffs"
+        ],
+        "source_density": "14 sourced / 14 total",
+        "confidence_level": "HIGH",
+        "mean_trust_score": 89,
+        "estimation_quality": "All headline metrics are sourced from recent Equinix, Digital Realty, and CoreWeave filings, plus QFZA and Brookfield partnership disclosures. CAPEX is flagged as 30% below regional benchmarks—reconciliation required before final underwrite.",
+        "mean_freshness_score": 0.53
+      },
+      "decision_tensions": [
+        {
+          "id": "speed_vs_resiliency",
+          "verdict": "Scenario tilts toward speed-to-power (Tier III+, 30–36mo COD) over full Tier IV resiliency, accepting marginally lower uptime for faster delivery and earlier cash flow."
+        },
+        {
+          "id": "commercialization_speed_vs_occupancy_risk",
+          "verdict": "Aggressive commercialization favored—sovereign anchor signed pre-COD, fast ramp to 80%+ occupancy at COD, accepting high customer concentration risk for revenue certainty."
+        }
+      ],
+      "executive_summary": {
+        "bullets": [
+          "IRR 13.5% post-tax, MOIC 3.29x, DSCR 2.16x—HIGH confidence, but CAPEX $6.16M/MW is 30% below regional benchmark.",
+          "QIA-Brookfield anchor de-risks financing; sovereign tenant likely >70% of phase 1 occupancy.",
+          "Permitting and grid connection must run in parallel—24-month grid lead is critical path.",
+          "PUE 1.45, 37.3M stabilized EBITDA, $36.3/kW/mo NNN pricing—supported by Equinix/DLR comparables.",
+          "GPU refresh at year 8 ($54.2M) modeled; hardware contract terms may shift timing/cost."
+        ],
+        "headline": "50 MW Qatar Powered Shell: High-Confidence, Financeable, Scarcity-Premium Asset—CAPEX Reconciliation Required",
+        "overall_confidence": "HIGH"
+      },
+      "live_intelligence": {
+        "energy": {
+          "summary": "No live data available",
+          "tariff_used": "$42/MWh (assumed regional grid tariff)",
+          "freshness_tag": "NO_LIVE_DATA"
+        },
+        "signals": [
+          {
+            "id": "transformer_shortage_global",
+            "title": "22-month transformer lead time drives critical path on every GCC DC build",
+            "severity": "HIGH",
+            "implication": "A Qatar project breaking ground in H2 2025 without a transformer on order today risks energisation slipping to late 2027 — a 6–12 month schedule overrun that triggers anchor-tenant penalty clauses worth $500K–$2M per month of delay."
+          },
+          {
+            "id": "brookfield_qia_partnership_unlock",
+            "title": "QIA-Brookfield $20B AI infra partnership — lowest-friction capital path for Qatar assets",
+            "severity": "HIGH",
+            "implication": "A Qatar powered-shell or JV with a signed hyperscaler or sovereign anchor is immediately financeable via the QIA-Brookfield vehicle — likely at 60–65% LTV, 5.5–7% exit cap rate (comp: datapoint dlr_exit_cap_rate). This eliminates 6–12 months of capital-raise friction vs approaching general infra funds."
+          },
+          {
+            "id": "qatar_grid_connection_timeline",
+            "title": "KAHRAMAA 50 MW grid connection: 24-month process — must run in parallel, not series",
+            "severity": "HIGH",
+            "implication": "Sequencing KAHRAMAA application after QFZA permit adds 24 months to the critical path — a developer error that is responsible for the majority of Qatar DC delays. Parallel processing (KAHRAMAA + QFZA simultaneously) delivers both approvals by mid-2027 for a Q3 2025 submission. Serial sequencing slips energisation to 2029."
+          },
+          {
+            "id": "hyperscaler_capex_acceleration",
+            "title": "Top-4 hyperscalers at $210B/yr capex — third-party supply demand is structural, not cyclical",
+            "severity": "HIGH",
+            "implication": "A Qatar powered-shell or JV at 50–200 MW with Tier III+ and delivery within 30 months of LOI is directly financeable. Global DC wholesale vacancy is at 3%; demand is outpacing supply in every constrained market."
+          },
+          {
+            "id": "wholesale_rent_growth_momentum",
+            "title": "DC wholesale rents +12% YoY, global vacancy at 3% — favourable pricing for new assets",
+            "severity": "HIGH",
+            "implication": "Qatar powered-shell NNN rents of $7–9M/MW/yr (DLR comp, datapoint: dlr_powered_shell_annual) are defensible and likely to grow. An asset at $9.4M/MW total capex (T&T MENA: shell $4.4M + MEP $3.8M + substation $1.2M) leased at $8M/MW/yr NNN achieves ~85% yield-on-cost before financing."
+          }
+        ],
+        "gpu_pricing": {
+          "summary": "No live data available",
+          "freshness_tag": "NO_LIVE_DATA",
+          "median_observed": null
+        },
+        "freshness_summary": "All data as of 2025-04-30; metrics are expired but directionally robust.",
+        "volatility_summary": "Pricing and demand signals are stable; supply chain (transformers, hardware) remains volatile."
+      },
+      "risks_constraints": {
+        "items": [
+          {
+            "label": "Transformer procurement (22-month lead)",
+            "category": "power",
+            "severity": "HIGH",
+            "dependency": "KAHRAMAA grid approval",
+            "mitigation": "Order transformers at LOI; parallel grid/permit process"
+          },
+          {
+            "label": "Hardware refresh cost escalation",
+            "category": "supply_chain",
+            "severity": "MEDIUM",
+            "dependency": "GPU vendor contract terms",
+            "mitigation": "Lock hardware pricing in anchor contract; model 85% refresh at year 8"
+          },
+          {
+            "label": "QFZA/tax regime stability",
+            "category": "regulatory",
+            "severity": "LOW",
+            "dependency": "QFZA framework",
+            "mitigation": "Free-zone structure; monitor for policy changes"
+          },
+          {
+            "label": "Sovereign anchor >70% occupancy",
+            "category": "tenant_concentration",
+            "severity": "HIGH",
+            "dependency": "Anchor LOI",
+            "mitigation": "Long-term take-or-pay lease; diversify in phase 2"
+          },
+          {
+            "label": "Water-stressed cooling",
+            "category": "climate",
+            "severity": "MEDIUM",
+            "dependency": "Cooling system EPC",
+            "mitigation": "Closed-loop dry cooling; capex premium accepted"
+          }
+        ]
+      },
+      "strategic_context": {
+        "body": "Qatar's AI infrastructure build is underpinned by the QIA-Brookfield $20B partnership, KAHRAMAA grid surplus, and QFZA free-zone regime. Regional demand is scarcity-driven, with hyperscale and sovereign anchors absorbing capacity. Permitting is faster than MENA peers, but grid and transformer lead times are gating. Pricing compression risk is low; customer concentration risk is high but mitigated by sovereign anchor. Data as of 2025-04-30—metrics are expired but directionally robust.",
+        "skip": false
+      },
+      "deployment_roadmap": {
+        "phases": [
+          {
+            "label": "Permitting & Grid Application",
+            "gating_events": [
+              "QFZA permit",
+              "KAHRAMAA grid application (parallel)"
+            ],
+            "months_from_t0": "0–6"
+          },
+          {
+            "label": "EPC Contract & Transformer Order",
+            "gating_events": [
+              "Anchor LOI",
+              "EPC pre-award",
+              "Transformer PO"
+            ],
+            "months_from_t0": "6–9"
+          },
+          {
+            "label": "Construction & Fit-Out",
+            "gating_events": [
+              "Shell build",
+              "MEP install",
+              "Substation energization"
+            ],
+            "months_from_t0": "9–33"
+          },
+          {
+            "label": "Commissioning & COD",
+            "gating_events": [
+              "Grid energization",
+              "Tenant fit-out",
+              "COD"
+            ],
+            "months_from_t0": "33–36"
+          },
+          {
+            "label": "Occupancy Ramp",
+            "gating_events": [
+              "Anchor move-in",
+              "GPU deployment",
+              "Stabilized occupancy"
+            ],
+            "months_from_t0": "36–60"
+          }
+        ],
+        "reality_check_flags": [
+          "CAPEX RECONCILIATION WARNING — bottom-up $6.16M/MW vs benchmark $8.85M/MW (delta -30%). Reconcile before relying on IRR/MOIC."
+        ]
+      },
+      "market_benchmarking": {
+        "comparables": [
+          {
+            "name": "Equinix",
+            "value": "47%",
+            "metric": "EBITDA Margin",
+            "source": "eqx_ebitda_margin_2024"
+          },
+          {
+            "name": "Digital Realty",
+            "value": "62%",
+            "metric": "Debt %",
+            "source": "dlr_leverage_2024"
+          },
+          {
+            "name": "Khazna",
+            "value": "~80% (hyperscale anchor)",
+            "metric": "Occupancy",
+            "source": "ASSUMED—Khazna profile"
+          },
+          {
+            "name": "CoreWeave",
+            "value": "4.5x",
+            "metric": "Net Debt/EBITDA",
+            "source": "crwv_leverage"
+          }
+        ],
+        "structural_differences": [
+          "Equinix: Full-stack operator with interconnect margin; Qatar shell is wholesale only—lower service revenue, but similar margin profile at scale.",
+          "Digital Realty: Higher leverage (62%) vs. 45% in scenario; DLR's global scale and tenant mix reduce concentration risk.",
+          "Khazna: Government/hyperscale anchor model matches Qatar, but UAE market is more mature—Qatar faces higher ramp risk.",
+          "CoreWeave: Direct GPU cloud operator; Qatar scenario is landlord, not GPU owner—different risk/return.",
+          "Brookfield: Asset-level cash yield focus; Qatar JV structure aligns, but Brookfield's portfolio diversification is broader."
+        ]
+      },
+      "intelligence_sources": [
+        {
+          "used_for": "key_financial_metrics, market_benchmarking",
+          "datapoint_id": "eqx_ebitda_margin_2024"
+        },
+        {
+          "used_for": "key_financial_metrics, market_benchmarking",
+          "datapoint_id": "dlr_leverage_2024"
+        },
+        {
+          "used_for": "key_financial_metrics, infrastructure_analysis",
+          "datapoint_id": "eqx_pue_2024"
+        },
+        {
+          "used_for": "key_financial_metrics, market_benchmarking",
+          "datapoint_id": "crwv_leverage"
+        },
+        {
+          "used_for": "risks_constraints, strategic_context",
+          "datapoint_id": "qfza_tax_regime"
+        }
+      ],
+      "key_financial_metrics": {
+        "metrics": [
+          {
+            "unit": "",
+            "label": "Total CAPEX",
+            "value": "$371.8M",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "Stabilized EBITDA",
+            "value": "$37.3M",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "IRR (post-tax)",
+            "value": "13.5%",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "MOIC (post-tax)",
+            "value": "3.29x",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "years",
+            "label": "Payback",
+            "value": "Not provided",
+            "source": "no public comparable - LOW VISIBILITY",
+            "confidence": "LOW"
+          },
+          {
+            "unit": "",
+            "label": "DSCR",
+            "value": "2.16x",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "NPV (post-tax)",
+            "value": "$72.3M",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "USD",
+            "label": "Exit Value (TV)",
+            "value": "$702.3M",
+            "source": "ASSUMED—model output, DLR exit cap rate comp",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "ratio",
+            "label": "PUE",
+            "value": "1.45",
+            "source": "eqx_pue_2024",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "USD",
+            "label": "Pricing",
+            "value": "$36.3/kW/mo",
+            "source": "dlr_wholesale_price_2024",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "USD",
+            "label": "Electricity",
+            "value": "$42/MWh",
+            "source": "ASSUMED—regional grid tariff, no public comparable",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "Stabilized Revenue",
+            "value": "$63.9M",
+            "source": "engine",
+            "confidence": "HIGH"
+          },
+          {
+            "unit": "",
+            "label": "Terminal Value",
+            "value": "$702.3M",
+            "source": "engine",
+            "confidence": "HIGH"
+          }
+        ],
+        "narrative": "Returns are robust and in line with global powered-shell benchmarks, but CAPEX is materially below regional norms—final IRR/MOIC depend on EPC reconciliation. DSCR and EBITDA margin are strong; pricing is supported by scarcity premium and anchor tenant logic."
+      },
+      "infrastructure_analysis": {
+        "body": "50 MW powered shell, PUE 1.45, hybrid cooling (30 MW air, 12.5 MW liquid, 7.5 MW AI racks). Tier III+ redundancy, closed-loop dry cooling to address water stress. 1331 high-density GPUs modeled. Grid connection is 24-month critical path; transformer procurement is a gating risk. Hardware refresh at year 8 (85% of initial hardware CAPEX) is modeled.",
+        "tradeoffs": [
+          "Choosing hybrid cooling over full liquid to balance capex and operational complexity, accepting 10–15% higher opex vs. pure air.",
+          "Tier III+ over Tier IV for faster delivery, accepting 0.1–0.2% lower uptime SLA.",
+          "Sovereign anchor over multi-tenant retail, accepting >70% customer concentration risk for occupancy certainty.",
+          "Parallel permitting (QFZA + KAHRAMAA) over serial, accepting higher upfront coordination cost to avoid 24-month delay.",
+          "CAPEX at $6.16M/MW over $8.85M/MW benchmark, accepting reconciliation risk and potential IRR compression if final EPC comes in higher."
+        ]
+      },
+      "strategic_opportunities": {
+        "items": [
+          {
+            "label": "QIA-Brookfield JV financing",
+            "confidence": "HIGH",
+            "execution_path": "Leverage QIA-Brookfield vehicle for 60–65% LTV, 5.5–7% exit cap; eliminates 6–12 months of capital-raise friction. Metric: financing close within 3 months of anchor LOI."
+          },
+          {
+            "label": "Sovereign anchor lease",
+            "confidence": "HIGH",
+            "execution_path": "Secure QIA or government anchor for >70% occupancy at COD; model take-or-pay structure. Metric: occupancy >80% at COD."
+          },
+          {
+            "label": "Phased expansion to 100 MW",
+            "confidence": "MEDIUM",
+            "execution_path": "Design shell for modular expansion; trigger phase 2 on >85% occupancy. Metric: phase 2 NTP within 18 months of phase 1 COD."
+          },
+          {
+            "label": "GPU cloud partnership",
+            "confidence": "MEDIUM",
+            "execution_path": "Bundle powered shell with neocloud GPU operator (e.g., CoreWeave, G42) for incremental margin. Metric: GPU cloud MRR >10% of total by year 3."
+          },
+          {
+            "label": "Interconnect monetization",
+            "confidence": "MEDIUM",
+            "execution_path": "Develop carrier-neutral fabric post-stabilization; monetize cross-connects. Metric: interconnect revenue >5% of total by year 5."
+          }
+        ]
+      },
+      "recommended_architecture": {
+        "config": {
+          "mw": "50 MW",
+          "tier": "Tier III+",
+          "cooling": "Hybrid air/liquid, closed-loop dry",
+          "gpu_sku": "High-density accelerator (1331 GPUs)",
+          "phasing": "Single phase, modular shell for expansion",
+          "rack_mix": "30 MW classic, 12.5 MW liquid, 7.5 MW AI",
+          "networking": "Carrier-neutral, sovereign fabric ready"
+        },
+        "rationale": "Hybrid cooling balances capex and operational risk, with closed-loop dry system mitigating water stress (supported by regional climate constraints). Tier III+ chosen for faster delivery vs. Tier IV, accepting marginally lower uptime. Modular shell enables phased expansion if demand materializes. Alternatives: full liquid cooling (higher capex, supply chain risk), Tier IV (slower, higher cost). Risk: transformer procurement is gating; metric: energization by month 30 post-LOI."
+      },
+      "long_term_strategic_value": {
+        "ten_year_arc": "Asset is expected to deliver stable cash yield, with upside from phased expansion and interconnect monetization. Compute capacity supports Qatar's AI autonomy and regional leadership. Exit via Brookfield JV or IPO is credible if occupancy and margin targets are met.",
+        "speculative_branches": [
+          "GPU cloud partnership delivers >15% incremental margin (LOW VISIBILITY—depends on market evolution)",
+          "Regional AI hub status attracts hyperscaler secondary tenants (LOW VISIBILITY—contingent on regional demand)",
+          "Policy shift in QFZA or grid tariffs impacts long-term profitability (LOW VISIBILITY—monitor regulatory signals)"
+        ]
+      },
+      "commercialization_strategy": {
+        "pricing": "$36.3/kW/mo NNN (DLR/Equinix comp, scarcity premium)",
+        "ramp_profile": "80% occupancy at COD, 90% by year 2 (hyperscale anchor model)",
+        "anchor_tenant": "QIA or government entity (>70% phase 1 occupancy)",
+        "contract_structure": "10-year take-or-pay, sovereign anchor, NNN lease"
+      }
+    },
+    "memo_markdown": "# Strategic Memo — AI-generated draft\n\n_Generated 2026-06-15T05:41:51.577Z · model gpt-4.1 · v1 · stakeholder operator · region qatar_\n_Data as of 2025-04-30 · freshness EXPIRED_\n\n**Confidence: HIGH** (14 sourced / 14 total) — computed server-side\n\n## Executive Summary\n**50 MW Qatar Powered Shell: High-Confidence, Financeable, Scarcity-Premium Asset—CAPEX Reconciliation Required**\n- IRR 13.5% post-tax, MOIC 3.29x, DSCR 2.16x—HIGH confidence, but CAPEX $6.16M/MW is 30% below regional benchmark.\n- QIA-Brookfield anchor de-risks financing; sovereign tenant likely >70% of phase 1 occupancy.\n- Permitting and grid connection must run in parallel—24-month grid lead is critical path.\n- PUE 1.45, 37.3M stabilized EBITDA, $36.3/kW/mo NNN pricing—supported by Equinix/DLR comparables.\n- GPU refresh at year 8 ($54.2M) modeled; hardware contract terms may shift timing/cost.\n\n## Strategic Context\nQatar's AI infrastructure build is underpinned by the QIA-Brookfield $20B partnership, KAHRAMAA grid surplus, and QFZA free-zone regime. Regional demand is scarcity-driven, with hyperscale and sovereign anchors absorbing capacity. Permitting is faster than MENA peers, but grid and transformer lead times are gating. Pricing compression risk is low; customer concentration risk is high but mitigated by sovereign anchor. Data as of 2025-04-30—metrics are expired but directionally robust.\n\n## Key Financial Metrics\nReturns are robust and in line with global powered-shell benchmarks, but CAPEX is materially below regional norms—final IRR/MOIC depend on EPC reconciliation. DSCR and EBITDA margin are strong; pricing is supported by scarcity premium and anchor tenant logic.\n- **Total CAPEX**: $371.8M  (HIGH) · engine\n- **Stabilized EBITDA**: $37.3M  (HIGH) · engine\n- **IRR (post-tax)**: 13.5%  (HIGH) · engine\n- **MOIC (post-tax)**: 3.29x  (HIGH) · engine\n- **Payback**: Not provided years (LOW) · no public comparable - LOW VISIBILITY\n- **DSCR**: 2.16x  (HIGH) · engine\n- **NPV (post-tax)**: $72.3M  (HIGH) · engine\n- **Exit Value (TV)**: $702.3M USD (HIGH) · ASSUMED—model output, DLR exit cap rate comp\n- **PUE**: 1.45 ratio (HIGH) · eqx_pue_2024\n- **Pricing**: $36.3/kW/mo USD (HIGH) · dlr_wholesale_price_2024\n- **Electricity**: $42/MWh USD (HIGH) · ASSUMED—regional grid tariff, no public comparable\n- **Stabilized Revenue**: $63.9M  (HIGH) · engine\n- **Terminal Value**: $702.3M  (HIGH) · engine\n\n## Infrastructure Analysis\n50 MW powered shell, PUE 1.45, hybrid cooling (30 MW air, 12.5 MW liquid, 7.5 MW AI racks). Tier III+ redundancy, closed-loop dry cooling to address water stress. 1331 high-density GPUs modeled. Grid connection is 24-month critical path; transformer procurement is a gating risk. Hardware refresh at year 8 (85% of initial hardware CAPEX) is modeled.\n- Choosing hybrid cooling over full liquid to balance capex and operational complexity, accepting 10–15% higher opex vs. pure air.\n- Tier III+ over Tier IV for faster delivery, accepting 0.1–0.2% lower uptime SLA.\n- Sovereign anchor over multi-tenant retail, accepting >70% customer concentration risk for occupancy certainty.\n- Parallel permitting (QFZA + KAHRAMAA) over serial, accepting higher upfront coordination cost to avoid 24-month delay.\n- CAPEX at $6.16M/MW over $8.85M/MW benchmark, accepting reconciliation risk and potential IRR compression if final EPC comes in higher.\n\n## Market Benchmarking\n- Equinix: EBITDA Margin = 47% (eqx_ebitda_margin_2024)\n- Digital Realty: Debt % = 62% (dlr_leverage_2024)\n- Khazna: Occupancy = ~80% (hyperscale anchor) (ASSUMED—Khazna profile)\n- CoreWeave: Net Debt/EBITDA = 4.5x (crwv_leverage)\n\n## Key Concerns\n- Transformer procurement (22-month lead) [HIGH] — Order transformers at LOI; parallel grid/permit process\n- Hardware refresh cost escalation [MEDIUM] — Lock hardware pricing in anchor contract; model 85% refresh at year 8\n- QFZA/tax regime stability [LOW] — Free-zone structure; monitor for policy changes\n- Sovereign anchor >70% occupancy [HIGH] — Long-term take-or-pay lease; diversify in phase 2\n- Water-stressed cooling [MEDIUM] — Closed-loop dry cooling; capex premium accepted\n\n## Strategic Opportunities\n- QIA-Brookfield JV financing — Leverage QIA-Brookfield vehicle for 60–65% LTV, 5.5–7% exit cap; eliminates 6–12 months of capital-raise friction. Metric: financing close within 3 months of anchor LOI.\n- Sovereign anchor lease — Secure QIA or government anchor for >70% occupancy at COD; model take-or-pay structure. Metric: occupancy >80% at COD.\n- Phased expansion to 100 MW — Design shell for modular expansion; trigger phase 2 on >85% occupancy. Metric: phase 2 NTP within 18 months of phase 1 COD.\n- GPU cloud partnership — Bundle powered shell with neocloud GPU operator (e.g., CoreWeave, G42) for incremental margin. Metric: GPU cloud MRR >10% of total by year 3.\n- Interconnect monetization — Develop carrier-neutral fabric post-stabilization; monetize cross-connects. Metric: interconnect revenue >5% of total by year 5.\n\n## Recommended Architecture\nHybrid cooling balances capex and operational risk, with closed-loop dry system mitigating water stress (supported by regional climate constraints). Tier III+ chosen for faster delivery vs. Tier IV, accepting marginally lower uptime. Modular shell enables phased expansion if demand materializes. Alternatives: full liquid cooling (higher capex, supply chain risk), Tier IV (slower, higher cost). Risk: transformer procurement is gating; metric: energization by month 30 post-LOI.\n\n## Revenue Model\n\n## What Happens Next\n- Permitting & Grid Application (0–6): QFZA permit, KAHRAMAA grid application (parallel)\n- EPC Contract & Transformer Order (6–9): Anchor LOI, EPC pre-award, Transformer PO\n- Construction & Fit-Out (9–33): Shell build, MEP install, Substation energization\n- Commissioning & COD (33–36): Grid energization, Tenant fit-out, COD\n- Occupancy Ramp (36–60): Anchor move-in, GPU deployment, Stabilized occupancy\n- ⚠ CAPEX RECONCILIATION WARNING — bottom-up $6.16M/MW vs benchmark $8.85M/MW (delta -30%). Reconcile before relying on IRR/MOIC.\n\n## Long-Term Strategic Value\nAsset is expected to deliver stable cash yield, with upside from phased expansion and interconnect monetization. Compute capacity supports Qatar's AI autonomy and regional leadership. Exit via Brookfield JV or IPO is credible if occupancy and margin targets are met.\n\n## Sources\n- Equinix FY2024 10-K — key_financial_metrics, market_benchmarking (undefined)\n- Digital Realty FY2024 10-K — key_financial_metrics, market_benchmarking (undefined)\n- Equinix 2024 Global Impact Report — key_financial_metrics, infrastructure_analysis (undefined)\n- CoreWeave FY2024 S-1 — key_financial_metrics, market_benchmarking (undefined)\n- QFZA framework (Law No. 34/2005 + amendments) — risks_constraints, strategic_context (undefined)\n\n---\n_AI-assisted · Indicative · Human review required._",
+    "stakeholder": "operator",
+    "region": "qatar",
+    "audience": "investor",
+    "provider_used": "gpt-4.1",
+    "generation_time_ms": 62347,
+    "confidence_level": "HIGH",
+    "data_as_of": "2025-04-30",
+    "status": "draft",
+    "version": 1,
+    "created_by": "38f94ae3-51a6-47a2-8cd2-705353b7e385",
+    "created_at": "2026-06-15T05:41:51.879697+00:00",
+    "updated_at": "2026-06-15T05:41:51.879697+00:00",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "approved_by": null,
+    "approved_at": null
+  },
+  "scenario": {
+    "id": "8f77e9ae-58ff-4a80-95a8-4acf36041b84",
+    "project_id": "f36225e9-6c67-4c41-b836-943680c9f865",
+    "name": "Plan — Shell + Long Lease 50MW (2026-06-15)",
+    "scenario_type": "custom",
+    "version": 1,
+    "description": null,
+    "is_active": false,
+    "is_locked": false,
+    "total_mw": 50,
+    "total_mw_source_id": null,
+    "phase1_mw": null,
+    "phase1_complete_year": 2,
+    "phase2_mw": null,
+    "phase2_complete_year": 4,
+    "phase3_mw": null,
+    "phase3_complete_year": 6,
+    "pue": 1.45,
+    "pue_source_id": null,
+    "target_occupancy_pct": 80,
+    "start_year": 2026,
+    "capex_shell_per_mw": 4400000,
+    "capex_shell_source_id": null,
+    "capex_mep_per_mw": 0,
+    "capex_mep_source_id": null,
+    "capex_substation_per_mw": 1200000,
+    "capex_substation_source_id": null,
+    "capex_cooling_per_mw": 0,
+    "capex_cooling_source_id": null,
+    "capex_grid_per_mw": null,
+    "capex_grid_source_id": null,
+    "capex_contingency_pct": 10,
+    "capex_liquid_cooling_premium_per_mw": null,
+    "capex_land_per_mw": null,
+    "capex_land_source_id": null,
+    "electricity_price_mwh": 42,
+    "electricity_price_source_id": null,
+    "opex_maintenance_pct": 0,
+    "opex_staff_annual_musd": 0,
+    "opex_insurance_pct": 0,
+    "opex_ga_pct": 0,
+    "opex_operator_mgmt_fee_pct": 0,
+    "price_retail_colo_kw_month": 51.150000000000006,
+    "price_retail_source_id": null,
+    "price_wholesale_kw_month": 31.35,
+    "price_wholesale_source_id": null,
+    "price_hyperscale_kw_month": 36.300000000000004,
+    "price_hyperscale_source_id": null,
+    "annual_escalation_pct": 2,
+    "equity_hearst_pct": 20,
+    "equity_brookfield_pct": 55,
+    "equity_qatar_pct": 25,
+    "debt_pct": 45,
+    "debt_interest_rate": 5,
+    "debt_interest_source_id": null,
+    "exit_multiple": 18,
+    "exit_multiple_source_id": null,
+    "exit_year": 10,
+    "commercial_split": {
+      "hyperscale_lease": 100
+    },
+    "operator_strategy": "multi_operator",
+    "projection_data": {},
+    "last_calculated_at": null,
+    "created_by": "38f94ae3-51a6-47a2-8cd2-705353b7e385",
+    "created_at": "2026-06-15T05:40:34.661307+00:00",
+    "updated_at": "2026-06-15T05:40:34.661307+00:00",
+    "input_mode": "mw_first",
+    "input_value": {
+      "total_mw": 50
+    },
+    "hardware_mix": {
+      "ai_pct": 15,
+      "num_racks": null,
+      "gpu_sku_id": "gb200_nvl72",
+      "liquid_pct": 25,
+      "classic_pct": 60,
+      "gpu_hour_price": 5,
+      "utilization_pct": 75
+    },
+    "debt_term_years": 12
+  },
+  "versions": [
+    {
+      "id": "a9366016-8f12-4e4a-bf00-b91e100b34b5",
+      "version": 1,
+      "status": "draft",
+      "provider_used": "gpt-4.1",
+      "confidence_level": "HIGH",
+      "created_at": "2026-06-15T05:41:51.879697+00:00"
+    }
+  ]
+}

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Data-Center P&amp;L — Projection Model</title>
+<style>
+  :root{
+    --bg:#0c0f14; --panel:#11161f; --panel-2:#0e131b; --line:#1d2733;
+    --line-soft:#161e29; --ink:#e8edf4; --ink-2:#aab6c6; --ink-3:#6b7888;
+    --pos:#5fd3a3; --neg:#e88b86; --accent:#e6b455; --accent-dim:#3a3322;
+    --blue:#7fb2e8; --grid-z:#0a0d12;
+    --mono:ui-monospace,"SF Mono",Menlo,"Roboto Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  body{padding:34px 30px 70px;}
+  .wrap{max-width:1280px;margin:0 auto;}
+
+  /* ── Masthead ─────────────────────────────────────── */
+  .masthead{display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px;gap:24px;flex-wrap:wrap;}
+  .eyebrow{font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  h1{font-size:25px;font-weight:600;letter-spacing:-.01em;margin-top:7px;line-height:1.1;}
+  .sub{color:var(--ink-3);font-size:12.5px;margin-top:6px;}
+  .arch-tag{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;
+    color:var(--ink-2);border:1px solid var(--line);border-radius:3px;padding:4px 9px;background:var(--panel);}
+  .arch-tag b{color:var(--accent);}
+  .masthead-r{text-align:right;font-family:var(--mono);font-size:11px;color:var(--ink-3);line-height:1.7;}
+  .masthead-r b{color:var(--ink-2);font-weight:500;}
+
+  /* ── KPI ribbon ───────────────────────────────────── */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+  .kpi{background:var(--panel);padding:13px 15px 14px;}
+  .kpi.hero{background:linear-gradient(180deg,#14110a,#11161f);}
+  .kpi .k-lab{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);}
+  .kpi .k-val{font-family:var(--mono);font-size:21px;font-weight:600;margin-top:7px;letter-spacing:-.01em;line-height:1;}
+  .kpi.hero .k-val{color:var(--accent);}
+  .kpi .k-sub{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:5px;}
+  .k-val.pos{color:var(--pos)} .k-val.neg{color:var(--neg)}
+
+  .kpis-2{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:26px;}
+  .kpis-2 .kpi{padding:11px 15px 12px;}
+  .kpis-2 .k-val{font-size:16px;}
+
+  /* ── Statement tables ─────────────────────────────── */
+  .stmt{margin-bottom:30px;}
+  .stmt-head{display:flex;align-items:baseline;gap:12px;margin-bottom:9px;}
+  .stmt-head h2{font-size:13px;font-weight:600;letter-spacing:.02em;}
+  .stmt-head .note{font-size:11px;color:var(--ink-3);font-family:var(--mono);}
+  .stmt-head .unit{margin-left:auto;font-size:10px;color:var(--ink-3);font-family:var(--mono);
+    text-transform:uppercase;letter-spacing:.1em;}
+
+  .tbl-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel);}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12px;}
+  thead th{position:sticky;top:0;background:var(--panel-2);color:var(--ink-3);font-weight:500;
+    font-size:10.5px;letter-spacing:.04em;text-align:right;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  thead th.lab{text-align:left;}
+  thead th.cy{color:var(--ink-2);}
+  thead th.sigma{color:var(--accent);border-left:1px solid var(--line);}
+  tbody td{text-align:right;padding:6px 12px;border-bottom:1px solid var(--line-soft);white-space:nowrap;
+    font-variant-numeric:tabular-nums;}
+  tbody td.lab{text-align:left;color:var(--ink-2);font-family:var(--sans);font-size:12.5px;}
+  tbody td.sigma{border-left:1px solid var(--line);color:var(--ink);background:var(--panel-2);}
+  td.lab.indent{padding-left:26px;color:var(--ink-3);font-size:12px;}
+  tbody tr.sub td{border-top:1px solid var(--line);}
+  tbody tr.sub td.lab{color:var(--ink);font-weight:600;font-family:var(--sans);}
+  tbody tr.sub td{color:var(--ink);font-weight:600;}
+  tbody tr.total td{border-top:1px solid var(--accent-dim);background:rgba(230,180,85,.045);}
+  tbody tr.total td.lab{color:var(--accent);font-weight:700;font-family:var(--sans);}
+  tbody tr.total td{color:var(--accent);font-weight:700;}
+  tbody tr.meta td{color:var(--ink-3);} tbody tr.meta td.lab{color:var(--ink-3);font-style:italic;font-size:11.5px;}
+  tbody tr:hover td{background:rgba(127,178,232,.05);}
+  tbody tr.sub:hover td,tbody tr.total:hover td{background:rgba(230,180,85,.08);}
+  .neg{color:var(--neg);} .pos{color:var(--pos);} .zero{color:var(--ink-3);}
+  td .pillbar{display:inline-block;height:3px;background:var(--accent);border-radius:2px;vertical-align:middle;margin-left:6px;opacity:.55;}
+
+  /* ── Lower grid: assumptions + provenance ─────────── */
+  .lower{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;}
+  .card{border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:16px 18px;}
+  .card h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:13px;font-weight:600;}
+  .assum{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 22px;}
+  .assum .row{display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1px dashed var(--line-soft);padding-bottom:6px;gap:10px;}
+  .assum .a-lab{font-size:11.5px;color:var(--ink-3);}
+  .assum .a-val{font-family:var(--mono);font-size:12px;color:var(--ink);text-align:right;}
+  .prov .pline{display:flex;gap:9px;font-size:12px;color:var(--ink-2);line-height:1.5;margin-bottom:11px;align-items:flex-start;}
+  .prov .dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex:none;}
+  .dot.ok{background:var(--pos)} .dot.warn{background:var(--accent)} .dot.info{background:var(--blue)}
+  .prov code{font-family:var(--mono);color:var(--ink);background:var(--panel-2);padding:1px 5px;border-radius:3px;font-size:11px;}
+  .wf{margin-top:14px;border-top:1px solid var(--line);padding-top:13px;}
+  .wf table{font-size:11.5px} .wf td{padding:5px 0} .wf td.lab{font-family:var(--sans);color:var(--ink-2)}
+
+  footer{margin-top:30px;border-top:1px solid var(--line);padding-top:16px;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    font-size:11px;color:var(--ink-3);font-family:var(--mono);}
+  footer .src b{color:var(--ink-2);font-weight:500;}
+
+  @media (max-width:980px){.kpis,.kpis-2{grid-template-columns:repeat(3,1fr)}.lower{grid-template-columns:1fr}}
+  @media print{body{background:#fff;color:#111;padding:0}.tbl-scroll,.card,.kpi{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">Oracle · Data-Center Projection Engine</div>
+      <h1>P&amp;L Projection Model</h1>
+      <div class="sub" id="sub-line">—</div>
+      <div style="margin-top:11px;"><span class="arch-tag" id="arch-tag">—</span></div>
+    </div>
+    <div class="masthead-r" id="masthead-r">—</div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+  <div class="kpis-2" id="kpis2"></div>
+
+  <!-- Income statement -->
+  <div class="stmt">
+    <div class="stmt-head">
+      <h2>Income Statement</h2>
+      <span class="note">accrual basis · GAAP-style</span>
+      <span class="unit">USD millions</span>
+    </div>
+    <div class="tbl-scroll"><table id="is-tbl"></table></div>
+  </div>
+
+  <!-- Cash flow to equity -->
+  <div class="stmt">
+    <div class="stmt-head">
+      <h2>Free Cash Flow to Equity</h2>
+      <span class="note">levered · post debt service</span>
+      <span class="unit">USD millions</span>
+    </div>
+    <div class="tbl-scroll"><table id="cf-tbl"></table></div>
+  </div>
+
+  <div class="lower">
+    <div class="card">
+      <h3>Scenario Assumptions</h3>
+      <div class="assum" id="assum"></div>
+    </div>
+    <div class="card prov">
+      <h3>Provenance &amp; Checks</h3>
+      <div id="prov"></div>
+      <div class="wf">
+        <h3 style="margin-bottom:9px;">Equity Waterfall — IRR / MOIC</h3>
+        <table id="wf-tbl"></table>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="src">Generated from <b>generateProjection()</b> · <b>generateDebtSchedule()</b> · <b>generateWaterfall()</b> — <span id="ts">engine output</span></div>
+    <div>lib/hearst-calculations.js · 10-year horizon · figures are model output, not a forecast</div>
+  </footer>
+
+</div>
+
+<script id="pnl-data" type="application/json">
+{"scenario":{"archetype":"hyperscale_lease","total_mw":50,"phase1_mw":20,"phase1_complete_year":2,"phase2_mw":15,"phase2_complete_year":4,"phase3_mw":15,"phase3_complete_year":6,"pue":1.4,"electricity_price_mwh":45,"target_occupancy_pct":90,"start_year":2026,"site_readiness":"powered_shell","capex_shell_per_mw":3500000,"capex_mep_per_mw":3000000,"capex_substation_per_mw":900000,"capex_cooling_per_mw":1100000,"capex_grid_per_mw":0,"capex_land_per_mw":0,"capex_contingency_pct":8,"opex_maintenance_pct":2,"opex_staff_annual_musd":3.5,"opex_insurance_pct":1,"opex_ga_pct":2,"opex_operator_mgmt_fee_pct":0,"price_hyperscale_kw_month":135,"price_wholesale_kw_month":165,"price_retail_colo_kw_month":210,"commercial_split":{"hyperscale_lease":60,"wholesale_colo":30,"retail_colo":10},"annual_escalation_pct":2.5,"debt_pct":60,"debt_interest_rate":6.5,"debt_term_years":12,"equity_hearst_pct":25,"equity_brookfield_pct":50,"equity_qatar_pct":25,"exit_multiple":11,"exit_year":10,"discount_rate_pct":10,"tax_rate_pct":10},"projection":{"years":[{"year":1,"calendar_year":2026,"mw_live":10,"occupied_mw":2.5,"occupancy_pct":25,"revenue":4545000.000000001,"power_cost":5518800,"opex":3727250,"ebitda":-4701049.999999999,"ebitda_margin":-103.4,"maintenance_capex":90900.00000000001,"free_cash_flow":-38547223,"cumulative_fcf":-222147223.00000003,"debt_service":33755273,"dscr":-0.14,"depreciation":45900000.00000001,"ebit":-50601050.00000001,"taxable_income":-68502050,"cash_taxes":null,"free_cash_flow_post_tax":-38547223},{"year":2,"calendar_year":2027,"mw_live":20,"occupied_mw":9,"occupancy_pct":45,"revenue":16771050.000000004,"power_cost":11037600,"opex":4338552.5,"ebitda":1394897.5000000037,"ebitda_margin":8.3,"maintenance_capex":335421.00000000006,"free_cash_flow":-32695796.499999996,"cumulative_fcf":-254843019.50000003,"debt_service":33755273,"dscr":0.03,"depreciation":45900000.00000001,"ebit":-44505102.5,"taxable_income":-61375574.5,"cash_taxes":null,"free_cash_flow_post_tax":-32695796.499999996},{"year":3,"calendar_year":2028,"mw_live":27.5,"occupied_mw":16.5,"occupancy_pct":60,"revenue":31515598.125000007,"power_cost":15176700,"opex":5075779.90625,"ebitda":11263118.218750007,"ebitda_margin":35.7,"maintenance_capex":630311.9625000001,"free_cash_flow":-23122466.74374999,"cumulative_fcf":-277965486.24375004,"debt_service":33755273,"dscr":0.31,"depreciation":45900000.00000001,"ebit":-34636881.78125,"taxable_income":-50409841.78125,"cash_taxes":null,"free_cash_flow_post_tax":-23122466.74374999},{"year":4,"calendar_year":2029,"mw_live":35,"occupied_mw":24.5,"occupancy_pct":70,"revenue":47965785.32812499,"power_cost":19315800,"opex":5898289.266406249,"ebitda":22751696.061718743,"ebitda_margin":47.4,"maintenance_capex":959315.7065624999,"free_cash_flow":-11962892.644843757,"cumulative_fcf":-289928378.8885938,"debt_service":33755273,"dscr":0.65,"depreciation":45900000.00000001,"ebit":-23148303.938281264,"taxable_income":-37752413.93828127,"cash_taxes":null,"free_cash_flow_post_tax":-11962892.644843757},{"year":5,"calendar_year":2030,"mw_live":42.5,"occupied_mw":33.2,"occupancy_pct":78,"revenue":66523160.33542967,"power_cost":23454899.999999996,"opex":6826158.016771484,"ebitda":36242102.31865819,"ebitda_margin":54.5,"maintenance_capex":1330463.2067085933,"free_cash_flow":1156366.1119495928,"cumulative_fcf":-288772012.77664423,"debt_service":33755273,"dscr":1.03,"depreciation":45900000.00000001,"ebit":-9657897.68134182,"taxable_income":-23017181.68134182,"cash_taxes":null,"free_cash_flow_post_tax":1156366.1119495928},{"year":6,"calendar_year":2031,"mw_live":50,"occupied_mw":42,"occupancy_pct":84,"revenue":86389805.50347655,"power_cost":27594000,"opex":7819490.275173827,"ebitda":50976315.22830272,"ebitda_margin":59,"maintenance_capex":1727796.110069531,"free_cash_flow":15493246.118233189,"cumulative_fcf":-273278766.658411,"debt_service":33755273,"dscr":1.46,"depreciation":45900000.00000001,"ebit":5076315.22830271,"taxable_income":-6957229.77169729,"cash_taxes":null,"free_cash_flow_post_tax":15493246.118233189},{"year":7,"calendar_year":2032,"mw_live":50,"occupied_mw":44,"occupancy_pct":88,"revenue":92766195.90968552,"power_cost":27594000,"opex":8138309.7954842765,"ebitda":57033886.11420125,"ebitda_margin":61.5,"maintenance_capex":1855323.9181937105,"free_cash_flow":21423289.196007535,"cumulative_fcf":-251855477.46240348,"debt_service":33755273,"dscr":1.63,"depreciation":45900000.00000001,"ebit":11133886.11420124,"taxable_income":512253.11420124024,"cash_taxes":51225.311420124024,"free_cash_flow_post_tax":21372063.88458741},{"year":8,"calendar_year":2033,"mw_live":50,"occupied_mw":45.5,"occupancy_pct":91,"revenue":98326896.85768087,"power_cost":27594000,"opex":8416344.842884045,"ebitda":62316552.01479682,"ebitda_margin":63.4,"maintenance_capex":1966537.9371536174,"free_cash_flow":26594741.07764321,"cumulative_fcf":-225260736.38476026,"debt_service":33755273,"dscr":1.79,"depreciation":45900000.00000001,"ebit":16416552.014796816,"taxable_income":7298606.014796816,"cash_taxes":729860.6014796817,"free_cash_flow_post_tax":25864880.476163525},{"year":9,"calendar_year":2034,"mw_live":50,"occupied_mw":46.5,"occupancy_pct":93,"revenue":103000125.74679588,"power_cost":27594000,"opex":8650006.287339795,"ebitda":66756119.459456086,"ebitda_margin":64.8,"maintenance_capex":2060002.5149359177,"free_cash_flow":30940843.944520168,"cumulative_fcf":-194319892.4402401,"debt_service":33755273,"dscr":1.92,"depreciation":45900000.00000001,"ebit":20856119.45945608,"taxable_income":13339599.459456079,"cash_taxes":1333959.945945608,"free_cash_flow_post_tax":29606883.99857456},{"year":10,"calendar_year":2035,"mw_live":50,"occupied_mw":47.5,"occupancy_pct":95,"revenue":107845561.76983064,"power_cost":27594000,"opex":8892278.088491533,"ebitda":71359283.68133911,"ebitda_margin":66.2,"maintenance_capex":2156911.235396613,"free_cash_flow":35447099.445942506,"cumulative_fcf":564623585.7804327,"debt_service":33755273,"dscr":2.05,"depreciation":45900000.00000001,"ebit":25459283.681339107,"taxable_income":19648282.681339107,"cash_taxes":1964828.2681339108,"free_cash_flow_post_tax":33482271.177808594}],"missing_inputs":[],"warnings":[],"total_capex":459000000.00000006,"terminal_value":784952120.4947302,"terminal_value_to_equity":723496378.7747302,"remaining_debt_at_exit":61455741.72,"equity_invested":183600000.00000003,"idc":0,"construction_years":0,"irr":0.1273390203136493,"npv":67383909.41010109,"payback_years":null,"stabilized_ebitda":50976315.22830272,"stabilized_revenue":86389805.50347655,"moic":4.08,"dscr_stabilized":1.46,"irr_post_tax":0.12670843022066564,"npv_post_tax":65693881.77883208,"moic_post_tax":4.05,"tax_assumptions":{"income_tax_rate_pct":10,"depreciable_life_years":10,"method":"straight_line","basis":"levered_equity","note":"Qatar corporate income tax (Law No. 24 of 2018), 10%. Operating income only; terminal value taxed via capital-gains path (no double-tax)."},"capex_reconciliation":{"model_capex_per_mw":9180000,"benchmark_capex_per_mw":8850000,"delta_pct":3.7,"within_tolerance":true},"revenue_start_year":1,"cod_offset_months":9},"debt_summary":{"principal":275400000,"total_interest":129663275,"total_principal_paid":275400000,"debt_term_years":12,"io_years":0,"min_dscr":null,"avg_dscr":null,"breach_years":[]},"debt_schedule":[{"year":1,"interest":17901000,"principal":15854273,"total_service":33755273,"closing_balance":259545727.05,"is_io":false},{"year":2,"interest":16870472,"principal":16884801,"total_service":33755273,"closing_balance":242660926.36,"is_io":false},{"year":3,"interest":15772960,"principal":17982313,"total_service":33755273,"closing_balance":224678613.62,"is_io":false},{"year":4,"interest":14604110,"principal":19151163,"total_service":33755273,"closing_balance":205527450.56,"is_io":false},{"year":5,"interest":13359284,"principal":20395989,"total_service":33755273,"closing_balance":185131461.9,"is_io":false},{"year":6,"interest":12033545,"principal":21721728,"total_service":33755273,"closing_balance":163409733.97,"is_io":false},{"year":7,"interest":10621633,"principal":23133640,"total_service":33755273,"closing_balance":140276093.73,"is_io":false},{"year":8,"interest":9117946,"principal":24637327,"total_service":33755273,"closing_balance":115638766.87,"is_io":false},{"year":9,"interest":7516520,"principal":26238753,"total_service":33755273,"closing_balance":89400013.77,"is_io":false},{"year":10,"interest":5811001,"principal":27944272,"total_service":33755273,"closing_balance":61455741.72,"is_io":false},{"year":11,"interest":3994623,"principal":29760650,"total_service":33755273,"closing_balance":31695091.98,"is_io":false},{"year":12,"interest":2060181,"principal":31695092,"total_service":33755273,"closing_balance":0.01,"is_io":false}],"waterfall":{"by_investor":{"hearst":{"irr":0.1736426875027183,"moic":4.69,"equity_invested":45900000,"total_distributions":215392281},"brookfield":{"irr":0.1736426875027183,"moic":4.69,"equity_invested":91800000,"total_distributions":430784563},"qatar":{"irr":0.1736426875027183,"moic":4.69,"equity_invested":45900000,"total_distributions":215392281},"lender":{}},"summary":{"total_equity":183600000.00000003,"total_debt":275400000,"pref_rate":0.08,"terminal_value":784952120.4947302,"terminal_value_to_equity":723496378.7747302,"remaining_debt_at_exit":61455741.72}}}
+</script>
+<script>
+/* ============================================================
+   Data-Center P&L — renders a board-grade income statement and
+   levered cash-flow bridge directly from the projection engine's
+   output object. Swap the JSON in #pnl-data to re-skin any run.
+   ============================================================ */
+const D = JSON.parse(document.getElementById('pnl-data').textContent);
+const P = D.projection, S = D.scenario, DS = D.debt_schedule || [], WF = D.waterfall || {};
+const YRS = P.years;
+
+/* ── formatters ─────────────────────────────────────── */
+const M = 1e6;
+const fmtM = (v,{sign=true,dp=1}={}) => {
+  if (v==null || isNaN(v)) return '—';
+  const x = v/M, neg = x<0;
+  const s = Math.abs(x).toLocaleString('en-US',{minimumFractionDigits:dp,maximumFractionDigits:dp});
+  return neg ? `(${s})` : (sign?s:s);
+};
+const fmtPct = (v,dp=1)=> v==null||isNaN(v) ? '—' : `${v.toFixed(dp)}%`;
+const fmtX   = (v,dp=2)=> v==null||isNaN(v) ? '—' : `${v.toFixed(dp)}×`;
+const cls    = v => v==null?'' : (v<0?'neg':(v===0?'zero':'pos'));
+const $B     = v => `$${(v/1e9).toFixed(2)}B`;
+const $M     = v => `$${(v/1e6).toFixed(1)}M`;
+
+/* ── masthead ───────────────────────────────────────── */
+const splitTxt = Object.entries(S.commercial_split||{})
+  .map(([k,v])=>`${k.replace(/_/g,' ')} ${v}%`).join(' · ');
+document.getElementById('sub-line').textContent =
+  `${S.total_mw} MW · ${S.start_year}–${S.start_year+9} · PUE ${S.pue.toFixed(2)} · ${splitTxt}`;
+document.getElementById('arch-tag').innerHTML =
+  `archetype <b>${(S.archetype||'—').replace(/_/g,' ')}</b>`;
+document.getElementById('masthead-r').innerHTML =
+  `Capacity <b>${S.total_mw} MW</b><br>Debt / equity <b>${S.debt_pct}% / ${100-S.debt_pct}%</b><br>Exit <b>${fmtX(S.exit_multiple,1)} EBITDA · yr ${S.exit_year}</b><br>Discount <b>${S.discount_rate_pct}%</b> · Tax <b>${S.tax_rate_pct}%</b>`;
+
+/* ── KPI ribbon ─────────────────────────────────────── */
+const payback = P.payback_years==null ? '> 10y' : `${P.payback_years} yr`;
+const hero = [
+  {lab:'Equity IRR · post-tax', val:fmtPct(P.irr_post_tax*100), sub:`pre-tax ${fmtPct(P.irr*100)}`, hero:true},
+  {lab:'Equity MOIC', val:fmtX(P.moic_post_tax), sub:`pre-tax ${fmtX(P.moic)}`, hero:true},
+  {lab:'NPV @'+S.discount_rate_pct+'%', val:$M(P.npv_post_tax), sub:'post-tax · levered', hero:true},
+  {lab:'Equity invested', val:$M(P.equity_invested), sub:`+ IDC ${$M(P.idc)}`},
+  {lab:'Total capex', val:$M(P.total_capex), sub:`${$M(P.total_capex/S.total_mw)}/MW`},
+  {lab:'Payback', val:payback, sub:'cumulative FCFE ≥ 0'},
+];
+document.getElementById('kpis').innerHTML = hero.map(k=>`
+  <div class="kpi ${k.hero?'hero':''}">
+    <div class="k-lab">${k.lab}</div>
+    <div class="k-val">${k.val}</div>
+    <div class="k-sub">${k.sub}</div>
+  </div>`).join('');
+
+const k2 = [
+  {lab:'Debt drawn', val:$M(WF.summary?.total_debt ?? P.total_capex*S.debt_pct/100), sub:`${S.debt_pct}% · ${S.debt_interest_rate}% · ${S.debt_term_years}y`},
+  {lab:'Stabilized revenue', val:$M(P.stabilized_revenue), sub:'first yr ≥ 80% occ'},
+  {lab:'Stabilized EBITDA', val:$M(P.stabilized_ebitda), sub:fmtPct(P.stabilized_ebitda/P.stabilized_revenue*100)+' margin'},
+  {lab:'DSCR @ stabilization', val:fmtX(P.dscr_stabilized), sub:'EBITDA / debt service'},
+  {lab:'Terminal value → equity', val:$M(P.terminal_value_to_equity), sub:`gross ${$M(P.terminal_value)}`},
+  {lab:'Remaining debt @ exit', val:$M(P.remaining_debt_at_exit), sub:`yr ${S.exit_year}`},
+];
+document.getElementById('kpis2').innerHTML = k2.map(k=>`
+  <div class="kpi">
+    <div class="k-lab">${k.lab}</div>
+    <div class="k-val">${k.val}</div>
+    <div class="k-sub">${k.sub}</div>
+  </div>`).join('');
+
+/* ── shared header ──────────────────────────────────── */
+function headRow(){
+  let h = `<thead><tr><th class="lab">USD millions</th>`;
+  YRS.forEach(y=>{ h += `<th><div class="cy">${y.calendar_year}</div>Y${y.year}</th>`; });
+  h += `<th class="sigma">Σ 10y</th></tr></thead>`;
+  return h;
+}
+
+/* render a statement from row specs.
+   spec: {lab, indent, pick(y,i)->value, kind:'money'|'pct'|'ratio',
+          negate, klass:'sub'|'total'|'meta', onlyExit, sum:true} */
+function renderStmt(id, rows){
+  let html = headRow() + '<tbody>';
+  for (const r of rows){
+    const tr = r.klass ? ` class="${r.klass}"` : '';
+    html += `<tr${tr}>`;
+    html += `<td class="lab${r.indent?' indent':''}">${r.lab}</td>`;
+    let sum = 0, sumHas = false;
+    YRS.forEach((y,i)=>{
+      let v = r.onlyExit ? (y.year===S.exit_year ? r.exitVal : null) : r.pick(y,i);
+      if (v!=null && r.negate) v = -Math.abs(v);
+      if (v!=null && r.kind==='money'){ sum += v; sumHas = true; }
+      let cell;
+      if (v==null) cell = '<span class="zero">—</span>';
+      else if (r.kind==='pct')   cell = `<span class="${cls(v)}">${fmtPct(v)}</span>`;
+      else if (r.kind==='ratio') cell = `<span class="${v<1?'neg':'pos'}">${fmtX(v)}</span>`;
+      else cell = `<span class="${cls(v)}">${fmtM(v)}</span>`;
+      html += `<td>${cell}</td>`;
+    });
+    // sigma column
+    let sig = '—';
+    if (r.sum!==false && r.kind==='money' && sumHas) sig = `<span class="${cls(sum)}">${fmtM(sum)}</span>`;
+    html += `<td class="sigma">${sig}</td></tr>`;
+  }
+  html += '</tbody>';
+  document.getElementById(id).innerHTML = html;
+}
+
+/* ── Income statement rows ──────────────────────────── */
+renderStmt('is-tbl', [
+  {lab:'Revenue', pick:y=>y.revenue, kind:'money'},
+  {lab:'Electricity &amp; power', indent:true, pick:y=>y.power_cost, kind:'money', negate:true},
+  {lab:'Operating expenses', indent:true, pick:y=>y.opex, kind:'money', negate:true},
+  {lab:'EBITDA', pick:y=>y.ebitda, kind:'money', klass:'sub'},
+  {lab:'EBITDA margin', pick:y=>y.ebitda_margin, kind:'pct', klass:'meta', sum:false},
+  {lab:'Depreciation &amp; amortisation', indent:true, pick:y=>y.depreciation, kind:'money', negate:true},
+  {lab:'EBIT', pick:y=>y.ebit, kind:'money', klass:'sub'},
+  {lab:'Interest expense', indent:true, pick:(y,i)=>DS[i]?.interest, kind:'money', negate:true},
+  {lab:'Pre-tax income', pick:y=>y.taxable_income, kind:'money', klass:'sub'},
+  {lab:`Income tax (${S.tax_rate_pct}%)`, indent:true, pick:y=>y.cash_taxes, kind:'money', negate:true},
+  {lab:'Net income', pick:y=> y.taxable_income==null?null : y.taxable_income-(y.cash_taxes||0), kind:'money', klass:'total'},
+  {lab:'Net margin', pick:y=>{ const ni=y.taxable_income==null?null:y.taxable_income-(y.cash_taxes||0); return (ni!=null&&y.revenue)?ni/y.revenue*100:null;}, kind:'pct', klass:'meta', sum:false},
+]);
+
+/* ── Cash flow to equity rows ───────────────────────── */
+renderStmt('cf-tbl', [
+  {lab:'EBITDA', pick:y=>y.ebitda, kind:'money'},
+  {lab:'Maintenance capex', indent:true, pick:y=>y.maintenance_capex, kind:'money', negate:true},
+  {lab:'Debt service (interest + principal)', indent:true, pick:y=>y.debt_service, kind:'money', negate:true},
+  {lab:'FCFE — pre-tax', pick:y=>y.free_cash_flow, kind:'money', klass:'sub'},
+  {lab:'Cash taxes', indent:true, pick:y=>y.cash_taxes, kind:'money', negate:true},
+  {lab:'FCFE — post-tax', pick:y=>y.free_cash_flow_post_tax, kind:'money', klass:'total'},
+  {lab:'(+) Terminal value to equity', indent:true, onlyExit:true, exitVal:P.terminal_value_to_equity, kind:'money', klass:'meta'},
+  {lab:'Cumulative FCFE (incl. exit)', pick:y=>y.cumulative_fcf, kind:'money', klass:'meta', sum:false},
+  {lab:'DSCR', pick:y=>y.dscr, kind:'ratio', klass:'meta', sum:false},
+]);
+
+/* ── Assumptions ────────────────────────────────────── */
+const A = [
+  ['Capacity', `${S.total_mw} MW`],
+  ['Phasing', `${S.phase1_mw}/${S.phase2_mw}/${S.phase3_mw} MW → yr ${S.phase3_complete_year}`],
+  ['PUE', S.pue.toFixed(2)],
+  ['Electricity', `$${S.electricity_price_mwh}/MWh`],
+  ['Target occupancy', `${S.target_occupancy_pct}%`],
+  ['Site readiness', `${(S.site_readiness||'—').replace(/_/g,' ')} · COD +${P.cod_offset_months}mo`],
+  ['Hyperscale price', `$${S.price_hyperscale_kw_month}/kW·mo`],
+  ['Wholesale price', `$${S.price_wholesale_kw_month}/kW·mo`],
+  ['Retail colo price', `$${S.price_retail_colo_kw_month}/kW·mo`],
+  ['Escalation', `${S.annual_escalation_pct}%/yr`],
+  ['Capex contingency', `${S.capex_contingency_pct}%`],
+  ['Staff opex', `$${S.opex_staff_annual_musd}M/yr`],
+  ['Leverage', `${S.debt_pct}% @ ${S.debt_interest_rate}% · ${S.debt_term_years}y`],
+  ['Equity split', `H ${S.equity_hearst_pct}% · B ${S.equity_brookfield_pct}% · Q ${S.equity_qatar_pct}%`],
+  ['Exit', `${fmtX(S.exit_multiple,1)} EBITDA · yr ${S.exit_year}`],
+  ['Discount / tax', `${S.discount_rate_pct}% / ${S.tax_rate_pct}%`],
+];
+document.getElementById('assum').innerHTML = A.map(([l,v])=>`
+  <div class="row"><span class="a-lab">${l}</span><span class="a-val">${v}</span></div>`).join('');
+
+/* ── Provenance / checks ────────────────────────────── */
+const rec = P.capex_reconciliation || {};
+const prov = [];
+prov.push({c: rec.within_tolerance?'ok':'warn',
+  t:`Capex reconciliation — model <code>${$M(rec.model_capex_per_mw)}/MW</code> vs benchmark <code>${$M(rec.benchmark_capex_per_mw)}/MW</code> (${rec.delta_pct>0?'+':''}${rec.delta_pct}%) — <b>${rec.within_tolerance?'within ±15% tolerance':'OUT OF TOLERANCE'}</b>.`});
+prov.push({c:'info', t:`Tax — ${P.tax_assumptions.note} Straight-line D&amp;A over ${P.tax_assumptions.depreciable_life_years}y; interest deductible; no refund on losses.`});
+if (P.revenue_start_year>1 || P.cod_offset_months>0)
+  prov.push({c:'info', t:`Pre-COD — revenue starts operating year ${P.revenue_start_year} (COD offset ${P.cod_offset_months}mo). No revenue, power or opex booked before delivery.`});
+prov.push({c:'info', t:`Equity outflow at close = total capex × (1 − debt%) + IDC (${$M(P.idc)}). Terminal value taxed via capital-gains path (no double-tax of exit).`});
+(P.warnings||[]).forEach(w=>prov.push({c:'warn', t:w}));
+document.getElementById('prov').innerHTML = prov.map(p=>`
+  <div class="pline"><span class="dot ${p.c}"></span><span>${p.t}</span></div>`).join('');
+
+/* ── Waterfall ──────────────────────────────────────── */
+const inv = WF.by_investor||{};
+const order = ['hearst','brookfield','qatar'];
+let wfh = `<thead><tr><th class="lab" style="text-align:left;color:var(--ink-3);font-weight:500;font-size:10px;letter-spacing:.1em;">INVESTOR</th>
+  <th style="text-align:right;color:var(--ink-3);font-size:10px;">EQUITY</th>
+  <th style="text-align:right;color:var(--ink-3);font-size:10px;">IRR</th>
+  <th style="text-align:right;color:var(--ink-3);font-size:10px;">MOIC</th>
+  <th style="text-align:right;color:var(--ink-3);font-size:10px;">DISTRIB.</th></tr></thead><tbody>`;
+order.forEach(k=>{ const v=inv[k]; if(!v||v.irr==null) return;
+  wfh += `<tr><td class="lab" style="text-transform:capitalize">${k}</td>
+    <td style="text-align:right">${$M(v.equity_invested)}</td>
+    <td style="text-align:right" class="pos">${fmtPct(v.irr*100)}</td>
+    <td style="text-align:right" class="pos">${fmtX(v.moic)}</td>
+    <td style="text-align:right">${$M(v.total_distributions)}</td></tr>`;
+});
+wfh += `</tbody>`;
+document.getElementById('wf-tbl').innerHTML = wfh;
+</script>
+</body>
+</html>

@@ -14,12 +14,16 @@ export async function GET(req) {
   const project_id = searchParams.get('project_id');
   if (!project_id) return NextResponse.json({ error: 'project_id required' }, { status: 400 });
 
+  // Pagination — défaut rétrocompatible (100). `limit` plafonne à 1000, `offset` pour parcourir tout.
+  const limit = Math.min(Number.parseInt(searchParams.get('limit'), 10) || 100, 1000);
+  const offset = Math.max(Number.parseInt(searchParams.get('offset'), 10) || 0, 0);
+
   const { data, error, count } = await supa
     .from('hearst_scenarios')
     .select('*', { count: 'exact' })
     .eq('project_id', project_id)
     .order('created_at')
-    .limit(100);
+    .range(offset, offset + limit - 1);
   if (error) return dbErrorResponse(error, '[scenarios][GET]');
 
   // Attach calculated projections and source scores
