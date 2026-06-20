@@ -11,11 +11,7 @@ import {
 } from '../utils/format';
 import {
   ARCHETYPES,
-  DEFAULT_GEOGRAPHY,
-  DEFAULT_SIM_SCALE_MW,
-  DEFAULT_SIM_AI_MIX_PCT,
   GPU_SKU_PRESETS,
-  DEFAULT_GPU_SKU,
   DEFAULT_GPU_HOUR_PRICE,
   DEFAULT_GPU_UTIL_PCT,
 } from '../utils/constants';
@@ -57,11 +53,11 @@ function numFmt(n, digits = 0) {
 export default function SimulatorPage() {
   // ── Inputs ──────────────────────────────────────────────────────────────────
   const [thesis, setThesis]           = useState('compute');
-  const [scale, setScale]             = useState(DEFAULT_SIM_SCALE_MW);
-  const [aiMix, setAiMix]             = useState(DEFAULT_SIM_AI_MIX_PCT);
-  const [gpuSku, setGpuSku]           = useState(DEFAULT_GPU_SKU);
+  const [scale, setScale]             = useState(150);
+  const [aiMix, setAiMix]             = useState(50);
+  const [gpuSku, setGpuSku]           = useState('h100');
   const [gpuHourPrice] = useState(DEFAULT_GPU_HOUR_PRICE);
-  const [geography, setGeography]     = useState(DEFAULT_GEOGRAPHY);
+  const [geography, setGeography]     = useState('qatar');
   
   // ── UI State ─────────────────────────────────────────────────────────────────
   const [isResultsMode, setIsResultsMode] = useState(false);
@@ -149,18 +145,18 @@ export default function SimulatorPage() {
     <div className={styles.container}>
       {/* TOP BAR */}
       <div className={styles.topBar}>
-        <div className={styles.item}><span className={`${styles.lbl} ${styles.textWhite}`} style={{letterSpacing: '0.2em', fontWeight: 700}}>HEARST</span></div>
-        <div className={styles.item}><span className={`${styles.lbl} ${styles.textPrimary}`}>ORACLE SIMULATOR</span></div>
+        <div className={styles.item}><span className={`${styles.lbl} ${styles.textWhite}`} style={{letterSpacing: '0.2em', fontWeight: 700}}>FUTUR ONE</span></div>
+        <div className={styles.item}><span className={`${styles.lbl} ${styles.textMuted}`}>PROJECTION COCKPIT</span></div>
         <div className={styles.item}>
           <span className={styles.lbl}>
-            <span className={styles.liveDot} style={{ background: loading ? 'var(--primary)' : 'var(--accent-green)', boxShadow: `0 0 8px ${loading ? 'var(--primary)' : 'var(--accent-green)'}`}}></span>
-            {loading ? 'COMPUTING...' : isResultsMode ? 'SYS_ANALYSIS' : 'SYS_READY'}
+            <span className={loading ? styles.liveDotActive : styles.liveDot}></span>
+            {loading ? 'COMPUTING...' : isResultsMode ? 'EVIDENCE-LINKED MODEL' : 'BASE SCENARIO'}
           </span>
         </div>
         <div className={styles.item} style={{flex: 1}}></div>
         <div className={styles.item}>
           <span className={`${styles.lbl} ${styles.textMuted}`}>
-            {isResultsMode ? 'STEP 02 // PROJECTION' : 'STEP 01 // CONFIGURATION'}
+            {isResultsMode ? 'FINANCIAL OUTCOMES' : 'UNDERWRITING PARAMETERS'}
           </span>
         </div>
       </div>
@@ -173,7 +169,7 @@ export default function SimulatorPage() {
               <div className={styles.row}>
                 <div className={styles.lbl} style={{marginBottom: '2rem'}}>INFRASTRUCTURE & POWER</div>
                 
-                <div className={`${styles.lbl} ${styles.textWhite}`} style={{marginBottom: '1rem'}}>SITE LOCATION</div>
+                <div className={`${styles.lbl} ${styles.textWhite}`} style={{marginBottom: '0.5rem'}}>SITE LOCATION</div>
                 {GEOGRAPHIES.map((g) => (
                   <div 
                     key={g.id} 
@@ -189,8 +185,9 @@ export default function SimulatorPage() {
               <div className={styles.rowStretch}>
                 <div className={styles.flexBetween}>
                   <div className={`${styles.lbl} ${styles.textWhite}`}>TARGET CAPACITY</div>
-                  <div className={`${styles.textLg} ${styles.textPrimary}`}>{scale} MW</div>
+                  <div className={`${styles.textLg} ${styles.textWhite}`}>{scale} MW</div>
                 </div>
+                <div className={styles.lbl} style={{textTransform: 'none', marginTop: '0.25rem'}}>Phase I / scalable campus</div>
                 
                 <div className={styles.sliderContainer}>
                   <input 
@@ -221,11 +218,11 @@ export default function SimulatorPage() {
           ) : (
             <div className={styles.fadeEnterActive}>
               <div className={styles.row}>
-                <div className={styles.lbl} style={{marginBottom: '2rem'}}>FINANCIAL PROJECTION</div>
+                <div className={styles.lbl} style={{marginBottom: '2rem'}}>FINANCIAL OUTCOMES</div>
                 {loading ? (
-                  <div className={styles.textMuted}>Running Monte Carlo simulations...</div>
+                  <div className={styles.textMuted}>Computing scenario...</div>
                 ) : error ? (
-                  <div className={styles.textAccent} style={{color: '#ff4444'}}>{error}</div>
+                  <div className={styles.textDanger}>{error}</div>
                 ) : (
                   <>
                     <div className={styles.resultWidget}>
@@ -242,13 +239,8 @@ export default function SimulatorPage() {
                       <div className={styles.resultValue}>{moic != null ? fmtX(moic) : MISSING}</div>
                     </div>
                     <div className={styles.resultWidget}>
-                      <div className={styles.resultLabel}>STABILIZED EBITDA</div>
-                      <div className={styles.resultValue}>{fmtUSD(ebitda)}</div>
-                    </div>
-                    <div className={styles.resultWidget}>
-                      <div className={styles.resultLabel}>MIN DSCR</div>
-                      <div className={styles.resultValue}>{dscr != null ? `${Number(dscr).toFixed(2)}×` : MISSING}</div>
-                      <div className={styles.resultSub}>Covenant: 1.20×</div>
+                      <div className={styles.resultLabel}>TOTAL PROJECT CAPEX</div>
+                      <div className={styles.resultValue}>{capEx != null ? fmtUSD(capEx) : MISSING}</div>
                     </div>
                   </>
                 )}
@@ -263,8 +255,8 @@ export default function SimulatorPage() {
             
             <div style={{padding: '1.5rem', borderBottom: `1px solid var(--hl)`, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}>
               <div className={styles.lbl}>SITE TOPOLOGY</div>
-              <div className={styles.lbl} style={{color: loading ? 'var(--primary)' : 'var(--accent-green)'}}>
-                <span className={styles.liveDot} style={{background: loading ? 'var(--primary)' : 'var(--accent-green)', boxShadow: `0 0 8px ${loading ? 'var(--primary)' : 'var(--accent-green)'}`}}></span>
+              <div className={styles.lbl} style={{color: loading ? 'var(--fg-muted)' : 'var(--fg)'}}>
+                <span className={loading ? styles.liveDotActive : styles.liveDot}></span>
                 {loading ? 'ANALYZING' : 'TIER IV READY'}
               </div>
             </div>
@@ -274,10 +266,10 @@ export default function SimulatorPage() {
               <svg viewBox="0 0 400 300">
                 <g transform="translate(200, 150)">
                   {/* Base platform */}
-                  <polygon points="0,-80 120,-20 0,40 -120,-20" strokeWidth="0.5" stroke="var(--primary)" className={styles.svgGlowStrong} />
+                  <polygon points="0,-80 120,-20 0,40 -120,-20" strokeWidth="0.5" stroke="var(--fg-dim)" className={styles.svgGlowStrong} />
                   {/* Grid lines on platform */}
-                  <line x1="-60" y1="-50" x2="60" y2="10" strokeDasharray="4,4" strokeWidth="1" stroke="var(--primary)"/>
-                  <line x1="60" y1="-50" x2="-60" y2="10" strokeDasharray="4,4" strokeWidth="1" stroke="var(--primary)"/>
+                  <line x1="-60" y1="-50" x2="60" y2="10" strokeDasharray="4,4" strokeWidth="0.5" stroke="var(--fg-dim)"/>
+                  <line x1="60" y1="-50" x2="-60" y2="10" strokeDasharray="4,4" strokeWidth="0.5" stroke="var(--fg-dim)"/>
 
                   {/* Server Rack 1 */}
                   <g transform="translate(-40, -20)">
@@ -306,8 +298,8 @@ export default function SimulatorPage() {
                   </g>
                   
                   {/* Floating Connection Node */}
-                  <circle cx="0" cy="-110" r="4" fill="var(--primary)" stroke="none" />
-                  <line x1="0" y1="-110" x2="0" y2="-70" stroke="var(--primary)" strokeDasharray="3,3" />
+                  <circle cx="0" cy="-110" r="3" fill="var(--fg-dim)" stroke="none" />
+                  <line x1="0" y1="-110" x2="0" y2="-70" stroke="var(--fg-dim)" strokeDasharray="2,2" strokeWidth="0.5" />
                 </g>
               </svg>
             </div>
@@ -319,12 +311,12 @@ export default function SimulatorPage() {
             {!isResultsMode ? (
               <button className={styles.btnLaunch} onClick={handleRunSimulation} disabled={loading}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                RUN SIMULATION
+                COMPUTE SCENARIO
               </button>
             ) : (
               <button className={styles.btnReset} onClick={handleReset}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-                RESET CONFIG
+                NEW SCENARIO
               </button>
             )}
           </div>
@@ -351,8 +343,9 @@ export default function SimulatorPage() {
               <div className={styles.row}>
                 <div className={styles.flexBetween}>
                   <div className={`${styles.lbl} ${styles.textWhite}`}>AI INFRASTRUCTURE MIX</div>
-                  <div className={`${styles.textLg} ${styles.textPrimary}`}>{aiMix}%</div>
+                  <div className={`${styles.textLg} ${styles.textWhite}`}>{aiMix}%</div>
                 </div>
+                <div className={styles.lbl} style={{textTransform: 'none', marginTop: '0.25rem'}}>AI load share — impacts capex, cooling, power density</div>
                 <div className={styles.sliderContainer}>
                   <input 
                     type="range" 
@@ -388,40 +381,20 @@ export default function SimulatorPage() {
               
               <div className={styles.row} style={{background: 'var(--surface)', marginTop: 'auto'}}>
                 <div className={styles.lbl}>EST. HARDWARE CAPEX</div>
-                <div className={`${styles.textHuge} ${styles.textPrimary}`} style={{marginTop: '0.75rem'}}>
+                <div className={`${styles.textHuge} ${styles.textWhite}`} style={{marginTop: '0.75rem'}}>
                   {/* Rough client-side estimate for input mode */}
                   {fmtUSD(scale * 1_000_000 * (1 + aiMix/100 * 2))}
                 </div>
                 <div className={`${styles.lbl} ${styles.textMuted}`} style={{marginTop: '0.5rem', textTransform: 'none'}}>
-                  Dynamic estimate based on scale & mix
+                  Total project envelope - indicative
                 </div>
               </div>
             </div>
           ) : (
             <div className={styles.fadeEnterActive} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
               <div className={styles.rowNoPad} style={{flex: 1}}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th className={styles.lbl} colSpan="3" style={{paddingTop: '1.5rem', color: 'var(--fg)'}}>COMPUTE CLUSTER SELECTION</th>
-                    </tr>
-                    <tr>
-                      <th className={styles.lbl}>HARDWARE</th>
-                      <th className={`${styles.lbl} ${styles.textRight}`}>QTY</th>
-                      <th className={`${styles.lbl} ${styles.textRight}`}>CAPEX EST.</th>
-                    </tr>
-                  </thead>
-                  <tbody className={styles.tableBody}>
-                    {!loading && hw ? renderHardwareRows() : (
-                      <tr className={styles.tableRow}>
-                        <td colSpan="3" className={`${styles.textSm} ${styles.textMuted}`}>Loading...</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-
                 {!loading && result?.waterfall?.summary && (
-                  <div style={{padding: '1.5rem', borderTop: '1px solid var(--hl)'}}>
+                  <div style={{padding: '1.5rem', borderBottom: '1px solid var(--hl)'}}>
                     <div className={styles.lbl} style={{marginBottom: '1rem', color: 'var(--fg)'}}>CAPITAL STRUCTURE</div>
                     <div className={styles.flexBetween} style={{marginBottom: '0.5rem'}}>
                       <div className={styles.textSm}>Total Equity</div>
@@ -437,15 +410,47 @@ export default function SimulatorPage() {
                     </div>
                   </div>
                 )}
+
+                <div style={{padding: '1.5rem', borderBottom: '1px solid var(--hl)'}}>
+                  <div className={styles.lbl} style={{marginBottom: '1rem', color: 'var(--fg)'}}>OPERATING METRICS</div>
+                  <div className={styles.flexBetween} style={{marginBottom: '0.5rem'}}>
+                    <div className={styles.textSm}>Stabilized EBITDA</div>
+                    <div className={styles.textSm}>{fmtUSD(ebitda)}</div>
+                  </div>
+                  <div className={styles.flexBetween}>
+                    <div className={styles.textSm}>Min DSCR</div>
+                    <div className={styles.textSm}>{dscr != null ? `${Number(dscr).toFixed(2)}×` : MISSING}</div>
+                  </div>
+                </div>
+
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th className={styles.lbl} colSpan="3" style={{paddingTop: '1.5rem', color: 'var(--fg)'}}>HARDWARE PROFILE</th>
+                    </tr>
+                    <tr>
+                      <th className={styles.lbl}>HARDWARE</th>
+                      <th className={`${styles.lbl} ${styles.textRight}`}>QTY</th>
+                      <th className={`${styles.lbl} ${styles.textRight}`}>CAPEX EST.</th>
+                    </tr>
+                  </thead>
+                  <tbody className={styles.tableBody}>
+                    {!loading && hw ? renderHardwareRows() : (
+                      <tr className={styles.tableRow}>
+                        <td colSpan="3" className={`${styles.textSm} ${styles.textMuted}`}>Loading...</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
               
               <div className={styles.row} style={{background: 'var(--surface)', marginTop: 'auto'}}>
-                <div className={styles.lbl}>TOTAL PROJECT CAPEX</div>
-                <div className={`${styles.textHuge} ${styles.textPrimary}`} style={{marginTop: '0.75rem'}}>
-                  {loading || capEx == null ? MISSING : fmtUSD(capEx)}
+                <div className={styles.lbl}>IS IT INVESTABLE?</div>
+                <div className={`${styles.textLg} ${styles.textPrimary}`} style={{marginTop: '0.75rem'}}>
+                  {loading ? MISSING : (irr >= 15 ? 'YES — MEETS HURDLE' : 'NO — BELOW HURDLE')}
                 </div>
                 <div className={`${styles.lbl} ${styles.textMuted}`} style={{marginTop: '0.5rem', textTransform: 'none'}}>
-                  Includes land, core & shell, MEP, and IT
+                  Based on 15% target IRR
                 </div>
               </div>
             </div>

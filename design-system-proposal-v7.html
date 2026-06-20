@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hearst Oracle | Simulator Proposal v7</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg: #0e0f0f;
+      --surface: #171919;
+      --surface-2: #1d2020;
+      --surface-3: #2a2d2d;
+      --surface-4: #454646;
+      --text: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.72);
+      --text-dim: rgba(255, 255, 255, 0.44);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --hearst-green: #8afd81;
+      --profit-green: #3eb51e;
+      --btc: #f7931a;
+      --kas: #49eacb;
+      --warning: #f0c25e;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --font: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      font-variant-numeric: tabular-nums;
+    }
+
+    body {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+    }
+
+    .rail {
+      min-height: 100vh;
+      background: #111212;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 18px 0;
+      gap: 18px;
+    }
+
+    .rail-logo {
+      width: 36px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 8px;
+    }
+
+    .rail-logo svg {
+      width: 32px;
+      height: 36px;
+    }
+
+    .rail-button {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-dim);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: 180ms ease;
+    }
+
+    .rail-button:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+
+    .rail-button.active {
+      background: rgba(138, 253, 129, 0.1);
+      border-color: rgba(138, 253, 129, 0.22);
+      color: var(--hearst-green);
+    }
+
+    .app {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 78px;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      align-items: center;
+      gap: 18px;
+      padding: 0 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+    }
+
+    .asset-pill {
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #0e0f0f;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+    }
+
+    .coin-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .market-strip {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .market-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      min-width: 0;
+    }
+
+    .market-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .market-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .market-delta {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--profit-green);
+    }
+
+    .stamp,
+    .user-chip {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .user-chip {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .page {
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .panel-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      line-height: 1;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-weight: 700;
+    }
+
+    .title {
+      margin: 6px 0 0;
+      font-size: 22px;
+      line-height: 1.15;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .subtle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(62, 181, 30, 0.08);
+      border: 1px solid rgba(62, 181, 30, 0.18);
+      color: #b8f5a8;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--profit-green);
+      box-shadow: 0 0 12px rgba(62, 181, 30, 0.55);
+    }
+
+    .hero-body {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .metric-card {
+      padding: 16px;
+      border-radius: 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .metric-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      font-weight: 700;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .metric-range {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      appearance: none;
+      background: transparent;
+      margin: 0;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(138,253,129,0.38), rgba(138,253,129,0.08));
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--hearst-green);
+      border: 3px solid #102010;
+      box-shadow: 0 0 0 5px rgba(138,253,129,0.14);
+      margin-top: -7px;
+      cursor: pointer;
+    }
+
+    .site-list,
+    .deploy-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      padding: 14px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text-muted);
+      transition: 160ms ease;
+      cursor: pointer;
+    }
+
+    .choice:hover {
+      background: rgba(255,255,255,0.045);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .choice.active {
+      border-color: rgba(138, 253, 129, 0.22);
+      background: rgba(138, 253, 129, 0.08);
+      color: var(--text);
+    }
+
+    .choice-main {
+      font-size: 14px;
+      font-weight: 600;
+      color: inherit;
+    }
+
+    .choice-meta {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .topology {
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 50% 46%, rgba(138,253,129,0.12), rgba(138,253,129,0) 45%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+      border: 1px solid var(--border);
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .topology svg {
+      width: min(100%, 520px);
+      height: auto;
+    }
+
+    .summary-strip {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .summary-cell {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(13, 14, 14, 0.78);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .summary-cell .metric-label {
+      margin-bottom: 8px;
+    }
+
+    .summary-cell .metric-value {
+      font-size: 18px;
+    }
+
+    .cta-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .cta-card {
+      padding: 20px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(138,253,129,0.12), rgba(138,253,129,0.03));
+      border: 1px solid rgba(138,253,129,0.18);
+    }
+
+    .cta-card h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .cta-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .button-primary {
+      height: 52px;
+      border: none;
+      border-radius: 12px;
+      background: var(--hearst-green);
+      color: #0f120f;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: 180ms ease;
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(138, 253, 129, 0.22);
+    }
+
+    .button-secondary {
+      height: 48px;
+      border-radius: 12px;
+      border: 1px solid var(--border-strong);
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .button-secondary:hover {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .grid-bottom {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+    }
+
+    .gpu-grid {
+      padding: 18px 20px 20px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .table thead th {
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 14px;
+      background: var(--surface-4);
+    }
+
+    .table thead th:first-child {
+      border-top-left-radius: 10px;
+    }
+
+    .table thead th:last-child {
+      border-top-right-radius: 10px;
+      text-align: right;
+    }
+
+    .table tbody td {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .table tbody tr:hover td {
+      background: rgba(255,255,255,0.025);
+      color: var(--text);
+    }
+
+    .table tbody td:last-child,
+    .table tbody td:nth-child(3),
+    .table tbody td:nth-child(4) {
+      text-align: right;
+    }
+
+    .hardware {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chip.green {
+      background: rgba(62,181,30,0.1);
+      color: #baf6aa;
+    }
+
+    .capex {
+      padding: 18px 20px 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .capex-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .capex-row strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .capex-total {
+      margin-top: 2px;
+      padding: 18px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+    }
+
+    .capex-total .eyebrow {
+      margin-bottom: 10px;
+    }
+
+    .capex-total .amount {
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .capex-total .foot {
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .wizard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .wizard-step {
+      padding: 18px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .wizard-step.active {
+      border-color: rgba(138, 253, 129, 0.18);
+      box-shadow: 0 0 0 1px rgba(138, 253, 129, 0.08), var(--shadow);
+    }
+
+    .wizard-index {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .wizard-step.active .wizard-index {
+      background: rgba(138,253,129,0.18);
+      color: var(--hearst-green);
+    }
+
+    .wizard-step h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .wizard-step p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1320px) {
+      .hero,
+      .grid-bottom,
+      .wizard {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 980px) {
+      body {
+        grid-template-columns: 1fr;
+      }
+
+      .rail {
+        display: none;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+        height: auto;
+        padding: 16px;
+      }
+
+      .market-strip {
+        overflow: auto;
+        padding-bottom: 4px;
+      }
+
+      .summary-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="rail">
+    <div class="rail-logo" aria-label="Hearst logo">
+      <svg viewBox="560 455 155 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+        <polygon fill="#8afd81" points="601.74 466.87 572.6 466.87 572.6 609.73 601.74 609.73 601.74 549.07 633.11 579.43 665.76 579.43 601.74 517.46 601.74 466.87"/>
+        <polygon fill="#8afd81" points="672.72 466.87 672.72 528.12 644.63 500.93 611.98 500.93 672.72 559.72 672.72 609.73 701.86 609.73 701.86 466.87 672.72 466.87"/>
+      </svg>
+    </div>
+    <button class="rail-button active" aria-label="Mining">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M4 7h16M7 4v16M17 4v16" />
+      </svg>
+    </button>
+    <button class="rail-button" aria-label="DeFi">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M5 12h3l2-4 4 8 2-4h3" />
+      </svg>
+    </button>
+    <button class="rail-button" aria-label="Contracts">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M8 3h6l5 5v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+        <path d="M14 3v6h6" />
+      </svg>
+    </button>
+    <button class="rail-button" aria-label="Invoices">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z" />
+        <path d="M9 8h6M9 12h6" />
+      </svg>
+    </button>
+  </aside>
+
+  <main class="app">
+    <header class="topbar">
+      <div class="asset-pill">
+        <span class="coin-dot" style="background: var(--btc);"></span>
+        Bitcoin
+      </div>
+
+      <div class="market-strip">
+        <div class="market-card">
+          <span class="coin-dot" style="background: var(--btc); width: 12px; height: 12px;"></span>
+          <div>
+            <div class="market-label">BTC</div>
+            <div class="market-value">$0</div>
+          </div>
+          <div class="market-delta">+0%</div>
+        </div>
+        <div class="market-card">
+          <span class="coin-dot" style="background: var(--kas); width: 12px; height: 12px;"></span>
+          <div>
+            <div class="market-label">KAS</div>
+            <div class="market-value">$0</div>
+          </div>
+          <div class="market-delta">+0%</div>
+        </div>
+        <div class="market-card">
+          <div>
+            <div class="market-label">Network</div>
+            <div class="market-value">906.73 EH/s</div>
+          </div>
+        </div>
+        <div class="market-card">
+          <div>
+            <div class="market-label">$/TH</div>
+            <div class="market-value">$0.017</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stamp">Jun 20, 02:56 UTC</div>
+      <div class="user-chip">MP</div>
+    </header>
+
+    <section class="page">
+      <div class="hero">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="eyebrow">Oracle Simulator</div>
+              <h1 class="title">Data center deployment configurator</h1>
+              <div class="subtle">Step 1 of 3 · configure site, megawatts and deployment profile</div>
+            </div>
+            <div class="status">ready to simulate</div>
+          </div>
+
+          <div class="hero-body">
+            <div class="stack">
+              <div class="metric-card">
+                <div class="metric-top">
+                  <div class="metric-label">Target capacity</div>
+                  <div class="metric-value" id="mw-value">250 MW</div>
+                </div>
+                <input id="mw-slider" type="range" min="20" max="1000" step="10" value="250">
+                <div class="metric-range">
+                  <span>20 MW</span>
+                  <span>1 GW</span>
+                </div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-top">
+                  <div class="metric-label">Site selection</div>
+                  <div class="chip green">grid access</div>
+                </div>
+                <div class="site-list">
+                  <div class="choice active">
+                    <div>
+                      <div class="choice-main">Texas, USA · TX-01</div>
+                      <div class="choice-meta">ERCOT · fast ramp · dry cooling</div>
+                    </div>
+                    <div class="choice-meta">selected</div>
+                  </div>
+                  <div class="choice">
+                    <div>
+                      <div class="choice-main">Reykjavik, ISL · RK-02</div>
+                      <div class="choice-meta">hydro surplus · cold climate</div>
+                    </div>
+                    <div class="choice-meta">7.2c/kWh</div>
+                  </div>
+                  <div class="choice">
+                    <div>
+                      <div class="choice-main">Oslo, NOR · OS-01</div>
+                      <div class="choice-meta">stable baseload · premium latency</div>
+                    </div>
+                    <div class="choice-meta">9.4c/kWh</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-top">
+                  <div class="metric-label">Deployment intent</div>
+                  <div class="chip">wizard input</div>
+                </div>
+                <div class="deploy-list">
+                  <div class="choice active">
+                    <div>
+                      <div class="choice-main">Inference campus</div>
+                      <div class="choice-meta">enterprise AI serving + burst workloads</div>
+                    </div>
+                    <div class="choice-meta">active</div>
+                  </div>
+                  <div class="choice">
+                    <div>
+                      <div class="choice-main">Training cluster</div>
+                      <div class="choice-meta">high density GPU pods + InfiniBand spine</div>
+                    </div>
+                    <div class="choice-meta">optional</div>
+                  </div>
+                  <div class="choice">
+                    <div>
+                      <div class="choice-main">Hybrid HPC</div>
+                      <div class="choice-meta">mixed CPU / GPU reservation profile</div>
+                    </div>
+                    <div class="choice-meta">optional</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="topology">
+              <svg viewBox="0 0 560 440" xmlns="http://www.w3.org/2000/svg" aria-label="Data center topology">
+                <defs>
+                  <linearGradient id="rackTop" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#2a2d2d"/>
+                    <stop offset="100%" stop-color="#1a1c1c"/>
+                  </linearGradient>
+                  <linearGradient id="rackSide" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#232626"/>
+                    <stop offset="100%" stop-color="#121414"/>
+                  </linearGradient>
+                </defs>
+                <g transform="translate(282 204)">
+                  <polygon points="0,-118 180,-28 0,64 -180,-28" fill="rgba(138,253,129,0.04)" stroke="rgba(138,253,129,0.28)" stroke-width="1.2"/>
+                  <line x1="-90" y1="-72" x2="90" y2="18" stroke="rgba(138,253,129,0.16)" stroke-dasharray="5 5"/>
+                  <line x1="92" y1="-74" x2="-90" y2="18" stroke="rgba(138,253,129,0.16)" stroke-dasharray="5 5"/>
+
+                  <g transform="translate(-60,-28)">
+                    <polygon points="0,-58 52,-32 0,-7 -52,-32" fill="url(#rackTop)" stroke="rgba(255,255,255,0.18)"/>
+                    <polygon points="-52,-32 0,-7 0,56 -52,30" fill="url(#rackSide)" stroke="rgba(255,255,255,0.12)"/>
+                    <polygon points="0,-7 52,-32 52,30 0,56" fill="#181a1a" stroke="rgba(255,255,255,0.12)"/>
+                    <line x1="-52" y1="-18" x2="0" y2="8" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="-52" y1="-2" x2="0" y2="24" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="-52" y1="14" x2="0" y2="40" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="0" y1="8" x2="52" y2="-18" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="0" y1="24" x2="52" y2="-2" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="0" y1="40" x2="52" y2="14" stroke="rgba(138,253,129,0.3)"/>
+                  </g>
+
+                  <g transform="translate(72,22)">
+                    <polygon points="0,-66 60,-36 0,-8 -60,-36" fill="url(#rackTop)" stroke="rgba(255,255,255,0.18)"/>
+                    <polygon points="-60,-36 0,-8 0,72 -60,42" fill="url(#rackSide)" stroke="rgba(255,255,255,0.12)"/>
+                    <polygon points="0,-8 60,-36 60,42 0,72" fill="#181a1a" stroke="rgba(255,255,255,0.12)"/>
+                    <line x1="-60" y1="-18" x2="0" y2="12" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="-60" y1="0" x2="0" y2="30" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="-60" y1="18" x2="0" y2="48" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="0" y1="12" x2="60" y2="-18" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="0" y1="30" x2="60" y2="0" stroke="rgba(138,253,129,0.3)"/>
+                    <line x1="0" y1="48" x2="60" y2="18" stroke="rgba(138,253,129,0.3)"/>
+                  </g>
+
+                  <circle cx="0" cy="-160" r="6" fill="#8afd81"/>
+                  <line x1="0" y1="-154" x2="0" y2="-104" stroke="rgba(138,253,129,0.55)" stroke-dasharray="4 4"/>
+                </g>
+              </svg>
+
+              <div class="summary-strip">
+                <div class="summary-cell">
+                  <div class="metric-label">PUE</div>
+                  <div class="metric-value">1.12</div>
+                </div>
+                <div class="summary-cell">
+                  <div class="metric-label">Grid connection</div>
+                  <div class="metric-value">2027 Q3</div>
+                </div>
+                <div class="summary-cell">
+                  <div class="metric-label">Water mode</div>
+                  <div class="metric-value">dry cooling</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="cta-panel">
+          <div class="cta-card panel">
+            <div class="eyebrow">Simulation launch</div>
+            <h3>Run the infrastructure model</h3>
+            <p>Generate pricing, deployment phasing and capacity assumptions before opening the full simulation and LLM narrative.</p>
+          </div>
+          <button class="button-primary" type="button">Launch simulation</button>
+          <button class="button-secondary" type="button">Preview step 2</button>
+        </section>
+      </div>
+
+      <div class="grid-bottom">
+        <section class="panel gpu-grid">
+          <div class="panel-header" style="padding: 0 0 14px; border-bottom: none;">
+            <div>
+              <div class="eyebrow">Compute cluster</div>
+              <div class="title" style="font-size: 18px; margin-top: 4px;">GPU mix and deployment shape</div>
+            </div>
+            <div class="chip green">phase 1 build</div>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Hardware</th>
+                <th>Qty</th>
+                <th>MW</th>
+                <th>Capex</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="hardware">NVIDIA H100 80GB</td>
+                <td>10,000</td>
+                <td>92</td>
+                <td>$300M</td>
+              </tr>
+              <tr>
+                <td class="hardware">NVIDIA B200 192GB</td>
+                <td>5,000</td>
+                <td>78</td>
+                <td>$200M</td>
+              </tr>
+              <tr>
+                <td class="hardware">GB200 NVL72</td>
+                <td>2,000</td>
+                <td>52</td>
+                <td>$140M</td>
+              </tr>
+              <tr>
+                <td class="hardware">InfiniBand networking</td>
+                <td>-</td>
+                <td>8</td>
+                <td>$45M</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="panel capex">
+          <div>
+            <div class="eyebrow">Commercial summary</div>
+            <div class="title" style="font-size: 18px; margin-top: 4px;">Step 1 assumptions</div>
+          </div>
+
+          <div class="capex-row">
+            <span>Target IT load</span>
+            <strong id="summary-mw">250 MW</strong>
+          </div>
+          <div class="capex-row">
+            <span>Estimated hardware capex</span>
+            <strong>$685.0M</strong>
+          </div>
+          <div class="capex-row">
+            <span>Civil + electrical placeholder</span>
+            <strong>$210.0M</strong>
+          </div>
+          <div class="capex-row">
+            <span>LLM narrative trigger</span>
+            <strong>Step 3</strong>
+          </div>
+
+          <div class="capex-total">
+            <div class="eyebrow">Indicative total</div>
+            <div class="amount">$895.0M</div>
+            <div class="foot">This page stays focused on configuration. Step 2 can expose the simulation outputs, and Step 3 can add the full LLM-backed strategic memo.</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="wizard">
+        <section class="wizard-step active">
+          <div class="wizard-index">1</div>
+          <h4>Configuration</h4>
+          <p>Select site, megawatts, GPU profile and deployment intent from a product shell that matches the authenticated Hearst dashboard.</p>
+        </section>
+        <section class="wizard-step">
+          <div class="wizard-index">2</div>
+          <h4>Simulation</h4>
+          <p>Display projected pricing, power curves, utilization assumptions and phase-by-phase deployment outputs.</p>
+        </section>
+        <section class="wizard-step">
+          <div class="wizard-index">3</div>
+          <h4>LLM Memo</h4>
+          <p>Generate the final investment narrative, risks, operating assumptions and recommendation package.</p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const slider = document.getElementById("mw-slider");
+    const heroValue = document.getElementById("mw-value");
+    const summaryValue = document.getElementById("summary-mw");
+
+    if (slider && heroValue && summaryValue) {
+      slider.addEventListener("input", function () {
+        const value = slider.value + " MW";
+        heroValue.textContent = value;
+        summaryValue.textContent = value;
+      });
+    }
+  </script>
+</body>
+</html>

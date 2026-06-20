@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hearst - Ultra Premium Institutional</title>
+  <style>
+    :root {
+      /* Palette Hearst stricte & absolue */
+      --bg: #000000;
+      --fg: #F5F5F5;
+      --fg-muted: #666666;
+      --fg-subtle: #333333;
+      --accent: #A3FF8D;
+      
+      /* Hairlines chirurgicales */
+      --line-hard: rgba(255, 255, 255, 0.2);
+      --line-soft: rgba(255, 255, 255, 0.08);
+      
+      /* Typographie Extreme Contrast */
+      --font-sans: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.4;
+      /* Grille de fond subtile façon blueprint financier */
+      background-image: 
+        linear-gradient(var(--line-soft) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+      background-size: 100px 100px;
+      background-position: center top;
+    }
+
+    /* ── SYSTEM BAR (Top) ── */
+    .sys-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 2rem;
+      border-bottom: 1px solid var(--line-hard);
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--fg-muted);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .sys-live {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent);
+    }
+
+    .sys-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    .wrapper {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      border-left: 1px solid var(--line-soft);
+      border-right: 1px solid var(--line-soft);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    /* ── HERO EDITORIAL ── */
+    .hero {
+      padding: 6rem 0 4rem 0;
+      border-bottom: 1px solid var(--line-hard);
+      position: relative;
+    }
+
+    /* Crosshairs aux intersections */
+    .hero::after {
+      content: '+';
+      position: absolute;
+      bottom: -7px;
+      right: -4px;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+    .hero::before {
+      content: '+';
+      position: absolute;
+      bottom: -7px;
+      left: -4px;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: var(--fg-muted);
+      margin-bottom: 2rem;
+      display: block;
+    }
+
+    .hero-eyebrow span {
+      color: var(--accent);
+      margin-right: 1rem;
+    }
+
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: 5.5rem;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 0.9;
+      margin: 0 0 2rem 0;
+      max-width: 800px;
+    }
+
+    .hero-abstract {
+      font-size: 1.1rem;
+      color: var(--fg-muted);
+      font-weight: 300;
+      max-width: 600px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ── BENTO GRID (Metrics) ── */
+    /* Utilisation de gap 1px avec background pour créer des hairlines parfaites */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      background-color: var(--line-soft);
+      gap: 1px;
+      border-bottom: 1px solid var(--line-hard);
+    }
+
+    .metric-block {
+      background-color: var(--bg);
+      padding: 3rem 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .metric-primary {
+      grid-row: span 2;
+      padding: 4rem 3rem;
+    }
+
+    .metric-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--fg-muted);
+    }
+
+    .metric-value-huge {
+      font-family: var(--font-serif);
+      font-size: 8rem;
+      line-height: 1;
+      font-weight: 400;
+      letter-spacing: -0.05em;
+      margin: 2rem 0;
+    }
+
+    .metric-value {
+      font-family: var(--font-mono);
+      font-size: 3rem;
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      margin: 1rem 0;
+    }
+
+    .metric-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+    }
+
+    .trend-up { color: var(--accent); }
+
+    /* ── DATA SECTION ── */
+    .data-section {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 0;
+    }
+
+    .data-sidebar {
+      padding: 4rem 3rem 4rem 0;
+      border-right: 1px solid var(--line-soft);
+    }
+
+    .sidebar-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin: 0 0 1.5rem 0;
+      font-weight: 500;
+    }
+
+    .sidebar-text {
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+      line-height: 1.6;
+      font-weight: 300;
+      margin-bottom: 3rem;
+    }
+
+    .mini-chart {
+      height: 60px;
+      width: 100%;
+      border-bottom: 1px solid var(--line-hard);
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .bar {
+      flex: 1;
+      background: var(--fg-subtle);
+      transition: background 0.3s;
+    }
+    .bar:hover { background: var(--accent); }
+
+    .data-content {
+      padding: 4rem 0 4rem 3rem;
+    }
+
+    /* ── SURGICAL TABLE ── */
+    .surgical-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .surgical-table th {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--fg-muted);
+      padding: 0 0 1.5rem 0;
+      border-bottom: 1px solid var(--line-hard);
+      font-weight: 400;
+    }
+
+    .surgical-table td {
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 0.95rem;
+      font-weight: 300;
+      transition: all 0.2s;
+    }
+
+    .surgical-table tr:hover td {
+      color: var(--accent);
+      border-bottom-color: var(--line-hard);
+      cursor: crosshair;
+    }
+
+    .num {
+      font-family: var(--font-mono);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .surgical-table th.num { text-align: right; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .status-badge::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      background: var(--fg-subtle);
+    }
+    .status-badge.active::before {
+      background: var(--accent);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="sys-bar">
+    <div>HEARST CORP // ORACLE SYSTEM</div>
+    <div class="sys-live">
+      <div class="sys-dot"></div>
+      LIVE DATA STREAM
+    </div>
+    <div>LAT: 40.7614° N // LON: 73.9826° W</div>
+  </div>
+
+  <div class="wrapper">
+    
+    <header class="hero">
+      <span class="hero-eyebrow"><span>//</span> COCKPIT / GLOBAL OVERVIEW</span>
+      <h1 class="hero-title">Consolidated<br>Portfolio</h1>
+      <p class="hero-abstract">Real-time valuation and risk exposure across all operational theaters. Data is marked to market. Strict adherence to Hearst compliance protocols.</p>
+    </header>
+
+    <div class="metrics-grid">
+      <!-- Primary Metric -->
+      <div class="metric-block metric-primary">
+        <div class="metric-label">Total Assets Under Management</div>
+        <div class="metric-value-huge">$4.2B</div>
+        <div class="metric-meta">
+          <span>Q3 2026 PROJECTION</span>
+          <span class="trend-up">▲ +12.4% YTD</span>
+        </div>
+      </div>
+      
+      <!-- Secondary Metrics -->
+      <div class="metric-block">
+        <div class="metric-label">Blended IRR</div>
+        <div class="metric-value">24.5%</div>
+        <div class="metric-meta">
+          <span>TARGET: 20.0%</span>
+        </div>
+      </div>
+
+      <div class="metric-block">
+        <div class="metric-label">Active Deals</div>
+        <div class="metric-value">14</div>
+        <div class="metric-meta">
+          <span>3 IN LATE STAGE</span>
+        </div>
+      </div>
+
+      <div class="metric-block">
+        <div class="metric-label">Capital Deployed</div>
+        <div class="metric-value">$845M</div>
+        <div class="metric-meta">
+          <span>FY 2026</span>
+        </div>
+      </div>
+
+      <div class="metric-block">
+        <div class="metric-label">Risk Index</div>
+        <div class="metric-value" style="color: var(--accent);">0.84</div>
+        <div class="metric-meta">
+          <span>NOMINAL VARIANCE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <aside class="data-sidebar">
+        <h2 class="sidebar-title">Asset Register</h2>
+        <p class="sidebar-text">Line-item breakdown of current holdings. Valuations are updated dynamically via the Oracle engine. Click any row to initialize the financial simulator.</p>
+        
+        <div class="metric-label" style="margin-bottom: 1rem;">Deployment Velocity</div>
+        <div class="mini-chart">
+          <div class="bar" style="height: 20%"></div>
+          <div class="bar" style="height: 40%"></div>
+          <div class="bar" style="height: 30%"></div>
+          <div class="bar" style="height: 60%"></div>
+          <div class="bar" style="height: 80%"></div>
+          <div class="bar" style="height: 50%"></div>
+          <div class="bar" style="height: 100%; background: var(--accent);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-family: var(--font-mono); font-size: 0.5rem; color: var(--fg-muted);">
+          <span>JAN</span>
+          <span>JUL</span>
+        </div>
+      </aside>
+
+      <main class="data-content">
+        <table class="surgical-table">
+          <thead>
+            <tr>
+              <th>Asset Identifier</th>
+              <th>Sector</th>
+              <th>Status</th>
+              <th class="num">Valuation</th>
+              <th class="num">IRR</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Project Alpha</td>
+              <td>Deep Tech</td>
+              <td><span class="status-badge active">Deployed</span></td>
+              <td class="num">$150.0M</td>
+              <td class="num">28.4%</td>
+            </tr>
+            <tr>
+              <td>Project Beta</td>
+              <td>Infrastructure</td>
+              <td><span class="status-badge">Diligence</span></td>
+              <td class="num">$85.5M</td>
+              <td class="num">19.2%</td>
+            </tr>
+            <tr>
+              <td>Project Gamma</td>
+              <td>AI / Compute</td>
+              <td><span class="status-badge active">Deployed</span></td>
+              <td class="num">$320.0M</td>
+              <td class="num">34.1%</td>
+            </tr>
+            <tr>
+              <td>Project Delta</td>
+              <td>Energy</td>
+              <td><span class="status-badge">Closed</span></td>
+              <td class="num">$45.0M</td>
+              <td class="num">15.5%</td>
+            </tr>
+            <tr>
+              <td>Project Epsilon</td>
+              <td>BioTech</td>
+              <td><span class="status-badge active">Deployed</span></td>
+              <td class="num">$210.0M</td>
+              <td class="num">41.0%</td>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hearst Oracle | Data Center Simulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Hearst Corporation Extracted Design System */
+  --bg: #131613; /* Deep sustainable dark from the dashboard */
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.08);
+  
+  --fg: #ffffff;
+  --fg-muted: rgba(255, 255, 255, 0.6);
+  --fg-dim: rgba(255, 255, 255, 0.35);
+  
+  --primary: #1d4fbb; /* Hearst Dashboard Blue */
+  --primary-hover: #255dcf;
+  
+  --accent-green: #4caf50; /* Eco/Sustainable Status */
+  
+  --hl: rgba(255, 255, 255, 0.1);
+  --hl-dim: rgba(255, 255, 255, 0.05);
+
+  --font-brand: 'Montserrat', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0; padding: 0;
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-brand);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+/* TYPOGRAPHY */
+.lbl {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fg-muted);
+  font-weight: 600;
+}
+.val {
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.text-primary { color: var(--primary); }
+.text-accent { color: var(--accent-green); }
+.text-white { color: var(--fg); }
+.text-muted { color: var(--fg-muted); }
+
+.live-dot {
+  display: inline-block; width: 6px; height: 6px;
+  background: var(--accent-green); border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-green); margin-right: 8px;
+  vertical-align: middle; animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* STRUCTURE */
+.top-bar {
+  display: flex; border-bottom: 1px solid var(--hl); width: 100%;
+  background: var(--surface);
+}
+.top-bar .item {
+  border-right: 1px solid var(--hl); padding: 0.75rem 1.25rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.top-bar .item:last-child { border-right: none; }
+
+.grid-main {
+  display: grid; grid-template-columns: 1fr 1.5fr 1fr;
+  min-height: calc(100vh - 43px);
+}
+.col { border-right: 1px solid var(--hl); display: flex; flex-direction: column; }
+.col:last-child { border-right: none; }
+.row {
+  border-bottom: 1px solid var(--hl); padding: 1.5rem;
+  display: flex; flex-direction: column;
+}
+.row.stretch { flex: 1; }
+.row.no-pad { padding: 0; }
+
+.flex-between { display: flex; justify-content: space-between; align-items: baseline; width: 100%; }
+
+/* INPUTS & CONTROLS */
+.slider-container {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+  margin: 10px 0;
+}
+input[type=range]:focus { outline: none; }
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 4px;
+  border-radius: 2px;
+  cursor: pointer; background: var(--surface-hover);
+}
+input[type=range]::-webkit-slider-thumb {
+  height: 20px; width: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--primary);
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -8px;
+  transition: transform 0.1s;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.selector-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--hl-dim);
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; transition: all 0.2s;
+  color: var(--fg-muted);
+}
+.selector-item:hover { color: var(--fg); background: var(--surface); padding-left: 0.5rem; padding-right: 0.5rem; }
+.selector-item.active { 
+  color: var(--primary); 
+  border-bottom: 2px solid var(--primary); 
+  font-weight: 600;
+}
+
+/* BUTTON */
+.btn-launch {
+  background: var(--primary);
+  border: none;
+  color: #fff;
+  font-family: var(--font-brand);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 1.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+.btn-launch:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 8px 24px rgba(29, 79, 187, 0.3);
+  transform: translateY(-1px);
+}
+.btn-launch:active {
+  transform: translateY(1px);
+}
+
+/* TABLE */
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; padding: 1.5rem 1.5rem 0.75rem 1.5rem; border-bottom: 1px solid var(--hl); font-weight: 600; color: var(--fg-muted); }
+.table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--hl-dim); transition: all 0.2s ease; }
+.table-body:hover .table-row:not(:hover) td { opacity: 0.4; }
+.table-row { transition: background 0.2s ease; }
+.table-row:hover { background: var(--surface); }
+.table-row:hover td { color: var(--primary); }
+
+/* SVG 3D DC */
+.dc-viz {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  position: relative;
+  background: radial-gradient(circle at center, var(--surface) 0%, transparent 70%);
+}
+.dc-viz svg {
+  width: 100%;
+  max-width: 450px;
+  stroke: var(--fg-dim);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transition: stroke 0.5s ease;
+}
+.dc-viz:hover svg {
+  stroke: var(--primary);
+}
+.svg-glow { fill: var(--bg); }
+.svg-glow-strong { fill: var(--surface-hover); }
+
+/* Normalized Sizes */
+.text-huge { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; }
+.text-lg { font-size: 1.75rem; font-weight: 600; }
+.text-md { font-size: 1.25rem; font-weight: 600; }
+.text-sm { font-size: 1rem; font-weight: 500; }
+</style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="item"><span class="lbl text-white" style="letter-spacing: 0.2em; font-weight: 700;">HEARST</span></div>
+    <div class="item"><span class="lbl text-primary">ORACLE SIMULATOR</span></div>
+    <div class="item"><span class="lbl"><span class="live-dot"></span>SYS_READY</span></div>
+    <div class="item" style="flex:1"></div>
+    <div class="item"><span class="lbl text-muted">STEP 01 // CONFIGURATION</span></div>
+  </div>
+
+  <div class="grid-main">
+    <!-- LEFT COLUMN: POWER & INFRASTRUCTURE -->
+    <div class="col">
+      <div class="row">
+        <div class="lbl" style="margin-bottom: 2rem;">INFRASTRUCTURE & POWER</div>
+        
+        <div class="lbl text-white" style="margin-bottom: 1rem;">SITE LOCATION</div>
+        <div class="selector-item active">
+          <div class="text-sm">TEXAS, USA (TX-01)</div>
+          <div class="lbl text-primary">SELECTED</div>
+        </div>
+        <div class="selector-item">
+          <div class="text-sm">REYKJAVIK, ISL (RK-02)</div>
+          <div class="lbl"></div>
+        </div>
+        <div class="selector-item">
+          <div class="text-sm">OSLO, NOR (OS-01)</div>
+          <div class="lbl"></div>
+        </div>
+      </div>
+      
+      <div class="row stretch">
+        <div class="flex-between">
+          <div class="lbl text-white">TARGET CAPACITY</div>
+          <div class="text-lg text-primary" id="mw-val">250 MW</div>
+        </div>
+        
+        <div class="slider-container">
+          <input type="range" min="10" max="1000" value="250" id="mw-slider">
+          <div class="flex-between" style="margin-top: 0.75rem;">
+            <div class="lbl">10 MW</div>
+            <div class="lbl">1 GW</div>
+          </div>
+        </div>
+        
+        <div class="flex-between" style="margin-top: 3rem;">
+          <div class="lbl">EST. PUE</div>
+          <div class="text-md">1.12</div>
+        </div>
+        <div class="flex-between" style="margin-top: 1.5rem;">
+          <div class="lbl">GRID CONNECTION</div>
+          <div class="text-md">2027 Q3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER COLUMN: 3D DATACENTER & LAUNCH -->
+    <div class="col">
+      <div class="row stretch no-pad" style="border-bottom: none; display: flex; flex-direction: column;">
+        
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--hl); display: flex; justify-content: space-between; align-items: baseline;">
+          <div class="lbl">SITE TOPOLOGY</div>
+          <div class="lbl text-accent"><span class="live-dot" style="background:var(--primary); box-shadow:0 0 8px var(--primary);"></span>TIER IV READY</div>
+        </div>
+        
+        <!-- 3D SVG DATACENTER -->
+        <div class="dc-viz">
+          <svg viewBox="0 0 400 300">
+            <g transform="translate(200, 150)">
+              <!-- Base platform -->
+              <polygon points="0,-80 120,-20 0,40 -120,-20" stroke-width="0.5" stroke="var(--primary)" class="svg-glow-strong" />
+              <!-- Grid lines on platform -->
+              <line x1="-60" y1="-50" x2="60" y2="10" stroke-dasharray="4,4" stroke-width="1" stroke="var(--primary)"/>
+              <line x1="60" y1="-50" x2="-60" y2="10" stroke-dasharray="4,4" stroke-width="1" stroke="var(--primary)"/>
+
+              <!-- Server Rack 1 -->
+              <g transform="translate(-40, -20)">
+                <!-- Top -->
+                <polygon points="0,-40 30,-25 0,-10 -30,-25" class="svg-glow-strong" />
+                <!-- Left side -->
+                <polygon points="-30,-25 0,-10 0,30 -30,15" class="svg-glow" />
+                <!-- Right side -->
+                <polygon points="0,-10 30,-25 30,15 0,30" class="svg-glow" />
+                <!-- Blades lines -->
+                <line x1="-30" y1="-15" x2="0" y2="0" />
+                <line x1="-30" y1="-5" x2="0" y2="10" />
+                <line x1="-30" y1="5" x2="0" y2="20" />
+                <line x1="0" y1="0" x2="30" y2="-15" />
+                <line x1="0" y1="10" x2="30" y2="-5" />
+                <line x1="0" y1="20" x2="30" y2="5" />
+              </g>
+
+              <!-- Server Rack 2 -->
+              <g transform="translate(40, 20)">
+                <!-- Top -->
+                <polygon points="0,-40 30,-25 0,-10 -30,-25" class="svg-glow-strong" />
+                <!-- Left side -->
+                <polygon points="-30,-25 0,-10 0,30 -30,15" class="svg-glow" />
+                <!-- Right side -->
+                <polygon points="0,-10 30,-25 30,15 0,30" class="svg-glow" />
+                <!-- Blades lines -->
+                <line x1="-30" y1="-15" x2="0" y2="0" />
+                <line x1="-30" y1="-5" x2="0" y2="10" />
+                <line x1="-30" y1="5" x2="0" y2="20" />
+                <line x1="0" y1="0" x2="30" y2="-15" />
+                <line x1="0" y1="10" x2="30" y2="-5" />
+                <line x1="0" y1="20" x2="30" y2="5" />
+              </g>
+              
+              <!-- Floating Connection Node -->
+              <circle cx="0" cy="-110" r="4" fill="var(--primary)" stroke="none" />
+              <line x1="0" y1="-110" x2="0" y2="-70" stroke="var(--primary)" stroke-dasharray="3,3" />
+            </g>
+          </svg>
+        </div>
+
+      </div>
+      
+      <!-- LAUNCH BUTTON -->
+      <div class="row" style="padding: 1.5rem;">
+        <button class="btn-launch" onclick="alert('Navigation vers Step 2 : Génération de la simulation par LLM...')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          RUN SIMULATION
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: COMPUTE & CAPEX -->
+    <div class="col">
+      <div class="row stretch no-pad">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="lbl" colspan="3" style="padding-top: 1.5rem; color: var(--fg);">COMPUTE CLUSTER SELECTION (GPUs)</th>
+            </tr>
+            <tr>
+              <th class="lbl">HARDWARE</th>
+              <th class="lbl text-right">QTY</th>
+              <th class="lbl text-right">CAPEX EST.</th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            <tr class="table-row">
+              <td class="text-sm">NVIDIA H100 (80GB)</td>
+              <td class="text-sm text-right">10,000</td>
+              <td class="text-sm text-right">$300M</td>
+            </tr>
+            <tr class="table-row">
+              <td class="text-sm">NVIDIA B200 (192GB)</td>
+              <td class="text-sm text-right">5,000</td>
+              <td class="text-sm text-right">$200M</td>
+            </tr>
+            <tr class="table-row">
+              <td class="text-sm">NVIDIA GB200 NVL72</td>
+              <td class="text-sm text-right">2,000</td>
+              <td class="text-sm text-right">$140M</td>
+            </tr>
+            <tr class="table-row">
+              <td class="text-sm">AMD MI300X</td>
+              <td class="text-sm text-right">0</td>
+              <td class="text-sm text-right text-muted">$0</td>
+            </tr>
+            <tr class="table-row">
+              <td class="text-sm text-muted">INFINIBAND NETWORKING</td>
+              <td class="text-sm text-right text-muted">-</td>
+              <td class="text-sm text-right">$45M</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="row" style="background: var(--surface);">
+        <div class="lbl">TOTAL HARDWARE CAPEX</div>
+        <div class="text-huge text-primary" style="margin-top: 0.75rem;">$685.0M</div>
+        <div class="lbl text-muted" style="margin-top: 0.5rem; text-transform:none;">Excludes cooling & civil works</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Slider interactivity simulation
+    const slider = document.getElementById('mw-slider');
+    const valDisplay = document.getElementById('mw-val');
+    
+    if (slider && valDisplay) {
+      slider.addEventListener('input', (e) => {
+        valDisplay.textContent = e.target.value + ' MW';
+      });
+      Je préférais que tu refasses un autre HTML    }
+  </script>
+</body>
+</html>

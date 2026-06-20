@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hearst - New Design System Proposal</title>
+  <style>
+    :root {
+      --ct-bg: #000000;
+      --ct-surface: #121212;
+      --ct-text: #F5F5F5;
+      --ct-text-muted: #8A8A8A;
+      --ct-accent: #A3FF8D;
+      --ct-danger: #EF4444;
+      
+      --ct-divider-strong: rgba(255, 255, 255, 0.15);
+      --ct-divider-faint: rgba(255, 255, 255, 0.07);
+      
+      --text-xs: 0.65rem;
+      --text-sm: 0.7rem;
+      --text-base: 0.78rem;
+      --text-xl: 0.88rem;
+      --text-2xl: 0.92rem;
+      --text-5xl: 1.05rem;
+      
+      --ct-font-sans: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --ct-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    body {
+      background-color: var(--ct-bg);
+      color: var(--ct-text);
+      font-family: var(--ct-font-sans);
+      margin: 0;
+      padding: 4rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      margin-bottom: 4rem;
+    }
+
+    .col-title {
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--ct-accent);
+      margin-bottom: 2rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--ct-divider-strong);
+    }
+
+    /* --- ANCIEN DESIGN (Boîtes) --- */
+    .old-panel {
+      background: var(--ct-surface);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .old-panel-title {
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--ct-accent);
+      margin: 0 0 1rem 0;
+    }
+
+    .old-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .old-card {
+      background: var(--ct-surface);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+
+    .old-card-label {
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ct-text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .old-card-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    /* --- NOUVEAU DESIGN (Minimaliste / Institut) --- */
+    .new-section {
+      border-top: 1px solid var(--ct-divider-strong);
+      padding: 1.5rem 0;
+      margin-bottom: 2rem;
+    }
+
+    .new-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.5rem;
+    }
+
+    .new-section-title {
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--ct-text);
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .new-section-meta {
+      font-family: var(--ct-font-mono);
+      font-size: var(--text-xs);
+      color: var(--ct-text-muted);
+    }
+
+    .new-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--ct-divider-faint);
+    }
+
+    .new-item {
+      padding: 1rem 1.5rem 1rem 0;
+      border-right: 1px solid var(--ct-divider-faint);
+    }
+
+    .new-item:last-child {
+      border-right: none;
+      padding-right: 0;
+      padding-left: 1.5rem;
+    }
+
+    .new-item-label {
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--ct-text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .new-item-value {
+      font-family: var(--ct-font-mono);
+      font-size: 1.75rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+    }
+
+    .new-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .new-list-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--ct-divider-faint);
+    }
+
+    .new-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .new-list-title {
+      font-size: var(--text-base);
+    }
+
+    .new-list-value {
+      font-family: var(--ct-font-mono);
+      color: var(--ct-text-muted);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="comparison">
+      
+      <!-- COLONNE GAUCHE : ACTUEL -->
+      <div>
+        <h2 class="col-title">Actuel (Boîtes & Surfaces)</h2>
+        
+        <div class="old-panel">
+          <h3 class="old-panel-title">Financial Overview</h3>
+          <div class="old-grid">
+            <div class="old-card">
+              <div class="old-card-label">AUM</div>
+              <div class="old-card-value">$4.2B</div>
+            </div>
+            <div class="old-card">
+              <div class="old-card-label">IRR</div>
+              <div class="old-card-value">24.5%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="old-panel">
+          <h3 class="old-panel-title">Recent Deals</h3>
+          <div class="old-card" style="margin-bottom: 1rem;">
+            <div class="old-card-label">Project Alpha</div>
+            <div class="old-card-value" style="font-size: 1rem;">$150M</div>
+          </div>
+          <div class="old-card">
+            <div class="old-card-label">Project Beta</div>
+            <div class="old-card-value" style="font-size: 1rem;">$85M</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLONNE DROITE : PROPOSITION -->
+      <div>
+        <h2 class="col-title">Proposition (Institut & Minimaliste)</h2>
+        
+        <section class="new-section">
+          <header class="new-section-head">
+            <h3 class="new-section-title">Financial Overview</h3>
+            <span class="new-section-meta">Q3 2026</span>
+          </header>
+          
+          <div class="new-grid">
+            <div class="new-item">
+              <div class="new-item-label">AUM</div>
+              <div class="new-item-value">$4.2B</div>
+            </div>
+            <div class="new-item">
+              <div class="new-item-label">IRR</div>
+              <div class="new-item-value">24.5%</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="new-section">
+          <header class="new-section-head">
+            <h3 class="new-section-title">Recent Deals</h3>
+          </header>
+          
+          <div class="new-list">
+            <div class="new-list-item">
+              <span class="new-list-title">Project Alpha</span>
+              <span class="new-list-value">$150M</span>
+            </div>
+            <div class="new-list-item">
+              <span class="new-list-title">Project Beta</span>
+              <span class="new-list-value">$85M</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

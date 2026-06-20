@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hearst - Pure Data</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --fg: #F5F5F5;
+      --fg-muted: #666666;
+      --accent: #A3FF8D;
+      --line: rgba(255, 255, 255, 0.15);
+      --line-faint: rgba(255, 255, 255, 0.05);
+      
+      --font-sans: "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 4rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── PURE GRID LAYOUT ── */
+    .core-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1px;
+      background-color: var(--line);
+      border: 1px solid var(--line);
+    }
+
+    .cell {
+      background-color: var(--bg);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Span helpers */
+    .span-12 { grid-column: span 12; }
+    .span-8 { grid-column: span 8; }
+    .span-4 { grid-column: span 4; }
+    .span-3 { grid-column: span 3; }
+    .span-6 { grid-column: span 6; }
+
+    /* ── TYPOGRAPHY ── */
+    .label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--fg-muted);
+      margin-bottom: 2rem;
+    }
+
+    .value-massive {
+      font-size: 6rem;
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-top: auto;
+    }
+
+    .value-large {
+      font-size: 3rem;
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-top: auto;
+    }
+
+    .value-mono {
+      font-family: var(--font-mono);
+    }
+
+    /* ── SURGICAL TABLE ── */
+    .raw-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: auto;
+    }
+
+    .raw-table th {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--fg-muted);
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+      font-weight: 400;
+    }
+
+    .raw-table td {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--line-faint);
+      font-size: 0.85rem;
+    }
+
+    .raw-table tr:last-child td {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .num {
+      font-family: var(--font-mono);
+      text-align: right;
+    }
+    .raw-table th.num { text-align: right; }
+
+    .accent { color: var(--accent); }
+
+  </style>
+</head>
+<body>
+
+  <div class="core-grid">
+    
+    <!-- ROW 1: Top level metrics -->
+    <div class="cell span-6">
+      <div class="label">Total AUM // Q3 2026</div>
+      <div class="value-massive value-mono">$4.24B</div>
+    </div>
+    
+    <div class="cell span-3">
+      <div class="label">Blended IRR</div>
+      <div class="value-large value-mono">24.5%</div>
+    </div>
+
+    <div class="cell span-3">
+      <div class="label">Risk Index</div>
+      <div class="value-large value-mono accent">0.84</div>
+    </div>
+
+    <!-- ROW 2: Data Table -->
+    <div class="cell span-12" style="padding: 3rem 2rem;">
+      <div class="label">Asset Register // Live</div>
+      <table class="raw-table">
+        <thead>
+          <tr>
+            <th>Identifier</th>
+            <th>Sector</th>
+            <th>Status</th>
+            <th class="num">Valuation</th>
+            <th class="num">IRR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Project Alpha</td>
+            <td>Deep Tech</td>
+            <td class="accent">Deployed</td>
+            <td class="num">$150.0M</td>
+            <td class="num">28.4%</td>
+          </tr>
+          <tr>
+            <td>Project Beta</td>
+            <td>Infrastructure</td>
+            <td style="color: var(--fg-muted);">Diligence</td>
+            <td class="num">$85.5M</td>
+            <td class="num">19.2%</td>
+          </tr>
+          <tr>
+            <td>Project Gamma</td>
+            <td>AI / Compute</td>
+            <td class="accent">Deployed</td>
+            <td class="num">$320.0M</td>
+            <td class="num">34.1%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hearst - High-End Institutional Design</title>
+  <style>
+    :root {
+      /* Palette stricte Hearst */
+      --ct-bg: #000000;
+      --ct-text: #F5F5F5;
+      --ct-text-muted: #8A8A8A;
+      --ct-accent: #A3FF8D;
+      
+      /* Hairlines ultra fines */
+      --ct-hairline: rgba(255, 255, 255, 0.12);
+      --ct-hairline-faint: rgba(255, 255, 255, 0.05);
+      
+      /* Typographie */
+      --font-sans: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    }
+
+    body {
+      background-color: var(--ct-bg);
+      color: var(--ct-text);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    /* ── LAYOUT MACRO ── */
+    .viewport {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    /* ── HEADER DE PAGE (Éditorial) ── */
+    .page-header {
+      margin-bottom: 5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--ct-hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .page-title-block {
+      max-width: 600px;
+    }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--ct-accent);
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+
+    .page-title {
+      font-family: var(--font-serif);
+      font-size: 3.5rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin: 0 0 1rem 0;
+      line-height: 1.1;
+    }
+
+    .page-context {
+      font-size: 0.9rem;
+      color: var(--ct-text-muted);
+      font-weight: 300;
+      margin: 0;
+    }
+
+    .header-meta {
+      text-align: right;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ct-text-muted);
+    }
+
+    /* ── GRILLE DE DONNÉES (Data Grid) ── */
+    /* Remplace les "Summary Cards" */
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--ct-hairline);
+      border-bottom: 1px solid var(--ct-hairline);
+      margin-bottom: 5rem;
+    }
+
+    .data-cell {
+      padding: 2.5rem 2rem;
+      border-right: 1px solid var(--ct-hairline-faint);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .data-cell:last-child {
+      border-right: none;
+    }
+
+    .data-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--ct-text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .data-value {
+      font-family: var(--font-mono);
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .data-sub {
+      font-size: 0.75rem;
+      color: var(--ct-text-muted);
+      font-weight: 300;
+    }
+
+    /* ── SECTIONS (Remplace les Panels) ── */
+    .section-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 4rem;
+      margin-bottom: 5rem;
+    }
+
+    .section-sidebar {
+      position: sticky;
+      top: 2rem;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--ct-text);
+      margin: 0 0 1rem 0;
+      font-weight: 500;
+    }
+
+    .section-desc {
+      font-size: 0.85rem;
+      color: var(--ct-text-muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* ── TABLES INSTITUTIONNELLES ── */
+    .inst-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .inst-table th {
+      text-align: left;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--ct-text-muted);
+      font-weight: 400;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--ct-hairline);
+    }
+
+    .inst-table td {
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--ct-hairline-faint);
+      font-size: 0.9rem;
+      font-weight: 300;
+    }
+
+    .inst-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .cell-numeric {
+      font-family: var(--font-mono);
+      text-align: right;
+    }
+
+    .inst-table th.cell-numeric {
+      text-align: right;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--ct-hairline);
+      border-radius: 2px;
+      color: var(--ct-text-muted);
+    }
+
+    .tag.active {
+      color: var(--ct-accent);
+      border-color: var(--ct-accent);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="viewport">
+    
+    <!-- HEADER -->
+    <header class="page-header">
+      <div class="page-title-block">
+        <span class="eyebrow">Cockpit / Overview</span>
+        <h1 class="page-title">Global Portfolio</h1>
+        <p class="page-context">Consolidated view of active assets, risk exposure, and real-time performance metrics across all operational theaters.</p>
+      </div>
+      <div class="header-meta">
+        <div>SYS.TIME: 2026.06.20</div>
+        <div style="color: var(--ct-accent); margin-top: 0.5rem;">STATUS: NOMINAL</div>
+      </div>
+    </header>
+
+    <!-- METRICS (No boxes, pure grid) -->
+    <div class="data-grid">
+      <div class="data-cell">
+        <div class="data-label">Total AUM</div>
+        <div class="data-value">$4.24B</div>
+        <div class="data-sub">+12.4% YoY</div>
+      </div>
+      <div class="data-cell">
+        <div class="data-label">Active Deals</div>
+        <div class="data-value">14</div>
+        <div class="data-sub">3 in late stage</div>
+      </div>
+      <div class="data-cell">
+        <div class="data-label">Blended IRR</div>
+        <div class="data-value">24.5%</div>
+        <div class="data-sub">Target: 20.0%</div>
+      </div>
+      <div class="data-cell">
+        <div class="data-label">Risk Exposure</div>
+        <div class="data-value" style="color: var(--ct-accent);">Low</div>
+        <div class="data-sub">Index: 0.84</div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="section-layout">
+      <!-- SIDEBAR -->
+      <aside class="section-sidebar">
+        <h2 class="section-title">Asset Register</h2>
+        <p class="section-desc">Detailed breakdown of current holdings. Valuations are marked to market as of the last close. Click on any asset to open the financial simulator.</p>
+      </aside>
+
+      <!-- CONTENT -->
+      <main class="section-content">
+        <table class="inst-table">
+          <thead>
+            <tr>
+              <th>Asset Name</th>
+              <th>Sector</th>
+              <th>Status</th>
+              <th class="cell-numeric">Valuation</th>
+              <th class="cell-numeric">IRR</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Project Alpha</td>
+              <td>Deep Tech</td>
+              <td><span class="tag active">Deployed</span></td>
+              <td class="cell-numeric">$150.0M</td>
+              <td class="cell-numeric">28.4%</td>
+            </tr>
+            <tr>
+              <td>Project Beta</td>
+              <td>Infrastructure</td>
+              <td><span class="tag">Diligence</span></td>
+              <td class="cell-numeric">$85.5M</td>
+              <td class="cell-numeric">19.2%</td>
+            </tr>
+            <tr>
+              <td>Project Gamma</td>
+              <td>AI / Compute</td>
+              <td><span class="tag active">Deployed</span></td>
+              <td class="cell-numeric">$320.0M</td>
+              <td class="cell-numeric">34.1%</td>
+            </tr>
+            <tr>
+              <td>Project Delta</td>
+              <td>Energy</td>
+              <td><span class="tag">Closed</span></td>
+              <td class="cell-numeric">$45.0M</td>
+              <td class="cell-numeric">15.5%</td>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+    </div>
+
+  </div>
+</body>
+</html>

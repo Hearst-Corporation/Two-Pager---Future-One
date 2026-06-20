@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hearst - Oracle Engine (Expert Level)</title>
+  <style>
+    :root {
+      /* Absolute Colors */
+      --bg: #000000;
+      --fg: #ffffff;
+      --fg-muted: rgba(255, 255, 255, 0.45);
+      --fg-subtle: rgba(255, 255, 255, 0.2);
+      --accent: #A3FF8D;
+      
+      /* Surgical Hairlines */
+      --hairline: rgba(255, 255, 255, 0.15);
+      --hairline-faint: rgba(255, 255, 255, 0.05);
+      
+      /* Typography System */
+      --font-sans: "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      
+      /* Fluid Spacing */
+      --pad: clamp(1.5rem, 3vw, 3rem);
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      /* Subtle scanline background */
+      background-image: linear-gradient(var(--hairline-faint) 1px, transparent 1px);
+      background-size: 100% 4px;
+    }
+
+    /* ── SYSTEM HEADER ── */
+    .sys-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 var(--pad);
+      border-bottom: 1px solid var(--hairline);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 1000;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--fg-muted);
+    }
+
+    .sys-live {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent);
+    }
+
+    .pulse {
+      width: 4px; height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+      animation: blink 2s infinite ease-in-out;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* ── MATHEMATICAL GRID ── */
+    .oracle-wrapper {
+      padding: calc(40px + var(--pad)) var(--pad) var(--pad) var(--pad);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .grid-system {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1px;
+      background: var(--hairline);
+      border: 1px solid var(--hairline);
+      position: relative;
+    }
+
+    /* Crosshairs at the corners of the grid */
+    .grid-system::before, .grid-system::after {
+      content: '+';
+      position: absolute;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1;
+      z-index: 10;
+    }
+    .grid-system::before { top: -6px; left: -4px; }
+    .grid-system::after { bottom: -6px; right: -4px; }
+
+    .cell {
+      background: var(--bg);
+      padding: var(--pad);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: background 0.4s ease;
+    }
+
+    .cell:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Grid Spans */
+    .span-12 { grid-column: span 12; }
+    .span-8  { grid-column: span 8; }
+    .span-6  { grid-column: span 6; }
+    .span-4  { grid-column: span 4; }
+    .span-3  { grid-column: span 3; }
+
+    /* ── TYPOGRAPHY ── */
+    .meta-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--fg-muted);
+      margin-bottom: auto; /* Pushes content down */
+      padding-bottom: 2rem;
+    }
+
+    .meta-label span {
+      color: var(--accent);
+      margin-right: 0.5rem;
+    }
+
+    .title-display {
+      font-family: var(--font-serif);
+      font-size: clamp(3rem, 6vw, 6rem);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-top: 2rem;
+    }
+
+    .data-massive {
+      font-family: var(--font-mono);
+      font-size: clamp(4rem, 8vw, 9rem);
+      font-weight: 300;
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+      margin-top: 2rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .data-large {
+      font-family: var(--font-mono);
+      font-size: clamp(2rem, 4vw, 4rem);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-top: 2rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .data-sub {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--hairline-faint);
+      padding-top: 0.5rem;
+    }
+
+    /* ── CSS-ONLY DATA VISUALIZATION ── */
+    .sparkline-container {
+      margin-top: 2rem;
+      height: 60px;
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .spark-bar {
+      flex: 1;
+      background: var(--fg-subtle);
+      transition: height 1s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s;
+      position: relative;
+    }
+
+    .spark-bar:hover {
+      background: var(--accent);
+    }
+
+    .spark-bar::after {
+      content: attr(data-val);
+      position: absolute;
+      top: -1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono);
+      font-size: 0.5rem;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .spark-bar:hover::after {
+      opacity: 1;
+    }
+
+    /* ── SURGICAL TABLE (Interactive) ── */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 2rem;
+    }
+
+    .oracle-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .oracle-table th {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--fg-muted);
+      padding: 0 1rem 1rem 0;
+      border-bottom: 1px solid var(--hairline);
+      font-weight: 400;
+    }
+
+    .oracle-table td {
+      padding: 1.5rem 1rem 1.5rem 0;
+      border-bottom: 1px solid var(--hairline-faint);
+      font-size: 0.9rem;
+      font-weight: 300;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .oracle-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .num {
+      font-family: var(--font-mono);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .oracle-table th.num {
+      text-align: right;
+    }
+
+    /* Hover effect: Dim other rows, highlight current */
+    .oracle-table:hover tr {
+      opacity: 0.3;
+    }
+    .oracle-table tr:hover {
+      opacity: 1;
+      cursor: crosshair;
+    }
+    .oracle-table tr:hover td {
+      color: var(--accent);
+      border-bottom-color: var(--hairline);
+    }
+
+    /* ── UTILS ── */
+    .accent { color: var(--accent); }
+    
+    @media (max-width: 1024px) {
+      .span-3, .span-4, .span-6 { grid-column: span 6; }
+      .span-8 { grid-column: span 12; }
+    }
+    @media (max-width: 768px) {
+      .span-3, .span-4, .span-6, .span-8 { grid-column: span 12; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="sys-header">
+    <div>SYS.ID: ORACLE-CORE-9</div>
+    <div class="sys-live"><div class="pulse"></div> LIVE STREAM</div>
+    <div>LAT: 40.7614 // LON: 73.9826</div>
+  </header>
+
+  <div class="oracle-wrapper">
+    <div class="grid-system">
+      
+      <!-- HERO CELL -->
+      <div class="cell span-8">
+        <div class="meta-label"><span>//</span> Global Portfolio Overview</div>
+        <div class="title-display">Sovereign AI<br>Infrastructure</div>
+      </div>
+
+      <!-- PRIMARY KPI -->
+      <div class="cell span-4">
+        <div class="meta-label">Total AUM (Marked to Market)</div>
+        <div class="data-massive">$4.2B</div>
+        <div class="data-sub">
+          <span>VAR: +12.4% YTD</span>
+          <span class="accent">NOMINAL</span>
+        </div>
+      </div>
+
+      <!-- SECONDARY KPIs -->
+      <div class="cell span-3">
+        <div class="meta-label">Blended IRR</div>
+        <div class="data-large">24.5%</div>
+        <div class="data-sub">
+          <span>TARGET: 20.0%</span>
+          <span>SPREAD: +450bps</span>
+        </div>
+      </div>
+
+      <div class="cell span-3">
+        <div class="meta-label">Capital Deployed</div>
+        <div class="data-large">$845M</div>
+        <div class="data-sub">
+          <span>FY 2026</span>
+          <span>14 ASSETS</span>
+        </div>
+      </div>
+
+      <div class="cell span-6">
+        <div class="meta-label">Deployment Velocity (Trailing 6M)</div>
+        <div class="sparkline-container">
+          <div class="spark-bar" style="height: 15%" data-val="$45M"></div>
+          <div class="spark-bar" style="height: 30%" data-val="$90M"></div>
+          <div class="spark-bar" style="height: 25%" data-val="$75M"></div>
+          <div class="spark-bar" style="height: 60%" data-val="$180M"></div>
+          <div class="spark-bar" style="height: 45%" data-val="$135M"></div>
+          <div class="spark-bar accent" style="height: 100%; background: var(--accent);" data-val="$320M"></div>
+        </div>
+        <div class="data-sub" style="border-top: none;">
+          <span>JAN 26</span>
+          <span class="accent">JUN 26 (CURRENT)</span>
+        </div>
+      </div>
+
+      <!-- DATA TABLE -->
+      <div class="cell span-12">
+        <div class="meta-label">Asset Register // Live Feed</div>
+        <div class="table-wrapper">
+          <table class="oracle-table">
+            <thead>
+              <tr>
+                <th>Identifier</th>
+                <th>Sector</th>
+                <th>Status</th>
+                <th class="num">Capital</th>
+                <th class="num">Valuation</th>
+                <th class="num">IRR</th>
+                <th class="num">MOIC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Project Alpha</td>
+                <td>Deep Tech</td>
+                <td class="accent">Deployed</td>
+                <td class="num">$120.0M</td>
+                <td class="num">$150.0M</td>
+                <td class="num">28.4%</td>
+                <td class="num">1.25x</td>
+              </tr>
+              <tr>
+                <td>Project Beta</td>
+                <td>Infrastructure</td>
+                <td style="color: var(--fg-muted);">Diligence</td>
+                <td class="num">$85.5M</td>
+                <td class="num">$85.5M</td>
+                <td class="num">19.2%</td>
+                <td class="num">1.00x</td>
+              </tr>
+              <tr>
+                <td>Project Gamma</td>
+                <td>AI / Compute</td>
+                <td class="accent">Deployed</td>
+                <td class="num">$200.0M</td>
+                <td class="num">$320.0M</td>
+                <td class="num">34.1%</td>
+                <td class="num">1.60x</td>
+              </tr>
+              <tr>
+                <td>Project Delta</td>
+                <td>Energy</td>
+                <td style="color: var(--fg-muted);">Closed</td>
+                <td class="num">$45.0M</td>
+                <td class="num">$45.0M</td>
+                <td class="num">15.5%</td>
+                <td class="num">1.00x</td>
+              </tr>
+              <tr>
+                <td>Project Epsilon</td>
+                <td>BioTech</td>
+                <td class="accent">Deployed</td>
+                <td class="num">$90.0M</td>
+                <td class="num">$210.0M</td>
+                <td class="num">41.0%</td>
+                <td class="num">2.33x</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
