@@ -56,20 +56,6 @@ function checkRl(actorId) {
   return { allowed: true };
 }
 
-const SECTION_IDS = [
-  'executive_summary',
-  'confidence_block',
-  'strategic_context',
-  'key_financial_metrics',
-  'infrastructure_analysis',
-  'market_benchmarking',
-  'risks_constraints',
-  'strategic_opportunities',
-  'recommended_architecture',
-  'commercialization_strategy',
-  'deployment_roadmap',
-  'long_term_strategic_value',
-];
 
 const MEMO_SCHEMA_INSTRUCTIONS = `Return a JSON object with the following exact keys (no markdown, no prose outside JSON) :
 
@@ -200,7 +186,7 @@ function sanitizeLiveBriefForClient(brief) {
   if (!brief || typeof brief !== 'object') return brief;
   const stripExcerpt = (o) => {
     if (!o || typeof o !== 'object') return o;
-    const { raw_excerpt, ...rest } = o;
+    const { raw_excerpt: _raw_excerpt, ...rest } = o;
     return rest;
   };
   return {

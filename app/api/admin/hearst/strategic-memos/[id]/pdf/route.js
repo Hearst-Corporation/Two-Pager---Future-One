@@ -100,23 +100,6 @@ function riskRows(risks) {
     </div>`).join('');
 }
 
-// Opportunity drivers (max 4)
-function drivers(opportunities) {
-  const items = (opportunities?.items || []).slice(0, 4);
-  if (!items.length) return '';
-  const nums = ['i.', 'ii.', 'iii.', 'iv.'];
-  return `<div class="drivers">
-    <div class="dr-title">Key Value Drivers</div>
-    <div class="driver-row">
-      ${items.map((op, i) => `
-      <div class="driver">
-        <div class="di">${nums[i]}</div>
-        <div class="dv"><span class="dfig">${esc(op.label)}</span></div>
-      </div>`).join('')}
-    </div>
-  </div>`;
-}
-
 // Conditions precedent from roadmap phase 0 gating events (max 4)
 function condRows(roadmap) {
   const events = (roadmap?.phases?.[0]?.gating_events || []).slice(0, 4);
@@ -203,7 +186,6 @@ function buildHtml(row) {
   const roadmap = m.deployment_roadmap || {};
   const arch   = m.recommended_architecture || {};
   const ctx    = m.strategic_context || {};
-  const opps   = m.strategic_opportunities || {};
   const fin    = m.key_financial_metrics || {};
   const comm   = m.commercialization_strategy || {};
 

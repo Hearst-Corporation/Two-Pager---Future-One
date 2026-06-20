@@ -21,7 +21,7 @@ const FIN_TOOLTIP = {
 import {
   generateDebtSchedule, generateWaterfall, generateSensitivity,
 } from '@/lib/hearst-calculations';
-import { fmtUSD, fmtPctFromRatio, fmtPctRaw, fmtX } from '@/lib/hearst-format';
+import { fmtUSD, fmtPctRaw, fmtX } from '@/lib/hearst-format';
 import { boardValue } from '@/lib/hearst-board-metrics';
 import { UI } from '@/lib/ui-strings';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';

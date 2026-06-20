@@ -119,7 +119,7 @@ function checkRateLimit(key: string, max: number, windowMs: number) {
 // ────────────────────────────────────────────────────────────────────────────
 // <think>...</think> stream-safe stripper (mirrors cockpit-shell behaviour).
 // ────────────────────────────────────────────────────────────────────────────
-function makeThinkStripper(): (chunk: string) => string {
+function makeThinkStripper(): (_s: string) => string {
   let buffer = "";
   let inThink = false;
   return function feed(chunk: string): string {
@@ -159,13 +159,6 @@ function makeThinkStripper(): (chunk: string) => string {
     buffer = "";
     return output;
   };
-}
-
-function genId(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 export async function POST(req: Request) {
