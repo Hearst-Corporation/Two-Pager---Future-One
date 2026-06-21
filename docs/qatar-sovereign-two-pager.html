@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Qatar Sovereign Data Center Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-body: #F3F4F6;
+    --page-bg: #FFFFFF;
+    --text-main: #111827;
+    --text-muted: #6B7280;
+    --text-light: #9CA3AF;
+    --border: #E5E7EB;
+    --border-strong: #D1D5DB;
+    --accent: #0F172A; 
+    --highlight-bg: #F9FAFB;
+    
+    --serif: 'Lora', Georgia, serif;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  
+  body {
+    background: var(--bg-body);
+    color: var(--text-main);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    padding: 40px 0;
+  }
+
+  .deck {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .page {
+    position: relative;
+    width: 100%;
+    min-height: 840px;
+    padding: 60px 80px;
+    background: var(--page-bg);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 50px;
+    border-bottom: 1px solid var(--text-main);
+    padding-bottom: 20px;
+  }
+
+  .brand {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-main);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .confidential {
+    font-family: var(--sans);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: 52px;
+    line-height: 1.1;
+    font-weight: 500;
+    margin-bottom: 24px;
+    max-width: 900px;
+    color: var(--text-main);
+  }
+
+  h1 span {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+  }
+  
+  h2 {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: var(--text-main);
+  }
+
+  .subtitle {
+    font-family: var(--sans);
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 850px;
+    font-weight: 400;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  /* KPI Grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 50px;
+  }
+
+  .kpi-card {
+    background: var(--page-bg);
+    padding: 30px 24px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .kpi-val {
+    font-family: var(--serif);
+    font-size: 42px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .kpi-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-main);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .kpi-desc {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Split Layout */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    flex: 1;
+  }
+
+  /* Image Section */
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    min-height: 320px;
+    background: url('../public/aerial-campus-2.png') center/cover no-repeat;
+    background-color: var(--highlight-bg);
+    filter: grayscale(40%) contrast(1.1);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .hero-caption {
+    position: absolute;
+    bottom: 16px;
+    left: 20px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--page-bg);
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  /* Narrative text */
+  .narrative h3 {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-main);
+  }
+
+  .narrative p {
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.7;
+  }
+
+  .bullets {
+    list-style: none;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+
+  .bullets li {
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 16px;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .bullets li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+
+  /* Charts Dashboard Layout */
+  .dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    flex: 1;
+  }
+
+  .chart-card {
+    background: var(--page-bg);
+    border: 1px solid var(--border-strong);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .chart-header {
+    padding: 30px 30px 10px 30px;
+  }
+
+  .chart-title {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+  }
+
+  .chart-subtitle {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .chart-svg-container {
+    flex: 1;
+    position: relative;
+    padding: 0 10px 20px 10px;
+    display: flex;
+  }
+
+  svg { 
+    width: 100%; 
+    height: 100%; 
+    display: block; 
+    overflow: visible; 
+  }
+
+  /* Table */
+  .bilan-container {
+    margin-top: 20px;
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .financial-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--sans);
+  }
+
+  .financial-table th {
+    text-align: right;
+    padding: 16px;
+    border-bottom: 1px solid var(--text-main);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 600;
+    vertical-align: bottom;
+  }
+
+  .financial-table th:first-child { text-align: left; }
+  .financial-table th:nth-child(3) { color: var(--text-main); background: var(--highlight-bg); }
+
+  .financial-table td {
+    text-align: right;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+    color: var(--text-main);
+    white-space: nowrap;
+  }
+
+  .financial-table td:first-child { text-align: left; color: var(--text-muted); white-space: normal; min-width: 220px; }
+  .financial-table td:nth-child(3) { background: var(--highlight-bg); font-weight: 600; color: var(--text-main); }
+
+  .table-group td {
+    padding-top: 40px;
+    padding-bottom: 12px;
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--text-main) !important;
+    border-bottom: 1px solid var(--border-strong);
+    font-weight: 600 !important;
+    background: var(--page-bg) !important;
+    white-space: normal;
+  }
+
+  .table-total td {
+    font-weight: 600;
+    color: var(--text-main);
+    border-top: 1px solid var(--text-main);
+    border-bottom: 2px solid var(--text-main);
+    background: var(--page-bg) !important;
+  }
+
+  .table-highlight td {
+    background: var(--accent) !important;
+    color: #FFF !important;
+    border-top: 1px solid var(--accent) !important;
+    border-bottom: 1px solid var(--accent) !important;
+    font-weight: 500;
+  }
+  .table-highlight td:first-child { color: rgba(255,255,255,0.8) !important; }
+
+  /* Mobile Adjustments */
+  @media (max-width: 980px) {
+    body { padding: 10px; }
+    .deck { gap: 20px; }
+    .page { padding: 40px 30px; min-height: auto; }
+    h1 { font-size: 40px; }
+    h2 { font-size: 28px; }
+    header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 30px; }
+    .split, .dashboard { grid-template-columns: 1fr; gap: 30px; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 0; }
+    .page { padding: 30px 20px; border-left: none; border-right: none; box-shadow: none; border-top: 1px solid var(--border); }
+    .page:first-child { border-top: none; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 24px; }
+    .subtitle { font-size: 15px; }
+    .kpi-grid { grid-template-columns: 1fr; }
+    .kpi-card { padding: 24px 20px; }
+    .hero-image { min-height: 200px; }
+    .chart-card { padding: 0; border: none; background: transparent; }
+    .chart-header { padding: 0 0 10px 0; }
+    .chart-svg-container { padding: 0; }
+    .bilan-container { margin-top: 10px; }
+    .financial-table { min-width: 600px; /* Forces horizontal scroll on mobile */ }
+    .table-group td { padding-top: 24px; }
+  }
+
+  @media print {
+    @page { margin: 0; size: landscape; }
+    body { padding: 0; background: #FFF; }
+    .deck { gap: 0; max-width: none; }
+    .page { border: none; box-shadow: none; break-after: page; padding: 50px 60px; min-height: 100vh; }
+  }
+</style>
+</head>
+<body>
+
+<svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0F172A" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.0"/>
+    </linearGradient>
+    <filter id="pillShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.1" />
+    </filter>
+  </defs>
+</svg>
+
+<main class="deck">
+
+  <section class="page">
+    <header>
+      <div class="brand">Project Earth / Hearst</div>
+      <div class="confidential">Sovereign Investment Memorandum — 1/3</div>
+    </header>
+
+    <h1>Sovereign Data Infrastructure.<br><span>Global Scale. Institutional Yields.</span></h1>
+    <p class="subtitle">A strategic initiative to deploy a hyper-scale, AI-ready data center platform. Backed by sovereign capital, this asset secures absolute ownership of critical national infrastructure while generating predictable, compounding cash flows.</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-val">150<span style="font-size:20px; font-family:var(--sans); font-weight:400; color:var(--text-light); margin-left:4px;">MW</span></div>
+        <div class="kpi-label">Initial Capacity</div>
+        <div class="kpi-desc">Fully contracted Day-1, scalable to 300+ MW globally.</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val">$1.5<span style="font-size:20px; font-family:var(--sans); font-weight:400; color:var(--text-light); margin-left:4px;">B</span></div>
+        <div class="kpi-label">Deployed Capital</div>
+        <div class="kpi-desc">100% sovereign & consortium ownership of real assets.</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val">$211<span style="font-size:20px; font-family:var(--sans); font-weight:400; color:var(--text-light); margin-left:4px;">M</span></div>
+        <div class="kpi-label">Net Annual Cash</div>
+        <div class="kpi-desc">Year 1 stabilized cash flow strictly for the Consortium.</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val">14.0<span style="font-size:20px; font-family:var(--sans); font-weight:400; color:var(--text-light); margin-left:4px;">%</span></div>
+        <div class="kpi-label">Net Cash Yield</div>
+        <div class="kpi-desc">Day-1 un-levered cash return on deployed capital.</div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="hero-image">
+        <div class="hero-caption">Target Hyperscale Masterplan</div>
+      </div>
+      <div class="narrative">
+        <h3>The Sovereign Advantage</h3>
+        <p>This platform transcends traditional real estate. By merging sovereign financial power with institutional execution, we create an undisputed market leader capable of hosting the next generation of global cloud and AI infrastructure.</p>
+        <ul class="bullets">
+          <li><strong>Absolute Ownership:</strong> The Consortium retains total control over the real estate, power rights, and physical infrastructure.</li>
+          <li><strong>De-risked Execution:</strong> Operating partnership ensures premium pricing ($225/kW) and 100% occupancy prior to delivery.</li>
+          <li><strong>AI-Ready Economics:</strong> Designed for high-density compute, maximizing the EBITDA generated per square meter.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="page">
+    <header>
+      <div class="brand">Financial Projections & Scalability</div>
+      <div class="confidential">Sovereign Investment Memorandum — 2/3</div>
+    </header>
+
+    <h2>Financial Trajectory & Scale Upside</h2>
+    <p class="subtitle" style="margin-bottom: 50px;">The financial architecture guarantees immediate, robust cash distributions while retaining massive scale potential. Cash compounding and capital efficiency (dilution of soft costs at scale) create an asymmetric return profile for the Consortium.</p>
+
+    <div class="dashboard">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">15-Year Cumulative Value Horizon</div>
+          <div class="chart-subtitle">Consortium 80% Economics (3% Esc. · 22x Exit)</div>
+        </div>
+        <div class="chart-svg-container">
+          <svg id="chart-horizon" viewBox="0 0 500 360" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">EBITDA Yield Expansion by Scale</div>
+          <div class="chart-subtitle">Capital Efficiency from 60MW to 300MW Target</div>
+        </div>
+        <div class="chart-svg-container">
+          <svg id="chart-scale" viewBox="0 0 500 360" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page">
+    <header>
+      <div class="brand">Balance Sheet & Returns Distribution</div>
+      <div class="confidential">Sovereign Investment Memorandum — 3/3</div>
+    </header>
+
+    <h2>Capital Structure & Returns Waterfall</h2>
+    <p class="subtitle">Detailed financial distribution between the Total Project, the Sovereign Consortium (funding 100% of Capex), and the Operating Partner.</p>
+
+    <div class="bilan-container">
+      <div class="table-responsive">
+        <table class="financial-table">
+          <thead>
+            <tr>
+              <th>Financial Metric</th>
+              <th>Total Project<br><span style="font-weight:400;color:var(--text-light);text-transform:none">(100%)</span></th>
+              <th>Consortium (Hearst + Sovereign)<br><span style="font-weight:600;color:var(--text-main);text-transform:none">(Asset Owners & Capital Providers)</span></th>
+              <th>Operating Partner<br><span style="font-weight:400;color:var(--text-light);text-transform:none">(Execution Alignment)</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="table-group">
+              <td colspan="4">1. Capital Structure & Ownership</td>
+            </tr>
+            <tr>
+              <td>Funded Capex (Initial 150MW)</td>
+              <td>$1.50B</td>
+              <td>$1.50B</td>
+              <td>$0</td>
+            </tr>
+            <tr>
+              <td>Asset & Real Estate Ownership</td>
+              <td>100%</td>
+              <td>100%</td>
+              <td>0%</td>
+            </tr>
+            <tr>
+              <td>Economic Distribution (Cash Flows)</td>
+              <td>100%</td>
+              <td>80%</td>
+              <td>20%</td>
+            </tr>
+
+            <tr class="table-group">
+              <td colspan="4">2. Stabilized Operations (Year 1)</td>
+            </tr>
+            <tr>
+              <td>Gross Revenue ($225/kW, 100% leased)</td>
+              <td>$405M</td>
+              <td>$324M</td>
+              <td>$81M</td>
+            </tr>
+            <tr>
+              <td>EBITDA Cash Generation (65% margin)</td>
+              <td>$263M</td>
+              <td>$211M</td>
+              <td>$53M</td>
+            </tr>
+            <tr class="table-total">
+              <td>Day-1 Cash Yield on Deployed Capital</td>
+              <td>17.6%</td>
+              <td>14.0%</td>
+              <td>N/A</td>
+            </tr>
+
+            <tr class="table-group">
+              <td colspan="4">3. 15-Year Value Generation (3% Escalation, 22x Exit)</td>
+            </tr>
+            <tr>
+              <td>Cumulative Cash Distributed (Y1-Y15)</td>
+              <td>$4.90B</td>
+              <td>$3.92B</td>
+              <td>$0.98B</td>
+            </tr>
+            <tr>
+              <td>Terminal Asset Value (Year 15 Exit)</td>
+              <td>$8.76B</td>
+              <td>$7.01B</td>
+              <td>$1.75B</td>
+            </tr>
+            <tr class="table-highlight">
+              <td>Total Value Created (Cash + Asset)</td>
+              <td>$13.66B</td>
+              <td>$10.93B</td>
+              <td>$2.73B</td>
+            </tr>
+
+            <tr class="table-group">
+              <td colspan="4">4. Return Profile</td>
+            </tr>
+            <tr>
+              <td>Multiple on Invested Capital (MOIC)</td>
+              <td>9.1x</td>
+              <td>7.3x</td>
+              <td>—</td>
+            </tr>
+            <tr class="table-total">
+              <td>Target Internal Rate of Return (IRR)</td>
+              <td>23.0%</td>
+              <td>20.7%</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const colorMain = '#0F172A';     
+  const colorGrid = '#F3F4F6';     
+  const colorAxis = '#9CA3AF';     
+  
+  const svgHorizon = document.getElementById('chart-horizon');
+  if (svgHorizon) {
+    const W = 500, H = 360, L = 50, R = 40, T = 40, B = 40;
+    const ebitdaY1 = 263.25, escalation = 0.03, consortiumShare = 0.8, exitMultiple = 22;
+    let cumulative = 0;
+    const pts = [];
+    
+    for (let year = 1; year <= 15; year++) {
+      const ebitda = ebitdaY1 * Math.pow(1 + escalation, year - 1);
+      cumulative += ebitda * consortiumShare;
+      const exitValue = year === 15 ? ebitda * exitMultiple * consortiumShare : 0;
+      pts.push({ year, cash: cumulative, total: cumulative + exitValue });
+    }
+
+    const maxVal = pts[14].total;
+    const x = d => L + ((d.year - 1) / 14) * (W - L - R);
+    const y = v => (H - B) - (v / maxVal) * (H - T - B);
+
+    let out = '';
+    
+    for (let i = 0; i <= 4; i++) {
+      const val = (maxVal * i) / 4;
+      const yy = y(val);
+      out += `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="${colorGrid}" stroke-width="1.5"/>`;
+      out += `<text x="${L-10}" y="${yy+4}" text-anchor="end" font-family="Inter" font-size="11" font-weight="500" fill="${colorAxis}">$${(val/1000).toFixed(0)}B</text>`;
+    }
+    
+    [1, 5, 10, 15].forEach(yr => {
+      out += `<text x="${x({year:yr})}" y="${H-15}" text-anchor="middle" font-family="Inter" font-size="11" font-weight="500" fill="${colorAxis}">Year ${yr}</text>`;
+    });
+
+    const cashPath = pts.map(d => `${x(d)},${y(d.cash)}`).join(' ');
+    const areaPath = `${x(pts[0])},${H-B} ` + cashPath + ` ${x(pts[14])},${H-B}`;
+    out += `<polygon points="${areaPath}" fill="url(#areaGradient)"/>`;
+    out += `<polyline points="${cashPath}" fill="none" stroke="${colorMain}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    out += `<line x1="${x(pts[14])}" y1="${y(pts[14].cash)}" x2="${x(pts[14])}" y2="${y(pts[14].total)}" stroke="${colorMain}" stroke-width="2" stroke-dasharray="4 4"/>`;
+    out += `<circle cx="${x(pts[14])}" cy="${y(pts[14].cash)}" r="4" fill="${colorMain}"/>`;
+    out += `<circle cx="${x(pts[14])}" cy="${y(pts[14].total)}" r="5" fill="#FFF" stroke="${colorMain}" stroke-width="2.5"/>`;
+    
+    const renderPill = (cx, cy, text, w, h, align) => {
+      const px = align === 'right' ? cx - w - 12 : cx + 12;
+      const py = cy - h/2;
+      let html = `<g filter="url(#pillShadow)">`;
+      html += `<rect x="${px}" y="${py}" width="${w}" height="${h}" rx="6" fill="${colorMain}"/>`;
+      html += `<text x="${px + w/2}" y="${py + h/2 + 4}" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600" fill="#FFF">${text}</text>`;
+      html += `</g>`;
+      html += `<line x1="${cx}" y1="${cy}" x2="${align==='right' ? px+w : px}" y2="${cy}" stroke="${colorMain}" stroke-width="1.5"/>`;
+      return html;
+    };
+
+    out += renderPill(x(pts[14]), y(pts[14].cash), "$3.9B Cash", 80, 26, 'right');
+    out += renderPill(x(pts[14]), y(pts[14].total), "$10.9B Total", 90, 26, 'right');
+
+    svgHorizon.innerHTML = out;
+  }
+
+  const svgScale = document.getElementById('chart-scale');
+  if (svgScale) {
+    const scaleData = [
+      { mw: 60, yld: 10.9 }, { mw: 90, yld: 11.6 }, { mw: 120, yld: 12.0 },
+      { mw: 150, yld: 12.3 }, { mw: 180, yld: 12.5 }, { mw: 210, yld: 12.7 },
+      { mw: 240, yld: 12.8 }, { mw: 270, yld: 12.9 }, { mw: 300, yld: 13.0 }
+    ];
+    
+    const W = 500, H = 360, L = 50, R = 40, T = 40, B = 40;
+    const x = d => L + ((d.mw - 60) / 240) * (W - L - R);
+    const y = v => (H - B) - ((v - 10.5) / 2.8) * (H - T - B);
+
+    let out = '';
+    
+    for (let v = 11; v <= 13; v += 0.5) {
+      const yy = y(v);
+      out += `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="${colorGrid}" stroke-width="1.5"/>`;
+      out += `<text x="${L-10}" y="${yy+4}" text-anchor="end" font-family="Inter" font-size="11" font-weight="500" fill="${colorAxis}">${v.toFixed(1)}%</text>`;
+    }
+    
+    [60, 150, 300].forEach(mw => {
+      const xx = x({mw});
+      out += `<line x1="${xx}" y1="${T}" x2="${xx}" y2="${H-B}" stroke="${colorGrid}" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+      out += `<text x="${xx}" y="${H-15}" text-anchor="middle" font-family="Inter" font-size="11" font-weight="500" fill="${colorAxis}">${mw} MW</text>`;
+    });
+
+    const scalePath = scaleData.map(d => `${x(d)},${y(d.yld)}`).join(' ');
+    const scaleArea = `${x(scaleData[0])},${H-B} ` + scalePath + ` ${x(scaleData[8])},${H-B}`;
+    out += `<polygon points="${scaleArea}" fill="url(#areaGradient)"/>`;
+    out += `<polyline points="${scalePath}" fill="none" stroke="${colorMain}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+    [60, 150, 300].forEach(mw => {
+      const d = scaleData.find(item => item.mw === mw);
+      const isTarget = mw === 150;
+      out += `<circle cx="${x(d)}" cy="${y(d.yld)}" r="${isTarget ? 5 : 4}" fill="${isTarget ? colorMain : '#FFF'}" stroke="${colorMain}" stroke-width="${isTarget ? 0 : 2}"/>`;
+    });
+
+    const renderPill = (cx, cy, text, w, h, align, drop) => {
+      const px = align === 'right' ? cx - w - 10 : cx + 10;
+      const py = cy - h/2 + (drop || 0);
+      let html = `<g filter="url(#pillShadow)">`;
+      html += `<rect x="${px}" y="${py}" width="${w}" height="${h}" rx="6" fill="${colorMain}"/>`;
+      html += `<text x="${px + w/2}" y="${py + h/2 + 4}" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600" fill="#FFF">${text}</text>`;
+      html += `</g>`;
+      return html;
+    };
+
+    out += renderPill(x({mw:60}), y(10.9), "10.9%", 50, 24, 'left', -20);
+    out += renderPill(x({mw:150}), y(12.3), "12.3% Target", 90, 24, 'left', -20);
+    out += renderPill(x({mw:300}), y(13.0), "13.0% Max", 80, 24, 'right', 20);
+
+    svgScale.innerHTML = out;
+  }
+</script>
+</body>
+</html>

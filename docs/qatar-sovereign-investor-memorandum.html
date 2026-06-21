@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="description" content="Private &amp; confidential investment memorandum — sovereign AI-ready data center platform (Qatar). For discussion purposes only; not an offer to sell securities." />
+<title>Qatar Sovereign Data Center Platform — Investment Memorandum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #EAE7DF;
+    --paper:  #FCFBF8;
+    --ink:    #0B1220;
+    --ink-2:  #1C2536;
+    --text:   #1A1E28;
+    --muted:  #6E6A62;
+    --faint:  #9A958A;
+    --line:   #E6E1D6;
+    --line-2: #D8D2C5;
+    --gold:   #B0894B;
+    --gold-d: #856634;
+    --gold-t: #F6F1E6;
+
+    --serif: 'Lora', Georgia, 'Times New Roman', serif;
+    --sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--canvas);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    padding: 48px 0;
+  }
+
+  .deck { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+
+  .page {
+    position: relative;
+    width: 100%;
+    min-height: 860px;
+    padding: 76px 84px;
+    background: var(--paper);
+    box-shadow: 0 1px 0 var(--line-2), 0 24px 60px rgba(11,18,32,0.07);
+    display: flex;
+    flex-direction: column;
+  }
+  .page::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); }
+
+  /* ---- editorial header ---- */
+  .topbar { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 64px; }
+  .brand { font-size: 12px; color: var(--ink); font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+  .confidential { font-size: 10.5px; text-transform: uppercase; letter-spacing: 2px; color: var(--faint); font-weight: 500; }
+
+  .phead { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+  .phead .pnum { font-family: var(--serif); font-size: 84px; line-height: 0.8; color: var(--line-2); font-weight: 400; font-style: italic; }
+  .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 2.4px; text-transform: uppercase; color: var(--gold-d); margin-bottom: 18px; display: flex; align-items: center; gap: 14px; }
+  .eyebrow::before { content: ''; width: 26px; height: 1.5px; background: var(--gold); display: inline-block; }
+
+  h1 { font-family: var(--serif); font-size: 62px; line-height: 1.06; font-weight: 500; color: var(--ink); letter-spacing: -0.5px; }
+  h1 .it { font-style: italic; font-weight: 400; color: var(--muted); }
+  h2 { font-family: var(--serif); font-size: 38px; line-height: 1.12; font-weight: 500; color: var(--ink); letter-spacing: -0.3px; max-width: 760px; }
+  h3 { font-family: var(--serif); font-size: 23px; font-weight: 500; color: var(--ink); }
+
+  .lede { font-size: 17px; color: var(--muted); max-width: 760px; line-height: 1.7; font-weight: 400; }
+  .note { font-size: 11.5px; color: var(--faint); line-height: 1.6; }
+  strong { font-weight: 600; color: var(--text); }
+  em { font-style: italic; }
+
+  .flexcap { margin-top: auto; }
+
+  /* ===== PAGE 1 — COVER ===== */
+  .cover-hero { position: relative; height: 360px; margin: 4px 0 44px; overflow: hidden; }
+  .cover-hero .img {
+    position: absolute; inset: 0;
+    background-image: url('../public/aerial-campus-2.png'), linear-gradient(135deg, #243044 0%, #0B1220 72%);
+    background-size: cover, cover; background-position: center, center; background-repeat: no-repeat;
+    filter: grayscale(38%) contrast(1.04);
+  }
+  .cover-hero .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,18,32,0.18) 0%, rgba(11,18,32,0.06) 38%, rgba(11,18,32,0.82) 100%); }
+  .cover-hero .cap { position: absolute; left: 36px; bottom: 30px; right: 36px; color: #F4F1EA; }
+  .cover-hero .cap .ce { font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+  .cover-hero .cap .ce::before { content: ''; width: 24px; height: 1.5px; background: var(--gold); display: inline-block; }
+  .cover-hero .cap h1 { color: #FBFAF6; font-size: 50px; }
+  .cover-hero .cap h1 .it { color: #C9C2B2; }
+  .cover-tag { position: absolute; right: 36px; top: 28px; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(244,241,234,0.7); }
+
+  .statrow { display: grid; grid-template-columns: repeat(4, 1fr); margin: 6px 0 46px; }
+  .stat { padding: 4px 26px; border-left: 1px solid var(--line); }
+  .stat:first-child { padding-left: 0; border-left: none; }
+  .stat-fig { font-family: var(--serif); font-size: 48px; line-height: 1; color: var(--ink); font-weight: 500; margin-bottom: 14px; }
+  .stat-fig .u { font-family: var(--sans); font-size: 18px; font-weight: 400; color: var(--faint); margin-left: 3px; }
+  .stat-lab { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--ink); font-weight: 600; margin-bottom: 9px; }
+  .stat-sub { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+  .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; padding-top: 36px; border-top: 1px solid var(--line); }
+  .pillar .pk { font-family: var(--serif); font-size: 19px; color: var(--ink); margin-bottom: 10px; }
+  .pillar .pv { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+  .pillar .pe { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold-d); font-weight: 600; margin-bottom: 14px; }
+
+  /* ===== PAGE 2 — INCOME UNIT ===== */
+  .chain { display: flex; align-items: stretch; margin: 12px 0 44px; }
+  .cnode { flex: 1 1 0; padding: 26px 22px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+  .cnode .cf { font-family: var(--serif); font-size: 30px; color: var(--ink); font-weight: 500; line-height: 1; margin-bottom: 10px; }
+  .cnode .cl { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; line-height: 1.4; }
+  .cnode.hero { background: var(--ink); border-radius: 2px; }
+  .cnode.hero .cf { color: #FBFAF6; font-size: 34px; }
+  .cnode.hero .cl { color: var(--gold); }
+  .carrow { display: flex; align-items: center; color: var(--gold); font-size: 22px; padding: 0 4px; }
+
+  .unit-split { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 56px; align-items: center; }
+  .mult { display: flex; align-items: flex-end; gap: 26px; height: 230px; }
+  .mbar { width: 92px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+  .mbar .bar { width: 100%; border-radius: 2px 2px 0 0; }
+  .mbar .bv { font-family: var(--serif); font-size: 22px; color: var(--ink); font-weight: 600; margin-bottom: 10px; }
+  .mbar .bl { font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center; letter-spacing: 0.3px; }
+  .mult-cap { }
+  .mult-cap .mx { font-family: var(--serif); font-size: 64px; color: var(--gold-d); font-weight: 500; line-height: 1; }
+  .mult-cap p { font-size: 14px; color: var(--muted); line-height: 1.65; margin-top: 12px; max-width: 320px; }
+
+  .annual { margin-top: 40px; padding-top: 34px; border-top: 1px solid var(--line); }
+  .annual h3 { font-size: 18px; margin-bottom: 6px; }
+  .annual .as { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .propbar { display: flex; height: 64px; border-radius: 2px; overflow: hidden; }
+  .propseg { display: flex; flex-direction: column; justify-content: center; padding: 0 18px; color: #FBFAF6; }
+  .propseg .pv { font-family: var(--serif); font-size: 19px; font-weight: 600; }
+  .propseg .pl { font-size: 10.5px; letter-spacing: 0.5px; opacity: 0.85; text-transform: uppercase; }
+  .seg-cons { background: var(--ink); }
+  .seg-op { background: var(--gold-d); }
+  .seg-opex { background: #C9C2B2; color: var(--ink); }
+
+  /* ===== PAGE 3 — TRANCHE MAP ===== */
+  .vizwrap { margin: 8px 0 8px; }
+  .vizwrap svg { width: 100%; height: auto; display: block; }
+  .stepstrip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 36px; padding-top: 34px; margin-top: 24px; border-top: 1px solid var(--line); }
+  .stepstrip.step5 { grid-template-columns: repeat(5, 1fr); gap: 22px; }
+  .stepstrip.step5 .sd { font-size: 11.5px; }
+  .step .sq { font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--gold-d); font-weight: 600; margin-bottom: 10px; }
+  .step .sh { font-family: var(--serif); font-size: 19px; color: var(--ink); margin-bottom: 8px; }
+  .step .sd { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+
+  /* ===== PAGE 4 — VALUE BUILD ===== */
+  .ladder { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 8px; }
+  .rung { padding: 26px 28px; border-left: 1px solid var(--line); position: relative; }
+  .rung:first-child { border-left: none; padding-left: 0; }
+  .rung .rmw { font-family: var(--serif); font-size: 30px; color: var(--ink); font-weight: 500; }
+  .rung .ryl { font-size: 13px; color: var(--gold-d); font-weight: 600; margin: 6px 0 10px; }
+  .rung .rd { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .rung .rdot { position: absolute; left: -5px; top: 30px; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); }
+  .rung:first-child .rdot { left: -4px; }
+
+  /* ===== PAGE 5 — OWNERSHIP & RETURNS ===== */
+  .own { display: grid; grid-template-columns: repeat(3, 1fr); margin: 6px 0 40px; }
+  .own .o { padding: 4px 30px; border-left: 1px solid var(--line); }
+  .own .o:first-child { padding-left: 0; border-left: none; }
+  .own .of { font-family: var(--serif); font-size: 44px; color: var(--ink); font-weight: 500; line-height: 1; margin-bottom: 12px; }
+  .own .ol { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .own .ol b { color: var(--ink); font-weight: 600; }
+
+  .build { margin: 8px 0 14px; }
+  .build .blabels { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .build .blabels span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+  .buildbar { display: flex; height: 58px; border-radius: 2px; overflow: hidden; border: 1px solid var(--line-2); }
+  .buildbar .bs { display: flex; flex-direction: column; justify-content: center; padding: 0 16px; }
+  .buildbar .bs .bf { font-family: var(--serif); font-size: 17px; font-weight: 600; }
+  .buildbar .bs .bn { font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .bs-cash { background: var(--ink); color: #FBFAF6; }
+  .bs-term { background: var(--gold-d); color: #FBFAF6; }
+  .build .bend { display: flex; gap: 40px; margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .bend .be { }
+  .bend .be .bv { font-family: var(--serif); font-size: 32px; color: var(--ink); font-weight: 500; }
+  .bend .be .bl { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-top: 4px; }
+
+  /* compact institutional table */
+  .ftable { width: 100%; border-collapse: collapse; font-family: var(--sans); margin-top: 8px; }
+  .ftable th { text-align: right; padding: 14px 14px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--ink); }
+  .ftable th:first-child { text-align: left; }
+  .ftable th.hl { color: var(--ink); }
+  .ftable td { text-align: right; padding: 13px 14px; font-variant-numeric: tabular-nums; font-size: 14px; color: var(--text); border-bottom: 1px solid var(--line); }
+  .ftable td:first-child { text-align: left; color: var(--muted); }
+  .ftable td.hl { color: var(--ink); font-weight: 600; }
+  .ftable tr.tr-strong td { border-top: 1px solid var(--ink); border-bottom: 2px solid var(--ink); font-weight: 600; color: var(--ink); }
+
+  /* ===== PAGE 6 — EVIDENCE & DISCIPLINE ===== */
+  .evrow { display: grid; grid-template-columns: repeat(4, 1fr); margin: 4px 0 44px; }
+  .ev { padding: 4px 24px; border-left: 1px solid var(--line); }
+  .ev:first-child { padding-left: 0; border-left: none; }
+  .ev .ef { font-family: var(--serif); font-size: 38px; color: var(--ink); font-weight: 500; line-height: 1; margin-bottom: 11px; }
+  .ev .el { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink); font-weight: 600; margin-bottom: 8px; }
+  .ev .ed { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+
+  .matrix { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .matrix th { text-align: left; padding: 13px 14px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--ink); }
+  .matrix td { text-align: left; padding: 14px 14px; font-size: 13px; color: var(--text); border-bottom: 1px solid var(--line); vertical-align: top; }
+  .matrix td.in { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .status { font-size: 10.5px; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+  .st-support { color: var(--gold-d); }
+  .st-position { color: var(--ink); }
+  .st-dd { color: var(--muted); }
+  .st-cp { color: var(--gold-d); }
+
+  .sectlabel { font-family: var(--serif); font-size: 19px; font-weight: 500; color: var(--ink); margin: 38px 0 6px; padding-left: 14px; border-left: 2px solid var(--gold); }
+  .sublabel { font-size: 12.5px; color: var(--muted); margin-bottom: 14px; padding-left: 16px; }
+
+  .scn { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  .scn th { text-align: right; padding: 13px 14px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--ink); }
+  .scn th:first-child { text-align: left; }
+  .scn th.inv { color: #FBFAF6; background: var(--ink); }
+  .scn td { text-align: right; padding: 12px 14px; font-variant-numeric: tabular-nums; font-size: 13.5px; border-bottom: 1px solid var(--line); }
+  .scn td:first-child { text-align: left; color: var(--muted); }
+  .scn td.inv { background: var(--gold-t); font-weight: 600; color: var(--ink); }
+  .scn tr.ret td { border-top: 1px solid var(--ink); font-weight: 600; }
+  .scn tr.ret td.inv { background: var(--ink); color: #FBFAF6; }
+
+  .cp-list { list-style: none; margin-top: 8px; columns: 2; column-gap: 48px; }
+  .cp-list li { font-size: 12.5px; color: var(--muted); line-height: 1.55; padding-left: 18px; position: relative; margin-bottom: 11px; break-inside: avoid; }
+  .cp-list li::before { content: '—'; position: absolute; left: 0; color: var(--gold); font-weight: 600; }
+  .cp-list li strong { color: var(--ink); }
+
+  .footnote { margin-top: auto; padding-top: 30px; font-size: 11px; color: var(--faint); line-height: 1.6; border-top: 1px solid var(--line); }
+
+  /* ---- global legal footer ---- */
+  .legal { max-width: 1180px; margin: 0 auto; }
+  .legal-box { background: var(--paper); box-shadow: 0 1px 0 var(--line-2); border-top: 3px solid var(--gold); padding: 26px 40px; }
+  .legal-box h4 { font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 12px; }
+  .legal-box p { font-size: 10.5px; line-height: 1.7; color: var(--faint); }
+  .legal-box p + p { margin-top: 8px; }
+
+  /* ---- responsive ---- */
+  @media (max-width: 920px) {
+    body { padding: 16px 0; }
+    .deck { gap: 22px; padding: 0 10px; }
+    .page { padding: 40px 26px; min-height: 0; }
+    h1, .cover-hero .cap h1 { font-size: 34px; }
+    h2 { font-size: 26px; }
+    .phead .pnum { font-size: 56px; }
+    .statrow, .pillars, .own, .evrow, .ladder { grid-template-columns: 1fr 1fr; }
+    .stat, .own .o, .ev { border-left: none; padding-left: 0; }
+    .unit-split, .stepstrip, .scn-wrap { grid-template-columns: 1fr; }
+    .chain { flex-wrap: wrap; }
+    .carrow { transform: rotate(90deg); width: 100%; justify-content: center; }
+    .cp-list { columns: 1; }
+    .ftable th, .ftable td, .scn th, .scn td, .matrix th, .matrix td { padding: 9px 7px; font-size: 12px; }
+  }
+
+  /* ---- print ---- */
+  @media print {
+    @page { margin: 0; size: A4 landscape; }
+    html, body { padding: 0; margin: 0; background: #FFF; }
+    .deck { gap: 0; max-width: none; padding: 0; }
+    .page { box-shadow: none; break-after: page; page-break-after: always; padding: 44px 56px; min-height: 100vh; }
+    .statrow, .pillars, .own, .evrow, .ladder, .chain, .stepstrip, .unit-split, table, tr, .legal-box, .buildbar, .propbar, .cover-hero { break-inside: avoid; page-break-inside: avoid; }
+    .legal { max-width: none; padding: 24px 56px; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false"><defs></defs></svg>
+
+<main class="deck">
+
+  <!-- ============ PAGE 1 — SOVEREIGN THESIS ============ -->
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Project Earth · Hearst</div>
+      <div class="confidential">Private &amp; Confidential — Investment Memorandum</div>
+    </div>
+
+    <div class="cover-hero">
+      <div class="img"></div>
+      <div class="veil"></div>
+      <div class="cover-tag">Sovereign Investment Memorandum — 01 / 06</div>
+      <div class="cap">
+        <div class="ce">Sovereign AI &amp; Cloud Infrastructure · Qatar</div>
+        <h1>Sovereign Data Infrastructure.<br><span class="it">Global scale. Long-term institutional yield.</span></h1>
+      </div>
+    </div>
+
+    <p class="lede">A strategic initiative to develop a hyper-scale, AI-ready data center platform. Backed by sovereign capital, it is structured to establish direct ownership and governance control of critical national infrastructure, with the objective of generating durable, escalating cash flows. Headline figures throughout reflect the <strong>Core Contracted Case</strong> — see methodology, Page 6.</p>
+
+    <div class="statrow" style="margin-top:42px;">
+      <div class="stat">
+        <div class="stat-fig">150<span class="u">MW</span></div>
+        <div class="stat-lab">Initial Capacity</div>
+        <div class="stat-sub">Targeted under anchor-led pre-lease; designed to scale to 300+ MW.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-fig">$1.5<span class="u">B</span></div>
+        <div class="stat-lab">Deployed Capital</div>
+        <div class="stat-sub">Direct sovereign &amp; consortium ownership of the underlying real assets.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-fig">$211<span class="u">M</span></div>
+        <div class="stat-lab">Net Annual Cash</div>
+        <div class="stat-sub">Stabilized Year-1 cash flow attributable to the Consortium.</div>
+      </div>
+      <div class="stat">
+        <div class="stat-fig">14.0<span class="u">%</span></div>
+        <div class="stat-lab">Net Cash Yield</div>
+        <div class="stat-sub">Stabilized un-levered cash yield on deployed capital.</div>
+      </div>
+    </div>
+
+    <div class="pillars flexcap">
+      <div class="pillar">
+        <div class="pe">Why Qatar</div>
+        <div class="pk">Power-backed industrial policy</div>
+        <div class="pv">Among the lowest-cost sovereign power in the world (~$0.03/kWh), the structural input behind durable AI-infrastructure economics.</div>
+      </div>
+      <div class="pillar">
+        <div class="pe">Why Now</div>
+        <div class="pk">Sovereign AI demand wave</div>
+        <div class="pv">Regional sovereign-scale programs (KSA, UAE) prove multi-gigawatt absorption; compute capacity is now strategic national infrastructure.</div>
+      </div>
+      <div class="pillar">
+        <div class="pe">The Position</div>
+        <div class="pk">A regional control point</div>
+        <div class="pv">Designed as a sovereign control point for AI and cloud capacity — a platform of strategic relevance, not local colocation demand alone.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 2 — THE 1 MW INCOME UNIT ============ -->
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Revenue Architecture · Unit Economics</div>
+      <div class="confidential">Investment Memorandum — 02 / 06</div>
+    </div>
+    <div class="phead">
+      <div>
+        <div class="eyebrow">The Income Unit</div>
+        <h2>One megawatt is a contracted cash machine</h2>
+      </div>
+      <div class="pnum">02</div>
+    </div>
+
+    <p class="lede" style="margin-bottom:8px;">Each megawatt is structured as a standardized, contracted income unit. Capital converts into long-dated, escalating cash and a substantial terminal asset — then replicates 150× across the platform.</p>
+
+    <div class="chain">
+      <div class="cnode"><div class="cf">$10.0M</div><div class="cl">Capital<br>deployed</div></div>
+      <div class="carrow">→</div>
+      <div class="cnode hero"><div class="cf">1 MW</div><div class="cl">15-yr NNN<br>contracted</div></div>
+      <div class="carrow">→</div>
+      <div class="cnode"><div class="cf">$2.70M</div><div class="cl">Annual<br>revenue</div></div>
+      <div class="carrow">→</div>
+      <div class="cnode"><div class="cf">$1.75M</div><div class="cl">Annual<br>EBITDA</div></div>
+      <div class="carrow">→</div>
+      <div class="cnode"><div class="cf">$58.4M</div><div class="cl">Terminal<br>value (22×)</div></div>
+    </div>
+
+    <div class="unit-split">
+      <div class="mult">
+        <div class="mbar">
+          <div class="bv">$10.0M</div>
+          <div class="bar" style="height:34px; background:var(--line-2);"></div>
+          <div class="bl">Capital<br>deployed</div>
+        </div>
+        <div class="mbar">
+          <div class="bv">$58.4M</div>
+          <div class="bar" style="height:198px; background:var(--ink);"></div>
+          <div class="bl">Terminal<br>value</div>
+        </div>
+      </div>
+      <div class="mult-cap">
+        <div class="mx">5.8×</div>
+        <p>On the Core Contracted Case, each megawatt is modelled to return ~5.8× its build cost in terminal value — in addition to 15 years of escalating contracted cash. Stabilized EBITDA yield: ~17.6% (project) · ~14.0% (Consortium share).</p>
+      </div>
+    </div>
+
+    <div class="annual">
+      <h3>Annual cash, in proportion</h3>
+      <div class="as">Stabilized 150 MW · Year 1 · Core Contracted Case — how $405M of gross contract becomes Consortium cash.</div>
+      <div class="propbar">
+        <div class="propseg seg-cons" style="width:52.1%;"><div class="pv">$211M</div><div class="pl">Consortium cash · 80%</div></div>
+        <div class="propseg seg-op" style="width:13.0%;"><div class="pv">$53M</div><div class="pl">Operating partner · 20%</div></div>
+        <div class="propseg seg-opex" style="width:34.9%;"><div class="pv">$142M</div><div class="pl">Opex · reserves · 35%</div></div>
+      </div>
+    </div>
+
+    <div class="footnote">
+      Revenue = $225/kW/month × 150,000 kW × 12 = $405M gross (Core Contracted Case). A triple-net structure is intended to pass power, maintenance and property cost to tenants; the 35% deduction reflects assumed platform overhead, insurance and reserves. The Operating Partner earns 20% of cash economics in consideration for securing anchor offtake and pre-delivery occupancy. Figures are illustrative and un-levered; see methodology, Page 6.
+    </div>
+  </section>
+
+  <!-- ============ PAGE 3 — FROM POWER TO CONTRACTED CASH ============ -->
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Execution · Go-to-Market</div>
+      <div class="confidential">Investment Memorandum — 03 / 06</div>
+    </div>
+    <div class="phead">
+      <div>
+        <div class="eyebrow">The Power-to-Cash Corridor</div>
+        <h2>Qatar can compress the path from power to contracted cash</h2>
+      </div>
+      <div class="pnum">03</div>
+    </div>
+
+    <p class="lede" style="margin-bottom:6px;">Value comes from control of power, not construction alone. With sovereign coordination, power allocation, land, permitting and anchor demand can be aligned earlier than a merchant greenfield — compressing the critical path. Capacity is targeted to be contracted ahead of energization; each tranche activates cash on delivery, toward a $405M stabilized run-rate within ~18 months of first power.</p>
+
+    <div class="vizwrap">
+      <svg id="tranche" viewBox="0 0 1000 320" preserveAspectRatio="xMidYMid meet" role="presentation" aria-hidden="true"></svg>
+    </div>
+    <div class="note" style="margin:2px 0 4px;">Accelerated path · subject to sovereign coordination &amp; anchor-led leasing · available / allocated MW · not a merchant greenfield timeline.</div>
+
+    <div class="stepstrip step5 flexcap">
+      <div class="step">
+        <div class="sq">M0–M3</div>
+        <div class="sh">Sovereign Alignment</div>
+        <div class="sd">Power allocation, site control and anchor term-sheet move in parallel.</div>
+      </div>
+      <div class="step">
+        <div class="sq">M3–M6</div>
+        <div class="sh">Fast-Track Prep</div>
+        <div class="sd">Available or allocable MW are prepared for first powered delivery.</div>
+      </div>
+      <div class="step">
+        <div class="sq">M6–M9</div>
+        <div class="sh">First Powered MW</div>
+        <div class="sd">Initial 50 MW activates contracted revenue; run-rate begins.</div>
+      </div>
+      <div class="step">
+        <div class="sq">M9–M15</div>
+        <div class="sh">Scale-Up</div>
+        <div class="sd">Expansion to 100 MW+ as delivery and tenant demand converge.</div>
+      </div>
+      <div class="step">
+        <div class="sq">M15–M18</div>
+        <div class="sh">Stabilized Platform</div>
+        <div class="sd">150 MW platform reaches the $405M revenue run-rate.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 4 — 15-YEAR VALUE CREATION ============ -->
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Capital Formation · 15-Year Horizon</div>
+      <div class="confidential">Investment Memorandum — 04 / 06</div>
+    </div>
+    <div class="phead">
+      <div>
+        <div class="eyebrow">Value Creation · Consortium 80% Economics</div>
+        <h2>Compounding cash, then a substantial terminal asset</h2>
+      </div>
+      <div class="pnum">04</div>
+    </div>
+
+    <p class="lede" style="margin-bottom:14px;"><strong>$1.5B of funded capital compounds into $10.93B of modelled consortium value</strong> — through cash distributions and terminal asset ownership over fifteen years (Core Contracted Case · 3% escalation · 22× EBITDA exit).</p>
+
+    <div class="vizwrap">
+      <svg id="valuebuild" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMid meet" role="presentation" aria-hidden="true"></svg>
+    </div>
+
+    <div class="flexcap">
+      <div class="eyebrow" style="margin-top:30px;">Scale Optionality — Illustrative</div>
+      <div class="ladder">
+        <div class="rung"><span class="rdot"></span><div class="rmw">60 MW</div><div class="ryl">~10.9% yield</div><div class="rd">Entry scale. Soft costs weigh more heavily on early capacity.</div></div>
+        <div class="rung"><span class="rdot"></span><div class="rmw">150 MW</div><div class="ryl">~12.3% yield · target</div><div class="rd">Reference platform. Soft costs diluted; full operating leverage.</div></div>
+        <div class="rung"><span class="rdot"></span><div class="rmw">300 MW</div><div class="ryl">~13.0% yield · optionality</div><div class="rd">Second-anchor dependent. Modeled as optionality, not base revenue.</div></div>
+      </div>
+      <div class="note" style="margin-top:14px;">Scale-yield figures are illustrative of capital efficiency at scale and are not a forecast. The 300 MW leg is contingent on a second anchor and dedicated power; see conditions precedent, Page 6.</div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 5 — CAPITAL STRUCTURE & RETURNS ============ -->
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Capital Structure · Returns Distribution</div>
+      <div class="confidential">Investment Memorandum — 05 / 06</div>
+    </div>
+    <div class="phead">
+      <div>
+        <div class="eyebrow">Ownership Economics</div>
+        <h2>Funds the capital. Owns the assets. Holds 80% of economics.</h2>
+      </div>
+      <div class="pnum">05</div>
+    </div>
+
+    <div class="own">
+      <div class="o"><div class="of">100%</div><div class="ol"><b>of project capital</b> funded by the Sovereign Consortium</div></div>
+      <div class="o"><div class="of">100%</div><div class="ol"><b>of real assets &amp; power rights</b> owned and governed by the Consortium</div></div>
+      <div class="o"><div class="of">80%</div><div class="ol"><b>of cash economics</b> to the Consortium; 20% to the Operating Partner for execution</div></div>
+    </div>
+
+    <div class="build">
+      <div class="blabels"><span>Capital invested $1.5B</span><span>15-year value build · Consortium · Core Contracted Case</span></div>
+      <div class="buildbar">
+        <div class="bs bs-cash" style="width:35.9%;"><div class="bf">$3.92B</div><div class="bn">Cumulative cash · Y1–Y15</div></div>
+        <div class="bs bs-term" style="width:64.1%;"><div class="bf">$7.01B</div><div class="bn">Terminal asset value · Y15</div></div>
+      </div>
+      <div class="bend">
+        <div class="be"><div class="bv">$10.93B</div><div class="bl">Total value created</div></div>
+        <div class="be"><div class="bv">7.3×</div><div class="bl">MOIC (15-yr)</div></div>
+        <div class="be"><div class="bv">20.7%</div><div class="bl">Target IRR</div></div>
+      </div>
+    </div>
+
+    <table class="ftable">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Total Project</th>
+          <th class="hl">Consortium</th>
+          <th>Operating Partner</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Funded capex (initial 150 MW)</td><td>$1.50B</td><td class="hl">$1.50B</td><td>$0</td></tr>
+        <tr><td>Economic distribution</td><td>100%</td><td class="hl">80%</td><td>20%</td></tr>
+        <tr><td>Stabilized EBITDA (Year 1)</td><td>$263M</td><td class="hl">$211M</td><td>$53M</td></tr>
+        <tr><td>Cumulative cash (Y1–Y15)</td><td>$4.90B</td><td class="hl">$3.92B</td><td>$0.98B</td></tr>
+        <tr><td>Terminal value (Year 15 · 22×)</td><td>$8.76B</td><td class="hl">$7.01B</td><td>$1.75B</td></tr>
+        <tr class="tr-strong"><td>Total value created</td><td>$13.66B</td><td class="hl">$10.93B</td><td>$2.73B</td></tr>
+        <tr><td>MOIC · Target IRR</td><td>9.1× · 24.3%</td><td class="hl">7.3× · 20.7%</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="footnote">
+      Illustrative distribution; all figures un-levered and independently re-computed from first principles. Figures represent the Core Contracted Case; the lease-up J-curve (Page 3) is intended to be mitigated through anchor-led pre-leasing. A downside range and conditions precedent are set out on Page 6.
+    </div>
+  </section>
+
+  <!-- ============ PAGE 6 — MARKET EVIDENCE & INVESTMENT DISCIPLINE ============ -->
+  <section class="page">
+    <div class="topbar">
+      <div class="brand">Market Evidence · Underwriting Discipline</div>
+      <div class="confidential">Investment Memorandum — 06 / 06</div>
+    </div>
+    <div class="phead">
+      <div>
+        <div class="eyebrow">Market Evidence &amp; Underwriting Discipline</div>
+        <h2>Anchored to today's market — underwritten with discipline</h2>
+      </div>
+      <div class="pnum">06</div>
+    </div>
+
+    <p class="lede" style="margin-bottom:30px;">AI has structurally re-priced data center infrastructure: power is the scarce asset, and tenants are securing capacity years in advance at record rents. The Core Contracted Case is anchored to live 2025 comparables and stress-tested. It remains a case, subject to the conditions precedent below; it is not a forecast or guarantee.</p>
+
+    <div class="evrow">
+      <div class="ev"><div class="ef">+30%</div><div class="el">Wholesale rent · YoY</div><div class="ed">Ashburn breached $215/kW/mo in 2025; AI-ready space at a further premium.</div></div>
+      <div class="ev"><div class="ef">1.4%</div><div class="el">Record-low vacancy</div><div class="ed">Primary markets effectively sold out (CBRE H2-2025).</div></div>
+      <div class="ev"><div class="ef">$24B</div><div class="el">Sovereign AI capital</div><div class="ed">Blackstone–AirTrunk at ~20–23× EBITDA; KSA &amp; UAE prove sovereign-scale absorption.</div></div>
+      <div class="ev"><div class="ef">$0.03</div><div class="el">GCC power · /kWh</div><div class="ed">A fraction of US/EU cost — the structural margin edge.</div></div>
+    </div>
+
+    <table class="matrix">
+      <thead>
+        <tr><th style="width:26%;">Key assumption</th><th style="width:14%;">Input</th><th style="width:38%;">Market reference (2025)</th><th style="width:22%;">Position</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Lease rate</td><td class="in">$225/kW/mo</td><td>Ashburn &gt;$215; MEEZA Qatar clears $190–285</td><td><span class="status st-support">Benchmark support</span></td></tr>
+        <tr><td>Build capex (facility-only)</td><td class="in">$10.0M/MW</td><td>GCC land/labor arbitrage; tenant owns the GPUs</td><td><span class="status st-position">Underwriting position</span></td></tr>
+        <tr><td>EBITDA margin (NNN)</td><td class="in">65%</td><td>Triple-net assets run 78–90% — leaves cushion</td><td><span class="status st-position">Underwriting position</span></td></tr>
+        <tr><td>Exit multiple</td><td class="in">22×</td><td>AirTrunk ~20–23× (Blackstone, 2024)</td><td><span class="status st-support">Benchmark support</span></td></tr>
+        <tr><td>Pre-leased occupancy</td><td class="in">Day-1</td><td>Anchor counterparty &amp; lease execution required</td><td><span class="status st-cp">Condition precedent</span></td></tr>
+        <tr><td>Dedicated power / PPA</td><td class="in">150 MW</td><td>QatarEnergy / Kahramaa allocation required</td><td><span class="status st-cp">Condition precedent</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="sectlabel">Scenario Range — Downside, Base &amp; Core Contracted</div>
+    <div class="sublabel">Consortium economics across an underwriting range. The Downside Case illustrates resilience under a slower ramp and rate compression; the Base Case is the underwriting midpoint; the Core Contracted Case is the reference case where anchor lease, secured power and phased execution are in place (see conditions precedent below).</div>
+    <table class="scn">
+      <thead>
+        <tr><th>Driver</th><th>Downside Case</th><th>Base Case</th><th class="inv">Core Contracted Case</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Lease rate ($/kW/mo)</td><td>$185</td><td>$195</td><td class="inv">$225</td></tr>
+        <tr><td>Build capex / MW</td><td>$13.0M</td><td>$11.7M</td><td class="inv">$10.0M</td></tr>
+        <tr><td>Exit multiple · stabilization</td><td>16.5× · ~48mo</td><td>19.5× · ~36mo</td><td class="inv">22.0× · contracted</td></tr>
+        <tr class="ret"><td>Consortium IRR</td><td>11.0%</td><td>15.1%</td><td class="inv">20.7%</td></tr>
+        <tr class="ret"><td>Consortium MOIC (15-yr)</td><td>3.3×</td><td>4.9×</td><td class="inv">7.3×</td></tr>
+      </tbody>
+    </table>
+
+    <div class="sectlabel">Conditions Precedent &amp; Methodology</div>
+    <ul class="cp-list">
+      <li>Headline economics represent the <strong>Core Contracted Case</strong> and are illustrative — not a forecast, valuation, or guarantee of returns.</li>
+      <li>Subject to execution of <strong>anchor lease(s)</strong> with creditworthy counterparties on the modelled terms and duration.</li>
+      <li>Subject to a <strong>dedicated power allocation / PPA</strong> (QatarEnergy / Kahramaa) sufficient for the 150 MW load.</li>
+      <li>Subject to <strong>site control, permitting, engineering, financing and full counterparty due diligence</strong>.</li>
+      <li>Benchmarks reflect third-party 2025 data; GCC comparables are limited and indicative. Comparable transactions are not indicative of future results.</li>
+      <li>The 300 MW expansion is contingent on a second anchor and additional power, and is modelled as optionality.</li>
+    </ul>
+
+    <div class="footnote">
+      Sources: CBRE North America Data Center Trends H2-2025 (US wholesale avg $196/kW/mo, ~1.4% vacancy); Cushman &amp; Wakefield 2025 Power &amp; Lease Pricing (Ashburn &gt;$215/kW/mo, +30% YoY); Blackstone–AirTrunk acquisition (2024, ~20–23× EV/EBITDA); MEEZA Qatar hyperscaler lease (Oct-2025). Returns independently computed (15-yr hold, 80% Consortium economics); the Downside and Base columns apply a phased lease-up ramp and illustrate the underwriting range. Benchmarks support, but do not guarantee, the Core Contracted Case; each remains subject to diligence and the conditions precedent above.
+    </div>
+  </section>
+
+</main>
+
+<footer class="legal">
+  <div class="legal-box">
+    <h4>Important Notice — Strictly Private &amp; Confidential</h4>
+    <p>This document has been prepared by Hearst Corporation and its affiliates (the "Promoter") solely for the information of the intended recipient and for discussion purposes only. It is strictly private and confidential and may not be reproduced, distributed or disclosed, in whole or in part, without the Promoter's prior written consent.</p>
+    <p>This document does not constitute, and shall not be construed as, an offer to sell or a solicitation of an offer to buy any security, interest or financial instrument, nor investment, legal, tax or financial advice, nor a prospectus or offering document. Any potential transaction would be made only pursuant to definitive legal documentation and subject to the conditions precedent set out herein.</p>
+    <p>The figures, projections and statements herein are illustrative, reflect the Core Contracted Case (also referred to herein as the investment case for discussion purposes only), and rest on assumptions believed reasonable but inherently uncertain. They are forward-looking and subject to significant business, market, regulatory, power-availability, counterparty and execution risks; actual results may differ materially. No representation or warranty, express or implied, is given as to the accuracy or completeness of the information, and no liability is accepted for any loss arising from its use. Recipients should conduct their own independent due diligence. Past or comparable transactions are not indicative of future results.</p>
+  </div>
+</footer>
+
+<script>
+  const INK = '#0B1220', GOLD = '#B0894B', GOLDD = '#856634', LINE = '#E6E1D6', MUT = '#6E6A62', FAINT = '#9A958A';
+
+  /* ---- PAGE 3 · POWER-TO-CASH CORRIDOR ---- */
+  (function(){
+    const svg = document.getElementById('tranche'); if (!svg) return;
+    const W=1000,H=320,L=78,R=152,T=72,B=58;
+    const xM = m => L + (m/18)*(W-L-R);
+    const yMW = v => (H-B) - (v/150)*(H-T-B);
+    let o = '';
+    // allocated-power rail (the sovereign advantage) — spans the full corridor
+    const railY=20, railH=24;
+    o += `<rect x="${L}" y="${railY}" width="${W-R-L}" height="${railH}" rx="4" fill="#F4ECDA" stroke="${GOLD}" stroke-width="1"/>`;
+    o += `<rect x="${L}" y="${railY}" width="5" height="${railH}" fill="${GOLD}"/>`;
+    o += `<text x="${L+16}" y="${railY+railH/2+4.5}" font-family="Inter" font-size="12" font-weight="600" fill="${GOLDD}" letter-spacing="0.6">Allocated Power Envelope · 150 MW</text>`;
+    o += `<text x="${W-R-10}" y="${railY+railH/2+4.5}" text-anchor="end" font-family="Inter" font-size="10.5" fill="${MUT}">available / pre-identified</text>`;
+    // execution phase bands — short premium labels (detail lives in the step cards below)
+    const bands = [[0,3,'Sovereign Alignment',1],[3,6,'Fast-Track Prep',1],[6,9,'First Powered MW',0],[9,15,'Scale-Up',0],[15,18,'150 MW Stabilized',0]];
+    bands.forEach((b,i) => {
+      const x0=xM(b[0]), x1=xM(b[1]);
+      o += `<rect x="${x0}" y="${T}" width="${x1-x0}" height="${H-B-T}" fill="${b[3]?'#F6F1E6':(i%2?'#FBFAF8':'#F4F2EB')}"/>`;
+      o += `<text x="${(x0+x1)/2}" y="${T-12}" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600" fill="${b[3]?GOLDD:MUT}" letter-spacing="0.2">${b[2]}</text>`;
+    });
+    [0,50,100,150].forEach(v => { const y=yMW(v);
+      o += `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${LINE}"/>`;
+      o += `<text x="${L-12}" y="${y+4}" text-anchor="end" font-family="Inter" font-size="12.5" fill="${FAINT}">${v} MW</text>`; });
+    const steps = [[0,0],[6,0],[6,50],[9,50],[9,100],[15,100],[15,150],[18,150]];
+    const poly = steps.map(s=>`${xM(s[0])},${yMW(s[1])}`).join(' ');
+    o += `<polygon points="${xM(0)},${yMW(0)} ${poly} ${xM(18)},${yMW(0)}" fill="${INK}" opacity="0.08"/>`;
+    o += `<polyline points="${poly}" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    [[6,50,'$135M'],[9,100,'$270M'],[15,150,'$405M']].forEach(r => { const x=xM(r[0]), y=yMW(r[1]);
+      o += `<circle cx="${x}" cy="${y}" r="5.5" fill="${GOLD}" stroke="#FCFBF8" stroke-width="2"/>`;
+      o += `<text x="${x+10}" y="${y-9}" font-family="Inter" font-size="13.5" font-weight="700" fill="${GOLDD}">${r[2]}</text>`; });
+    [0,3,6,9,12,15,18].forEach(m => o += `<text x="${xM(m)}" y="${H-B+24}" text-anchor="middle" font-family="Inter" font-size="12.5" fill="${MUT}">M${m}</text>`);
+    o += `<text x="${W-R+12}" y="${yMW(150)+4}" font-family="Inter" font-size="13" font-weight="600" fill="${INK}">150 MW</text>`;
+    o += `<text x="${W-R+12}" y="${yMW(150)+21}" font-family="Inter" font-size="11.5" fill="${MUT}">stabilized · M18</text>`;
+    svg.innerHTML = o;
+  })();
+
+  /* ---- PAGE 4 · VALUE-CREATION BRIDGE ($1.5B → $10.93B) ---- */
+  (function(){
+    const svg = document.getElementById('valuebuild'); if (!svg) return;
+    const W=1000,H=400,L=86,R=252,T=46,B=58;
+    const e1=263.25, esc=0.03, sh=0.8, exit=22, cap=1500;
+    let cum=0; const pts=[];
+    for (let y=1;y<=15;y++){ const e=e1*Math.pow(1+esc,y-1)*sh; cum+=e; pts.push({y,cum}); }
+    const cashTop = pts[14].cum;                 // ~3920
+    const term = e1*Math.pow(1+esc,14)*exit*sh;  // ~7010
+    const total = cashTop+term;                  // ~10930
+    const maxV = total*1.07;
+    const xT = t => L + (t/15)*(W-L-R);           // t = year 0..15
+    const yV = v => (H-B) - (v/maxV)*(H-T-B);
+    let o='';
+    for (let b=0;b<=10;b+=2){ const v=b*1000, y=yV(v);
+      o += `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="${LINE}"/>`;
+      o += `<text x="${L-14}" y="${y+5}" text-anchor="end" font-family="Inter" font-size="13" fill="${FAINT}">$${b}B</text>`; }
+    [0,5,10,15].forEach(t => o += `<text x="${xT(t)}" y="${H-B+26}" text-anchor="middle" font-family="Inter" font-size="13" fill="${MUT}">Year ${t}</text>`);
+    // capital base reference (Year 0)
+    const cw=24;
+    o += `<rect x="${xT(0)-cw/2}" y="${yV(cap)}" width="${cw}" height="${(H-B)-yV(cap)}" fill="${INK}" opacity="0.30"/>`;
+    o += `<text x="${xT(0)}" y="${yV(cap)-12}" text-anchor="middle" font-family="Inter" font-size="13" font-weight="700" fill="${INK}">$1.5B</text>`;
+    o += `<text x="${xT(0)}" y="${yV(cap)-28}" text-anchor="middle" font-family="Inter" font-size="10.5" fill="${MUT}">capital · Y0</text>`;
+    // cumulative cash area
+    const line = pts.map(p=>`${xT(p.y)},${yV(p.cum)}`).join(' ');
+    o += `<polygon points="${xT(1)},${yV(0)} ${line} ${xT(15)},${yV(0)}" fill="${INK}" opacity="0.09"/>`;
+    o += `<polyline points="${line}" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    // Year-15 climax column: cash (ink) + terminal (gold) stacked
+    const colW=60, cx=xT(15);
+    o += `<rect x="${cx-colW/2}" y="${yV(cashTop)}" width="${colW}" height="${(H-B)-yV(cashTop)}" fill="${INK}"/>`;
+    o += `<rect x="${cx-colW/2}" y="${yV(total)}" width="${colW}" height="${yV(cashTop)-yV(total)}" fill="${GOLD}"/>`;
+    o += `<rect x="${cx-colW/2}" y="${yV(total)}" width="${colW}" height="3" fill="${GOLDD}"/>`;
+    // bracket label on the gold (terminal) segment
+    o += `<text x="${cx-colW/2-12}" y="${(yV(total)+yV(cashTop))/2-2}" text-anchor="end" font-family="Inter" font-size="13.5" font-weight="700" fill="${GOLDD}">+$7.01B</text>`;
+    o += `<text x="${cx-colW/2-12}" y="${(yV(total)+yV(cashTop))/2+15}" text-anchor="end" font-family="Inter" font-size="10.5" fill="${MUT}">Terminal Asset Value · 22×</text>`;
+    // right-hand labels — clear hierarchy: total (strongest) · cash · returns
+    o += `<line x1="${cx+colW/2}" y1="${yV(total)}" x2="${W-R+12}" y2="${yV(total)}" stroke="${GOLDD}" stroke-dasharray="3 3"/>`;
+    o += `<text x="${W-R+18}" y="${yV(total)+2}" font-family="Inter" font-size="25" font-weight="700" fill="${GOLDD}">$10.93B</text>`;
+    o += `<text x="${W-R+18}" y="${yV(total)+21}" font-family="Inter" font-size="12" font-weight="600" fill="${INK}" letter-spacing="0.3">Total Consortium Value</text>`;
+    o += `<text x="${W-R+18}" y="${yV(total)+38}" font-family="Inter" font-size="12" fill="${MUT}">7.3× MOIC · 20.7% IRR</text>`;
+    o += `<line x1="${cx+colW/2}" y1="${yV(cashTop)}" x2="${W-R+12}" y2="${yV(cashTop)}" stroke="${INK}" stroke-dasharray="3 3"/>`;
+    o += `<text x="${W-R+18}" y="${yV(cashTop)+5}" font-family="Inter" font-size="16" font-weight="700" fill="${INK}">$3.92B</text>`;
+    o += `<text x="${W-R+18}" y="${yV(cashTop)+22}" font-family="Inter" font-size="11.5" fill="${MUT}">Cumulative Cash · Y1–Y15</text>`;
+    svg.innerHTML = o;
+  })();
+</script>
+</body>
+</html>

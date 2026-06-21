@@ -13,7 +13,7 @@
   },
   "overrides": [
     {
-      "files": ["components/pitch/tokens.js", "components/pitch/slides.jsx"],
+      "files": ["components/presentation/pitch/**/*.{js,jsx}", "components/presentation/pitch-misa/**/*.{js,jsx}"],
       "rules": {
         "no-unused-vars": "off"
       }

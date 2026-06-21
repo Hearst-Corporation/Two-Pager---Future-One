@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" fill="none">
+  <!-- Marque G : cercle ouvert avec barre horizontale (lettre G stylisée, rappel rouage data center ops) -->
+  <!-- Icône remontée pour aligner le centre optique avec Kontena/B-Global (même viewBox 240×60) -->
+  <g transform="translate(8 2)" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M40 22 A18 18 0 1 0 40 32 Z"/>
+    <path d="M22 27 H40"/>
+  </g>
+  <!-- Wordmark : baseline y=32 comme KONTENA pour une rangée homogène -->
+  <text x="62" y="32" font-family="'Helvetica Neue', Arial, sans-serif" font-size="19" font-weight="800" letter-spacing="0.6" fill="#FFFFFF">GATTI</text>
+  <text x="111" y="32" font-family="'Helvetica Neue', Arial, sans-serif" font-size="19" font-weight="300" letter-spacing="0.6" fill="#FFFFFF" opacity="0.85">SERVICES</text>
+  <!-- Baseline -->
+  <text x="62" y="46" font-family="'Helvetica Neue', Arial, sans-serif" font-size="6" letter-spacing="2" fill="#FFFFFF" opacity="0.7">DATA CENTER OPERATIONS</text>
+</svg>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hearst · Qatar Data Center Platform — Investor Presentation</title>
+<style>
+  :root{
+    --ink:#111111;
+    --soft:#4B4B4B;
+    --muted:#777777;
+    --line:#D8D8D8;
+    --paper:#FFFFFF;
+    --wash:#F6F6F4;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  .deck{max-width:1180px;margin:0 auto;padding:28px 28px 72px}
+  .page{
+    min-height:760px;
+    padding:44px 50px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .page:first-child{border-top:1px solid var(--line)}
+  .topline{
+    display:flex;
+    justify-content:space-between;
+    gap:24px;
+    align-items:flex-start;
+    margin-bottom:46px;
+    font-size:10px;
+    letter-spacing:1.8px;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:700;
+  }
+  .brand{color:var(--ink)}
+  h1,h2{
+    font-family:var(--serif);
+    font-weight:600;
+    letter-spacing:-1.3px;
+    line-height:.98;
+  }
+  h1{font-size:76px;max-width:920px}
+  h2{font-size:54px;max-width:880px;margin-bottom:28px}
+  .subtitle{
+    margin-top:28px;
+    max-width:760px;
+    font-size:21px;
+    color:var(--soft);
+  }
+  .statement{
+    font-family:var(--serif);
+    font-size:36px;
+    line-height:1.08;
+    letter-spacing:-.7px;
+    max-width:930px;
+  }
+  .statement strong{font-weight:700}
+  .rule{height:1px;background:var(--line);margin:34px 0}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px}
+  .kpi{
+    border:1px solid var(--line);
+    background:var(--paper);
+    padding:20px 18px;
+    min-height:132px;
+  }
+  .kpi .v{
+    font-family:var(--serif);
+    font-size:42px;
+    letter-spacing:-1px;
+    line-height:1;
+  }
+  .kpi .l{
+    margin-top:12px;
+    font-size:10px;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:800;
+  }
+  .kpi .s{
+    margin-top:10px;
+    font-size:13px;
+    color:var(--soft);
+  }
+  table{width:100%;border-collapse:collapse;margin-top:18px;font-size:15px}
+  th{
+    text-align:right;
+    padding:12px 14px;
+    border-bottom:1px solid var(--ink);
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:var(--muted);
+  }
+  th:first-child{text-align:left}
+  td{
+    text-align:right;
+    padding:15px 14px;
+    border-bottom:1px solid var(--line);
+    font-family:var(--mono);
+    white-space:nowrap;
+  }
+  td:first-child{
+    text-align:left;
+    font-family:var(--sans);
+    font-weight:650;
+    white-space:normal;
+  }
+  tr.total td{border-top:2px solid var(--ink);font-weight:800;background:var(--wash)}
+  .grid-2{display:grid;grid-template-columns:1.05fr .95fr;gap:42px;align-items:center}
+  .box{
+    border:1px solid var(--line);
+    background:var(--wash);
+    padding:26px;
+  }
+  .box h3{
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:18px;
+  }
+  .formula{
+    font-family:var(--mono);
+    font-size:15px;
+    line-height:1.8;
+  }
+  .formula b{font-family:var(--sans)}
+  .chart-card{
+    border:1px solid var(--line);
+    padding:24px 26px 18px;
+    background:var(--paper);
+  }
+  .chart-title{
+    display:flex;
+    justify-content:space-between;
+    gap:18px;
+    align-items:flex-start;
+    margin-bottom:18px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.3px;
+    color:var(--muted);
+    font-weight:800;
+  }
+  svg{width:100%;display:block}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--soft)}
+  .legend span::before{
+    content:"";
+    display:inline-block;
+    width:20px;
+    height:2px;
+    background:var(--ink);
+    vertical-align:middle;
+    margin-right:7px;
+  }
+  .small{
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.6;
+    margin-top:18px;
+  }
+  .bullets{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}
+  .bullet{
+    border-top:1px solid var(--ink);
+    padding-top:16px;
+    font-size:16px;
+    color:var(--soft);
+  }
+  .bullet b{display:block;color:var(--ink);font-size:18px;margin-bottom:8px}
+  .closing{
+    font-family:var(--serif);
+    font-size:46px;
+    line-height:1.05;
+    letter-spacing:-1px;
+    max-width:980px;
+  }
+  .print-note{font-size:10px;color:var(--muted);margin-top:24px}
+  @media(max-width:860px){
+    .deck{padding:14px}.page{padding:34px 22px;min-height:auto}
+    h1{font-size:48px}h2{font-size:38px}.statement{font-size:28px}
+    .kpi-row,.bullets,.grid-2{grid-template-columns:1fr}
+    td,th{font-size:12px;padding:10px 8px}
+  }
+  @media print{
+    body{background:#fff}.deck{max-width:none;padding:0}
+    .page{min-height:100vh;break-after:page;border-bottom:none}
+  }
+</style>
+</head>
+<body>
+<main class="deck">
+
+  <section class="page">
+    <div class="topline">
+      <div class="brand">Hearst · Qatar Data Center Platform</div>
+      <div>Investor presentation · confidential</div>
+    </div>
+    <h1>Une infrastructure souveraine qui retourne du cash chaque année.</h1>
+    <p class="subtitle">Hearst pilote le projet avec le gouvernement qatari. Equinix n’investit pas de capital : Equinix opère, commercialise, remplit le site et maintient l’actif.</p>
+    <div class="kpi-row">
+      <div class="kpi"><div class="v">150 MW</div><div class="l">Campus cible</div><div class="s">Hyperscale / colocation, Qatar</div></div>
+      <div class="kpi"><div class="v">$1.5B</div><div class="l">Capex financé</div><div class="s">Porté par Hearst + gouvernement dans les 80%</div></div>
+      <div class="kpi"><div class="v">$263M</div><div class="l">EBITDA cash annuel</div><div class="s">Avant amortissement, scénario Equinix premium</div></div>
+      <div class="kpi"><div class="v">14.0%</div><div class="l">Cash yield Hearst</div><div class="s">Cash annuel Hearst / capital financé</div></div>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topline"><div>01 · Structure économique</div><div>Simple à lire</div></div>
+    <p class="statement"><strong>Hearst finance et contrôle.</strong> Le gouvernement qatari entre avec Hearst dans les 80%. <strong>Equinix est le prestataire stratégique</strong> : il vend la capacité, apporte la crédibilité client, opère le site et reçoit 20% de l’économie.</p>
+    <div class="rule"></div>
+    <table>
+      <thead>
+        <tr><th>Ligne</th><th>Projet total</th><th>Hearst + gouvernement</th><th>Equinix</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Capital investi</td><td>$1.50B</td><td>$1.50B</td><td>$0</td></tr>
+        <tr><td>Part économique</td><td>100%</td><td>80%</td><td>20%</td></tr>
+        <tr><td>Rôle</td><td>Plateforme DC Qatar</td><td>Sponsor / propriétaire / entité gouvernementale</td><td>Opérateur / ventes / maintenance</td></tr>
+        <tr class="total"><td>Lecture investisseur</td><td>Actif souverain</td><td>Capital + contrôle + 80% du cash</td><td>Prestataire aligné à la performance</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page">
+    <div class="topline"><div>02 · Equinix premium</div><div>Pourquoi les 20% créent de la valeur</div></div>
+    <h2>Les 20% Equinix ne sont pas une dilution. C’est le prix du leader mondial.</h2>
+    <p class="subtitle">Equinix apporte le gage de qualité que le marché reconnaît : environ 40% du marché global, une marque numéro 1 en data center, la capacité de vendre aux hyperscalers, d’atteindre l’occupation et d’opérer l’actif au standard institutionnel.</p>
+    <div class="kpi-row">
+      <div class="kpi"><div class="v">40%</div><div class="l">Marché global</div><div class="s">Position stratégique Equinix communiquée au marché</div></div>
+      <div class="kpi"><div class="v">#1</div><div class="l">Opérateur data center</div><div class="s">Crédibilité immédiate auprès des clients et prêteurs</div></div>
+      <div class="kpi"><div class="v">100%</div><div class="l">Objectif occupation</div><div class="s">Equinix vend, remplit et sécurise la demande</div></div>
+      <div class="kpi"><div class="v">20x+</div><div class="l">Multiple défendable</div><div class="s">Actif opéré par un leader, pas par un opérateur inconnu</div></div>
+    </div>
+    <div class="chart-card" style="margin-top:28px">
+      <div class="chart-title">
+        <span>Effet Equinix sur le retour Hearst</span>
+        <span>Base prudent vs premium opérateur</span>
+      </div>
+      <svg id="premiumBars" viewBox="0 0 980 240" aria-label="Comparaison des retours Hearst"></svg>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Levier Equinix</th><th>Effet financier</th><th>Impact Hearst</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Prix commercial premium</td><td>$210 → $225/kW/mois</td><td>Revenu annuel : $359M → $405M</td></tr>
+        <tr><td>Occupation institutionnelle</td><td>95% → 100%</td><td>EBITDA annuel : $215M → $263M</td></tr>
+        <tr><td>Opération leader mondial</td><td>60% → 65% marge cash</td><td>Cash Hearst année 1 : $172M → $211M</td></tr>
+        <tr><td>Multiple de sortie premium</td><td>20x → 22x EBITDA</td><td>Valeur Hearst année 15 : $5.21B → $7.01B</td></tr>
+        <tr class="total"><td>Conclusion</td><td>Les 20% achètent prix, occupation, marge et multiple</td><td>Cash + valeur Hearst : $8.42B → $10.93B</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page">
+    <div class="topline"><div>03 · Cash annuel avant amortissement</div><div>Le chiffre à retenir</div></div>
+    <div class="grid-2">
+      <div>
+        <h2>Le site génère environ $263M d’EBITDA cash par an.</h2>
+        <p class="subtitle">L’amortissement est comptable, non-cash. Pour l’investisseur, le bon indicateur est le cash réellement distribué avant amortissement.</p>
+      </div>
+      <div class="box">
+        <h3>Formule Equinix premium</h3>
+        <div class="formula">
+          <b>Revenu</b> = 150 MW × 1,000 × $225/kW/mois × 12 × 100%<br />
+          <b>Revenu</b> = ~$405M/an<br />
+          <b>EBITDA cash</b> = $405M × 65%<br />
+          <b>EBITDA cash</b> = ~$263M/an<br />
+          <b>Cash Hearst</b> = $263M × 80% = ~$211M/an
+        </div>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Métrique annuelle stabilisée</th><th>Total projet</th><th>Hearst 80%</th><th>Equinix 20%</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Revenu brut annuel</td><td>$405M</td><td>$324M économique</td><td>$81M économique</td></tr>
+        <tr><td>EBITDA cash annuel</td><td>$263M</td><td>$211M</td><td>$53M</td></tr>
+        <tr><td>Marge EBITDA cash</td><td>65%</td><td>65%</td><td>65%</td></tr>
+        <tr class="total"><td>Rendement cash sur le capital financé par Hearst</td><td>17.6% projet</td><td>14.0% Hearst</td><td>n/a</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page">
+    <div class="topline"><div>04 · Effet volume</div><div>L’économie d’échelle augmente le rendement</div></div>
+    <h2>Plus le campus est lourd, plus l’EBITDA augmente et plus le capex par MW baisse.</h2>
+    <p class="subtitle">Le chiffre d’affaires monte mécaniquement avec les MW vendus. Mais le vrai levier investisseur est ailleurs : substation, foncier, design, soft costs et achats en volume se diluent. Résultat : l’EBITDA yield sur coût augmente avec l’échelle.</p>
+    <div class="chart-card">
+      <div class="chart-title">
+        <span>Scale curve · EBITDA yield sur coût</span>
+        <span>60 MW → 300 MW</span>
+      </div>
+      <svg id="scaleCurve" viewBox="0 0 980 300" aria-label="Courbe de rendement EBITDA selon la taille du campus"></svg>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Campus</th><th>Capex / MW</th><th>Capex total</th><th>EBITDA annuel</th><th>EBITDA yield</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>60 MW</td><td>$10.6M</td><td>$0.63B</td><td>$69M</td><td>10.9%</td></tr>
+        <tr class="total"><td>150 MW · base investisseur</td><td>$9.4M</td><td>$1.41B</td><td>$173M</td><td>12.3%</td></tr>
+        <tr><td>300 MW</td><td>$8.8M</td><td>$2.65B</td><td>$345M</td><td>13.0%</td></tr>
+      </tbody>
+    </table>
+    <p class="small">Lecture : ces KPI sont les rendements asset-level avant dette, avant amortissement, à 100% d’occupation sur la courbe scale. La présentation conserve un base case plus institutionnel à 95% d’occupation et $210/kW/mois pour les returns Hearst.</p>
+  </section>
+
+  <section class="page">
+    <div class="topline"><div>05 · Courbe 15 ans</div><div>Cash + valorisation</div></div>
+    <h2>Le rendement ne vient pas seulement du cash annuel. Il vient aussi de la valeur de sortie.</h2>
+    <div class="chart-card">
+      <div class="chart-title">
+        <span>Projection Hearst 80% · cash cumulé + valeur finale</span>
+        <span>Equinix premium · 3% escalation · 22x EBITDA</span>
+      </div>
+      <svg id="curve" viewBox="0 0 980 360" aria-label="Courbe de cash cumulé et valeur finale"></svg>
+      <div class="legend"><span>Cash cumulé reçu par Hearst</span><span>Cash + valeur finale année 15</span></div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Valeur à 15 ans</th><th>Total projet</th><th>Hearst 80%</th><th>Equinix 20%</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Cash EBITDA cumulé</td><td>$4.90B</td><td>$3.92B</td><td>$979M</td></tr>
+        <tr><td>Valorisation finale</td><td>$8.76B</td><td>$7.01B</td><td>$1.75B</td></tr>
+        <tr class="total"><td>Cash + valeur finale</td><td>$13.66B</td><td>$10.93B</td><td>$2.73B</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr><th>Année</th><th>Revenu projet</th><th>EBITDA projet</th><th>Cash Hearst</th><th>Cash cumulé Hearst</th><th>Cash + valeur Hearst</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Y1</td><td>$405M</td><td>$263M</td><td>$211M</td><td>$0.21B</td><td>$0.21B</td></tr>
+        <tr><td>Y5</td><td>$456M</td><td>$296M</td><td>$237M</td><td>$1.12B</td><td>$1.12B</td></tr>
+        <tr><td>Y10</td><td>$528M</td><td>$344M</td><td>$275M</td><td>$2.41B</td><td>$2.41B</td></tr>
+        <tr class="total"><td>Y15</td><td>$613M</td><td>$398M</td><td>$319M</td><td>$3.92B</td><td>$10.93B</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page">
+    <div class="topline"><div>06 · Returns investisseur</div><div>Ce que Hearst montre</div></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="v">14.0%</div><div class="l">Cash yield année 1</div><div class="s">Après 20% économie Equinix, avant amortissement</div></div>
+      <div class="kpi"><div class="v">20.7%</div><div class="l">IRR Hearst</div><div class="s">Hearst finance 100% et reçoit 80%</div></div>
+      <div class="kpi"><div class="v">7.3x</div><div class="l">Multiple Hearst</div><div class="s">Cash + valorisation / capital investi</div></div>
+      <div class="kpi"><div class="v">$10.93B</div><div class="l">Retour total Hearst</div><div class="s">Cash cumulé + valeur finale</div></div>
+    </div>
+    <div class="bullets">
+      <div class="bullet"><b>Pas de risque serveur.</b> Le modèle vend de la capacité électrique et immobilière. Le compute reste chez les clients.</div>
+      <div class="bullet"><b>Equinix aligne le remplissage.</b> Son économie dépend de l’occupation, de l’exploitation et de la qualité commerciale du site.</div>
+      <div class="bullet"><b>Le gouvernement renforce le contrôle.</b> Les 80% portent la souveraineté, le foncier, l’énergie et la valeur stratégique.</div>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="topline"><div>07 · Message final</div><div>Investor line</div></div>
+    <p class="closing">Hearst construit une plateforme d’infrastructure souveraine au Qatar. Equinix ne finance pas le capex : il transforme l’actif en site rempli, opéré et valorisé comme infrastructure premium. Le projet retourne environ $211M/an de cash à Hearst et peut créer plus de $10B de cash + valeur sur 15 ans.</p>
+    <p class="print-note">Hypothèses Equinix premium : 150 MW, capex $10M/MW, $225/kW/mois, 100% de charge contractée, 65% marge EBITDA cash, 3% escalation annuelle, valorisation finale 22x EBITDA. Les chiffres sont indicatifs et doivent être validés par term sheets, contrat Equinix, PPA, EPC et structure juridique finale.</p>
+  </section>
+
+</main>
+
+<script>
+  const premiumBars = document.getElementById('premiumBars');
+  if (premiumBars) {
+    const bars = [
+      { label: 'Base prudent', value: 8.42, irr: '17.4%', cash: '$172M/an' },
+      { label: 'Equinix premium', value: 10.93, irr: '20.7%', cash: '$211M/an' },
+    ];
+    const BW = 980, BH = 240, BL = 180, BR = 40, BT = 32, rowH = 76;
+    const maxBar = 11.5;
+    let barOut = '';
+    bars.forEach((d, i) => {
+      const y0 = BT + i * rowH;
+      const w = ((BW - BL - BR) * d.value) / maxBar;
+      barOut += `<text x="0" y="${y0 + 31}" font-family="monospace" font-size="14" font-weight="700" fill="#111">${d.label}</text>`;
+      barOut += `<rect x="${BL}" y="${y0}" width="${BW-BL-BR}" height="42" fill="#F2F2F0" stroke="#D8D8D8"/>`;
+      barOut += `<rect x="${BL}" y="${y0}" width="${w}" height="42" fill="#111"/>`;
+      barOut += `<text x="${BL + w - 10}" y="${y0 + 27}" text-anchor="end" font-family="monospace" font-size="13" font-weight="700" fill="#fff">$${d.value.toFixed(2)}B</text>`;
+      barOut += `<text x="${BL + w + 12}" y="${y0 + 27}" font-family="monospace" font-size="13" fill="#111">${d.irr} IRR · ${d.cash}</text>`;
+    });
+    barOut += `<text x="${BL}" y="${BH - 20}" font-family="monospace" font-size="12" fill="#777">Cash cumulé + valorisation finale pour Hearst, après 20% économie Equinix</text>`;
+    premiumBars.innerHTML = barOut;
+  }
+
+  const scaleSvg = document.getElementById('scaleCurve');
+  const scaleData = [
+    { mw: 60, capex: 10.6, ebitda: 69, yield: 10.9 },
+    { mw: 90, capex: 9.95, ebitda: 103, yield: 11.6 },
+    { mw: 120, capex: 9.60, ebitda: 138, yield: 12.0 },
+    { mw: 150, capex: 9.37, ebitda: 173, yield: 12.3 },
+    { mw: 180, capex: 9.20, ebitda: 207, yield: 12.5 },
+    { mw: 210, capex: 9.08, ebitda: 241, yield: 12.7 },
+    { mw: 240, capex: 8.98, ebitda: 276, yield: 12.8 },
+    { mw: 270, capex: 8.90, ebitda: 311, yield: 12.9 },
+    { mw: 300, capex: 8.83, ebitda: 345, yield: 13.0 },
+  ];
+  if (scaleSvg) {
+    const SW = 980, SH = 300, SL = 62, SR = 26, ST = 28, SB = 48;
+    const sx = d => SL + ((d.mw - 60) / 240) * (SW - SL - SR);
+    const sy = v => (SH - SB) - ((v - 10.5) / 2.8) * (SH - ST - SB);
+    let scaleOut = '';
+    for (let v = 11; v <= 13; v += 0.5) {
+      const yy = sy(v);
+      scaleOut += `<line x1="${SL}" y1="${yy}" x2="${SW-SR}" y2="${yy}" stroke="#E4E4E4"/>`;
+      scaleOut += `<text x="${SL-10}" y="${yy+4}" text-anchor="end" font-family="monospace" font-size="12" fill="#777">${v.toFixed(1)}%</text>`;
+    }
+    for (let mw of [60, 150, 300]) {
+      const xx = sx({ mw });
+      scaleOut += `<text x="${xx}" y="${SH-18}" text-anchor="middle" font-family="monospace" font-size="12" fill="#777">${mw} MW</text>`;
+    }
+    const scalePts = scaleData.map(d => `${sx(d).toFixed(1)},${sy(d.yield).toFixed(1)}`).join(' ');
+    scaleOut += `<polyline points="${scalePts}" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    scaleData.forEach(d => {
+      const r = d.mw === 150 ? 7 : 4;
+      const fill = d.mw === 150 ? '#fff' : '#111';
+      const stroke = d.mw === 150 ? ' stroke="#111" stroke-width="3"' : '';
+      scaleOut += `<circle cx="${sx(d)}" cy="${sy(d.yield)}" r="${r}" fill="${fill}"${stroke}/>`;
+    });
+    scaleOut += `<text x="${sx({mw:60})+8}" y="${sy(10.9)-16}" font-family="monospace" font-size="13" font-weight="700" fill="#111">10.9%</text>`;
+    scaleOut += `<text x="${sx({mw:150})}" y="${sy(12.3)-18}" text-anchor="middle" font-family="monospace" font-size="13" font-weight="700" fill="#111">12.3% base</text>`;
+    scaleOut += `<text x="${sx({mw:300})-8}" y="${sy(13.0)-16}" text-anchor="end" font-family="monospace" font-size="13" font-weight="700" fill="#111">13.0%</text>`;
+    scaleOut += `<line x1="${SL}" y1="${SH-SB}" x2="${SW-SR}" y2="${SH-SB}" stroke="#111"/>`;
+    scaleOut += `<line x1="${SL}" y1="${ST}" x2="${SL}" y2="${SH-SB}" stroke="#111"/>`;
+    scaleSvg.innerHTML = scaleOut;
+  }
+
+  const hearstCash = [];
+  const hearstCashPlusValue = [];
+  const ebitdaY1 = 263.25;
+  const escalation = 0.03;
+  const hearstShare = 0.8;
+  const exitMultiple = 22;
+  let cumulative = 0;
+  for (let year = 1; year <= 15; year += 1) {
+    const ebitda = ebitdaY1 * Math.pow(1 + escalation, year - 1);
+    cumulative += ebitda * hearstShare;
+    hearstCash.push({ year, value: cumulative });
+    const exitValue = year === 15 ? ebitda * exitMultiple * hearstShare : 0;
+    hearstCashPlusValue.push({ year, value: cumulative + exitValue });
+  }
+
+  const svg = document.getElementById('curve');
+  const W = 980, H = 360, L = 58, R = 24, T = 28, B = 48;
+  const max = Math.max(...hearstCashPlusValue.map(d => d.value));
+  const x = d => L + ((d.year - 1) / 14) * (W - L - R);
+  const y = v => (H - B) - (v / max) * (H - T - B);
+  const fmt = v => `$${(v / 1000).toFixed(v >= 1000 ? 1 : 0)}B`;
+  let out = '';
+  for (let i = 0; i <= 4; i += 1) {
+    const val = max * i / 4;
+    const yy = y(val);
+    out += `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#E4E4E4"/>`;
+    out += `<text x="${L-10}" y="${yy+4}" text-anchor="end" font-family="monospace" font-size="12" fill="#777">${fmt(val)}</text>`;
+  }
+  for (let year of [1,3,5,7,9,11,13,15]) {
+    const xx = x({ year });
+    out += `<text x="${xx}" y="${H-18}" text-anchor="middle" font-family="monospace" font-size="12" fill="#777">Y${year}</text>`;
+  }
+  const cashPts = hearstCash.map(d => `${x(d).toFixed(1)},${y(d.value).toFixed(1)}`).join(' ');
+  const valuePts = hearstCashPlusValue.map(d => `${x(d).toFixed(1)},${y(d.value).toFixed(1)}`).join(' ');
+  out += `<polyline points="${cashPts}" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+  out += `<polyline points="${valuePts}" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="8 7" stroke-linecap="round" stroke-linejoin="round"/>`;
+  hearstCash.forEach((d, i) => {
+    if (i % 2 === 0 || d.year === 15) out += `<circle cx="${x(d)}" cy="${y(d.value)}" r="4" fill="#111"/>`;
+  });
+  const finalCash = hearstCash[14];
+  const finalValue = hearstCashPlusValue[14];
+  out += `<circle cx="${x(finalValue)}" cy="${y(finalValue.value)}" r="7" fill="#fff" stroke="#111" stroke-width="3"/>`;
+  out += `<text x="${x(finalCash)-8}" y="${y(finalCash.value)-14}" text-anchor="end" font-family="monospace" font-size="13" font-weight="700" fill="#111">$3.92B cash</text>`;
+  out += `<text x="${x(finalValue)-8}" y="${y(finalValue.value)-14}" text-anchor="end" font-family="monospace" font-size="13" font-weight="700" fill="#111">$10.93B cash + valeur</text>`;
+  out += `<line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="#111"/>`;
+  out += `<line x1="${L}" y1="${T}" x2="${L}" y2="${H-B}" stroke="#111"/>`;
+  svg.innerHTML = out;
+</script>
+</body>
+</html>

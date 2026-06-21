@@ -1,0 +1,48 @@
+/* ============================================================
+   PRESENTATION TOKENS — scopés à la section /presentation
+   ------------------------------------------------------------
+   Récupérés depuis prese-hub (app/globals.css). Ces --color-*
+   sont legacy login dans Oracle et donc undefined : on les
+   redéfinit UNIQUEMENT sous .presentation-scope pour ne PAS
+   polluer le module Hearst ni le login.
+   ============================================================ */
+
+.presentation-scope {
+  --color-bg-main: #F5F5F6;
+  --color-bg-secondary: #ECECEE;
+  --color-surface: #FFFFFF;
+
+  --color-gray-900: #1A1D24;
+  --color-gray-850: #22262E;
+  --color-gray-800: #2A2F38;
+  --color-gray-750: #323842;
+  --color-gray-700: #3D4450;
+  --color-gray-600: #4B5363;
+  --color-gray-500: #5B616A;
+  --color-gray-400: #8A9099;
+  --color-gray-300: #C9CDD2;
+  --color-gray-200: #E4E6EA;
+  --color-gray-100: #F2F3F5;
+
+  --color-dark-surface: #22262E;
+  --color-dark-elevated: #2A2F38;
+  --color-dark-contrast: #1A1D24;
+
+  --color-accent-primary: #9F1239;
+  --color-accent-strong: #BE123C;
+  --color-accent-soft: #E11D48;
+
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+  --color-info: #2563EB;
+
+  --color-text-primary: #1A1D24;
+  --color-text-secondary: #3A4048;
+  --color-text-muted: #8A9099;
+  --color-text-inverse: #FFFFFF;
+
+  --color-border-light: #E4E6EA;
+  --color-border-medium: #C9CDD2;
+  --color-border-strong: #2A2F36;
+}

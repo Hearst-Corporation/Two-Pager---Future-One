@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none">
+  <!-- Centre optique remonté pour aligner le filigrane footer avec kontena-icon / bglobal-icon (même slot 55×55, objectFit contain) -->
+  <g transform="translate(0 -5)">
+    <path d="M40 22 A18 18 0 1 0 40 32 Z" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M22 27 H40" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

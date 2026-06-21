@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Futur One · Data Center Platform — Investment Fact Sheet</title>
+<style>
+  :root{
+    --bg:#0F1115; --panel:#15181E; --panel2:#1A1D24; --elevated:#22262E; --line:#2A2F38; --line2:#363C46;
+    --txt:#EAECEF; --muted:#9098A3; --dim:#646B76;
+    --accent:#BE123C; --accent2:#E11D48; --gold:#C9A24B; --ok:#10B981; --warn:#D9883C;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#070809;color:var(--txt);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;padding:32px 16px 70px}
+  .sheet{max-width:1000px;margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:4px;
+    box-shadow:0 40px 120px rgba(0,0,0,.6);overflow:hidden}
+
+  /* ===== MASTHEAD ===== */
+  .masthead{padding:34px 40px 26px;border-bottom:2px solid var(--accent);position:relative;
+    background:linear-gradient(120deg,rgba(190,18,60,.10),transparent 60%)}
+  .mh-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .h{width:30px;height:34px}
+  .brand .nm{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase}
+  .brand .nm small{display:block;font-size:8.5px;letter-spacing:2px;color:var(--muted);font-weight:600;margin-top:2px}
+  .conf{text-align:right;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent2);font-weight:800;line-height:1.7}
+  .conf span{color:var(--dim);display:block;font-weight:600}
+  h1{font-family:var(--serif);font-size:38px;font-weight:700;letter-spacing:-.5px;line-height:1.04}
+  h1 .a{color:var(--accent2);font-style:italic}
+  .tagline{margin-top:12px;font-size:13.5px;color:var(--muted);max-width:660px}
+  .eyebrow{font-size:9px;letter-spacing:3px;font-weight:800;text-transform:uppercase;color:var(--accent2);margin-bottom:12px}
+
+  /* ===== HERO KPI STRIP ===== */
+  .kpibar{display:grid;grid-template-columns:repeat(5,1fr);background:var(--accent);gap:1px}
+  .kpibar .k{background:#A50F33;padding:18px 16px;text-align:center}
+  .kpibar .k .v{font-family:var(--serif);font-size:30px;font-weight:700;color:#fff;letter-spacing:-1px;line-height:1}
+  .kpibar .k .l{font-size:8.5px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.72);font-weight:700;margin-top:8px}
+
+  /* ===== BODY GRID ===== */
+  .body{padding:30px 40px 36px}
+  .row{display:grid;grid-template-columns:1.35fr 1fr;gap:30px;margin-bottom:30px}
+  .row.one{grid-template-columns:1fr}
+  h2{font-size:11px;letter-spacing:2px;font-weight:800;text-transform:uppercase;color:var(--accent2);
+    padding-bottom:9px;border-bottom:1px solid var(--line);margin-bottom:16px;display:flex;justify-content:space-between;align-items:baseline}
+  h2 .n{font-size:9px;color:var(--dim);font-weight:700}
+  p.body-txt{font-size:13px;color:#C6CBD2;margin-bottom:12px}
+  p.body-txt b{color:#fff}
+
+  /* opportunity bullets */
+  .thesis{list-style:none}
+  .thesis li{position:relative;padding:9px 0 9px 22px;font-size:12.5px;color:#C6CBD2;border-bottom:1px solid var(--line)}
+  .thesis li:last-child{border-bottom:none}
+  .thesis li::before{content:"";position:absolute;left:0;top:15px;width:8px;height:8px;background:var(--accent);transform:rotate(45deg)}
+  .thesis li b{color:#fff}
+
+  /* fact table */
+  .ftab{width:100%;border-collapse:collapse;font-size:12px}
+  .ftab td{padding:8px 0;border-bottom:1px solid var(--line)}
+  .ftab tr:last-child td{border-bottom:none}
+  .ftab td.k{color:var(--muted)}
+  .ftab td.v{text-align:right;font-weight:700;color:#fff;font-family:var(--mono);font-size:11.5px}
+  .ftab td.v .u{color:var(--muted);font-weight:500;font-size:10px}
+
+  /* capital stack bar */
+  .stack{margin-top:6px}
+  .stack .bar{display:flex;height:30px;border-radius:3px;overflow:hidden;margin-bottom:10px}
+  .stack .seg{display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:#fff;letter-spacing:.4px}
+  .stack .leg{display:flex;flex-wrap:wrap;gap:14px;font-size:10.5px;color:var(--muted)}
+  .stack .leg i{width:9px;height:9px;display:inline-block;margin-right:5px;border-radius:2px;vertical-align:middle}
+
+  /* chart */
+  .chartwrap{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:18px 20px 12px}
+  .chartwrap .ct{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .chartwrap .cs{font-size:11px;color:var(--dim);margin-bottom:14px}
+  svg.spark{width:100%;height:150px;display:block}
+
+  /* mini stat cards */
+  .scards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .sc{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:14px}
+  .sc .v{font-family:var(--serif);font-size:23px;font-weight:700;color:#fff;letter-spacing:-.5px;line-height:1}
+  .sc .l{font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:7px}
+  .sc .s{font-size:10px;color:var(--dim);margin-top:3px}
+
+  /* phasing timeline */
+  .phase{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .ph{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:5px;padding:13px 15px}
+  .ph .p{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent2);font-weight:800}
+  .ph .mw{font-family:var(--serif);font-size:22px;font-weight:700;color:#fff;margin:4px 0 2px}
+  .ph .yr{font-size:10.5px;color:var(--muted)}
+
+  /* partners / risk lists */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+  .lst{list-style:none;font-size:12px}
+  .lst li{padding:8px 0;border-bottom:1px solid var(--line);color:#C6CBD2;display:flex;justify-content:space-between;gap:12px}
+  .lst li:last-child{border-bottom:none}
+  .lst li b{color:#fff}
+  .lst li .t{color:var(--muted);font-size:11px}
+  .tag{font-size:8.5px;font-weight:800;letter-spacing:.5px;padding:2px 7px;border-radius:4px;text-transform:uppercase;white-space:nowrap}
+  .tag.ok{background:rgba(16,185,129,.14);color:var(--ok)} .tag.mid{background:rgba(217,136,60,.16);color:var(--warn)} .tag.acc{background:rgba(190,18,60,.16);color:var(--accent2)}
+
+  .src{margin-top:8px;font-size:10px;color:var(--dim);line-height:1.7}
+  .src b{color:var(--muted)}
+
+  /* footer */
+  .foot{padding:20px 40px;border-top:1px solid var(--line);background:var(--panel);
+    display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .foot .disc{font-size:9.5px;color:var(--dim);max-width:640px;line-height:1.6}
+  .foot .pg{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);font-weight:800;white-space:nowrap}
+
+  @media(max-width:780px){.row,.twocol{grid-template-columns:1fr}.kpibar{grid-template-columns:repeat(2,1fr)}.scards,.phase{grid-template-columns:1fr 1fr}h1{font-size:28px}}
+  @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;border:none}}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- MASTHEAD -->
+  <div class="masthead">
+    <div class="mh-top">
+      <div class="brand">
+        <svg class="h" viewBox="0 0 91 100" fill="none"><path d="M10 43.4 41.6 74H61L19.7 34 10 43.4Z" fill="#BE123C"/><path d="M80 57.8 48.4 28H29l41.3 39L80 57.8Z" fill="#BE123C"/><path d="M23 8H7v84h16V8Z" fill="#BE123C"/><path d="M82 8H65v84h17V8Z" fill="#BE123C"/></svg>
+        <div class="nm">FUTUR ONE<small>Hearst Qatar · Sovereign Infrastructure</small></div>
+      </div>
+      <div class="conf">Strictly Private &amp; Confidential<span>Investment Teaser · Not an Offer</span><span>Prepared for Sovereign Wealth Allocation</span></div>
+    </div>
+    <div class="eyebrow">Tier III Colocation Platform · State of Qatar</div>
+    <h1>The Data Center <span class="a">Landlord.</span></h1>
+    <p class="tagline">A 60&nbsp;MW sovereign-grade colocation platform — Hearst owns and operates the facility and
+      <b>leases dedicated megawatts</b> to hyperscale and government anchors. No servers, no GPUs, no technology risk:
+      pure powered-capacity infrastructure with contracted, escalating, hard-currency revenue.</p>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="kpibar">
+    <div class="k"><div class="v">14.5%</div><div class="l">Equity IRR</div></div>
+    <div class="k"><div class="v">4.2×</div><div class="l">MOIC · 10 yr</div></div>
+    <div class="k"><div class="v">$725M</div><div class="l">Total Capex</div></div>
+    <div class="k"><div class="v">1.70×</div><div class="l">DSCR (stab.)</div></div>
+    <div class="k"><div class="v">0%</div><div class="l">Corp. Tax (QFZA)</div></div>
+  </div>
+
+  <div class="body">
+
+    <!-- THESIS + SNAPSHOT -->
+    <div class="row">
+      <div>
+        <h2>Investment Thesis <span class="n">01</span></h2>
+        <ul class="thesis">
+          <li><b>Pure infrastructure, zero technology risk.</b> Hearst is the landlord of powered capacity — the client brings its own compute. Returns track real estate, not chip cycles.</li>
+          <li><b>Contracted, escalating cash flow.</b> 15-year hyperscale leases at $175/kW/month, 3% annual escalation, 90% stabilized occupancy. Hard-currency, investment-grade counterparties.</li>
+          <li><b>Structural cost advantage.</b> Qatar industrial power at ~$32/MWh — among the lowest globally — and 0% corporate tax under the QFZA Free Zone regime (20-year holiday).</li>
+          <li><b>Sovereign demand anchor.</b> Google, Microsoft and Oracle cloud regions are already live in Doha (25–80 MW each). National AI strategy underwrites multi-decade demand.</li>
+          <li><b>Bankable exit.</b> Stabilized Tier III colocation trades at 15–18× EBITDA; a 16× exit in 2035 yields a $1.57B terminal value.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Transaction Snapshot <span class="n">02</span></h2>
+        <table class="ftab">
+          <tr><td class="k">Asset</td><td class="v">Tier III Colocation DC</td></tr>
+          <tr><td class="k">Capacity</td><td class="v">60 <span class="u">MW IT</span></td></tr>
+          <tr><td class="k">Location</td><td class="v">Qatar Free Zone</td></tr>
+          <tr><td class="k">Model</td><td class="v">Owner-Operator (NNN)</td></tr>
+          <tr><td class="k">Total capex</td><td class="v">$724.5 <span class="u">M</span></td></tr>
+          <tr><td class="k">Capex / MW</td><td class="v">$12.1 <span class="u">M</span></td></tr>
+          <tr><td class="k">Equity ticket</td><td class="v">$362.3 <span class="u">M</span></td></tr>
+          <tr><td class="k">Leverage</td><td class="v">50<span class="u">%</span></td></tr>
+          <tr><td class="k">Hold</td><td class="v">10 <span class="u">yr · exit 2035</span></td></tr>
+          <tr><td class="k">Stabilized EBITDA</td><td class="v">$70.7 <span class="u">M</span></td></tr>
+          <tr><td class="k">Stabilized revenue</td><td class="v">$122.7 <span class="u">M</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROJECTION CHART -->
+    <div class="row one">
+      <div>
+        <h2>10-Year Cash Flow Profile <span class="n">03</span></h2>
+        <div class="chartwrap">
+          <div class="ct">Cumulative free cash flow to equity — J-curve to exit</div>
+          <div class="cs">Phased lease-up to 60 MW; trough −$462M (Y4), turns positive on terminal value at exit (Y10, +$1,161M).</div>
+          <svg class="spark" id="spark" viewBox="0 0 1000 150" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="scards" style="margin-top:14px">
+          <div class="sc"><div class="v">$156M</div><div class="l">Revenue Y10</div><div class="s">from $6M Y1</div></div>
+          <div class="sc"><div class="v">$98M</div><div class="l">EBITDA Y10</div><div class="s">~63% margin</div></div>
+          <div class="sc"><div class="v">$1.57B</div><div class="l">Terminal value</div><div class="s">16× exit EBITDA</div></div>
+          <div class="sc"><div class="v">$199M</div><div class="l">NPV @ 10%</div><div class="s">positive vs WACC</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPITAL STACK + PHASING -->
+    <div class="row">
+      <div>
+        <h2>Capital Structure <span class="n">04</span></h2>
+        <div class="stack">
+          <div class="bar">
+            <div class="seg" style="width:50%;background:#2A2F38">DEBT 50%</div>
+            <div class="seg" style="width:27.5%;background:#BE123C">BROOKFIELD 27.5%</div>
+            <div class="seg" style="width:12.5%;background:#8A1538">QIA 12.5%</div>
+            <div class="seg" style="width:10%;background:#C9A24B;color:#1A1D24">HEARST 10%</div>
+          </div>
+          <div class="leg">
+            <span><i style="background:#2A2F38"></i>Senior debt · $362.3M · 6.5% · 15 yr</span>
+            <span><i style="background:#BE123C"></i>Brookfield · lead infra</span>
+            <span><i style="background:#8A1538"></i>QIA · sovereign anchor</span>
+            <span><i style="background:#C9A24B"></i>Hearst · sponsor / operator</span>
+          </div>
+        </div>
+        <table class="ftab" style="margin-top:14px">
+          <tr><td class="k">Senior debt</td><td class="v">$362.3M <span class="u">· 6.5% · 15yr</span></td></tr>
+          <tr><td class="k">Total equity</td><td class="v">$362.3 <span class="u">M</span></td></tr>
+          <tr><td class="k">Preferred return</td><td class="v">8<span class="u">% LP hurdle</span></td></tr>
+          <tr><td class="k">Min. DSCR</td><td class="v">1.25× <span class="u">covenant</span></td></tr>
+        </table>
+      </div>
+      <div>
+        <h2>Deployment Phasing <span class="n">05</span></h2>
+        <div class="phase">
+          <div class="ph"><div class="p">Phase I</div><div class="mw">24 MW</div><div class="yr">Live Year 2</div></div>
+          <div class="ph"><div class="p">Phase II</div><div class="mw">18 MW</div><div class="yr">Live Year 4</div></div>
+          <div class="ph"><div class="p">Phase III</div><div class="mw">18 MW</div><div class="yr">Live Year 6</div></div>
+        </div>
+        <table class="ftab" style="margin-top:14px">
+          <tr><td class="k">PUE (hot-climate air)</td><td class="v">1.42</td></tr>
+          <tr><td class="k">Power price</td><td class="v">$32 <span class="u">/MWh</span></td></tr>
+          <tr><td class="k">Lease rate</td><td class="v">$175 <span class="u">/kW/mo</span></td></tr>
+          <tr><td class="k">Annual escalation</td><td class="v">3<span class="u">%</span></td></tr>
+          <tr><td class="k">Stabilized occupancy</td><td class="v">90<span class="u">%</span></td></tr>
+          <tr><td class="k">Depreciation</td><td class="v">15 <span class="u">yr · straight-line</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- PARTNERS + RISK -->
+    <div class="row one">
+      <div class="twocol">
+        <div>
+          <h2>Anchor Demand &amp; Comps <span class="n">06</span></h2>
+          <ul class="lst">
+            <li><span><b>Google Cloud</b> <span class="t">me-central1 Doha</span></span><span class="tag ok">30 MW live</span></li>
+            <li><span><b>Microsoft Azure</b> <span class="t">Qatar Central</span></span><span class="tag ok">25–80 MW</span></li>
+            <li><span><b>Oracle Cloud</b> <span class="t">1st OCI gov region</span></span><span class="tag ok">$1.5B</span></li>
+            <li><span><b>MEEZA</b> <span class="t">national incumbent</span></span><span class="tag mid">$219M / 44 MW</span></li>
+            <li><span><b>Ooredoo DC</b> <span class="t">Qatar buildout</span></span><span class="tag mid">$1B / 120 MW</span></li>
+          </ul>
+        </div>
+        <div>
+          <h2>Key Risks &amp; Mitigants <span class="n">07</span></h2>
+          <ul class="lst">
+            <li><span><b>Lease-up</b> <span class="t">vacancy in ramp years</span></span><span class="tag mid">anchor pre-lets</span></li>
+            <li><span><b>Grid connection</b> <span class="t">24-mo KAHRAMAA</span></span><span class="tag mid">200 MW reserved</span></li>
+            <li><span><b>Exit timing</b> <span class="t">cap-rate at sale</span></span><span class="tag mid">15–18× band</span></li>
+            <li><span><b>Operations</b> <span class="t">in-house vs outsourced O&amp;M</span></span><span class="tag acc">fee model TBD</span></li>
+            <li><span><b>Technology</b> <span class="t">obsolescence</span></span><span class="tag ok">tenant-borne</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="src" style="margin-top:18px">
+        <b>Sources &amp; basis.</b> All figures derived from Oracle's sourced financial engine (run live, verified) and benchmark library:
+        capex Turner &amp; Townsend MENA 2024; lease rates JLL/NTT Qatar; power KAHRAMAA industrial tariff; depreciation 15-yr blend per
+        Qatar GTA Law 24/2018 + Decision 39/2019, Art. 16, cross-checked vs Digital Realty / Equinix 10-K; exit multiple Brookfield 2024.
+        No figure is invented — every input traces to a cited benchmark or the statutory text.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="foot">
+    <div class="disc"><b>Disclaimer.</b> This document is a preliminary, non-binding teaser for discussion only and does not constitute an offer,
+      solicitation, or recommendation to invest. Projections are model outputs based on stated assumptions and benchmarks; actual results
+      will differ. The management-fee treatment (12% in this run) overstates a third-party-operated case; a true owner-operator retains the
+      full operating margin. Figures subject to confirmatory due diligence.</div>
+    <div class="pg">Futur One · 2026</div>
+  </div>
+
+</div>
+
+<script>
+  // cumulative FCF $M, Y1..Y10
+  const CUM=[-392,-429,-453,-462,-453,-425,-389,-346,-297,1161];
+  (function(){
+    const W=1000,H=150,PAD=14;
+    const min=Math.min(...CUM),max=Math.max(...CUM),range=(max-min)||1;
+    const x=i=>PAD+(i/(CUM.length-1))*(W-2*PAD);
+    const y=v=>(H-PAD)-((v-min)/range)*(H-2*PAD);
+    const pts=CUM.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const area=`${PAD},${(H-PAD)} ${pts} ${(W-PAD)},${(H-PAD)}`;
+    const y0=y(0);
+    let svg=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#BE123C" stop-opacity=".38"/><stop offset="100%" stop-color="#BE123C" stop-opacity="0"/></linearGradient></defs>`;
+    svg+=`<polygon points="${area}" fill="url(#g)"/>`;
+    if(min<0&&max>0){svg+=`<line x1="${PAD}" y1="${y0.toFixed(1)}" x2="${W-PAD}" y2="${y0.toFixed(1)}" stroke="#646B76" stroke-width="1" stroke-dasharray="5 4"/>`;
+      svg+=`<text x="${PAD+4}" y="${(y0-6).toFixed(1)}" font-size="11" fill="#646B76" font-family="monospace">break-even</text>`;}
+    svg+=`<polyline points="${pts}" fill="none" stroke="#BE123C" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+    CUM.forEach((v,i)=>{svg+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3.2" fill="#BE123C"/>`;
+      if(i===CUM.length-1)svg+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="6" fill="none" stroke="#BE123C" stroke-width="1.5"/>`;});
+    document.getElementById('spark').innerHTML=svg;
+  })();
+</script>
+</body>
+</html>

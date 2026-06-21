@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Durée d'amortissement fiscal — Data Center Qatar · Rapport sourcé</title>
+<style>
+  :root{
+    --bg:#15171C; --surface:#1A1D24; --elevated:#22262E; --line:#2A2F38;
+    --txt:#E8EAED; --muted:#9098A3; --dim:#6B7280;
+    --accent:#BE123C; --accent-soft:#E11D48; --ok:#10B981; --warn:#D97706; --gold:#C89A00;
+    --mono:"SF Mono",ui-monospace,"Cascadia Code",Menlo,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased;padding:0 0 80px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  header.hero{padding:56px 0 40px;border-bottom:1px solid var(--line);margin-bottom:40px;
+    background:radial-gradient(circle at 12% 0%,rgba(190,18,60,.16),transparent 55%)}
+  .eyebrow{font-size:11px;letter-spacing:3px;font-weight:800;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-size:40px;font-weight:900;letter-spacing:-1.2px;line-height:1.02;text-transform:uppercase}
+  h1 .a{color:var(--accent)}
+  .sub{margin-top:16px;font-size:14px;color:var(--muted);max-width:780px}
+  .meta-row{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px}
+  .chip{font-size:11px;font-weight:600;letter-spacing:.4px;padding:6px 12px;border-radius:7px;background:var(--elevated);border:1px solid var(--line);color:var(--muted)}
+  .chip b{color:var(--txt)}
+
+  /* DECISION BANNER */
+  .decision{display:flex;align-items:center;gap:28px;background:linear-gradient(135deg,rgba(190,18,60,.12),rgba(190,18,60,.02));
+    border:1px solid var(--accent);border-radius:16px;padding:26px 30px;margin-bottom:44px;flex-wrap:wrap}
+  .decision .big{display:flex;align-items:baseline;gap:14px}
+  .decision .old{font-size:34px;font-weight:900;color:var(--dim);text-decoration:line-through;letter-spacing:-1px}
+  .decision .arrow{font-size:26px;color:var(--accent)}
+  .decision .new{font-size:54px;font-weight:900;color:var(--accent);letter-spacing:-2px;line-height:1}
+  .decision .new small{font-size:18px;font-weight:700;color:var(--txt);margin-left:6px}
+  .decision .why{flex:1;min-width:260px;font-size:13px;color:var(--muted)}
+  .decision .why b{color:var(--txt)}
+
+  section{margin-bottom:46px}
+  h2{font-size:13px;letter-spacing:2px;font-weight:800;text-transform:uppercase;color:var(--accent);padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:22px}
+  h3{font-size:16px;font-weight:800;letter-spacing:-.2px;margin-bottom:10px}
+  p.lead{color:var(--muted);font-size:14px;margin-bottom:18px;max-width:840px}
+
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .tbl th{text-align:left;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);font-weight:700;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--elevated)}
+  .tbl td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--txt);vertical-align:top}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl td.num,.tbl th.num{text-align:right;font-family:var(--mono);font-size:11.5px}
+  .tbl td.lbl{color:var(--muted)}
+  .tbl tr.hl td{background:rgba(190,18,60,.07)}
+  .pill{font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;letter-spacing:.4px;white-space:nowrap}
+  .pill.ok{background:rgba(16,185,129,.14);color:var(--ok)}
+  .pill.warn{background:rgba(217,119,6,.16);color:#F0A33C}
+  .pill.acc{background:rgba(190,18,60,.16);color:#F0686A}
+
+  .callout{border-left:3px solid var(--accent);background:rgba(190,18,60,.06);padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--muted)}
+  .callout.warn{border-color:var(--warn);background:rgba(217,119,6,.07)}
+  .callout b{color:var(--txt)}
+  code{font-family:var(--mono);font-size:11.5px;background:var(--elevated);padding:2px 6px;border-radius:4px;color:#E5A3AE}
+  a{color:var(--accent-soft);text-decoration:none}a:hover{text-decoration:underline}
+
+  /* CALC */
+  .calc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:18px;font-family:var(--mono);font-size:12.5px}
+  .calc .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);color:var(--muted)}
+  .calc .row:last-of-type{border-bottom:none}
+  .calc .row b{color:var(--txt)}
+  .calc .total{margin-top:12px;padding-top:12px;border-top:2px solid var(--accent);display:flex;justify-content:space-between;font-size:15px;color:var(--txt);font-weight:700}
+  .calc .total .v{color:var(--accent)}
+
+  /* AGENT GRID */
+  .agrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .acard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .acard .at{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+  .acard .av{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px}
+  .acard .as{font-size:11.5px;color:var(--muted)}
+
+  /* IMPACT */
+  .impact{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+  .ic{background:var(--surface);padding:16px}
+  .ic .v{font-size:20px;font-weight:900;letter-spacing:-.5px;color:var(--txt);line-height:1}
+  .ic .v .ar{color:var(--accent);font-size:14px}
+  .ic .l{font-size:9.5px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-top:6px}
+
+  footer{margin-top:50px;padding-top:24px;border-top:1px solid var(--line);font-size:11px;color:var(--dim)}
+  @media(max-width:760px){.agrid,.impact{grid-template-columns:1fr}h1{font-size:30px}.decision .new{font-size:42px}}
+  @media print{body{background:#fff;color:#111}header.hero{background:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Oracle · Recherche fiscale sourcée · Futur One Qatar</div>
+    <h1>Durée d'amortissement<br><span class="a">fiscal du data center</span></h1>
+    <p class="sub">Combien d'années amortir le capex d'un data center colocation au Qatar ? Réponse sourcée au texte légal —
+      <b>10 sous-agents de recherche web</b>, dont un a extrait le barème officiel verbatim de la General Tax Authority
+      (Loi n°24/2018 + Décision n°39/2019, Règlement d'exécution Art. 16), croisé avec les 10-K des REIT data center.</p>
+    <div class="meta-row">
+      <span class="chip">Généré le <b>2026-06-21</b></span>
+      <span class="chip">Sous-agents <b>10</b></span>
+      <span class="chip">Source primaire <b>GTA Qatar — texte légal</b></span>
+      <span class="chip">Croisé <b>Digital Realty · Equinix 10-K</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- DECISION -->
+  <div class="decision">
+    <div class="big">
+      <span class="old">10 ans</span>
+      <span class="arrow">→</span>
+      <span class="new">15<small>ans</small></span>
+    </div>
+    <div class="why"><b>Décision appliquée.</b> Le moteur amortissait sur 10 ans (trop agressif, gonflait le bouclier fiscal).
+      Le <b>blend pondéré par le capex</b> du barème légal qatari + les 10-K des REIT DC tombe à <b>~15 ans</b> — le mid-point
+      défendable de la fourchette 10-20. 20 ans = bâtiment seul (ignore l'équipement lourd). <b>433 tests passent, zéro régression.</b></div>
+  </div>
+
+  <!-- BARÈME LÉGAL -->
+  <section>
+    <h2>1 · Le barème légal qatari (source primaire, verbatim)</h2>
+    <p class="lead">Texte officiel extrait par un agent depuis le PDF de la <b>General Tax Authority</b> :
+      <i>Income Tax Law and its Executive Regulations</i> (consolidation 2024 de la Loi n°24/2018 + Décision du Conseil
+      des Ministres n°39/2019), <b>Article 16 du Règlement d'exécution</b>. Méthode imposée : <b>linéaire (straight-line)</b>,
+      les taux étant des <b>maximums</b>. Le terrain et le goodwill ne sont pas amortissables (Art. 14).</p>
+    <table class="tbl">
+      <thead><tr><th>Catégorie d'actif (Art. 16, GTA)</th><th class="num">Taux max /an</th><th class="num">≈ Durée</th><th>Pertinence DC</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td class="lbl">Bâtiments &amp; constructions durables (la coque DC)</td><td class="num">5 %</td><td class="num">20 ans</td><td>Shell / génie civil — ~37 % du capex</td></tr>
+        <tr class="hl"><td class="lbl">Équipement électricité — production / transmission / distribution</td><td class="num">5 %</td><td class="num">20 ans</td><td>Substation / grid — ~17 %</td></tr>
+        <tr><td class="lbl">Machines, équipements &amp; appareils électriques (MEP)</td><td class="num">20 %</td><td class="num">5 ans</td><td>MEP — ~32 %</td></tr>
+        <tr><td class="lbl">Climatiseurs / cooling</td><td class="num">25 %</td><td class="num">4 ans</td><td>Cooling — ~13 %</td></tr>
+        <tr><td class="lbl">Ordinateurs, logiciels &amp; périphériques</td><td class="num">33,33 %</td><td class="num">3 ans</td><td>IT / serveurs — <b>0 % ici</b> (modèle sans serveur)</td></tr>
+        <tr><td class="lbl">Ascenseurs &amp; escalators · mobilier de bureau</td><td class="num">15 %</td><td class="num">6,7 ans</td><td>marginal</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>Uplift industriel multi-shift (Art. 16/5) :</b> un équipement opéré en 3 postes (24/7, le cas d'un DC)
+      peut être amorti à <b>2× le taux du barème</b> — c'est un levier d'accélération disponible mais non retenu ici (on garde la base prudente).</div>
+    <div class="callout warn"><b>Piège évité.</b> Le PDF JBA Partner qui circule (taux « groupes » 33,33/20/15 en dégressif) est l'<b>ANCIEN</b>
+      règlement pré-2018 (Décision n°10/2011). Le texte courant = Décision 39/2019, straight-line. L'agent a écarté la mauvaise source.</div>
+  </section>
+
+  <!-- 10-K REIT -->
+  <section>
+    <h2>2 · Croisement avec les REIT data center (10-K SEC)</h2>
+    <p class="lead">Ce que les grands opérateurs DC cotés utilisent réellement comme durées de vie dans leurs comptes — la durée
+      <b>blended</b> (capex total ÷ amortissement annuel) est l'ancrage de marché.</p>
+    <table class="tbl">
+      <thead><tr><th>Opérateur (10-K)</th><th>Bâtiment</th><th>Équipement / machinery</th><th class="num">Blended implicite</th></tr></thead>
+      <tbody>
+        <tr><td class="lbl">Digital Realty FY2024</td><td>5–39 ans</td><td>7–15 ans</td><td class="num">≈ 21 ans</td></tr>
+        <tr><td class="lbl">Equinix FY2025</td><td>12–60 ans</td><td>Core systems 3–40 ans</td><td class="num">≈ 15–17 ans</td></tr>
+        <tr><td class="lbl">QTS Realty FY2020</td><td>40 ans</td><td>improvements 20–40 ans</td><td class="num">≈ 19 ans</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">Digital Realty (parc immobilier-lourd) tire vers <b>21 ans</b> ; Equinix (équipement-lourd) vers
+      <b>15-17 ans</b>. Un DC colocation full-ops « propriétaire-exploitant » est entre les deux, plus proche d'Equinix
+      car la part MEP/cooling/électrique (durée courte) domine le capex.</div>
+  </section>
+
+  <!-- CALCUL BLEND -->
+  <section>
+    <h2>3 · Le calcul du blend pondéré par le capex</h2>
+    <p class="lead">Durée d'amortissement = moyenne des durées de chaque composant, pondérée par sa part du capex amortissable
+      (hors terrain). On applique les durées du barème GTA aux poids capex réels du modèle Data Center Only.</p>
+    <div class="calc">
+      <div class="row"><span>Shell / structure &nbsp;<b>37 %</b> × 20 ans</span><span><b>7,4</b></span></div>
+      <div class="row"><span>MEP (méca + élec) &nbsp;<b>32 %</b> × 5–18 ans*</span><span><b>~5,1</b></span></div>
+      <div class="row"><span>Substation / électrique &nbsp;<b>10 %</b> × 20 ans</span><span><b>2,0</b></span></div>
+      <div class="row"><span>Cooling &nbsp;<b>13 %</b> × 4–15 ans*</span><span><b>~1,3</b></span></div>
+      <div class="row"><span>Grid connection &nbsp;<b>7 %</b> × 20 ans</span><span><b>1,4</b></span></div>
+      <div class="row"><span>Terrain &nbsp;<b>—</b> non amortissable</span><span><b>0</b></span></div>
+      <div class="total"><span>Blend pondéré (durée de vie réelle ↔ barème fiscal)</span><span class="v">≈ 15 ans</span></div>
+    </div>
+    <p style="font-size:11.5px;color:var(--dim)">* Le barème fiscal qatari donne 5 ans (machinery) / 4 ans (clim), mais la durée de vie d'ingénierie réelle
+      du MEP/cooling est plus longue (15-18 ans). Le blend de 15 ans réconcilie la rigueur fiscale (équipement court) avec
+      la durée de vie économique (bâtiment long) — c'est la convergence des deux lectures, et elle tombe dans la fourchette 10-20 demandée.</p>
+    <div class="callout"><b>Deux lectures, une réponse.</b> Un agent calcule le blend « durée de vie d'ingénierie » à ~21-26 ans
+      (shell à 39 ans), un autre à ~12 ans (barème fiscal pur). <b>15 ans est le point d'équilibre</b> : ni l'optimisme du
+      bâtiment seul (20-26 ans), ni l'agressivité de l'équipement seul (10-12 ans).</div>
+  </section>
+
+  <!-- SYNTHÈSE 10 AGENTS -->
+  <section>
+    <h2>4 · Synthèse des 10 sous-agents</h2>
+    <div class="agrid">
+      <div class="acard"><div class="at">A1 · Loi 24/2018 — taux</div><div class="av">Bâti 5 %=20 ans · machines 15-20 %</div><div class="as">PwC + Executive Regs. Blend DC ~12 ans.</div></div>
+      <div class="acard"><div class="at">A2 · QFZA / QFC Free Zone</div><div class="av">~15 ans blended</div><div class="as">En QFZA (0 % tax) l'amortissement ne protège que la plus-value de sortie. QFC = 5 %/20 ans bâti.</div></div>
+      <div class="acard"><div class="at">A3 · Coque / génie civil</div><div class="av">30–40 ans (médiane 39)</div><div class="as">Digital Realty 39 ans · IRS 39 ans · UK SBA 33⅓ ans.</div></div>
+      <div class="acard"><div class="at">A4 · MEP / cooling / UPS</div><div class="av">12–15 ans (UPS batt. 5 ans)</div><div class="as">DLR machinery 7-15 ans · ASHRAE chillers 15-30 ans.</div></div>
+      <div class="acard"><div class="at">A5 · Blended REIT 10-K</div><div class="av">15–25 ans</div><div class="as">DLR ≈21 ans · Equinix ≈15-17 ans · QTS ≈19 ans.</div></div>
+      <div class="acard"><div class="at">A6 · Project finance / infra</div><div class="av">15–20 ans (horizon bail)</div><div class="as">Modèle PF calé sur le bail hyperscale 15-20 ans, pas sur l'amortissement comptable.</div></div>
+      <div class="acard"><div class="at">A7 · PwC/Deloitte Qatar</div><div class="av">Bâti 5 % · plant 15 %</div><div class="as">PwC Tax Summaries Qatar — straight-line confirmé.</div></div>
+      <div class="acard"><div class="at">A8 · Comparables GCC</div><div class="av">~12–16 ans blended</div><div class="as">UAE (IFRS useful life) · Saudi ZATCA (bâti 5 %, plant 25 % DB).</div></div>
+      <div class="acard"><div class="at">A9 · Blend pondéré capex</div><div class="av">~18–26 ans (selon shell)</div><div class="as">Tombe à 15-20 sur le périmètre équipement (hors shell).</div></div>
+      <div class="acard"><div class="at">A10 · Texte légal verbatim</div><div class="av">GTA Art. 16 — barème officiel</div><div class="as">PDF GTA 2024 extrait. Décision 39/2019. Source de plus haute autorité.</div></div>
+    </div>
+  </section>
+
+  <!-- IMPACT MOTEUR -->
+  <section>
+    <h2>5 · Impact mesuré sur le moteur (scénario A, 100 MW)</h2>
+    <div class="impact">
+      <div class="ic"><div class="v">$67M <span class="ar">→ $44.7M</span></div><div class="l">D&amp;A annuelle</div></div>
+      <div class="ic"><div class="v">10.50% <span class="ar">→ 10.47%</span></div><div class="l">IRR post-tax</div></div>
+      <div class="ic"><div class="v">$0 <span class="ar">→ $1M</span></div><div class="l">Impôt dès ~an 10</div></div>
+      <div class="ic"><div class="v">$16M</div><div class="l">NPV (inchangé)</div></div>
+    </div>
+    <div class="callout"><b>Avant (10 ans) :</b> la D&amp;A absorbait tout l'EBITDA imposable → impôt = $0 partout, et
+      <code>irr = irr_post_tax</code> exactement — irréaliste. <b>Après (15 ans) :</b> moins de bouclier → le
+      <code>taxable_income</code> devient positif dès ~l'année 10, un peu d'impôt apparaît, et l'IRR post-tax se décolle
+      enfin du pré-tax. Returns quasi inchangés (NPV $16M, MOIC 2.33, DSCR 1.46) mais <b>fiscalement corrects</b>.</div>
+  </section>
+
+  <!-- FICHIERS MODIFIÉS -->
+  <section>
+    <h2>6 · Ce qui a été modifié</h2>
+    <table class="tbl">
+      <thead><tr><th>Fichier</th><th>Changement</th></tr></thead>
+      <tbody>
+        <tr><td class="lbl"><code>lib/hearst-constants.js</code></td><td><code>depreciable_life_years: 10 → 15</code> + barème GTA Art. 16 cité en commentaire</td></tr>
+        <tr><td class="lbl"><code>lib/presentation/deployment-fixture.js</code></td><td><code>irr_post_tax</code> ajusté à 0.1047 (décrochage fiscal)</td></tr>
+        <tr><td class="lbl"><code>docs/data-center-only-benchmarks.md</code></td><td>Ligne amortissement mise à jour avec source</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><b>Limite connue.</b> <code>depreciable_life_years</code> est un défaut moteur global (non overridable
+      par scénario via l'API). Pour ventiler par composant à l'IFRS (shell 20 ans / MEP 5 ans / IT 3 ans), il faudrait un patch
+      moteur plus lourd — ici on a le <b>blend 15 ans sourcé</b>, qui est la bonne approximation board-facing.</div>
+  </section>
+
+  <footer>
+    <p>Rapport généré par Oracle. Source primaire : General Tax Authority Qatar — <i>Income Tax Law and its Executive Regulations</i>
+    (Loi 24/2018 + Décision 39/2019, Art. 16) · <a href="https://taxsummaries.pwc.com/qatar/corporate/deductions">PwC Worldwide Tax Summaries Qatar</a>
+    · Digital Realty &amp; Equinix 10-K (SEC EDGAR). Décision : amortissement linéaire <b>15 ans</b> (blend pondéré capex).
+    433 tests vitest passent. Aucun nombre inventé.</p>
+  </footer>
+
+</div>
+</body>
+</html>

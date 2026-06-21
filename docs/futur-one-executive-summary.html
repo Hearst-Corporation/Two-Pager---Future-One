@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Futur One · Data Center Platform — Executive Summary</title>
+<style>
+  :root{
+    --bg:#0F1115; --panel:#15181E; --panel2:#1A1D24; --elevated:#22262E; --line:#2A2F38; --line2:#363C46;
+    --txt:#EAECEF; --muted:#9098A3; --dim:#646B76;
+    --accent:#BE123C; --accent2:#E11D48; --gold:#C9A24B; --ok:#10B981;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#070809;color:var(--txt);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;padding:32px 16px 70px}
+  .sheet{max-width:1060px;margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6);overflow:hidden}
+
+  /* MASTHEAD */
+  .masthead{padding:38px 44px 28px;border-bottom:2px solid var(--accent);background:linear-gradient(120deg,rgba(190,18,60,.12),transparent 62%)}
+  .mh-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .brand .h{width:30px;height:34px}
+  .brand .nm{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase}
+  .brand .nm small{display:block;font-size:8.5px;letter-spacing:2px;color:var(--muted);font-weight:600;margin-top:2px}
+  .conf{text-align:right;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent2);font-weight:800;line-height:1.7}
+  .conf span{color:var(--dim);display:block;font-weight:600}
+  .eyebrow{font-size:9px;letter-spacing:3px;font-weight:800;text-transform:uppercase;color:var(--accent2);margin-bottom:13px}
+  h1{font-family:var(--serif);font-size:40px;font-weight:700;letter-spacing:-.6px;line-height:1.03}
+  h1 .a{color:var(--accent2);font-style:italic}
+  .tagline{margin-top:13px;font-size:13.5px;color:var(--muted);max-width:720px}
+
+  /* HEADLINE STRIP */
+  .strip{display:grid;grid-template-columns:repeat(5,1fr);background:var(--accent);gap:1px}
+  .strip .k{background:#A50F33;padding:17px 14px;text-align:center}
+  .strip .k .v{font-family:var(--serif);font-size:25px;font-weight:700;color:#fff;letter-spacing:-.8px;line-height:1}
+  .strip .k .l{font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.72);font-weight:700;margin-top:7px}
+
+  .body{padding:32px 44px 38px}
+  .section{margin-bottom:34px}
+  h2{font-size:11px;letter-spacing:2px;font-weight:800;text-transform:uppercase;color:var(--accent2);padding-bottom:9px;border-bottom:1px solid var(--line);margin-bottom:18px;display:flex;justify-content:space-between;align-items:baseline}
+  h2 .n{font-size:24px;font-family:var(--serif);color:var(--line2);font-weight:700}
+  p.lead{font-size:13px;color:#C6CBD2;margin-bottom:16px;max-width:860px}
+  p.lead b{color:#fff}
+
+  /* TABLES */
+  .tbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .tbl th{text-align:right;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--dim);font-weight:700;padding:10px 13px;border-bottom:1px solid var(--line);background:var(--elevated)}
+  .tbl th:first-child{text-align:left}
+  .tbl td{padding:8px 13px;border-bottom:1px solid var(--line);text-align:right;font-family:var(--mono);font-size:11px;color:var(--txt)}
+  .tbl td:first-child{text-align:left;font-family:var(--sans);font-weight:700;color:#fff}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl tr.hl td{background:rgba(201,162,75,.08)}
+  .tbl tr.hl2 td{background:rgba(16,185,129,.07)}
+  .tbl .accent{color:var(--accent2);font-weight:700}
+  .tbl .save{color:var(--ok);font-weight:700}
+  .tbl .bar{display:inline-block;height:7px;background:var(--accent);border-radius:2px;vertical-align:middle;margin-right:6px}
+
+  /* CHART */
+  .chartwrap{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:20px 22px 14px;margin-bottom:18px}
+  .chartwrap .ct{font-size:9.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .chartwrap .cs{font-size:11px;color:var(--dim);margin-bottom:14px}
+  svg.curve{width:100%;height:250px;display:block}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+  .ftab{width:100%;border-collapse:collapse;font-size:12px}
+  .ftab td{padding:7px 0;border-bottom:1px solid var(--line)}
+  .ftab tr:last-child td{border-bottom:none}
+  .ftab td.k{color:var(--muted)}
+  .ftab td.v{text-align:right;font-weight:700;color:#fff;font-family:var(--mono);font-size:11.5px}
+  .ftab td.v .u{color:var(--muted);font-weight:500;font-size:10px}
+  .subh{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+
+  .callout{border-left:3px solid var(--accent);background:rgba(190,18,60,.06);padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:12px;color:var(--muted)}
+  .callout.gold{border-color:var(--gold);background:rgba(201,162,75,.06)}
+  .callout b{color:#fff}
+  code{font-family:var(--mono);font-size:10.5px;background:var(--elevated);padding:2px 6px;border-radius:4px;color:#E5A3AE}
+
+  /* PILLS row */
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .pill{font-size:11px;padding:7px 13px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .pill b{color:#fff}
+
+  .src{margin-top:6px;font-size:9.5px;color:var(--dim);line-height:1.7}
+  .src b{color:var(--muted)}
+
+  .foot{padding:20px 44px;border-top:1px solid var(--line);background:var(--panel);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .foot .disc{font-size:9.5px;color:var(--dim);max-width:700px;line-height:1.6}
+  .foot .pg{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);font-weight:800}
+
+  @media(max-width:800px){.strip{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}h1{font-size:30px}}
+  @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;border:none}.section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- MASTHEAD -->
+  <div class="masthead">
+    <div class="mh-top">
+      <div class="brand">
+        <svg class="h" viewBox="0 0 91 100" fill="none"><path d="M10 43.4 41.6 74H61L19.7 34 10 43.4Z" fill="#BE123C"/><path d="M80 57.8 48.4 28H29l41.3 39L80 57.8Z" fill="#BE123C"/><path d="M23 8H7v84h16V8Z" fill="#BE123C"/><path d="M82 8H65v84h17V8Z" fill="#BE123C"/></svg>
+        <div class="nm">FUTUR ONE<small>Hearst Qatar · Sovereign Data Center Platform</small></div>
+      </div>
+      <div class="conf">Strictly Private &amp; Confidential<span>Executive Summary · Build &amp; Operating Economics</span><span>Prepared for Sovereign Allocation</span></div>
+    </div>
+    <div class="eyebrow">Tier III Colocation · The Data Center Landlord</div>
+    <h1>Build cheaper at scale.<br><span class="a">Operate at sovereign margins.</span></h1>
+    <p class="tagline">A Qatar colocation platform that owns and leases powered megawatts — no servers, no technology risk. This summary consolidates the sourced build-cost scale curve, full-load operating economics, capex composition, and the Qatar tax depreciation basis into one reference page.</p>
+  </div>
+
+  <div class="strip">
+    <div class="k"><div class="v">$12.0→8.8M</div><div class="l">Capex/MW · 30→300 MW</div></div>
+    <div class="k"><div class="v">−26%</div><div class="l">Scale saving</div></div>
+    <div class="k"><div class="v">$2.1M</div><div class="l">Revenue/MW @100%</div></div>
+    <div class="k"><div class="v">~55%</div><div class="l">EBITDA margin</div></div>
+    <div class="k"><div class="v">0%</div><div class="l">Corp tax · QFZA</div></div>
+  </div>
+
+  <div class="body">
+
+    <!-- 01 SCALE CURVE -->
+    <div class="section">
+      <h2>Build economics — cost per MW falls with scale <span class="n">01</span></h2>
+      <p class="lead">Construction cost per megawatt declines as the campus grows: fixed site costs (substation, land, soft costs, control room) dilute across more MW while procurement moves to bulk. <b>~80% of the scale benefit is captured by 150 MW</b>; beyond that the linear MEP/cooling load dominates and the curve flattens to the ~$7.8M floor.</p>
+      <div class="chartwrap">
+        <div class="ct">Capex $/MW vs campus size — per 30 MW step</div>
+        <div class="cs">Tier III air-cooled, money of 2026, excludes IT/GPU. <code>$/MW = 7.8 + K·MW^(−0.61)</code></div>
+        <svg class="curve" id="curve" viewBox="0 0 1000 250" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Size</th><th>Capex/MW</th><th>Total capex</th><th>Saving vs 30MW</th><th>Revenue/yr</th><th>EBITDA/yr</th></tr></thead>
+        <tbody id="ladder"></tbody>
+      </table>
+    </div>
+
+    <!-- 02 CAPEX COMPOSITION + OPERATING -->
+    <div class="section">
+      <div class="grid2">
+        <div>
+          <h2>Capex composition <span class="n">02</span></h2>
+          <p class="lead" style="margin-bottom:12px">Per MW, on a ~$11M base. Electrical + cooling (MEP, ~75%) scale linearly; only the fixed site bucket (~15-20%) dilutes.</p>
+          <table class="tbl">
+            <thead><tr><th>Component</th><th>%</th><th>$/MW</th><th>Scaling</th></tr></thead>
+            <tbody>
+              <tr><td><span class="bar" style="width:48px"></span>Electrical / power</td><td>42%</td><td>$4.6M</td><td>linear</td></tr>
+              <tr><td><span class="bar" style="width:20px"></span>Cooling (hot-climate)</td><td>18%</td><td>$2.0M</td><td>linear</td></tr>
+              <tr><td><span class="bar" style="width:14px"></span>Shell / structure</td><td>13%</td><td>$1.4M</td><td>semi-fixed</td></tr>
+              <tr><td><span class="bar" style="width:12px"></span>Fit-out / white space</td><td>11%</td><td>$1.2M</td><td>mixed</td></tr>
+              <tr><td><span class="bar" style="width:8px"></span>Substation / grid</td><td>7%</td><td>$0.8M</td><td class="save">dilutes</td></tr>
+              <tr><td><span class="bar" style="width:5px"></span>Soft costs (design/PM)</td><td>5%</td><td>$0.6M</td><td class="save">dilutes</td></tr>
+              <tr class="hl2"><td><span class="bar" style="width:3px;background:#10B981"></span>Land (free-zone)</td><td>2-4%</td><td>$0.2-0.4M</td><td class="save">dilutes</td></tr>
+            </tbody>
+          </table>
+          <p class="src"><b>Sources.</b> alpha-matica, irecruit 2026, Cushman 2025, SemiAnalysis. Land in Qatar = free-zone allocation, structurally below US ~5%.</p>
+        </div>
+        <div>
+          <h2>Operating P&amp;L @ 100% load <span class="n">03</span></h2>
+          <p class="lead" style="margin-bottom:12px">Per MW per year, full occupancy, wholesale NNN lease. Power passed through to tenant.</p>
+          <div class="subh">Per MW · per year</div>
+          <table class="ftab">
+            <tr><td class="k">Lease rate</td><td class="v">$175 <span class="u">/kW/mo</span></td></tr>
+            <tr><td class="k">Revenue</td><td class="v accent" style="color:var(--accent2)">$2.10 <span class="u">M</span></td></tr>
+            <tr><td class="k">— Maintenance M&amp;E</td><td class="v">$0.15 <span class="u">M</span></td></tr>
+            <tr><td class="k">— Staff / O&amp;M</td><td class="v">$0.05 <span class="u">M</span></td></tr>
+            <tr><td class="k">— Insurance + G&amp;A</td><td class="v">$0.10 <span class="u">M</span></td></tr>
+            <tr><td class="k">— Power (NNN)</td><td class="v">tenant</td></tr>
+            <tr><td class="k"><b style="color:#fff">EBITDA</b></td><td class="v" style="color:#10B981">$1.15 <span class="u">M</span></td></tr>
+            <tr><td class="k">EBITDA margin</td><td class="v">~55%</td></tr>
+          </table>
+          <div class="subh" style="margin-top:14px">Aggregate at full load</div>
+          <table class="ftab">
+            <tr><td class="k">60 MW</td><td class="v">$126M rev · $69M EBITDA</td></tr>
+            <tr><td class="k">150 MW</td><td class="v">$315M rev · $173M EBITDA</td></tr>
+            <tr><td class="k">300 MW</td><td class="v">$630M rev · $345M EBITDA</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 DEPRECIATION & TAX + QATAR EDGE -->
+    <div class="section">
+      <div class="grid2">
+        <div>
+          <h2>Depreciation &amp; tax basis <span class="n">04</span></h2>
+          <p class="lead" style="margin-bottom:12px">Sourced to Qatar's statutory schedule, cross-checked vs REIT 10-K useful lives.</p>
+          <table class="tbl">
+            <thead><tr><th>Asset (GTA Art. 16)</th><th>Rate/yr</th><th>Life</th></tr></thead>
+            <tbody>
+              <tr><td>Building shell</td><td>5%</td><td>20 yr</td></tr>
+              <tr><td>Electrical infra</td><td>5%</td><td>20 yr</td></tr>
+              <tr><td>MEP / machinery</td><td>20%</td><td>5 yr</td></tr>
+              <tr><td>Cooling / HVAC</td><td>25%</td><td>4 yr</td></tr>
+              <tr class="hl"><td><b>Capex-weighted blend</b></td><td class="accent">—</td><td class="accent">15 yr</td></tr>
+            </tbody>
+          </table>
+          <p class="src"><b>Basis.</b> Qatar Law 24/2018 + Decision 39/2019, Art. 16 (GTA). Blend cross-checked: Digital Realty 10-K ~21yr, Equinix ~15-17yr. Straight-line, 15-yr blended.</p>
+        </div>
+        <div>
+          <h2>The Qatar edge <span class="n">05</span></h2>
+          <p class="lead" style="margin-bottom:14px">Structural advantages that lift the operating margin above global peers.</p>
+          <div class="pills">
+            <span class="pill"><b>$32/MWh</b> power — among lowest globally</span>
+            <span class="pill"><b>0%</b> corporate tax (QFZA, 20-yr holiday)</span>
+            <span class="pill"><b>100%</b> foreign ownership</span>
+            <span class="pill"><b>8,000 MW</b> grid headroom · 200 MW reserved</span>
+            <span class="pill"><b>1.42</b> PUE achievable hot-climate</span>
+            <span class="pill">Anchors live: <b>Google · Microsoft · Oracle</b> Doha</span>
+          </div>
+          <div class="callout gold" style="margin-top:16px"><b>Comps.</b> MEEZA Qatar $219M / 44 MW (shell, ~$5M/MW) · Ooredoo $1B / 120 MW (~$8.3M/MW fitted) · Khazna UAE pipeline 1 GW. Capital precedent: QIA × Brookfield × Qai $20B AI partnership.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEY TAKEAWAY -->
+    <div class="callout"><b>The thesis in one line.</b> A 150 MW Qatar campus builds at ~$9.4M/MW ($1.4B), captures ~80% of all scale savings, runs at ~$315M revenue / ~$173M EBITDA per year at full load, depreciates over a sourced 15-year blend, and pays 0% corporate tax in the free zone — pure powered-capacity infrastructure with no technology risk.</div>
+
+  </div>
+
+  <div class="foot">
+    <div class="disc"><b>Disclaimer.</b> Illustrative build and operating economics for discussion only; not an offer or recommendation. All figures derive from a 20-agent sourced research sweep (Turner &amp; Townsend, Cushman &amp; Wakefield, JLL, CBRE, DCD, Digital Realty / Equinix 10-K, Qatar GTA) and Oracle's financial engine. Qatar carries no published per-MW cost index — figures interpolate UAE/Saudi benchmarks and real Gulf project capex. Actual costs vary by tier, redundancy, cooling and timing. No figure is invented.</div>
+    <div class="pg">Futur One · 2026</div>
+  </div>
+
+</div>
+
+<script>
+  const DATA=[
+    {mw:30,c:12.00,tot:360,s:0,rev:63,eb:35},
+    {mw:60,c:10.55,tot:633,s:12.1,rev:126,eb:69},
+    {mw:90,c:9.95,tot:895,s:17.1,rev:189,eb:103},
+    {mw:120,c:9.60,tot:1152,s:20.0,rev:252,eb:138},
+    {mw:150,c:9.37,tot:1406,s:21.9,rev:315,eb:173},
+    {mw:180,c:9.20,tot:1657,s:23.3,rev:378,eb:207},
+    {mw:210,c:9.08,tot:1907,s:24.3,rev:441,eb:241},
+    {mw:240,c:8.98,tot:2155,s:25.2,rev:504,eb:276},
+    {mw:270,c:8.90,tot:2402,s:25.9,rev:567,eb:311},
+    {mw:300,c:8.83,tot:2648,s:26.4,rev:630,eb:345},
+  ];
+  document.getElementById('ladder').innerHTML=DATA.map((r,i)=>{
+    const cls=i===0?'hl':(i===DATA.length-1?'hl2':'');
+    return `<tr class="${cls}"><td>${r.mw} MW</td><td class="accent">$${r.c.toFixed(2)}M</td><td>$${(r.tot/1000).toFixed(2)}B</td><td class="save">${r.s>0?'−'+r.s.toFixed(1)+'%':'—'}</td><td>$${r.rev}M</td><td>$${r.eb}M</td></tr>`;
+  }).join('');
+  (function(){
+    const W=1000,H=250,L=66,R=28,T=22,B=42;
+    const xmin=30,xmax=300,ymin=7.5,ymax=12.5;
+    const X=mw=>L+((mw-xmin)/(xmax-xmin))*(W-L-R);
+    const Y=c=>(H-B)-((c-ymin)/(ymax-ymin))*(H-T-B);
+    let svg='';
+    for(let v=8;v<=12;v++){const y=Y(v);svg+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#22262E"/>`;svg+=`<text x="${L-9}" y="${y+3}" font-size="10.5" fill="#646B76" font-family="monospace" text-anchor="end">$${v}M</text>`;}
+    const yf=Y(7.8);svg+=`<line x1="${L}" y1="${yf}" x2="${W-R}" y2="${yf}" stroke="#10B981" stroke-dasharray="5 4" opacity=".6"/>`;svg+=`<text x="${W-R}" y="${yf-5}" font-size="9.5" fill="#10B981" font-family="monospace" text-anchor="end">floor $7.8M</text>`;
+    DATA.forEach(r=>svg+=`<text x="${X(r.mw)}" y="${H-B+17}" font-size="10" fill="#646B76" font-family="monospace" text-anchor="middle">${r.mw}</text>`);
+    svg+=`<text x="${(L+W-R)/2}" y="${H-4}" font-size="9.5" fill="#9098A3" text-anchor="middle" letter-spacing="1">CAMPUS SIZE — MW</text>`;
+    const pts=DATA.map(r=>`${X(r.mw).toFixed(1)},${Y(r.c).toFixed(1)}`).join(' ');
+    svg+=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#BE123C" stop-opacity=".30"/><stop offset="100%" stop-color="#BE123C" stop-opacity="0"/></linearGradient></defs>`;
+    svg+=`<polygon points="${X(30)},${H-B} ${pts} ${X(300)},${H-B}" fill="url(#g)"/>`;
+    svg+=`<polyline points="${pts}" fill="none" stroke="#BE123C" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+    DATA.forEach((r,i)=>{const x=X(r.mw),y=Y(r.c);svg+=`<circle cx="${x}" cy="${y}" r="4" fill="#BE123C"/>`;
+      if(i===0||i===3||i===DATA.length-1){svg+=`<circle cx="${x}" cy="${y}" r="7" fill="none" stroke="#BE123C" stroke-width="1.5"/>`;svg+=`<text x="${x}" y="${y-13}" font-size="11.5" fill="#fff" font-family="monospace" font-weight="700" text-anchor="middle">$${r.c.toFixed(1)}M</text>`;}});
+    document.getElementById('curve').innerHTML=svg;
+  })();
+</script>
+</body>
+</html>

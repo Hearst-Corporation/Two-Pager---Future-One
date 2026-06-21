@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Futur One · Data Center Build Economics — Scale Curve</title>
+<style>
+  :root{
+    --bg:#0F1115; --panel:#15181E; --panel2:#1A1D24; --elevated:#22262E; --line:#2A2F38; --line2:#363C46;
+    --txt:#EAECEF; --muted:#9098A3; --dim:#646B76;
+    --accent:#BE123C; --accent2:#E11D48; --gold:#C9A24B; --ok:#10B981;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#070809;color:var(--txt);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;padding:32px 16px 70px}
+  .sheet{max-width:1040px;margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6);overflow:hidden}
+
+  .masthead{padding:34px 40px 26px;border-bottom:2px solid var(--accent);background:linear-gradient(120deg,rgba(190,18,60,.10),transparent 60%)}
+  .mh-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .h{width:28px;height:32px}
+  .brand .nm{font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase}
+  .brand .nm small{display:block;font-size:8px;letter-spacing:2px;color:var(--muted);font-weight:600;margin-top:2px}
+  .conf{text-align:right;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent2);font-weight:800;line-height:1.7}
+  .conf span{color:var(--dim);display:block;font-weight:600}
+  .eyebrow{font-size:9px;letter-spacing:3px;font-weight:800;text-transform:uppercase;color:var(--accent2);margin-bottom:12px}
+  h1{font-family:var(--serif);font-size:36px;font-weight:700;letter-spacing:-.5px;line-height:1.05}
+  h1 .a{color:var(--accent2);font-style:italic}
+  .tagline{margin-top:12px;font-size:13.5px;color:var(--muted);max-width:680px}
+
+  /* HEADLINE STRIP */
+  .strip{display:grid;grid-template-columns:repeat(4,1fr);background:var(--accent);gap:1px}
+  .strip .k{background:#A50F33;padding:16px;text-align:center}
+  .strip .k .v{font-family:var(--serif);font-size:27px;font-weight:700;color:#fff;letter-spacing:-1px;line-height:1}
+  .strip .k .l{font-size:8px;letter-spacing:1.3px;text-transform:uppercase;color:rgba(255,255,255,.72);font-weight:700;margin-top:7px}
+
+  .body{padding:30px 40px 36px}
+  h2{font-size:11px;letter-spacing:2px;font-weight:800;text-transform:uppercase;color:var(--accent2);padding-bottom:9px;border-bottom:1px solid var(--line);margin-bottom:18px;display:flex;justify-content:space-between;align-items:baseline}
+  h2 .n{font-size:9px;color:var(--dim)}
+  p.lead{font-size:13px;color:#C6CBD2;margin-bottom:18px;max-width:840px}
+  p.lead b{color:#fff}
+
+  /* CHART */
+  .chartwrap{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:22px 24px 16px;margin-bottom:24px}
+  .chartwrap .ct{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .chartwrap .cs{font-size:11.5px;color:var(--dim);margin-bottom:16px}
+  svg.curve{width:100%;height:300px;display:block}
+
+  /* TABLE */
+  .tbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .tbl th{text-align:right;font-size:9px;letter-spacing:.6px;text-transform:uppercase;color:var(--dim);font-weight:700;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--elevated)}
+  .tbl th:first-child{text-align:left}
+  .tbl td{padding:9px 14px;border-bottom:1px solid var(--line);text-align:right;font-family:var(--mono);font-size:11.5px;color:var(--txt)}
+  .tbl td:first-child{text-align:left;font-family:var(--sans);font-weight:700;color:#fff}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl tr.anchor td{background:rgba(201,162,75,.08)}
+  .tbl tr.floor td{background:rgba(16,185,129,.07)}
+  .tbl .save{color:var(--ok);font-weight:700}
+  .tbl .accent{color:var(--accent2);font-weight:700}
+
+  /* DRIVERS */
+  .drivers{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  .drv{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:5px;padding:13px 16px}
+  .drv .dt{font-size:11px;font-weight:800;color:#fff;margin-bottom:3px}
+  .drv .dd{font-size:11.5px;color:var(--muted)}
+  .drv .dd b{color:var(--gold)}
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:6px}
+  .ftab{width:100%;border-collapse:collapse;font-size:12px}
+  .ftab td{padding:8px 0;border-bottom:1px solid var(--line)}
+  .ftab tr:last-child td{border-bottom:none}
+  .ftab td.k{color:var(--muted)}
+  .ftab td.v{text-align:right;font-weight:700;color:#fff;font-family:var(--mono);font-size:11.5px}
+  .ftab td.v .u{color:var(--muted);font-weight:500;font-size:10px}
+
+  .callout{border-left:3px solid var(--accent);background:rgba(190,18,60,.06);padding:13px 17px;border-radius:0 8px 8px 0;margin:16px 0;font-size:12.5px;color:var(--muted)}
+  .callout b{color:#fff}
+  .src{margin-top:14px;font-size:10px;color:var(--dim);line-height:1.7}
+  .src b{color:var(--muted)}
+  code{font-family:var(--mono);font-size:11px;background:var(--elevated);padding:2px 6px;border-radius:4px;color:#E5A3AE}
+
+  .foot{padding:18px 40px;border-top:1px solid var(--line);background:var(--panel);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .foot .disc{font-size:9.5px;color:var(--dim);max-width:680px;line-height:1.6}
+  .foot .pg{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);font-weight:800}
+
+  @media(max-width:780px){.strip{grid-template-columns:repeat(2,1fr)}.drivers,.split{grid-template-columns:1fr}h1{font-size:27px}}
+  @media print{body{background:#fff;padding:0}.sheet{box-shadow:none;border:none}}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="masthead">
+    <div class="mh-top">
+      <div class="brand">
+        <svg class="h" viewBox="0 0 91 100" fill="none"><path d="M10 43.4 41.6 74H61L19.7 34 10 43.4Z" fill="#BE123C"/><path d="M80 57.8 48.4 28H29l41.3 39L80 57.8Z" fill="#BE123C"/><path d="M23 8H7v84h16V8Z" fill="#BE123C"/><path d="M82 8H65v84h17V8Z" fill="#BE123C"/></svg>
+        <div class="nm">FUTUR ONE<small>Hearst Qatar · Build Economics</small></div>
+      </div>
+      <div class="conf">Strictly Private &amp; Confidential<span>Construction Cost Scale Curve</span><span>Per 30 MW Increment · Qatar Tier III</span></div>
+    </div>
+    <div class="eyebrow">The Economics of Scale</div>
+    <h1>Build cheaper <span class="a">by building bigger.</span></h1>
+    <p class="tagline">Construction cost per megawatt falls as the campus grows — fixed site costs (substation, land, soft costs, control room) dilute across more MW while procurement moves to bulk. This is the unit economics of a Tier III colocation platform in Qatar, priced per 30 MW step from 30 to 300 MW.</p>
+  </div>
+
+  <div class="strip">
+    <div class="k"><div class="v">$12.0M</div><div class="l">Capex / MW @ 30 MW</div></div>
+    <div class="k"><div class="v">$8.8M</div><div class="l">Capex / MW @ 300 MW</div></div>
+    <div class="k"><div class="v">−26%</div><div class="l">Cost / MW reduction</div></div>
+    <div class="k"><div class="v">$7.8M</div><div class="l">Floor (irreducible)</div></div>
+  </div>
+
+  <div class="body">
+
+    <!-- CHART -->
+    <h2>Construction cost per MW vs. campus size <span class="n">01</span></h2>
+    <div class="chartwrap">
+      <div class="ct">Capex $/MW — hyperbolic decline to the floor</div>
+      <div class="cs">Air-cooled Tier III, money of 2026, excludes IT/GPU. Steep early gains (−12% from 30→60 MW), flattening toward the ~$7.8M irreducible floor past ~200 MW.</div>
+      <svg class="curve" id="curve" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <!-- TABLE -->
+    <h2>Scale ladder — per 30 MW step <span class="n">02</span></h2>
+    <table class="tbl">
+      <thead><tr>
+        <th>Size</th><th>Capex / MW</th><th>Total capex</th><th>Δ step</th><th>Saving vs 30 MW</th>
+        <th>Revenue / yr*</th><th>EBITDA / yr*</th>
+      </tr></thead>
+      <tbody id="ladder"></tbody>
+    </table>
+    <p style="font-size:10px;color:var(--dim);margin-top:2px">* Operating revenue &amp; EBITDA at <b style="color:var(--muted)">100% occupancy</b>, wholesale lease $175/kW/month (~$2.1M/MW/yr), ~55% EBITDA margin. Power passed through to tenant (NNN).</p>
+
+    <!-- DRIVERS -->
+    <h2>What drives the curve <span class="n">03</span></h2>
+    <p class="lead">Most capex (electrical + cooling MEP, ~75-85%) scales linearly per MW — it does not get cheaper. The economy of scale comes entirely from the <b>fixed site bucket (~10-25% of capex)</b> being spread over more megawatts.</p>
+    <div class="drivers">
+      <div class="drv"><div class="dt">Substation &amp; grid connection</div><div class="dd">A 100 MW substation does not cost 2× a 50 MW one. Large transformers price at <b>$15-30/kVA</b> vs $40-70 for small. Per-MW grid cost drops <b>~20-50%</b> at scale.</div></div>
+      <div class="drv"><div class="dt">Soft costs &amp; design</div><div class="dd">Engineering, permits, PM (8-15% of capex) are largely fixed per site. Spread over 300 MW vs 30 MW, the $/MW falls <b>~10×</b>; reused across a fleet, further still.</div></div>
+      <div class="drv"><div class="dt">Land &amp; site spine</div><div class="dd">One parcel, one perimeter, one access road, one NOC — bought once for the full build-out. Land at <b>~0.5 acre/MW</b> dilutes; in Qatar free-zone allocation makes it ~1-3% of capex.</div></div>
+      <div class="drv"><div class="dt">Bulk procurement</div><div class="dd">Gensets, switchgear, UPS, chillers bought direct/OEM at volume. The lever behind the hyperscaler <b>$6M/MW</b> target — and the floor that linear MEP imposes.</div></div>
+    </div>
+
+    <!-- OPERATING -->
+    <h2>Operating economics at full load <span class="n">04</span></h2>
+    <div class="split">
+      <div>
+        <table class="ftab">
+          <tr><td class="k">Lease rate (wholesale)</td><td class="v">$175 <span class="u">/kW/mo</span></td></tr>
+          <tr><td class="k">Revenue / MW / yr @ 100%</td><td class="v">$2.1 <span class="u">M</span></td></tr>
+          <tr><td class="k">Power (NNN)</td><td class="v">tenant <span class="u">pass-through</span></td></tr>
+          <tr><td class="k">Operating opex / MW / yr</td><td class="v">$0.3 <span class="u">M</span></td></tr>
+          <tr><td class="k">EBITDA / MW / yr</td><td class="v">$1.15 <span class="u">M</span></td></tr>
+          <tr><td class="k">EBITDA margin</td><td class="v">~55<span class="u">%</span></td></tr>
+        </table>
+      </div>
+      <div>
+        <table class="ftab">
+          <tr><td class="k">Revenue @ 60 MW</td><td class="v">$126 <span class="u">M/yr</span></td></tr>
+          <tr><td class="k">Revenue @ 150 MW</td><td class="v">$315 <span class="u">M/yr</span></td></tr>
+          <tr><td class="k">Revenue @ 300 MW</td><td class="v">$630 <span class="u">M/yr</span></td></tr>
+          <tr><td class="k">EBITDA @ 300 MW</td><td class="v">$345 <span class="u">M/yr</span></td></tr>
+          <tr><td class="k">Qatar power cost</td><td class="v">$32 <span class="u">/MWh</span></td></tr>
+          <tr><td class="k">PUE (hot-climate)</td><td class="v">1.42</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout"><b>The scaling rule.</b> Cost/MW follows <code>$/MW = 7.8 + K·MW^(−0.61)</code> — a hyperbola with a hard floor. Doubling capacity cuts $/MW by ~12% early, fading to &lt;1% past 200 MW. You capture <b>~80% of the total scale benefit by 150 MW</b>; beyond that the linear MEP/cooling cost dominates and the curve is essentially flat.</div>
+
+    <div class="src">
+      <b>Sourcing.</b> 20-agent research sweep. Capex/MW: Turner &amp; Townsend Data Centre Cost Index 2025-26 (UAE $8.8/W, Saudi $10.8/W, global avg $10.7M→$11.3M/MW); Cushman &amp; Wakefield 2025 (US avg $11.7M/MW, $9.3-15M range); JLL ($7.7M 2020→$10.7M 2025, 7% CAGR); DCD (hyperscaler $6M/MW target, $7-8M realistic); irecruit 2026 (Tier III $10-12M/MW). Real Gulf projects: MEEZA Qatar $5M/MW (shell), Ooredoo $8.3M/MW (fitted). Scale exponent b≈0.85 from cost-capacity law calibrated to DCD/McKinsey terrain data. Operating: Digital Realty FY2024 ($2.06-2.3M revenue/MW, ~54% EBITDA margin), CBRE wholesale $196/kW/mo, Qatar power KAHRAMAA $32/MWh.
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <div class="disc"><b>Disclaimer.</b> Illustrative build economics for discussion only; not an offer. The cost curve is a model calibrated to published benchmarks — actual project costs depend on tier, redundancy (N+1 vs 2N), cooling (air vs liquid, +7-10%), market and timing. Qatar carries no published per-MW index; figures interpolate UAE/Saudi T&amp;T data and real project capex. Hot-climate cooling and imported equipment add cost; free-zone land allocation reduces it.</div>
+    <div class="pg">Futur One · 2026</div>
+  </div>
+
+</div>
+
+<script>
+  const DATA = [
+    {mw:30, c:12.00, tot:360, d:null, s:0,  rev:63,  eb:35},
+    {mw:60, c:10.55, tot:633, d:-12.1, s:12.1, rev:126, eb:69},
+    {mw:90, c:9.95, tot:895, d:-5.7, s:17.1, rev:189, eb:103},
+    {mw:120,c:9.60, tot:1152,d:-3.5, s:20.0, rev:252, eb:138},
+    {mw:150,c:9.37, tot:1406,d:-2.4, s:21.9, rev:315, eb:173},
+    {mw:180,c:9.20, tot:1657,d:-1.8, s:23.3, rev:378, eb:207},
+    {mw:210,c:9.08, tot:1907,d:-1.4, s:24.3, rev:441, eb:241},
+    {mw:240,c:8.98, tot:2155,d:-1.1, s:25.2, rev:504, eb:276},
+    {mw:270,c:8.90, tot:2402,d:-0.9, s:25.9, rev:567, eb:311},
+    {mw:300,c:8.83, tot:2648,d:-0.8, s:26.4, rev:630, eb:345},
+  ];
+
+  // LADDER TABLE
+  document.getElementById('ladder').innerHTML = DATA.map((r,i)=>{
+    const cls = i===0?'anchor':(i===DATA.length-1?'floor':'');
+    return `<tr class="${cls}">
+      <td>${r.mw} MW</td>
+      <td class="accent">$${r.c.toFixed(2)}M</td>
+      <td>$${(r.tot/1000).toFixed(2)}B</td>
+      <td>${r.d!=null?r.d.toFixed(1)+'%':'—'}</td>
+      <td class="save">${r.s>0?'−'+r.s.toFixed(1)+'%':'—'}</td>
+      <td>$${r.rev}M</td>
+      <td>$${r.eb}M</td>
+    </tr>`;
+  }).join('');
+
+  // CURVE
+  (function(){
+    const W=1000,H=300, L=70,R=30,T=24,B=46;
+    const xmin=30,xmax=300, ymin=7.5,ymax=12.5;
+    const X=mw=>L+((mw-xmin)/(xmax-xmin))*(W-L-R);
+    const Y=c=>(H-B)-((c-ymin)/(ymax-ymin))*(H-T-B);
+    let svg='';
+    // grid Y
+    for(let v=8;v<=12;v++){const y=Y(v);
+      svg+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#22262E" stroke-width="1"/>`;
+      svg+=`<text x="${L-10}" y="${y+3}" font-size="11" fill="#646B76" font-family="monospace" text-anchor="end">$${v}M</text>`;}
+    // floor line
+    const yf=Y(7.8);
+    svg+=`<line x1="${L}" y1="${yf}" x2="${W-R}" y2="${yf}" stroke="#10B981" stroke-width="1" stroke-dasharray="5 4" opacity="0.6"/>`;
+    svg+=`<text x="${W-R}" y="${yf-6}" font-size="10" fill="#10B981" font-family="monospace" text-anchor="end">floor $7.8M</text>`;
+    // grid X labels
+    DATA.forEach(r=>{svg+=`<text x="${X(r.mw)}" y="${H-B+18}" font-size="10.5" fill="#646B76" font-family="monospace" text-anchor="middle">${r.mw}</text>`;});
+    svg+=`<text x="${(L+W-R)/2}" y="${H-6}" font-size="10" fill="#9098A3" font-family="sans-serif" text-anchor="middle" letter-spacing="1">CAMPUS SIZE — MW (per 30 MW step)</text>`;
+    // area
+    const pts=DATA.map(r=>`${X(r.mw).toFixed(1)},${Y(r.c).toFixed(1)}`).join(' ');
+    const area=`${X(30)},${H-B} ${pts} ${X(300)},${H-B}`;
+    svg+=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#BE123C" stop-opacity=".30"/><stop offset="100%" stop-color="#BE123C" stop-opacity="0"/></linearGradient></defs>`;
+    svg+=`<polygon points="${area}" fill="url(#g)"/>`;
+    svg+=`<polyline points="${pts}" fill="none" stroke="#BE123C" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+    // points + labels
+    DATA.forEach((r,i)=>{const x=X(r.mw),y=Y(r.c);
+      svg+=`<circle cx="${x}" cy="${y}" r="4" fill="#BE123C"/>`;
+      if(i===0||i===3||i===DATA.length-1){
+        svg+=`<circle cx="${x}" cy="${y}" r="7" fill="none" stroke="#BE123C" stroke-width="1.5"/>`;
+        svg+=`<text x="${x}" y="${y-14}" font-size="12" fill="#fff" font-family="monospace" font-weight="700" text-anchor="middle">$${r.c.toFixed(1)}M</text>`;}
+    });
+    document.getElementById('curve').innerHTML=svg;
+  })();
+</script>
+</body>
+</html>

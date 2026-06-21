@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rapport — Simulation de déploiement data center · Futur One Qatar</title>
+<style>
+  :root{
+    --bg:#15171C; --surface:#1A1D24; --elevated:#22262E; --line:#2A2F38;
+    --txt:#E8EAED; --muted:#9098A3; --dim:#6B7280;
+    --accent:#BE123C; --accent-soft:#E11D48; --ok:#10B981; --warn:#D97706; --err:#DC2626;
+    --mono:"SF Mono",ui-monospace,"Cascadia Code",Menlo,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;padding:0 0 80px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+
+  /* HERO */
+  header.hero{padding:56px 0 40px;border-bottom:1px solid var(--line);margin-bottom:40px;
+    background:radial-gradient(circle at 15% 0%,rgba(190,18,60,.16),transparent 55%)}
+  .eyebrow{font-size:11px;letter-spacing:3px;font-weight:800;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-size:40px;font-weight:900;letter-spacing:-1.2px;line-height:1.02;text-transform:uppercase}
+  h1 .a{color:var(--accent)}
+  .sub{margin-top:16px;font-size:14px;color:var(--muted);max-width:760px}
+  .meta-row{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px}
+  .chip{font-size:11px;font-weight:600;letter-spacing:.4px;padding:6px 12px;border-radius:7px;
+    background:var(--elevated);border:1px solid var(--line);color:var(--muted)}
+  .chip b{color:var(--txt)}
+
+  /* SECTIONS */
+  section{margin-bottom:46px}
+  h2{font-size:13px;letter-spacing:2px;font-weight:800;text-transform:uppercase;color:var(--accent);
+    padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:22px}
+  h3{font-size:18px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px}
+  p.lead{color:var(--muted);font-size:14px;margin-bottom:18px;max-width:820px}
+
+  /* VERDICT BANNER */
+  .verdict{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:14px}
+  .vcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;position:relative;overflow:hidden}
+  .vcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+  .vcard.ok::before{background:var(--ok)} .vcard.warn::before{background:var(--warn)} .vcard.err::before{background:var(--err)}
+  .vcard .code{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase}
+  .vcard h3{margin:6px 0 8px}
+  .badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.6px;padding:3px 9px;border-radius:20px;text-transform:uppercase}
+  .badge.ok{background:rgba(16,185,129,.14);color:var(--ok)}
+  .badge.warn{background:rgba(217,119,6,.16);color:#F0A33C}
+  .badge.err{background:rgba(220,38,38,.16);color:#F0686A}
+  .vcard p{font-size:12.5px;color:var(--muted);margin-top:10px}
+
+  /* KPI GRID */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:20px}
+  .kpi{background:var(--surface);padding:16px 16px 14px}
+  .kpi .v{font-size:22px;font-weight:900;letter-spacing:-.6px;color:var(--accent);line-height:1}
+  .kpi .v.neg{color:#F0686A}
+  .kpi .l{font-size:9.5px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-top:6px;white-space:nowrap}
+
+  /* TABLES */
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px;
+    background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .tbl th{text-align:left;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);
+    font-weight:700;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--elevated)}
+  .tbl td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--txt)}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl td.num,.tbl th.num{text-align:right;font-family:var(--mono);font-size:11.5px}
+  .tbl td.lbl{color:var(--muted)}
+  .pill{font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;letter-spacing:.4px}
+  .pill.ok{background:rgba(16,185,129,.14);color:var(--ok)}
+  .pill.warn{background:rgba(217,119,6,.16);color:#F0A33C}
+  .pill.err{background:rgba(220,38,38,.16);color:#F0686A}
+
+  /* DETAIL CARD */
+  .detail{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:20px}
+  .detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+  .detail-head .left .tag{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase}
+
+  /* MINI CHART */
+  .chartbox{background:var(--elevated);border:1px solid var(--line);border-radius:10px;padding:18px 18px 10px;margin:8px 0 18px}
+  .chartbox .ct{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+  svg.spark{width:100%;height:120px;display:block}
+  .zerolab{font-size:9px;fill:var(--dim);font-family:var(--mono)}
+
+  /* SCORE BARS */
+  .scores{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:6px 0 4px}
+  .score{display:flex;flex-direction:column;align-items:center;gap:7px}
+  .score .sl{font-size:9px;font-weight:800;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+  .gauge{display:flex;flex-direction:column-reverse;gap:3px}
+  .seg{width:16px;height:5px;border-radius:1px;background:var(--line)}
+  .seg.on{background:var(--accent)}
+  .score .sv{font-size:11px;font-weight:900;color:var(--txt)}
+
+  /* CALLOUT */
+  .callout{border-left:3px solid var(--accent);background:rgba(190,18,60,.06);padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:13px;color:var(--muted)}
+  .callout.warn{border-color:var(--warn);background:rgba(217,119,6,.07)}
+  .callout b{color:var(--txt)}
+  code{font-family:var(--mono);font-size:11.5px;background:var(--elevated);padding:2px 6px;border-radius:4px;color:#E5A3AE}
+
+  footer{margin-top:50px;padding-top:24px;border-top:1px solid var(--line);font-size:11px;color:var(--dim)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:720px){.verdict,.grid2{grid-template-columns:1fr}.scores{grid-template-columns:repeat(3,1fr)}h1{font-size:30px}}
+  @media print{body{background:#fff;color:#111}.wrap{max-width:100%}header.hero{background:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Oracle · Moteur financier · Futur One Qatar</div>
+    <h1>Simulation de<br><span class="a">déploiement data center</span></h1>
+    <p class="sub">Rapport complet — 3 scénarios tirés du moteur financier live (<code>POST /api/admin/hearst/simulate</code>),
+      chaque chiffre vérifié pour cohérence contre la data sourcée (benchmarks Qatar/MENA, catalogue GPU, seuils financiers).
+      Le scénario A est figé comme base de la page de présentation <code>/presentation/deployment</code>.</p>
+    <div class="meta-row">
+      <span class="chip">Généré le <b>2026-06-21</b></span>
+      <span class="chip">Scénarios <b>3</b></span>
+      <span class="chip">Source <b>engine live + datapoints sourcés</b></span>
+      <span class="chip">Principe <b>aucun nombre inventé</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ===================== SYNTHÈSE ===================== -->
+  <section>
+    <h2>Synthèse — verdict des 3 scénarios</h2>
+    <p class="lead">Chaque scénario a été tiré avec un payload réaliste puis audité ligne par ligne. Seul A est sain et présentable ;
+      B et C révèlent des comportements du moteur à connaître avant de communiquer des chiffres.</p>
+    <div class="verdict">
+      <div class="vcard ok">
+        <div class="code">Scénario A · Code B</div>
+        <h3>Powered Shell phasé</h3>
+        <span class="badge ok">✓ Sain — figé</span>
+        <p>100 MW, hyperscale Qatar. IRR 10.5% > WACC 10%, NPV positif, DSCR 1.46 bankable, J-curve propre. <b>Retenu comme base de design.</b></p>
+      </div>
+      <div class="vcard warn">
+        <div class="code">Scénario B · Code F</div>
+        <h3>NeoCloud GPU</h3>
+        <span class="badge warn">⚠ Biaisé</span>
+        <p>75 MW AI-native. Calculs GPU exacts, mais <b>dette double-comptée</b> (waterfall 1 811M vs 577M servie) → DSCR 10.6 et IRR 49% gonflés. Upside non dérisqué.</p>
+      </div>
+      <div class="vcard err">
+        <div class="code">Scénario C · Code H</div>
+        <h3>Sovereign AI</h3>
+        <span class="badge err">✗ Rejeté</span>
+        <p>200 MW souverain. <b>IRR −5.6%</b>, DSCR jamais > 0.59, capex +41% vs benchmark. Le moteur le rejette à juste titre — cas de test négatif.</p>
+      </div>
+    </div>
+    <div class="callout"><b>Décision :</b> figer le scénario A dans <code>lib/presentation/deployment-fixture.js</code> (snapshot éditable),
+      consommé par <code>/presentation/deployment</code>. B et C documentés ici pour la transparence et comme garde-fous.</div>
+  </section>
+
+  <!-- ===================== SCÉNARIO A ===================== -->
+  <section>
+    <h2>Scénario A — Powered Shell phasé, hyperscale Qatar <span class="pill ok">FIGÉ</span></h2>
+
+    <div class="kpis">
+      <div class="kpi"><div class="v">10.5%</div><div class="l">Equity IRR</div></div>
+      <div class="kpi"><div class="v">$16.0M</div><div class="l">NPV @ WACC 10%</div></div>
+      <div class="kpi"><div class="v">2.33x</div><div class="l">MOIC</div></div>
+      <div class="kpi"><div class="v">1.46x</div><div class="l">DSCR stabilisé</div></div>
+      <div class="kpi"><div class="v">$671M</div><div class="l">Capex total</div></div>
+      <div class="kpi"><div class="v">$6.7M</div><div class="l">Capex / MW</div></div>
+      <div class="kpi"><div class="v">100</div><div class="l">MW · phasé</div></div>
+      <div class="kpi"><div class="v">87</div><div class="l">Fit score /100</div></div>
+    </div>
+
+    <div class="chartbox">
+      <div class="ct">Cumulative FCF — 10 ans (J-curve, flip à l'exit an 8)</div>
+      <svg class="spark" id="sparkA" viewBox="0 0 1000 160" preserveAspectRatio="none"></svg>
+    </div>
+
+    <h3 style="margin:18px 0 10px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Scores archétype (6 dimensions /5)</h3>
+    <div class="scores" id="scoresA"></div>
+
+    <div class="grid2" style="margin-top:22px">
+      <div>
+        <h3 style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Structure & capacité</h3>
+        <table class="tbl">
+          <tr><td class="lbl">Capacité totale</td><td class="num">100 MW</td></tr>
+          <tr><td class="lbl">Phasing (P1 / P2 / P3)</td><td class="num">40 / 30 / 30 MW</td></tr>
+          <tr><td class="lbl">Années de phase</td><td class="num">an 2 / 4 / 6</td></tr>
+          <tr><td class="lbl">Leverage (dette)</td><td class="num">40%</td></tr>
+          <tr><td class="lbl">Taux de dette (effectif)</td><td class="num">5.0% <span class="pill ok">−150 bps</span></td></tr>
+          <tr><td class="lbl">Site readiness *</td><td class="num">powered_shell</td></tr>
+          <tr><td class="lbl">COD offset *</td><td class="num">9 mois</td></tr>
+          <tr><td class="lbl">Exit (multiple / année)</td><td class="num">18× / an 8</td></tr>
+          <tr><td class="lbl">PUE</td><td class="num">1.45</td></tr>
+          <tr><td class="lbl">Occupation cible</td><td class="num">90%</td></tr>
+        </table>
+        <p style="font-size:11px;color:var(--dim);margin-top:4px">* ajoutés à la main dans le fixture (non injectables via l'API).</p>
+      </div>
+      <div>
+        <h3 style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Returns & capital</h3>
+        <table class="tbl">
+          <tr><td class="lbl">Equity IRR</td><td class="num">10.50%</td></tr>
+          <tr><td class="lbl">IRR post-tax</td><td class="num">10.50%</td></tr>
+          <tr><td class="lbl">NPV @ WACC 10%</td><td class="num">+$16.0M</td></tr>
+          <tr><td class="lbl">MOIC</td><td class="num">2.33×</td></tr>
+          <tr><td class="lbl">Payback</td><td class="num">— (via exit)</td></tr>
+          <tr><td class="lbl">DSCR stabilisé</td><td class="num">1.46×</td></tr>
+          <tr><td class="lbl">Equity investi</td><td class="num">$402.6M</td></tr>
+          <tr><td class="lbl">Dette / equity</td><td class="num">0.67×</td></tr>
+          <tr><td class="lbl">EBITDA stabilisé</td><td class="num">$48.2M</td></tr>
+          <tr><td class="lbl">Terminal value</td><td class="num">$997.2M</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <h3 style="margin:24px 0 10px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Projection 10 ans</h3>
+    <table class="tbl">
+      <thead><tr>
+        <th>Année</th><th class="num">MW live</th><th class="num">Occ.</th>
+        <th class="num">Revenue</th><th class="num">EBITDA</th><th class="num">FCF</th><th class="num">Cumul. FCF</th><th class="num">DSCR</th>
+      </tr></thead>
+      <tbody id="yearsA"></tbody>
+    </table>
+
+    <h3 style="margin:24px 0 10px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Vérification de cohérence</h3>
+    <table class="tbl">
+      <thead><tr><th>Vérification</th><th>Statut</th><th>Détail & source</th></tr></thead>
+      <tbody>
+        <tr><td class="lbl">Capex/MW $6.71M</td><td><span class="pill ok">OK</span></td><td>shell 4.4M + sub 1.2M + land 0.5M, MEP/cooling = 0 (powered shell). −24% vs benchmark $8.85M = attendu (T&T MENA).</td></tr>
+        <tr><td class="lbl">IRR 10.5%</td><td><span class="pill ok">OK</span></td><td>Dans la fourchette powered_shell (5–15%). > WACC 10%, < hurdle IC 15%. Profil faible risque/faible rendement.</td></tr>
+        <tr><td class="lbl">IRR = IRR post-tax</td><td><span class="pill ok">OK</span></td><td>D&A (67M/an) > EBITDA → taxable_income négatif → cash_taxes = 0 partout. Logique.</td></tr>
+        <tr><td class="lbl">NPV +$16M</td><td><span class="pill ok">OK</span></td><td>Cohérent : IRR 10.5% > discount 10% → NPV légèrement positif.</td></tr>
+        <tr><td class="lbl">DSCR 1.46</td><td><span class="pill ok">OK</span></td><td>> covenant 1.25, < strong 1.5. Bankable. Monte 0.18 → 1.86 sur le ramp.</td></tr>
+        <tr><td class="lbl">Exit 18× (cap ~5.6%)</td><td><span class="pill ok">OK</span></td><td>Sourcé Brookfield "DC 18–25×", base case Qatar 16–18× pour exit 2033. TV = 18 × EBITDA(y8) = $997.2M (identité exacte).</td></tr>
+        <tr><td class="lbl">J-curve FCF</td><td><span class="pill ok">OK</span></td><td>Creux −458.6M (an 4), flip +483.5M (an 8 quand TV injectée).</td></tr>
+        <tr><td class="lbl">Réconciliation capex</td><td><span class="pill warn">WARN</span></td><td>Seul warning du moteur : −24% vs benchmark. Légitime pour un powered shell. missing_inputs = []. confidence = 100.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== SCÉNARIO B ===================== -->
+  <section>
+    <h2>Scénario B — NeoCloud GPU, AI-native Qatar <span class="pill warn">BIAISÉ</span></h2>
+    <p class="lead">75 MW, mix 60% AI / 20% liquid / 20% classic, GPU H200 SXM5 (6 987 racks). Les calculs hardware sont rigoureusement exacts ;
+      les returns sont gonflés par un défaut du moteur (dette double-comptée) — à ne PAS communiquer comme base case.</p>
+
+    <div class="kpis">
+      <div class="kpi"><div class="v">49.0%</div><div class="l">IRR (gonflé)</div></div>
+      <div class="kpi"><div class="v">$5.87B</div><div class="l">NPV (gonflé)</div></div>
+      <div class="kpi"><div class="v">13.3x</div><div class="l">MOIC (gonflé)</div></div>
+      <div class="kpi"><div class="v">10.6x</div><div class="l">DSCR (artefact)</div></div>
+      <div class="kpi"><div class="v">$3.02B</div><div class="l">Capex total</div></div>
+      <div class="kpi"><div class="v">55 896</div><div class="l">GPUs (H200)</div></div>
+      <div class="kpi"><div class="v">$1.10B</div><div class="l">Revenue AI / an</div></div>
+      <div class="kpi"><div class="v">70</div><div class="l">Fit score /100</div></div>
+    </div>
+
+    <div class="callout warn"><b>⚠ Défaut moteur — dette double-comptée.</b>
+      <code>waterfall.total_debt</code> = 1 810.9M (60% du capex complet) mais le <code>debt_schedule</code> n'amortit que <b>576.7M</b>
+      (60% du capex facility seul, avant le fold GPU). Le service de dette ne couvre qu'⅓ de la dette affichée →
+      <b>DSCR 10.6 et IRR 49% mécaniquement gonflés</b>. Le hardware GPU (2 057M) est financé 100% equity dans la projection
+      mais compté comme levier dans le waterfall. À rapprocher de l'audit moteur au dossier (returns surévalués).</div>
+
+    <div class="grid2">
+      <div>
+        <h3 style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Hardware breakdown (vérifié exact)</h3>
+        <table class="tbl">
+          <tr><td class="lbl">GPU SKU</td><td class="num">H200 SXM5 · NVIDIA</td></tr>
+          <tr><td class="lbl">Racks</td><td class="num">6 987</td></tr>
+          <tr><td class="lbl">Total GPUs</td><td class="num">55 896</td></tr>
+          <tr><td class="lbl">MW AI / liquid / classic</td><td class="num">45 / 15 / 15</td></tr>
+          <tr><td class="lbl">Capex hardware</td><td class="num">$2.057B</td></tr>
+          <tr><td class="lbl">Revenue AI / an</td><td class="num">$1.098B</td></tr>
+          <tr><td class="lbl">GPU-hour price</td><td class="num">$2.99</td></tr>
+          <tr><td class="lbl">Utilisation</td><td class="num">75%</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3 style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Vérification cohérence GPU</h3>
+        <table class="tbl">
+          <tr><td class="lbl">revenue_ai recalculé</td><td><span class="pill ok">0.000%</span></td></tr>
+          <tr><td class="lbl">capex_hardware (MSRP+15%)</td><td><span class="pill ok">$0 écart</span></td></tr>
+          <tr><td class="lbl">total_gpus = racks×density</td><td><span class="pill ok">OK</span></td></tr>
+          <tr><td class="lbl">mw_ai = racks×kW/rack</td><td><span class="pill ok">45.0 MW</span></td></tr>
+          <tr><td class="lbl">GPU refresh (an 8)</td><td><span class="pill ok">−$931.7M FCF</span></td></tr>
+          <tr><td class="lbl">Dette (base)</td><td><span class="pill err">DOUBLE</span></td></tr>
+          <tr><td class="lbl">DSCR 10.6</td><td><span class="pill err">ARTEFACT</span></td></tr>
+          <tr><td class="lbl">Réconciliation capex +45%</td><td><span class="pill warn">WARN</span></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="callout"><b>Note prix GPU :</b> le catalogue (<code>REFERENCE_GPU_HOUR_PRICES</code>) dit H200 = $2.99 (valeur utilisée),
+      mais <code>datapoints.js</code> dit $3.49 — divergence interne du repo. À $3.49 le revenue AI monterait à ~$1.28B.
+      Aussi : <code>cod_offset = 0</code> (pas de gating COD) gonfle aussi l'IRR — un greenfield réaliste décalerait le revenu de 18–36 mois.</div>
+  </section>
+
+  <!-- ===================== SCÉNARIO C ===================== -->
+  <section>
+    <h2>Scénario C — Sovereign AI, Qatar Gov anchor <span class="pill err">REJETÉ</span></h2>
+    <p class="lead">200 MW, campus souverain. Le moteur fonctionne correctement et <b>rejette le projet</b> : capex trop lourd face à un revenue souverain bridé.
+      Conservé comme cas de test négatif — utile pour valider que le moteur ne maquille pas un mauvais deal.</p>
+
+    <div class="kpis">
+      <div class="kpi"><div class="v neg">−5.6%</div><div class="l">Equity IRR</div></div>
+      <div class="kpi"><div class="v neg">−$1.16B</div><div class="l">NPV</div></div>
+      <div class="kpi"><div class="v neg">0.19x</div><div class="l">MOIC</div></div>
+      <div class="kpi"><div class="v neg">0.51x</div><div class="l">DSCR (breach)</div></div>
+      <div class="kpi"><div class="v">$2.50B</div><div class="l">Capex total</div></div>
+      <div class="kpi"><div class="v">$12.5M</div><div class="l">Capex/MW (+41%)</div></div>
+      <div class="kpi"><div class="v">200</div><div class="l">MW</div></div>
+      <div class="kpi"><div class="v">77</div><div class="l">Fit score /100</div></div>
+    </div>
+
+    <h3 style="margin:18px 0 10px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Diagnostic & cohérence</h3>
+    <table class="tbl">
+      <thead><tr><th>Point</th><th>Statut</th><th>Détail & source</th></tr></thead>
+      <tbody>
+        <tr><td class="lbl">Capex/MW $12.49M</td><td><span class="pill err">+41%</span></td><td>shell 4.4 + MEP 3.8 + sub 1.2 + cooling 1.95 (×1.3 souverain). Aucune économie d'échelle (engine linéaire). > benchmark $8.85M.</td></tr>
+        <tr><td class="lbl">Électricité Qatar</td><td><span class="pill warn">$30 vs $42</span></td><td>Bootstrap utilise $30/MWh (PUBLIC_SOURCES_LIBRARY), pas $42 (datapoints KAHRAMAA). Les 2 couches divergent.</td></tr>
+        <tr><td class="lbl">Tax QFZA 0% vs 10%</td><td><span class="pill warn">10% appliqué</span></td><td>Engine applique 10% par défaut (QFZA 0% non injectable). Académique ici : taxable_income négatif → tax déjà = 0.</td></tr>
+        <tr><td class="lbl">DSCR ≤ 0.59</td><td><span class="pill err">BREACH</span></td><td>Service ~$200.6M/an vs EBITDA max $123M. Jamais > covenant 1.25. La dette favorable −100 bps ne sauve pas.</td></tr>
+        <tr><td class="lbl">Cooling souverain ×1.3</td><td><span class="pill ok">OK</span></td><td>1.5M × 1.3 = 1.95M/MW appliqué correctement.</td></tr>
+        <tr><td class="lbl">Revenue ×0.90</td><td><span class="pill ok">OK</span></td><td>NTT MENA $110 × 0.90 = $99/kW/mo appliqué.</td></tr>
+        <tr><td class="lbl">J-curve</td><td><span class="pill ok">OK</span></td><td>Creux −$2.01B (an 8), rebond TV à −$707.6M (an 10). Jamais positif → payback null.</td></tr>
+        <tr><td class="lbl">Waterfall pari passu</td><td><span class="pill ok">OK</span></td><td>Hearst 20% / Brookfield 55% / Qatar 25%, IRR identiques −5.6%.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><b>Racine du rejet :</b> capex $2.50B (+41%) vs EBITDA stabilisé ~$123M et revenue souverain bridé →
+      ne couvre jamais son service de dette. Testé en variante (dette 45% + exit 18×) → IRR toujours −0.81%. Le levier n'est pas le problème, le couple capex/revenue l'est.</div>
+  </section>
+
+  <!-- ===================== LIMITES MOTEUR ===================== -->
+  <section>
+    <h2>Limites du moteur & de l'API découvertes</h2>
+    <table class="tbl">
+      <thead><tr><th>Limite</th><th>Impact</th><th>Contournement</th></tr></thead>
+      <tbody>
+        <tr><td class="lbl"><code>site_readiness</code> non injectable via /simulate</td><td>COD offset = 0, IDC = 0, revenu dès l'an 1</td><td>Posé à la main dans le fixture (9 mois pour A)</td></tr>
+        <tr><td class="lbl"><code>cod_offset_months</code> / <code>tax_rate_pct</code> hors schema</td><td>Rejet 400 si envoyés en override</td><td>Édités dans le fixture éditable</td></tr>
+        <tr><td class="lbl">Dette double-comptée (scénarios GPU)</td><td>DSCR + IRR gonflés sur B</td><td>Ne pas figer B ; à corriger dans le moteur</td></tr>
+        <tr><td class="lbl">Électricité $30 (bootstrap) vs $42 (datapoints)</td><td>Couches de data divergentes</td><td>Réconcilier la source de vérité</td></tr>
+        <tr><td class="lbl"><code>payback_years</code> = null (powered shell)</td><td>Structurel : equity revient via exit</td><td>Affiché "— (via exit)"</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>Rapport généré par Oracle · moteur financier <code>lib/hearst-calculations.js</code> + datapoints sourcés <code>lib/oracle-intelligence/datapoints.js</code>.
+    Scénario A figé dans <code>lib/presentation/deployment-fixture.js</code>, rendu par <code>/presentation/deployment</code>.
+    Chiffres = run live vérifié, aucun nombre inventé. Re-tirable via <code>?live=1</code> sur la page.</p>
+  </footer>
+
+</div>
+
+<script>
+  // ---- Données A (depuis le fixture figé) ----
+  const A_YEARS = [
+    {y:1,cy:2026,mw:20,occ:25,rev:2475000,eb:2475000,fcf:-10994500,cum:-413594500,dscr:0.18},
+    {y:2,cy:2027,mw:40,occ:45,rev:9177300,eb:9177300,fcf:-23318624,cum:-436913124,dscr:0.28},
+    {y:3,cy:2028,mw:55,occ:60,rev:17329801,eb:17329801,fcf:-15329172,cum:-452242296,dscr:0.53},
+    {y:4,cy:2029,mw:70,occ:70,rev:26504093,eb:26504093,fcf:-6338366,cum:-458580663,dscr:0.80},
+    {y:5,cy:2030,mw:85,occ:78,rev:36937510,eb:36937510,fcf:3886382,cum:-454694280,dscr:1.12},
+    {y:6,cy:2031,mw:100,occ:84,rev:48202616,eb:48202616,fcf:14926185,cum:-439768094,dscr:1.46},
+    {y:7,cy:2032,mw:100,occ:88,rev:52012918,eb:52012918,fcf:18660281,cum:-421107812,dscr:1.58},
+    {y:8,cy:2033,mw:100,occ:91,rev:55399668,eb:55399668,fcf:21979296,cum:483487418,dscr:1.68},
+    {y:9,cy:2034,mw:100,occ:93,rev:58315760,eb:58315760,fcf:24837067,cum:508324485,dscr:1.77},
+    {y:10,cy:2035,mw:100,occ:95,rev:61356958,eb:61356958,fcf:27817441,cum:536141927,dscr:1.86},
+  ];
+  const A_SCORES = {brand:5,bankability:5,speed:4,control:4,margin:3,exit:5};
+
+  function fmtUSD(v){const a=Math.abs(v),s=v<0?'-':'';
+    if(a>=1e9)return s+'$'+(a/1e9).toFixed(2)+'B';
+    if(a>=1e6)return s+'$'+(a/1e6).toFixed(1)+'M';
+    if(a>=1e3)return s+'$'+(a/1e3).toFixed(0)+'K';return s+'$'+a.toFixed(0);}
+
+  // Table années A
+  document.getElementById('yearsA').innerHTML = A_YEARS.map(r=>{
+    const cumCls = r.cum>=0 ? 'style="color:#10B981"' : 'style="color:#F0686A"';
+    return `<tr>
+      <td class="lbl">${r.y} · ${r.cy}</td>
+      <td class="num">${r.mw} MW</td>
+      <td class="num">${r.occ}%</td>
+      <td class="num">${fmtUSD(r.rev)}</td>
+      <td class="num">${fmtUSD(r.eb)}</td>
+      <td class="num">${fmtUSD(r.fcf)}</td>
+      <td class="num" ${cumCls}>${fmtUSD(r.cum)}</td>
+      <td class="num">${r.dscr.toFixed(2)}x</td>
+    </tr>`;}).join('');
+
+  // Scores A
+  document.getElementById('scoresA').innerHTML = Object.entries(A_SCORES).map(([k,v])=>{
+    const segs=[1,2,3,4,5].map(i=>`<span class="seg ${i<=v?'on':''}"></span>`).join('');
+    return `<div class="score"><div class="sl">${k}</div><div class="gauge">${segs}</div><div class="sv">${v}/5</div></div>`;
+  }).join('');
+
+  // Sparkline cumulative FCF A (J-curve avec ligne de zéro)
+  (function(){
+    const W=1000,H=160,PAD=14;
+    const vals=A_YEARS.map(r=>r.cum);
+    const min=Math.min(...vals),max=Math.max(...vals),range=(max-min)||1;
+    const x=i=>PAD+(i/(vals.length-1))*(W-2*PAD);
+    const y=v=>(H-PAD)-((v-min)/range)*(H-2*PAD);
+    const pts=vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const area=`${PAD},${(H-PAD)} ${pts} ${(W-PAD)},${(H-PAD)}`;
+    const y0=y(0);
+    let svg='';
+    svg+=`<defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#BE123C" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#BE123C" stop-opacity="0"/></linearGradient></defs>`;
+    svg+=`<polygon points="${area}" fill="url(#gA)"/>`;
+    if(min<0&&max>0){
+      svg+=`<line x1="${PAD}" y1="${y0.toFixed(1)}" x2="${W-PAD}" y2="${y0.toFixed(1)}" stroke="#6B7280" stroke-width="1" stroke-dasharray="4 4"/>`;
+      svg+=`<text class="zerolab" x="${PAD+4}" y="${(y0-5).toFixed(1)}">0</text>`;
+    }
+    svg+=`<polyline points="${pts}" fill="none" stroke="#BE123C" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    // points
+    vals.forEach((v,i)=>{svg+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="#BE123C"/>`;});
+    document.getElementById('sparkA').innerHTML=svg;
+  })();
+</script>
+</body>
+</html>

@@ -84,3 +84,9 @@ A[0-9]-*.png
 /section-*.png
 /other-sections.png
 /financial-*.png
+# ship: dev verification screenshots + scratch run dumps (artefacts, never committed)
+/dc-check.png
+/deployment-check.png
+/deployment-fixture.png
+/qatar-p1.png
+/docs/_dc-only-run.json
