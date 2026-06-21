@@ -79,3 +79,9 @@ export interface ScenarioResult extends ScenarioDef {
   irr: number;
   moic: number;
 }
+
+export interface ProprietaryComputeTier {
+  mw: number;
+  label: string;
+  description: string;
+}

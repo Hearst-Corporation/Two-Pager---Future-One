@@ -202,6 +202,30 @@
 .legalBox p { font-size: 10.5px; line-height: 1.7; color: var(--faint); }
 .legalBox p + p { margin-top: 8px; }
 
+/* New Sections Styling */
+.ladderList { display: flex; flex-direction: column; gap: 16px; margin: 24px 0 40px; }
+.ladderRow { display: flex; align-items: center; gap: 32px; padding: 24px 32px; background: var(--paper); border-left: 4px solid var(--gold); box-shadow: inset 0 0 0 1px var(--line); }
+.lrMw { font-family: var(--serif); font-size: 32px; font-weight: 500; color: var(--ink); width: 120px; flex: none; }
+.lrContent { display: flex; flex-direction: column; gap: 4px; }
+.lrLabel { font-size: 15px; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: 1px; }
+.lrDesc { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+.gCard { padding: 32px; background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--ink); display: flex; flex-direction: column; gap: 16px; }
+.gIcon { font-size: 24px; }
+.gTitle { font-family: var(--serif); font-size: 20px; font-weight: 500; color: var(--ink); }
+.gDesc { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+.valStack { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+.valRow { display: flex; align-items: stretch; gap: 16px; }
+.valLet { width: 48px; display: flex; align-items: center; justify-content: center; background: var(--line); font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--muted); }
+.valCore { flex: 1; padding: 24px 32px; background: var(--ink); color: #FBFAF6; }
+.valCore .valTitle { color: var(--gold); font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.valCore .valDesc { color: #C9C2B2; font-size: 14px; line-height: 1.5; }
+.valUp { flex: 1; padding: 24px 32px; background: var(--paper); border: 1px solid var(--line); }
+.valUp .valTitle { color: var(--ink); font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.valUp .valDesc { color: var(--muted); font-size: 14px; line-height: 1.5; }
+
 /* responsive */
 @media (max-width: 920px) {
   .report { padding: 16px 0; }
@@ -217,6 +241,10 @@
   .carrow { transform: rotate(90deg); width: 100%; justify-content: center; }
   .cpList { columns: 1; }
   .ftable th, .ftable td, .scn th, .scn td, .matrix th, .matrix td { padding: 9px 7px; font-size: 12px; }
+  .ladderRow { flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px; }
+  .grid2 { grid-template-columns: 1fr; }
+  .valRow { flex-direction: column; }
+  .valLet { width: 100%; height: 32px; }
 }
 
 /* print — A4 landscape, one section per page, collision-free */
@@ -229,6 +257,6 @@
   .report { background: #FFF; padding: 0; height: auto; overflow: visible; }
   .deck { gap: 0; max-width: none; padding: 0; }
   .page { box-shadow: none; break-after: page; page-break-after: always; padding: 40px 52px; }
-  .statrow, .pillars, .own, .evrow, .ladder, .chain, .stepstrip, .unitSplit, .coverHero, .buildbar, .propbar, .legalBox, .ftable, .matrix, .scn { break-inside: avoid; page-break-inside: avoid; }
+  .statrow, .pillars, .own, .evrow, .ladder, .chain, .stepstrip, .unitSplit, .coverHero, .buildbar, .propbar, .legalBox, .ftable, .matrix, .scn, .ladderRow, .gCard, .valRow { break-inside: avoid; page-break-inside: avoid; }
   .legal { max-width: none; }
 }

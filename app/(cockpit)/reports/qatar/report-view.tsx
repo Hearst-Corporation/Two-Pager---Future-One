@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import styles from './qatar-report.module.css';
-import { QATAR_ASSUMPTIONS } from '@/lib/investment-model/qatar/assumptions';
+import { QATAR_ASSUMPTIONS, PROPRIETARY_COMPUTE_RESERVE } from '@/lib/investment-model/qatar/assumptions';
 import {
   computePlatform,
   unitEconomics,
@@ -29,14 +29,12 @@ function CorridorSVG({ revenuePerMw }: { revenuePerMw: number }) {
   let k = 0;
   const key = () => `c${k++}`;
 
-  // allocated-power rail
   const railY = 20, railH = 24;
   e.push(<rect key={key()} x={L} y={railY} width={W - R - L} height={railH} rx={4} fill="#F4ECDA" stroke={GOLD} strokeWidth={1} />);
   e.push(<rect key={key()} x={L} y={railY} width={5} height={railH} fill={GOLD} />);
   e.push(<text key={key()} x={L + 16} y={railY + railH / 2 + 4.5} fontFamily="Inter" fontSize={12} fontWeight={600} fill={GOLDD} letterSpacing="0.6">Allocated Power Envelope · 150 MW</text>);
   e.push(<text key={key()} x={W - R - 10} y={railY + railH / 2 + 4.5} textAnchor="end" fontFamily="Inter" fontSize={10.5} fill={MUT}>available / pre-identified</text>);
 
-  // phase bands (short labels)
   const bands: Array<[number, number, string, number]> = [
     [0, 3, 'Sovereign Alignment', 1], [3, 6, 'Fast-Track Prep', 1],
     [6, 9, 'First Powered MW', 0], [9, 15, 'Scale-Up', 0], [15, 18, '150 MW Stabilized', 0],
@@ -61,7 +59,6 @@ function CorridorSVG({ revenuePerMw }: { revenuePerMw: number }) {
   ([[6, 50], [9, 100], [15, 150]] as Array<[number, number]>).forEach(([m, v]) => {
     const x = xM(m), y = yMW(v);
     e.push(<circle key={key()} cx={x} cy={y} r={5.5} fill={GOLD} stroke="#FCFBF8" strokeWidth={2} />);
-    // top milestone sits on the 150-line; drop its label below the line to clear the band header.
     const ly = v === 150 ? y + 24 : y - 9;
     e.push(<text key={key()} x={x + 10} y={ly} fontFamily="Inter" fontSize={13.5} fontWeight={700} fill={GOLDD}>{usdM(v * revenuePerMw)}</text>);
   });
@@ -99,18 +96,15 @@ function ValueBridgeSVG({
     e.push(<text key={key()} x={xT(t)} y={H - B + 26} textAnchor="middle" fontFamily="Inter" fontSize={13} fill={MUT}>Year {t}</text>)
   );
 
-  // capital reference (Year 0)
   const cw = 24;
   e.push(<rect key={key()} x={xT(0) - cw / 2} y={yV(capital)} width={cw} height={H - B - yV(capital)} fill={INK} opacity={0.3} />);
   e.push(<text key={key()} x={xT(0)} y={yV(capital) - 12} textAnchor="middle" fontFamily="Inter" fontSize={13} fontWeight={700} fill={INK}>{usdB1(capital)}</text>);
   e.push(<text key={key()} x={xT(0)} y={yV(capital) - 28} textAnchor="middle" fontFamily="Inter" fontSize={10.5} fill={MUT}>capital · Y0</text>);
 
-  // cumulative cash area + line
   const line = cumulative.map((p) => `${xT(p.year)},${yV(p.cumulativeConsortium)}`).join(' ');
   e.push(<polygon key={key()} points={`${xT(1)},${yV(0)} ${line} ${xT(15)},${yV(0)}`} fill={INK} opacity={0.09} />);
   e.push(<polyline key={key()} points={line} fill="none" stroke={INK} strokeWidth={2.5} strokeLinejoin="round" />);
 
-  // Year-15 climax column
   const colW = 60, cx = xT(15);
   e.push(<rect key={key()} x={cx - colW / 2} y={yV(cashTop)} width={colW} height={H - B - yV(cashTop)} fill={INK} />);
   e.push(<rect key={key()} x={cx - colW / 2} y={yV(total)} width={colW} height={yV(cashTop) - yV(total)} fill={GOLD} />);
@@ -118,7 +112,6 @@ function ValueBridgeSVG({
   e.push(<text key={key()} x={cx - colW / 2 - 12} y={(yV(total) + yV(cashTop)) / 2 - 2} textAnchor="end" fontFamily="Inter" fontSize={13.5} fontWeight={700} fill={GOLDD}>+{usdB(terminal)}</text>);
   e.push(<text key={key()} x={cx - colW / 2 - 12} y={(yV(total) + yV(cashTop)) / 2 + 15} textAnchor="end" fontFamily="Inter" fontSize={10.5} fill={MUT}>Terminal Asset Value · 22×</text>);
 
-  // right labels — hierarchy: total (strongest) · cash
   e.push(<line key={key()} x1={cx + colW / 2} y1={yV(total)} x2={W - R + 12} y2={yV(total)} stroke={GOLDD} strokeDasharray="3 3" />);
   e.push(<text key={key()} x={W - R + 18} y={yV(total) + 2} fontFamily="Inter" fontSize={25} fontWeight={700} fill={GOLDD}>{usdB(total)}</text>);
   e.push(<text key={key()} x={W - R + 18} y={yV(total) + 21} fontFamily="Inter" fontSize={12} fontWeight={600} fill={INK} letterSpacing="0.3">Total Consortium Value</text>);
@@ -147,8 +140,6 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
 
   const cashPct = (p.cumulativeCashConsortium / p.totalValueConsortium) * 100;
   const termPct = 100 - cashPct;
-  const maxMultH = 198;
-  const capexBarH = (u.capexPerMw / u.terminalValuePerMw) * maxMultH;
 
   const rootClass = [styles.report, print ? styles.printRoot : '', fontClass].filter(Boolean).join(' ');
 
@@ -156,64 +147,41 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
     <div className={rootClass}>
       <main className={styles.deck}>
 
-        {/* ===== 1 · SOVEREIGN THESIS ===== */}
+        {/* ===== 1 · SOVEREIGN AI INFRASTRUCTURE THESIS ===== */}
         <section className={styles.page}>
           <div className={styles.topbar}>
             <div className={styles.brand}>Project Earth · Hearst</div>
-            <div className={styles.confidential}>Private &amp; Confidential — Investment Memorandum</div>
+            <div className={styles.confidential}>Private &amp; Confidential — Strategic Sovereign Memorandum</div>
           </div>
           <div className={styles.coverHero}>
             <div className={`${styles.coverImg} ${styles.coverImgPhoto}`} />
             <div className={styles.coverVeil} />
-            <div className={styles.coverTag}>Sovereign Investment Memorandum — 01 / 06</div>
+            <div className={styles.coverTag}>Sovereign Investment Memorandum — 01 / 09</div>
             <div className={styles.coverCap}>
-              <div className={styles.coverCe}>Sovereign AI &amp; Cloud Infrastructure · Qatar</div>
-              <div className={styles.coverTitle}>Sovereign Data Infrastructure.<br /><span className={styles.it}>Global scale. Long-term institutional yield.</span></div>
+              <div className={styles.coverCe}>Sovereign AI Infrastructure Stack · Qatar</div>
+              <div className={styles.coverTitle}>Sovereign Intelligence.<br /><span className={styles.it}>From hardened power to proprietary compute.</span></div>
             </div>
           </div>
-          <p className={styles.lede}>A strategic initiative to develop a hyper-scale, AI-ready data center platform. Backed by sovereign capital, it is structured to establish direct ownership and governance control of critical national infrastructure, with the objective of generating durable, escalating cash flows. Headline figures reflect the <b>Core Contracted Case</b> — see methodology, Section 6.</p>
-
-          <div className={styles.statrow} style={{ marginTop: 42 }}>
-            <div className={styles.stat}><div className={styles.statFig}>150<span className={styles.statU}>MW</span></div><div className={styles.statLab}>Initial Capacity</div><div className={styles.statSub}>Targeted under anchor-led pre-lease; designed to scale to 300+ MW.</div></div>
-            <div className={styles.stat}><div className={styles.statFig}>$1.5<span className={styles.statU}>B</span></div><div className={styles.statLab}>Deployed Capital</div><div className={styles.statSub}>Direct sovereign &amp; consortium ownership of the real assets.</div></div>
-            <div className={styles.stat}><div className={styles.statFig}>$211<span className={styles.statU}>M</span></div><div className={styles.statLab}>Net Annual Cash</div><div className={styles.statSub}>Stabilized Year-1 cash attributable to the Consortium.</div></div>
-            <div className={styles.stat}><div className={styles.statFig}>14.0<span className={styles.statU}>%</span></div><div className={styles.statLab}>Net Cash Yield</div><div className={styles.statSub}>Stabilized un-levered cash yield on deployed capital.</div></div>
-          </div>
+          <p className={styles.lede}>Qatar should not only host AI infrastructure; it should own the sovereign compute and model layer that powers it. This initiative develops a hyper-scale, AI-ready data center platform backed by sovereign capital. It establishes direct ownership of critical national infrastructure, generating durable cash flows while securing the nation's algorithmic independence.</p>
 
           <div className={`${styles.pillars} ${styles.flexcap}`}>
-            <div><div className={styles.pe}>Why Qatar</div><div className={styles.pk}>Power-backed industrial policy</div><div className={styles.pv}>Among the lowest-cost sovereign power in the world (~$0.03/kWh) — the structural input behind durable AI-infrastructure economics.</div></div>
-            <div><div className={styles.pe}>Why Now</div><div className={styles.pk}>Sovereign AI demand wave</div><div className={styles.pv}>Regional sovereign-scale programs prove multi-gigawatt absorption; compute capacity is now strategic national infrastructure.</div></div>
-            <div><div className={styles.pe}>Strategic Position</div><div className={styles.pk}>A regional control point</div><div className={styles.pv}>Designed as a sovereign control point for AI and cloud capacity — a platform of strategic relevance, not local colocation alone.</div></div>
+            <div><div className={styles.pe}>Layer 1</div><div className={styles.pk}>Deep Data Center</div><div className={styles.pv}>The 150 MW Core Contracted Case. Power-backed industrial policy delivering long-term institutional yield.</div></div>
+            <div><div className={styles.pe}>Layer 2</div><div className={styles.pk}>Sovereign Resilience</div><div className={styles.pv}>Digital Continuity for national-priority workloads. Hardened infrastructure and EMP-shielded optionality.</div></div>
+            <div><div className={styles.pe}>Layer 3</div><div className={styles.pk}>Proprietary Compute</div><div className={styles.pv}>A dedicated GPU reserve to train, fine-tune, and serve sovereign models—creating asymmetric equity upside.</div></div>
           </div>
         </section>
 
-        {/* ===== 2 · THE 1 MW INCOME UNIT ===== */}
+        {/* ===== 2 · CORE CONTRACTED CASE ===== */}
         <section className={styles.page}>
-          <div className={styles.topbar}><div className={styles.brand}>Revenue Architecture · Unit Economics</div><div className={styles.confidential}>Investment Memorandum — 02 / 06</div></div>
-          <div className={styles.phead}><div><div className={styles.eyebrow}>The Income Unit</div><div className={styles.h2}>One megawatt is a contracted cash machine</div></div><div className={styles.pnum}>02</div></div>
-          <p className={styles.lede} style={{ marginBottom: 8 }}>Each megawatt is structured as a standardized, contracted income unit. Capital converts into long-dated, escalating cash and a substantial terminal asset — then replicates 150× across the platform.</p>
+          <div className={styles.topbar}><div className={styles.brand}>Infrastructure Yield · Bankable Foundation</div><div className={styles.confidential}>Investment Memorandum — 02 / 09</div></div>
+          <div className={styles.phead}><div><div className={styles.eyebrow}>Core Contracted Case</div><div className={styles.h2}>The infrastructure yield underwrites the asset</div></div><div className={styles.pnum}>02</div></div>
+          <p className={styles.lede} style={{ marginBottom: 42 }}>The Core Contracted Case is the bankable foundation. It isolates the highly predictable, contracted cash flows of the 150 MW Deep Data Center from the equity upside of the intelligence layer. Every leased megawatt creates yield.</p>
 
-          <div className={styles.chain}>
-            <div className={styles.cnode}><div className={styles.cf}>{usdMdec(u.capexPerMw, 1)}</div><div className={styles.cl}>Capital<br />deployed</div></div>
-            <div className={styles.carrow}>→</div>
-            <div className={`${styles.cnode} ${styles.cnodeHero}`}><div className={styles.cf}>1 MW</div><div className={styles.cl}>15-yr NNN<br />contracted</div></div>
-            <div className={styles.carrow}>→</div>
-            <div className={styles.cnode}><div className={styles.cf}>{usdMdec(u.annualRevenuePerMw, 2)}</div><div className={styles.cl}>Annual<br />revenue</div></div>
-            <div className={styles.carrow}>→</div>
-            <div className={styles.cnode}><div className={styles.cf}>{usdMdec(u.annualEbitdaPerMw, 2)}</div><div className={styles.cl}>Annual<br />EBITDA</div></div>
-            <div className={styles.carrow}>→</div>
-            <div className={styles.cnode}><div className={styles.cf}>{usdMdec(u.terminalValuePerMw, 1)}</div><div className={styles.cl}>Terminal<br />value (22×)</div></div>
-          </div>
-
-          <div className={styles.unitSplit}>
-            <div className={styles.mult}>
-              <div className={styles.mbar}><div className={styles.bv}>{usdMdec(u.capexPerMw, 1)}</div><div className={styles.bar} style={{ height: capexBarH, background: 'var(--line2)' }} /><div className={styles.bl}>Capital<br />deployed</div></div>
-              <div className={styles.mbar}><div className={styles.bv}>{usdMdec(u.terminalValuePerMw, 1)}</div><div className={styles.bar} style={{ height: maxMultH, background: 'var(--ink)' }} /><div className={styles.bl}>Terminal<br />value</div></div>
-            </div>
-            <div>
-              <div className={styles.mx}>{mult(u.valueMultiple)}</div>
-              <p className={styles.multCapP}>On the Core Contracted Case, each megawatt is modelled to return ~{mult(u.valueMultiple)} its build cost in terminal value — in addition to 15 years of escalating contracted cash. Stabilized EBITDA yield: ~{pct(p.stabilizedYieldProject)} (project) · ~{pct(p.stabilizedYieldConsortium)} (Consortium share).</p>
-            </div>
+          <div className={styles.statrow}>
+            <div className={styles.stat}><div className={styles.statFig}>150<span className={styles.statU}>MW</span></div><div className={styles.statLab}>Initial Capacity</div><div className={styles.statSub}>Targeted under anchor-led pre-lease.</div></div>
+            <div className={styles.stat}><div className={styles.statFig}>$1.5<span className={styles.statU}>B</span></div><div className={styles.statLab}>Deployed Capital</div><div className={styles.statSub}>Direct sovereign ownership.</div></div>
+            <div className={styles.stat}><div className={styles.statFig}>$211<span className={styles.statU}>M</span></div><div className={styles.statLab}>Net Annual Cash</div><div className={styles.statSub}>Stabilized Year-1 cash (Consortium).</div></div>
+            <div className={styles.stat}><div className={styles.statFig}>14.0<span className={styles.statU}>%</span></div><div className={styles.statLab}>Net Cash Yield</div><div className={styles.statSub}>Stabilized un-levered cash yield.</div></div>
           </div>
 
           <div className={styles.annual}>
@@ -225,15 +193,13 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
               <div className={`${styles.propseg} ${styles.segOpex}`} style={{ width: `${opexPct}%` }}><div className={styles.propPv}>{usdM(opexUsd)}</div><div className={styles.propPl}>Opex · reserves · 35%</div></div>
             </div>
           </div>
-
-          <div className={styles.footnote}>Revenue = $225/kW/month × 150,000 kW × 12 = {usdM(gross)} gross (Core Contracted Case). A triple-net structure is intended to pass power, maintenance and property cost to tenants; the 35% deduction reflects assumed platform overhead, insurance and reserves. Figures are illustrative and un-levered; see methodology, Section 6.</div>
         </section>
 
-        {/* ===== 3 · POWER-TO-CASH CORRIDOR ===== */}
+        {/* ===== 3 · QATAR POWER-TO-CASH CORRIDOR ===== */}
         <section className={styles.page}>
-          <div className={styles.topbar}><div className={styles.brand}>Execution · Go-to-Market</div><div className={styles.confidential}>Investment Memorandum — 03 / 06</div></div>
+          <div className={styles.topbar}><div className={styles.brand}>Execution · Go-to-Market</div><div className={styles.confidential}>Investment Memorandum — 03 / 09</div></div>
           <div className={styles.phead}><div><div className={styles.eyebrow}>The Power-to-Cash Corridor</div><div className={styles.h2}>Qatar can compress the path from power to contracted cash</div></div><div className={styles.pnum}>03</div></div>
-          <p className={styles.lede} style={{ marginBottom: 6 }}>Value comes from control of power, not construction alone. With sovereign coordination, power allocation, land, permitting and anchor demand can be aligned earlier than a merchant greenfield — compressing the critical path. Capacity is targeted to be contracted ahead of energization; each tranche activates cash on delivery, toward a {usdM(gross)} stabilized run-rate within ~18 months of first power.</p>
+          <p className={styles.lede} style={{ marginBottom: 6 }}>Value comes from control of power, not construction alone. With sovereign coordination, power allocation, land, permitting and anchor demand can be aligned earlier than a merchant greenfield — compressing the critical path. Capacity is targeted to be contracted ahead of energization.</p>
 
           <div className={styles.viz}><CorridorSVG revenuePerMw={revenuePerMw} /></div>
           <div className={styles.note} style={{ margin: '2px 0 4px' }}>Accelerated path · subject to sovereign coordination &amp; anchor-led leasing · available / allocated MW · not a merchant greenfield timeline.</div>
@@ -249,7 +215,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
 
         {/* ===== 4 · DAY 0 → YEAR 15 VALUE CREATION ===== */}
         <section className={styles.page}>
-          <div className={styles.topbar}><div className={styles.brand}>Capital Formation · 15-Year Horizon</div><div className={styles.confidential}>Investment Memorandum — 04 / 06</div></div>
+          <div className={styles.topbar}><div className={styles.brand}>Capital Formation · 15-Year Horizon</div><div className={styles.confidential}>Investment Memorandum — 04 / 09</div></div>
           <div className={styles.phead}><div><div className={styles.eyebrow}>Value Creation · Consortium 80% Economics</div><div className={styles.h2}>Day 0 to Year 15 — capital that compounds into ownership</div></div><div className={styles.pnum}>04</div></div>
           <p className={styles.lede} style={{ marginBottom: 14 }}><b>{usdB1(a.fundedCapexUsd)} of funded capital compounds into {usdB(p.totalValueConsortium)} of modelled consortium value</b> — through cash distributions and terminal asset ownership over fifteen years (Core Contracted Case · 3% escalation · 22× EBITDA exit).</p>
 
@@ -265,29 +231,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
             />
           </div>
 
-          <div className={styles.flexcap}>
-            <div className={styles.eyebrow} style={{ marginTop: 30 }}>Scale Optionality — Illustrative</div>
-            <div className={styles.ladder}>
-              <div className={styles.rung}><span className={styles.rdot} /><div className={styles.rmw}>60 MW</div><div className={styles.ryl}>~10.9% yield</div><div className={styles.rd}>Entry scale. Soft costs weigh more heavily on early capacity.</div></div>
-              <div className={styles.rung}><span className={styles.rdot} /><div className={styles.rmw}>150 MW</div><div className={styles.ryl}>~12.3% yield · reference</div><div className={styles.rd}>Reference platform. Soft costs diluted; full operating leverage.</div></div>
-              <div className={styles.rung}><span className={styles.rdot} /><div className={styles.rmw}>300 MW</div><div className={styles.ryl}>~13.0% yield · optionality</div><div className={styles.rd}>Second-anchor dependent. Modelled as optionality, not base revenue.</div></div>
-            </div>
-            <div className={styles.note} style={{ marginTop: 12 }}>Scale-yield figures are illustrative of capital efficiency at scale and are not a forecast. The 300 MW leg is contingent on a second anchor and dedicated power; see conditions precedent, Section 6.</div>
-          </div>
-        </section>
-
-        {/* ===== 5 · CAPITAL STRUCTURE & RETURNS ===== */}
-        <section className={styles.page}>
-          <div className={styles.topbar}><div className={styles.brand}>Capital Structure · Returns Distribution</div><div className={styles.confidential}>Investment Memorandum — 05 / 06</div></div>
-          <div className={styles.phead}><div><div className={styles.eyebrow}>Ownership Economics</div><div className={styles.h2}>Funds the capital. Owns the assets. Holds 80% of economics.</div></div><div className={styles.pnum}>05</div></div>
-
-          <div className={styles.own}>
-            <div className={styles.o}><div className={styles.of}>100%</div><div className={styles.ol}><b>of project capital</b> funded by the Sovereign Consortium</div></div>
-            <div className={styles.o}><div className={styles.of}>100%</div><div className={styles.ol}><b>of real assets &amp; power rights</b> owned and governed by the Consortium</div></div>
-            <div className={styles.o}><div className={styles.of}>80%</div><div className={styles.ol}><b>of cash economics</b> to the Consortium; 20% to the Operating Partner</div></div>
-          </div>
-
-          <div className={styles.build}>
+          <div className={styles.build} style={{ marginTop: 40 }}>
             <div className={styles.blabels}><span>Capital invested {usdB1(a.fundedCapexUsd)}</span><span>15-year value build · Consortium · Core Contracted Case</span></div>
             <div className={styles.buildbar}>
               <div className={`${styles.bs} ${styles.bsCash}`} style={{ width: `${cashPct}%` }}><div className={styles.bsF}>{usdB(p.cumulativeCashConsortium)}</div><div className={styles.bsN}>Cumulative cash · Y1–Y15</div></div>
@@ -299,35 +243,124 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
               <div><div className={styles.beV}>{pct(p.irrConsortium)}</div><div className={styles.beL}>Target IRR</div></div>
             </div>
           </div>
-
-          <table className={styles.ftable}>
-            <thead><tr><th>Metric</th><th>Total Project</th><th className={styles.thHl}>Consortium</th><th>Operating Partner</th></tr></thead>
-            <tbody>
-              <tr><td>Funded capex (initial 150 MW)</td><td>{usdB(a.fundedCapexUsd)}</td><td className={styles.tdHl}>{usdB(a.fundedCapexUsd)}</td><td>$0</td></tr>
-              <tr><td>Economic distribution</td><td>100%</td><td className={styles.tdHl}>80%</td><td>20%</td></tr>
-              <tr><td>Stabilized EBITDA (Year 1)</td><td>{usdM(p.annualEbitda)}</td><td className={styles.tdHl}>{usdM(p.consortiumAnnualCash)}</td><td>{usdM(p.operatingPartnerAnnualCash)}</td></tr>
-              <tr><td>Cumulative cash (Y1–Y15)</td><td>{usdB(p.cumulativeCashTotal)}</td><td className={styles.tdHl}>{usdB(p.cumulativeCashConsortium)}</td><td>{usdB(p.cumulativeCashOperating)}</td></tr>
-              <tr><td>Terminal value (Year 15 · 22×)</td><td>{usdB(p.terminalValueTotal)}</td><td className={styles.tdHl}>{usdB(p.terminalValueConsortium)}</td><td>{usdB(p.terminalValueOperating)}</td></tr>
-              <tr className={styles.trStrong}><td>Total value created</td><td>{usdB(p.totalValueTotal)}</td><td className={styles.tdHl}>{usdB(p.totalValueConsortium)}</td><td>{usdB(p.totalValueOperating)}</td></tr>
-              <tr><td>MOIC · Target IRR</td><td>{mult(p.moicTotal)} · {pct(p.irrTotal)}</td><td className={styles.tdHl}>{mult(p.moicConsortium)} · {pct(p.irrConsortium)}</td><td>—</td></tr>
-            </tbody>
-          </table>
-
-          <div className={styles.footnote}>Illustrative distribution; all figures un-levered and independently re-computed from first principles. Figures represent the Core Contracted Case; the lease-up J-curve (Section 3) is intended to be mitigated through anchor-led pre-leasing. A downside range and conditions precedent are set out in Section 6.</div>
         </section>
 
-        {/* ===== 6 · MARKET EVIDENCE & UNDERWRITING DISCIPLINE ===== */}
+        {/* ===== 5 · PROPRIETARY COMPUTE RESERVE ===== */}
         <section className={styles.page}>
-          <div className={styles.topbar}><div className={styles.brand}>Market Evidence · Underwriting Discipline</div><div className={styles.confidential}>Investment Memorandum — 06 / 06</div></div>
-          <div className={styles.phead}><div><div className={styles.eyebrow}>Market Evidence &amp; Underwriting Discipline</div><div className={styles.h2}>Anchored to today's market — underwritten with discipline</div></div><div className={styles.pnum}>06</div></div>
-          <p className={styles.lede} style={{ marginBottom: 30 }}>AI has structurally re-priced data center infrastructure: power is the scarce asset, and tenants are securing capacity years in advance at record rents. The Core Contracted Case is anchored to live 2025 comparables and stress-tested. It remains a case, subject to the conditions precedent below; it is not a forecast or guarantee.</p>
+          <div className={styles.topbar}><div className={styles.brand}>Strategic Upside · Equity Creation</div><div className={styles.confidential}>Investment Memorandum — 05 / 09</div></div>
+          <div className={styles.phead}><div><div className={styles.eyebrow}>Proprietary Compute Reserve</div><div className={styles.h2}>Every proprietary megawatt creates model equity</div></div><div className={styles.pnum}>05</div></div>
+          <p className={styles.lede} style={{ marginBottom: 42 }}>A dedicated fraction of the platform's capacity is reserved for proprietary compute. This capacity is not leased to third parties; it is retained by the platform to train, fine-tune, and serve sovereign models. This creates asymmetric equity upside beyond the infrastructure yield.</p>
 
-          <div className={styles.evrow}>
-            <div className={styles.ev}><div className={styles.evF}>+30%</div><div className={styles.evL}>Wholesale rent · YoY</div><div className={styles.evD}>Ashburn breached $215/kW/mo in 2025; AI-ready space at a further premium.</div></div>
-            <div className={styles.ev}><div className={styles.evF}>1.4%</div><div className={styles.evL}>Record-low vacancy</div><div className={styles.evD}>Primary markets effectively sold out (CBRE H2-2025).</div></div>
-            <div className={styles.ev}><div className={styles.evF}>$24B</div><div className={styles.evL}>Sovereign AI capital</div><div className={styles.evD}>Blackstone–AirTrunk at ~20–23× EBITDA; KSA &amp; UAE prove sovereign-scale absorption.</div></div>
-            <div className={styles.ev}><div className={styles.evF}>$0.03</div><div className={styles.evL}>GCC power · /kWh</div><div className={styles.evD}>A fraction of US/EU cost — the structural margin edge.</div></div>
+          <div className={styles.ladderList}>
+            {PROPRIETARY_COMPUTE_RESERVE.map((tier, i) => (
+              <div key={i} className={styles.ladderRow}>
+                <div className={styles.lrMw}>{tier.mw} MW</div>
+                <div className={styles.lrContent}>
+                  <div className={styles.lrLabel}>{tier.label}</div>
+                  <div className={styles.lrDesc}>{tier.description}</div>
+                </div>
+              </div>
+            ))}
           </div>
+
+          <div className={styles.flexcap}>
+            <div className={styles.note}>The Proprietary Compute Reserve is outside the Core Contracted Case. It represents strategic optionality for the consortium to capture software and model valuation multiples.</div>
+          </div>
+        </section>
+
+        {/* ===== 6 · HEARST AI INTELLIGENCE LAYER ===== */}
+        <section className={styles.page}>
+          <div className={styles.topbar}><div className={styles.brand}>Operating Platform · Sovereign Intelligence</div><div className={styles.confidential}>Investment Memorandum — 06 / 09</div></div>
+          <div className={styles.phead}><div><div className={styles.eyebrow}>Hearst AI Intelligence Layer</div><div className={styles.h2}>Converting reserved megawatts into proprietary model equity</div></div><div className={styles.pnum}>06</div></div>
+          <p className={styles.lede} style={{ marginBottom: 42 }}>Hearst AI acts as the operating intelligence layer. It is not a vendor; it is the platform's proprietary engine for sovereign model serving, data-resident inference, and continued pretraining on national-priority data.</p>
+
+          <div className={styles.grid2}>
+            <div className={styles.gCard}>
+              <div className={styles.gIcon}>⚡</div>
+              <div className={styles.gTitle}>Platform-Controlled Compute</div>
+              <div className={styles.gDesc}>Direct management of the GPU compute infrastructure. From single GPU testing to multi-megawatt proprietary clusters, optimized for sovereign workloads.</div>
+            </div>
+            <div className={styles.gCard}>
+              <div className={styles.gIcon}>🧠</div>
+              <div className={styles.gTitle}>Sovereign Model Serving</div>
+              <div className={styles.gDesc}>Fine-tuning and continued pretraining of frontier open-weights (Llama, DeepSeek, Qwen) on proprietary national data, ensuring absolute data residency.</div>
+            </div>
+            <div className={styles.gCard}>
+              <div className={styles.gIcon}>☁️</div>
+              <div className={styles.gTitle}>AI Cloud &amp; Products</div>
+              <div className={styles.gDesc}>A full suite of developer tools, chat interfaces, and managed AI services deployed securely within the sovereign boundary.</div>
+            </div>
+            <div className={styles.gCard}>
+              <div className={styles.gIcon}>🛡️</div>
+              <div className={styles.gTitle}>Forward-Deployed Engineering</div>
+              <div className={styles.gDesc}>Elite engineering talent embedded locally to accelerate national AI adoption, perform custom development, and conduct frontier research.</div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== 7 · SOVEREIGN RESILIENCE LAYER ===== */}
+        <section className={styles.page}>
+          <div className={styles.topbar}><div className={styles.brand}>Digital Continuity · Hardened Infrastructure</div><div className={styles.confidential}>Investment Memorandum — 07 / 09</div></div>
+          <div className={styles.phead}><div><div className={styles.eyebrow}>Sovereign Resilience Layer</div><div className={styles.h2}>The platform is not just performant; it is sovereign-grade</div></div><div className={styles.pnum}>07</div></div>
+          <p className={styles.lede} style={{ marginBottom: 42 }}>To host national-priority workloads and sovereign intelligence, the physical infrastructure must guarantee Digital Continuity. The Bastion layer provides hardened design optionality for strategic facilities.</p>
+
+          <div className={styles.pillars}>
+            <div><div className={styles.pe}>Continuity</div><div className={styles.pk}>National-Priority Workloads</div><div className={styles.pv}>Designed to ensure uninterrupted operation for government, defense, and critical enterprise data under extreme conditions.</div></div>
+            <div><div className={styles.pe}>Protection</div><div className={styles.pk}>Hardened Infrastructure</div><div className={styles.pv}>Advanced physical and electromagnetic isolation (EMP-shielded optionality) exceeding standard commercial Tier IV requirements.</div></div>
+            <div><div className={styles.pe}>Operations</div><div className={styles.pk}>Active Monitoring</div><div className={styles.pv}>Integrated advisory and threat-intelligence subscriptions, providing sovereign stakeholders with complete situational awareness.</div></div>
+          </div>
+        </section>
+
+        {/* ===== 8 · VALUATION UPLIFT ===== */}
+        <section className={styles.page}>
+          <div className={styles.topbar}><div className={styles.brand}>Financial Architecture · Asymmetric Upside</div><div className={styles.confidential}>Investment Memorandum — 08 / 09</div></div>
+          <div className={styles.phead}><div><div className={styles.eyebrow}>Valuation Uplift</div><div className={styles.h2}>Downside protection with asymmetric equity upside</div></div><div className={styles.pnum}>08</div></div>
+          <p className={styles.lede} style={{ marginBottom: 42 }}>The financial architecture separates the predictable infrastructure yield from the high-multiple technology upside. The Core Contracted Case underwrites the asset, while the Proprietary Compute Reserve captures software valuation multiples.</p>
+
+          <div className={styles.valStack}>
+            <div className={styles.valRow}>
+              <div className={styles.valLet}>A</div>
+              <div className={styles.valCore}>
+                <div className={styles.valTitle}>Core Deep Data Center</div>
+                <div className={styles.valDesc}>Hosting only. Infrastructure multiples (~20–22× EBITDA). Provides the absolute downside protection.</div>
+              </div>
+            </div>
+            <div className={styles.valRow}>
+              <div className={styles.valLet}>B</div>
+              <div className={styles.valUp}>
+                <div className={styles.valTitle}>+ 1–3 MW Proprietary Compute Proof</div>
+                <div className={styles.valDesc}>Initial model equity creation. Validates the sovereign intelligence layer.</div>
+              </div>
+            </div>
+            <div className={styles.valRow}>
+              <div className={styles.valLet}>C</div>
+              <div className={styles.valUp}>
+                <div className={styles.valTitle}>+ 5 MW Sovereign Platform Seed</div>
+                <div className={styles.valDesc}>SaaS and managed services revenue streams begin to blend with infrastructure yield.</div>
+              </div>
+            </div>
+            <div className={styles.valRow}>
+              <div className={styles.valLet}>D</div>
+              <div className={styles.valUp}>
+                <div className={styles.valTitle}>+ 10 MW Proprietary LLM Platform</div>
+                <div className={styles.valDesc}>Full technology multiples (10–15× Revenue) applied to the intelligence layer's output.</div>
+              </div>
+            </div>
+            <div className={styles.valRow}>
+              <div className={styles.valLet}>E</div>
+              <div className={styles.valUp}>
+                <div className={styles.valTitle}>+ 20 MW Institutional Expansion</div>
+                <div className={styles.valDesc}>Maximum asymmetric upside. The platform becomes the dominant sovereign AI provider in the region.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== 9 · CONDITIONS & DISCIPLINE ===== */}
+        <section className={styles.page}>
+          <div className={styles.topbar}><div className={styles.brand}>Market Evidence · Underwriting Discipline</div><div className={styles.confidential}>Investment Memorandum — 09 / 09</div></div>
+          <div className={styles.phead}><div><div className={styles.eyebrow}>Conditions Precedent &amp; Discipline</div><div className={styles.h2}>Anchored to today's market — underwritten with discipline</div></div><div className={styles.pnum}>09</div></div>
+          <p className={styles.lede} style={{ marginBottom: 30 }}>AI has structurally re-priced data center infrastructure. The Core Contracted Case is anchored to live 2025 comparables and stress-tested. It remains a case, subject to the conditions precedent below; it is not a forecast or guarantee.</p>
 
           <table className={styles.matrix}>
             <thead><tr><th style={{ width: '26%' }}>Key assumption</th><th style={{ width: '14%' }}>Input</th><th style={{ width: '38%' }}>Market reference (2025)</th><th style={{ width: '22%' }}>Position</th></tr></thead>
@@ -342,7 +375,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           </table>
 
           <div className={styles.sectlabel}>Scenario Range — Underwriting Discipline</div>
-          <div className={styles.sublabel}>Consortium economics across a downside, a conservative base, and the reference case. Stress columns evidence the floor, not the expected outcome. The Core Contracted Case assumes signed anchor offtake, secured power and phased delivery (see conditions precedent below).</div>
+          <div className={styles.sublabel}>Consortium economics across a downside, a conservative base, and the reference case. Stress columns evidence the floor, not the expected outcome. The Core Contracted Case assumes signed anchor offtake, secured power and phased delivery.</div>
           <table className={styles.scn}>
             <thead><tr><th>Driver</th><th>Downside Case</th><th>Base Case</th><th className={styles.scnInvH}>Core Contracted Case</th></tr></thead>
             <tbody>
@@ -354,17 +387,17 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
             </tbody>
           </table>
 
-          <div className={styles.sectlabel}>Conditions Precedent &amp; Methodology</div>
+          <div className={styles.sectlabel}>Conditions Precedent &amp; Strategic Discipline</div>
           <ul className={styles.cpList}>
             <li>Headline economics represent the <b>Core Contracted Case</b> and are illustrative — not a forecast, valuation, or guarantee of returns.</li>
             <li>Subject to execution of <b>anchor lease(s)</b> with creditworthy counterparties on the modelled terms and duration.</li>
             <li>Subject to a <b>dedicated power allocation / PPA</b> (QatarEnergy / Kahramaa) sufficient for the 150 MW load.</li>
-            <li>Subject to <b>site control, permitting, engineering, financing and full counterparty due diligence</b>.</li>
-            <li>Benchmarks reflect third-party 2025 data; GCC comparables are limited and indicative.</li>
-            <li>The 300 MW expansion is contingent on a second anchor and additional power, and is modelled as optionality.</li>
+            <li><b>AI upside is outside the Core Contracted Case</b> until capitalized and contracted; GPU capex is staged.</li>
+            <li>The intelligence layer relies on <b>fine-tuning and continued pretraining</b> of open-weights, not frontier models from scratch.</li>
+            <li>Model strategy requires strict <b>governance and data residency</b>.</li>
           </ul>
 
-          <div className={styles.footnote}>Sources: CBRE North America Data Center Trends H2-2025; Cushman &amp; Wakefield 2025 Power &amp; Lease Pricing; Blackstone–AirTrunk acquisition (2024, ~20–23× EV/EBITDA); MEEZA Qatar hyperscaler lease (Oct-2025). Returns independently computed (15-yr hold, 80% Consortium economics); stress columns apply a phased lease-up ramp.</div>
+          <div className={styles.footnote}>Sources: CBRE North America Data Center Trends H2-2025; Cushman &amp; Wakefield 2025 Power &amp; Lease Pricing; Blackstone–AirTrunk acquisition (2024, ~20–23× EV/EBITDA); MEEZA Qatar hyperscaler lease (Oct-2025). Returns independently computed (15-yr hold, 80% Consortium economics).</div>
         </section>
 
       </main>

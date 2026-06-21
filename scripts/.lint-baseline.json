@@ -1,3 +1,27 @@
 {
-  "strings": []
+  "strings": [
+    "app/(cockpit)/presentation/deployment/page.jsx :: <div style={St.stateMsg}>Chargement de la simulation…</div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={`${styles.bs} ${styles.bsTerm}`} style={{ width: `${termPct}%` }}><div className={styles.bsF}>{usdB(p.terminalValueConsortium)}</div><div className={styles.bsN}>Terminal asset value · Y15</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.coverTitle}>Sovereign Intelligence.<br /><span className={styles.it}>From hardened power to proprietary compute.</span></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.phead}><div><div className={styles.eyebrow}>Conditions Precedent &amp; Discipline</div><div className={styles.h2}>Anchored to today's market — underwritten with discipline</div></div><div className={styles.pnum}>09</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.phead}><div><div className={styles.eyebrow}>Core Contracted Case</div><div className={styles.h2}>The infrastructure yield underwrites the asset</div></div><div className={styles.pnum}>02</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.phead}><div><div className={styles.eyebrow}>Hearst AI Intelligence Layer</div><div className={styles.h2}>Converting reserved megawatts into proprietary model equity</div></div><div className={styles.pnum}>06</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.phead}><div><div className={styles.eyebrow}>Proprietary Compute Reserve</div><div className={styles.h2}>Every proprietary megawatt creates model equity</div></div><div className={styles.pnum}>05</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.phead}><div><div className={styles.eyebrow}>Sovereign Resilience Layer</div><div className={styles.h2}>The platform is not just performant; it is sovereign-grade</div></div><div className={styles.pnum}>07</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.phead}><div><div className={styles.eyebrow}>The Power-to-Cash Corridor</div><div className={styles.h2}>Qatar can compress the path from power to contracted cash</div></div><div className={styles.pnum}>03</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.phead}><div><div className={styles.eyebrow}>Valuation Uplift</div><div className={styles.h2}>Downside protection with asymmetric equity upside</div></div><div className={styles.pnum}>08</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.stat}><div className={styles.statFig}>$1.5<span className={styles.statU}>B</span></div><div className={styles.statLab}>Deployed Capital</div><div className={styles.statSub}>Direct sovereign ownership.</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.stat}><div className={styles.statFig}>150<span className={styles.statU}>MW</span></div><div className={styles.statLab}>Initial Capacity</div><div className={styles.statSub}>Targeted under anchor-led pre-lease.</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div className={styles.valDesc}>Initial model equity creation. Validates the sovereign intelligence layer.</div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div><div className={styles.beV}>{usdB(p.totalValueConsortium)}</div><div className={styles.beL}>Total value created</div></div>",
+    "app/(cockpit)/reports/qatar/report-view.tsx :: <div><div className={styles.sq}>M3–M6</div><div className={styles.sh}>Fast-Track Prep</div><div className={styles.sd}>Available or allocable MW are prepared for first powered delivery.</div></div>",
+    "components/presentation/pages/DatacenterP2.jsx :: <span style={S.darkHeadlineAccent}>We assemble it.</span>",
+    "components/presentation/pages/P2InsideLeft.jsx :: <span style={S.darkHeadlineAccent}>The window is now.</span>",
+    "components/presentation/pages/P2InsideLeft.jsx :: title=\"PROPOSED STRUCTURE\"",
+    "components/presentation/pages/P3InsideRight.jsx :: <div style={S.buildingImg} aria-label=\"Image campus\" />",
+    "components/presentation/pages/P3InsideRight.jsx :: title=\"ACCELERATE\"",
+    "components/presentation/pages/P4Back.jsx :: <div style={S.contactValue}>By invitation only.</div>",
+    "components/presentation/pitch-misa/shared/PillarDeck.jsx :: <div style={{ ...S.clickZone, ...S.clickLeft }} onClick={() => go(-1)} aria-label=\"Previous slide\" />",
+    "components/presentation/pitch-misa/shared/PillarDeck.jsx :: <div style={{ ...S.clickZone, ...S.clickRight }} onClick={() => go(1)} aria-label=\"Next slide\" />"
+  ]
 }
