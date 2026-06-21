@@ -315,8 +315,8 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <th className={styles.thHl}>Milestone</th>
                 <th>Lease revenue</th>
                 <th>EBITDA · 65%</th>
-                <th className={styles.thHl}>Consortium cash · 80%</th>
-                <th className={styles.thHl}>Cumulative</th>
+                <th className={styles.thHl}>Consortium · 80%</th>
+                <th className={styles.thHl}>Cumulative cash</th>
               </tr>
             </thead>
             <tbody>
@@ -345,9 +345,14 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 );
               })}
               <tr className={styles.trStrong}>
-                <td>Terminal asset · Year 15</td>
-                <td colSpan={2}>22× exit EBITDA</td>
-                <td className={styles.tdHl}>{usdB(assetFinal)}</td>
+                <td>15-year cash total</td>
+                <td colSpan={2}>—</td>
+                <td className={styles.tdHl}>{usdB(cashFinal)}</td>
+                <td className={styles.tdHl}>{usdB(cashFinal)}</td>
+              </tr>
+              <tr className={styles.rowExit}>
+                <td>+ Terminal asset · Y15</td>
+                <td colSpan={3}>22× exit EBITDA · {usdB(assetFinal)}</td>
                 <td className={styles.tdHl}>{usdB(totalFinal)}</td>
               </tr>
             </tbody>

@@ -18,6 +18,15 @@ modules) · Supabase (schéma `crm`, service_role) · Kimi K2.6 via Hypercli · 
 
 ---
 
+## 🚨 RÈGLE ABSOLUE — FIN DE PASSE → COMMIT + PUSH
+Dès qu'une passe de travail est terminée (fix, feature, audit, refactor — peu importe) :
+1. `git add` des fichiers modifiés (jamais `-A` global).
+2. `git commit` avec message descriptif.
+3. `git push` immédiatement.
+Pas d'accumulation. Pas de "je pousse après". Chaque passe = un commit + un push.
+
+---
+
 ## 🚨 RÈGLES ABSOLUES — INFRASTRUCTURE (NON NÉGOCIABLE)
 
 ### Dev server → port **5005**, toujours.
