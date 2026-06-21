@@ -241,21 +241,22 @@
 .ratK { color: var(--ink); font-weight: 600; }
 
 /* Return Stack — institutional table (fine rules, no closed cards) */
+.thesisBlock { margin: 48px 0 32px; padding-left: 20px; border-left: 3px solid var(--gold); }
+.thesisLine { font-family: var(--serif); font-size: 21px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+.thesisLine b { color: var(--ink); font-weight: 500; }
+
 .rstack { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.rstack th { text-align: right; padding: 16px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--ink); }
-.rstack th:first-child { text-align: left; }
-.rstack td { text-align: right; padding: 18px 10px; font-size: 12.5px; color: var(--text); border-bottom: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums; }
-.rstack td:first-child { text-align: left; }
-.rsLayer { color: var(--ink); font-weight: 600; }
-.rsEv { color: var(--goldD); font-weight: 600; }
+.rstack th { text-align: left; padding: 16px 12px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--ink); }
+.rstack td { text-align: left; padding: 22px 12px; font-size: 14px; color: var(--text); border-bottom: 1px solid var(--line); vertical-align: top; }
+.rsLayer { color: var(--ink); font-weight: 600; font-family: var(--serif); font-size: 18px !important; }
+.rsDesc { color: var(--muted); line-height: 1.5; }
+.rsEv { color: var(--goldD); font-weight: 600; font-variant-numeric: tabular-nums; }
 .rsCore td { background: var(--ink); color: #FBFAF6; border-bottom: 3px solid var(--gold); }
 .rsCore .rsLayer { color: #FBFAF6; }
+.rsCore .rsDesc { color: var(--faint); }
 .rsCore .rsEv { color: var(--gold); }
 .rsOption td { color: var(--muted); }
 .rsOption .rsLayer { color: var(--ink); }
-.rsStatusCore { font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600; color: var(--gold); }
-.rsStatusUp { font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600; color: var(--goldD); }
-.rsStatusOpt { font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600; color: var(--faint); }
 
 /* responsive */
 @media (max-width: 920px) {
@@ -298,6 +299,6 @@
   
   .rsCore td { background: transparent !important; color: var(--ink) !important; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
   .rsCore .rsLayer { color: var(--ink) !important; }
+  .rsCore .rsDesc { color: var(--muted) !important; }
   .rsCore .rsEv { color: var(--ink) !important; }
-  .rsStatusCore { color: var(--ink) !important; }
 }

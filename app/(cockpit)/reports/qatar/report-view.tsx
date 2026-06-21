@@ -343,8 +343,8 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
         {/* ===== 5 · PROPRIETARY COMPUTE RESERVE ===== */}
         <section className={styles.page}>
           <div className={styles.topbar}><div className={styles.brand}>Strategic Upside · Equity Creation</div><div className={styles.confidential}>Investment Memorandum — 05 / 09</div></div>
-          <div className={styles.phead}><div><div className={styles.eyebrow}>Proprietary Compute Reserve</div><div className={styles.h2}>Lease a megawatt, you own a cash flow. Reserve a megawatt, you can own a model.</div></div><div className={styles.pnum}>05</div></div>
-          <p className={styles.lede} style={{ marginBottom: 36 }}>A dedicated fraction of the platform's capacity is reserved for proprietary compute. This capacity is not leased to third parties; it is retained by the platform to train, fine-tune, and serve sovereign models on open-weight foundations — not a frontier model from scratch. This creates asymmetric equity upside beyond the infrastructure yield.</p>
+          <div className={styles.phead}><div><div className={styles.eyebrow}>Proprietary LLM Reserve</div><div className={styles.h2}>Lease a megawatt, you own a cash flow. Retain a megawatt, you own a proprietary LLM.</div></div><div className={styles.pnum}>05</div></div>
+          <p className={styles.lede} style={{ marginBottom: 36 }}>A dedicated fraction of the platform's capacity is reserved for proprietary compute. This capacity is not leased to third parties; it is retained by the platform to train, fine-tune, and serve a proprietary Hearst LLM on open-weight foundations. This creates asymmetric equity upside beyond the infrastructure yield.</p>
 
           <div className={styles.ladderList}>
             {PROPRIETARY_COMPUTE_RESERVE.map((tier, i) => {
@@ -367,11 +367,11 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           </div>
 
           <div className={styles.rationale}>
-            <div className={styles.ratItem}><span className={styles.ratK}>3 MW first.</span> The smallest pocket that is a real capability — a fine-tuning factory and sovereign-model program — not a demonstration.</div>
+            <div className={styles.ratItem}><span className={styles.ratK}>3 MW first.</span> The smallest pocket that is a real capability — a fine-tuning factory for the proprietary Hearst LLM.</div>
             <div className={styles.ratItem}><span className={styles.ratK}>5 MW unlocks scale.</span> Sovereign serving at meaningful scale; cloud and managed-services revenue begin to blend with infrastructure yield.</div>
-            <div className={styles.ratItem}><span className={styles.ratK}>10 MW is the inflection.</span> Large fine-tunes and continued pretraining support a genuine proprietary-LLM-platform narrative and a software multiple.</div>
-            <div className={styles.ratItem}><span className={styles.ratK}>20 MW is an option.</span> An institutional expansion that triggers on a sovereign anchor contract — never an initial commitment.</div>
-            <div className={styles.ratItem}><span className={styles.ratK}>Capital is ring-fenced.</span> GPU capex sits in a separate compute sub-vehicle, so its depreciation and obsolescence never touch the contracted infrastructure yield.</div>
+            <div className={styles.ratItem}><span className={styles.ratK}>10 MW is the inflection.</span> Large fine-tunes and continued pretraining support a genuine proprietary LLM platform narrative.</div>
+            <div className={styles.ratItem}><span className={styles.ratK}>20 MW is an option.</span> A sovereign expansion option that triggers on an anchor contract — never an initial commitment.</div>
+            <div className={styles.ratItem}><span className={styles.ratK}>Capital is ring-fenced.</span> GPU capex sits in a separate compute sub-vehicle, so its depreciation never touches the contracted infrastructure yield.</div>
           </div>
 
           <div className={styles.flexcap}>
@@ -443,71 +443,57 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           <div className={styles.viz}><UpliftSVG coreLabel={usdB(p.totalValueConsortium)} /></div>
           <div className={styles.note} style={{ margin: '4px 0 30px' }}>Illustrative value stack. The Core Contracted Case underwrites the asset; the Proprietary Compute Reserve creates the equity upside. Additional-EV ranges are the figures below; bar heights are proportional intent.</div>
 
-          <div className={styles.sectlabel}>Return Stack — Core Floor vs Proprietary Compute Upside</div>
-          <div className={styles.sublabel}>Reserve rows are incremental and mutually progressive — the 10 MW tier includes the 3→5→10 ramp; rows are not additive. Reserve revenue and contribution are illustrative potential at maturity, not contracted.</div>
+          <div className={styles.thesisBlock}>
+            <div className={styles.thesisLine}><b>Existing sovereign infrastructure</b> underwrites the asset.</div>
+            <div className={styles.thesisLine}><b>Reserved compute</b> is retained for the proprietary Hearst LLM.</div>
+            <div className={styles.thesisLine}>That reserve adds <b>strategic software-layer upside</b> above the core infrastructure value.</div>
+          </div>
+
           <table className={styles.rstack}>
             <thead>
               <tr>
-                <th style={{ width: '18%' }}>Layer</th>
-                <th style={{ width: '6%' }}>MW</th>
-                <th style={{ width: '11%' }}>Capex</th>
-                <th style={{ width: '12%' }}>Revenue / yr</th>
-                <th style={{ width: '13%' }}>Op. contribution</th>
-                <th style={{ width: '16%' }}>Valuation logic</th>
-                <th style={{ width: '13%' }}>Additional EV</th>
-                <th style={{ width: '11%' }}>Status</th>
+                <th style={{ width: '22%' }}>Layer</th>
+                <th style={{ width: '32%' }}>What it is</th>
+                <th style={{ width: '15%' }}>Capital needed</th>
+                <th style={{ width: '16%' }}>What it can generate</th>
+                <th style={{ width: '15%' }}>Potential value added</th>
               </tr>
             </thead>
             <tbody>
               <tr className={styles.rsCore}>
-                <td className={styles.rsLayer}>Core Contracted Case</td>
-                <td>150</td>
+                <td className={styles.rsLayer}>Core Infrastructure</td>
+                <td className={styles.rsDesc}>150 MW sovereign data center platform already underwriting the asset</td>
                 <td>{usdB1(a.fundedCapexUsd)}</td>
-                <td>{usdM(gross)}</td>
-                <td>{usdM(p.annualEbitda)}</td>
-                <td>Infrastructure · 22×</td>
-                <td className={styles.rsEv}>{usdB(p.totalValueConsortium)}</td>
-                <td className={styles.rsStatusCore}>Bankable floor</td>
+                <td>{usdM(p.consortiumAnnualCash)} annual consortium cash</td>
+                <td className={styles.rsEv}>{usdB(p.totalValueConsortium)} core value</td>
               </tr>
               <tr>
-                <td className={styles.rsLayer}>+ 3 MW reserve</td>
-                <td>+3</td>
+                <td className={styles.rsLayer}>3 MW Reserve</td>
+                <td className={styles.rsDesc}>First proprietary LLM capability</td>
                 <td>+$155–210M</td>
-                <td>~$15–30M</td>
-                <td>~$6–15M · 40–50%</td>
-                <td>Services + early model-IP</td>
-                <td className={styles.rsEv}>+$0.3 / 0.5 / 0.8B</td>
-                <td className={styles.rsStatusUp}>Upside · contract</td>
+                <td>~$6–15M potential annual contribution</td>
+                <td className={styles.rsEv}>+$0.3–0.8B</td>
               </tr>
               <tr>
-                <td className={styles.rsLayer}>+ 5 MW reserve</td>
-                <td>+5</td>
+                <td className={styles.rsLayer}>5 MW Reserve</td>
+                <td className={styles.rsDesc}>Platform seed</td>
                 <td>+$250–340M</td>
-                <td>~$30–60M</td>
-                <td>~$15–35M · 50–58%</td>
-                <td>Neocloud 3–5× + IP</td>
-                <td className={styles.rsEv}>+$0.6 / 1.0 / 1.6B</td>
-                <td className={styles.rsStatusUp}>Upside · utilization</td>
+                <td>~$15–35M</td>
+                <td className={styles.rsEv}>+$0.6–1.6B</td>
               </tr>
               <tr>
-                <td className={styles.rsLayer}>+ 10 MW reserve</td>
-                <td>+10</td>
+                <td className={styles.rsLayer}>10 MW Reserve</td>
+                <td className={styles.rsDesc}>Proprietary LLM platform</td>
                 <td>+$480–650M</td>
-                <td>~$70–140M</td>
-                <td>~$40–90M · 55–65%</td>
-                <td>Neocloud + software 10–20×</td>
-                <td className={styles.rsEv}>+$1.2 / 1.8 / 3.0B</td>
-                <td className={styles.rsStatusUp}>Upside · revenue</td>
+                <td>~$40–90M</td>
+                <td className={styles.rsEv}>+$1.2–3.0B</td>
               </tr>
               <tr className={styles.rsOption}>
-                <td className={styles.rsLayer}>+ 20 MW option</td>
-                <td>+20</td>
+                <td className={styles.rsLayer}>20 MW Option</td>
+                <td className={styles.rsDesc}>Sovereign expansion option</td>
                 <td>+$0.95–1.3B</td>
-                <td>~$150–280M</td>
-                <td>~$90–180M · 60–65%</td>
-                <td>Strategic sovereign premium</td>
-                <td className={styles.rsEv}>+$2.0 / 3.0 / 5.0B</td>
-                <td className={styles.rsStatusOpt}>Option · anchor</td>
+                <td>~$90–180M</td>
+                <td className={styles.rsEv}>+$2.0–5.0B</td>
               </tr>
             </tbody>
           </table>
