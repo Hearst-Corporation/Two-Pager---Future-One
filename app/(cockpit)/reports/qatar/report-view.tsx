@@ -411,13 +411,13 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           <table className={styles.rstack}>
             <thead>
               <tr>
-                <th style={{ width: '17%' }}>Layer</th>
-                <th>MW</th>
-                <th>Capex</th>
-                <th>Revenue / yr</th>
-                <th>Op. contribution</th>
-                <th style={{ width: '20%' }}>Valuation logic</th>
-                <th>Additional EV</th>
+                <th style={{ width: '15%' }}>Layer</th>
+                <th style={{ width: '6%' }}>MW</th>
+                <th style={{ width: '11%' }}>Capex</th>
+                <th style={{ width: '11%' }}>Revenue / yr</th>
+                <th style={{ width: '13%' }}>Op. contribution</th>
+                <th style={{ width: '16%' }}>Valuation logic</th>
+                <th style={{ width: '13%' }}>Additional EV</th>
                 <th style={{ width: '15%' }}>Status</th>
               </tr>
             </thead>
@@ -426,10 +426,10 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <td className={styles.rsLayer}>Core Contracted Case</td>
                 <td>150</td>
                 <td>{usdB1(a.fundedCapexUsd)}</td>
-                <td>{usdM(gross)} gross</td>
-                <td>{usdM(p.annualEbitda)} EBITDA</td>
-                <td>Infrastructure · 22× exit</td>
-                <td className={styles.rsEv}>{usdB(p.totalValueConsortium)} value</td>
+                <td>{usdM(gross)}</td>
+                <td>{usdM(p.annualEbitda)}</td>
+                <td>Infrastructure · 22×</td>
+                <td className={styles.rsEv}>{usdB(p.totalValueConsortium)}</td>
                 <td><span className={`${styles.rsTag} ${styles.rsTagCore}`}>Bankable floor</span></td>
               </tr>
               <tr>
@@ -440,7 +440,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <td>~$6–15M · 40–50%</td>
                 <td>Services + early model-IP</td>
                 <td className={styles.rsEv}>+$0.3 / 0.5 / 0.8B</td>
-                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · 1 model contract</span></td>
+                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · contract</span></td>
               </tr>
               <tr>
                 <td className={styles.rsLayer}>+ 5 MW reserve</td>
@@ -460,7 +460,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <td>~$40–90M · 55–65%</td>
                 <td>Neocloud + software 10–20×</td>
                 <td className={styles.rsEv}>+$1.2 / 1.8 / 3.0B</td>
-                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · recurring rev.</span></td>
+                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · revenue</span></td>
               </tr>
               <tr className={styles.rsOption}>
                 <td className={styles.rsLayer}>+ 20 MW option</td>
@@ -470,7 +470,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <td>~$90–180M · 60–65%</td>
                 <td>Strategic sovereign premium</td>
                 <td className={styles.rsEv}>+$2.0 / 3.0 / 5.0B</td>
-                <td><span className={`${styles.rsTag} ${styles.rsTagOpt}`}>Option · sovereign anchor</span></td>
+                <td><span className={`${styles.rsTag} ${styles.rsTagOpt}`}>Option · anchor</span></td>
               </tr>
             </tbody>
           </table>
