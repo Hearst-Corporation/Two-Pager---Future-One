@@ -16,7 +16,11 @@ const DEF_RE = /^\s*(--[a-z0-9-]+)\s*:/i;
 const SKIP = [/node_modules/, /\.next/, /coverage/, /playwright-report/];
 
 const CP_SOT = 'app/(cockpit)/admin/hearst/cp-tokens.css';
-const COLOR_SOT = 'app/globals.css';
+// --color-* legacy = globals.css (login). La surface presentation/ est un
+// domaine de tokens autonome (cf. « design libre par repo ») et possède sa
+// propre source --color-* ; l'invariant « une seule source par token » ci-dessous
+// continue d'interdire toute duplication entre ces fichiers.
+const COLOR_SOT = ['app/globals.css', 'app/(cockpit)/presentation/presentation-tokens.css'];
 
 function walkCss(dir, out = []) {
   for (const e of readdirSync(dir)) {
@@ -59,8 +63,8 @@ for (const [token, fileset] of map) {
   if (token.startsWith('--cp-') && only !== CP_SOT) {
     errors.push(`${token} (--cp-*) défini dans ${only} → doit vivre dans ${CP_SOT}`);
   }
-  if (token.startsWith('--color-') && only !== COLOR_SOT) {
-    errors.push(`${token} (--color-*) défini dans ${only} → doit vivre dans ${COLOR_SOT}`);
+  if (token.startsWith('--color-') && !COLOR_SOT.includes(only)) {
+    errors.push(`${token} (--color-*) défini dans ${only} → doit vivre dans ${COLOR_SOT.join(' ou ')}`);
   }
 }
 

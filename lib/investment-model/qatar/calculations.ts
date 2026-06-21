@@ -87,7 +87,8 @@ export function computePlatform(
   const totalValueOperating = cumulativeCashOperating + terminalValueOperating;
 
   const cfTotal = [-fundedCapexUsd];
-  const cfConsortium = [-fundedCapexUsd];
+  // Consortium deploys only its share of capex — IRR must reflect its actual outlay.
+  const cfConsortium = [-fundedCapexUsd * consortiumShare];
   for (let y = 1; y <= holdYears; y++) {
     const ebitdaY = annualEbitda * Math.pow(1 + escalation, y - 1) * energized(y);
     let cTot = ebitdaY;
@@ -118,7 +119,9 @@ export function computePlatform(
     totalValueConsortium,
     totalValueOperating,
     moicTotal: totalValueTotal / fundedCapexUsd,
-    moicConsortium: totalValueConsortium / fundedCapexUsd,
+    moicConsortium: (fundedCapexUsd * consortiumShare) > 0
+      ? totalValueConsortium / (fundedCapexUsd * consortiumShare)
+      : 0,
     irrTotal: irr(cfTotal),
     irrConsortium: irr(cfConsortium),
     cumulativeByYear,

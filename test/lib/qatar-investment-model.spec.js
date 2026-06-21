@@ -28,8 +28,8 @@ describe('Qatar model — canonical platform headline numbers', () => {
     expect(r.terminalValueConsortium / B).toBeCloseTo(7.01, 2));
   it('total consortium value ≈ $10.93B', () =>
     expect(r.totalValueConsortium / B).toBeCloseTo(10.93, 2));
-  it('MOIC ≈ 7.3×', () => expect(r.moicConsortium).toBeCloseTo(7.3, 1));
-  it('IRR ≈ 20.7%', () => expect(r.irrConsortium * 100).toBeCloseTo(20.7, 1));
+  it('MOIC ≈ 9.1×', () => expect(r.moicConsortium).toBeCloseTo(9.1, 1));
+  it('IRR ≈ 24.3%', () => expect(r.irrConsortium * 100).toBeCloseTo(24.3, 1));
   it('total-project IRR ≈ 24.3%', () =>
     expect(r.irrTotal * 100).toBeCloseTo(24.3, 1));
 });
@@ -49,16 +49,16 @@ describe('Qatar model — per-MW unit economics', () => {
 describe('Qatar model — scenario range', () => {
   const by = (k) => SCENARIO_RESULTS.find((s) => s.key === k);
 
-  it('Downside Case ≈ 11.0% IRR / 3.3× MOIC', () => {
-    expect(by('downside').irr * 100).toBeCloseTo(11.0, 0);
-    expect(by('downside').moic).toBeCloseTo(3.3, 1);
+  it('Downside Case ≈ 13.4% IRR / 4.2× MOIC', () => {
+    expect(by('downside').irr * 100).toBeCloseTo(13.4, 0);
+    expect(by('downside').moic).toBeCloseTo(4.2, 1);
   });
-  it('Base Case ≈ 15.1% IRR / 4.9× MOIC', () => {
-    expect(by('base').irr * 100).toBeCloseTo(15.1, 0);
-    expect(by('base').moic).toBeCloseTo(4.9, 1);
+  it('Base Case ≈ 17.9% IRR / 6.2× MOIC', () => {
+    expect(by('base').irr * 100).toBeCloseTo(17.9, 0);
+    expect(by('base').moic).toBeCloseTo(6.2, 1);
   });
-  it('Core Contracted Case ≈ 20.7% IRR / 7.3× MOIC', () => {
-    expect(by('core').irr * 100).toBeCloseTo(20.7, 1);
-    expect(by('core').moic).toBeCloseTo(7.3, 1);
+  it('Core Contracted Case ≈ 24.3% IRR / 9.1× MOIC', () => {
+    expect(by('core').irr * 100).toBeCloseTo(24.3, 1);
+    expect(by('core').moic).toBeCloseTo(9.1, 1);
   });
 });

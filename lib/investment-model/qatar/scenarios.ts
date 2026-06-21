@@ -15,7 +15,7 @@ export const SCENARIOS: ScenarioDef[] = [
       escalation: 0.02,
     },
     ramp: [0.2, 0.5, 0.8],
-    canonical: { irr: 0.11, moic: 3.3 },
+    canonical: { irr: 0.134, moic: 4.17 },
   },
   {
     key: 'base',
@@ -27,14 +27,14 @@ export const SCENARIOS: ScenarioDef[] = [
       escalation: 0.03,
     },
     ramp: [0.4, 0.8],
-    canonical: { irr: 0.151, moic: 4.9 },
+    canonical: { irr: 0.179, moic: 6.17 },
   },
   {
     key: 'core',
     label: 'Core Contracted Case',
     overrides: {},
     ramp: [],
-    canonical: { irr: 0.207, moic: 7.3 },
+    canonical: { irr: 0.243, moic: 9.1 },
   },
 ];
 

@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { compactLiveBriefForModel } from '../app/api/admin/hearst/strategic-memo/route.js';
+import { compactLiveBriefForModel } from '../app/api/admin/hearst/strategic-memo/memo-projection.js';
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 

@@ -16,7 +16,7 @@ import {
   projectArchetype,
 } from '@/lib/hearst-deal-structures.js';
 import { generateProjection } from '@/lib/hearst-calculations.js';
-import { resolveTruthProjection } from '@/app/api/admin/hearst/strategic-memo/route.js';
+import { resolveTruthProjection } from '@/app/api/admin/hearst/strategic-memo/memo-projection.js';
 
 const ID_TO_ARCHETYPE = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
 
