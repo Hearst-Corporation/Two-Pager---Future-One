@@ -163,25 +163,19 @@ body.oracle-results-page [data-viz-rail] {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  /* Capital bande : donut pleine largeur, returns | structure en dessous */
+  /* Capital bande : donut pleine largeur, structure en dessous */
   body.oracle-results-page [data-capital-panel] {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     grid-template-areas:
-      'donut donut'
-      'returns structure';
+      'donut'
+      'structure';
     gap: var(--cp-space-5);
     align-items: start;
   }
 
   body.oracle-results-page [data-capital-zone='donut'] {
     grid-area: donut;
-  }
-
-  body.oracle-results-page [data-capital-zone='returns'] {
-    grid-area: returns;
-    justify-content: flex-start;
-    align-self: start;
   }
 
   body.oracle-results-page [data-capital-zone='structure'] {
@@ -194,15 +188,9 @@ body.oracle-results-page [data-viz-rail] {
     padding-top: 0;
   }
 
-  body.oracle-results-page [data-capital-zone='returns'],
   body.oracle-results-page [data-capital-zone='structure'] {
     border-top: 1px solid var(--cp-border-base);
     padding-top: var(--cp-space-5);
-  }
-
-  body.oracle-results-page [data-capital-zone='structure'] {
-    border-left: 1px solid var(--cp-border-base);
-    padding-left: var(--cp-space-5);
   }
 
   body.oracle-results-page [data-capital-donut] {
@@ -239,10 +227,10 @@ body.oracle-results-page [data-viz-rail] {
 
   /* Analysis reste empilé (chart pleine largeur + bande capital) — pas de sidebar étroite */
 
-  /* Capital : donut · returns · structure (screenshot board) */
+  /* Capital : donut · structure côte à côte */
   body.oracle-results-page [data-capital-panel] {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
-    grid-template-areas: 'donut returns structure';
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    grid-template-areas: 'donut structure';
     align-items: start;
     gap: var(--cp-space-6);
   }
@@ -250,15 +238,6 @@ body.oracle-results-page [data-viz-rail] {
   body.oracle-results-page [data-capital-zone='donut'] {
     justify-content: flex-start;
     align-self: start;
-  }
-
-  body.oracle-results-page [data-capital-zone='returns'] {
-    justify-content: flex-start;
-    align-self: start;
-    border-top: 0;
-    padding-top: 0;
-    border-left: 1px solid var(--cp-border-base);
-    padding-left: var(--cp-space-5);
   }
 
   body.oracle-results-page [data-capital-zone='structure'] {

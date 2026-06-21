@@ -655,8 +655,8 @@ const S = {
   debtSummary: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-5)' },
   sensitivitySelect: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
   // Sticky first-column overrides — spread on top of S.th / S.tdLabel for label columns only
-  thSticky: { position: 'sticky', left: 0, zIndex: 1, background: 'var(--cp-surface-0)' },
-  tdLabelSticky: { position: 'sticky', left: 0, zIndex: 1, background: 'var(--cp-surface-2)' },
+  thSticky: { position: 'sticky', left: 0, zIndex: 1, background: 'color-mix(in srgb, var(--cp-bg-deep) 96%, var(--cp-text-strong))' },
+  tdLabelSticky: { position: 'sticky', left: 0, zIndex: 1, background: 'color-mix(in srgb, var(--cp-bg-deep) 94%, var(--cp-text-strong))' },
   // Sources traceability link below KPI grid
   sourcesLink: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-accent)', fontWeight: 'var(--cp-weight-semibold)', textDecoration: 'none' },
 };

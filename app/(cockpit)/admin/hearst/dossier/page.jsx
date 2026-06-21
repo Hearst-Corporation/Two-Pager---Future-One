@@ -281,11 +281,15 @@ function Cashflow({ years }) {
 // context when viewing a memo in isolation.
 // Data comes from the `scenario` row (hearst_scenarios.*) already fetched by
 // GET /strategic-memos/[id] and passed as a prop — no new fetch needed.
-// Fields used: name, total_mw, archetype_id, business_model_id, total_capex,
-// debt_pct. If a field is absent on the row we show '—', never an invented value.
+// Fields used: name, total_mw, archetype_id, business_model_id, debt_pct.
+// CAPEX comes from execProjection (_exec_projection embedded in memo_json) —
+// total_capex is NOT persisted on the scenario row (it is computed by the engine
+// at projection time), so we read it from the projection snapshot embedded in the
+// memo. If absent on both sources, '—' is shown — no invented value.
 
-function DecisionContextCard({ scenario }) {
+function DecisionContextCard({ scenario, execProjection }) {
   const sc = scenario || {};
+  const proj = execProjection || {};
   const NA = UI.DOSSIER_CTX_MISSING;
 
   // Capacity: prefer total_mw from the row; fall back to '—'
@@ -297,8 +301,10 @@ function DecisionContextCard({ scenario }) {
     ? archParts.map(s => s.replace(/_/g, ' ')).join(' · ')
     : NA;
 
-  // Total CAPEX: from scenario row (computed by the engine when saved)
-  const capex = sc.total_capex != null ? fmtUsd(sc.total_capex) : NA;
+  // Total CAPEX: read from the projection snapshot embedded in the memo
+  // (_exec_projection.total_capex). total_capex is not persisted on the
+  // scenario row — it is a computed output of generateProjection.
+  const capex = proj.total_capex != null ? fmtUsd(proj.total_capex) : NA;
 
   // Leverage: debt_pct stored as 0..100 on the row
   const leverage = sc.debt_pct != null ? `${sc.debt_pct}%` : NA;
@@ -453,7 +459,7 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
       </Card>
 
       {/* ── DECISION CONTEXT (scenario anchor) ───────────────────────── */}
-      {scenario && <DecisionContextCard scenario={scenario} />}
+      {scenario && <DecisionContextCard scenario={scenario} execProjection={m._exec_projection} />}
 
       {/* ── KPI STRIP + RETURNS COMPOSITION ─────────────────────────── */}
       <section style={S.kpiStrip}>
