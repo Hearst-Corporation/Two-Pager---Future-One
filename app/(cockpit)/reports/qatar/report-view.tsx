@@ -123,21 +123,22 @@ function ValueBridgeSVG({
 }
 
 /* ---------- Section 8 · Valuation Uplift value-stack (deterministic SVG) ---------- */
-function UpliftSVG() {
-  // Editorial step-stack: a broad, stable infrastructure base, then progressively
-  // taller equity-upside steps. Heights are illustrative proportions only — no
-  // financial figures are asserted. Reserve MW reproduce PROPRIETARY_COMPUTE_RESERVE.
-  const W = 1000, H = 360, L = 70, R = 30, T = 30, B = 96;
+function UpliftSVG({ coreLabel }: { coreLabel: string }) {
+  // Editorial step-stack: a broad, stable infrastructure base (the Core Contracted
+  // Case value), then progressively taller equity-upside steps showing the
+  // additional-EV range each reserve tier can support once contracted. Bar heights
+  // are illustrative proportions; the EV ranges are the canonical display figures.
+  const W = 1000, H = 384, L = 70, R = 30, T = 44, B = 100;
   const e: ReactNode[] = [];
   let k = 0;
   const key = () => `u${k++}`;
 
-  const steps: Array<{ tag: string; head: string; lens: string; h: number; gold: boolean }> = [
-    { tag: 'Core', head: 'Deep Data Center', lens: 'Infrastructure yield', h: 0.30, gold: false },
-    { tag: '+1–3 MW', head: 'Proof · Model Factory', lens: 'Services · proof', h: 0.46, gold: true },
-    { tag: '+5 MW', head: 'Platform Seed', lens: 'Cloud · neocloud', h: 0.62, gold: true },
-    { tag: '+10 MW', head: 'Proprietary LLM Platform', lens: 'Software · model equity', h: 0.82, gold: true },
-    { tag: '+20 MW', head: 'Institutional Option', lens: 'Sovereign platform', h: 1.0, gold: true },
+  const steps: Array<{ tag: string; head: string; ev: string; h: number; gold: boolean }> = [
+    { tag: 'Core', head: 'Deep Data Center', ev: coreLabel, h: 0.30, gold: false },
+    { tag: '+3 MW', head: 'Proof · Model Factory', ev: '+$0.3–0.8B', h: 0.46, gold: true },
+    { tag: '+5 MW', head: 'Platform Seed', ev: '+$0.6–1.6B', h: 0.62, gold: true },
+    { tag: '+10 MW', head: 'LLM Platform', ev: '+$1.2–3.0B', h: 0.82, gold: true },
+    { tag: '+20 MW', head: 'Institutional Option', ev: '+$2.0–5.0B', h: 1.0, gold: true },
   ];
 
   const plotW = W - L - R, plotH = H - T - B;
@@ -153,7 +154,7 @@ function UpliftSVG() {
     const barH = plotH * s.h;
     const y = baseY - barH;
     const isCore = !s.gold;
-    // open block: filled for core (downside floor), outlined gold for upside
+    // open block: filled for core (yield floor), outlined gold for upside
     if (isCore) {
       e.push(<rect key={key()} x={x} y={y} width={colW} height={barH} fill={INK} />);
     } else {
@@ -165,16 +166,17 @@ function UpliftSVG() {
       const prevH = plotH * steps[i - 1].h;
       e.push(<line key={key()} x1={x - gap} y1={baseY - prevH} x2={x} y2={baseY - prevH} stroke={LINE} strokeDasharray="2 3" />);
     }
-    // tag inside/above
-    e.push(<text key={key()} x={x + colW / 2} y={y - 12} textAnchor="middle" fontFamily="Inter" fontSize={13} fontWeight={700} fill={isCore ? INK : GOLDD}>{s.tag}</text>);
+    // EV figure above the bar (the headline number for each tier)
+    e.push(<text key={key()} x={x + colW / 2} y={y - 26} textAnchor="middle" fontFamily="Inter" fontSize={14.5} fontWeight={700} fill={isCore ? INK : GOLDD}>{s.ev}</text>);
+    // MW tag just under the EV figure
+    e.push(<text key={key()} x={x + colW / 2} y={y - 11} textAnchor="middle" fontFamily="Inter" fontSize={11} fontWeight={600} fill={MUT} letterSpacing="0.3">{s.tag}</text>);
     // head label below baseline
-    e.push(<text key={key()} x={x + colW / 2} y={baseY + 24} textAnchor="middle" fontFamily="Inter" fontSize={12.5} fontWeight={600} fill={INK}>{s.head}</text>);
-    e.push(<text key={key()} x={x + colW / 2} y={baseY + 42} textAnchor="middle" fontFamily="Inter" fontSize={11} fill={MUT}>{s.lens}</text>);
+    e.push(<text key={key()} x={x + colW / 2} y={baseY + 26} textAnchor="middle" fontFamily="Inter" fontSize={12} fontWeight={600} fill={INK}>{s.head}</text>);
   });
 
   // axis intent labels (left)
-  e.push(<text key={key()} x={L} y={T + 2} fontFamily="Inter" fontSize={11} fontWeight={600} fill={GOLDD} letterSpacing="0.4">Equity upside</text>);
-  e.push(<text key={key()} x={L} y={baseY - 6} fontFamily="Inter" fontSize={11} fontWeight={600} fill={MUT} letterSpacing="0.4">Yield floor</text>);
+  e.push(<text key={key()} x={L} y={T - 14} fontFamily="Inter" fontSize={11} fontWeight={600} fill={GOLDD} letterSpacing="0.4">Additional EV · equity upside</text>);
+  e.push(<text key={key()} x={L} y={baseY - 8} fontFamily="Inter" fontSize={11} fontWeight={600} fill={MUT} letterSpacing="0.4">Yield floor</text>);
 
   return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="presentation" aria-hidden="true">{e}</svg>;
 }
@@ -312,8 +314,8 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
         {/* ===== 5 · PROPRIETARY COMPUTE RESERVE ===== */}
         <section className={styles.page}>
           <div className={styles.topbar}><div className={styles.brand}>Strategic Upside · Equity Creation</div><div className={styles.confidential}>Investment Memorandum — 05 / 09</div></div>
-          <div className={styles.phead}><div><div className={styles.eyebrow}>Proprietary Compute Reserve</div><div className={styles.h2}>Every proprietary megawatt creates model equity</div></div><div className={styles.pnum}>05</div></div>
-          <p className={styles.lede} style={{ marginBottom: 42 }}>A dedicated fraction of the platform's capacity is reserved for proprietary compute. This capacity is not leased to third parties; it is retained by the platform to train, fine-tune, and serve sovereign models. This creates asymmetric equity upside beyond the infrastructure yield.</p>
+          <div className={styles.phead}><div><div className={styles.eyebrow}>Proprietary Compute Reserve</div><div className={styles.h2}>Lease a megawatt, you own a cash flow. Reserve a megawatt, you can own a model.</div></div><div className={styles.pnum}>05</div></div>
+          <p className={styles.lede} style={{ marginBottom: 36 }}>A dedicated fraction of the platform's capacity is reserved for proprietary compute. This capacity is not leased to third parties; it is retained by the platform to train, fine-tune, and serve sovereign models on open-weight foundations — not a frontier model from scratch. This creates asymmetric equity upside beyond the infrastructure yield.</p>
 
           <div className={styles.ladderList}>
             {PROPRIETARY_COMPUTE_RESERVE.map((tier, i) => (
@@ -327,8 +329,16 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
             ))}
           </div>
 
+          <div className={styles.rationale}>
+            <div className={styles.ratItem}><span className={styles.ratK}>3 MW first.</span> The smallest pocket that is a real capability — a fine-tuning factory and sovereign-model program — not a demonstration.</div>
+            <div className={styles.ratItem}><span className={styles.ratK}>5 MW unlocks scale.</span> Sovereign serving at meaningful scale; cloud and managed-services revenue begin to blend with infrastructure yield.</div>
+            <div className={styles.ratItem}><span className={styles.ratK}>10 MW is the inflection.</span> Large fine-tunes and continued pretraining support a genuine proprietary-LLM-platform narrative and a software multiple.</div>
+            <div className={styles.ratItem}><span className={styles.ratK}>20 MW is an option.</span> An institutional expansion that triggers on a sovereign anchor contract — never an initial commitment.</div>
+            <div className={styles.ratItem}><span className={styles.ratK}>Capital is ring-fenced.</span> GPU capex sits in a separate compute sub-vehicle, so its depreciation and obsolescence never touch the contracted infrastructure yield.</div>
+          </div>
+
           <div className={styles.flexcap}>
-            <div className={styles.note}>The Proprietary Compute Reserve is outside the Core Contracted Case. It represents strategic optionality for the consortium to capture software and model valuation multiples.</div>
+            <div className={styles.note}>The Core Contracted Case underwrites the asset. The Proprietary Compute Reserve creates the equity upside. It sits outside the Core Contracted Case and is not reflected in headline yield, MOIC or IRR until separately capitalized and contracted.</div>
           </div>
         </section>
 
@@ -393,31 +403,79 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           <div className={styles.phead}><div><div className={styles.eyebrow}>Valuation Uplift</div><div className={styles.h2}>Downside protection with asymmetric equity upside</div></div><div className={styles.pnum}>08</div></div>
           <p className={styles.lede} style={{ marginBottom: 42 }}>The financial architecture separates the predictable infrastructure yield from the high-multiple technology upside. The Core Contracted Case underwrites the asset, while the Proprietary Compute Reserve captures software valuation multiples.</p>
 
-          <div className={styles.viz}><UpliftSVG /></div>
-          <div className={styles.note} style={{ margin: '4px 0 30px' }}>Illustrative value stack. The Core Contracted Case underwrites the asset; the Proprietary Compute Reserve creates the equity upside. Step heights are proportional intent, not asserted valuations.</div>
+          <div className={styles.viz}><UpliftSVG coreLabel={usdB(p.totalValueConsortium)} /></div>
+          <div className={styles.note} style={{ margin: '4px 0 30px' }}>Illustrative value stack. The Core Contracted Case underwrites the asset; the Proprietary Compute Reserve creates the equity upside. Additional-EV ranges are the figures below; bar heights are proportional intent.</div>
 
-          <div className={styles.upLegend}>
-            <div className={styles.upItem}>
-              <div className={styles.upK}>Core Deep Data Center</div>
-              <div className={styles.upV}>Hosting only. Infrastructure multiples (~20–22× EBITDA). The absolute downside protection.</div>
-            </div>
-            <div className={styles.upItem}>
-              <div className={styles.upK}>+ 1–3 MW · Proof &amp; Model Factory</div>
-              <div className={styles.upV}>Initial model-equity creation; validates the sovereign intelligence layer on services and proof multiples.</div>
-            </div>
-            <div className={styles.upItem}>
-              <div className={styles.upK}>+ 5 MW · Platform Seed</div>
-              <div className={styles.upV}>Sovereign serving at scale; cloud and managed-services revenue blend with infrastructure yield.</div>
-            </div>
-            <div className={styles.upItem}>
-              <div className={styles.upK}>+ 10 MW · Proprietary LLM Platform</div>
-              <div className={styles.upV}>Software and model-equity multiples (10–15× revenue) applied to the intelligence layer's output.</div>
-            </div>
-            <div className={styles.upItem}>
-              <div className={styles.upK}>+ 20 MW · Institutional Option</div>
-              <div className={styles.upV}>Maximum asymmetric upside as a sovereign platform; an expansion option, not the initial commitment.</div>
-            </div>
-          </div>
+          <div className={styles.sectlabel}>Return Stack — Core Floor vs Proprietary Compute Upside</div>
+          <div className={styles.sublabel}>Reserve rows are incremental and mutually progressive — the 10 MW tier includes the 3→5→10 ramp; rows are not additive. Reserve revenue and contribution are illustrative potential at maturity, not contracted.</div>
+          <table className={styles.rstack}>
+            <thead>
+              <tr>
+                <th style={{ width: '17%' }}>Layer</th>
+                <th>MW</th>
+                <th>Capex</th>
+                <th>Revenue / yr</th>
+                <th>Op. contribution</th>
+                <th style={{ width: '20%' }}>Valuation logic</th>
+                <th>Additional EV</th>
+                <th style={{ width: '15%' }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className={styles.rsCore}>
+                <td className={styles.rsLayer}>Core Contracted Case</td>
+                <td>150</td>
+                <td>{usdB1(a.fundedCapexUsd)}</td>
+                <td>{usdM(gross)} gross</td>
+                <td>{usdM(p.annualEbitda)} EBITDA</td>
+                <td>Infrastructure · 22× exit</td>
+                <td className={styles.rsEv}>{usdB(p.totalValueConsortium)} value</td>
+                <td><span className={`${styles.rsTag} ${styles.rsTagCore}`}>Bankable floor</span></td>
+              </tr>
+              <tr>
+                <td className={styles.rsLayer}>+ 3 MW reserve</td>
+                <td>+3</td>
+                <td>+$155–210M</td>
+                <td>~$15–30M</td>
+                <td>~$6–15M · 40–50%</td>
+                <td>Services + early model-IP</td>
+                <td className={styles.rsEv}>+$0.3 / 0.5 / 0.8B</td>
+                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · 1 model contract</span></td>
+              </tr>
+              <tr>
+                <td className={styles.rsLayer}>+ 5 MW reserve</td>
+                <td>+5</td>
+                <td>+$250–340M</td>
+                <td>~$30–60M</td>
+                <td>~$15–35M · 50–58%</td>
+                <td>Neocloud 3–5× + IP</td>
+                <td className={styles.rsEv}>+$0.6 / 1.0 / 1.6B</td>
+                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · utilization</span></td>
+              </tr>
+              <tr>
+                <td className={styles.rsLayer}>+ 10 MW reserve</td>
+                <td>+10</td>
+                <td>+$480–650M</td>
+                <td>~$70–140M</td>
+                <td>~$40–90M · 55–65%</td>
+                <td>Neocloud + software 10–20×</td>
+                <td className={styles.rsEv}>+$1.2 / 1.8 / 3.0B</td>
+                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · recurring rev.</span></td>
+              </tr>
+              <tr className={styles.rsOption}>
+                <td className={styles.rsLayer}>+ 20 MW option</td>
+                <td>+20</td>
+                <td>+$0.95–1.3B</td>
+                <td>~$150–280M</td>
+                <td>~$90–180M · 60–65%</td>
+                <td>Strategic sovereign premium</td>
+                <td className={styles.rsEv}>+$2.0 / 3.0 / 5.0B</td>
+                <td><span className={`${styles.rsTag} ${styles.rsTagOpt}`}>Option · sovereign anchor</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div className={styles.note} style={{ marginTop: 22 }}>This Strategic Upside sits outside the Core Contracted Case and is not reflected in headline yield, MOIC or IRR until separately capitalized and contracted. GPU capital is ring-fenced in a dedicated compute sub-vehicle; reserve operating contribution excludes GPU depreciation. Reserve figures are illustrative potential at maturity, not contracted.</div>
         </section>
 
         {/* ===== 9 · CONDITIONS & DISCIPLINE ===== */}

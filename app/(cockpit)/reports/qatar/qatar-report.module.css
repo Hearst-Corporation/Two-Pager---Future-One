@@ -231,11 +231,28 @@
 .stackTop { color: var(--goldD); }
 .stackSep { color: var(--line2); margin: 0 16px; font-size: 16px; }
 
-/* Valuation Uplift — supporting legend under the SVG */
-.upLegend { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; margin-bottom: 8px; border-top: 1px solid var(--line); }
-.upItem { padding: 18px 0; border-bottom: 1px solid var(--line); }
-.upK { font-size: 12.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--ink); margin-bottom: 6px; }
-.upV { font-size: 13px; color: var(--muted); line-height: 1.55; }
+/* Proprietary Compute Reserve — ramp rationale (open, hairline-ruled) */
+.rationale { display: flex; flex-direction: column; margin: 28px 0 8px; border-top: 1px solid var(--line); }
+.ratItem { font-size: 13px; color: var(--muted); line-height: 1.55; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.ratK { color: var(--ink); font-weight: 600; }
+
+/* Return Stack — institutional table (fine rules, no closed cards) */
+.rstack { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.rstack th { text-align: right; padding: 12px 8px; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--ink); }
+.rstack th:first-child { text-align: left; }
+.rstack td { text-align: right; padding: 13px 8px; font-size: 11.5px; color: var(--text); border-bottom: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums; }
+.rstack td:first-child { text-align: left; }
+.rsLayer { color: var(--ink); font-weight: 600; }
+.rsEv { color: var(--goldD); font-weight: 600; white-space: nowrap; }
+.rsCore td { background: var(--ink); color: #FBFAF6; border-bottom: 1px solid var(--ink); }
+.rsCore .rsLayer { color: #FBFAF6; }
+.rsCore .rsEv { color: var(--gold); }
+.rsOption td { color: var(--muted); }
+.rsOption .rsLayer { color: var(--ink); }
+.rsTag { font-size: 9.5px; letter-spacing: 0.4px; text-transform: uppercase; font-weight: 600; line-height: 1.35; display: inline-block; }
+.rsTagCore { color: var(--gold); }
+.rsTagUp { color: var(--goldD); }
+.rsTagOpt { color: var(--faint); }
 
 /* responsive */
 @media (max-width: 920px) {
@@ -258,7 +275,8 @@
   .crossWord { writing-mode: horizontal-tb; transform: none; font-size: 34px; }
   .crossRow { grid-template-columns: 1fr; gap: 6px; }
   .stack { gap: 4px 0; }
-  .upLegend { grid-template-columns: 1fr; gap: 0; }
+  .rstack th, .rstack td { padding: 8px 5px; font-size: 10.5px; }
+  .rstack { table-layout: auto; }
 }
 
 /* print — A4 landscape, one section per page, collision-free */
@@ -271,6 +289,7 @@
   .report { background: #FFF; padding: 0; height: auto; overflow: visible; }
   .deck { gap: 0; max-width: none; padding: 0; }
   .page { box-shadow: none; break-after: page; page-break-after: always; padding: 40px 52px; }
-  .statrow, .pillars, .own, .evrow, .ladder, .chain, .stepstrip, .unitSplit, .coverHero, .buildbar, .propbar, .legalBox, .ftable, .matrix, .scn, .ladderRow, .capRow, .crossRow, .crossSec, .upItem { break-inside: avoid; page-break-inside: avoid; }
+  .statrow, .pillars, .own, .evrow, .ladder, .chain, .stepstrip, .unitSplit, .coverHero, .buildbar, .propbar, .legalBox, .ftable, .matrix, .scn, .ladderRow, .capRow, .crossRow, .crossSec, .rstack, .rationale { break-inside: avoid; page-break-inside: avoid; }
+  .rstack th, .rstack td { padding: 8px 6px; font-size: 10px; }
   .legal { max-width: none; }
 }
