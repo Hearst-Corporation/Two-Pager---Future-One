@@ -3,7 +3,6 @@ import styles from './qatar-report.module.css';
 import { QATAR_ASSUMPTIONS, PROPRIETARY_COMPUTE_RESERVE } from '@/lib/investment-model/qatar/assumptions';
 import {
   computePlatform,
-  unitEconomics,
   usdB,
   usdM,
   usdMdec,
@@ -123,11 +122,67 @@ function ValueBridgeSVG({
   return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="presentation" aria-hidden="true">{e}</svg>;
 }
 
+/* ---------- Section 8 · Valuation Uplift value-stack (deterministic SVG) ---------- */
+function UpliftSVG() {
+  // Editorial step-stack: a broad, stable infrastructure base, then progressively
+  // taller equity-upside steps. Heights are illustrative proportions only — no
+  // financial figures are asserted. Reserve MW reproduce PROPRIETARY_COMPUTE_RESERVE.
+  const W = 1000, H = 360, L = 70, R = 30, T = 30, B = 96;
+  const e: ReactNode[] = [];
+  let k = 0;
+  const key = () => `u${k++}`;
+
+  const steps: Array<{ tag: string; head: string; lens: string; h: number; gold: boolean }> = [
+    { tag: 'Core', head: 'Deep Data Center', lens: 'Infrastructure yield', h: 0.30, gold: false },
+    { tag: '+1–3 MW', head: 'Proof · Model Factory', lens: 'Services · proof', h: 0.46, gold: true },
+    { tag: '+5 MW', head: 'Platform Seed', lens: 'Cloud · neocloud', h: 0.62, gold: true },
+    { tag: '+10 MW', head: 'Proprietary LLM Platform', lens: 'Software · model equity', h: 0.82, gold: true },
+    { tag: '+20 MW', head: 'Institutional Option', lens: 'Sovereign platform', h: 1.0, gold: true },
+  ];
+
+  const plotW = W - L - R, plotH = H - T - B;
+  const gap = 22;
+  const colW = (plotW - gap * (steps.length - 1)) / steps.length;
+  const baseY = H - B;
+
+  // baseline rule
+  e.push(<line key={key()} x1={L} y1={baseY} x2={W - R} y2={baseY} stroke={LINE} />);
+
+  steps.forEach((s, i) => {
+    const x = L + i * (colW + gap);
+    const barH = plotH * s.h;
+    const y = baseY - barH;
+    const isCore = !s.gold;
+    // open block: filled for core (downside floor), outlined gold for upside
+    if (isCore) {
+      e.push(<rect key={key()} x={x} y={y} width={colW} height={barH} fill={INK} />);
+    } else {
+      e.push(<rect key={key()} x={x} y={y} width={colW} height={barH} fill="#FBF7EE" stroke={GOLD} strokeWidth={1.25} />);
+      e.push(<rect key={key()} x={x} y={y} width={colW} height={3} fill={GOLDD} />);
+    }
+    // connector tick between steps (rising staircase cue)
+    if (i > 0) {
+      const prevH = plotH * steps[i - 1].h;
+      e.push(<line key={key()} x1={x - gap} y1={baseY - prevH} x2={x} y2={baseY - prevH} stroke={LINE} strokeDasharray="2 3" />);
+    }
+    // tag inside/above
+    e.push(<text key={key()} x={x + colW / 2} y={y - 12} textAnchor="middle" fontFamily="Inter" fontSize={13} fontWeight={700} fill={isCore ? INK : GOLDD}>{s.tag}</text>);
+    // head label below baseline
+    e.push(<text key={key()} x={x + colW / 2} y={baseY + 24} textAnchor="middle" fontFamily="Inter" fontSize={12.5} fontWeight={600} fill={INK}>{s.head}</text>);
+    e.push(<text key={key()} x={x + colW / 2} y={baseY + 42} textAnchor="middle" fontFamily="Inter" fontSize={11} fill={MUT}>{s.lens}</text>);
+  });
+
+  // axis intent labels (left)
+  e.push(<text key={key()} x={L} y={T + 2} fontFamily="Inter" fontSize={11} fontWeight={600} fill={GOLDD} letterSpacing="0.4">Equity upside</text>);
+  e.push(<text key={key()} x={L} y={baseY - 6} fontFamily="Inter" fontSize={11} fontWeight={600} fill={MUT} letterSpacing="0.4">Yield floor</text>);
+
+  return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="presentation" aria-hidden="true">{e}</svg>;
+}
+
 /* ============================ REPORT ============================ */
 export function QatarReport({ print = false, fontClass = '' }: { print?: boolean; fontClass?: string }) {
   const a = QATAR_ASSUMPTIONS;
   const p = computePlatform(a);
-  const u = unitEconomics(a);
   const scn = SCENARIO_RESULTS;
   const by = (k: string) => scn.find((s) => s.key === k)!;
   const revenuePerMw = p.annualRevenue / a.mw;
@@ -168,6 +223,15 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
             <div><div className={styles.pe}>Layer 1</div><div className={styles.pk}>Deep Data Center</div><div className={styles.pv}>The 150 MW Core Contracted Case. Power-backed industrial policy delivering long-term institutional yield.</div></div>
             <div><div className={styles.pe}>Layer 2</div><div className={styles.pk}>Sovereign Resilience</div><div className={styles.pv}>Digital Continuity for national-priority workloads. Hardened infrastructure and EMP-shielded optionality.</div></div>
             <div><div className={styles.pe}>Layer 3</div><div className={styles.pk}>Proprietary Compute</div><div className={styles.pv}>A dedicated GPU reserve to train, fine-tune, and serve sovereign models—creating asymmetric equity upside.</div></div>
+          </div>
+
+          <div className={styles.stack}>
+            {['Energy', 'Deep Data Center', 'Sovereign Resilience', 'Proprietary Compute', 'Intelligence Layer'].map((s, i, arr) => (
+              <span key={s} className={styles.stackItem}>
+                <span className={i === arr.length - 1 ? styles.stackTop : undefined}>{s}</span>
+                {i < arr.length - 1 && <span className={styles.stackSep}>/</span>}
+              </span>
+            ))}
           </div>
         </section>
 
@@ -274,26 +338,26 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           <div className={styles.phead}><div><div className={styles.eyebrow}>Hearst AI Intelligence Layer</div><div className={styles.h2}>Converting reserved megawatts into proprietary model equity</div></div><div className={styles.pnum}>06</div></div>
           <p className={styles.lede} style={{ marginBottom: 42 }}>Hearst AI acts as the operating intelligence layer. It is not a vendor; it is the platform's proprietary engine for sovereign model serving, data-resident inference, and continued pretraining on national-priority data.</p>
 
-          <div className={styles.grid2}>
-            <div className={styles.gCard}>
-              <div className={styles.gIcon}>⚡</div>
-              <div className={styles.gTitle}>Platform-Controlled Compute</div>
-              <div className={styles.gDesc}>Direct management of the GPU compute infrastructure. From single GPU testing to multi-megawatt proprietary clusters, optimized for sovereign workloads.</div>
+          <div className={styles.capList}>
+            <div className={styles.capRow}>
+              <div className={styles.capNum}>01.</div>
+              <div className={styles.capTitle}>Platform-Controlled Compute</div>
+              <div className={styles.capDesc}>Direct management of the GPU compute infrastructure. From single-GPU validation to multi-megawatt proprietary clusters, optimized for sovereign workloads.</div>
             </div>
-            <div className={styles.gCard}>
-              <div className={styles.gIcon}>🧠</div>
-              <div className={styles.gTitle}>Sovereign Model Serving</div>
-              <div className={styles.gDesc}>Fine-tuning and continued pretraining of frontier open-weights (Llama, DeepSeek, Qwen) on proprietary national data, ensuring absolute data residency.</div>
+            <div className={styles.capRow}>
+              <div className={styles.capNum}>02.</div>
+              <div className={styles.capTitle}>Sovereign Model Serving</div>
+              <div className={styles.capDesc}>Fine-tuning and continued pretraining of open-weight foundations (Llama, DeepSeek, Qwen) on proprietary national data, ensuring absolute data residency.</div>
             </div>
-            <div className={styles.gCard}>
-              <div className={styles.gIcon}>☁️</div>
-              <div className={styles.gTitle}>AI Cloud &amp; Products</div>
-              <div className={styles.gDesc}>A full suite of developer tools, chat interfaces, and managed AI services deployed securely within the sovereign boundary.</div>
+            <div className={styles.capRow}>
+              <div className={styles.capNum}>03.</div>
+              <div className={styles.capTitle}>AI Cloud &amp; Products</div>
+              <div className={styles.capDesc}>A full suite of developer tools, chat interfaces, and managed AI services deployed securely within the sovereign boundary.</div>
             </div>
-            <div className={styles.gCard}>
-              <div className={styles.gIcon}>🛡️</div>
-              <div className={styles.gTitle}>Forward-Deployed Engineering</div>
-              <div className={styles.gDesc}>Elite engineering talent embedded locally to accelerate national AI adoption, perform custom development, and conduct frontier research.</div>
+            <div className={styles.capRow}>
+              <div className={styles.capNum}>04.</div>
+              <div className={styles.capTitle}>Forward-Deployed Engineering</div>
+              <div className={styles.capDesc}>Senior engineering talent embedded locally to accelerate national AI adoption, perform custom development, and conduct applied research.</div>
             </div>
           </div>
         </section>
@@ -304,10 +368,22 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           <div className={styles.phead}><div><div className={styles.eyebrow}>Sovereign Resilience Layer</div><div className={styles.h2}>The platform is not just performant; it is sovereign-grade</div></div><div className={styles.pnum}>07</div></div>
           <p className={styles.lede} style={{ marginBottom: 42 }}>To host national-priority workloads and sovereign intelligence, the physical infrastructure must guarantee Digital Continuity. The Bastion layer provides hardened design optionality for strategic facilities.</p>
 
-          <div className={styles.pillars}>
-            <div><div className={styles.pe}>Continuity</div><div className={styles.pk}>National-Priority Workloads</div><div className={styles.pv}>Designed to ensure uninterrupted operation for government, defense, and critical enterprise data under extreme conditions.</div></div>
-            <div><div className={styles.pe}>Protection</div><div className={styles.pk}>Hardened Infrastructure</div><div className={styles.pv}>Advanced physical and electromagnetic isolation (EMP-shielded optionality) exceeding standard commercial Tier IV requirements.</div></div>
-            <div><div className={styles.pe}>Operations</div><div className={styles.pk}>Active Monitoring</div><div className={styles.pv}>Integrated advisory and threat-intelligence subscriptions, providing sovereign stakeholders with complete situational awareness.</div></div>
+          <div className={styles.crossSec}>
+            <div className={styles.crossWord}>CONTINUITY</div>
+            <div className={styles.crossRows}>
+              <div className={styles.crossRow}>
+                <div className={styles.crossK}>National-Priority Workloads</div>
+                <div className={styles.crossV}>Designed to ensure uninterrupted operation for government and critical enterprise data, sustaining service through severe disruption.</div>
+              </div>
+              <div className={styles.crossRow}>
+                <div className={styles.crossK}>Hardened Infrastructure</div>
+                <div className={styles.crossV}>Advanced physical and electromagnetic isolation (EMP-shielded optionality) exceeding standard commercial Tier IV requirements.</div>
+              </div>
+              <div className={styles.crossRow}>
+                <div className={styles.crossK}>Active Monitoring</div>
+                <div className={styles.crossV}>Integrated advisory and situational-intelligence subscriptions, giving sovereign stakeholders complete operational awareness.</div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -317,41 +393,29 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           <div className={styles.phead}><div><div className={styles.eyebrow}>Valuation Uplift</div><div className={styles.h2}>Downside protection with asymmetric equity upside</div></div><div className={styles.pnum}>08</div></div>
           <p className={styles.lede} style={{ marginBottom: 42 }}>The financial architecture separates the predictable infrastructure yield from the high-multiple technology upside. The Core Contracted Case underwrites the asset, while the Proprietary Compute Reserve captures software valuation multiples.</p>
 
-          <div className={styles.valStack}>
-            <div className={styles.valRow}>
-              <div className={styles.valLet}>A</div>
-              <div className={styles.valCore}>
-                <div className={styles.valTitle}>Core Deep Data Center</div>
-                <div className={styles.valDesc}>Hosting only. Infrastructure multiples (~20–22× EBITDA). Provides the absolute downside protection.</div>
-              </div>
+          <div className={styles.viz}><UpliftSVG /></div>
+          <div className={styles.note} style={{ margin: '4px 0 30px' }}>Illustrative value stack. The Core Contracted Case underwrites the asset; the Proprietary Compute Reserve creates the equity upside. Step heights are proportional intent, not asserted valuations.</div>
+
+          <div className={styles.upLegend}>
+            <div className={styles.upItem}>
+              <div className={styles.upK}>Core Deep Data Center</div>
+              <div className={styles.upV}>Hosting only. Infrastructure multiples (~20–22× EBITDA). The absolute downside protection.</div>
             </div>
-            <div className={styles.valRow}>
-              <div className={styles.valLet}>B</div>
-              <div className={styles.valUp}>
-                <div className={styles.valTitle}>+ 1–3 MW Proprietary Compute Proof</div>
-                <div className={styles.valDesc}>Initial model equity creation. Validates the sovereign intelligence layer.</div>
-              </div>
+            <div className={styles.upItem}>
+              <div className={styles.upK}>+ 1–3 MW · Proof &amp; Model Factory</div>
+              <div className={styles.upV}>Initial model-equity creation; validates the sovereign intelligence layer on services and proof multiples.</div>
             </div>
-            <div className={styles.valRow}>
-              <div className={styles.valLet}>C</div>
-              <div className={styles.valUp}>
-                <div className={styles.valTitle}>+ 5 MW Sovereign Platform Seed</div>
-                <div className={styles.valDesc}>SaaS and managed services revenue streams begin to blend with infrastructure yield.</div>
-              </div>
+            <div className={styles.upItem}>
+              <div className={styles.upK}>+ 5 MW · Platform Seed</div>
+              <div className={styles.upV}>Sovereign serving at scale; cloud and managed-services revenue blend with infrastructure yield.</div>
             </div>
-            <div className={styles.valRow}>
-              <div className={styles.valLet}>D</div>
-              <div className={styles.valUp}>
-                <div className={styles.valTitle}>+ 10 MW Proprietary LLM Platform</div>
-                <div className={styles.valDesc}>Full technology multiples (10–15× Revenue) applied to the intelligence layer's output.</div>
-              </div>
+            <div className={styles.upItem}>
+              <div className={styles.upK}>+ 10 MW · Proprietary LLM Platform</div>
+              <div className={styles.upV}>Software and model-equity multiples (10–15× revenue) applied to the intelligence layer's output.</div>
             </div>
-            <div className={styles.valRow}>
-              <div className={styles.valLet}>E</div>
-              <div className={styles.valUp}>
-                <div className={styles.valTitle}>+ 20 MW Institutional Expansion</div>
-                <div className={styles.valDesc}>Maximum asymmetric upside. The platform becomes the dominant sovereign AI provider in the region.</div>
-              </div>
+            <div className={styles.upItem}>
+              <div className={styles.upK}>+ 20 MW · Institutional Option</div>
+              <div className={styles.upV}>Maximum asymmetric upside as a sovereign platform; an expansion option, not the initial commitment.</div>
             </div>
           </div>
         </section>

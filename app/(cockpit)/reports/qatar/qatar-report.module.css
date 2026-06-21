@@ -210,21 +210,32 @@
 .lrLabel { font-size: 15px; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: 1px; }
 .lrDesc { font-size: 14px; color: var(--muted); line-height: 1.5; }
 
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
-.gCard { padding: 32px; background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--ink); display: flex; flex-direction: column; gap: 16px; }
-.gIcon { font-size: 24px; }
-.gTitle { font-family: var(--serif); font-size: 20px; font-weight: 500; color: var(--ink); }
-.gDesc { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+/* Hearst AI — editorial capability list (open blocks, numbered, no cards) */
+.capList { display: flex; flex-direction: column; margin-bottom: 8px; border-top: 1px solid var(--line); }
+.capRow { display: grid; grid-template-columns: 72px 0.9fr 1.4fr; gap: 28px; align-items: baseline; padding: 26px 0; border-bottom: 1px solid var(--line); }
+.capNum { font-family: var(--serif); font-size: 22px; font-weight: 500; font-style: italic; color: var(--goldD); line-height: 1; }
+.capTitle { font-family: var(--serif); font-size: 21px; font-weight: 500; color: var(--ink); line-height: 1.2; }
+.capDesc { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
 
-.valStack { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
-.valRow { display: flex; align-items: stretch; gap: 16px; }
-.valLet { width: 48px; display: flex; align-items: center; justify-content: center; background: var(--line); font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--muted); }
-.valCore { flex: 1; padding: 24px 32px; background: var(--ink); color: #FBFAF6; }
-.valCore .valTitle { color: var(--gold); font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-.valCore .valDesc { color: #C9C2B2; font-size: 14px; line-height: 1.5; }
-.valUp { flex: 1; padding: 24px 32px; background: var(--paper); border: 1px solid var(--line); }
-.valUp .valTitle { color: var(--ink); font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-.valUp .valDesc { color: var(--muted); font-size: 14px; line-height: 1.5; }
+/* Sovereign Resilience — editorial cross-section with a large vertical word */
+.crossSec { display: grid; grid-template-columns: 132px 1fr; gap: 44px; align-items: stretch; }
+.crossWord { font-family: var(--serif); font-size: 58px; font-weight: 500; letter-spacing: 2px; color: var(--line2); writing-mode: vertical-rl; transform: rotate(180deg); text-transform: uppercase; line-height: 1; align-self: stretch; }
+.crossRows { display: flex; flex-direction: column; border-top: 1px solid var(--ink); }
+.crossRow { display: grid; grid-template-columns: 0.8fr 1.6fr; gap: 32px; align-items: baseline; padding: 24px 0; border-bottom: 1px solid var(--line); }
+.crossK { font-family: var(--serif); font-size: 19px; font-weight: 500; color: var(--ink); }
+.crossV { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+/* Sovereign Stack — typographic strata strip */
+.stack { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 0; margin-top: 38px; padding-top: 26px; border-top: 1px solid var(--line); }
+.stackItem { display: inline-flex; align-items: baseline; font-family: var(--serif); font-size: 18px; font-weight: 500; color: var(--muted); letter-spacing: 0.2px; }
+.stackTop { color: var(--goldD); }
+.stackSep { color: var(--line2); margin: 0 16px; font-size: 16px; }
+
+/* Valuation Uplift — supporting legend under the SVG */
+.upLegend { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; margin-bottom: 8px; border-top: 1px solid var(--line); }
+.upItem { padding: 18px 0; border-bottom: 1px solid var(--line); }
+.upK { font-size: 12.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--ink); margin-bottom: 6px; }
+.upV { font-size: 13px; color: var(--muted); line-height: 1.55; }
 
 /* responsive */
 @media (max-width: 920px) {
@@ -242,9 +253,12 @@
   .cpList { columns: 1; }
   .ftable th, .ftable td, .scn th, .scn td, .matrix th, .matrix td { padding: 9px 7px; font-size: 12px; }
   .ladderRow { flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px; }
-  .grid2 { grid-template-columns: 1fr; }
-  .valRow { flex-direction: column; }
-  .valLet { width: 100%; height: 32px; }
+  .capRow { grid-template-columns: 1fr; gap: 8px; padding: 20px 0; }
+  .crossSec { grid-template-columns: 1fr; gap: 16px; }
+  .crossWord { writing-mode: horizontal-tb; transform: none; font-size: 34px; }
+  .crossRow { grid-template-columns: 1fr; gap: 6px; }
+  .stack { gap: 4px 0; }
+  .upLegend { grid-template-columns: 1fr; gap: 0; }
 }
 
 /* print — A4 landscape, one section per page, collision-free */
@@ -257,6 +271,6 @@
   .report { background: #FFF; padding: 0; height: auto; overflow: visible; }
   .deck { gap: 0; max-width: none; padding: 0; }
   .page { box-shadow: none; break-after: page; page-break-after: always; padding: 40px 52px; }
-  .statrow, .pillars, .own, .evrow, .ladder, .chain, .stepstrip, .unitSplit, .coverHero, .buildbar, .propbar, .legalBox, .ftable, .matrix, .scn, .ladderRow, .gCard, .valRow { break-inside: avoid; page-break-inside: avoid; }
+  .statrow, .pillars, .own, .evrow, .ladder, .chain, .stepstrip, .unitSplit, .coverHero, .buildbar, .propbar, .legalBox, .ftable, .matrix, .scn, .ladderRow, .capRow, .crossRow, .crossSec, .upItem { break-inside: avoid; page-break-inside: avoid; }
   .legal { max-width: none; }
 }
