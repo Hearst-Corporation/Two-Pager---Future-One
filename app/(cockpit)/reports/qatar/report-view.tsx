@@ -21,18 +21,18 @@ const usdB1 = (x: number) => `$${(x / 1e9).toFixed(1)}B`;
 
 /* ---------- Section 3 · Power-to-Cash Corridor (deterministic SVG) ---------- */
 function CorridorSVG({ revenuePerMw }: { revenuePerMw: number }) {
-  const W = 1000, H = 320, L = 78, R = 152, T = 72, B = 58;
+  const W = 1000, H = 340, L = 78, R = 152, T = 80, B = 60;
   const xM = (m: number) => L + (m / 18) * (W - L - R);
   const yMW = (v: number) => H - B - (v / 150) * (H - T - B);
   const e: ReactNode[] = [];
   let k = 0;
   const key = () => `c${k++}`;
 
-  const railY = 20, railH = 24;
-  e.push(<rect key={key()} x={L} y={railY} width={W - R - L} height={railH} rx={4} fill="#FBFAF8" stroke={LINE} strokeWidth={1} />);
-  e.push(<rect key={key()} x={L} y={railY} width={5} height={railH} fill={GOLD} />);
-  e.push(<text key={key()} x={L + 16} y={railY + railH / 2 + 4.5} fontFamily="Inter" fontSize={12} fontWeight={600} fill={GOLDD} letterSpacing="0.6">Allocated Power Envelope · 150 MW</text>);
-  e.push(<text key={key()} x={W - R - 10} y={railY + railH / 2 + 4.5} textAnchor="end" fontFamily="Inter" fontSize={10.5} fill={MUT}>available / pre-identified</text>);
+  const railY = 24, railH = 28;
+  e.push(<rect key={key()} x={L} y={railY} width={W - R - L} height={railH} fill="#FDFCF9" stroke={LINE} strokeWidth={1} />);
+  e.push(<rect key={key()} x={L} y={railY} width={6} height={railH} fill={GOLD} />);
+  e.push(<text key={key()} x={L + 20} y={railY + railH / 2 + 5} fontFamily="Inter" fontSize={13} fontWeight={600} fill={GOLDD} letterSpacing="0.8">ALLOCATED POWER ENVELOPE · 150 MW</text>);
+  e.push(<text key={key()} x={W - R - 14} y={railY + railH / 2 + 4.5} textAnchor="end" fontFamily="Inter" fontSize={11.5} fill={MUT}>available / pre-identified</text>);
 
   const bands: Array<[number, number, string, number]> = [
     [0, 3, 'Sovereign Alignment', 1], [3, 6, 'Fast-Track Prep', 1],
@@ -40,33 +40,33 @@ function CorridorSVG({ revenuePerMw }: { revenuePerMw: number }) {
   ];
   bands.forEach(([m0, m1, label, gold], i) => {
     const x0 = xM(m0), x1 = xM(m1);
-    e.push(<rect key={key()} x={x0} y={T} width={x1 - x0} height={H - B - T} fill={gold ? '#F6F1E6' : i % 2 ? '#FBFAF8' : '#F4F2EB'} />);
-    e.push(<text key={key()} x={(x0 + x1) / 2} y={T - 12} textAnchor="middle" fontFamily="Inter" fontSize={11} fontWeight={600} fill={gold ? GOLDD : MUT} letterSpacing="0.2">{label}</text>);
+    e.push(<rect key={key()} x={x0} y={T} width={x1 - x0} height={H - B - T} fill={gold ? '#FBF9F4' : i % 2 ? '#FDFCF9' : 'transparent'} />);
+    e.push(<text key={key()} x={(x0 + x1) / 2} y={T - 14} textAnchor="middle" fontFamily="Inter" fontSize={11.5} fontWeight={600} fill={gold ? GOLDD : MUT} letterSpacing="0.3">{label}</text>);
   });
 
   [0, 50, 100, 150].forEach((v) => {
     const y = yMW(v);
-    e.push(<line key={key()} x1={L} y1={y} x2={W - R} y2={y} stroke={LINE} />);
-    e.push(<text key={key()} x={L - 12} y={y + 4} textAnchor="end" fontFamily="Inter" fontSize={12.5} fill={FAINT}>{v} MW</text>);
+    e.push(<line key={key()} x1={L} y1={y} x2={W - R} y2={y} stroke={LINE} strokeWidth={v === 0 ? 2 : 1} />);
+    e.push(<text key={key()} x={L - 14} y={y + 4} textAnchor="end" fontFamily="Inter" fontSize={13} fill={FAINT}>{v} MW</text>);
   });
 
   const steps: Array<[number, number]> = [[0, 0], [6, 0], [6, 50], [9, 50], [9, 100], [15, 100], [15, 150], [18, 150]];
   const poly = steps.map(([m, v]) => `${xM(m)},${yMW(v)}`).join(' ');
-  e.push(<polygon key={key()} points={`${xM(0)},${yMW(0)} ${poly} ${xM(18)},${yMW(0)}`} fill={INK} opacity={0.08} />);
-  e.push(<polyline key={key()} points={poly} fill="none" stroke={INK} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />);
+  e.push(<polygon key={key()} points={`${xM(0)},${yMW(0)} ${poly} ${xM(18)},${yMW(0)}`} fill={INK} opacity={0.06} />);
+  e.push(<polyline key={key()} points={poly} fill="none" stroke={INK} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />);
 
   ([[6, 50], [9, 100], [15, 150]] as Array<[number, number]>).forEach(([m, v]) => {
     const x = xM(m), y = yMW(v);
-    e.push(<circle key={key()} cx={x} cy={y} r={5.5} fill={GOLD} stroke="#FCFBF8" strokeWidth={2} />);
-    const ly = v === 150 ? y + 24 : y - 9;
-    e.push(<text key={key()} x={x + 10} y={ly} fontFamily="Inter" fontSize={13.5} fontWeight={700} fill={GOLDD}>{usdM(v * revenuePerMw)}</text>);
+    e.push(<circle key={key()} cx={x} cy={y} r={6} fill={GOLD} stroke="#FCFBF8" strokeWidth={2} />);
+    const ly = v === 150 ? y + 26 : y - 12;
+    e.push(<text key={key()} x={x + 12} y={ly} fontFamily="Inter" fontSize={14.5} fontWeight={700} fill={GOLDD}>{usdM(v * revenuePerMw)}</text>);
   });
 
   [0, 3, 6, 9, 12, 15, 18].forEach((m) =>
-    e.push(<text key={key()} x={xM(m)} y={H - B + 24} textAnchor="middle" fontFamily="Inter" fontSize={12.5} fill={MUT}>M{m}</text>)
+    e.push(<text key={key()} x={xM(m)} y={H - B + 26} textAnchor="middle" fontFamily="Inter" fontSize={13} fill={MUT}>M{m}</text>)
   );
-  e.push(<text key={key()} x={W - R + 12} y={yMW(150) + 4} fontFamily="Inter" fontSize={13} fontWeight={600} fill={INK}>150 MW</text>);
-  e.push(<text key={key()} x={W - R + 12} y={yMW(150) + 21} fontFamily="Inter" fontSize={11.5} fill={MUT}>stabilized · M18</text>);
+  e.push(<text key={key()} x={W - R + 14} y={yMW(150) + 5} fontFamily="Inter" fontSize={14} fontWeight={700} fill={INK}>150 MW</text>);
+  e.push(<text key={key()} x={W - R + 14} y={yMW(150) + 24} fontFamily="Inter" fontSize={12} fill={MUT}>stabilized · M18</text>);
 
   return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="presentation" aria-hidden="true">{e}</svg>;
 }
@@ -95,88 +95,117 @@ function ValueBridgeSVG({
     e.push(<text key={key()} x={xT(t)} y={H - B + 26} textAnchor="middle" fontFamily="Inter" fontSize={13} fill={MUT}>Year {t}</text>)
   );
 
-  const cw = 24;
-  e.push(<rect key={key()} x={xT(0) - cw / 2} y={yV(capital)} width={cw} height={H - B - yV(capital)} fill={INK} opacity={0.15} />);
-  e.push(<text key={key()} x={xT(0)} y={yV(capital) - 12} textAnchor="middle" fontFamily="Inter" fontSize={13} fontWeight={700} fill={INK}>{usdB1(capital)}</text>);
-  e.push(<text key={key()} x={xT(0)} y={yV(capital) - 28} textAnchor="middle" fontFamily="Inter" fontSize={10.5} fill={MUT}>capital · Y0</text>);
+  const cw = 32;
+  e.push(<rect key={key()} x={xT(0) - cw / 2} y={yV(capital)} width={cw} height={H - B - yV(capital)} fill={INK} opacity={0.1} />);
+  e.push(<text key={key()} x={xT(0)} y={yV(capital) - 14} textAnchor="middle" fontFamily="Inter" fontSize={14} fontWeight={700} fill={INK}>{usdB1(capital)}</text>);
+  e.push(<text key={key()} x={xT(0)} y={yV(capital) - 30} textAnchor="middle" fontFamily="Inter" fontSize={11} fill={MUT}>capital · Y0</text>);
 
   const line = cumulative.map((p) => `${xT(p.year)},${yV(p.cumulativeConsortium)}`).join(' ');
-  e.push(<polygon key={key()} points={`${xT(1)},${yV(0)} ${line} ${xT(15)},${yV(0)}`} fill={INK} opacity={0.09} />);
+  e.push(<polygon key={key()} points={`${xT(1)},${yV(0)} ${line} ${xT(15)},${yV(0)}`} fill={INK} opacity={0.06} />);
   e.push(<polyline key={key()} points={line} fill="none" stroke={INK} strokeWidth={2.5} strokeLinejoin="round" />);
 
-  const colW = 60, cx = xT(15);
+  const colW = 72, cx = xT(15);
   e.push(<rect key={key()} x={cx - colW / 2} y={yV(cashTop)} width={colW} height={H - B - yV(cashTop)} fill={INK} />);
   e.push(<rect key={key()} x={cx - colW / 2} y={yV(total)} width={colW} height={yV(cashTop) - yV(total)} fill={GOLD} />);
-  e.push(<rect key={key()} x={cx - colW / 2} y={yV(total)} width={colW} height={3} fill={GOLDD} />);
-  e.push(<text key={key()} x={cx - colW / 2 - 12} y={(yV(total) + yV(cashTop)) / 2 - 2} textAnchor="end" fontFamily="Inter" fontSize={13.5} fontWeight={700} fill={GOLDD}>+{usdB(terminal)}</text>);
-  e.push(<text key={key()} x={cx - colW / 2 - 12} y={(yV(total) + yV(cashTop)) / 2 + 15} textAnchor="end" fontFamily="Inter" fontSize={10.5} fill={MUT}>Terminal Asset Value · 22×</text>);
+  e.push(<rect key={key()} x={cx - colW / 2} y={yV(total)} width={colW} height={4} fill={GOLDD} />);
+  e.push(<text key={key()} x={cx - colW / 2 - 16} y={(yV(total) + yV(cashTop)) / 2 - 2} textAnchor="end" fontFamily="Inter" fontSize={14.5} fontWeight={700} fill={GOLDD}>+{usdB(terminal)}</text>);
+  e.push(<text key={key()} x={cx - colW / 2 - 16} y={(yV(total) + yV(cashTop)) / 2 + 16} textAnchor="end" fontFamily="Inter" fontSize={11} fill={MUT}>Terminal Asset Value · 22×</text>);
 
   e.push(<line key={key()} x1={cx + colW / 2} y1={yV(total)} x2={W - R + 12} y2={yV(total)} stroke={GOLDD} strokeDasharray="3 3" />);
-  e.push(<text key={key()} x={W - R + 18} y={yV(total) + 2} fontFamily="Inter" fontSize={25} fontWeight={700} fill={GOLDD}>{usdB(total)}</text>);
-  e.push(<text key={key()} x={W - R + 18} y={yV(total) + 21} fontFamily="Inter" fontSize={12} fontWeight={600} fill={INK} letterSpacing="0.3">Total Consortium Value</text>);
-  e.push(<text key={key()} x={W - R + 18} y={yV(total) + 38} fontFamily="Inter" fontSize={12} fill={MUT}>{moicLabel} MOIC · {irrLabel} IRR</text>);
+  e.push(<text key={key()} x={W - R + 20} y={yV(total) + 4} fontFamily="Inter" fontSize={28} fontWeight={700} fill={GOLDD}>{usdB(total)}</text>);
+  e.push(<text key={key()} x={W - R + 20} y={yV(total) + 24} fontFamily="Inter" fontSize={13} fontWeight={600} fill={INK} letterSpacing="0.3">Total Consortium Value</text>);
+  e.push(<text key={key()} x={W - R + 20} y={yV(total) + 42} fontFamily="Inter" fontSize={12.5} fill={MUT}>{moicLabel} MOIC · {irrLabel} IRR</text>);
   e.push(<line key={key()} x1={cx + colW / 2} y1={yV(cashTop)} x2={W - R + 12} y2={yV(cashTop)} stroke={INK} strokeDasharray="3 3" />);
-  e.push(<text key={key()} x={W - R + 18} y={yV(cashTop) + 5} fontFamily="Inter" fontSize={16} fontWeight={700} fill={INK}>{usdB(cashTop)}</text>);
-  e.push(<text key={key()} x={W - R + 18} y={yV(cashTop) + 22} fontFamily="Inter" fontSize={11.5} fill={MUT}>Cumulative Cash · Y1–Y15</text>);
+  e.push(<text key={key()} x={W - R + 20} y={yV(cashTop) + 5} fontFamily="Inter" fontSize={18} fontWeight={700} fill={INK}>{usdB(cashTop)}</text>);
+  e.push(<text key={key()} x={W - R + 20} y={yV(cashTop) + 24} fontFamily="Inter" fontSize={12} fill={MUT}>Cumulative Cash · Y1–Y15</text>);
 
   return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="presentation" aria-hidden="true">{e}</svg>;
 }
 
 /* ---------- Section 8 · Valuation Uplift value-stack (deterministic SVG) ---------- */
 function UpliftSVG({ coreLabel }: { coreLabel: string }) {
-  // Editorial step-stack: a broad, stable infrastructure base (the Core Contracted
-  // Case value), then progressively taller equity-upside steps showing the
-  // additional-EV range each reserve tier can support once contracted. Bar heights
-  // are illustrative proportions; the EV ranges are the canonical display figures.
-  const W = 1000, H = 384, L = 70, R = 30, T = 44, B = 100;
+  const W = 1000, H = 460, L = 40, R = 40, T = 60, B = 90;
   const e: ReactNode[] = [];
   let k = 0;
   const key = () => `u${k++}`;
 
-  const steps: Array<{ tag: string; head: string; ev: string; h: number; gold: boolean }> = [
-    { tag: 'Core', head: 'Deep Data Center', ev: coreLabel, h: 0.30, gold: false },
-    { tag: '+3 MW', head: 'Proof · Model Factory', ev: '+$0.3–0.8B', h: 0.46, gold: true },
-    { tag: '+5 MW', head: 'Platform Seed', ev: '+$0.6–1.6B', h: 0.62, gold: true },
-    { tag: '+10 MW', head: 'LLM Platform', ev: '+$1.2–3.0B', h: 0.82, gold: true },
-    { tag: '+20 MW', head: 'Institutional Option', ev: '+$2.0–5.0B', h: 1.0, gold: true },
+  const steps = [
+    { tag: 'Core', head: 'Deep Data Center', ev: coreLabel, val: 10.9, gold: false },
+    { tag: '+3 MW', head: 'Proof · Model Factory', ev: '+$0.3–0.8B', val: 0.8, gold: true },
+    { tag: '+5 MW', head: 'Platform Seed', ev: '+$0.6–1.6B', val: 1.6, gold: true },
+    { tag: '+10 MW', head: 'LLM Platform', ev: '+$1.2–3.0B', val: 3.0, gold: true },
+    { tag: '+20 MW', head: 'Institutional Option', ev: '+$2.0–5.0B', val: 5.0, gold: true },
   ];
 
-  const plotW = W - L - R, plotH = H - T - B;
-  const gap = 22;
-  const colW = (plotW - gap * (steps.length - 1)) / steps.length;
+  const plotW = W - L - R;
+  const plotH = H - T - B;
   const baseY = H - B;
+  
+  // We want a bridge chart.
+  // Core is a massive block. The others stack up.
+  const totalVal = 10.9 + 0.8 + 1.6 + 3.0 + 5.0;
+  const scaleY = plotH / totalVal;
+  
+  const colW = 140;
+  const gap = (plotW - (steps.length * colW)) / (steps.length - 1);
+
+  let currentY = baseY;
 
   // baseline rule
-  e.push(<line key={key()} x1={L} y1={baseY} x2={W - R} y2={baseY} stroke={LINE} />);
+  e.push(<line key={key()} x1={L} y1={baseY} x2={W - R} y2={baseY} stroke={LINE} strokeWidth={2} />);
 
   steps.forEach((s, i) => {
     const x = L + i * (colW + gap);
-    const barH = plotH * s.h;
-    const y = baseY - barH;
-    const isCore = !s.gold;
-    // open block: filled for core (yield floor), outlined gold for upside
-    if (isCore) {
+    const barH = Math.max(s.val * scaleY, 4); // minimum height
+    
+    let y: number;
+    if (i === 0) {
+      // Core sits on the baseline
+      y = baseY - barH;
+      currentY = y;
+      
       e.push(<rect key={key()} x={x} y={y} width={colW} height={barH} fill={INK} />);
+      // Subtle top highlight
+      e.push(<rect key={key()} x={x} y={y} width={colW} height={3} fill="rgba(255,255,255,0.15)" />);
+      
+      e.push(<text key={key()} x={x + colW / 2} y={y - 24} textAnchor="middle" fontFamily="Inter" fontSize={24} fontWeight={700} fill={INK}>{s.ev}</text>);
+      e.push(<text key={key()} x={x + colW / 2} y={y + 34} textAnchor="middle" fontFamily="Inter" fontSize={12} fontWeight={600} fill="#FBFAF6" letterSpacing="1">150 MW FLOOR</text>);
     } else {
-      e.push(<rect key={key()} x={x} y={y} width={colW} height={barH} fill="#F7F5F0" stroke={LINE} strokeWidth={1} />);
-      e.push(<rect key={key()} x={x} y={y} width={colW} height={4} fill={GOLDD} />);
+      // Upside steps float above the previous level
+      y = currentY - barH;
+      
+      // Connector line from previous step
+      const prevX = L + (i - 1) * (colW + gap) + colW;
+      e.push(<line key={key()} x1={prevX} y1={currentY} x2={x} y2={currentY} stroke={LINE} strokeDasharray="4 4" strokeWidth={1.5} />);
+      
+      // The block
+      const isOption = i === 4;
+      e.push(<rect key={key()} x={x} y={y} width={colW} height={barH} fill={isOption ? 'transparent' : '#FDFCF9'} stroke={isOption ? MUT : GOLD} strokeWidth={isOption ? 1 : 1.5} strokeDasharray={isOption ? '4 4' : 'none'} />);
+      if (!isOption) {
+        e.push(<rect key={key()} x={x} y={y} width={colW} height={4} fill={GOLDD} />);
+      } else {
+        e.push(<rect key={key()} x={x} y={y} width={colW} height={2} fill={MUT} />);
+      }
+      
+      // Drop line to baseline
+      e.push(<line key={key()} x1={x + colW/2} y1={y + barH} x2={x + colW/2} y2={baseY} stroke={LINE} strokeDasharray="2 4" strokeWidth={1} />);
+      
+      e.push(<text key={key()} x={x + colW / 2} y={y - 20} textAnchor="middle" fontFamily="Inter" fontSize={17} fontWeight={700} fill={isOption ? MUT : GOLDD}>{s.ev}</text>);
+      
+      currentY = y;
     }
-    // connector tick between steps (rising staircase cue)
-    if (i > 0) {
-      const prevH = plotH * steps[i - 1].h;
-      e.push(<line key={key()} x1={x - gap} y1={baseY - prevH} x2={x} y2={baseY - prevH} stroke={LINE} strokeDasharray="2 3" />);
-    }
-    // EV figure above the bar (the headline number for each tier)
-    e.push(<text key={key()} x={x + colW / 2} y={y - 28} textAnchor="middle" fontFamily="Inter" fontSize={15} fontWeight={700} fill={isCore ? INK : GOLDD}>{s.ev}</text>);
-    // MW tag just under the EV figure
-    e.push(<text key={key()} x={x + colW / 2} y={y - 12} textAnchor="middle" fontFamily="Inter" fontSize={11.5} fontWeight={600} fill={MUT} letterSpacing="0.3">{s.tag}</text>);
-    // head label below baseline
-    e.push(<text key={key()} x={x + colW / 2} y={baseY + 26} textAnchor="middle" fontFamily="Inter" fontSize={12.5} fontWeight={600} fill={INK}>{s.head}</text>);
+
+    // Labels below baseline
+    e.push(<text key={key()} x={x + colW / 2} y={baseY + 30} textAnchor="middle" fontFamily="Inter" fontSize={14.5} fontWeight={600} fill={INK}>{s.head}</text>);
+    e.push(<text key={key()} x={x + colW / 2} y={baseY + 50} textAnchor="middle" fontFamily="Inter" fontSize={12.5} fontWeight={500} fill={MUT} letterSpacing="0.5">{s.tag}</text>);
   });
 
-  // axis intent labels (left)
-  e.push(<text key={key()} x={L} y={T - 14} fontFamily="Inter" fontSize={11} fontWeight={600} fill={GOLDD} letterSpacing="0.4">Additional EV · equity upside</text>);
-  e.push(<text key={key()} x={L} y={baseY - 8} fontFamily="Inter" fontSize={11} fontWeight={600} fill={MUT} letterSpacing="0.4">Yield floor</text>);
+  // Inflection marker for 10 MW
+  const infX = L + 3 * (colW + gap) + colW / 2;
+  const infY = baseY - (steps[0].val + steps[1].val + steps[2].val + steps[3].val) * scaleY;
+  e.push(<text key={key()} x={infX} y={T - 20} textAnchor="middle" fontFamily="Inter" fontSize={11} fontWeight={700} fill={GOLDD} letterSpacing="1.5">STRATEGIC INFLECTION</text>);
+  e.push(<line key={key()} x1={infX} y1={T - 10} x2={infX} y2={infY - 40} stroke={GOLDD} strokeWidth={1} />);
+  e.push(<polygon key={key()} points={`${infX - 4},${infY - 44} ${infX + 4},${infY - 44} ${infX},${infY - 36}`} fill={GOLDD} />);
 
   return <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="presentation" aria-hidden="true">{e}</svg>;
 }
@@ -318,15 +347,23 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           <p className={styles.lede} style={{ marginBottom: 36 }}>A dedicated fraction of the platform's capacity is reserved for proprietary compute. This capacity is not leased to third parties; it is retained by the platform to train, fine-tune, and serve sovereign models on open-weight foundations — not a frontier model from scratch. This creates asymmetric equity upside beyond the infrastructure yield.</p>
 
           <div className={styles.ladderList}>
-            {PROPRIETARY_COMPUTE_RESERVE.map((tier, i) => (
-              <div key={i} className={styles.ladderRow}>
-                <div className={styles.lrMw}>{tier.mw} MW</div>
-                <div className={styles.lrContent}>
-                  <div className={styles.lrLabel}>{tier.label}</div>
-                  <div className={styles.lrDesc}>{tier.description}</div>
+            {PROPRIETARY_COMPUTE_RESERVE.map((tier, i) => {
+              const isOption = i === 3; // 20 MW is the 4th item
+              const isInflection = i === 2; // 10 MW
+              return (
+                <div key={i} className={`${styles.ladderRow} ${isOption ? styles.ladderOption : ''}`}>
+                  <div className={styles.lrMw}>
+                    <div className={styles.lrMwVal}>{tier.mw} MW</div>
+                    {isOption && <div className={styles.lrMwTag}>OPTION</div>}
+                    {isInflection && <div className={styles.lrMwTag}>INFLECTION</div>}
+                  </div>
+                  <div className={styles.lrContent}>
+                    <div className={styles.lrLabel}>{tier.label}</div>
+                    <div className={styles.lrDesc}>{tier.description}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className={styles.rationale}>
@@ -430,7 +467,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <td>{usdM(p.annualEbitda)}</td>
                 <td>Infrastructure · 22×</td>
                 <td className={styles.rsEv}>{usdB(p.totalValueConsortium)}</td>
-                <td><span className={`${styles.rsTag} ${styles.rsTagCore}`}>Bankable floor</span></td>
+                <td className={styles.rsStatusCore}>Bankable floor</td>
               </tr>
               <tr>
                 <td className={styles.rsLayer}>+ 3 MW reserve</td>
@@ -440,7 +477,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <td>~$6–15M · 40–50%</td>
                 <td>Services + early model-IP</td>
                 <td className={styles.rsEv}>+$0.3 / 0.5 / 0.8B</td>
-                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · contract</span></td>
+                <td className={styles.rsStatusUp}>Upside · contract</td>
               </tr>
               <tr>
                 <td className={styles.rsLayer}>+ 5 MW reserve</td>
@@ -450,7 +487,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <td>~$15–35M · 50–58%</td>
                 <td>Neocloud 3–5× + IP</td>
                 <td className={styles.rsEv}>+$0.6 / 1.0 / 1.6B</td>
-                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · utilization</span></td>
+                <td className={styles.rsStatusUp}>Upside · utilization</td>
               </tr>
               <tr>
                 <td className={styles.rsLayer}>+ 10 MW reserve</td>
@@ -460,7 +497,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <td>~$40–90M · 55–65%</td>
                 <td>Neocloud + software 10–20×</td>
                 <td className={styles.rsEv}>+$1.2 / 1.8 / 3.0B</td>
-                <td><span className={`${styles.rsTag} ${styles.rsTagUp}`}>Upside · revenue</span></td>
+                <td className={styles.rsStatusUp}>Upside · revenue</td>
               </tr>
               <tr className={styles.rsOption}>
                 <td className={styles.rsLayer}>+ 20 MW option</td>
@@ -470,7 +507,7 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
                 <td>~$90–180M · 60–65%</td>
                 <td>Strategic sovereign premium</td>
                 <td className={styles.rsEv}>+$2.0 / 3.0 / 5.0B</td>
-                <td><span className={`${styles.rsTag} ${styles.rsTagOpt}`}>Option · anchor</span></td>
+                <td className={styles.rsStatusOpt}>Option · anchor</td>
               </tr>
             </tbody>
           </table>
