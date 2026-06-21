@@ -285,6 +285,7 @@ export const UI = {
   RESULTS_BM_REVENUE_NOTE: 'Annual run-rate',
   RESULTS_BM_SOURCE: 'Data Quality',
   RESULTS_BM_SOURCE_NOTE: 'Inputs backed by sourced benchmarks',
+  RESULTS_ECON_SOURCED_INPUTS: (n: number) => `${n} sourced input${n !== 1 ? 's' : ''} — View sources →`,
   RESULTS_EMPTY_NO_ID_TITLE: 'No scenario selected',
   RESULTS_EMPTY_NO_ID_BODY: 'Select a scenario from the Simulator or Workspace to view results.',
   RESULTS_EMPTY_CTA_SIMULATOR: 'Go to Simulator',
@@ -418,6 +419,16 @@ export const UI = {
   WS_NO_SCENARIOS: 'No saved scenarios yet. Build one in the Simulator and click "Save this plan".',
   WS_NO_REPORTS: 'No reports yet. Generate a strategic memo from the Simulator.',
   WS_DELETE_CONFIRM: (name: string) => `Delete scenario "${name}"? This cannot be undone.`,
+  WS_SAVED_HINT: (n: number) => `${n} saved`,
+
+  // Dossier — Decision Context card (Fix #2)
+  DOSSIER_CTX_TITLE: 'Decision Context',
+  DOSSIER_CTX_EYEBROW_SCENARIO: 'Scenario',
+  DOSSIER_CTX_LABEL_CAPACITY: 'Capacity',
+  DOSSIER_CTX_LABEL_ARCHETYPE: 'Archetype / model',
+  DOSSIER_CTX_LABEL_CAPEX: 'Total CAPEX',
+  DOSSIER_CTX_LABEL_LEVERAGE: 'Leverage (debt)',
+  DOSSIER_CTX_MISSING: '—',
 
   // Sources
   SOURCES_IN_MODEL: 'In model',
@@ -653,6 +664,10 @@ export const UI = {
   FIN_PARAM_DEBT_LEVERAGE: 'Debt Leverage',
   FIN_PARAM_EXIT_MULTIPLE: 'Exit Multiple',
   FIN_PARAM_PUE: 'PUE',
+
+  // Financial — sources traceability link (near KPI grid)
+  FIN_SOURCES_LINK: 'View sources →',
+  FIN_SOURCES_LINK_TITLE: 'Open the sources library that backs these KPIs',
 
   // Financial — warnings
   FIN_WARNINGS_TITLE: 'INVESTMENT WARNINGS',

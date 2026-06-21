@@ -272,7 +272,7 @@ export default function FinancialPage() {
       </div>
 
       {/* Summary KPIs */}
-      <KpiGrid cols={4} data-financial-kpi-grid style={{ marginBottom: 'var(--cp-space-6)' }}>
+      <KpiGrid cols={4} data-financial-kpi-grid style={{ marginBottom: 'var(--cp-space-3)' }}>
         <KpiCard label={UI.FIN_KPI_TOTAL_CAPEX} value={proj.total_capex} format="currency" />
         <KpiCard label={UI.FIN_KPI_PROJECT_IRR} value={boardValue(proj, 'irr')} format="pct" sublabel={proj.irr != null && proj.irr_post_tax != null ? `${UI.FIN_PRETAX_PREFIX}: ${fmtPctFromRatio(proj.irr)}` : undefined} highlight={boardValue(proj, 'irr') != null} />
         <KpiCard label={UI.FIN_KPI_NPV} value={boardValue(proj, 'npv')} format="currency" />
@@ -282,6 +282,11 @@ export default function FinancialPage() {
         <KpiCard label={UI.FIN_KPI_TERMINAL} value={proj.terminal_value} format="currency" />
         <KpiCard label={UI.FIN_KPI_STAB_REVENUE} value={proj.stabilized_revenue} format="currency" sublabel={UI.FIN_KPI_PER_YEAR} />
       </KpiGrid>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--cp-space-5)' }}>
+        <Link href="/admin/hearst/sources" style={S.sourcesLink} title={UI.FIN_SOURCES_LINK_TITLE}>
+          {UI.FIN_SOURCES_LINK}
+        </Link>
+      </div>
 
       {!hasProjection ? (
         <>
@@ -312,14 +317,14 @@ export default function FinancialPage() {
           <table style={S.table}>
             <thead>
               <tr>
-                <th style={S.th}>{UI.FIN_TH_METRIC}</th>
+                <th style={{ ...S.th, ...S.thSticky }}>{UI.FIN_TH_METRIC}</th>
                 {(proj.years || []).map(y => <th key={y.year} style={S.th}>{UI.FIN_TH_YEAR(y.year)}</th>)}
               </tr>
             </thead>
             <tbody>
               {METRIC_COLS.map(col => (
                 <tr key={col.key}>
-                  <td style={S.tdLabel}>{col.label}</td>
+                  <td style={{ ...S.tdLabel, ...S.tdLabelSticky }}>{col.label}</td>
                   {(proj.years || []).map(y => (
                     <td key={y.year} style={{ ...S.td, color: col.key === 'ebitda' || col.key === 'free_cash_flow' ? (y[col.key] >= 0 ? 'var(--cp-accent)' : 'var(--cp-error)') : 'inherit' }}>
                       {col.fmt(y[col.key])}
@@ -331,7 +336,7 @@ export default function FinancialPage() {
                   value (net of remaining debt) only lands in the exit year, not annually. */}
               {proj.terminal_value_to_equity != null && (
                 <tr>
-                  <td style={S.tdLabel}>{UI.FIN_ROW_EXIT_VALUE}</td>
+                  <td style={{ ...S.tdLabel, ...S.tdLabelSticky }}>{UI.FIN_ROW_EXIT_VALUE}</td>
                   {(proj.years || []).map(y => {
                     const isExit = y.year === (base?.exit_year || 10);
                     return (
@@ -426,15 +431,15 @@ export default function FinancialPage() {
                 <table style={S.table}>
                   <thead>
                     <tr>
-                      {[UI.FIN_TH_YEAR_LABEL, UI.FIN_TH_OPENING_BALANCE, UI.FIN_TH_INTEREST, UI.FIN_TH_PRINCIPAL, UI.FIN_TH_CLOSING_BALANCE, UI.FIN_TH_TOTAL_SERVICE, UI.FIN_TH_DSCR].map(h => (
-                        <th key={h} style={S.th}>{h}</th>
+                      {[UI.FIN_TH_YEAR_LABEL, UI.FIN_TH_OPENING_BALANCE, UI.FIN_TH_INTEREST, UI.FIN_TH_PRINCIPAL, UI.FIN_TH_CLOSING_BALANCE, UI.FIN_TH_TOTAL_SERVICE, UI.FIN_TH_DSCR].map((h, i) => (
+                        <th key={h} style={i === 0 ? { ...S.th, ...S.thSticky } : S.th}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {debtSchedule.schedule.map(r => (
                       <tr key={r.year} style={{ background: r.is_io ? 'var(--cp-surface-3)' : 'transparent' }}>
-                        <td style={S.tdLabel}>Y{r.year}{r.is_io ? ' (IO)' : ''}</td>
+                        <td style={{ ...S.tdLabel, ...S.tdLabelSticky }}>Y{r.year}{r.is_io ? ' (IO)' : ''}</td>
                         <td style={S.td}>{fmtM(r.opening_balance)}</td>
                         <td style={S.td}>{fmtM(r.interest)}</td>
                         <td style={S.td}>{fmtM(r.principal)}</td>
@@ -532,7 +537,7 @@ export default function FinancialPage() {
               <table style={{ ...S.table, width: 'auto', minWidth: '100%' }}>
                 <thead>
                   <tr>
-                    <th style={{ ...S.th, minWidth: 120 }}>{sensitivity.axis_y.label} ↓ / {sensitivity.axis_x.label} →</th>
+                    <th style={{ ...S.th, ...S.thSticky, minWidth: 120 }}>{sensitivity.axis_y.label} ↓ / {sensitivity.axis_x.label} →</th>
                     {sensitivity.axis_x.values.map((v, i) => (
                       <th key={i} style={S.th}>{formatSensVal(v, sensitivity.axis_x.unit)}</th>
                     ))}
@@ -541,7 +546,7 @@ export default function FinancialPage() {
                 <tbody>
                   {sensitivity.cells.map((row, ri) => (
                     <tr key={ri}>
-                      <td style={S.tdLabel}>{formatSensVal(sensitivity.axis_y.values[ri], sensitivity.axis_y.unit)}</td>
+                      <td style={{ ...S.tdLabel, ...S.tdLabelSticky }}>{formatSensVal(sensitivity.axis_y.values[ri], sensitivity.axis_y.unit)}</td>
                       {row.map((cell, ci) => (
                         <td key={ci} style={{
                           ...S.td,
@@ -649,4 +654,9 @@ const S = {
   warnRow: { fontSize: 'var(--cp-font-sm)', color: 'var(--cp-error)', padding: 'var(--cp-space-1) 0', borderBottom: '1px solid var(--cp-error-bg)' },
   debtSummary: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--cp-space-3)', marginBottom: 'var(--cp-space-5)' },
   sensitivitySelect: { fontSize: 'var(--cp-font-xs)', padding: 'var(--cp-space-1) var(--cp-space-2)', background: 'var(--cp-surface-2)', border: '1px solid var(--cp-border)', borderRadius: 'var(--cp-radius-xs)', color: 'var(--cp-text-primary)', cursor: 'pointer' },
+  // Sticky first-column overrides — spread on top of S.th / S.tdLabel for label columns only
+  thSticky: { position: 'sticky', left: 0, zIndex: 1, background: 'var(--cp-surface-0)' },
+  tdLabelSticky: { position: 'sticky', left: 0, zIndex: 1, background: 'var(--cp-surface-2)' },
+  // Sources traceability link below KPI grid
+  sourcesLink: { fontSize: 'var(--cp-font-xs)', color: 'var(--cp-accent)', fontWeight: 'var(--cp-weight-semibold)', textDecoration: 'none' },
 };

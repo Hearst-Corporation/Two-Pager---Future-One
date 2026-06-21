@@ -815,7 +815,7 @@ p { margin: 0; }
       This memorandum has been prepared by the ORACLE Strategy Group for the Investment Committee and Board of Directors on a strictly private and
       confidential basis. Figures are derived from ORACLE internal model v${esc(String(row.version || 1))} and the sources listed; forward-looking estimates are
       subject to execution, market and macroeconomic conditions. AI-assisted — human review required. Not for distribution.
-      Memo ID: ${esc(row.id)} · Generated ${esc(new Date(row.created_at).toISOString())} · Model: ${esc(row.provider_used || 'n/a')}.
+      Memo ID: ${esc(row.id)} · Generated ${esc(new Date(row.created_at).toISOString())} · Model: ${esc(row.provider_used ?? 'n/a')}.
     </div>
   </div>
   <div class="runfoot">

@@ -277,10 +277,21 @@ export default function SimulatorResultsPage() {
         </div>
 
         <DecisionHeader projection={projection} />
+        <ReturnsComposition projection={projection} />
       </Card>
 
       <Card as="section" variant="flat" padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
-        <SectionHead title={UI.RESULTS_ECON_TITLE} hint={UI.RESULTS_ECON_HINT} style={{ marginBottom: 0 }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--cp-space-4)', flexWrap: 'wrap' }}>
+          <SectionHead title={UI.RESULTS_ECON_TITLE} hint={UI.RESULTS_ECON_HINT} style={{ marginBottom: 0, flex: '1 1 auto' }} />
+          {simResult?.source_map && Object.keys(simResult.source_map).length > 0 && (
+            <Link
+              href="/admin/hearst/sources"
+              style={{ color: 'var(--cp-accent)', fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-bold)', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
+            >
+              {UI.RESULTS_ECON_SOURCED_INPUTS(Object.keys(simResult.source_map).length)}
+            </Link>
+          )}
+        </div>
         <KpiGrid data-economics-grid style={{ gap: 'var(--cp-space-4)' }}>
           <BoardMetric label={UI.RESULTS_BM_CAPEX} value={fmtUSD(projection?.total_capex)} note={UI.RESULTS_BM_CAPEX_NOTE} hint="capex" />
           <BoardMetric label={UI.RESULTS_BM_REVENUE} value={fmtUSD(projection?.stabilized_revenue)} note={UI.RESULTS_BM_REVENUE_NOTE} hint="revenue" />
@@ -306,10 +317,6 @@ export default function SimulatorResultsPage() {
             <div data-capital-zone="donut">
               <span style={S.cardEyebrow}>{UI.RESULTS_KPI_CAPITAL}</span>
               <CapitalDonut segments={donutSegments} />
-            </div>
-
-            <div data-capital-zone="returns">
-              <ReturnsComposition projection={projection} />
             </div>
 
             <div data-capital-zone="structure">

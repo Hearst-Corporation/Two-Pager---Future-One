@@ -276,6 +276,59 @@ function Cashflow({ years }) {
   );
 }
 
+// ─── Decision Context card ────────────────────────────────────────────────────
+// Shows which scenario this verdict is anchored to, so readers never lose
+// context when viewing a memo in isolation.
+// Data comes from the `scenario` row (hearst_scenarios.*) already fetched by
+// GET /strategic-memos/[id] and passed as a prop — no new fetch needed.
+// Fields used: name, total_mw, archetype_id, business_model_id, total_capex,
+// debt_pct. If a field is absent on the row we show '—', never an invented value.
+
+function DecisionContextCard({ scenario }) {
+  const sc = scenario || {};
+  const NA = UI.DOSSIER_CTX_MISSING;
+
+  // Capacity: prefer total_mw from the row; fall back to '—'
+  const capacity = sc.total_mw != null ? `${sc.total_mw} MW` : NA;
+
+  // Archetype / operating model: archetype_id + optional business_model_id
+  const archParts = [sc.archetype_id, sc.business_model_id].filter(Boolean);
+  const archLabel = archParts.length > 0
+    ? archParts.map(s => s.replace(/_/g, ' ')).join(' · ')
+    : NA;
+
+  // Total CAPEX: from scenario row (computed by the engine when saved)
+  const capex = sc.total_capex != null ? fmtUsd(sc.total_capex) : NA;
+
+  // Leverage: debt_pct stored as 0..100 on the row
+  const leverage = sc.debt_pct != null ? `${sc.debt_pct}%` : NA;
+
+  return (
+    <Card variant="card" surface={0} style={{ padding: 'var(--cp-space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-3)' }}>
+      <div style={S.eyebrow}>{UI.DOSSIER_CTX_TITLE}</div>
+      {sc.name && (
+        <div style={{ fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)' }}>
+          <span style={{ ...S.eyebrow, marginRight: 'var(--cp-space-2)' }}>{UI.DOSSIER_CTX_EYEBROW_SCENARIO}</span>
+          {sc.name}
+        </div>
+      )}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, calc(var(--cp-space-9) * 4)), 1fr))', gap: 'var(--cp-space-3)' }}>
+        {[
+          [UI.DOSSIER_CTX_LABEL_CAPACITY,  capacity],
+          [UI.DOSSIER_CTX_LABEL_ARCHETYPE, archLabel],
+          [UI.DOSSIER_CTX_LABEL_CAPEX,     capex],
+          [UI.DOSSIER_CTX_LABEL_LEVERAGE,  leverage],
+        ].map(([label, value]) => (
+          <div key={label}>
+            <div style={S.kpiLabel}><span style={S.eyebrow}>{label}</span></div>
+            <div style={{ fontSize: 'var(--cp-font-sm)', fontWeight: 'var(--cp-weight-semibold)', color: 'var(--cp-text-primary)', marginTop: 'calc(var(--cp-space-1) / 2)' }}>{value}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 // ─── Decision Canvas ──────────────────────────────────────────────────────────
 
 function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusChange }) {
@@ -398,6 +451,9 @@ function DecisionCanvas({ memo, scenario, versions, onVersionSelect, onStatusCha
           )}
         </div>
       </Card>
+
+      {/* ── DECISION CONTEXT (scenario anchor) ───────────────────────── */}
+      {scenario && <DecisionContextCard scenario={scenario} />}
 
       {/* ── KPI STRIP + RETURNS COMPOSITION ─────────────────────────── */}
       <section style={S.kpiStrip}>

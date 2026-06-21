@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { SectionHead, Table, Row, Cell, Button, Card } from '@/components/hearst/ui';
 import { S as CP } from '@/lib/cp-styles';
 import { UI } from '@/lib/ui-strings';
+import { isTestScenario } from '@/lib/financial-scenario-picker';
 
 const WS_ERR = { ...CP.error, padding: 'var(--cp-space-3)', border: '1px solid var(--cp-border)', marginBottom: 'var(--cp-space-4)' };
 
@@ -59,6 +60,9 @@ export default function WorkspacePage() {
     }
   }
 
+  // Display filter — hide E2E / synthetic test scenarios from UI (DB rows untouched).
+  const visibleScenarios = scenarios ? scenarios.filter(s => !isTestScenario(s)) : scenarios;
+
   return (
     <div className="oracle-page">
       <header className="oracle-page-header">
@@ -72,12 +76,12 @@ export default function WorkspacePage() {
       {err && <div style={WS_ERR}>Error: {err}</div>}
 
       <Card as="section" variant="flat" surface={1} padding="lg" style={S.section}>
-        <SectionHead title="Saved scenarios" hint={`${scenarios?.length ?? '—'} saved`} />
-        {scenarios === null && <div style={CP.empty}>{UI.STATE_LOADING}</div>}
-        {scenarios && scenarios.length === 0 && <div style={CP.empty}>{UI.WS_NO_SCENARIOS}</div>}
-        {scenarios && scenarios.length > 0 && (
+        <SectionHead title="Saved scenarios" hint={UI.WS_SAVED_HINT(visibleScenarios?.length ?? '—')} />
+        {visibleScenarios === null && <div style={CP.empty}>{UI.STATE_LOADING}</div>}
+        {visibleScenarios && visibleScenarios.length === 0 && <div style={CP.empty}>{UI.WS_NO_SCENARIOS}</div>}
+        {visibleScenarios && visibleScenarios.length > 0 && (
           <Table head={['Name', 'Type', 'Created', 'Status', '']}>
-            {scenarios.map(s => (
+            {visibleScenarios.map(s => (
               <Row key={s.id}>
                 <Cell label>{s.name}</Cell>
                 <Cell>{s.scenario_type || '—'}</Cell>
