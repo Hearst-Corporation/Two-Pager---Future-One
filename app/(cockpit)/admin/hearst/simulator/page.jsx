@@ -20,6 +20,7 @@ import CaseHeaderStep from '@/components/hearst/simulator/sections/CaseHeaderSte
 import ArchetypePicker from '@/components/hearst/simulator/ArchetypePicker';
 import InputModeSwitcher from '@/components/hearst/simulator/InputModeSwitcher';
 import InputFieldHero from '@/components/hearst/simulator/InputFieldHero';
+import InvestmentResultSummary from '@/components/hearst/simulator/InvestmentResultSummary';
 import TechnologyStackStep from '@/components/hearst/simulator/sections/TechnologyStackStep';
 import CaseSwitcher from '@/components/hearst/simulator/CaseSwitcher';
 import CaseProvenance from '@/components/hearst/simulator/CaseProvenance';
@@ -395,10 +396,6 @@ export default function SimulatorPage() {
                 mode={state.mode}
                 value={inputValue}
                 onChange={onInputChange}
-                projection={projection}
-                scenario={scenario}
-                derived={simResult?.derived}
-                solver={simResult?.solver}
               />
             </div>
 
@@ -425,30 +422,38 @@ export default function SimulatorPage() {
             </div>
           </div>
 
-          {/* VALIDATE CONFIG → integrated into card footer */}
-          <div data-sim-config-footer style={S.configFooter}>
-            <span style={S.validateHint}>
-              {simError ? UI.SIM_FIX_ERROR
-                : loading ? UI.STATE_CALCULATING
-                : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
-                : !projectId ? UI.SIM_LOADING_PROJECT
-                : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
-                : projection ? UI.SIM_READY
-                : UI.SIM_FILL}
-            </span>
-            <Button
-              variant="primary"
-              size="lg"
-              block
-              disabled={validateBlocked}
-              onClick={handleValidateAndReveal}
-              className="sim-config-cta"
-              style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
-            >
-              {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_CONFIG_GENERATE_MEMO}
-            </Button>
-          </div>
         </Card>
+
+        {/* RESULTS — engine-computed quantities + CTA, always visible below config */}
+        <InvestmentResultSummary
+          mode={state.mode}
+          projection={projection}
+          scenario={scenario}
+          derived={simResult?.derived}
+          solver={simResult?.solver}
+          loading={loading}
+        >
+          <span style={S.validateHint}>
+            {simError ? UI.SIM_FIX_ERROR
+              : loading ? UI.STATE_CALCULATING
+              : projectLoadError ? UI.SIM_PROJECT_UNAVAILABLE
+              : !projectId ? UI.SIM_LOADING_PROJECT
+              : savingState === 'saving' ? UI.SIM_SAVING_SCENARIO
+              : projection ? UI.SIM_READY
+              : UI.SIM_FILL}
+          </span>
+          <Button
+            variant="primary"
+            size="lg"
+            block
+            disabled={validateBlocked}
+            onClick={handleValidateAndReveal}
+            className="sim-config-cta"
+            style={{ textTransform: 'uppercase', letterSpacing: 'var(--cp-tracking-wide)' }}
+          >
+            {savingState === 'saving' ? UI.SIM_SAVING : UI.SIM_CONFIG_GENERATE_MEMO}
+          </Button>
+        </InvestmentResultSummary>
 
         {projectLoadError && (
           <div className="cp-surface-accent-soft" style={{ ...CP.accentAlert, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--cp-space-3)' }} role="alert">
@@ -500,13 +505,6 @@ const S = {
     fontSize: 'var(--cp-font-base)',
     color: 'var(--cp-text-muted)',
     fontWeight: 'var(--cp-weight-semibold)',
-  },
-  configFooter: {
-    ...L.rowBetween,
-    gap: 'var(--cp-space-3)',
-    flexWrap: 'wrap',
-    paddingTop: 'var(--cp-space-4)',
-    borderTop: '1px solid var(--cp-border-base)',
   },
   caseProvenance: {
     marginTop: 'var(--cp-space-3)',

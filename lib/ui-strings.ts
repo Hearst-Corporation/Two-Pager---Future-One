@@ -125,6 +125,8 @@ export const UI = {
   SIM_CONFIG_MODEL_LABEL: 'Operating Model',
   SIM_CONFIG_HW_LABEL: 'Hardware Mix',
   SIM_CONFIG_GENERATE_MEMO: 'Generate Investment Memo',
+  SIM_RESULT_SUMMARY_EYEBROW: 'Computed by the engine',
+  SIM_RESULT_SUMMARY_TITLE: 'Investment Result Summary',
   SIM_CONFIG_FINETUNE_SHOW: 'Tune power density per rack',
   SIM_CONFIG_FINETUNE_HIDE: 'Hide rack density controls',
   // Archetypes (Deal Structures)
