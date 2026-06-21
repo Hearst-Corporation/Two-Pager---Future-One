@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Qatar Data Center Platform — Partner Financial Presentation</title>
+<style>
+  :root{
+    --ink:#10171f;
+    --ink-2:#33404e;
+    --muted:#6b7785;
+    --faint:#9aa6b2;
+    --line:#dfe4e9;
+    --line-2:#eef1f4;
+    --paper:#ffffff;
+    --paper-2:#f6f8fa;
+    --paper-3:#fbfcfd;
+    --gold:#9a7b32;
+    --gold-soft:#c9a85b;
+    --navy:#1b2c44;
+    --navy-2:#274064;
+    --teal:#2f6f6b;
+    --green:#3a6b4a;
+    --crimson:#7a2230;
+    --accent:#1b2c44;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:"Helvetica Neue",Arial,"Segoe UI",system-ui,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#5b6470;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+
+  .deck{padding:28px 0;}
+
+  .page{
+    position:relative;
+    width:1123px;
+    height:794px;
+    margin:0 auto 26px;
+    background:var(--paper);
+    box-shadow:0 10px 40px rgba(0,0,0,.34);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- frame / header / footer ---------- */
+  .frame{
+    position:absolute;inset:18px;border:1px solid var(--line);pointer-events:none;
+  }
+  .frame::before{
+    content:"";position:absolute;inset:5px;border:1px solid var(--line-2);
+  }
+
+  .head{
+    position:relative;z-index:2;
+    display:flex;align-items:flex-end;justify-content:space-between;
+    padding:40px 56px 16px;
+    border-bottom:1px solid var(--line);
+    margin:0 0 0;
+  }
+  .head .kicker{
+    font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);
+    font-weight:700;margin-bottom:9px;
+  }
+  .head h1{
+    font-family:var(--serif);font-weight:600;color:var(--ink);
+    font-size:30px;line-height:1.08;margin:0;letter-spacing:-.01em;
+  }
+  .head .sub{font-size:12px;color:var(--muted);margin-top:7px;max-width:560px;line-height:1.4;}
+  .head .seal{
+    text-align:right;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);
+    line-height:1.7;
+  }
+  .head .seal strong{display:block;color:var(--navy);font-size:11px;letter-spacing:.18em;}
+
+  .body{position:relative;z-index:2;flex:1;padding:24px 56px 14px;display:flex;flex-direction:column;}
+
+  .foot{
+    position:relative;z-index:2;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:11px 56px 26px;border-top:1px solid var(--line);
+    font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  }
+  .foot .conf{color:var(--gold);font-weight:700;}
+
+  .pageno{font-weight:700;color:var(--ink-2);}
+
+  /* ---------- generic bits ---------- */
+  .eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;}
+  .lead{font-size:13px;color:var(--ink-2);line-height:1.5;}
+  .small{font-size:11px;color:var(--muted);line-height:1.45;}
+  .mono-num{font-variant-numeric:tabular-nums;}
+
+  .qline{
+    font-family:var(--serif);font-style:italic;font-size:13.5px;color:var(--navy);
+  }
+
+  /* =================================================================
+     PAGE 1 — PARTNERSHIP STRUCTURE
+  ================================================================== */
+  .p1-wrap{flex:1;display:flex;gap:34px;align-items:stretch;padding-top:8px;}
+  .p1-left{flex:1.15;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+  .p1-right{flex:1;display:flex;flex-direction:column;gap:14px;}
+
+  .platform-node{
+    width:100%;max-width:420px;text-align:center;
+    border:1.5px solid var(--navy);background:var(--navy);color:#fff;
+    border-radius:4px;padding:20px 22px 18px;
+    box-shadow:0 6px 18px rgba(27,44,68,.22);
+  }
+  .platform-node .pn-lab{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold-soft);font-weight:700;}
+  .platform-node .pn-big{font-family:var(--serif);font-size:33px;font-weight:600;margin:5px 0 2px;letter-spacing:.01em;}
+  .platform-node .pn-sub{font-size:11px;color:#c3ccd8;letter-spacing:.04em;}
+
+  .connector{width:1.5px;height:30px;background:var(--line);position:relative;}
+  .connector::after{content:"";position:absolute;left:-3.5px;bottom:0;width:8px;height:8px;border-right:1.5px solid var(--line);border-bottom:1.5px solid var(--line);transform:rotate(45deg);}
+
+  .split-bar{width:100%;max-width:420px;height:24px;border-radius:3px;overflow:hidden;display:flex;border:1px solid var(--line);}
+  .split-bar .s80{flex:80;background:linear-gradient(180deg,#274064,#1b2c44);}
+  .split-bar .s20{flex:20;background:linear-gradient(180deg,#b59445,#9a7b32);}
+
+  .owners{width:100%;max-width:420px;display:flex;gap:14px;margin-top:14px;}
+  .owner{
+    flex:1;border:1px solid var(--line);border-radius:4px;padding:15px 16px;background:var(--paper-3);
+    position:relative;
+  }
+  .owner.is80{border-top:3px solid var(--navy);}
+  .owner.is20{border-top:3px solid var(--gold);}
+  .owner .o-pct{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);line-height:1;}
+  .owner .o-name{font-size:11.5px;font-weight:700;color:var(--ink-2);margin-top:6px;letter-spacing:.02em;}
+  .owner .o-role{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.35;}
+
+  .cash-panel{
+    border:1px solid var(--line);border-radius:4px;background:var(--paper-2);
+    padding:18px 20px;flex:1;display:flex;flex-direction:column;
+  }
+  .cash-panel h3{margin:0 0 3px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--navy);font-weight:700;}
+  .cash-panel .cp-note{font-size:10.5px;color:var(--muted);margin-bottom:16px;}
+  .cash-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-top:1px solid var(--line-2);}
+  .cash-row:first-of-type{border-top:none;}
+  .cash-swatch{width:9px;height:34px;border-radius:2px;flex:none;}
+  .cash-row .cr-amt{font-family:var(--serif);font-size:23px;font-weight:600;color:var(--ink);width:118px;flex:none;}
+  .cash-row .cr-lab{font-size:11.5px;color:var(--ink-2);font-weight:600;}
+  .cash-row .cr-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+  .cash-total{
+    margin-top:auto;padding-top:14px;border-top:1.5px solid var(--ink);
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+  .cash-total .t-lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+  .cash-total .t-val{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--ink);}
+
+  /* =================================================================
+     PAGE 2 — DEPLOYMENT
+  ================================================================== */
+  .p2-chart{flex:1;display:flex;flex-direction:column;padding-top:6px;}
+  .ramp-stage{position:relative;height:330px;margin-top:6px;}
+  .ramp-svg{position:absolute;inset:0;width:100%;height:100%;}
+  .ramp-grid line{stroke:var(--line-2);stroke-width:1;}
+  .ramp-axis{stroke:var(--line);stroke-width:1;}
+  .ramp-area{fill:url(#rampFill);}
+  .ramp-line{fill:none;stroke:var(--navy);stroke-width:2.5;}
+  .ramp-rev{fill:none;stroke:var(--gold);stroke-width:2;stroke-dasharray:3 3;}
+  .ramp-dot{fill:#fff;stroke:var(--navy);stroke-width:2;}
+  .ramp-ylab{font-family:var(--sans);font-size:10px;fill:var(--faint);}
+  .ramp-cap{font-family:var(--serif);font-size:12px;fill:var(--ink);font-weight:600;}
+
+  .phase-row{display:flex;gap:0;margin-top:14px;border-top:1px solid var(--line);}
+  .phase{
+    flex:1;padding:14px 14px 10px;border-right:1px solid var(--line-2);position:relative;
+  }
+  .phase:last-child{border-right:none;}
+  .phase .ph-marker{position:absolute;top:-5.5px;left:14px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--navy);}
+  .phase.stable .ph-marker{background:var(--gold);border-color:var(--gold);}
+  .phase .ph-time{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:700;}
+  .phase .ph-cap{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);margin:5px 0 4px;}
+  .phase .ph-desc{font-size:10.5px;color:var(--muted);line-height:1.4;}
+
+  .p2-callout{
+    margin-top:16px;display:flex;align-items:center;justify-content:space-between;
+    border:1px solid var(--gold-soft);background:linear-gradient(180deg,#fffdf7,#fbf6ea);
+    border-radius:4px;padding:16px 24px;
+  }
+  .p2-callout .pc-lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;}
+  .p2-callout .pc-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+  .p2-callout .pc-val{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);}
+
+  /* =================================================================
+     PAGE 3 — ECONOMICS CHAIN
+  ================================================================== */
+  .p3-wrap{flex:1;display:flex;flex-direction:column;padding-top:10px;}
+  .chain{display:flex;align-items:stretch;gap:0;flex:none;}
+  .chain-step{
+    flex:1;position:relative;display:flex;flex-direction:column;justify-content:center;
+    padding:20px 16px 20px 26px;min-height:138px;
+    background:var(--paper-2);border:1px solid var(--line);border-left:none;
+    clip-path:polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%);
+    margin-right:-14px;
+  }
+  .chain-step:first-child{border-left:1px solid var(--line);clip-path:polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);padding-left:20px;}
+  .chain-step.s1{background:#eef1f5;}
+  .chain-step.s2{background:#e9eef4;}
+  .chain-step.s3{background:#e3ebf1;}
+  .chain-step.s4{background:#dde7ee;}
+  .chain-step.s5{background:var(--navy);border-color:var(--navy);}
+  .chain-step .cs-lab{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px;}
+  .chain-step .cs-val{font-family:var(--serif);font-size:25px;font-weight:600;color:var(--ink);line-height:1.05;}
+  .chain-step .cs-desc{font-size:9.5px;color:var(--muted);margin-top:5px;line-height:1.3;}
+  .chain-step.s5 .cs-lab{color:var(--gold-soft);}
+  .chain-step.s5 .cs-val{color:#fff;}
+  .chain-step.s5 .cs-desc{color:#b9c4d2;}
+
+  .margin-track{display:flex;margin-top:18px;border:1px solid var(--line);border-radius:3px;overflow:hidden;}
+  .margin-track .seg{padding:9px 12px;font-size:10px;color:#fff;font-weight:700;letter-spacing:.04em;text-align:center;}
+  .margin-track .seg small{display:block;font-weight:400;font-size:9px;opacity:.85;margin-top:1px;}
+  .seg-cash{background:#274064;}
+  .seg-partner{background:#3a6b4a;}
+  .seg-opex{background:#8a6a3a;}
+
+  .p3-metrics{display:flex;gap:18px;margin-top:auto;padding-top:18px;}
+  .metric{
+    flex:1;border:1px solid var(--line);border-radius:4px;padding:16px 18px;background:var(--paper-3);
+    border-top:3px solid var(--gold);
+  }
+  .metric.alt{border-top-color:var(--navy);}
+  .metric .m-lab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+  .metric .m-val{font-family:var(--serif);font-size:32px;font-weight:600;color:var(--ink);line-height:1;margin-top:8px;}
+  .metric .m-sub{font-size:10.5px;color:var(--muted);margin-top:6px;}
+
+  /* =================================================================
+     PAGE 4 — 15-YEAR VALUE BUILD
+  ================================================================== */
+  .p4-wrap{flex:1;display:flex;gap:30px;padding-top:8px;}
+  .p4-chart{flex:1.5;display:flex;flex-direction:column;}
+  .p4-side{flex:1;display:flex;flex-direction:column;gap:13px;}
+
+  .vb-stage{position:relative;flex:1;min-height:300px;}
+  .vb-svg{width:100%;height:100%;display:block;}
+  .vb-grid line{stroke:var(--line-2);stroke-width:1;}
+  .vb-axis{stroke:var(--line);stroke-width:1;}
+  .vb-cumarea{fill:url(#cumFill);}
+  .vb-cumline{fill:none;stroke:var(--green);stroke-width:2.5;}
+  .vb-ylab,.vb-xlab{font-family:var(--sans);font-size:9.5px;fill:var(--faint);}
+  .vb-legend{display:flex;gap:18px;margin-top:8px;font-size:10px;color:var(--muted);}
+  .vb-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .vb-legend i{width:12px;height:3px;border-radius:2px;display:inline-block;}
+
+  .vb-card{border:1px solid var(--line);border-radius:4px;padding:14px 16px;background:var(--paper-3);}
+  .vb-card .vc-lab{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+  .vb-card .vc-val{font-family:var(--serif);font-size:25px;font-weight:600;color:var(--ink);margin-top:4px;}
+  .vb-card .vc-sub{font-size:10px;color:var(--faint);margin-top:3px;}
+  .vb-card.total{background:var(--navy);border-color:var(--navy);}
+  .vb-card.total .vc-lab{color:var(--gold-soft);}
+  .vb-card.total .vc-val{color:#fff;font-size:30px;}
+  .vb-card.total .vc-sub{color:#b9c4d2;}
+  .vb-twin{display:flex;gap:13px;}
+  .vb-twin .vb-card{flex:1;}
+  .vb-twin .vc-val{font-size:21px;}
+
+  /* =================================================================
+     PAGE 5 — LLM UPSIDE
+  ================================================================== */
+  .p5-banner{
+    display:flex;align-items:center;justify-content:space-between;
+    border:1px solid var(--navy);background:linear-gradient(180deg,#1f3252,#1b2c44);color:#fff;
+    border-radius:4px;padding:14px 22px;margin-bottom:14px;
+  }
+  .p5-banner .b-title{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.01em;}
+  .p5-banner .b-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+  .p5-banner .tag{
+    font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+    border:1px solid rgba(201,168,91,.5);color:var(--gold-soft);border-radius:20px;padding:4px 11px;
+  }
+
+  .p5-wrap{flex:1;display:flex;gap:26px;}
+  .p5-left{flex:1.45;display:flex;flex-direction:column;}
+  .p5-right{flex:1;display:flex;flex-direction:column;}
+
+  .ramp-head{display:flex;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:0 0 8px;border-bottom:1px solid var(--line);}
+  .ramp-head .h-tier{flex:1.1;}
+  .ramp-head .h-col{flex:1;text-align:right;}
+
+  .tier-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--line-2);}
+  .tier-row.opt{background:repeating-linear-gradient(135deg,transparent,transparent 7px,rgba(154,123,50,.04) 7px,rgba(154,123,50,.04) 14px);}
+  .tier-mw{flex:1.1;display:flex;align-items:center;gap:11px;}
+  .tier-bubble{
+    width:46px;height:46px;border-radius:50%;flex:none;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    border:2px solid var(--navy);color:var(--navy);background:#fff;
+  }
+  .tier-bubble .tb-mw{font-family:var(--serif);font-size:15px;font-weight:700;line-height:1;}
+  .tier-bubble .tb-u{font-size:7px;letter-spacing:.1em;text-transform:uppercase;}
+  .tier-row.t2 .tier-bubble{border-color:#33557f;color:#33557f;}
+  .tier-row.t3 .tier-bubble{border-color:var(--gold);color:var(--gold);background:#fffdf6;}
+  .tier-row.opt .tier-bubble{border-style:dashed;border-color:var(--gold);color:var(--gold);}
+  .tier-name{font-size:11.5px;font-weight:700;color:var(--ink-2);line-height:1.2;}
+  .tier-name small{display:block;font-size:9px;font-weight:400;color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+  .tier-col{flex:1;text-align:right;}
+  .tier-col .tc-v{font-family:var(--serif);font-size:14.5px;font-weight:600;color:var(--ink);}
+  .tier-col.val .tc-v{color:var(--green);}
+  .tier-col .tc-k{font-size:8.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;}
+
+  .combined{border:1px solid var(--line);border-radius:4px;padding:16px 18px;background:var(--paper-2);flex:1;display:flex;flex-direction:column;}
+  .combined h3{margin:0 0 2px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:700;}
+  .combined .cmb-note{font-size:10px;color:var(--muted);margin-bottom:14px;}
+  .cmb-core{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1.5px solid var(--ink);margin-bottom:8px;}
+  .cmb-core .cc-lab{font-size:10.5px;font-weight:700;color:var(--ink-2);letter-spacing:.04em;}
+  .cmb-core .cc-val{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink);}
+
+  .cmb-stack{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
+  .cmb-bar-row{display:flex;align-items:center;gap:10px;}
+  .cmb-bar-row .br-lab{font-size:9.5px;color:var(--muted);font-weight:700;width:78px;flex:none;letter-spacing:.03em;}
+  .cmb-bar-track{flex:1;height:14px;background:var(--line-2);border-radius:2px;position:relative;overflow:hidden;}
+  .cmb-bar-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#c9a85b,#9a7b32);border-radius:2px;}
+  .cmb-bar-row .br-val{font-family:var(--serif);font-size:11px;font-weight:600;color:var(--green);width:74px;text-align:right;flex:none;}
+  .cmb-foot{font-size:9px;color:var(--faint);margin-top:12px;line-height:1.4;font-style:italic;}
+
+  .disclaimer{
+    margin-top:14px;padding:13px 18px;border:1px solid var(--line);border-left:3px solid var(--gold);
+    background:var(--paper-3);border-radius:3px;
+    font-size:9px;line-height:1.55;color:var(--muted);
+  }
+  .disclaimer strong{color:var(--ink-2);letter-spacing:.04em;}
+
+  /* =================================================================
+     PRINT
+  ================================================================== */
+  @page{size:A4 landscape;margin:0;}
+  @media print{
+    html,body{background:#fff;}
+    .deck{padding:0;}
+    .page{
+      width:297mm;height:209mm;margin:0;box-shadow:none;
+      page-break-after:always;break-after:page;
+    }
+    .page:last-child{page-break-after:auto;break-after:auto;}
+    .frame{inset:6mm;}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- ============================ PAGE 1 ============================ -->
+  <section class="page" id="p1">
+    <div class="frame"></div>
+    <div class="head">
+      <div>
+        <div class="kicker">Qatar Sovereign Data Center Platform</div>
+        <h1>1. Partnership Structure</h1>
+        <div class="sub">A single joint venture owns the platform economics. The partner needs to understand one split — who receives the cash the platform generates.</div>
+      </div>
+      <div class="seal">
+        <strong>Hearst · Consortium</strong>
+        Partner Briefing<br/>Strictly Private
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="p1-wrap">
+        <!-- LEFT: ownership diagram -->
+        <div class="p1-left">
+          <div class="platform-node">
+            <div class="pn-lab">Joint Venture · Operating Platform</div>
+            <div class="pn-big">150 MW</div>
+            <div class="pn-sub">Sovereign Data Center Platform · $1.5B deployed capital</div>
+          </div>
+          <div class="connector"></div>
+          <div class="split-bar"><div class="s80"></div><div class="s20"></div></div>
+          <div class="owners">
+            <div class="owner is80">
+              <div class="o-pct">80%</div>
+              <div class="o-name">Consortium</div>
+              <div class="o-role">Anchor sponsor of the platform economics</div>
+            </div>
+            <div class="owner is20">
+              <div class="o-pct">20%</div>
+              <div class="o-name">Equinix</div>
+              <div class="o-role">Operating partner of the platform</div>
+            </div>
+          </div>
+          <div class="small" style="margin-top:18px;max-width:420px;text-align:center;">
+            All core economics flow into the JV. No side deals, no nested ownership tree — one platform, one 80&nbsp;/&nbsp;20 split.
+          </div>
+        </div>
+
+        <!-- RIGHT: cash split -->
+        <div class="p1-right">
+          <div class="cash-panel">
+            <h3>Annual Cash, Stabilized</h3>
+            <div class="cp-note">How the platform's annual cash generation is allocated.</div>
+
+            <div class="cash-row">
+              <div class="cash-swatch" style="background:#274064;"></div>
+              <div class="cr-amt">$211M</div>
+              <div>
+                <div class="cr-lab">Consortium cash</div>
+                <div class="cr-sub">80% economic share</div>
+              </div>
+            </div>
+            <div class="cash-row">
+              <div class="cash-swatch" style="background:#3a6b4a;"></div>
+              <div class="cr-amt">$53M</div>
+              <div>
+                <div class="cr-lab">Operating partner cash</div>
+                <div class="cr-sub">20% share to Equinix</div>
+              </div>
+            </div>
+            <div class="cash-row">
+              <div class="cash-swatch" style="background:#8a6a3a;"></div>
+              <div class="cr-amt">$142M</div>
+              <div>
+                <div class="cr-lab">Opex / reserves</div>
+                <div class="cr-sub">Operating costs &amp; platform reserves</div>
+              </div>
+            </div>
+
+            <div class="cash-total">
+              <div class="t-lab">From $405M gross revenue · $263M EBITDA</div>
+              <div class="t-val">150 MW</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span class="conf">Confidential — Partner Use Only</span>
+      <span>Who owns the economics?</span>
+      <span class="pageno">01 / 05</span>
+    </div>
+  </section>
+
+  <!-- ============================ PAGE 2 ============================ -->
+  <section class="page" id="p2">
+    <div class="frame"></div>
+    <div class="head">
+      <div>
+        <div class="kicker">From Power Alignment to Full Run-Rate</div>
+        <h1>2. Deployment Path</h1>
+        <div class="sub">Eighteen months from sovereign alignment to a stabilized 150 MW platform. Capacity ramps; revenue follows as megawatts come online.</div>
+      </div>
+      <div class="seal">
+        <strong>Hearst · Consortium</strong>
+        18-Month Path<br/>To $405M Run-Rate
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="p2-chart">
+        <div class="ramp-stage">
+          <svg class="ramp-svg" viewBox="0 0 1000 330" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="rampFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#274064" stop-opacity="0.18"/>
+                <stop offset="1" stop-color="#274064" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+            <!-- gridlines -->
+            <g class="ramp-grid">
+              <line x1="60" y1="40"  x2="980" y2="40"/>
+              <line x1="60" y1="105" x2="980" y2="105"/>
+              <line x1="60" y1="170" x2="980" y2="170"/>
+              <line x1="60" y1="235" x2="980" y2="235"/>
+            </g>
+            <!-- y axis labels (capacity) -->
+            <text class="ramp-ylab" x="14" y="44">150 MW</text>
+            <text class="ramp-ylab" x="24" y="109">100</text>
+            <text class="ramp-ylab" x="30" y="174">50</text>
+            <text class="ramp-ylab" x="36" y="239">0</text>
+            <!-- axes -->
+            <line class="ramp-axis" x1="60" y1="300" x2="980" y2="300"/>
+            <line class="ramp-axis" x1="60" y1="40"  x2="60"  y2="300"/>
+
+            <!-- capacity area + line. baseline y=300 (0MW), top y=40 (150MW) -->
+            <path class="ramp-area" d="M60,300 L60,300 L244,300 L428,288 L612,235 L796,118 L980,45 L980,300 Z"/>
+            <path class="ramp-line" d="M60,300 L244,300 L428,288 L612,235 L796,118 L980,45"/>
+
+            <!-- revenue dashed line (appears as platform stabilizes) -->
+            <path class="ramp-rev" d="M428,300 L612,272 L796,150 L980,62"/>
+
+            <!-- nodes -->
+            <circle class="ramp-dot" cx="60"  cy="300" r="4"/>
+            <circle class="ramp-dot" cx="244" cy="300" r="4"/>
+            <circle class="ramp-dot" cx="428" cy="288" r="4"/>
+            <circle class="ramp-dot" cx="612" cy="235" r="4"/>
+            <circle class="ramp-dot" cx="796" cy="118" r="4"/>
+            <circle class="ramp-dot" cx="980" cy="45"  r="5" fill="#9a7b32" stroke="#9a7b32"/>
+
+            <text class="ramp-cap" x="600" y="225" text-anchor="end">first powered MW</text>
+            <text class="ramp-cap" x="950" y="38" text-anchor="end" fill="#9a7b32">150 MW stabilized</text>
+          </svg>
+        </div>
+
+        <div class="phase-row">
+          <div class="phase">
+            <div class="ph-marker"></div>
+            <div class="ph-time">M0 – M3</div>
+            <div class="ph-cap">Alignment</div>
+            <div class="ph-desc">Sovereign alignment, site, power &amp; anchor term sheet.</div>
+          </div>
+          <div class="phase">
+            <div class="ph-marker"></div>
+            <div class="ph-time">M3 – M6</div>
+            <div class="ph-cap">Fast-track prep</div>
+            <div class="ph-desc">Procurement &amp; build mobilization on a fast-track basis.</div>
+          </div>
+          <div class="phase">
+            <div class="ph-marker"></div>
+            <div class="ph-time">M6 – M9</div>
+            <div class="ph-cap">First MW</div>
+            <div class="ph-desc">First powered megawatts online — revenue begins.</div>
+          </div>
+          <div class="phase">
+            <div class="ph-marker"></div>
+            <div class="ph-time">M9 – M15</div>
+            <div class="ph-cap">Scale-up</div>
+            <div class="ph-desc">Capacity ramps toward full platform footprint.</div>
+          </div>
+          <div class="phase stable">
+            <div class="ph-marker"></div>
+            <div class="ph-time">M15 – M18</div>
+            <div class="ph-cap">150 MW</div>
+            <div class="ph-desc">Platform stabilized at full run-rate.</div>
+          </div>
+        </div>
+
+        <div class="p2-callout">
+          <div>
+            <div class="pc-lab">Stabilized Annual Gross Revenue</div>
+            <div class="pc-sub">Full 150 MW run-rate reached by month 18</div>
+          </div>
+          <div class="pc-val">$405M / yr</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span class="conf">Confidential — Partner Use Only</span>
+      <span>How does deployment happen?</span>
+      <span class="pageno">02 / 05</span>
+    </div>
+  </section>
+
+  <!-- ============================ PAGE 3 ============================ -->
+  <section class="page" id="p3">
+    <div class="frame"></div>
+    <div class="head">
+      <div>
+        <div class="kicker">The Core Money Flow</div>
+        <h1>3. Infrastructure Economics</h1>
+        <div class="sub">How 150 MW of capacity becomes revenue, EBITDA, consortium cash and, ultimately, core platform value.</div>
+      </div>
+      <div class="seal">
+        <strong>Hearst · Consortium</strong>
+        Bankable<br/>Core Case
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="p3-wrap">
+        <!-- value chain arrows -->
+        <div class="chain">
+          <div class="chain-step s1">
+            <div class="cs-lab">Capacity</div>
+            <div class="cs-val">150 MW</div>
+            <div class="cs-desc">Sovereign platform</div>
+          </div>
+          <div class="chain-step s2">
+            <div class="cs-lab">Gross Revenue</div>
+            <div class="cs-val">$405M</div>
+            <div class="cs-desc">Annual, stabilized</div>
+          </div>
+          <div class="chain-step s3">
+            <div class="cs-lab">Project EBITDA</div>
+            <div class="cs-val">$263M</div>
+            <div class="cs-desc">~65% margin</div>
+          </div>
+          <div class="chain-step s4">
+            <div class="cs-lab">Consortium Cash</div>
+            <div class="cs-val">$211M</div>
+            <div class="cs-desc">80% share, per year</div>
+          </div>
+          <div class="chain-step s5">
+            <div class="cs-lab">Core Value</div>
+            <div class="cs-val">$10.93B</div>
+            <div class="cs-desc">Total consortium value</div>
+          </div>
+        </div>
+
+        <!-- how revenue is split -->
+        <div class="margin-track">
+          <div class="seg seg-cash" style="flex:211;">$211M Consortium cash<small>80% economic share</small></div>
+          <div class="seg seg-partner" style="flex:53;">$53M Partner<small>20% share</small></div>
+          <div class="seg seg-opex" style="flex:142;">$142M Opex / reserves<small>operating &amp; reserves</small></div>
+        </div>
+        <div class="small" style="margin-top:7px;color:var(--faint);">Allocation of the $405M annual gross revenue — bars sized to dollar amounts.</div>
+
+        <!-- return metrics -->
+        <div class="p3-metrics">
+          <div class="metric alt">
+            <div class="m-lab">Deployed Capital</div>
+            <div class="m-val">$1.5B</div>
+            <div class="m-sub">Total platform investment</div>
+          </div>
+          <div class="metric">
+            <div class="m-lab">MOIC</div>
+            <div class="m-val">7.3×</div>
+            <div class="m-sub">Multiple on invested capital</div>
+          </div>
+          <div class="metric">
+            <div class="m-lab">IRR</div>
+            <div class="m-val">20.7%</div>
+            <div class="m-sub">Levered, 15-year hold</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span class="conf">Confidential — Partner Use Only</span>
+      <span>How does the infrastructure make money?</span>
+      <span class="pageno">03 / 05</span>
+    </div>
+  </section>
+
+  <!-- ============================ PAGE 4 ============================ -->
+  <section class="page" id="p4">
+    <div class="frame"></div>
+    <div class="head">
+      <div>
+        <div class="kicker">Cash Received + Terminal Value at Exit</div>
+        <h1>4. 15-Year Value Creation</h1>
+        <div class="sub">Value builds two ways: consortium cash compounds through the hold, and the platform is realized at a terminal asset value in year 15.</div>
+      </div>
+      <div class="seal">
+        <strong>Hearst · Consortium</strong>
+        15-Year Hold<br/>22× EBITDA Exit
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="p4-wrap">
+        <!-- chart -->
+        <div class="p4-chart">
+          <div class="vb-stage">
+            <svg class="vb-svg" viewBox="0 0 640 360" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="cumFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#3a6b4a" stop-opacity="0.20"/>
+                  <stop offset="1" stop-color="#3a6b4a" stop-opacity="0.02"/>
+                </linearGradient>
+                <linearGradient id="termFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#274064"/>
+                  <stop offset="1" stop-color="#1b2c44"/>
+                </linearGradient>
+              </defs>
+
+              <!-- gridlines -->
+              <g class="vb-grid">
+                <line x1="44" y1="40"  x2="640" y2="40"/>
+                <line x1="44" y1="100" x2="640" y2="100"/>
+                <line x1="44" y1="160" x2="640" y2="160"/>
+                <line x1="44" y1="220" x2="640" y2="220"/>
+                <line x1="44" y1="280" x2="640" y2="280"/>
+              </g>
+              <!-- y labels ($B) -->
+              <text class="vb-ylab" x="6" y="44">$11B</text>
+              <text class="vb-ylab" x="12" y="104">$8B</text>
+              <text class="vb-ylab" x="12" y="164">$6B</text>
+              <text class="vb-ylab" x="12" y="224">$4B</text>
+              <text class="vb-ylab" x="12" y="284">$2B</text>
+
+              <line class="vb-axis" x1="44" y1="320" x2="640" y2="320"/>
+              <line class="vb-axis" x1="44" y1="40"  x2="44"  y2="320"/>
+
+              <!-- terminal value block at year 15 (right) : total 10.93B; cash 3.92B at base, terminal 7.01B stacked.
+                   scale: 320 = $0 ; 40 = ~$11.2B => ~25px per $B. cumulative cash 3.92B -> top y ≈ 320-3.92*25=222 -->
+              <!-- terminal value bar sitting ON TOP of cumulative cash -->
+              <rect x="566" y="46" width="40" height="176" fill="url(#termFill)"/>
+              <rect x="566" y="222" width="40" height="98" fill="#3a6b4a" opacity="0.85"/>
+              <line x1="566" y1="222" x2="606" y2="222" stroke="#fff" stroke-width="1.5"/>
+
+              <!-- cumulative cash curve: smooth, escalating ~3%/yr, ending at 3.92B (y≈222) -->
+              <path class="vb-cumarea" d="M44,320 C150,316 250,304 330,286 C420,266 500,246 566,222 L566,320 Z"/>
+              <path class="vb-cumline" d="M44,320 C150,316 250,304 330,286 C420,266 500,246 566,222"/>
+
+              <!-- markers -->
+              <circle cx="44" cy="320" r="3.5" fill="#3a6b4a"/>
+              <circle cx="566" cy="222" r="4" fill="#3a6b4a"/>
+
+              <!-- x labels -->
+              <text class="vb-xlab" x="44"  y="336" text-anchor="middle">Y0</text>
+              <text class="vb-xlab" x="210" y="336" text-anchor="middle">Y5</text>
+              <text class="vb-xlab" x="376" y="336" text-anchor="middle">Y10</text>
+              <text class="vb-xlab" x="586" y="336" text-anchor="middle">Y15</text>
+            </svg>
+            <!-- floating callouts over the year-15 stack -->
+          </div>
+          <div class="vb-legend">
+            <span><i style="background:#3a6b4a;"></i> Cumulative consortium cash (illustrative)</span>
+            <span><i style="background:#274064;"></i> Terminal asset value at exit</span>
+          </div>
+          <div class="small" style="margin-top:9px;color:var(--faint);line-height:1.4;">
+            Cumulative cash curve is illustrative — a smooth path to the known $3.92B total under the 3% annual escalation assumption. Detailed annual figures are not modeled here.
+          </div>
+        </div>
+
+        <!-- side cards -->
+        <div class="p4-side">
+          <div class="vb-card">
+            <div class="vc-lab">Initial Capital</div>
+            <div class="vc-val">$1.5B</div>
+            <div class="vc-sub">Deployed into the platform</div>
+          </div>
+          <div class="vb-card">
+            <div class="vc-lab">Cumulative Cash · 15 yrs</div>
+            <div class="vc-val">$3.92B</div>
+            <div class="vc-sub">Consortium cash received during the hold</div>
+          </div>
+          <div class="vb-card">
+            <div class="vc-lab">Terminal Asset Value · Y15</div>
+            <div class="vc-val">$7.01B</div>
+            <div class="vc-sub">22× EBITDA exit multiple</div>
+          </div>
+          <div class="vb-card total">
+            <div class="vc-lab">Total Consortium Value</div>
+            <div class="vc-val">$10.93B</div>
+            <div class="vc-sub">Cash received + terminal value at exit</div>
+          </div>
+          <div class="vb-twin">
+            <div class="vb-card">
+              <div class="vc-lab">MOIC</div>
+              <div class="vc-val">7.3×</div>
+            </div>
+            <div class="vb-card">
+              <div class="vc-lab">IRR</div>
+              <div class="vc-val">20.7%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span class="conf">Confidential — Partner Use Only</span>
+      <span>How does value build over 15 years?</span>
+      <span class="pageno">04 / 05</span>
+    </div>
+  </section>
+
+  <!-- ============================ PAGE 5 ============================ -->
+  <section class="page" id="p5">
+    <div class="frame"></div>
+    <div class="head">
+      <div>
+        <div class="kicker">Retained Compute · Above the Core Case</div>
+        <h1>5. Proprietary LLM Upside</h1>
+        <div class="sub">What the platform's retained, ring-fenced compute adds beyond the bankable infrastructure case.</div>
+      </div>
+      <div class="seal">
+        <strong>Hearst · Consortium</strong>
+        Illustrative<br/>Potential
+      </div>
+    </div>
+
+    <div class="body" style="padding-top:14px;">
+      <div class="p5-banner">
+        <div class="b-title">Proprietary Hearst LLM</div>
+        <div class="b-tags">
+          <span class="tag">Retained compute</span>
+          <span class="tag">Not leased out</span>
+          <span class="tag">Internal cluster</span>
+          <span class="tag">Ring-fenced GPU capex</span>
+        </div>
+      </div>
+
+      <div class="p5-wrap">
+        <!-- LEFT: progressive ramp -->
+        <div class="p5-left">
+          <div class="ramp-head">
+            <div class="h-tier">Capacity tier</div>
+            <div class="h-col">Capex</div>
+            <div class="h-col">Annual contribution</div>
+            <div class="h-col">Value added</div>
+          </div>
+
+          <div class="tier-row t1">
+            <div class="tier-mw">
+              <div class="tier-bubble"><span class="tb-mw">3</span><span class="tb-u">MW</span></div>
+              <div class="tier-name">First proprietary<br/>LLM capability</div>
+            </div>
+            <div class="tier-col"><div class="tc-v">+$155–210M</div></div>
+            <div class="tier-col"><div class="tc-v">~$6–15M</div><div class="tc-k">/ yr</div></div>
+            <div class="tier-col val"><div class="tc-v">+$0.3–0.8B</div></div>
+          </div>
+
+          <div class="tier-row t2">
+            <div class="tier-mw">
+              <div class="tier-bubble"><span class="tb-mw">5</span><span class="tb-u">MW</span></div>
+              <div class="tier-name">Platform seed</div>
+            </div>
+            <div class="tier-col"><div class="tc-v">+$250–340M</div></div>
+            <div class="tier-col"><div class="tc-v">~$15–35M</div><div class="tc-k">/ yr</div></div>
+            <div class="tier-col val"><div class="tc-v">+$0.6–1.6B</div></div>
+          </div>
+
+          <div class="tier-row t3">
+            <div class="tier-mw">
+              <div class="tier-bubble"><span class="tb-mw">10</span><span class="tb-u">MW</span></div>
+              <div class="tier-name">Proprietary LLM platform<small>includes 3 → 5 → 10 ramp</small></div>
+            </div>
+            <div class="tier-col"><div class="tc-v">+$480–650M</div></div>
+            <div class="tier-col"><div class="tc-v">~$40–90M</div><div class="tc-k">/ yr</div></div>
+            <div class="tier-col val"><div class="tc-v">+$1.2–3.0B</div></div>
+          </div>
+
+          <div class="tier-row opt">
+            <div class="tier-mw">
+              <div class="tier-bubble"><span class="tb-mw">20</span><span class="tb-u">MW</span></div>
+              <div class="tier-name">Sovereign expansion<small>option · not the starting plan</small></div>
+            </div>
+            <div class="tier-col"><div class="tc-v">+$0.95–1.3B</div></div>
+            <div class="tier-col"><div class="tc-v">~$90–180M</div><div class="tc-k">/ yr</div></div>
+            <div class="tier-col val"><div class="tc-v">+$2.0–5.0B</div></div>
+          </div>
+
+          <div class="small" style="margin-top:12px;color:var(--ink-2);line-height:1.5;">
+            Retained compute is <strong>held by the platform company</strong>, not leased — powering a proprietary Hearst LLM built on open-weight foundations, fine-tuning, continued pretraining and governed inference. <strong>Reserve rows are progressive, not additive.</strong>
+          </div>
+        </div>
+
+        <!-- RIGHT: combined view -->
+        <div class="p5-right">
+          <div class="combined">
+            <h3>Core + Upside</h3>
+            <div class="cmb-note">Progressive scenarios — do not sum the LLM tiers.</div>
+
+            <div class="cmb-core">
+              <div class="cc-lab">Core infrastructure value</div>
+              <div class="cc-val">$10.93B</div>
+            </div>
+
+            <div class="cmb-stack">
+              <div class="cmb-bar-row">
+                <div class="br-lab">3 MW</div>
+                <div class="cmb-bar-track"><div class="cmb-bar-fill" style="width:16%;"></div></div>
+                <div class="br-val">+$0.3–0.8B</div>
+              </div>
+              <div class="cmb-bar-row">
+                <div class="br-lab">5 MW</div>
+                <div class="cmb-bar-track"><div class="cmb-bar-fill" style="width:32%;"></div></div>
+                <div class="br-val">+$0.6–1.6B</div>
+              </div>
+              <div class="cmb-bar-row">
+                <div class="br-lab">10 MW</div>
+                <div class="cmb-bar-track"><div class="cmb-bar-fill" style="width:60%;"></div></div>
+                <div class="br-val">+$1.2–3.0B</div>
+              </div>
+              <div class="cmb-bar-row">
+                <div class="br-lab">20 MW · opt</div>
+                <div class="cmb-bar-track"><div class="cmb-bar-fill" style="width:100%;background:repeating-linear-gradient(135deg,#c9a85b,#c9a85b 5px,#9a7b32 5px,#9a7b32 10px);"></div></div>
+                <div class="br-val">+$2.0–5.0B</div>
+              </div>
+            </div>
+
+            <div class="cmb-foot">Bars show value-added range per scenario above the $10.93B core case. Each is a standalone path, not a cumulative addition.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <strong>Core Infrastructure figures are the bankable case.</strong> Proprietary LLM Reserve figures are illustrative potential at maturity, outside the Core Case, and contingent on separate capitalization, contracts and utilization. Reserve rows are progressive, not additive. GPU capital is ring-fenced in a dedicated compute vehicle. The LLM strategy is based on open-weight foundations, fine-tuning, continued pretraining and governed inference — not a frontier model trained from scratch.
+      </div>
+    </div>
+
+    <div class="foot">
+      <span class="conf">Confidential — Partner Use Only</span>
+      <span>What does the proprietary LLM add?</span>
+      <span class="pageno">05 / 05</span>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
