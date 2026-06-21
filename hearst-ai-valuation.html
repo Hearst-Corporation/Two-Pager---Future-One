@@ -3,161 +3,131 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hearst AI — Valuation Observatory · Equity Raise</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<title>Hearst — One Company · Value Today · Corporate Equity Raise</title>
 <style>
   :root{
-    --bg:#080b11; --bg-2:#0c111a; --panel:#0f1622; --panel-2:#121a28; --panel-3:#0c1119;
-    --line:#1d2735; --line-2:#161f2b; --grid:#131c28;
-    --ink:#eaf1f8; --ink-2:#b8c4d4; --muted:#7e8ca0; --faint:#54627a;
-    --cyan:#38bdf8; --lime:#bef264; --violet:#c084fc; --amber:#fbbf24; --coral:#fb7185;
-    --signal:#bef264;
-    --compute:#38bdf8; --train:#bef264; --research:#c084fc;
-    --display:"Fraunces",Georgia,"Times New Roman",serif;
-    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
-    --sans:"Archivo","Helvetica Neue",system-ui,sans-serif;
+    --ink:#10171f; --ink-2:#33404e; --muted:#6b7785; --faint:#9aa6b2;
+    --line:#dfe4e9; --line-2:#eef1f4; --paper:#ffffff; --paper-2:#f6f8fa; --paper-3:#fbfcfd;
+    --gold:#9a7b32; --gold-soft:#c9a85b; --navy:#1b2c44; --navy-2:#274064;
+    --teal:#2f6f6b; --green:#3a6b4a; --crimson:#7a2230;
+    --compute:#274064; --train:#9a7b32; --research:#2f6f6b; --infra:#1b2c44;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:"Helvetica Neue",Arial,"Segoe UI",system-ui,sans-serif;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:#05070b;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  html,body{margin:0;padding:0;background:#5b6470;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
   .deck{padding:28px 0;}
+  .page{position:relative;width:1123px;height:794px;margin:0 auto 26px;background:var(--paper);box-shadow:0 10px 40px rgba(0,0,0,.34);overflow:hidden;display:flex;flex-direction:column;}
 
-  .page{
-    position:relative;width:1123px;height:794px;margin:0 auto 26px;overflow:hidden;
-    display:flex;flex-direction:column;
-    background:
-      radial-gradient(1100px 520px at 82% -8%, rgba(56,189,248,.10), transparent 60%),
-      radial-gradient(900px 600px at -6% 110%, rgba(192,132,252,.10), transparent 55%),
-      linear-gradient(160deg,#0b111b 0%,#080b11 52%,#070a0f 100%);
-    box-shadow:0 18px 60px rgba(0,0,0,.55);
-  }
-  /* faint technical grid + grain */
-  .page::before{
-    content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
-    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-    background-size:46px 46px;mask-image:radial-gradient(120% 90% at 50% 30%,#000 55%,transparent 100%);opacity:.5;
-  }
-  .frame{position:absolute;inset:16px;border:1px solid var(--line);pointer-events:none;z-index:1;}
-  .frame::before,.frame::after{content:"";position:absolute;width:14px;height:14px;border:1.5px solid var(--signal);}
-  .frame::before{top:-1px;left:-1px;border-right:none;border-bottom:none;}
-  .frame::after{bottom:-1px;right:-1px;border-left:none;border-top:none;}
-  .tick-tr{position:absolute;top:15px;right:15px;width:14px;height:14px;border:1.5px solid var(--line);border-left:none;border-bottom:none;z-index:1;}
-  .tick-bl{position:absolute;bottom:15px;left:15px;width:14px;height:14px;border:1.5px solid var(--line);border-right:none;border-top:none;z-index:1;}
+  .frame{position:absolute;inset:18px;border:1px solid var(--line);pointer-events:none;}
+  .frame::before{content:"";position:absolute;inset:5px;border:1px solid var(--line-2);}
 
-  .head{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;padding:26px 50px 14px;border-bottom:1px solid var(--line);}
-  .meta{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--signal);margin-bottom:9px;display:flex;gap:10px;align-items:center;}
-  .meta .dot{width:5px;height:5px;border-radius:50%;background:var(--signal);box-shadow:0 0 8px var(--signal);}
-  .meta .dim{color:var(--faint);}
-  .head h1{font-family:var(--display);font-weight:500;color:var(--ink);font-size:30px;line-height:1.04;margin:0;letter-spacing:-.015em;}
-  .head h1 em{font-style:italic;color:var(--signal);}
-  .head .sub{font-size:11.5px;color:var(--muted);margin-top:7px;max-width:660px;line-height:1.45;}
-  .head .seal{text-align:right;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);line-height:1.8;}
-  .head .seal b{display:block;color:var(--ink-2);font-size:11px;letter-spacing:.2em;}
+  .head{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;padding:20px 56px 12px;border-bottom:1px solid var(--line);}
+  .head .kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:7px;}
+  .head h1{font-family:var(--serif);font-weight:600;color:var(--ink);font-size:26px;line-height:1.08;margin:0;letter-spacing:-.01em;}
+  .head .sub{font-size:11.5px;color:var(--muted);margin-top:6px;max-width:640px;line-height:1.45;}
+  .head .seal{text-align:right;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);line-height:1.7;}
+  .head .seal strong{display:block;color:var(--navy);font-size:11px;letter-spacing:.18em;}
 
-  .body{position:relative;z-index:2;flex:1;padding:16px 50px 8px;display:flex;flex-direction:column;min-height:0;}
-  .foot{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:9px 50px 20px;border-top:1px solid var(--line);font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
-  .foot .sig{color:var(--signal);}
+  .body{position:relative;z-index:2;flex:1;padding:14px 56px 8px;display:flex;flex-direction:column;min-height:0;}
+  .foot{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:9px 56px 18px;border-top:1px solid var(--line);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
+  .foot .conf{color:var(--gold);font-weight:700;}
+  .pageno{font-weight:700;color:var(--ink-2);}
+  .num{font-variant-numeric:tabular-nums;}
+  .section-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
 
-  .lab{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:500;}
-  .lab .acc{color:var(--signal);}
-  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;}
-  .ser{font-family:var(--display);}
+  /* ---- cover ---- */
+  .hero{display:flex;gap:30px;flex:1;min-height:0;align-items:stretch;}
+  .hero-l{flex:1.1;display:flex;flex-direction:column;justify-content:center;}
+  .hero-tag{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:12px;}
+  .hero-val{font-family:var(--serif);font-weight:600;font-size:86px;line-height:.9;letter-spacing:-.02em;color:var(--ink);}
+  .hero-unit{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:14px;}
+  .hero-span{margin-top:18px;font-size:12.5px;color:var(--ink-2);line-height:1.55;max-width:460px;}
+  .hero-span b{color:var(--navy);font-variant-numeric:tabular-nums;}
+  .hero-r{flex:1;display:flex;flex-direction:column;gap:12px;justify-content:center;}
+  .warn{display:inline-flex;align-items:center;gap:7px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#7a5b16;border:1px solid var(--gold-soft);background:linear-gradient(180deg,#fffdf7,#fbf6ea);border-radius:20px;padding:5px 13px;font-weight:700;}
 
-  .panel{border:1px solid var(--line);border-radius:8px;background:linear-gradient(180deg,var(--panel),var(--panel-3));position:relative;}
+  .pillar{border:1px solid var(--line);border-radius:5px;background:var(--paper-3);padding:14px 16px;position:relative;overflow:hidden;}
+  .pillar::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;}
+  .pillar.infra::after{background:var(--infra);}
+  .pillar.ai::after{background:var(--gold);}
+  .pillar .pl-top{display:flex;align-items:baseline;justify-content:space-between;}
+  .pillar .pl-n{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);font-weight:700;}
+  .pillar .pl-v{font-family:var(--serif);font-size:25px;font-weight:600;color:var(--ink);}
+  .pillar .pl-d{font-size:10px;color:var(--muted);line-height:1.45;margin-top:6px;}
+  .pillar .pl-d b{color:var(--ink-2);}
+
+  /* ---- KPI ---- */
+  .kpis{display:flex;gap:9px;}
+  .kpi{flex:1;border:1px solid var(--line);border-radius:4px;background:var(--paper-3);padding:9px 11px;border-top:3px solid var(--gold);}
+  .kpi.alt{border-top-color:var(--navy);}
+  .kpi.total{background:var(--navy);border-color:var(--navy);}
+  .kpi .k-lab{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+  .kpi .k-val{font-family:var(--serif);font-size:21px;font-weight:600;color:var(--ink);line-height:1;margin-top:4px;font-variant-numeric:tabular-nums;}
+  .kpi .k-sub{font-size:8.5px;color:var(--faint);margin-top:3px;line-height:1.3;}
+  .kpi.total .k-lab{color:var(--gold-soft);} .kpi.total .k-val{color:#fff;} .kpi.total .k-sub{color:#b9c4d2;}
+
+  /* ---- panels / grid ---- */
+  .grid{display:flex;gap:20px;flex:1;min-height:0;}
+  .panel{border:1px solid var(--line);border-radius:5px;background:var(--paper-3);display:flex;flex-direction:column;min-height:0;}
   .panel .p-h{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--line-2);}
-  .panel .p-t{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);font-weight:500;}
-
-  /* ---- COVER ---- */
-  .hero{display:flex;gap:24px;flex:1;min-height:0;}
-  .hero-l{flex:1.15;display:flex;flex-direction:column;justify-content:center;}
-  .hero-tag{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--signal);margin-bottom:12px;}
-  .hero-val{font-family:var(--display);font-weight:500;font-size:84px;line-height:.92;letter-spacing:-.02em;color:var(--ink);}
-  .hero-val .g{background:linear-gradient(95deg,#bef264,#38bdf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-  .hero-unit{font-family:var(--mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:14px;}
-  .hero-span{margin-top:18px;font-size:12.5px;color:var(--ink-2);line-height:1.55;max-width:440px;}
-  .hero-span b{color:var(--lime);font-family:var(--mono);}
-  .hero-r{flex:1;display:flex;flex-direction:column;gap:12px;}
-  .gauge-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;}
-  .kpi-strip{display:flex;gap:10px;}
-  .kpi{flex:1;border:1px solid var(--line);border-radius:7px;background:var(--panel-2);padding:10px 12px;}
-  .kpi .k-l{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
-  .kpi .k-v{font-family:var(--display);font-size:20px;color:var(--ink);margin-top:4px;line-height:1;}
-  .kpi .k-s{font-size:8.5px;color:var(--muted);margin-top:3px;}
-
-  .pills{display:flex;gap:10px;margin-top:14px;}
-  .pill{flex:1;border:1px solid var(--line);border-radius:7px;background:var(--panel-2);padding:11px 13px;position:relative;overflow:hidden;}
-  .pill::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;}
-  .pill.c::after{background:var(--compute);box-shadow:0 0 12px var(--compute);}
-  .pill.t::after{background:var(--train);box-shadow:0 0 12px var(--train);}
-  .pill.r::after{background:var(--research);box-shadow:0 0 12px var(--research);}
-  .pill .pl-n{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);font-weight:500;}
-  .pill .pl-d{font-size:9.5px;color:var(--muted);line-height:1.4;margin-top:5px;}
-  .pill .pl-m{font-family:var(--mono);font-size:9px;margin-top:6px;}
-  .pill.c .pl-m{color:var(--compute);} .pill.t .pl-m{color:var(--train);} .pill.r .pl-m{color:var(--research);}
-
-  .warn{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.06);border-radius:20px;padding:4px 12px;}
-
-  /* ---- charts generic ---- */
-  .chart-grid line{stroke:var(--grid);stroke-width:1;}
-  .axis{stroke:var(--line);stroke-width:1;}
-  .axlab{font-family:var(--mono);font-size:8.5px;fill:var(--faint);}
-  .axttl{font-family:var(--mono);font-size:8.5px;fill:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
-  .bub-lab{font-family:var(--mono);font-size:8px;fill:var(--ink-2);}
-  .trend{stroke:var(--faint);stroke-width:1;stroke-dasharray:4 4;}
-
-  /* legend */
-  .legend{display:flex;gap:16px;font-family:var(--mono);font-size:9px;color:var(--muted);}
-  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .panel .p-t{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);font-weight:700;}
+  .legend{display:flex;gap:13px;font-size:9px;color:var(--muted);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
   .legend i{width:9px;height:9px;border-radius:50%;display:inline-block;}
 
-  /* bars panel */
-  .barrow{display:flex;align-items:center;gap:8px;margin:6px 0;}
-  .barrow .b-name{font-family:var(--mono);font-size:9px;color:var(--ink-2);width:88px;flex:none;}
-  .barrow .b-track{flex:1;height:13px;background:var(--panel-3);border-radius:3px;overflow:hidden;position:relative;}
-  .barrow .b-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;}
-  .barrow .b-val{font-family:var(--mono);font-size:9px;color:var(--ink);width:34px;text-align:right;flex:none;}
+  /* asset rows / bars */
+  .arow{display:flex;align-items:center;gap:10px;margin:7px 0;}
+  .arow .a-name{font-size:10px;color:var(--ink-2);width:150px;flex:none;}
+  .arow .a-name small{display:block;color:var(--faint);font-size:8.5px;margin-top:1px;}
+  .arow .a-track{flex:1;height:14px;background:var(--paper-2);border-radius:3px;overflow:hidden;position:relative;border:1px solid var(--line-2);}
+  .arow .a-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;}
+  .arow .a-val{font-family:var(--serif);font-size:13px;font-weight:600;color:var(--ink);width:64px;text-align:right;flex:none;font-variant-numeric:tabular-nums;}
+  .dotc{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:8px;vertical-align:middle;}
 
-  /* generic table */
-  table.gt{width:100%;border-collapse:collapse;}
-  table.gt thead th{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:500;text-align:right;padding:6px 9px;border-bottom:1px solid var(--line);}
+  /* tables */
+  table.gt{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;}
+  table.gt thead th{background:var(--navy);color:#fff;font-weight:700;letter-spacing:.04em;font-size:8.5px;text-transform:uppercase;padding:6px 10px;text-align:right;border-right:1px solid rgba(255,255,255,.08);}
   table.gt thead th:first-child{text-align:left;}
-  table.gt td{font-family:var(--mono);font-size:9.5px;color:var(--ink-2);text-align:right;padding:5px 9px;border-bottom:1px solid var(--line-2);}
-  table.gt td:first-child{text-align:left;color:var(--ink);}
-  table.gt tr:last-child td{border-bottom:none;}
-  table.gt tr.hi td{background:rgba(190,242,100,.07);color:var(--ink);}
-  .dotc{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:middle;}
+  table.gt tbody td{font-size:10px;color:var(--ink-2);padding:5px 10px;text-align:right;border-right:1px solid var(--line-2);border-top:1px solid var(--line-2);}
+  table.gt tbody td:first-child{text-align:left;font-weight:700;color:var(--ink-2);}
+  table.gt tbody tr:nth-child(odd){background:var(--paper-2);}
+  table.gt tr.hi td{background:rgba(154,123,50,.10);font-weight:700;color:var(--ink);}
 
-  .note{font-family:var(--mono);font-size:8px;color:var(--faint);line-height:1.5;margin-top:7px;}
-  .note b{color:var(--muted);}
-
-  /* scenario cards */
-  .scns{display:flex;gap:14px;}
-  .scn{flex:1;border:1px solid var(--line);border-radius:8px;background:linear-gradient(180deg,var(--panel),var(--panel-3));padding:14px;display:flex;flex-direction:column;align-items:center;}
-  .scn.base{border-color:rgba(190,242,100,.4);box-shadow:0 0 0 1px rgba(190,242,100,.12),0 0 30px rgba(190,242,100,.06);}
-  .scn .s-n{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
-  .scn.base .s-n{color:var(--signal);}
-  .scn .s-v{font-family:var(--display);font-size:23px;color:var(--ink);margin-top:3px;}
-  .scn .s-rows{width:100%;margin-top:10px;}
-  .scn .s-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8.5px;color:var(--muted);padding:3px 0;border-top:1px solid var(--line-2);}
-  .scn .s-row:first-child{border-top:none;}
-  .scn .s-row b{color:var(--ink-2);}
-
-  .discl{border:1px solid var(--line);border-left:2px solid var(--amber);border-radius:6px;background:rgba(251,191,36,.04);padding:9px 14px;font-size:9.5px;line-height:1.55;color:var(--muted);}
-  .discl b{color:var(--ink-2);}
-
-  /* assumptions table */
   table.at{width:100%;border-collapse:collapse;}
-  table.at thead th{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:500;text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);}
-  table.at td{font-size:9.5px;color:var(--ink-2);padding:5px 10px;border-bottom:1px solid var(--line-2);vertical-align:top;line-height:1.4;}
-  table.at td.v{font-family:var(--mono);color:var(--ink);white-space:nowrap;}
-  table.at td.tc{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);white-space:nowrap;}
-  table.at td.ok{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--cyan);white-space:nowrap;}
-  table.at td.s{font-family:var(--mono);font-size:8px;color:var(--faint);}
+  table.at thead th{background:var(--navy);color:#fff;font-weight:700;letter-spacing:.04em;font-size:8px;text-transform:uppercase;padding:6px 10px;text-align:left;border-right:1px solid rgba(255,255,255,.08);}
+  table.at td{font-size:9px;color:var(--ink-2);padding:4.5px 10px;border-right:1px solid var(--line-2);border-top:1px solid var(--line-2);vertical-align:top;line-height:1.35;}
+  table.at tbody tr:nth-child(odd){background:var(--paper-2);}
+  table.at td.v{font-family:var(--serif);font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap;}
+  table.at td.tc{font-size:7.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);font-weight:700;white-space:nowrap;}
+  table.at td.ok{font-size:7.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--teal);font-weight:700;white-space:nowrap;}
+  table.at td.s{color:var(--faint);font-size:8.5px;}
+
+  /* scenarios */
+  .scns{display:flex;gap:12px;}
+  .scn{flex:1;border:1px solid var(--line);border-radius:5px;background:var(--paper-3);padding:13px 15px;display:flex;flex-direction:column;border-top:3px solid var(--muted);}
+  .scn.base{border-top-color:var(--navy);background:var(--paper-2);}
+  .scn .s-n{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);font-weight:700;}
+  .scn.base .s-n{color:var(--gold);}
+  .scn .s-v{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);line-height:1;margin:9px 0 3px;}
+  .scn .s-v small{font-size:11px;color:var(--muted);font-family:var(--sans);font-weight:400;letter-spacing:.03em;}
+  .scn .s-row{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);padding:4px 0;border-top:1px solid var(--line-2);margin-top:2px;}
+  .scn .s-row:first-of-type{border-top:none;margin-top:9px;}
+  .scn .s-row b{color:var(--ink-2);font-weight:700;}
+
+  .disclaimer{margin-top:10px;padding:9px 16px;border:1px solid var(--line);border-left:3px solid var(--gold);background:var(--paper-3);border-radius:3px;font-size:9.5px;line-height:1.5;color:var(--muted);}
+  .disclaimer strong{color:var(--ink-2);letter-spacing:.03em;}
+
+  /* generic svg chart helpers */
+  .cg line{stroke:var(--line-2);stroke-width:1;}
+  .cax{stroke:var(--line);stroke-width:1;}
+  .clab{font-family:var(--sans);font-size:9px;fill:var(--faint);}
+  .cttl{font-family:var(--sans);font-size:8.5px;fill:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+  .bub{font-family:var(--sans);font-size:8px;fill:var(--ink-2);}
 
   @page{size:A4 landscape;margin:0;}
   @media print{
-    html,body{background:#05070b;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    html,body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .deck{padding:0;}
     .page{width:297mm;height:209mm;margin:0;box-shadow:none;page-break-after:always;break-after:page;}
     .page:last-child{page-break-after:auto;}
@@ -170,378 +140,276 @@
 
   <!-- ============ P1 · COVER ============ -->
   <section class="page" id="p1">
-    <div class="frame"></div><div class="tick-tr"></div><div class="tick-bl"></div>
+    <div class="frame"></div>
     <div class="head">
       <div>
-        <div class="meta"><span class="dot"></span>Hearst AI · Valuation Observatory<span class="dim">/ corporate equity raise</span></div>
-        <h1>What is <em>Hearst&nbsp;AI</em> worth?</h1>
-        <div class="sub">A comparables-anchored, sum-of-the-parts valuation across three engines — GPU compute, B2B model training, and frontier research — benchmarked to the live 2026 market.</div>
+        <div class="kicker">Hearst · One Company · Corporate Equity Raise</div>
+        <h1>What Hearst is worth today</h1>
+        <div class="sub">One company, two real asset bases: a 150&nbsp;MW sovereign datacenter platform interest and an AI compute-and-training business. Stated at today's value — and re-rated as the B2B training engine scales.</div>
       </div>
-      <div class="seal"><b>HEARST AI</b>Indicative · Pre-money<br/>FEB 2026 · CONF.</div>
+      <div class="seal"><strong>HEARST</strong>Indicative · Pre-money<br/>Feb 2026 · Strictly Private</div>
     </div>
 
     <div class="body">
       <div class="hero">
         <div class="hero-l">
-          <div class="hero-tag">Indicative pre-money — base case</div>
-          <div class="hero-val"><span class="g">$380–520M</span></div>
-          <div class="hero-unit">scaling-stage scenario · USD</div>
-          <div class="hero-span">Scenario span <b>~$110M → ~$1.9B</b> across early → established traction. Driven by ARR, GPU fleet and research credibility. Sum-of-the-parts midpoint <b>~$450M</b>; comparable-round cross-check <b>$300–500M</b>.</div>
-          <div style="margin-top:20px;"><span class="warn">⚠ illustrative — no company financials provided · confirm inputs to fix the point</span></div>
+          <div class="hero-tag">Combined value today — base case</div>
+          <div class="hero-val">~$4.0B</div>
+          <div class="hero-unit">today, pre-money · USD · conservative basis</div>
+          <div class="hero-span">Range <b>~$3.7B → ~$5.2B</b> as the AI engines scale. Today's value is anchored by hard assets, not projections: the datacenter platform interest at its <b>discounted</b> present value (not its 15-year total). On the 15-year horizon the platform interest alone reaches <b>$10.93B</b>.</div>
+          <div style="margin-top:20px;"><span class="warn">⚠ Not promotional — datacenter at NPV today, AI engines at live market multiples · AI inputs to confirm</span></div>
         </div>
         <div class="hero-r">
-          <div class="panel" style="flex:1;">
-            <div class="p-h"><span class="p-t">Valuation range · $M</span><span class="lab acc">base $450M</span></div>
-            <div class="gauge-wrap">
-              <svg viewBox="0 0 300 200" width="100%" height="100%">
-                <defs>
-                  <linearGradient id="gaugeG" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#bef264"/>
-                  </linearGradient>
-                </defs>
-                <!-- track 270deg arc, center 150,150 r110, from 135deg to 405deg -->
-                <path d="M 72.2 227.8 A 110 110 0 1 1 227.8 227.8" fill="none" stroke="#162133" stroke-width="14" stroke-linecap="round"/>
-                <!-- range band 380-520 of 0-2000 -> 19%..26% of 270deg -->
-                <path d="M 72.2 227.8 A 110 110 0 1 1 227.8 227.8" fill="none" stroke="url(#gaugeG)" stroke-width="14" stroke-linecap="round"
-                      stroke-dasharray="518.4" stroke-dashoffset="453" opacity="0.30"/>
-                <!-- base 450/2000 = 22.5% of 270deg arc length (arc len = 2*pi*110*0.75=518.4); fill to 22.5% -->
-                <path d="M 72.2 227.8 A 110 110 0 1 1 227.8 227.8" fill="none" stroke="url(#gaugeG)" stroke-width="14" stroke-linecap="round"
-                      stroke-dasharray="116.6 518.4"/>
-                <text x="150" y="138" text-anchor="middle" font-family="Fraunces,serif" font-size="40" fill="#eaf1f8">$450M</text>
-                <text x="150" y="162" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" letter-spacing="1.5" fill="#7e8ca0">SUM-OF-THE-PARTS</text>
-                <text x="56" y="196" font-family="JetBrains Mono,monospace" font-size="8" fill="#54627a">$0</text>
-                <text x="232" y="196" font-family="JetBrains Mono,monospace" font-size="8" fill="#54627a">$2B</text>
-              </svg>
-            </div>
+          <div class="kpis">
+            <div class="kpi alt"><div class="k-lab">Value today</div><div class="k-val">~$4.0B</div><div class="k-sub">base, pre-money</div></div>
+            <div class="kpi alt"><div class="k-lab">15-yr horizon</div><div class="k-val">$11B+</div><div class="k-sub">platform + AI</div></div>
+            <div class="kpi"><div class="k-lab">Asset pillars</div><div class="k-val">2</div><div class="k-sub">infra + AI</div></div>
           </div>
-          <div class="kpi-strip">
-            <div class="kpi"><div class="k-l">Methods</div><div class="k-v">3</div><div class="k-s">triangulated</div></div>
-            <div class="kpi"><div class="k-l">Live comps</div><div class="k-v">25+</div><div class="k-s">2026 market</div></div>
-            <div class="kpi"><div class="k-l">Blended ×</div><div class="k-v">~9×</div><div class="k-s">on total ARR</div></div>
+          <div class="pillar infra">
+            <div class="pl-top"><div class="pl-n">① Infrastructure — Datacenter platform</div><div class="pl-v">~$3.6B</div></div>
+            <div class="pl-d">80% economic interest in a 150&nbsp;MW Qatar sovereign datacenter platform (80/20 with Equinix). <b>NPV today ~$3.6B</b> · 15-yr value <b>$10.93B</b>. The hard asset.</div>
+          </div>
+          <div class="pillar ai">
+            <div class="pl-top"><div class="pl-n">② AI — Compute · Training · Research</div><div class="pl-v">~$0.44B</div></div>
+            <div class="pl-d">GPU compute layer + B2B model training + frontier research. <b>~$444M today</b>, scaling to <b>$1.5B+</b> as training ARR ramps. The re-rating engine.</div>
           </div>
         </div>
       </div>
-
-      <div class="pills">
-        <div class="pill c"><div class="pl-n">① GPU Compute</div><div class="pl-d">Agentic compute layer — per-second GPU cloud, L4→B300, scale to 512 GPUs. Capital-intensive.</div><div class="pl-m">~6× ARR · comps 5–8×</div></div>
-        <div class="pill t"><div class="pl-n">② B2B Model Training</div><div class="pl-d">Enterprise fine-tuning &amp; deployment on open models — Llama 4, DeepSeek, Qwen 3, Kimi, MiniMax.</div><div class="pl-m">~15× ARR · comps 14–22×</div></div>
-        <div class="pill r"><div class="pl-n">③ Frontier Research</div><div class="pl-d">World models · vision-language-action · action models. Pre-revenue optionality, valued on team + research.</div><div class="pl-m">$40–400M · comps $2–39B</div></div>
-      </div>
     </div>
 
-    <div class="foot"><span class="sig">● CONFIDENTIAL — INDICATIVE · NOT AN OFFER</span><span>HEARST AI / VALUATION OBSERVATORY</span><span>01 — 05</span></div>
+    <div class="foot"><span class="conf">Confidential — Indicative · Not an Offer</span><span>One company · Two asset bases · Value today</span><span class="pageno">01 / 05</span></div>
   </section>
 
-  <!-- ============ P2 · COMP LANDSCAPE ============ -->
+  <!-- ============ P2 · ASSETS TODAY ============ -->
   <section class="page" id="p2">
-    <div class="frame"></div><div class="tick-tr"></div><div class="tick-bl"></div>
+    <div class="frame"></div>
     <div class="head">
       <div>
-        <div class="meta"><span class="dot"></span>Comparable universe<span class="dim">/ live market · jun 2026</span></div>
-        <h1>The <em>landscape</em> we price against</h1>
-        <div class="sub">Where Hearst AI sits on the valuation-vs-revenue plane. GPU-cloud is capital-intensive and trades cheap; inference / model-services platforms trade richer.</div>
+        <div class="kicker">What we have today · The asset base</div>
+        <h1>Real assets, today — not projections</h1>
+        <div class="sub">The company's present value is dominated by one hard asset — a 150&nbsp;MW datacenter platform interest, valued at its discounted present worth — sitting alongside an AI compute-and-research stack.</div>
       </div>
-      <div class="seal"><b>MAP 02</b>val × revenue<br/>log–log</div>
+      <div class="seal"><strong>HEARST</strong>Asset Base<br/>Today · NPV</div>
     </div>
 
     <div class="body">
-      <div style="display:flex;gap:16px;flex:1;min-height:0;">
-        <!-- scatter -->
-        <div class="panel" style="flex:1.5;display:flex;flex-direction:column;">
-          <div class="p-h"><span class="p-t">Valuation ($B) vs revenue / ARR ($B) — log scale</span>
-            <span class="legend"><span><i style="background:#38bdf8;"></i>GPU cloud</span><span><i style="background:#bef264;"></i>AI services</span><span><i style="background:#c084fc;"></i>Hearst AI</span></span>
-          </div>
-          <svg viewBox="0 0 700 400" width="100%" style="flex:1;display:block;padding:6px;">
-            <!-- gridlines (log decades): x at rev 0.05,0.1,0.5,1,5 ; y at val 0.5,1,5,10,50 -->
-            <g class="chart-grid">
-              <line x1="60" y1="30" x2="60" y2="370"/><line x1="218" y1="30" x2="218" y2="370"/>
-              <line x1="396" y1="30" x2="396" y2="370"/><line x1="450" y1="30" x2="450" y2="370"/><line x1="631" y1="30" x2="631" y2="370"/>
-              <line x1="60" y1="370" x2="650" y2="370"/><line x1="60" y1="298" x2="650" y2="298"/>
-              <line x1="60" y1="227" x2="650" y2="227"/><line x1="60" y1="156" x2="650" y2="156"/><line x1="60" y1="85" x2="650" y2="85"/>
-            </g>
-            <line class="axis" x1="60" y1="370" x2="650" y2="370"/><line class="axis" x1="60" y1="30" x2="60" y2="370"/>
-            <!-- y labels ($B) -->
-            <text class="axlab" x="54" y="373" text-anchor="end">0.3</text><text class="axlab" x="54" y="301" text-anchor="end">1</text>
-            <text class="axlab" x="54" y="230" text-anchor="end">5</text><text class="axlab" x="54" y="159" text-anchor="end">15</text><text class="axlab" x="54" y="88" text-anchor="end">60</text>
-            <text class="axttl" x="14" y="200" text-anchor="middle" transform="rotate(-90 14 200)">Valuation $B</text>
-            <!-- x labels ($B) -->
-            <text class="axlab" x="60" y="384" text-anchor="middle">.03</text><text class="axlab" x="218" y="384" text-anchor="middle">.1</text>
-            <text class="axlab" x="396" y="384" text-anchor="middle">.5</text><text class="axlab" x="450" y="384" text-anchor="middle">1</text><text class="axlab" x="631" y="384" text-anchor="middle">5</text>
-            <text class="axttl" x="355" y="399" text-anchor="middle">Revenue / ARR $B</text>
-            <!-- ~10x trend -->
-            <line class="trend" x1="60" y1="370" x2="650" y2="47"/>
-            <text class="axlab" x="600" y="60" fill="#54627a">≈10× rev</text>
-            <!-- GPU-cloud bubbles (cyan) -->
-            <g>
-              <circle cx="632" cy="47" r="11" fill="#38bdf8" fill-opacity="0.22" stroke="#38bdf8" stroke-width="1.5"/><text class="bub-lab" x="632" y="33" text-anchor="middle">CoreWeave</text>
-              <circle cx="471" cy="36" r="9" fill="#38bdf8" fill-opacity="0.22" stroke="#38bdf8" stroke-width="1.5"/><text class="bub-lab" x="471" y="22" text-anchor="middle">Nebius</text>
-              <circle cx="451" cy="174" r="7" fill="#38bdf8" fill-opacity="0.22" stroke="#38bdf8" stroke-width="1.5"/><text class="bub-lab" x="451" y="161" text-anchor="middle">Together</text>
-              <circle cx="420" cy="188" r="6" fill="#38bdf8" fill-opacity="0.22" stroke="#38bdf8" stroke-width="1.5"/><text class="bub-lab" x="409" y="201" text-anchor="end">Lambda</text>
-              <circle cx="348" cy="157" r="6" fill="#38bdf8" fill-opacity="0.22" stroke="#38bdf8" stroke-width="1.5"/><text class="bub-lab" x="348" y="144" text-anchor="middle">Crusoe</text>
-              <circle cx="373" cy="241" r="5" fill="#38bdf8" fill-opacity="0.22" stroke="#38bdf8" stroke-width="1.5"/><text class="bub-lab" x="373" y="256" text-anchor="middle">Voltage</text>
-            </g>
-            <!-- AI services bubbles (lime) -->
-            <g>
-              <circle cx="394" cy="141" r="7" fill="#bef264" fill-opacity="0.20" stroke="#bef264" stroke-width="1.5"/><text class="bub-lab" x="394" y="128" text-anchor="middle">Baseten</text>
-              <circle cx="292" cy="178" r="6" fill="#bef264" fill-opacity="0.20" stroke="#bef264" stroke-width="1.5"/><text class="bub-lab" x="292" y="165" text-anchor="middle">Cohere</text>
-              <circle cx="316" cy="203" r="5" fill="#bef264" fill-opacity="0.20" stroke="#bef264" stroke-width="1.5"/><text class="bub-lab" x="316" y="217" text-anchor="middle">Modal</text>
-              <circle cx="309" cy="212" r="5" fill="#bef264" fill-opacity="0.20" stroke="#bef264" stroke-width="1.5"/><text class="bub-lab" x="270" y="224" text-anchor="middle">Fireworks</text>
-            </g>
-            <!-- Hearst (violet, ringed) -->
-            <circle cx="80" cy="346" r="13" fill="none" stroke="#c084fc" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/>
-            <circle cx="80" cy="346" r="6" fill="#c084fc" stroke="#fff" stroke-width="1.5"/>
-            <text class="bub-lab" x="96" y="349" fill="#c084fc" font-weight="700">Hearst · base</text>
-          </svg>
-        </div>
-
-        <!-- revenue multiple bars -->
-        <div class="panel" style="flex:1;display:flex;flex-direction:column;">
-          <div class="p-h"><span class="p-t">Revenue multiple by comp (× ARR)</span></div>
-          <div style="padding:12px 14px;flex:1;display:flex;flex-direction:column;justify-content:center;">
-            <div class="barrow"><span class="b-name">Voltage</span><span class="b-track"><span class="b-fill" style="width:17%;background:#38bdf8;"></span></span><span class="b-val">5×</span></div>
-            <div class="barrow"><span class="b-name">CoreWeave*</span><span class="b-track"><span class="b-fill" style="width:17%;background:#38bdf8;"></span></span><span class="b-val">5×</span></div>
-            <div class="barrow"><span class="b-name">Together</span><span class="b-track"><span class="b-fill" style="width:26%;background:#38bdf8;"></span></span><span class="b-val">7.5×</span></div>
-            <div class="barrow"><span class="b-name">Lambda</span><span class="b-track"><span class="b-fill" style="width:28%;background:#38bdf8;"></span></span><span class="b-val">8×</span></div>
-            <div class="barrow"><span class="b-name">Modal</span><span class="b-track"><span class="b-fill" style="width:52%;background:#bef264;"></span></span><span class="b-val">15×</span></div>
-            <div class="barrow"><span class="b-name">Fireworks</span><span class="b-track"><span class="b-fill" style="width:55%;background:#bef264;"></span></span><span class="b-val">16×</span></div>
-            <div class="barrow"><span class="b-name">Baseten</span><span class="b-track"><span class="b-fill" style="width:76%;background:#bef264;"></span></span><span class="b-val">22×</span></div>
-            <div class="barrow"><span class="b-name">Cohere</span><span class="b-track"><span class="b-fill" style="width:100%;background:#bef264;"></span></span><span class="b-val">29×</span></div>
-            <div class="barrow" style="margin-top:9px;border-top:1px dashed var(--line);padding-top:9px;"><span class="b-name" style="color:#c084fc;font-weight:700;">Hearst blend</span><span class="b-track"><span class="b-fill" style="width:31%;background:#c084fc;box-shadow:0 0 12px #c084fc;"></span></span><span class="b-val" style="color:#c084fc;">~9×</span></div>
-          </div>
-          <div class="note" style="padding:0 14px 10px;"><b>*</b> CoreWeave on forward revenue. Foundation-model labs (Mistral ~138×) excluded — they price model IP, not a services multiple.</div>
-        </div>
-      </div>
-
-      <div class="note" style="margin-top:6px;">● <b>Physical-AI / research comps are pre-revenue</b> and sit off this revenue plane — priced on team + optionality: Figure $39B · Skild $14B · Physical Intelligence $5.6B · World Labs $5B · Generalist $2B (detailed on p.3).</div>
-    </div>
-
-    <div class="foot"><span class="sig">● CONFIDENTIAL — INDICATIVE · NOT AN OFFER</span><span>COMP LANDSCAPE / GPU-CLOUD 5–8× · SERVICES 14–22×</span><span>02 — 05</span></div>
-  </section>
-
-  <!-- ============ P3 · VALUATION BUILD ============ -->
-  <section class="page" id="p3">
-    <div class="frame"></div><div class="tick-tr"></div><div class="tick-bl"></div>
-    <div class="head">
-      <div>
-        <div class="meta"><span class="dot"></span>Sum-of-the-parts<span class="dim">/ base case build-up</span></div>
-        <h1>How the <em>$450M</em> is built</h1>
-        <div class="sub">Each engine's ARR × its comp multiple, plus research optionality. The value splits three ways — and scales with ARR along a ~9× blended line.</div>
-      </div>
-      <div class="seal"><b>BUILD 03</b>donut · curve<br/>base $444M</div>
-    </div>
-
-    <div class="body">
-      <div style="display:flex;gap:16px;flex:1;min-height:0;">
-        <!-- donut -->
-        <div class="panel" style="flex:1;display:flex;flex-direction:column;">
-          <div class="p-h"><span class="p-t">Value mix · base case</span></div>
-          <div style="flex:1;display:flex;align-items:center;justify-content:center;">
-            <svg viewBox="0 0 220 200" width="100%" height="100%">
-              <g transform="rotate(-90 110 100)">
-                <circle cx="110" cy="100" r="68" fill="none" stroke="#162133" stroke-width="26"/>
-                <circle cx="110" cy="100" r="68" fill="none" stroke="#38bdf8" stroke-width="26" stroke-dasharray="138.6 288.7" stroke-dashoffset="0"/>
-                <circle cx="110" cy="100" r="68" fill="none" stroke="#bef264" stroke-width="26" stroke-dasharray="173.2 254.1" stroke-dashoffset="-138.6"/>
-                <circle cx="110" cy="100" r="68" fill="none" stroke="#c084fc" stroke-width="26" stroke-dasharray="115.5 311.8" stroke-dashoffset="-311.8"/>
+      <div class="grid">
+        <div class="panel" style="flex:1.25;">
+          <div class="p-h"><span class="p-t">Value mix · today (base case)</span><span class="legend"><span><i style="background:#1b2c44;"></i>Datacenter</span><span><i style="background:#9a7b32;"></i>Training</span><span><i style="background:#274064;"></i>Compute</span><span><i style="background:#2f6f6b;"></i>Research</span></span></div>
+          <div style="display:flex;align-items:center;justify-content:center;flex:1;min-height:0;padding:8px;">
+            <svg viewBox="0 0 230 210" width="100%" height="100%">
+              <!-- donut: total 4012; datacenter 3568 (88.9%), training 180 (4.5%), compute 144 (3.6%), research 120 (3.0%) -->
+              <!-- circumference = 2*pi*70 = 439.82 ; dash = pct*439.82 -->
+              <g transform="rotate(-90 115 100)">
+                <circle cx="115" cy="100" r="70" fill="none" stroke="#eef1f4" stroke-width="28"/>
+                <circle cx="115" cy="100" r="70" fill="none" stroke="#1b2c44" stroke-width="28" stroke-dasharray="391.1 48.7" stroke-dashoffset="0"/>
+                <circle cx="115" cy="100" r="70" fill="none" stroke="#9a7b32" stroke-width="28" stroke-dasharray="19.7 420.1" stroke-dashoffset="-391.1"/>
+                <circle cx="115" cy="100" r="70" fill="none" stroke="#274064" stroke-width="28" stroke-dasharray="15.8 424.0" stroke-dashoffset="-410.8"/>
+                <circle cx="115" cy="100" r="70" fill="none" stroke="#2f6f6b" stroke-width="28" stroke-dasharray="13.2 426.6" stroke-dashoffset="-426.6"/>
               </g>
-              <text x="110" y="96" text-anchor="middle" font-family="Fraunces,serif" font-size="27" fill="#eaf1f8">$444M</text>
-              <text x="110" y="114" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" letter-spacing="1" fill="#7e8ca0">PRE-MONEY</text>
+              <text x="115" y="96" text-anchor="middle" font-family="Iowan Old Style,Palatino,Georgia,serif" font-size="29" font-weight="600" fill="#10171f">~$4.0B</text>
+              <text x="115" y="115" text-anchor="middle" font-family="Helvetica Neue,Arial,sans-serif" font-size="8" letter-spacing="1.4" fill="#6b7785">TODAY · PRE-MONEY</text>
             </svg>
           </div>
           <div style="padding:0 16px 14px;">
-            <div class="barrow"><span class="dotc" style="background:#38bdf8;"></span><span class="b-name" style="width:auto;flex:1;">Compute · $24M × 6×</span><span class="b-val" style="width:54px;">$144M</span></div>
-            <div class="barrow"><span class="dotc" style="background:#bef264;"></span><span class="b-name" style="width:auto;flex:1;">Training · $12M × 15×</span><span class="b-val" style="width:54px;">$180M</span></div>
-            <div class="barrow"><span class="dotc" style="background:#c084fc;"></span><span class="b-name" style="width:auto;flex:1;">Research optionality</span><span class="b-val" style="width:54px;">$120M</span></div>
+            <div class="arow"><span class="dotc" style="background:#1b2c44;"></span><span class="a-name" style="width:auto;flex:1;">Datacenter platform · 80% (NPV)</span><span class="a-val">$3.57B</span></div>
+            <div class="arow"><span class="dotc" style="background:#9a7b32;"></span><span class="a-name" style="width:auto;flex:1;">B2B model training</span><span class="a-val">$180M</span></div>
+            <div class="arow"><span class="dotc" style="background:#274064;"></span><span class="a-name" style="width:auto;flex:1;">GPU compute layer</span><span class="a-val">$144M</span></div>
+            <div class="arow"><span class="dotc" style="background:#2f6f6b;"></span><span class="a-name" style="width:auto;flex:1;">Frontier research optionality</span><span class="a-val">$120M</span></div>
           </div>
         </div>
 
-        <!-- ARR -> valuation curve -->
-        <div class="panel" style="flex:1.6;display:flex;flex-direction:column;">
-          <div class="p-h"><span class="p-t">Pre-money vs total ARR — scenario curve</span><span class="legend"><span><i style="background:#bef264;"></i>pre-money</span></span></div>
-          <svg viewBox="0 0 640 360" width="100%" style="flex:1;display:block;padding:6px;">
-            <defs>
-              <linearGradient id="areaG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bef264" stop-opacity="0.30"/><stop offset="1" stop-color="#bef264" stop-opacity="0.02"/></linearGradient>
-            </defs>
-            <g class="chart-grid">
-              <line x1="60" y1="300" x2="610" y2="300"/><line x1="60" y1="232" x2="610" y2="232"/>
-              <line x1="60" y1="164" x2="610" y2="164"/><line x1="60" y1="96" x2="610" y2="96"/>
-            </g>
-            <line class="axis" x1="60" y1="300" x2="610" y2="300"/><line class="axis" x1="60" y1="30" x2="60" y2="300"/>
-            <!-- y $M 0..1700 -->
-            <text class="axlab" x="54" y="303" text-anchor="end">0</text><text class="axlab" x="54" y="235" text-anchor="end">425</text>
-            <text class="axlab" x="54" y="167" text-anchor="end">850</text><text class="axlab" x="54" y="99" text-anchor="end">1275</text><text class="axlab" x="54" y="40" text-anchor="end">1700</text>
-            <text class="axttl" x="16" y="165" text-anchor="middle" transform="rotate(-90 16 165)">Pre-money $M</text>
-            <!-- x ARR 0..150 ; map x = 60 + arr/150*550 -->
-            <text class="axlab" x="60" y="314" text-anchor="middle">0</text><text class="axlab" x="170" y="314" text-anchor="middle">30</text>
-            <text class="axlab" x="280" y="314" text-anchor="middle">60</text><text class="axlab" x="390" y="314" text-anchor="middle">90</text><text class="axlab" x="500" y="314" text-anchor="middle">120</text><text class="axlab" x="610" y="314" text-anchor="middle">150</text>
-            <text class="axttl" x="335" y="332" text-anchor="middle">Total ARR $M</text>
-            <!-- curve points: (arr,prem): (10,130)(36,444)(75,925)(135,1570). x=60+arr/150*550 ; y=300-prem/1700*270 -->
-            <!-- (10)->x96.7 y279.4 ; (36)->x192 y229.5 ; (75)->x335 y153.1 ; (135)->x555 y50.6 -->
-            <path d="M60,300 L96.7,279.4 L192,229.5 L335,153.1 L555,50.6 L610,28" fill="none" stroke="#bef264" stroke-width="2.5"/>
-            <path d="M60,300 L96.7,279.4 L192,229.5 L335,153.1 L555,50.6 L610,28 L610,300 L60,300 Z" fill="url(#areaG)"/>
-            <!-- scenario dots -->
-            <circle cx="96.7" cy="279.4" r="5" fill="#080b11" stroke="#7e8ca0" stroke-width="2"/><text class="bub-lab" x="104" y="274" fill="#7e8ca0">Early ~$136M</text>
-            <circle cx="192" cy="229.5" r="6" fill="#bef264" stroke="#fff" stroke-width="1.5"/><text class="bub-lab" x="201" y="224" fill="#bef264" font-weight="700">Scaling ~$444M</text>
-            <circle cx="335" cy="153.1" r="5" fill="#080b11" stroke="#c084fc" stroke-width="2"/><text class="bub-lab" x="343" y="148" fill="#c084fc">$75M ARR ~$925M</text>
-            <circle cx="555" cy="50.6" r="5" fill="#080b11" stroke="#38bdf8" stroke-width="2"/><text class="bub-lab" x="547" y="46" text-anchor="end" fill="#38bdf8">Established ~$1.57B</text>
-          </svg>
-        </div>
-      </div>
-
-      <!-- sensitivity strip -->
-      <div class="panel" style="margin-top:12px;">
-        <div class="p-h"><span class="p-t">Sensitivity — pre-money vs total ARR (base mix · ⅔ compute · ⅓ services)</span><span class="lab">blended <span class="acc">~9×</span> + research</span></div>
-        <div style="padding:4px 8px;">
-          <table class="gt">
-            <thead><tr><th>Total ARR</th><th>Compute value</th><th>Services value</th><th>Research opt.</th><th>Pre-money</th><th>Blend ×</th></tr></thead>
-            <tbody>
-              <tr><td>$10M</td><td>$40M</td><td>$50M</td><td>$40M</td><td>~$130M</td><td>~9×</td></tr>
-              <tr class="hi"><td>$36M — base</td><td>$144M</td><td>$180M</td><td>$120M</td><td>~$444M</td><td>~9×</td></tr>
-              <tr><td>$75M</td><td>$300M</td><td>$375M</td><td>$250M</td><td>~$925M</td><td>~9×</td></tr>
-              <tr><td>$135M</td><td>$540M</td><td>$675M</td><td>$350M</td><td>~$1.57B</td><td>~9×</td></tr>
-            </tbody>
-          </table>
+        <div class="panel" style="flex:1;">
+          <div class="p-h"><span class="p-t">Pillar A · Datacenter platform — the hard asset</span></div>
+          <div style="padding:13px 16px;flex:1;display:flex;flex-direction:column;">
+            <div style="font-size:11px;color:var(--ink-2);line-height:1.5;">150&nbsp;MW Qatar sovereign datacenter platform · 80% economic interest, 20% Equinix as operating partner. A funded, contracted infrastructure asset.</div>
+            <div class="kpis" style="margin-top:12px;">
+              <div class="kpi alt"><div class="k-lab">Value today</div><div class="k-val">$3.57B</div><div class="k-sub">NPV @ 10%</div></div>
+              <div class="kpi"><div class="k-lab">15-yr value</div><div class="k-val">$10.93B</div><div class="k-sub">cash + terminal</div></div>
+            </div>
+            <table class="gt" style="margin-top:12px;">
+              <tbody>
+                <tr><td>Capacity</td><td>150 MW</td></tr>
+                <tr><td>Stabilized revenue</td><td>$405M / yr</td></tr>
+                <tr><td>Stabilized EBITDA (65%)</td><td>$263M / yr</td></tr>
+                <tr><td>Consortium share (80%)</td><td>$211M / yr</td></tr>
+                <tr><td>Platform capex</td><td>$1.5B</td></tr>
+              </tbody>
+            </table>
+            <div class="disclaimer" style="margin-top:auto;">
+              <strong>Today's mark is conservative.</strong> The datacenter interest is carried at its present value (future cash + terminal, discounted at 10%) — <strong>$3.57B</strong>, not its undiscounted 15-year total of $10.93B. Deployment / funding status to confirm.
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="foot"><span class="sig">● CONFIDENTIAL — INDICATIVE · NOT AN OFFER</span><span>VALUE BUILD / COMPUTE 6× · SERVICES 15× · OPTIONALITY</span><span>03 — 05</span></div>
+    <div class="foot"><span class="conf">Confidential — Indicative · Not an Offer</span><span>Asset base today ≈ $4.0B · datacenter at discounted present value</span><span class="pageno">02 / 05</span></div>
   </section>
 
-  <!-- ============ P4 · SCENARIOS + MARKET ============ -->
-  <section class="page" id="p4">
-    <div class="frame"></div><div class="tick-tr"></div><div class="tick-bl"></div>
+  <!-- ============ P3 · TRAINING RE-RATES ============ -->
+  <section class="page" id="p3">
+    <div class="frame"></div>
     <div class="head">
       <div>
-        <div class="meta"><span class="dot"></span>Scenarios &amp; market<span class="dim">/ traction × TAM</span></div>
-        <h1>Three <em>traction</em> states · three markets</h1>
-        <div class="sub">Read the gauge nearest your actuals. Beneath it, the three markets Hearst AI compounds into — infrastructure, enterprise AI, and physical AI.</div>
+        <div class="kicker">The re-rating engine · B2B model training</div>
+        <h1>Why one company is worth more</h1>
+        <div class="sub">Raw datacenter compute trades at a low multiple (~6× revenue, capital-intensive). Wrapped inside a B2B model-training business, the same capacity earns a services multiple (~15×) — re-rating the whole company.</div>
       </div>
-      <div class="seal"><b>SCAN 04</b>gauges · TAM<br/>2025→2030</div>
+      <div class="seal"><strong>HEARST</strong>Compute → Training<br/>~6× → ~15×</div>
+    </div>
+
+    <div class="body">
+      <div class="grid">
+        <div class="panel" style="flex:1;">
+          <div class="p-h"><span class="p-t">Revenue multiple — compute vs services</span></div>
+          <div style="padding:13px 16px;flex:1;display:flex;flex-direction:column;justify-content:center;">
+            <div class="arow"><span class="a-name">CoreWeave* <small>GPU cloud</small></span><span class="a-track"><span class="a-fill" style="width:17%;background:#274064;"></span></span><span class="a-val">5×</span></div>
+            <div class="arow"><span class="a-name">Together <small>GPU cloud</small></span><span class="a-track"><span class="a-fill" style="width:26%;background:#274064;"></span></span><span class="a-val">7.5×</span></div>
+            <div class="arow"><span class="a-name">Lambda <small>GPU cloud</small></span><span class="a-track"><span class="a-fill" style="width:28%;background:#274064;"></span></span><span class="a-val">8×</span></div>
+            <div class="arow"><span class="a-name">Modal <small>AI services</small></span><span class="a-track"><span class="a-fill" style="width:52%;background:#9a7b32;"></span></span><span class="a-val">15×</span></div>
+            <div class="arow"><span class="a-name">Fireworks <small>AI services</small></span><span class="a-track"><span class="a-fill" style="width:55%;background:#9a7b32;"></span></span><span class="a-val">16×</span></div>
+            <div class="arow"><span class="a-name">Baseten <small>AI services</small></span><span class="a-track"><span class="a-fill" style="width:76%;background:#9a7b32;"></span></span><span class="a-val">22×</span></div>
+            <div class="arow"><span class="a-name">Cohere <small>AI services</small></span><span class="a-track"><span class="a-fill" style="width:100%;background:#9a7b32;"></span></span><span class="a-val">29×</span></div>
+            <div class="arow" style="margin-top:8px;border-top:1px dashed var(--line);padding-top:9px;"><span class="a-name" style="color:var(--gold);font-weight:700;">Hearst blend</span><span class="a-track"><span class="a-fill" style="width:31%;background:linear-gradient(90deg,#c9a85b,#9a7b32);"></span></span><span class="a-val" style="color:var(--gold);">~9×</span></div>
+            <div style="font-size:8.5px;color:var(--faint);line-height:1.45;margin-top:10px;font-style:italic;"><b style="font-style:normal;color:var(--muted);">*</b> CoreWeave on forward revenue. The training engine pulls Hearst's blended multiple up from the ~6× datacenter floor toward services territory.</div>
+          </div>
+        </div>
+
+        <div class="panel" style="flex:1.25;">
+          <div class="p-h"><span class="p-t">Training ARR → value added ($M) · 15× services multiple</span><span class="legend"><span><i style="background:#9a7b32;"></i>training value</span></span></div>
+          <svg viewBox="0 0 640 360" width="100%" style="flex:1;display:block;padding:8px;">
+            <defs><linearGradient id="aG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a7b32" stop-opacity="0.26"/><stop offset="1" stop-color="#9a7b32" stop-opacity="0.02"/></linearGradient></defs>
+            <g class="cg"><line x1="64" y1="300" x2="610" y2="300"/><line x1="64" y1="232" x2="610" y2="232"/><line x1="64" y1="164" x2="610" y2="164"/><line x1="64" y1="96" x2="610" y2="96"/></g>
+            <line class="cax" x1="64" y1="300" x2="610" y2="300"/><line class="cax" x1="64" y1="30" x2="64" y2="300"/>
+            <text class="clab" x="58" y="303" text-anchor="end">$0</text><text class="clab" x="58" y="235" text-anchor="end">$225M</text>
+            <text class="clab" x="58" y="167" text-anchor="end">$450M</text><text class="clab" x="58" y="99" text-anchor="end">$675M</text>
+            <text class="cttl" x="20" y="165" text-anchor="middle" transform="rotate(-90 20 165)">Value added $M</text>
+            <!-- x ARR 0..45 ; x=64+arr/45*546 ; y=300-val/750*270 -->
+            <!-- (4,60)(12,180)(30,450)(45,675) -->
+            <text class="clab" x="64" y="314" text-anchor="middle">0</text><text class="clab" x="210" y="314" text-anchor="middle">$12M</text><text class="clab" x="428" y="314" text-anchor="middle">$30M</text><text class="clab" x="610" y="314" text-anchor="middle">$45M ARR</text>
+            <text class="cttl" x="337" y="332" text-anchor="middle">Training ARR</text>
+            <path d="M64,300 L112.5,278.4 L210,235.2 L428,138.0 L610,57.0 L610,300 L64,300 Z" fill="url(#aG)"/>
+            <path d="M64,300 L112.5,278.4 L210,235.2 L428,138.0 L610,57.0" fill="none" stroke="#9a7b32" stroke-width="2.5"/>
+            <circle cx="112.5" cy="278.4" r="5" fill="#fff" stroke="#6b7785" stroke-width="2"/><text class="bub" x="120" y="273" fill="#6b7785">Early · $4M → $60M</text>
+            <circle cx="210" cy="235.2" r="6" fill="#9a7b32" stroke="#fff" stroke-width="1.5"/><text class="bub" x="219" y="230" fill="#9a7b32" font-weight="700">Base · $12M → $180M</text>
+            <circle cx="610" cy="57.0" r="5" fill="#fff" stroke="#1b2c44" stroke-width="2"/><text class="bub" x="602" y="52" text-anchor="end" fill="#1b2c44">Scaled · $45M → $675M</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="disclaimer" style="margin-top:auto;">
+        <strong>The thesis in one line.</strong> The datacenter supplies the compute; the B2B training business sells <strong>outcomes</strong> on top of it — fine-tuned, deployed, domain-specific models on open foundations (Llama&nbsp;4, DeepSeek, Qwen&nbsp;3, Kimi&nbsp;K2.5, MiniMax&nbsp;M2.1). That earns a services multiple (~15×) rather than an infrastructure one (~6×), so every $1 of training ARR adds far more value than $1 of raw compute — lifting the single company well above the sum of its hardware.
+      </div>
+    </div>
+
+    <div class="foot"><span class="conf">Confidential — Indicative · Not an Offer</span><span>Training re-rates the asset · ~6× compute → ~15× services</span><span class="pageno">03 / 05</span></div>
+  </section>
+
+  <!-- ============ P4 · COMBINED VALUATION ============ -->
+  <section class="page" id="p4">
+    <div class="frame"></div>
+    <div class="head">
+      <div>
+        <div class="kicker">Single-company valuation · today → scaling</div>
+        <h1>The one-company sum of the parts</h1>
+        <div class="sub">Datacenter interest (held flat at today's NPV) plus the AI engines (compute + training + research), across three AI-traction states. The datacenter anchors the floor; AI scaling drives the upside.</div>
+      </div>
+      <div class="seal"><strong>HEARST</strong>Sum-of-the-Parts<br/>base ~$4.0B</div>
     </div>
 
     <div class="body">
       <div class="scns">
         <div class="scn">
           <div class="s-n">Early · seed–A</div>
-          <svg viewBox="0 0 140 92" width="150"><path d="M20 82 A 50 50 0 1 1 120 82" fill="none" stroke="#162133" stroke-width="11" stroke-linecap="round"/><path d="M20 82 A 50 50 0 1 1 120 82" fill="none" stroke="#7e8ca0" stroke-width="11" stroke-linecap="round" stroke-dasharray="235.6" stroke-dashoffset="219.6"/><text x="70" y="66" text-anchor="middle" font-family="Fraunces,serif" font-size="22" fill="#eaf1f8">$136M</text><text x="70" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#7e8ca0">~$10M ARR</text></svg>
-          <div class="s-rows">
-            <div class="s-row"><span>Compute $6M×6</span><b>$36M</b></div>
-            <div class="s-row"><span>Training $4M×15</span><b>$60M</b></div>
-            <div class="s-row"><span>Research opt.</span><b>$40M</b></div>
-            <div class="s-row"><span>~256 GPUs</span><b>$110–170M</b></div>
-          </div>
+          <div class="s-v">~$3.7B<small> today</small></div>
+          <div class="s-row"><span>Datacenter 80% (NPV)</span><b>$3.57B</b></div>
+          <div class="s-row"><span>Compute $6M × 6×</span><b>$36M</b></div>
+          <div class="s-row"><span>Training $4M × 15×</span><b>$60M</b></div>
+          <div class="s-row"><span>Research optionality</span><b>$40M</b></div>
+          <div class="s-row"><span>AI engines subtotal</span><b>~$136M</b></div>
         </div>
         <div class="scn base">
           <div class="s-n">◆ Scaling · series A–B</div>
-          <svg viewBox="0 0 140 92" width="150"><path d="M20 82 A 50 50 0 1 1 120 82" fill="none" stroke="#162133" stroke-width="11" stroke-linecap="round"/><path d="M20 82 A 50 50 0 1 1 120 82" fill="none" stroke="#bef264" stroke-width="11" stroke-linecap="round" stroke-dasharray="235.6" stroke-dashoffset="183.3"/><text x="70" y="66" text-anchor="middle" font-family="Fraunces,serif" font-size="22" fill="#eaf1f8">$444M</text><text x="70" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#bef264">~$36M ARR</text></svg>
-          <div class="s-rows">
-            <div class="s-row"><span>Compute $24M×6</span><b>$144M</b></div>
-            <div class="s-row"><span>Training $12M×15</span><b>$180M</b></div>
-            <div class="s-row"><span>Research opt.</span><b>$120M</b></div>
-            <div class="s-row"><span>~768 GPUs</span><b>$380–520M</b></div>
-          </div>
+          <div class="s-v">~$4.0B<small> today</small></div>
+          <div class="s-row"><span>Datacenter 80% (NPV)</span><b>$3.57B</b></div>
+          <div class="s-row"><span>Compute $24M × 6×</span><b>$144M</b></div>
+          <div class="s-row"><span>Training $12M × 15×</span><b>$180M</b></div>
+          <div class="s-row"><span>Research optionality</span><b>$120M</b></div>
+          <div class="s-row"><span>AI engines subtotal</span><b>~$444M</b></div>
         </div>
         <div class="scn">
           <div class="s-n">Established · series B+</div>
-          <svg viewBox="0 0 140 92" width="150"><path d="M20 82 A 50 50 0 1 1 120 82" fill="none" stroke="#162133" stroke-width="11" stroke-linecap="round"/><path d="M20 82 A 50 50 0 1 1 120 82" fill="none" stroke="#38bdf8" stroke-width="11" stroke-linecap="round" stroke-dasharray="235.6" stroke-dashoffset="50.6"/><text x="70" y="66" text-anchor="middle" font-family="Fraunces,serif" font-size="20" fill="#eaf1f8">$1.57B</text><text x="70" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#38bdf8">~$135M ARR</text></svg>
-          <div class="s-rows">
-            <div class="s-row"><span>Compute $90M×6</span><b>$540M</b></div>
-            <div class="s-row"><span>Training $45M×15</span><b>$675M</b></div>
-            <div class="s-row"><span>Research opt.</span><b>$350M</b></div>
-            <div class="s-row"><span>~2,500 GPUs</span><b>$1.3–1.9B</b></div>
-          </div>
+          <div class="s-v">~$5.1B<small> today</small></div>
+          <div class="s-row"><span>Datacenter 80% (NPV)</span><b>$3.57B</b></div>
+          <div class="s-row"><span>Compute $90M × 6×</span><b>$540M</b></div>
+          <div class="s-row"><span>Training $45M × 15×</span><b>$675M</b></div>
+          <div class="s-row"><span>Research optionality</span><b>$350M</b></div>
+          <div class="s-row"><span>AI engines subtotal</span><b>~$1.57B</b></div>
         </div>
       </div>
 
-      <div style="display:flex;gap:16px;margin-top:14px;flex:1;min-height:0;">
-        <!-- TAM curves -->
-        <div class="panel" style="flex:1.7;display:flex;flex-direction:column;">
-          <div class="p-h"><span class="p-t">Markets · TAM $B, 2025→2030</span>
-            <span class="legend"><span><i style="background:#bef264;"></i>Enterprise AI</span><span><i style="background:#38bdf8;"></i>AI infra</span><span><i style="background:#c084fc;"></i>Physical AI</span></span>
-          </div>
-          <svg viewBox="0 0 620 220" width="100%" style="flex:1;display:block;padding:6px;">
-            <defs>
-              <linearGradient id="t1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bef264" stop-opacity="0.22"/><stop offset="1" stop-color="#bef264" stop-opacity="0"/></linearGradient>
-            </defs>
-            <g class="chart-grid"><line x1="50" y1="180" x2="600" y2="180"/><line x1="50" y1="135" x2="600" y2="135"/><line x1="50" y1="90" x2="600" y2="90"/><line x1="50" y1="45" x2="600" y2="45"/></g>
-            <line class="axis" x1="50" y1="180" x2="600" y2="180"/><line class="axis" x1="50" y1="20" x2="50" y2="180"/>
-            <text class="axlab" x="44" y="183" text-anchor="end">0</text><text class="axlab" x="44" y="138" text-anchor="end">90</text><text class="axlab" x="44" y="93" text-anchor="end">180</text><text class="axlab" x="44" y="48" text-anchor="end">270</text>
-            <!-- x years 2025..2030 ; x=50+(i/5)*550 ; y=180-(v/270)*160 -->
-            <!-- Enterprise AI 110,131,156,185,221,263 -->
-            <path d="M50,180 L50,114.8 L160,102.4 L270,87.6 L380,70.4 L490,49.0 L600,24.2 L600,180 Z" fill="url(#t1)"/>
-            <path d="M50,114.8 L160,102.4 L270,87.6 L380,70.4 L490,49.0 L600,24.2" fill="none" stroke="#bef264" stroke-width="2.5"/>
-            <!-- AI infra 65,81,102,127,159,199 -->
-            <path d="M50,141.5 L160,132.0 L270,119.6 L380,104.7 L490,85.8 L600,62.1" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
-            <!-- Physical AI 4.4,6.1,8.5,11.8,16.4,22.8 -->
-            <path d="M50,177.4 L160,176.4 L270,175.0 L380,173.0 L490,170.3 L600,166.5" fill="none" stroke="#c084fc" stroke-width="2.5"/>
-            <!-- year labels -->
-            <text class="axlab" x="50" y="194" text-anchor="middle">2025</text><text class="axlab" x="270" y="194" text-anchor="middle">2027</text><text class="axlab" x="490" y="194" text-anchor="middle">2029</text><text class="axlab" x="600" y="194" text-anchor="end">2030</text>
-            <!-- CAGR tags -->
-            <text class="axlab" x="604" y="22" fill="#bef264" font-weight="700">~19% · $263B</text>
-            <text class="axlab" x="604" y="60" fill="#38bdf8">~25% · $199B</text>
-            <text class="axlab" x="604" y="164" fill="#c084fc">~39% · $23B</text>
-          </svg>
-        </div>
-        <!-- GPU economics -->
-        <div class="panel" style="flex:1;display:flex;flex-direction:column;">
-          <div class="p-h"><span class="p-t">GPU economics · 2026</span></div>
-          <div style="padding:12px 14px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:9px;">
-            <div class="barrow"><span class="b-name">H100 /hr</span><span class="b-track"><span class="b-fill" style="width:42%;background:#38bdf8;"></span></span><span class="b-val">$2–3</span></div>
-            <div class="barrow"><span class="b-name">H200 /hr</span><span class="b-track"><span class="b-fill" style="width:58%;background:#38bdf8;"></span></span><span class="b-val">$3.5–4</span></div>
-            <div class="barrow"><span class="b-name">B200 /hr</span><span class="b-track"><span class="b-fill" style="width:85%;background:#38bdf8;"></span></span><span class="b-val">$5–6</span></div>
-            <div style="display:flex;gap:9px;margin-top:6px;">
-              <div class="kpi" style="flex:1;"><div class="k-l">Gross margin</div><div class="k-v" style="color:#bef264;">55–65%</div><div class="k-s">pre-deprec.</div></div>
-              <div class="kpi" style="flex:1;"><div class="k-l">Break-even</div><div class="k-v" style="color:#fbbf24;">~70%</div><div class="k-s">utilization</div></div>
-            </div>
-            <div class="note" style="margin-top:2px;">CoreWeave proxy: 57% adj. EBITDA, ~6% adj. op. margin after depreciation — why GPU-cloud earns a low revenue multiple.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="foot"><span class="sig">● CONFIDENTIAL — INDICATIVE · NOT AN OFFER</span><span>SCENARIOS / READ THE GAUGE NEAREST YOUR ACTUALS</span><span>04 — 05</span></div>
-  </section>
-
-  <!-- ============ P5 · METHOD + SOURCES ============ -->
-  <section class="page" id="p5">
-    <div class="frame"></div><div class="tick-tr"></div><div class="tick-bl"></div>
-    <div class="head">
-      <div>
-        <div class="meta"><span class="dot"></span>Method · inputs · provenance<span class="dim">/ no invented figures</span></div>
-        <h1>Every number, <em>sourced</em></h1>
-        <div class="sub">Each multiple is a 2026 market comparable; each company-specific input is flagged "to confirm." Replace the flagged rows with actuals to fix the valuation.</div>
-      </div>
-      <div class="seal"><b>LEDGER 05</b>inputs &amp;<br/>sources</div>
-    </div>
-
-    <div class="body">
-      <div class="panel" style="flex:1;display:flex;flex-direction:column;min-height:0;">
-        <div style="padding:6px 14px;overflow:hidden;">
-          <table class="at">
-            <thead><tr><th style="width:170px;">Input</th><th style="width:118px;">Value</th><th style="width:96px;">Status</th><th>Basis / source</th></tr></thead>
+      <div class="panel" style="margin-top:14px;">
+        <div class="p-h"><span class="p-t">Combined value — today vs 15-year horizon</span></div>
+        <div style="padding:4px 10px;">
+          <table class="gt">
+            <thead><tr><th>AI-traction state</th><th>Datacenter — today (NPV)</th><th>AI engines</th><th>Combined — today</th><th>Datacenter — 15-yr</th><th>Combined — 15-yr</th></tr></thead>
             <tbody>
-              <tr><td>Compute revenue multiple</td><td class="v">6× ARR</td><td class="ok">market</td><td class="s">CoreWeave ~5× fwd · Lambda 8× · Together 7.5× · Voltage 5×</td></tr>
-              <tr><td>Services revenue multiple</td><td class="v">15× ARR</td><td class="ok">market</td><td class="s">Baseten 22× · Modal 15× · Fireworks 14–19×</td></tr>
-              <tr><td>Research optionality</td><td class="v">$40–400M</td><td class="ok">market</td><td class="s">Physical-AI marks $0.1–39B, scaled for Hearst's earlier embedded research</td></tr>
-              <tr><td>Compute ARR</td><td class="v">$6 / 24 / 90M</td><td class="tc">confirm</td><td class="s">illustrative — fleet × rate × utilization</td></tr>
-              <tr><td>Training ARR</td><td class="v">$4 / 12 / 45M</td><td class="tc">confirm</td><td class="s">illustrative — # enterprise engagements × ACV</td></tr>
-              <tr><td>GPU fleet</td><td class="v">256 / 768 / 2,500</td><td class="tc">confirm</td><td class="s">illustrative — operated or contracted</td></tr>
-              <tr><td>GPU rental rates</td><td class="v">$2–6/hr</td><td class="ok">market</td><td class="s">H100 $2–3 · H200 $3.5–4 · B200 $5–6 (getdeploying / Spheron, Jun 26)</td></tr>
-              <tr><td>GPU-cloud gross margin</td><td class="v">55–65%</td><td class="ok">market</td><td class="s">ModulEdge; CoreWeave 57% adj. EBITDA (pre-deprec.)</td></tr>
-              <tr><td>Raise size / pre-money target</td><td class="v">—</td><td class="tc">confirm</td><td class="s">not provided — drives post-money &amp; dilution</td></tr>
-              <tr><td>Stage benchmark</td><td class="v">A $84M · B $119–142M</td><td class="ok">market</td><td class="s">AI Series A/B median pre-money 2025 (Aventis / valueaddvc)</td></tr>
+              <tr><td>Early · seed–A</td><td>$3.57B</td><td>$0.14B</td><td>~$3.7B</td><td>$10.93B</td><td>~$11.1B</td></tr>
+              <tr class="hi"><td>Scaling · A–B — base</td><td>$3.57B</td><td>$0.44B</td><td>~$4.0B</td><td>$10.93B</td><td>~$11.4B</td></tr>
+              <tr><td>Established · B+</td><td>$3.57B</td><td>$1.57B</td><td>~$5.1B</td><td>$10.93B</td><td>~$12.5B</td></tr>
             </tbody>
           </table>
         </div>
-        <div style="margin-top:auto;padding:10px 14px 14px;">
-          <div class="discl">
-            <b>Method &amp; disclaimer.</b> Indicative, comparables-anchored sum-of-the-parts from Hearst AI's qualitative description; <b>no audited financials provided</b>, so revenue / ARR / fleet are illustrative scenario inputs and the pre-money is a <b>range, not a point</b>. Comparable valuations &amp; multiples are third-party market data as of June 2026 (public filings, press, Sacra / PitchBook estimates); several rounds are reported "in talks," not closed, and private revenue is frequently estimated. Not an offer, solicitation, or fairness opinion. Calibrate with management actuals before any transaction.
+        <div class="disclaimer" style="margin:8px 10px 12px;">
+          <strong>Read it conservatively.</strong> "Today" carries the datacenter at its discounted present value (~$3.57B) and the AI engines at live market revenue multiples — the defensible mark for an investor entering now. The "15-year" columns add the datacenter's full hold-period value ($10.93B); they are a horizon, not a current price. AI ARR / fleet inputs are illustrative pending management actuals.
+        </div>
+      </div>
+    </div>
+
+    <div class="foot"><span class="conf">Confidential — Indicative · Not an Offer</span><span>Today ~$4.0B · 15-yr horizon ~$11.4B · datacenter anchors, AI scales</span><span class="pageno">04 / 05</span></div>
+  </section>
+
+  <!-- ============ P5 · METHOD & SOURCES ============ -->
+  <section class="page" id="p5">
+    <div class="frame"></div>
+    <div class="head">
+      <div>
+        <div class="kicker">Method · inputs · provenance</div>
+        <h1>Every number, sourced</h1>
+        <div class="sub">Market multiples are live 2026 comparables; the datacenter mark is a discounted-cash NPV; company-specific AI inputs are flagged "to confirm." Replace the flagged rows with actuals to fix the valuation.</div>
+      </div>
+      <div class="seal"><strong>HEARST</strong>Ledger<br/>No invented figures</div>
+    </div>
+
+    <div class="body">
+      <div class="panel" style="flex:1;min-height:0;">
+        <div style="padding:4px 12px;">
+          <table class="at">
+            <thead><tr><th style="width:172px;">Input</th><th style="width:120px;">Value</th><th style="width:80px;">Status</th><th>Basis / source</th></tr></thead>
+            <tbody>
+              <tr><td>Datacenter interest — value today</td><td class="v">$3.57B</td><td class="ok">computed</td><td class="s">NPV @ 10% of 80% consortium cash (15 yr, 3% esc) + $7.01B terminal</td></tr>
+              <tr><td>Datacenter interest — 15-yr value</td><td class="v">$10.93B</td><td class="ok">model</td><td class="s">$3.92B cumulative cash + $7.01B terminal (22× exit) — Qatar model</td></tr>
+              <tr><td>Compute revenue multiple</td><td class="v">6× ARR</td><td class="ok">market</td><td class="s">CoreWeave ~5× fwd · Lambda 8× · Together 7.5×</td></tr>
+              <tr><td>Services (training) multiple</td><td class="v">15× ARR</td><td class="ok">market</td><td class="s">Baseten 22× · Modal 15× · Fireworks 14–19×</td></tr>
+              <tr><td>Research optionality</td><td class="v">$40–350M</td><td class="ok">market</td><td class="s">Physical-AI marks $0.1–39B, scaled for Hearst's embedded research</td></tr>
+              <tr><td>Compute ARR</td><td class="v">$6 / 24 / 90M</td><td class="tc">confirm</td><td class="s">illustrative — fleet × rate × utilization</td></tr>
+              <tr><td>Training ARR</td><td class="v">$4 / 12 / 45M</td><td class="tc">confirm</td><td class="s">illustrative — # enterprise engagements × ACV</td></tr>
+              <tr><td>GPU fleet</td><td class="v">256 / 768 / 2,500</td><td class="tc">confirm</td><td class="s">illustrative — operated or contracted</td></tr>
+              <tr><td>Discount rate (datacenter NPV)</td><td class="v">10%</td><td class="ok">market</td><td class="s">Qatar infrastructure WACC benchmark</td></tr>
+              <tr><td>Raise size / pre-money target</td><td class="v">—</td><td class="tc">confirm</td><td class="s">not provided — drives post-money &amp; dilution</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:auto;padding:8px 12px 14px;">
+          <div class="disclaimer">
+            <strong>Method &amp; disclaimer.</strong> One legal entity; sum-of-the-parts. The datacenter interest is marked at discounted present value today (not its 15-year total) to avoid overstatement; AI engines use live 2026 revenue multiples from public comparables (filings, press, Sacra / PitchBook estimates — several private revenues are estimated). AI ARR, fleet and the raise terms are <strong>illustrative, to confirm</strong> with management actuals. This is an indicative valuation, <strong>not promotional</strong>, and not an offer, solicitation or fairness opinion. Calibrate with actuals before any transaction.
           </div>
         </div>
       </div>
     </div>
 
-    <div class="foot"><span class="sig">● CONFIDENTIAL — INDICATIVE · NOT AN OFFER</span><span>LEDGER / CONFIRM FLAGGED INPUTS TO FINALIZE</span><span>05 — 05</span></div>
+    <div class="foot"><span class="conf">Confidential — Indicative · Not an Offer</span><span>Ledger · confirm flagged inputs to finalize</span><span class="pageno">05 / 05</span></div>
   </section>
 
 </div>
