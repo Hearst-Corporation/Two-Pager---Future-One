@@ -8,7 +8,7 @@ import {
   solveMwForCapital,
 } from '@/lib/hearst-solver.js';
 import { projectArchetype, DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
-import { foldGpuRevenue } from '@/lib/hearst-calculations';
+import { foldGpuRevenue, generateProjection } from '@/lib/hearst-calculations';
 import { calcHardwareBreakdown } from '@/lib/hearst-gpu-catalog';
 import { bootstrapScenarioFromSources } from '@/lib/hearst-bootstrap';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
@@ -232,6 +232,96 @@ describe('solveMwForCapital — bounded binary search (P0-3)', () => {
     const r = solveMwForCapital(1_000_000_000, (mw) => 1_000_000_000 - mw); // decreasing
     expect(r.converged).toBe(false);
     expect(r.diagnostic).toMatch(/monotonic/i);
+  });
+});
+
+// AC-B: projectionFn injection into solveForTargetIrr / solveScenarioForMode
+describe('solveForTargetIrr — projectionFn injection (AC-B)', () => {
+  // Synthetic projectionFn that returns a higher IRR than generateProjection for the same lever.
+  // We bias the IRR by adding a fixed bonus so the solver must converge to a DIFFERENT lever_value.
+  const BONUS_IRR = 0.08; // 8pp upward bias applied by the fake pipeline
+  const syntheticProjectionFn = (scenario) => {
+    const base = generateProjection(scenario);
+    if (!base || base.irr == null) return base;
+    return { ...base, irr: base.irr + BONUS_IRR };
+  };
+
+  it('AC-B1: target_irr_first with projectionFn — achieved_irr == projectionFn(result.scenario).irr (not raw)', () => {
+    const target = 0.20; // 20% target
+    // Without projectionFn (raw generateProjection)
+    const rawResult = solveForTargetIrr(QATAR_BASE_SCENARIO, target, 'pricing');
+    // With projectionFn (biased pipeline)
+    const injResult = solveForTargetIrr(QATAR_BASE_SCENARIO, target, 'pricing', {
+      projectionFn: syntheticProjectionFn,
+    });
+
+    if (injResult.converged) {
+      // The achieved_irr must equal projectionFn(scenario).irr, NOT the raw IRR
+      const pIrr = syntheticProjectionFn(injResult.scenario)?.irr;
+      expect(injResult.achieved_irr).toBeCloseTo(pIrr, 3);
+      expect(injResult.achieved_irr).toBeCloseTo(target, 2);
+
+      // Prove the gap: raw IRR at the injected solver's lever_value is DIFFERENT (≥BONUS_IRR lower)
+      if (rawResult.converged) {
+        // The two solvers should have converged to different lever values because of the bias
+        expect(Math.abs(injResult.lever_value - rawResult.lever_value)).toBeGreaterThan(1);
+      }
+    } else {
+      // Acceptable if biased pipeline pushes target out of range
+      expect(injResult.diagnostic).toBeTruthy();
+    }
+  });
+
+  it('AC-B2: without projectionFn — behaviour is strictly identical to prior baseline', () => {
+    const target = 0.15;
+    const resultA = solveForTargetIrr(QATAR_BASE_SCENARIO, target, 'pricing');
+    const resultB = solveForTargetIrr(QATAR_BASE_SCENARIO, target, 'pricing', {});
+    // Both must produce exactly the same outcome (no projectionFn = generateProjection default)
+    expect(resultB.converged).toBe(resultA.converged);
+    if (resultA.converged && resultB.converged) {
+      expect(resultB.lever_value).toBeCloseTo(resultA.lever_value, 6);
+      expect(resultB.achieved_irr).toBeCloseTo(resultA.achieved_irr, 6);
+    }
+  });
+
+  it('AC-B3a: capital_first inchangé (projectionFn ignoré)', () => {
+    const a = solveScenarioForMode('capital_first', { total_capex_usd: 1_000_000_000 }, QATAR_BASE_SCENARIO);
+    const b = solveScenarioForMode('capital_first', { total_capex_usd: 1_000_000_000 }, QATAR_BASE_SCENARIO, {
+      projectionFn: syntheticProjectionFn,
+    });
+    // capital_first uses totalCapexForMw, not projectionFn — both fall back to facility-only here
+    expect(b.derived.archetype_aware).toBe(a.derived.archetype_aware);
+    expect(b.derived.mw).toBeCloseTo(a.derived.mw, 1);
+  });
+
+  it('AC-B3b: mw_first inchangé (projectionFn ignoré)', () => {
+    const a = solveScenarioForMode('mw_first', { total_mw: 75 }, QATAR_BASE_SCENARIO);
+    const b = solveScenarioForMode('mw_first', { total_mw: 75 }, QATAR_BASE_SCENARIO, {
+      projectionFn: syntheticProjectionFn,
+    });
+    expect(b.scenario.total_mw).toBe(a.scenario.total_mw);
+    expect(b.derived.total_mw).toBe(a.derived.total_mw);
+    expect(b.solver).toBeUndefined();
+  });
+
+  it('AC-B3c: solveScenarioForMode target_irr_first threads projectionFn to solveForTargetIrr', () => {
+    const target_pct = 20;
+    const target = target_pct / 100;
+    const rawR = solveScenarioForMode('target_irr_first', { target_irr_pct: target_pct, lever: 'pricing', total_mw: 50 }, QATAR_BASE_SCENARIO);
+    const injR = solveScenarioForMode('target_irr_first', { target_irr_pct: target_pct, lever: 'pricing', total_mw: 50 }, QATAR_BASE_SCENARIO, {
+      projectionFn: syntheticProjectionFn,
+    });
+    if (injR.solver.converged) {
+      // achieved_irr must match projectionFn output, not raw
+      const pIrr = syntheticProjectionFn(injR.scenario)?.irr;
+      expect(injR.solver.achieved_irr).toBeCloseTo(pIrr, 3);
+      if (rawR.solver.converged) {
+        // Lever values must differ because the biased pipeline changes the solve
+        expect(Math.abs(injR.solver.lever_value - rawR.solver.lever_value)).toBeGreaterThan(0.5);
+      }
+    } else {
+      expect(injR.solver.diagnostic).toBeTruthy();
+    }
   });
 });
 

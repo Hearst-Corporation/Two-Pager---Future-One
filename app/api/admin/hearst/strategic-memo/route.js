@@ -261,32 +261,137 @@ function compactIntelligenceBriefForModel(brief) {
   };
 }
 
-function compactLiveBriefForModel(brief) {
+/**
+ * Derive a human-readable freshness tag from a provider pricing record.
+ * Uses `freshness_hours` when available; falls back to `status`.
+ *
+ * @param {{ status: string, freshness_hours: number|null }} priceRecord
+ * @returns {'FRESH'|'OK'|'STALE'|'NO_LIVE_DATA'}
+ */
+function _derivePriceFreshnessTag(priceRecord) {
+  if (!priceRecord) return 'NO_LIVE_DATA';
+  if (priceRecord.freshness_hours != null) {
+    if (priceRecord.freshness_hours < 4)   return 'FRESH';
+    if (priceRecord.freshness_hours < 24)  return 'OK';
+    return 'STALE';
+  }
+  if (priceRecord.status === 'live')    return 'FRESH';
+  if (priceRecord.status === 'stale')   return 'STALE';
+  return 'NO_LIVE_DATA';
+}
+
+/**
+ * Compact the live brief into a lean shape for the LLM.
+ * Only reads fields that actually exist in the real oracle-live return values:
+ *   - gpu_pricing  → Array of per-SKU objects (median_price_usd_hour, confidence_band, status, prices[])
+ *   - energy       → EnergyRegion object (electricity_tariff_industrial_usd_mwh.value, source_confidence, label)
+ *   - signals      → flat Array of signal objects (id, title, severity, implication)
+ *
+ * No ghost keys, no fabricated freshness. Missing blocks are omitted entirely.
+ *
+ * @param {{ gpu_pricing: Array|null, energy: Object|null, signals: Array }} brief
+ * @returns {Object}
+ */
+export function compactLiveBriefForModel(brief) {
   if (!brief) return brief;
-  return {
-    gpu_pricing: brief.gpu_pricing && {
-      summary: brief.gpu_pricing.summary,
-      freshness_tag: brief.gpu_pricing.freshness_tag,
-      median_observed: brief.gpu_pricing.median_observed,
-      prices: (brief.gpu_pricing.prices || []).slice(0, 4).map(p => ({
-        provider: p.provider,
-        sku: p.sku,
-        price_usd_hr: p.price_usd_hr,
-        freshness_tag: p.freshness_tag,
-      })),
-    },
-    energy: brief.energy && {
-      summary: brief.energy.summary,
-      tariff_used: brief.energy.tariff_used,
-      freshness_tag: brief.energy.freshness_tag,
-    },
-    signals: (brief.signals?.signals || brief.signals || []).slice(0, 5).map(s => ({
-      id: s.id,
-      title: s.title,
-      severity: s.severity,
-      implication: s.implication,
-    })),
-  };
+  const out = {};
+
+  // ── gpu_pricing ──────────────────────────────────────────────────────────
+  // Real shape: Array<{ sku, median_price_usd_hour, range_low, range_high,
+  //   confidence_band, status, notes, prices[], static_anchors[], region }>
+  // We expose the first 3 SKUs, each with their top-4 live price rows.
+  const gpuArray = Array.isArray(brief.gpu_pricing) ? brief.gpu_pricing : null;
+  if (gpuArray && gpuArray.length > 0) {
+    out.gpu_pricing = gpuArray.slice(0, 3).map(skuBrief => {
+      // Derive overall freshness tag from aggregate status / confidence_band
+      let freshness_tag;
+      if (skuBrief.status === 'live')         freshness_tag = 'FRESH';
+      else if (skuBrief.status === 'partial_live') freshness_tag = 'OK';
+      else if (skuBrief.status === 'stale')   freshness_tag = 'STALE';
+      else                                     freshness_tag = 'NO_LIVE_DATA';
+
+      // Derive median_observed from real field (null when no live data)
+      const medianRaw = skuBrief.median_price_usd_hour;
+      const median_observed = medianRaw != null ? `$${medianRaw}/hr` : null;
+
+      // Build summary from real fields, never invent figures
+      const livePriceCount = (skuBrief.prices || []).filter(
+        p => p.status === 'live' || p.status === 'partial_live'
+      ).length;
+      const summary = median_observed
+        ? `${skuBrief.sku} median $${medianRaw}/hr across ${livePriceCount} live provider(s); confidence: ${skuBrief.confidence_band ?? '?'}`
+        : `${skuBrief.sku} — no live pricing data; confidence: ${skuBrief.confidence_band ?? '?'}`;
+
+      return {
+        sku: skuBrief.sku,
+        summary,
+        freshness_tag,
+        median_observed,
+        confidence_band: skuBrief.confidence_band ?? null,
+        range_low: skuBrief.range_low ?? null,
+        range_high: skuBrief.range_high ?? null,
+        // Top-4 provider price rows — real fields only
+        prices: (skuBrief.prices || []).slice(0, 4).map(p => ({
+          provider: p.provider ?? null,
+          status: p.status ?? null,
+          price_usd_hour: p.price_usd_hour ?? null,
+          freshness_tag: _derivePriceFreshnessTag(p),
+        })),
+        notes: skuBrief.notes ?? null,
+      };
+    });
+  }
+
+  // ── energy ───────────────────────────────────────────────────────────────
+  // Real shape: EnergyRegion { label, region, electricity_tariff_industrial_usd_mwh: { value, range_low/high, confidence },
+  //   source_confidence, cooling_sensitivity, water_stress_index, implications[], ... }
+  if (brief.energy && typeof brief.energy === 'object' && brief.energy.region) {
+    const e = brief.energy;
+    const tariffSpec = e.electricity_tariff_industrial_usd_mwh;
+    const tariffValue = tariffSpec?.value ?? null;
+    const tariff_used = tariffValue != null
+      ? `$${tariffValue}/MWh (range $${tariffSpec.range_low ?? '?'}–$${tariffSpec.range_high ?? '?'}/MWh, confidence: ${tariffSpec.confidence ?? '?'})`
+      : null;
+
+    // Derive freshness tag from source_confidence (energy is static — no live scraping)
+    let freshness_tag;
+    if (e.source_confidence === 'high')   freshness_tag = 'OK';
+    else if (e.source_confidence === 'medium') freshness_tag = 'STALE';
+    else                                        freshness_tag = 'NO_LIVE_DATA';
+
+    const summary = tariff_used
+      ? `${e.label} industrial electricity ${tariff_used}; cooling sensitivity: ${e.cooling_sensitivity ?? '?'}; water stress: ${e.water_stress_index ?? '?'}/5`
+      : `${e.label} — tariff data unavailable`;
+
+    out.energy = {
+      region: e.region,
+      label: e.label,
+      summary,
+      tariff_used,
+      freshness_tag,
+      source_confidence: e.source_confidence ?? null,
+      cooling_sensitivity: e.cooling_sensitivity ?? null,
+      water_stress_index: e.water_stress_index ?? null,
+      // Top-3 decisional implications derived from archetype/reality constraints
+      implications: (e.implications || []).slice(0, 3),
+    };
+  }
+
+  // ── signals ──────────────────────────────────────────────────────────────
+  // Real shape: flat Array<{ id, title, severity, category, explanation,
+  //   implication, confidence, freshness, recommended_action, impact_score, ... }>
+  // (no nested .signals property — the array IS the signals list)
+  const signalArray = Array.isArray(brief.signals) ? brief.signals : [];
+  if (signalArray.length > 0) {
+    out.signals = signalArray.slice(0, 5).map(s => ({
+      id: s.id ?? null,
+      title: s.title ?? null,
+      severity: s.severity ?? null,
+      implication: s.implication ?? null,
+    }));
+  }
+
+  return out;
 }
 
 function buildProjectionSnapshot(payload) {
