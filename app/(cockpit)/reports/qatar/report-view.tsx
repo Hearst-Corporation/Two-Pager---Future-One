@@ -29,7 +29,7 @@ function CorridorSVG({ revenuePerMw }: { revenuePerMw: number }) {
   const key = () => `c${k++}`;
 
   const railY = 20, railH = 24;
-  e.push(<rect key={key()} x={L} y={railY} width={W - R - L} height={railH} rx={4} fill="#F4ECDA" stroke={GOLD} strokeWidth={1} />);
+  e.push(<rect key={key()} x={L} y={railY} width={W - R - L} height={railH} rx={4} fill="#FBFAF8" stroke={LINE} strokeWidth={1} />);
   e.push(<rect key={key()} x={L} y={railY} width={5} height={railH} fill={GOLD} />);
   e.push(<text key={key()} x={L + 16} y={railY + railH / 2 + 4.5} fontFamily="Inter" fontSize={12} fontWeight={600} fill={GOLDD} letterSpacing="0.6">Allocated Power Envelope · 150 MW</text>);
   e.push(<text key={key()} x={W - R - 10} y={railY + railH / 2 + 4.5} textAnchor="end" fontFamily="Inter" fontSize={10.5} fill={MUT}>available / pre-identified</text>);
@@ -96,7 +96,7 @@ function ValueBridgeSVG({
   );
 
   const cw = 24;
-  e.push(<rect key={key()} x={xT(0) - cw / 2} y={yV(capital)} width={cw} height={H - B - yV(capital)} fill={INK} opacity={0.3} />);
+  e.push(<rect key={key()} x={xT(0) - cw / 2} y={yV(capital)} width={cw} height={H - B - yV(capital)} fill={INK} opacity={0.15} />);
   e.push(<text key={key()} x={xT(0)} y={yV(capital) - 12} textAnchor="middle" fontFamily="Inter" fontSize={13} fontWeight={700} fill={INK}>{usdB1(capital)}</text>);
   e.push(<text key={key()} x={xT(0)} y={yV(capital) - 28} textAnchor="middle" fontFamily="Inter" fontSize={10.5} fill={MUT}>capital · Y0</text>);
 
@@ -158,8 +158,8 @@ function UpliftSVG({ coreLabel }: { coreLabel: string }) {
     if (isCore) {
       e.push(<rect key={key()} x={x} y={y} width={colW} height={barH} fill={INK} />);
     } else {
-      e.push(<rect key={key()} x={x} y={y} width={colW} height={barH} fill="#FBF7EE" stroke={GOLD} strokeWidth={1.25} />);
-      e.push(<rect key={key()} x={x} y={y} width={colW} height={3} fill={GOLDD} />);
+      e.push(<rect key={key()} x={x} y={y} width={colW} height={barH} fill="#F7F5F0" stroke={LINE} strokeWidth={1} />);
+      e.push(<rect key={key()} x={x} y={y} width={colW} height={4} fill={GOLDD} />);
     }
     // connector tick between steps (rising staircase cue)
     if (i > 0) {
@@ -167,11 +167,11 @@ function UpliftSVG({ coreLabel }: { coreLabel: string }) {
       e.push(<line key={key()} x1={x - gap} y1={baseY - prevH} x2={x} y2={baseY - prevH} stroke={LINE} strokeDasharray="2 3" />);
     }
     // EV figure above the bar (the headline number for each tier)
-    e.push(<text key={key()} x={x + colW / 2} y={y - 26} textAnchor="middle" fontFamily="Inter" fontSize={14.5} fontWeight={700} fill={isCore ? INK : GOLDD}>{s.ev}</text>);
+    e.push(<text key={key()} x={x + colW / 2} y={y - 28} textAnchor="middle" fontFamily="Inter" fontSize={15} fontWeight={700} fill={isCore ? INK : GOLDD}>{s.ev}</text>);
     // MW tag just under the EV figure
-    e.push(<text key={key()} x={x + colW / 2} y={y - 11} textAnchor="middle" fontFamily="Inter" fontSize={11} fontWeight={600} fill={MUT} letterSpacing="0.3">{s.tag}</text>);
+    e.push(<text key={key()} x={x + colW / 2} y={y - 12} textAnchor="middle" fontFamily="Inter" fontSize={11.5} fontWeight={600} fill={MUT} letterSpacing="0.3">{s.tag}</text>);
     // head label below baseline
-    e.push(<text key={key()} x={x + colW / 2} y={baseY + 26} textAnchor="middle" fontFamily="Inter" fontSize={12} fontWeight={600} fill={INK}>{s.head}</text>);
+    e.push(<text key={key()} x={x + colW / 2} y={baseY + 26} textAnchor="middle" fontFamily="Inter" fontSize={12.5} fontWeight={600} fill={INK}>{s.head}</text>);
   });
 
   // axis intent labels (left)
@@ -411,14 +411,14 @@ export function QatarReport({ print = false, fontClass = '' }: { print?: boolean
           <table className={styles.rstack}>
             <thead>
               <tr>
-                <th style={{ width: '15%' }}>Layer</th>
+                <th style={{ width: '18%' }}>Layer</th>
                 <th style={{ width: '6%' }}>MW</th>
                 <th style={{ width: '11%' }}>Capex</th>
-                <th style={{ width: '11%' }}>Revenue / yr</th>
+                <th style={{ width: '12%' }}>Revenue / yr</th>
                 <th style={{ width: '13%' }}>Op. contribution</th>
                 <th style={{ width: '16%' }}>Valuation logic</th>
                 <th style={{ width: '13%' }}>Additional EV</th>
-                <th style={{ width: '15%' }}>Status</th>
+                <th style={{ width: '11%' }}>Status</th>
               </tr>
             </thead>
             <tbody>
