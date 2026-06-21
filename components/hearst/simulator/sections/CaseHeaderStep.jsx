@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Card } from '@/components/hearst/ui';
 import { DEAL_ARCHETYPES } from '@/lib/hearst-deal-structures';
 import { fmtUSD, fmtPctRaw, fmtMW } from '@/lib/hearst-format';
+import { UI } from '@/lib/ui-strings';
 
 const ARCH_LABEL = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a.label]));
 
@@ -32,11 +33,11 @@ export default function CaseHeaderStep({ archetypeId, geography, totalMw, mode, 
       <span style={S.eyebrow}>INVESTMENT CASE</span>
       
       <div style={S.narrative}>
-        <div className="sim-case-sentence" style={S.sentence}>
-          Deploy <strong>{capex ? fmtUSD(capex) : '...'}</strong> into a <strong>{model}</strong> in <strong>{geo}</strong> targeting <strong>{irr != null ? fmtPctRaw(irr, 1) : '...'}</strong> IRR.
-        </div>
+        <h1 className="sim-case-sentence" style={S.sentence}>
+          Deploy <strong>{capex ? fmtUSD(capex) : UI.STATE_CALCULATING}</strong> into a <strong>{model}</strong> in <strong>{geo}</strong> targeting <strong>{irr != null ? fmtPctRaw(irr, 1) : UI.STATE_CALCULATING}</strong> IRR.
+        </h1>
         <div style={S.meta}>
-          <span>{capacity != null ? fmtMW(capacity, 0) : '...'} Capacity</span>
+          <span>{capacity != null ? fmtMW(capacity, 0) : UI.STATE_CALCULATING} Capacity</span>
           <span style={S.dot}>•</span>
           <span>Driven by {constraint}</span>
         </div>

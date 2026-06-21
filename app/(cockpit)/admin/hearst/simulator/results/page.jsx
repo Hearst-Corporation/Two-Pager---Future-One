@@ -95,7 +95,7 @@ export default function SimulatorResultsPage() {
     async function load() {
       if (!searchParams) return;
       if (!scenarioId) {
-        setError('Missing scenario id.');
+        setError(UI.RESULTS_EMPTY_NO_ID_TITLE);
         setLoading(false);
         return;
       }
@@ -235,11 +235,23 @@ export default function SimulatorResultsPage() {
   }
 
   if (error) {
+    const isNoId = error === UI.RESULTS_EMPTY_NO_ID_TITLE;
     return (
       <div className="oracle-page">
         <div data-results-layout style={S.inner}>
-          <Link href="/admin/hearst/simulator" style={S.backLink}>← Back to simulator</Link>
-          <div style={RESULTS_ERROR}>Error: {error}</div>
+          <Card variant="card" surface={1} padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
+            <div style={S.emptyTitle}>{isNoId ? UI.RESULTS_EMPTY_NO_ID_TITLE : UI.RESULTS_EMPTY_ERROR_TITLE}</div>
+            <div style={S.emptyBody}>{isNoId ? UI.RESULTS_EMPTY_NO_ID_BODY : UI.RESULTS_EMPTY_ERROR_BODY}</div>
+            {!isNoId && <div style={S.emptyTech}>{error}</div>}
+            <div style={S.emptyCta}>
+              <Link href="/admin/hearst/simulator" style={{ textDecoration: 'none' }}>
+                <Button variant="primary" size="sm">{UI.RESULTS_EMPTY_CTA_SIMULATOR}</Button>
+              </Link>
+              <Link href="/admin/hearst/workspace" style={{ textDecoration: 'none' }}>
+                <Button variant="secondary" size="sm">{UI.RESULTS_EMPTY_CTA_WORKSPACE}</Button>
+              </Link>
+            </div>
+          </Card>
         </div>
       </div>
     );
@@ -256,7 +268,7 @@ export default function SimulatorResultsPage() {
               {UI.RESULTS_BACK_EDIT}
             </Button>
           </Link>
-          <span style={S.heroName}>{row?.name || UI.RESULTS_HERO_FALLBACK_NAME}</span>
+          <h1 style={S.heroName}>{row?.name || UI.RESULTS_HERO_FALLBACK_NAME}</h1>
         </div>
 
         <div data-narrative-box style={S.narrativeBox}>
@@ -400,5 +412,25 @@ const S = {
     fontWeight: 'var(--cp-weight-black)',
     letterSpacing: 'var(--cp-tracking-eyebrow)',
     textTransform: 'uppercase',
+  },
+  emptyTitle: {
+    fontSize: 'var(--cp-font-lg)',
+    fontWeight: 'var(--cp-weight-bold)',
+    color: 'var(--cp-text-primary)',
+  },
+  emptyBody: {
+    fontSize: 'var(--cp-font-base)',
+    color: 'var(--cp-text-muted)',
+    lineHeight: 'var(--cp-leading-normal)',
+  },
+  emptyTech: {
+    fontSize: 'var(--cp-font-xs)',
+    color: 'var(--cp-text-faint)',
+    fontFamily: 'ui-monospace, monospace',
+  },
+  emptyCta: {
+    display: 'flex',
+    gap: 'var(--cp-space-3)',
+    flexWrap: 'wrap',
   },
 };

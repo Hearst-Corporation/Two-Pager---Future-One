@@ -25,6 +25,7 @@ import { build2DDiagramSpec, buildTopologySpec, buildDeploymentPhaseSpec } from 
 import { explainMetric, simplifyTechnicalTerm, SUPPORTED_AUDIENCES } from '@/lib/oracle-explainability';
 import { fmtUSD, fmtPctFromRatio, fmtX } from '@/lib/hearst-format';
 import { generateProjection, foldGpuRevenue } from '@/lib/hearst-calculations';
+import { DEAL_ARCHETYPES, projectArchetype } from '@/lib/hearst-deal-structures';
 import { FINANCIAL_THRESHOLDS } from '@/lib/hearst-constants';
 import { assertNoPromises, freshnessStatusFromTimestamp, computeDataFreshness, computeConfidenceBlock } from '@/lib/memo-confidence';
 import { persistMemo } from '@/lib/strategic-memo-store';
@@ -54,6 +55,106 @@ function checkRl(actorId) {
   }
   b.count++;
   return { allowed: true };
+}
+
+// Same archetype lookup the /simulate route uses (keeps the memo recompute
+// deterministically aligned with what generated the on-screen numbers).
+const ARCHETYPE_BY_ID = Object.fromEntries(DEAL_ARCHETYPES.map(a => [a.id, a]));
+
+/**
+ * Resolve the engine-authoritative ("truth") projection for the memo, ARCHETYPE-AWARE.
+ *
+ * Why this exists (P0 coherence bug):
+ *   Most archetypes are modelled by re-running generateProjection() on the
+ *   post-archetype scenario — recomputing it server-side here is correct and
+ *   anti-tampering. BUT `sale_leaseback` (compute_as: 'one_time_sale') does NOT
+ *   project a 10-year HOLD: projectArchetype() builds a developer-SALE model
+ *   (exit at dev_exit_year ≈ 4, sale_proceeds = stabilized_ebitda / sale_yield,
+ *   levered equity cash flows, Qatar capital-gains tax) and returns a projection
+ *   with `sale_mode: true`. A blind generateProjection(scenario) here would
+ *   OVERWRITE that with a hold projection — the memo would then pin HOLD
+ *   IRR/MOIC/NPV/payback/TV while the screen shows the SALE. The document lies.
+ *
+ * Resolution rules:
+ *   1. SALE path — archetype.compute_as === 'one_time_sale' (or, defensively,
+ *      payload.projection.sale_mode === true) AND the archetype is resolvable
+ *      server-side from payload.archetype_outcome.id:
+ *        → recompute via projectArchetype(scenario, archetype), which reproduces
+ *          the SALE model deterministically (same code path as /simulate). Use
+ *          ITS projection as truth. We do NOT call generateProjection / foldGpuRevenue
+ *          here (sale_mode carries no recurring GPU/colo revenue).
+ *   2. SALE fallback — payload.projection.sale_mode === true but the archetype is
+ *      NOT resolvable server-side (no id in payload): reuse payload.projection
+ *      verbatim instead of recomputing, so the memo still matches the screen
+ *      rather than silently reverting to a hold model.
+ *   3. STANDARD path — every other archetype: recompute generateProjection(scenario)
+ *      then fold GPU revenue when hardware_breakdown is present (the existing,
+ *      correct behaviour for gpu_cloud / minority_equity / recurring_revenue).
+ *      Unchanged.
+ *
+ * @param {object} payload - the /simulate result snapshot (scenario, projection,
+ *   archetype_outcome, hardware_breakdown, …).
+ * @returns {{ projection: object|null, mode: 'sale_recompute'|'sale_fallback'|'standard_recompute'|'client_projection', recomputeError: string|null }}
+ */
+export function resolveTruthProjection(payload) {
+  const scenario = payload?.scenario || null;
+  const clientProjection = payload?.projection || null;
+  const archetype = ARCHETYPE_BY_ID[payload?.archetype_outcome?.id] || null;
+  const isOneTimeSale =
+    archetype?.compute_as === 'one_time_sale' ||
+    payload?.archetype_outcome?.compute_as === 'one_time_sale' ||
+    clientProjection?.sale_mode === true;
+
+  // ── SALE path (sale_leaseback / one_time_sale / any sale_mode projection) ──
+  if (isOneTimeSale) {
+    if (scenario && archetype) {
+      try {
+        // projectArchetype reproduces the developer-sale model deterministically,
+        // identical to /simulate. Its projection (sale_mode:true, payback≈dev_exit)
+        // is the SAME object the screen rendered.
+        const ar = projectArchetype(scenario, archetype);
+        if (ar?.projection) {
+          return { projection: ar.projection, mode: 'sale_recompute', recomputeError: null };
+        }
+      } catch (e) {
+        // Fall through to the fallback below — never throw out of the resolver.
+        if (clientProjection?.sale_mode === true) {
+          return { projection: clientProjection, mode: 'sale_fallback', recomputeError: e?.message || 'projectArchetype failed' };
+        }
+        return { projection: clientProjection, mode: 'client_projection', recomputeError: e?.message || 'projectArchetype failed' };
+      }
+    }
+    // Documented FALLBACK: scenario or archetype not recoverable server-side, but
+    // the client projection IS a sale. Reuse it rather than recomputing a HOLD —
+    // this keeps the memo matching the screen. (A standard generateProjection here
+    // would produce a 10-year hold and re-introduce the divergence.)
+    if (clientProjection?.sale_mode === true) {
+      return { projection: clientProjection, mode: 'sale_fallback', recomputeError: null };
+    }
+    // No scenario AND no sale projection to fall back on — nothing to resolve.
+    return { projection: clientProjection, mode: 'client_projection', recomputeError: null };
+  }
+
+  // ── STANDARD path (unchanged) — recompute hold projection + fold GPU revenue ──
+  if (scenario) {
+    try {
+      const serverProjection = generateProjection(scenario);
+      const hb = payload?.hardware_breakdown;
+      if (serverProjection?.years?.length && hb && ((hb.revenue_ai_annual > 0) || (hb.capex_hardware > 0))) {
+        foldGpuRevenue(serverProjection, hb, scenario, {
+          rfs_year: scenario.phase1_complete_year || 3, ramp_years: 2,
+          exit_year: scenario.exit_year || 10,
+          discount_rate_pct: scenario.discount_rate_pct ?? FINANCIAL_THRESHOLDS.discount_rate_pct,
+        });
+      }
+      if (serverProjection && serverProjection.years?.length) {
+        return { projection: serverProjection, mode: 'standard_recompute', recomputeError: null };
+      }
+    } catch (e) {
+      return { projection: clientProjection, mode: 'client_projection', recomputeError: e?.message || 'generateProjection failed' };
+    }
+  }
+  return { projection: clientProjection, mode: 'client_projection', recomputeError: null };
 }
 
 
@@ -561,26 +662,17 @@ export async function POST(req) {
 
   // ── Part A: server-side projection recompute (kills "trust client projection") ──
   // payload.scenario IS the post-archetype scenario (simulate returns archResult.scenario).
-  // We recompute from the engine and use that as the source of truth instead of
-  // whatever the client sent in payload.projection (which may be fabricated/empty).
-  let serverProjection = null;
-  if (payload?.scenario) {
-    try {
-      serverProjection = generateProjection(payload.scenario);
-      const hb = payload.hardware_breakdown;
-      if (serverProjection?.years?.length && hb && ((hb.revenue_ai_annual > 0) || (hb.capex_hardware > 0))) {
-        foldGpuRevenue(serverProjection, hb, payload.scenario, {
-          rfs_year: payload.scenario.phase1_complete_year || 3, ramp_years: 2,
-          exit_year: payload.scenario.exit_year || 10,
-          discount_rate_pct: payload.scenario.discount_rate_pct ?? FINANCIAL_THRESHOLDS.discount_rate_pct,
-        });
-      }
-    } catch (e) {
-      console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] server-side projection recompute failed:`, e?.message);
-      serverProjection = null;
-    }
+  // ARCHETYPE-AWARE (P0 coherence fix): for sale_leaseback (compute_as 'one_time_sale')
+  // we recompute via projectArchetype() — the developer-SALE model (exit ≈ dev_exit_year,
+  // sale_mode:true), NOT generateProjection() which would silently substitute a 10-year
+  // HOLD and make the memo contradict the on-screen SALE numbers. Every other archetype
+  // keeps the standard generateProjection + GPU-fold recompute (correct + deterministic).
+  // See resolveTruthProjection() for the full decision table.
+  const resolved = resolveTruthProjection(payload);
+  if (resolved.recomputeError) {
+    console.warn(`[strategic-memo][actor=${auth.profile?.id ?? 'anon'}] truth projection recompute (${resolved.mode}) hit an error:`, resolved.recomputeError);
   }
-  const truthProjection = (serverProjection && serverProjection.years?.length) ? serverProjection : (payload?.projection || null);
+  const truthProjection = resolved.projection;
   // Replace payload.projection with the engine-authoritative value so all downstream reads use it.
   payload = { ...payload, projection: truthProjection };
 

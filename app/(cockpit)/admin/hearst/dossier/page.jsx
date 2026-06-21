@@ -829,7 +829,20 @@ function AllMemosView() {
 
       {err && <div style={DOSSIER_ERR}>Error: {err}</div>}
       {memos === null && <div style={DOSSIER_EMPTY}>{UI.DOSSIER_LOADING_MEMOS}</div>}
-      {memos && memos.length === 0 && <div style={DOSSIER_EMPTY}>{UI.WS_NO_REPORTS}</div>}
+      {memos && memos.length === 0 && (
+        <Card variant="card" surface={1} padding="lg" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--cp-space-4)' }}>
+          <div style={S.emptyTitle}>{UI.DOSSIER_EMPTY_NO_MEMOS_TITLE}</div>
+          <div style={S.emptyBody}>{UI.DOSSIER_EMPTY_NO_MEMOS_BODY}</div>
+          <div style={S.emptyCta}>
+            <Link href="/admin/hearst/simulator" style={{ textDecoration: 'none' }}>
+              <Button variant="primary" size="sm">{UI.DOSSIER_EMPTY_CTA_SIMULATOR}</Button>
+            </Link>
+            <Link href="/admin/hearst/workspace" style={{ textDecoration: 'none' }}>
+              <Button variant="secondary" size="sm">{UI.DOSSIER_EMPTY_CTA_WORKSPACE}</Button>
+            </Link>
+          </div>
+        </Card>
+      )}
 
       {memos && memos.length > 0 && (
         <Table
@@ -1056,5 +1069,10 @@ const S = {
   memoCardStatus: { fontSize: 'var(--cp-font-micro)', color: 'var(--cp-text-muted)', textTransform: 'capitalize' },
   memoCardTitle: { fontSize: 'var(--cp-font-md)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)', marginBottom: 'var(--cp-space-1)' },
   memoCardMeta: { display: 'flex', gap: 'var(--cp-space-3)', fontSize: 'var(--cp-font-xs)', color: 'var(--cp-text-muted)', fontFamily: 'ui-monospace, monospace', flexWrap: 'wrap' },
+
+  // ── Guided empty states ──
+  emptyTitle: { fontSize: 'var(--cp-font-lg)', fontWeight: 'var(--cp-weight-bold)', color: 'var(--cp-text-primary)' },
+  emptyBody: { fontSize: 'var(--cp-font-base)', color: 'var(--cp-text-muted)', lineHeight: 'var(--cp-leading-normal)' },
+  emptyCta: { display: 'flex', gap: 'var(--cp-space-3)', flexWrap: 'wrap' },
 
 };
